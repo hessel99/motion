@@ -486,3 +486,8 @@
 .left-panel .agent-input textarea { font-size: var(--ag-body); line-height: var(--ag-leading); min-height: 40px; padding: var(--space-2); }
 .left-panel .ctx-chip { font-size: var(--text-xs); height: 22px; }
 .left-panel .send-btn { width: 28px; height: 28px; }
+/* the narrowest stage (1100px window): frame steps and the preview button go (, . and the menu
+   still reach them), so the transport never runs into the track tools */
+@container tlhead (max-width: 640px) { .tp > :nth-child(2), .tp > :nth-child(4), .tp > :nth-child(6) { display: none; } .tt-chip:not(.set):not(.rec) { padding: 0 var(--space-3); } }
+/* the active composition tab always shows its whole name (others shrink first) */
+.ct-tab.on { flex-shrink: 0; }
