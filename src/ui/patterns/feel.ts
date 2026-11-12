@@ -18,7 +18,7 @@ const EXPO_IN: Bez = [0.7, 0, 0.84, 0];
 const EXPO_IO: Bez = [0.87, 0, 0.13, 1];
 const EXPO_OUT: Bez = [0.16, 1, 0.3, 1];
 /** how far overshoot pushes the handles past the 0..1 band at overshoot = 1 */
-const ANTICIPATION = 0.6;
+const ANTICIPATION = 0.8;
 const OVERSHOOT = 0.9;
 
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
@@ -32,8 +32,15 @@ export function feelToBezier(f: Feel, out: Bez = [0, 0, 0, 0]): Bez {
     const base = lo[i] + (hi[i] - lo[i]) * u;
     out[i] = LIN[i] + (base - LIN[i]) * k;
   }
-  out[1] -= ANTICIPATION * o * (1 - a);
-  out[3] += OVERSHOOT * o * a;
+  // overshoot always really overshoots: the eased side's handle is first pulled to the 0 / 1
+  // band (over the first eighth of the knob, so the mapping stays continuous) and then pushed
+  // past it. a handle beyond the band makes the curve leave 0..1 (y'(0) = 3*y1 / 3*x1 < 0,
+  // y'(1) = 3*(1 - y2) / ... < 0). without the pull, mid attack / smoothness curves had their
+  // handles inside the band and overshoot 50% produced no overshoot at all.
+  const ramp = Math.min(1, o * 8);
+  const wIn = Math.min(1, 2 * (1 - a)), wOut = Math.min(1, 2 * a);
+  out[1] -= wIn * ramp * Math.max(0, out[1]) + ANTICIPATION * o * (1 - a);
+  out[3] += wOut * ramp * Math.max(0, 1 - out[3]) + OVERSHOOT * o * a;
   for (let i = 0; i < 4; i++) out[i] = r3(out[i]);
   return out;
 }
@@ -95,11 +102,23 @@ export function bezierToFeel(v: Bez): Feel {
   return best;
 }
 
-/** a short human name for a feel (shown under the pad) */
+/** how far a bezier ease leaves the 0..1 band: [below 0, above 1] (sampled) */
+export function curveExcursion(v: Bez | number[]): [number, number] {
+  let lo = 0, hi = 0;
+  for (let i = 1; i < 64; i++) { const y = bezierY(v, i / 64); if (y < lo) lo = y; if (y - 1 > hi) hi = y - 1; }
+  return [-lo, hi];
+}
+
+/** a short human name for a feel (shown under the pad). the overshoot names come from what the
+ *  curve actually does, not from the knob value */
 export function feelName(f: Feel): string {
   if (f.smooth < 0.12 && f.overshoot < 0.1) return 'Linear';
   const side = f.attack < 0.36 ? 'in' : f.attack > 0.64 ? 'out' : 'io';
-  if (f.overshoot >= 0.25) return side === 'in' ? 'Wind-up' : side === 'out' ? 'Overshoot' : 'Elastic';
+  const [under, over] = curveExcursion(feelToBezier(f));
+  const VISIBLE = 0.02;
+  if (under > VISIBLE && over > VISIBLE) return 'Elastic';
+  if (under > VISIBLE) return 'Wind-up';
+  if (over > VISIBLE) return 'Overshoot';
   const strong = f.smooth > 0.72;
   if (side === 'in') return strong ? 'Lazy' : 'Ease in';
   if (side === 'out') return strong ? 'Snappy' : 'Ease out';

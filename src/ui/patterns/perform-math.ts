@@ -87,9 +87,27 @@ function fitSegment(s: Sample[], a: number, b: number): { v: Bez | null; err: nu
 }
 
 /** turn a performance into position keyframes (values in the samples' space) */
+/** drop the still parts at both ends of a recording: the pickup lag before the hand starts
+ *  moving (times are re-based so the motion starts at 0) and the hold before the release.
+ *  `eps`: how far the pointer may drift and still count as still */
+export function trimStill(s: Sample[], eps: number): Sample[] {
+  if (s.length < 3) return s;
+  const far = (a: Sample, b: Sample) => Math.hypot(a.x - b.x, a.y - b.y) > eps;
+  let i = 0;
+  while (i < s.length - 1 && !far(s[i + 1], s[0])) i++;
+  let j = s.length - 1;
+  while (j > i && !far(s[j - 1], s[s.length - 1])) j--;
+  if (j <= i) return [s[0]]; // never moved
+  const t0 = s[i].t;
+  return s.slice(i, j + 1).map(p => ({ t: p.t - t0, x: p.x, y: p.y }));
+}
+
 export function buildKeys(s: Sample[], o: BuildOpts): Keyframe[] {
   if (!s.length) return [];
   const frame = 1 / o.fps, tol = o.tol ?? 10, gap = o.minGap ?? 3 * frame;
+  // a still hand reports the same pointer position, so "still" means no movement at all (any
+  // threshold would also eat the slow start of a genuinely eased gesture)
+  s = trimStill(s, 1e-6);
   // 1. where the path bends (space only: catmull-rom tangents carry the curvature)
   const base = simplify(s, tol * 2.5, 0);
   // 2. where the timing changes more than one bezier ease can express (stops, sudden pushes)

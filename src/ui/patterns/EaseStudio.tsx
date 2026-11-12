@@ -13,7 +13,8 @@ import type { PropKey } from '../../core/model';
 import { bezierToFeel, feelName, feelToBezier, type Feel } from './feel';
 import { Knob } from './Knob';
 import { applyEase, EasePreview, type EaseSpec } from './ops';
-import { cssVar, onTick, setupCanvas } from './ticker';
+import { onTick, setupCanvas } from './ticker';
+import { ptPalette } from './palette';
 import { drawLane, easeAt as easeY, loopPhase, sameSpec, strokeEase } from './draw';
 import { FeelPad } from './FeelPad';
 import './patterns.css';
@@ -65,9 +66,9 @@ function currentSegment(keys: string[]): Seg | null {
   return seg;
 }
 
-function specOf(seg: Seg | null, preview: EasePreview): EaseSpec | null {
+function specOf(seg: Seg | null): EaseSpec | null {
   if (!seg) return null;
-  const kf = preview.original(editor.store.layer(seg.layerId)!.props[seg.key]!)!;
+  const kf = editor.store.layer(seg.layerId)!.props[seg.key]!.kf!;
   const a = kf[seg.i], b = kf[seg.i + 1];
   if (a.interp === 'hold') return null;
   if (a.interp === 'linear') return { kind: 'linear' };
@@ -80,7 +81,7 @@ export function EaseStudio() {
   const keys = [...store.keySelection];
   const preview = useMemo(() => new EasePreview(store), []);
   const seg = currentSegment(keys);
-  const spec = specOf(seg, preview);
+  const spec = specOf(seg);
   const hover = useRef<Swatch | null>(null);
   const [hoverName, setHoverName] = useState<string | null>(null);
   // the last feel we set, so the puck stays exactly where it was put (the inverse mapping is a
@@ -101,10 +102,11 @@ export function EaseStudio() {
 
   // stop previewing when the panel goes away or anything else happens (keys, undo)
   useEffect(() => {
-    const stop = () => { if (preview.active) { preview.end(); hover.current = null; setHoverName(null); } };
-    const offTick = onTick(now => preview.tick(now));
+    // the preview also ends itself on any document change / undo / redo (an agent edit, ⌘Z)
+    preview.onEnd = () => { hover.current = null; setHoverName(null); };
+    const stop = () => { if (preview.active) preview.end(); };
     window.addEventListener('keydown', stop, true);
-    return () => { offTick(); window.removeEventListener('keydown', stop, true); preview.end(); };
+    return () => { window.removeEventListener('keydown', stop, true); preview.onEnd = null; preview.end(); };
   }, []);
 
   const setFeel = (f: Feel, mk: string) => {
@@ -128,16 +130,20 @@ export function EaseStudio() {
 
   const startPreview = (s: Swatch) => {
     if (!keys.length) return;
+    preview.begin(keys, s.spec);
+    if (!preview.active) return;
     hover.current = s;
     setHoverName(s.name);
-    preview.begin(keys, s.spec);
   };
+  // drive the looping preview playhead only while a swatch is previewed
+  useEffect(() => (hoverName ? onTick(now => preview.tick(now)) : undefined), [hoverName]);
   const stopPreview = () => {
     hover.current = null;
     setHoverName(null);
     preview.end();
   };
   const applySwatch = (s: Swatch) => {
+    const stillHovered = hover.current === s;
     preview.end();
     if (s.spec.kind === 'spring') { applyEase(store, keys, s.spec); if (tab === 'feel') setTab('spring'); }
     else {
@@ -146,7 +152,7 @@ export function EaseStudio() {
       if (tab === 'spring') setTab('feel');
     }
     // keep previewing the (now applied) ease while the pointer stays on it
-    if (hover.current === s) preview.begin(keys, s.spec);
+    if (stillHovered) startPreview(s);
   };
 
   if (!seg) return null;
@@ -156,11 +162,7 @@ export function EaseStudio() {
     <div class="pt-studio">
       <div class="pt-tabs" role="tablist" aria-label="Easing mode">
         {(['feel', 'spring', 'curve'] as StudioTab[]).map(t => (
-          <button role="tab" aria-selected={tab === t} class={'pt-tab' + (tab === t ? ' on' : '')} onClick={() => {
-            setTab(t);
-            if (t === 'spring' && !isSpring) applyEase(store, keys, { kind: 'spring', bounce: lastBounce.current });
-            if (t === 'feel' && isSpring) setFeel(feel, 'tab' + Math.random());
-          }}>{t === 'feel' ? 'Feel' : t === 'spring' ? 'Spring' : 'Curve'}</button>
+          <button role="tab" aria-selected={tab === t} class={'pt-tab' + (tab === t ? ' on' : '')} onClick={() => setTab(t) /* view only: never edits the document */}>{t === 'feel' ? 'Feel' : t === 'spring' ? 'Spring' : 'Curve'}</button>
         ))}
         <span class="pt-feel-name">{hoverName ? <span class="pt-b">B · {hoverName.replace(' spring', '')}</span> : isSpring ? `Spring ${Math.round(lastBounce.current * 100)}%` : spec?.kind === 'linear' ? 'Linear' : feelName(feel)}</span>
       </div>
@@ -172,7 +174,7 @@ export function EaseStudio() {
             format={v => Math.round(v * 100) + '%'} detents={[{ v: 0, label: 'none' }]}
             title="Anticipation on lazy curves, overshoot on punchy ones"
             onChange={(v, mk) => setFeel({ ...feel, overshoot: Math.round(v * 100) / 100 }, mk)} />
-          <Lane spec={spec} b={hover} />
+          <Lane spec={spec} b={hover} hoverName={hoverName} />
         </div>
       </>}
 
@@ -182,11 +184,11 @@ export function EaseStudio() {
             format={v => Math.round(v * 100) + '%'} detents={SPRING_PRESETS.map(p => ({ v: p.bounce, label: p.name }))}
             title="0% settles without bouncing; detents click into the named springs"
             onChange={(v, mk) => applyEase(store, keys, { kind: 'spring', bounce: Math.round(v * 100) / 100 }, mk)} />
-          <Lane spec={spec} b={hover} tall />
+          <Lane spec={spec} b={hover} hoverName={hoverName} tall />
         </div>
       )}
 
-      {tab === 'curve' && <Lane spec={spec} b={hover} wide />}
+      {tab === 'curve' && <Lane spec={spec} b={hover} hoverName={hoverName} wide />}
 
       <div class="pt-swatches" role="listbox" aria-label="Ease swatches: focus or hover to preview on the canvas, Enter or click to apply"
         onPointerLeave={stopPreview}>
@@ -202,44 +204,59 @@ export function EaseStudio() {
 
 // ---------------- A/B spacing lane ----------------
 
-/** the current ease (A) as a spacing chart with a live ball; while a swatch is hovered, B races it */
-function Lane({ spec, b, tall, wide }: { spec: EaseSpec | null; b: { current: Swatch | null }; tall?: boolean; wide?: boolean }) {
+/** how long the lane keeps animating after a change before it settles into a still frame */
+const LANE_LIVE_MS = 2 * (220 + 900 + 520);
+
+/** the current ease (A) as a spacing chart with a live ball; while a swatch is hovered, B races it.
+ *  it only animates while B is shown or for a couple of loops after A changed, then draws one
+ *  still frame and stops ticking (a selected key alone costs nothing per frame). */
+function Lane({ spec, b, hoverName, tall, wide }: { spec: EaseSpec | null; b: { current: Swatch | null }; hoverName: string | null; tall?: boolean; wide?: boolean }) {
   const cv = useRef<HTMLCanvasElement>(null);
   const specRef = useRef(spec);
   specRef.current = spec;
   const W = wide ? 236 : 168, H = tall ? 70 : 56;
+  const anim = useRef<{ off: (() => void) | null; until: number }>({ off: null, until: 0 });
+  useEffect(() => () => { anim.current.off?.(); anim.current.off = null; }, []);
+  const specKey = spec ? JSON.stringify(spec) : '';
   useEffect(() => {
     const c = cv.current!;
-    let accent = '', dim = '', warm = '';
-    let lastW = 0;
-    return onTick(now => {
-      if (!c.isConnected) return;
+    const paint = (ph: number) => {
       const ctx = setupCanvas(c, W, H);
-      if (W !== lastW) { accent = cssVar(c, '--accent', '#4c8dff'); dim = 'rgba(255,255,255,0.4)'; warm = cssVar(c, '--pt-b', '#ffb54c'); lastW = W; }
+      const P = ptPalette();
+      const { accent, warm } = P;
+      const dim = P.ink(0.4);
       ctx.clearRect(0, 0, W, H);
       const A = specRef.current, B = b.current?.spec ?? null;
-      const ph = loopPhase(now);
       const x0 = 14, x1 = W - 26;
       // faint curve of A behind the lanes
       if (A) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.strokeStyle = P.ink(0.1);
         ctx.lineWidth = 1.5;
         strokeEase(ctx, A, x0, 6, x1 - x0, H - 12, -0.25, A.kind === 'spring' ? 1.6 : 1.3, 48);
       }
       if (B) {
         if (A) drawLane(ctx, A, x0, x1, H * 0.32, ph, accent, dim);
-        drawLane(ctx, B, x0, x1, H * 0.7, ph, warm, 'rgba(255,181,76,0.35)');
+        drawLane(ctx, B, x0, x1, H * 0.7, ph, warm, P.warmA(0.35));
         ctx.font = '600 8px Inter, system-ui, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.fillStyle = P.ink(0.5);
         ctx.fillText('A', 2, H * 0.32 + 3);
         ctx.fillStyle = warm;
         ctx.fillText('B', 2, H * 0.7 + 3);
       } else if (A) drawLane(ctx, A, x0, x1, H / 2, ph, accent, dim);
       // end marks
-      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.fillStyle = P.ink(0.2);
       ctx.fillRect(x0 - 0.5, 8, 1, H - 16); ctx.fillRect(x1 - 0.5, 8, 1, H - 16);
+    };
+    const a = anim.current;
+    a.until = performance.now() + LANE_LIVE_MS;
+    a.off?.();
+    a.off = onTick(now => {
+      if (!c.isConnected) return;
+      const live = !!b.current || now < a.until;
+      paint(live ? loopPhase(now) : 1);
+      if (!live) { a.off?.(); a.off = null; }
     });
-  }, [W, H]);
+  }, [W, H, specKey, hoverName]);
   return <canvas ref={cv} class="pt-lane" aria-hidden="true" />;
 }
 
@@ -255,12 +272,13 @@ function SwatchTile({ s, on, hovered, onEnter, onLeave, onApply }: { s: Swatch; 
     ctx.clearRect(0, 0, W, H);
     const spring = s.spec.kind === 'spring';
     const lo = spring ? -0.1 : -0.35, hi = spring ? 1.6 : 1.35;
-    ctx.strokeStyle = hovered ? cssVar(c, '--pt-b', '#ffb54c') : on ? cssVar(c, '--accent', '#4c8dff') : 'rgba(255,255,255,0.55)';
+    const P = ptPalette();
+    ctx.strokeStyle = hovered ? P.warm : on ? P.accent : P.ink(0.55);
     ctx.lineWidth = 1.4;
     strokeEase(ctx, s.spec, 3, 2, W - 6, H - 4, lo, hi, 30);
     if (ph >= 0) {
       const y = 2 + (H - 4) - ((easeY(s.spec, ph) - lo) / (hi - lo)) * (H - 4);
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = P.ink(1);
       ctx.beginPath(); ctx.arc(3 + ph * (W - 6), y, 2.2, 0, Math.PI * 2); ctx.fill();
     }
   };

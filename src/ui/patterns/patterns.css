@@ -1,27 +1,36 @@
 /* ux patterns (ease studio, knobs, rhythm). everything reads the design tokens with fallbacks so
    the concurrent design-system pass can re-theme it without touching this file. */
 
-:root {
-  --pt-pad-bg: #141418;
-  --pt-b: #ffb54c;              /* the "B" (compare / hover) color */
-  --pt-knob-body: #2a2a30;
-  --pt-knob-cap: #1c1c21;
-  --pt-led-off: rgba(255, 255, 255, 0.10);
+/* derived from the design tokens (tokens.css), so both themes work. declared on every themed
+   element: a var() resolves where it is declared */
+:root,
+[data-theme] {
+  --pt-pad-bg: var(--surface-0);
+  --pt-knob-body: var(--surface-3);
+  --pt-knob-cap: var(--surface-1);
+  --pt-led-off: color-mix(in srgb, var(--text) 12%, transparent);
+  --pt-ink-faint: color-mix(in srgb, var(--text) 8%, transparent);
+  --pt-ink-tick: color-mix(in srgb, var(--text) 45%, transparent);
 }
+:root,
+[data-theme='dark'] { --pt-b: #ffb54c; }  /* the "B" (compare / hover) color */
+[data-theme='light'] { --pt-b: #c26a00; }
+[data-theme='light'] .knob-body { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25)); }
+[data-theme='light'] .pt-pad, [data-theme='light'] .pt-lane, [data-theme='light'] .pt-strip, [data-theme='light'] .pt-swatch { box-shadow: inset 0 0 0 1px var(--border); }
 
 /* ---------------- studio ---------------- */
 .pt-studio { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 8px; }
 .pt-studio > * { width: 236px; }
 .pt-tabs { display: flex; align-items: center; gap: 2px; padding: 2px; background: var(--pt-pad-bg); border-radius: 8px; }
-.pt-tab { flex: none; background: transparent; border: 0; border-radius: 6px; padding: 3px 9px; font-size: 11px; color: var(--muted, #8a8a93); }
-.pt-tab:hover:not(:disabled) { color: var(--text, #e4e4e8); }
-.pt-tab.on { background: var(--panel-2, #26262a); color: var(--text, #e4e4e8); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 1px 3px rgba(0, 0, 0, 0.4); }
-.pt-tab:focus-visible, .pt-swatch:focus-visible, .pt-switch:focus-visible { outline: 2px solid var(--accent, #4c8dff); outline-offset: 1px; }
-.pt-feel-name { margin-left: auto; padding-right: 6px; font-size: 11px; font-weight: 600; color: var(--text, #e4e4e8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pt-tab { flex: none; background: transparent; border: 0; border-radius: 6px; padding: 3px 9px; font-size: 11px; color: var(--text-muted); }
+.pt-tab:hover:not(:disabled) { color: var(--text); }
+.pt-tab.on { background: var(--surface-2); color: var(--text); box-shadow: 0 1px 0 var(--pt-ink-faint) inset, 0 1px 3px rgba(0, 0, 0, 0.25); }
+.pt-tab:focus-visible, .pt-swatch:focus-visible, .pt-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.pt-feel-name { margin-left: auto; padding-right: 6px; font-size: 11px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pt-b { color: var(--pt-b); }
 
 .pt-pad { display: block; border-radius: 10px; cursor: crosshair; touch-action: none; outline: none; transition: box-shadow 0.15s; }
-.pt-pad:focus-visible { box-shadow: 0 0 0 2px var(--accent, #4c8dff); }
+.pt-pad:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
 .pt-pad.inactive { opacity: 0.75; }
 
 .pt-row { display: flex; align-items: center; gap: 10px; }
@@ -30,39 +39,39 @@
 .pt-swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
 .pt-swatch {
   display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 2px 4px;
-  background: var(--pt-pad-bg); border: 1px solid transparent; border-radius: 8px; font-size: 10px; color: var(--muted, #8a8a93);
+  background: var(--pt-pad-bg); border: 1px solid transparent; border-radius: 8px; font-size: 10px; color: var(--text-muted);
   transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.1, 1), border-color 0.12s;
 }
 .pt-swatch canvas { display: block; }
 .pt-swatch span { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
-.pt-swatch.on { border-color: var(--accent, #4c8dff); color: var(--text, #e4e4e8); }
-.pt-swatch.hover { border-color: var(--pt-b); color: var(--text, #e4e4e8); transform: translateY(-1px); }
+.pt-swatch.on { border-color: var(--accent); color: var(--text); }
+.pt-swatch.hover { border-color: var(--pt-b); color: var(--text); transform: translateY(-1px); }
 .pt-spring-dot { display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--pt-b); opacity: 0.8; }
-.pt-hint { font-size: 10px; color: var(--muted, #8a8a93); text-align: center; }
+.pt-hint { font-size: 10px; color: var(--text-muted); text-align: center; }
 
 .pt-switch {
   display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; font-size: 10px; font-weight: 600;
-  border-radius: 999px; background: transparent; border: 1px solid var(--line, #2e2e33); color: var(--muted, #8a8a93);
+  border-radius: 999px; background: transparent; border: 1px solid var(--border); color: var(--text-muted);
 }
-.pt-switch.on { color: var(--accent, #4c8dff); border-color: color-mix(in srgb, var(--accent, #4c8dff) 50%, transparent); background: color-mix(in srgb, var(--accent, #4c8dff) 12%, transparent); }
+.pt-switch.on { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 50%, transparent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
 
 /* ---------------- knob ---------------- */
 .pt-knob { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: none; min-width: 52px; }
 .pt-knob.disabled { opacity: 0.35; }
-.pt-knob-label { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted, #8a8a93); }
-.pt-knob-value { font-size: 10px; font-variant-numeric: tabular-nums; color: var(--text, #e4e4e8); white-space: nowrap; }
+.pt-knob-label { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+.pt-knob-value { font-size: 10px; font-variant-numeric: tabular-nums; color: var(--text); white-space: nowrap; }
 .pt-knob-dial { border-radius: 50%; cursor: ns-resize; touch-action: none; outline: none; line-height: 0; }
 .pt-knob.disabled .pt-knob-dial { cursor: default; }
-.pt-knob-dial:focus-visible { box-shadow: 0 0 0 2px var(--accent, #4c8dff); }
+.pt-knob-dial:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
 .pt-knob-dial svg { display: block; overflow: visible; }
 .knob-led { fill: var(--pt-led-off); transition: fill 0.08s; }
-.knob-led.on { fill: var(--pt-hue, var(--accent, #4c8dff)); filter: drop-shadow(0 0 2px var(--pt-hue, var(--accent, #4c8dff))); }
-.knob-tick { stroke: rgba(255, 255, 255, 0.45); stroke-width: 1.2; stroke-linecap: round; }
+.knob-led.on { fill: var(--pt-hue, var(--accent)); filter: drop-shadow(0 0 2px var(--pt-hue, var(--accent))); }
+.knob-tick { stroke: var(--pt-ink-tick); stroke-width: 1.2; stroke-linecap: round; }
 .knob-body { fill: var(--pt-knob-body); filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55)); }
-.knob-cap { fill: var(--pt-knob-cap); stroke: rgba(255, 255, 255, 0.07); }
-.knob-pointer { stroke: var(--text, #e4e4e8); stroke-width: 2.4; stroke-linecap: round; }
-.knob-flash { fill: none; stroke: var(--pt-hue, var(--accent, #4c8dff)); stroke-width: 2; }
-.pt-knob-dial.turning .knob-body { fill: color-mix(in srgb, var(--pt-knob-body) 80%, var(--accent, #4c8dff)); }
+.knob-cap { fill: var(--pt-knob-cap); stroke: var(--pt-ink-faint); }
+.knob-pointer { stroke: var(--text); stroke-width: 2.4; stroke-linecap: round; }
+.knob-flash { fill: none; stroke: var(--pt-hue, var(--accent)); stroke-width: 2; }
+.pt-knob-dial.turning .knob-body { fill: color-mix(in srgb, var(--pt-knob-body) 80%, var(--accent)); }
 
 /* ---------------- rhythm ---------------- */
 .pt-rhythm .insp-title .pt-switch { margin-left: auto; }
@@ -75,7 +84,7 @@
 .pt-perform canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .pt-perform-pill {
   position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px;
-  padding: 6px 12px; border-radius: 999px; background: rgba(20, 20, 24, 0.92); color: var(--text, #e4e4e8); font-size: 11px; white-space: nowrap; pointer-events: none;
+  padding: 6px 12px; border-radius: 999px; background: color-mix(in srgb, var(--surface-overlay) 92%, transparent); color: var(--text); font-size: 11px; white-space: nowrap; pointer-events: none;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 .pt-perform-pill i { width: 8px; height: 8px; border-radius: 50%; background: #ff5a4f; }

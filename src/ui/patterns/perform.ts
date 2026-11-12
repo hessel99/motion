@@ -8,7 +8,6 @@
 import { editor } from '../../app/editor';
 import { toast } from '../../app/actions';
 import { valueAt } from '../../core/commands';
-import type { Keyframe, Prop } from '../../core/model';
 import { invert } from '../viewport-controller';
 import { buildKeys, type Sample } from './perform-math';
 import { onTick } from './ticker';
@@ -46,7 +45,11 @@ export function armPerform(layerId: string) {
   const samples: Sample[] = [];
   const trail: number[] = [];
   let rec = false, began = 0, sx = 0, sy = 0, cx = 0, cy = 0;
-  let prop: Prop | undefined, saved: { kf?: Keyframe[]; v: number[] } | null = null, offTick: (() => void) | null = null;
+  // the live recording is shown through a preview override (store.previewProps): the document
+  // is never touched until the single 'Perform motion' transaction at the end, so autosave, undo
+  // and agent tools never see a half-recorded position
+  let previewing = false, offTick: (() => void) | null = null;
+  const offDoc: (() => void)[] = [];
 
   const posAt = (x: number, y: number) => {
     const [ax, ay] = vp.toComp(sx, sy), [bx, by] = vp.toComp(x, y);
@@ -54,11 +57,13 @@ export function armPerform(layerId: string) {
     return [start[0] + pinv[0] * dx + pinv[2] * dy, start[1] + pinv[1] * dx + pinv[3] * dy];
   };
   const restoreLayer = () => {
-    if (prop && saved) { prop.kf = saved.kf; prop.v = saved.v; store.notifyPreview([layerId]); }
-    saved = null;
+    if (previewing) store.setPreviewProp(layerId, 'position', undefined);
+    previewing = false;
   };
   const cleanup = () => {
     offTick?.();
+    for (const f of offDoc) f();
+    offDoc.length = 0;
     restoreLayer();
     ov.remove();
     window.removeEventListener('keydown', onKey, true);
@@ -96,7 +101,7 @@ export function armPerform(layerId: string) {
     if (t0 + t >= store.comp.duration) { finish(); return; }
     const p = posAt(cx, cy);
     samples.push({ t, x: p[0], y: p[1] });
-    if (prop) { prop.v = p; store.notifyPreview([layerId]); }
+    if (previewing) store.setPreviewProp(layerId, 'position', { v: p });
     store.time = t0 + t;
     store.emit('tick');
     // trail
@@ -117,9 +122,11 @@ export function armPerform(layerId: string) {
     e.preventDefault();
     ov.setPointerCapture(e.pointerId);
     sx = cx = e.clientX - r.left; sy = cy = e.clientY - r.top;
-    const l = store.layer(layerId)!;
-    prop = l.props.position;
-    if (prop) { saved = { kf: prop.kf, v: prop.v }; prop.kf = undefined; prop.v = start.slice(); store.notifyPreview([layerId]); }
+    store.setPreviewProp(layerId, 'position', { v: start.slice() });
+    previewing = true;
+    // a real edit / undo while recording (agent tool, ⌘Z): the recording's base is gone, cancel it
+    const abort = () => { if (active) { rec = false; cleanup(); toast('Performance cancelled: the document changed'); } };
+    offDoc.push(store.on('doc', abort), store.on('history', abort));
     rec = true;
     began = performance.now();
     ov.classList.add('recording');
@@ -132,7 +139,7 @@ export function armPerform(layerId: string) {
     cx = last.clientX - r.left; cy = last.clientY - r.top;
   });
   ov.addEventListener('pointerup', finish);
-  ov.addEventListener('contextmenu', e => { e.preventDefault(); rec = false; cleanup(); });
+  ov.addEventListener('contextmenu', e => { e.preventDefault(); rec = false; cleanup(); toast('Performance cancelled'); });
   window.addEventListener('keydown', onKey, true);
   active = () => { rec = false; cleanup(); };
 }

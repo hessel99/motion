@@ -10,9 +10,10 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
 import { Knob } from './Knob';
-import { applyStagger, applyTempo, snapshotTiming, type TimingSnap } from './ops';
+import { applyStagger, applyTempo, maxTempo, snapshotTiming, type TimingSnap } from './ops';
 import { detectStagger, layerSpan } from './timing';
-import { cssVar, setupCanvas } from './ticker';
+import { setupCanvas } from './ticker';
+import { ptPalette } from './palette';
 import { roundRect } from './draw';
 import { armPerform } from './perform';
 import './patterns.css';
@@ -36,6 +37,12 @@ export function RhythmPanel({ ids }: { ids: string[] }) {
   const begin = () => { snap.current = snapshotTiming(store, ids); };
   const end = () => { snap.current = null; };
   const onStart = () => { begin(); g0.current = det; };
+  // tempo range: from the span at the start of the gesture (stable while turning), a quarter to
+  // four times as long, never past the composition end; 360px of travel for the whole range
+  const base = snap.current ?? live;
+  const baseSpan = base ? base.span[1] - base.span[0] : 0;
+  const tMax = base ? Math.min(maxTempo(store, base), Math.max(baseSpan * 4, 0.1)) : 1;
+  const tMin = Math.min(tMax, Math.max(1 / store.comp.fps, baseSpan / 4));
 
   return (
     <div class="insp-section pt-rhythm">
@@ -50,7 +57,7 @@ export function RhythmPanel({ ids }: { ids: string[] }) {
       </div>
       {live && <RhythmStrip snap={live} markers={markers} />}
       {live && <div class="pt-knobs">
-        <Knob label="Tempo" value={span} min={0.05} max={Math.max(10, span * 4)} log size={50}
+        <Knob label="Tempo" value={span} min={tMin} max={tMax} log travel={360} size={50}
           format={fmtS} disabled={span < 1e-6}
           title="Stretch or squeeze the whole animation of the selection (shape stays the same)"
           onStart={begin} onEnd={end}
@@ -87,14 +94,15 @@ function RhythmStrip({ snap, markers }: { snap: TimingSnap; markers: number[] })
     const c = cv.current!;
     const ctx = setupCanvas(c, W, H);
     ctx.clearRect(0, 0, W, H);
-    const accent = cssVar(c, '--accent', '#4c8dff');
+    const P = ptPalette();
+    const accent = P.accent;
     roundRect(ctx, 0, 0, W, H, 8);
-    ctx.fillStyle = cssVar(c, '--pt-pad-bg', '#141418');
+    ctx.fillStyle = P.padBg;
     ctx.fill();
     const t0 = Math.max(0, snap.span[0] - 0.1), t1 = snap.span[1] + 0.1;
     const X = (t: number) => 8 + ((t - t0) / (t1 - t0 || 1)) * (W - 16);
     // markers / beats
-    ctx.fillStyle = 'rgba(255,200,80,0.45)';
+    ctx.fillStyle = P.warmA(0.6);
     for (const m of markers) if (m >= t0 && m <= t1) ctx.fillRect(Math.round(X(m)), 4, 1, H - 8);
     // bars (layer i fades along the cascade so the rhythm reads left to right)
     for (let i = 0; i < rows; i++) {
@@ -111,7 +119,7 @@ function RhythmStrip({ snap, markers }: { snap: TimingSnap; markers: number[] })
     }
     ctx.globalAlpha = 1;
     if (snap.layers.length > rows) {
-      ctx.font = '9px Inter, system-ui, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textAlign = 'right';
+      ctx.font = '9px Inter, system-ui, sans-serif'; ctx.fillStyle = P.ink(0.5); ctx.textAlign = 'right';
       ctx.fillText(`+${snap.layers.length - rows}`, W - 6, H - 3);
     }
   });

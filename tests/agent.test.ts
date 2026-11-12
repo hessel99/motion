@@ -8,7 +8,8 @@ import { snapshotDoc, diffDocs, summarizeDiff, diffIsEmpty } from '../src/agent/
 import { describeTrack, easeName, fmtValue } from '../src/agent/describe';
 import { editorContext, resolveMentions, composeMessage } from '../src/agent/context';
 import { variations } from '../src/agent/variations';
-import { serializeChat } from '../src/agent/history';
+import { serializeChat, reviewAtEnd, type ReviewInfo } from '../src/agent/history';
+import { agentClient } from '../src/agent/client';
 import { availableActions, targetPhrase, QUICK_ACTIONS } from '../src/agent/quick';
 import { toolLabel } from '../src/agent/labels';
 
@@ -267,7 +268,7 @@ describe('quick actions + labels + persistence', () => {
   it('serializes chats without images and with stale review cards', () => {
     const c = serializeChat([
       { role: 'tool', text: '', tool: { id: 't', name: 'screenshot', input: { big: 'x'.repeat(5000) }, image: 'data:...' } },
-      { role: 'review', text: '', review: { marker: 1, endMarker: 2, steps: 1, diff: { added: [], removed: [], changed: [], comp: [] }, state: 'pending' } },
+      { role: 'review', text: '', review: { startId: 1, endId: 2, steps: 1, diff: { added: [], removed: [], changed: [], comp: [] }, state: 'pending' } },
     ], { claude: 's1' });
     expect(c.msgs[0].tool!.image).toBeUndefined();
     expect(JSON.stringify(c.msgs[0].tool!.input).length).toBeLessThan(1700);
@@ -287,5 +288,60 @@ describe('history markers past the undo cap', () => {
     expect(s.historyLength).toBe(marker + 2);
     expect(s.undoTo(marker)).toBe(2);
     expect(a.name).toBe('n519');
+  });
+});
+
+describe('review card identity (undo entry ids)', () => {
+  const review = (startId: number, endId: number): ReviewInfo => ({ startId, endId, steps: 2, diff: { added: [], removed: [], changed: [], comp: [] }, state: 'pending' });
+
+  it('undoing the turn and making as many own edits does not re-enable revert/compare', () => {
+    const { s, a } = fresh();
+    const startId = s.topEntryId;
+    const h0 = s.historyLength;
+    s.transact('agent', tx => tx.set(a, 'name', 'agent1'));
+    s.transact('agent', tx => tx.set(a, 'name', 'agent2'));
+    const r = review(startId, s.topEntryId);
+    expect(reviewAtEnd(r, s.topEntryId)).toBe(true);
+    s.undo(); s.undo();
+    s.transact('mine', tx => tx.set(a, 'name', 'mine1'));
+    s.transact('mine', tx => tx.set(a, 'name', 'mine2'));
+    expect(s.historyLength).toBe(h0 + 2); // the old step-count check matched here
+    expect(reviewAtEnd(r, s.topEntryId)).toBe(false);
+  });
+
+  it('redoing the turn re-enables it; undoToEntry / redoToEntry go exactly between the two states', () => {
+    const { s, a } = fresh();
+    const startId = s.topEntryId;
+    s.transact('agent', tx => tx.set(a, 'name', 'agent1'));
+    s.transact('agent', tx => tx.set(a, 'name', 'agent2'));
+    const r = review(startId, s.topEntryId);
+    expect(s.undoToEntry(startId)).toBe(2);
+    expect(a.name).toBe('Logo');
+    expect(s.redoToEntry(r.endId!)).toBe(2);
+    expect(a.name).toBe('agent2');
+    expect(reviewAtEnd(r, s.topEntryId)).toBe(true);
+    // an edit while "comparing" clears the redo stack: ending the compare must not redo anything
+    s.undoToEntry(startId);
+    s.transact('mine', tx => tx.set(a, 'name', 'mine'));
+    expect(s.redoToEntry(r.endId!)).toBe(0);
+    expect(a.name).toBe('mine');
+  });
+
+  it('merging into the top entry gives it a new id (the state changed)', () => {
+    const { s, a } = fresh();
+    s.transact('drag', tx => tx.set(a, 'name', 'x1'), 'k');
+    const id = s.topEntryId, h = s.historyLength;
+    s.transact('drag', tx => tx.set(a, 'name', 'x2'), 'k');
+    expect(s.historyLength).toBe(h);
+    expect(s.topEntryId).not.toBe(id);
+  });
+
+  it('agentClient.forget lifts an Ask-mode lock left by a locally finished turn', async () => {
+    fresh();
+    (agentClient as any).readOnlyChats.add('c-test');
+    await expect(agentClient.runTool('add_layer', { type: 'rect' })).rejects.toThrow(/Ask/);
+    agentClient.forget('c-test');
+    expect(agentClient.readOnlyCount).toBe(0);
+    await expect(agentClient.runTool('add_layer', { type: 'rect' })).resolves.toBeTruthy();
   });
 });

@@ -2,7 +2,7 @@
 // every document mutation goes through transact() which records inverse ops,
 // so the ui and the ai agent tools share one code path and everything is undoable.
 
-import type { Composition, Layer, Project } from './model';
+import type { Composition, Layer, Project, Prop, PropKey } from './model';
 import { createComp, createProject } from './model';
 
 export interface Change {
@@ -15,7 +15,14 @@ export interface Change {
 
 type Op = () => void; // inverse operation
 
+/** undo entry ids: monotonic for the whole page lifetime (and seeded from the clock, so ids from an
+ *  earlier session never collide with this one's) */
+let entrySeq = Date.now();
+
 interface Entry {
+  /** unique id. changes whenever the step's content changes (a merge), so "the top entry is X"
+   *  really means the document is in the state X left it in */
+  id: number;
   label: string;
   mergeKey?: string;
   undo: Op[];
@@ -105,8 +112,23 @@ export class Store {
     if (s) for (const fn of s) fn();
   }
 
-  /** transient preview (hover swatches): the caller swapped document values in place and
-   *  restores them itself. only redraw listeners (renderer) hear it: no undo, no ui 'doc' event */
+  /** transient preview overrides (ease swatch hover, Perform recording): view state, never part of
+   *  the document. the renderer evaluates `previewProps[layer][key]` instead of the document prop,
+   *  so autosave/serialize, undo and agent tools never see previewed values. */
+  readonly previewProps = new Map<string, Partial<Record<PropKey, Prop>>>();
+  /** set (or with `prop` undefined: remove) a preview override and redraw that layer */
+  setPreviewProp(layerId: string, key: PropKey, prop: Prop | undefined) {
+    let m = this.previewProps.get(layerId);
+    if (prop) { if (!m) this.previewProps.set(layerId, (m = {})); m[key] = prop; }
+    else if (m) { delete m[key]; if (!Object.keys(m).length) this.previewProps.delete(layerId); }
+    this.notifyPreview([layerId]);
+  }
+  /** the prop the renderer should evaluate: the preview override if any, else the document's */
+  renderProp(layer: Layer, key: PropKey): Prop | undefined {
+    return this.previewProps.get(layer.id)?.[key] ?? layer.props[key];
+  }
+
+  /** redraw only (renderer listeners): no undo, no ui 'doc' event. used by preview overrides */
   notifyPreview(layerIds: Iterable<string>) {
     const c: Change = { structure: false, comp: false, layers: new Set(layerIds), meta: false, assets: false };
     for (const fn of this.listeners) fn(c);
@@ -141,12 +163,13 @@ export class Store {
     if (mk && top && top.mergeKey === mk) {
       top.undo.push(...tx.undo);
       top.redo.push(...tx.redo);
+      top.id = ++entrySeq;
       const c = top.change, d = tx.change;
       c.structure ||= d.structure; c.comp ||= d.comp; c.meta ||= d.meta; c.assets ||= d.assets;
       for (const id of d.layers) c.layers.add(id);
     } else {
       const d = tx.change;
-      this.undoStack.push({ label, mergeKey: mk, undo: tx.undo, redo: tx.redo, selection: this.selection.slice(), change: { ...d, layers: new Set(d.layers) } });
+      this.undoStack.push({ id: ++entrySeq, label, mergeKey: mk, undo: tx.undo, redo: tx.redo, selection: this.selection.slice(), change: { ...d, layers: new Set(d.layers) } });
       if (this.undoStack.length > 500) { this.undoStack.shift(); this.dropped++; }
     }
     this.emitChange(tx.change);
@@ -208,6 +231,23 @@ export class Store {
     return n;
   }
   get canRedo() { return this.redoStack.length > 0; }
+  /** id of the top undo entry (0 = empty): identifies the document state exactly, unlike
+   *  historyLength (a count: undo agent steps + make as many own edits = same count) */
+  get topEntryId() { return this.undoStack[this.undoStack.length - 1]?.id ?? 0; }
+  /** undo until entry `id` is on top (0 or an entry that is gone: as far as the stack goes). returns steps undone */
+  undoToEntry(id: number) {
+    let n = 0;
+    while (this.undoStack.length && this.topEntryId !== id) { this.undo(); n++; }
+    return n;
+  }
+  /** redo until entry `id` is on top again; does nothing if `id` is not on the redo stack
+   *  (a new edit cleared it). returns steps redone */
+  redoToEntry(id: number) {
+    if (!this.redoStack.some(e => e.id === id)) return 0;
+    let n = 0;
+    while (this.redoStack.length && this.topEntryId !== id) { this.redo(); n++; }
+    return n;
+  }
   /** labels of the undo steps, oldest first */
   get historyLabels(): string[] { return this.undoStack.map(e => e.label); }
   get undoLabel() { return this.undoStack[this.undoStack.length - 1]?.label; }
@@ -243,6 +283,7 @@ export class Store {
     this.ensureActiveComp();
     this.workArea = null;
     this.solo.clear();
+    this.previewProps.clear();
     this.undoStack.length = 0;
     this.redoStack.length = 0;
     this.dropped = 0;

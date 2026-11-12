@@ -1,5 +1,6 @@
 // document operations behind the patterns: undoable tempo / stagger edits (drag = one undo step
-// through a merge key) and the transient, non-undoable ease preview used by hover swatches.
+// through a merge key) and the transient ease preview used by hover swatches (renderer-side
+// overrides, never written into the document).
 
 import { parseKeyId } from '../../core/commands';
 import type { Interp, Keyframe, PathKey, PropKey } from '../../core/model';
@@ -71,35 +72,40 @@ export function easedRange(store: Store, keys: Iterable<string>): [number, numbe
 }
 
 /**
- * transient preview of an ease on the real layers: the keyframe arrays are swapped in place
- * (no transaction, nothing in the undo stack), the renderer is told to redraw, and the
- * playhead loops over the eased segments. end() puts everything back exactly (same array
- * objects), so the document is untouched.
+ * transient preview of an ease: the eased keyframes go into the store's preview overrides
+ * (`store.previewProps`, evaluated by the renderer instead of the document prop), never into
+ * the document. autosave / serialize, undo and agent tools only ever see the real keys. the
+ * playhead loops over the eased segments. the preview ends itself on any real document change
+ * or undo/redo ('doc' / 'history'), because its overrides were computed from the old keys.
  */
 export class EasePreview {
-  private saved: { prop: { kf?: Keyframe[] }; kf: Keyframe[] }[] = [];
-  private ids: string[] = [];
+  private overridden: { layerId: string; key: PropKey }[] = [];
   private t0 = 0;
   private range: [number, number] | null = null;
   private start = 0;
+  private off: (() => void)[] = [];
   active = false;
+  /** called whenever the preview ends (also when it ends itself on a document change) */
+  onEnd: (() => void) | null = null;
   constructor(private store: Store) {}
 
   begin(keys: Iterable<string>, ease: EaseSpec) {
     const store = this.store;
-    if (this.active) this.restoreKeys(); else this.t0 = store.time;
     const list = [...keys];
     const groups = groupKeys(store, list);
-    if (!groups.length) return;
+    if (!groups.length) { this.end(); return; }
+    if (this.active) this.clearOverrides(); else this.t0 = store.time;
     this.range = easedRange(store, list);
     for (const g of groups) {
       const prop = store.layer(g.layerId)!.props[g.key]!;
-      this.saved.push({ prop, kf: prop.kf! });
-      prop.kf = easedKeys(prop.kf!, g.idx, ease);
+      store.setPreviewProp(g.layerId, g.key, { ...prop, kf: easedKeys(prop.kf!, g.idx, ease) });
+      this.overridden.push({ layerId: g.layerId, key: g.key });
     }
-    this.ids = groups.map(g => g.layerId);
-    store.notifyPreview(this.ids);
-    if (!this.active) this.start = performance.now();
+    if (!this.active) {
+      this.start = performance.now();
+      const stop = () => this.end();
+      this.off = [store.on('doc', stop), store.on('history', stop)];
+    }
     this.active = true;
   }
 
@@ -114,23 +120,19 @@ export class EasePreview {
     this.store.emit('tick');
   }
 
-  /** the document's real keyframes for a prop while it is being previewed */
-  original(prop: { kf?: Keyframe[] }): Keyframe[] | undefined {
-    for (const s of this.saved) if (s.prop === prop) return s.kf;
-    return prop.kf;
-  }
-
-  private restoreKeys() {
-    for (let i = this.saved.length - 1; i >= 0; i--) this.saved[i].prop.kf = this.saved[i].kf;
-    this.saved.length = 0;
+  private clearOverrides() {
+    for (const o of this.overridden) this.store.setPreviewProp(o.layerId, o.key, undefined);
+    this.overridden.length = 0;
   }
 
   end() {
     if (!this.active) return;
-    this.restoreKeys();
     this.active = false;
-    this.store.notifyPreview(this.ids);
+    for (const f of this.off) f();
+    this.off = [];
+    this.clearOverrides();
     this.store.setTime(this.t0);
+    this.onEnd?.();
   }
 }
 
@@ -160,14 +162,23 @@ export function snapshotTiming(store: Store, ids: string[]): TimingSnap | null {
 
 export interface SnapOpts { targets?: readonly number[]; radius?: number; mergeKey?: string }
 
+/** the longest tempo duration that keeps the selection inside the composition */
+export function maxTempo(store: Store, snap: TimingSnap) {
+  return Math.max(1 / store.comp.fps, store.comp.duration - snap.span[0]);
+}
+
 /** stretch the whole selection so it lasts `duration` seconds (pivot = first key). magnetic:
- *  the end lands on a marker/beat when close. returns the duration actually applied. */
+ *  the end lands on a marker/beat when close. the end never goes past the composition end.
+ *  returns the duration actually applied. */
 export function applyTempo(store: Store, snap: TimingSnap, duration: number, o: SnapOpts = {}): number {
   const [a, b] = snap.span;
   const len = b - a;
   if (len < 1e-6) return 0;
-  let end = a + Math.max(1 / store.comp.fps, duration);
+  const maxEnd = a + maxTempo(store, snap);
+  let end = a + Math.max(1 / store.comp.fps, Math.min(duration, maxEnd - a));
   if (o.targets?.length) end = snapTo(end, o.targets, o.radius ?? 0.1);
+  end = Math.min(end, maxEnd);
+  if (end - a < 1e-6) return 0;
   const f = (end - a) / len;
   store.transact('Tempo', tx => {
     tx.keepKeys = true;
@@ -187,16 +198,24 @@ export function applyTempo(store: Store, snap: TimingSnap, duration: number, o: 
 export function applyStagger(store: Store, snap: TimingSnap, stagger: number, groove: number, o: SnapOpts = {}) {
   const n = snap.layers.length;
   if (n < 2) return;
-  const offs = staggerOffsets(n, Math.max(0, stagger), groove);
   const base = snap.layers[0].span[0];
   const fps = store.comp.fps;
+  // magnet: snap the cascade as a whole (its last start lands on a marker), never each layer on
+  // its own. per-layer snapping bent the spacing, so the knobs read it back as a groove change
+  // (with the magnet on, ArrowUp on Stagger changed Groove instead)
+  let st = Math.max(0, stagger);
+  const unit = staggerOffsets(n, 1, groove)[n - 1];
+  if (o.targets?.length && st > 0 && unit > 1e-9) {
+    const last = snapTo(base + st * unit, o.targets, o.radius ?? 0.1);
+    if (last > base) st = (last - base) / unit;
+  }
+  const offs = staggerOffsets(n, st, groove);
   store.transact('Stagger', tx => {
     tx.keepKeys = true;
     snap.layers.forEach((s, i) => {
       const l = store.layer(s.id);
       if (!l) return;
       let start = base + offs[i];
-      if (o.targets?.length) start = snapTo(start, o.targets, o.radius ?? 0.1);
       start = Math.round(start * fps) / fps;
       const dt = start - s.span[0];
       for (const [k, kf] of s.props) { const p = l.props[k]; if (p) tx.set(p, 'kf', shift(kf, dt)); }

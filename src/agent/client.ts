@@ -129,6 +129,16 @@ class AgentClient {
 
   cancel(chatId: string) { this.send({ type: 'chat_cancel', chatId }); }
 
+  /** stop routing a chat's events and lift its Ask-mode lock. for turns finished locally (the
+   *  cancel safety net, a detached turn) whose 'done' may never arrive from the bridge */
+  forget(chatId: string) {
+    this.chatHandlers.delete(chatId);
+    if (this.readOnlyChats.delete(chatId)) this.emit();
+  }
+
+  /** chats whose Ask-mode lock is active (tests / diagnostics) */
+  get readOnlyCount() { return this.readOnlyChats.size; }
+
   refreshProviders() { this.send({ type: 'providers_refresh' }); }
 }
 
