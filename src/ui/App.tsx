@@ -146,6 +146,7 @@ const TOOLS: { id: Tool; label: string; key: string; icon: string }[] = [
   { id: 'rect', label: 'Rectangle', key: 'R', icon: '▢' },
   { id: 'ellipse', label: 'Ellipse', key: 'O', icon: '◯' },
   { id: 'text', label: 'Text', key: 'T', icon: 'T' },
+  { id: 'pen', label: 'Pen', key: 'P', icon: '✒' },
   { id: 'hand', label: 'Hand', key: 'H', icon: '✋' },
 ];
 

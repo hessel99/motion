@@ -4,6 +4,7 @@
 import type { Editor } from '../app/editor';
 import { addLayer, valueAt, deleteLayers, cloneLayers, setPropTx } from '../core/commands';
 import type { Tx } from '../core/store';
+import { PenTool } from './pen';
 import type { Layer } from '../core/model';
 import { Track } from '../core/evaluate';
 
@@ -31,12 +32,14 @@ export class ViewportController {
   private lastSelKey = '';
   private mouse = { x: 0, y: 0 };
   onTextEdit: ((id: string) => void) | null = null;
+  pen: PenTool;
 
   constructor(private ed: Editor, private host: HTMLElement, private canvas: HTMLCanvasElement) {
     this.overlay = document.createElement('canvas');
     this.overlay.className = 'vp-overlay';
     host.appendChild(this.overlay);
     this.octx = this.overlay.getContext('2d')!;
+    this.pen = new PenTool(ed, (x, y) => this.toScreen(x, y), () => { this.overlayDirty = true; });
     const ro = new ResizeObserver(() => this.resize());
     ro.observe(host);
     this.resize();
@@ -51,7 +54,13 @@ export class ViewportController {
     st.on('selection', () => (this.overlayDirty = true));
     st.on('doc', () => (this.overlayDirty = true));
     st.on('time', () => (this.overlayDirty = true));
-    ed.on('tool', () => this.updateCursor());
+    ed.on('tool', () => { this.updateCursor(); if (ed.tool !== 'pen' && this.pen.active) this.pen.finish(false); });
+    st.on('selection', () => { if (this.pen.editId && !(st.selection.length === 1 && st.selection[0] === this.pen.editId)) { this.pen.editId = null; this.overlayDirty = true; } });
+    window.addEventListener('keydown', e => {
+      if (isTyping(e)) return;
+      if (this.pen.active && (e.key === 'Enter' || e.key === 'Escape')) { e.preventDefault(); e.stopImmediatePropagation(); this.pen.finish(false); }
+      else if (this.pen.editId && (e.key === 'Escape' || e.key === 'Enter')) { e.preventDefault(); e.stopImmediatePropagation(); this.pen.editId = null; this.overlayDirty = true; }
+    }, true);
     ed.on('loaded', () => { this.fitted = false; this.resize(); });
     ed.onFrame((_now, _t, playing) => {
       // overlay only depends on selection/time/view: redraw when needed (during playback only if something is selected)
@@ -181,6 +190,8 @@ export class ViewportController {
     }
     if (e.button !== 0) return;
     const [cx, cy] = this.toComp(x, y);
+    if (tool === 'pen') { this.pen.down(cx, cy, this.zoom); return; }
+    if (this.pen.editId && this.pen.editDown(x, y)) return;
     if (tool === 'rect' || tool === 'ellipse') {
       this.drag = { kind: 'create', type: tool, cx, cy, id: null };
       st.beginGesture('create');
@@ -311,6 +322,8 @@ export class ViewportController {
     this.mouse = { x, y };
     const st = this.ed.store;
     const d = this.drag;
+    if (this.ed.tool === 'pen') { const [cx, cy] = this.toComp(x, y); this.pen.move(cx, cy); return; }
+    if (this.pen.editMove(x, y, this.zoom)) return;
     if (!d) {
       if (this.ed.tool === 'select') {
         const [cx, cy] = this.toComp(x, y);
@@ -421,6 +434,8 @@ export class ViewportController {
   }
 
   private up(e: PointerEvent) {
+    this.pen.up();
+    if (this.pen.editUp()) { this.host.releasePointerCapture?.(e.pointerId); return; }
     const d = this.drag;
     this.drag = null;
     this.guides = { x: [], y: [] };
@@ -453,6 +468,7 @@ export class ViewportController {
     const l = st.layer(hit)!;
     if (l.type === 'text') { st.select([hit]); this.onTextEdit?.(hit); return; }
     if (l.type === 'precomp' && l.compRef) { st.openComp(l.compRef); return; }
+    if (l.type === 'path' && l.geometry?.length && (st.selection[0] === hit || st.selection.length === 0 || l.parent === null)) { st.select([hit]); this.pen.editId = hit; this.overlayDirty = true; return; }
     // double click enters groups: select the next level down
     const sel = st.selection[0];
     let cur: string | null = hit, prev = hit;
@@ -578,6 +594,7 @@ export class ViewportController {
       for (const gx of this.guides.x) { const [sx] = this.toScreen(gx, 0); g.beginPath(); g.moveTo(Math.round(sx) + 0.5, 0); g.lineTo(Math.round(sx) + 0.5, H); g.stroke(); }
       for (const gy of this.guides.y) { const [, sy] = this.toScreen(0, gy); g.beginPath(); g.moveTo(0, Math.round(sy) + 0.5); g.lineTo(W, Math.round(sy) + 0.5); g.stroke(); }
     }
+    this.pen.draw(g);
     const d = this.drag;
     if (d?.kind === 'marquee') {
       g.fillStyle = 'rgba(76,141,255,0.08)';

@@ -8,6 +8,7 @@ import {
 } from '../core/commands';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { ANIM_PRESETS, applyPreset } from '../core/presets';
+import { parsePathD } from '../import/svg';
 import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
 
 export interface ToolDef {
@@ -122,7 +123,8 @@ export const TOOLS: ToolDef[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        type: { enum: ['rect', 'ellipse', 'text', 'group'] },
+        type: { enum: ['rect', 'ellipse', 'text', 'group', 'path'] },
+        d: { type: 'string', description: 'for type "path": SVG path data in the layer box coordinates (0..w, 0..h), e.g. "M0 0 L100 0 L50 80 Z"' },
         name: { type: 'string' },
         x: { type: 'number' }, y: { type: 'number' }, w: { type: 'number' }, h: { type: 'number' },
         fill: colorSchema,
@@ -139,7 +141,8 @@ export const TOOLS: ToolDef[] = [
     run: (a) => {
       const s = st();
       const type = a.type as LayerType;
-      if (!['rect', 'ellipse', 'text', 'group'].includes(type)) throw new Error('type must be rect, ellipse, text or group');
+      if (!['rect', 'ellipse', 'text', 'group', 'path'].includes(type)) throw new Error('type must be rect, ellipse, text, group or path');
+      if (type === 'path' && typeof a.d !== 'string') throw new Error('path layers need "d" (SVG path data)');
       if (a.parent) need(a.parent);
       const init: any = { x: a.x ?? 0, y: a.y ?? 0, w: a.w ?? (type === 'text' ? 0 : 200), h: a.h ?? (type === 'text' ? 0 : 200), name: a.name };
       if (a.fill !== undefined) init.color = parseColor(a.fill);
@@ -148,6 +151,11 @@ export const TOOLS: ToolDef[] = [
         init.color ??= [1, 1, 1, 1];
       }
       if (!init.name) delete init.name;
+      if (type === 'path') {
+        const cmds = parsePathD(a.d);
+        init.geometry = [{ cmds, fillRule: 'nonzero' }];
+        init.geomSize = [init.w, init.h];
+      }
       const l = addLayer(s, type, init, a.parent ?? null);
       s.transact('Agent: layer props', tx => {
         const L = s.layer(l.id)!;

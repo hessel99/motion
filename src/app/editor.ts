@@ -6,7 +6,7 @@ import { Store } from '../core/store';
 import { Renderer } from '../render/renderer';
 import type { Project } from '../core/model';
 
-export type Tool = 'select' | 'rect' | 'ellipse' | 'text' | 'hand';
+export type Tool = 'select' | 'rect' | 'ellipse' | 'text' | 'pen' | 'hand';
 
 export interface FrameHook { (now: number, t: number, playing: boolean): void }
 

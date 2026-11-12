@@ -152,6 +152,26 @@ await page.keyboard.type('Hello');
 await page.mouse.click(cx + 300, cy + 200);
 const txt = await ev(() => Object.values(editor.store.project.layers).find(l => l.type === 'text')?.text.content);
 check('text tool + typing', txt === 'Hello', String(txt));
+// pen: triangle with one curved point, closed by clicking the first point
+{
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('p');
+  await page.mouse.click(cx - 200, cy + 150);
+  await page.mouse.move(cx - 100, cy - 100); await page.mouse.down(); await page.mouse.move(cx - 40, cy - 100, { steps: 3 }); await page.mouse.up();
+  await page.mouse.click(cx, cy + 150);
+  await page.mouse.click(cx - 200, cy + 150);
+  const pth = await ev(() => { const l = editor.store.layer(editor.store.selection[0]); return l && { type: l.type, cmds: l.geometry?.[0].cmds.map(c => c[0]).join(''), tool: editor.tool }; });
+  check('pen draws a closed path', pth?.type === 'path' && pth.cmds.startsWith('M') && pth.cmds.includes('C') && pth.cmds.endsWith('Z') && pth.tool === 'select', JSON.stringify(pth));
+  // edit mode: double click the path, drag its first anchor
+  await page.waitForTimeout(100);
+  await page.mouse.dblclick(cx - 170, cy + 140);
+  const before = await ev(() => editor.store.layer(editor.store.selection[0]).geometry[0].cmds[0].slice());
+  await page.mouse.move(cx - 200, cy + 150); await page.mouse.down(); await page.mouse.move(cx - 260, cy + 190, { steps: 4 }); await page.mouse.up();
+  const after = await ev(() => editor.store.layer(editor.store.selection[0]).geometry[0].cmds[0].slice());
+  check('path point edit', Math.abs((after[1] - before[1]) * (await ev(() => viewport.zoom)) + 60) < 2, `${before} -> ${after}`);
+  await page.keyboard.press('Escape');
+}
+
 // delete
 await ev(() => editor.store.select(editor.store.comp.root.slice()));
 await page.keyboard.press('Delete');

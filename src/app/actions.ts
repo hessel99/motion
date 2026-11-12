@@ -427,6 +427,7 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (k === 'r') return run(() => editor.setTool('rect'));
     if (k === 'o' || k === 'e') return run(() => editor.setTool('ellipse'));
     if (k === 't') return run(() => editor.setTool('text'));
+    if (k === 'p' && !e.shiftKey) return run(() => editor.setTool('pen'));
     if (k === 'h') return run(() => editor.setTool('hand'));
     if (k === 'home') return run(() => s.setTime(0));
     if (k === 'end') return run(() => s.setTime(s.comp.duration));
