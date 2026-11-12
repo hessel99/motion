@@ -35,7 +35,9 @@ concurrency:
 
 jobs:
   mac:
-    runs-on: macos-latest   # macos-14 images were retired
+    # linux runners start right away (macOS ones often queue for a long time); electron-builder
+    # builds the mac zips on linux. a .dmg needs macOS, so new installs use the zip too.
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
       RELEASES_REPO: ${{ vars.MOTION_RELEASES_REPO || github.repository }}
@@ -80,8 +82,8 @@ jobs:
       - name: Build interface
         run: npx vite build
 
-      - name: Build app (arm64 + x64 zip and dmg)
-        run: npx electron-builder --mac zip dmg --arm64 --x64 --publish never
+      - name: Build app (mac arm64 + x64 zips)
+        run: npx electron-builder --mac zip --arm64 --x64 --publish never
 
       - name: Release notes
         env:
@@ -111,7 +113,6 @@ jobs:
           name: motion-${{ steps.v.outputs.version }}
           path: |
             release/updates/
-            release/*.dmg
           retention-days: 14
 
       - name: Publish release + update feed
@@ -119,10 +120,10 @@ jobs:
         run: |
           V="${{ steps.v.outputs.version }}"; CH="${{ steps.v.outputs.channel }}"
           PRE=""; [ "$CH" = "beta" ] && PRE="--prerelease"
-          # 1. the version's release: app downloads (dmg for new installs, zips for updates) + UI bundle + manifest
+          # 1. the version's release: app downloads (zips: for new installs and updates) + UI bundle + manifest
           TARGET=""; [ "$RELEASES_REPO" = "$GITHUB_REPOSITORY" ] && TARGET="--target $GITHUB_SHA"
           gh release create "v$V" --repo "$RELEASES_REPO" --title "Motion $V" --notes-file notes.md $PRE $TARGET \
-            release/*.dmg release/updates/*.zip "release/updates/manifest-$V.json"
+            release/updates/*.zip "release/updates/manifest-$V.json"
           # 2. the feed: a fixed release "updates" that holds stable.json / beta.json (what installed apps read)
           if ! gh release view updates --repo "$RELEASES_REPO" >/dev/null 2>&1; then
             gh release create updates --repo "$RELEASES_REPO" --prerelease --title "Update feed" \
