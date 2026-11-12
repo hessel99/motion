@@ -10,3 +10,6 @@ e2e.png
 electron.png
 .claude/worktrees/
 undefined-*.png
+
+# update signing key (scripts/gen-update-key.mjs): never commit
+.update-key/

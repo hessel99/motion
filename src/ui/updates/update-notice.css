@@ -1,0 +1,12 @@
+.upd-pill {
+  position: fixed; right: 16px; bottom: 16px; z-index: var(--z-toast, 1000);
+  display: flex; align-items: center; gap: 2px; max-width: 420px;
+  padding: 3px; border-radius: var(--radius-lg, 8px);
+  background: var(--card-bg, #2a2a2a); border: 1px solid var(--card-border, #3a3a3a);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25); font-size: var(--text-sm, 12px); color: var(--text, #eee);
+}
+.upd-pill button { border: 0; background: transparent; color: inherit; font: inherit; border-radius: var(--radius-md, 6px); padding: 4px 8px; cursor: default; }
+.upd-pill button:hover { background: var(--surface-hover, rgba(255, 255, 255, 0.08)); }
+.upd-pill-text { text-align: left; color: var(--text-secondary, #bbb) !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upd-pill-act { font-weight: var(--weight-medium, 500); }
+.upd-pill-x { color: var(--text-muted, #888) !important; padding: 4px 6px !important; }
