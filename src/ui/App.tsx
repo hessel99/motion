@@ -9,7 +9,7 @@ import { showContextMenu, type MenuItem } from './menu';
 import {
   exportLottie, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, toast,
 } from '../app/actions';
-import { setProjectName } from '../core/commands';
+import { setProjectName, editMode } from '../core/commands';
 
 let vp: ViewportController | null = null;
 let tl: Timeline | null = null;
@@ -87,6 +87,7 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
         <button class="play" title="Play / pause (Space)" onClick={() => editor.togglePlay()}>{s.playing ? '❚❚' : '▶'}</button>
         <button class="ghost" title="Next frame (.)" onClick={() => editor.stepFrames(1)}>▸</button>
         <span class="timecode" ref={time}>00:00</span>
+        <button class={'ghost autokey' + (editMode.autoKey ? ' rec' : '')} title="Auto-keyframe: every change creates a keyframe at the playhead" onClick={() => { editMode.autoKey = !editMode.autoKey; editor.emit('view'); }}>● Auto-key</button>
       </div>
       <div class="tb-right">
         <button class="ghost" disabled={!s.canUndo} title={`Undo ${s.undoLabel ?? ''} (⌘Z)`} onClick={() => s.undo()}>↶</button>

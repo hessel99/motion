@@ -4,9 +4,9 @@
 import { editor } from '../app/editor';
 import {
   addLayer, cloneLayers, deleteLayers, groupLayers, isAnimated, keyId, setCompSettings, setEase, setLayerField, setProp,
-  setPropTx, valueAt,
+  setPropTx, valueAt, setSpring,
 } from '../core/commands';
-import { EASE_PRESETS } from '../core/easing';
+import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
 
 export interface ToolDef {
@@ -22,7 +22,7 @@ const text = (v: unknown): ToolContent[] => [{ type: 'text', text: typeof v === 
 
 const colorSchema = { description: 'color as "#rrggbb", "#rrggbbaa" or [r,g,b,a] with 0..1 floats', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'number' } }] };
 const propValueSchema = { description: 'number, number array, or color (for fill/stroke)', anyOf: [{ type: 'number' }, { type: 'array', items: { type: 'number' } }, { type: 'string' }] };
-const easeSchema = { description: `ease preset name (${EASE_PRESETS.map(p => p.name).join(', ')}) or cubic-bezier [x1,y1,x2,y2]`, anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'number' } }] };
+const easeSchema = { description: `ease preset name (${EASE_PRESETS.map(p => p.name).join(', ')}), spring preset (${SPRING_PRESETS.map(p => 'spring ' + p.name).join(', ')}), "spring:<bounce 0..0.9>", or cubic-bezier [x1,y1,x2,y2]`, anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'number' } }] };
 
 export function parseColor(c: any): number[] {
   if (Array.isArray(c)) {
@@ -210,7 +210,7 @@ export const TOOLS: ToolDef[] = [
       const key = checkProp(a.prop);
       const incoming: Keyframe[] = (a.keyframes as any[]).map(k => {
         const ease = resolveEase(k.ease);
-        return { t: +k.t, v: toValue(key, k.v), interp: k.interp ?? (ease.linear ? 'linear' : 'bezier'), out: [ease.v[0], ease.v[1]], in: [0.667, 1], sOut: k.sOut, sIn: k.sIn } as Keyframe;
+        return { t: +k.t, v: toValue(key, k.v), interp: k.interp ?? (ease.bounce !== undefined ? 'spring' : ease.linear ? 'linear' : 'bezier'), bounce: ease.bounce, out: [ease.v[0], ease.v[1]], in: [0.667, 1], sOut: k.sOut, sIn: k.sIn } as Keyframe;
       });
       incoming.sort((x, y) => x.t - y.t);
       // the "in" handle of key i+1 comes from the ease of key i
@@ -241,7 +241,9 @@ export const TOOLS: ToolDef[] = [
       const kf = l.props[key]?.kf ?? [];
       const idx: number[] = a.indices ?? kf.map((_, i) => i);
       const e = resolveEase(a.ease);
-      setEase(st(), idx.map(i => keyId(l.id, key, i)), e.v, e.linear ? 'linear' : 'bezier');
+      const ids = idx.map(i => keyId(l.id, key, i));
+      if (e.bounce !== undefined) setSpring(st(), ids, e.bounce);
+      else setEase(st(), ids, e.v, e.linear ? 'linear' : 'bezier');
       return text('ok');
     },
   },
@@ -309,8 +311,13 @@ export const TOOLS: ToolDef[] = [
   },
 ];
 
-function resolveEase(e: any): { v: [number, number, number, number]; linear: boolean } {
+function resolveEase(e: any): { v: [number, number, number, number]; linear: boolean; bounce?: number } {
   if (e === undefined || e === null) return { v: [0.333, 0, 0.667, 1], linear: false };
+  if (typeof e === 'string' && /^spring/i.test(e.trim())) {
+    const m = e.match(/spring\s*[:\s]\s*([\d.]+)/i);
+    const preset = SPRING_PRESETS.find(p => e.toLowerCase().includes(p.name.toLowerCase()));
+    return { v: [0.333, 0, 0.667, 1], linear: false, bounce: m ? Math.min(0.9, +m[1]) : preset?.bounce ?? 0.3 };
+  }
   if (Array.isArray(e) && e.length === 4) return { v: e.map(Number) as any, linear: false };
   if (typeof e === 'string') {
     const p = EASE_PRESETS.find(p => p.name.toLowerCase() === e.toLowerCase().replace(/[-_]/g, ' '));

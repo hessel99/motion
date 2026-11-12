@@ -2,7 +2,7 @@
 // sent to agents and diffed. hot-path evaluation lives in evaluate.ts and works
 // on compiled typed-array tracks, never on these objects directly.
 
-export type Interp = 'bezier' | 'linear' | 'hold';
+export type Interp = 'bezier' | 'linear' | 'hold' | 'spring';
 
 export interface Keyframe {
   /** time in seconds (composition time) */
@@ -15,6 +15,8 @@ export interface Keyframe {
    *  out = handle leaving this keyframe, in = handle arriving at this keyframe. */
   out: [number, number];
   in: [number, number];
+  /** spring bounce 0..1 when interp = 'spring' (settles exactly at the next keyframe) */
+  bounce?: number;
   /** optional spatial tangents (position only), relative to the keyframe value, like after effects / lottie */
   sOut?: number[];
   sIn?: number[];

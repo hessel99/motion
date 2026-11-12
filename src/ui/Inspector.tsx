@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
 import {
   addKeyframe, deleteKeyframes, isAnimated, keyId, parseKeyId, setCompSettings, setEase, setLayerField, setProp,
-  setSegmentHandles, toggleAnimated, valueAt,
+  setSegmentHandles, toggleAnimated, valueAt, setSpring,
 } from '../core/commands';
-import { EASE_PRESETS } from '../core/easing';
+import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
 import { PROP_DEFS, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
 import { useChannels } from './hooks';
 
@@ -311,13 +311,24 @@ function EasePanel() {
   const active = EASE_PRESETS.find(p => p.v.every((x, i) => Math.abs(x - cur[i]) < 1e-3));
   return (
     <Section title={`Easing · ${keys.length} key${keys.length > 1 ? 's' : ''}`} right={seg && <span class="insp-type">{PROP_DEFS[seg.key].label}</span>}>
-      {a && b && seg && a.interp !== 'hold' && (
+      {a && b && seg && a.interp === 'spring' && <SpringView bounce={a.bounce ?? 0.3} onChange={v => setSpring(store, keys, v)} />}
+      {a && b && seg && a.interp !== 'hold' && a.interp !== 'spring' && (
         <CurveEditor value={cur} onChange={(v, mk) => setSegmentHandles(store, seg!.layerId, seg!.key, seg!.i, [v[0], v[1]], [v[2], v[3]], mk)} />
       )}
       {a?.interp === 'hold' && <div class="muted small">Hold keyframe (no interpolation)</div>}
+      <div class="ease-group">Springs</div>
+      <div class="ease-presets">
+        {SPRING_PRESETS.map(p => (
+          <button class={'ease-chip' + (a?.interp === 'spring' && Math.abs((a.bounce ?? 0.3) - p.bounce) < 1e-3 ? ' on' : '')} onClick={() => setSpring(store, keys, p.bounce)}>
+            <MiniSpring bounce={p.bounce} />
+            <span>{p.name}</span>
+          </button>
+        ))}
+      </div>
+      <div class="ease-group">Curves</div>
       <div class="ease-presets">
         {EASE_PRESETS.map(p => (
-          <button class={'ease-chip' + (active?.name === p.name ? ' on' : '')} title={p.v.join(', ')} onClick={() => setEase(store, keys, p.name)}>
+          <button class={'ease-chip' + (a?.interp !== 'spring' && active?.name === p.name ? ' on' : '')} title={p.v.join(', ')} onClick={() => setEase(store, keys, p.name)}>
             <MiniCurve v={p.v} />
             <span>{p.name}</span>
           </button>
@@ -325,6 +336,38 @@ function EasePanel() {
       </div>
       <div class="row small muted">cubic-bezier({cur.map(x => Math.round(x * 100) / 100).join(', ')})</div>
     </Section>
+  );
+}
+
+function MiniSpring({ bounce }: { bounce: number }) {
+  const s = 18, p = 2;
+  let d = '';
+  for (let i = 0; i <= 24; i++) {
+    const x = i / 24, y = springAt(bounce, x);
+    d += `${i ? 'L' : 'M'}${(p + x * (s - 2 * p)).toFixed(1)} ${(s - p - y * (s - 2 * p) * 0.7 - (s - 2 * p) * 0.15).toFixed(1)}`;
+  }
+  return <svg width={s} height={s}><path d={d} fill="none" stroke="currentColor" stroke-width="1.4" /></svg>;
+}
+
+function SpringView({ bounce, onChange }: { bounce: number; onChange: (b: number) => void }) {
+  const W = 236, H = 120, pad = 14;
+  let d = '';
+  for (let i = 0; i <= 120; i++) {
+    const x = i / 120, y = springAt(bounce, x);
+    d += `${i ? 'L' : 'M'}${(pad + x * (W - 2 * pad)).toFixed(1)} ${(H - pad - (y / 1.5) * (H - 2 * pad)).toFixed(1)}`;
+  }
+  return (
+    <div>
+      <svg class="curve" width={W} height={H}>
+        <line x1={pad} x2={W - pad} y1={H - pad - (1 / 1.5) * (H - 2 * pad)} y2={H - pad - (1 / 1.5) * (H - 2 * pad)} class="curve-box" />
+        <path d={d} class="curve-path" />
+      </svg>
+      <div class="row">
+        <span class="muted small">Bounce</span>
+        <input type="range" min="0" max="0.9" step="0.01" value={bounce} style={{ flex: 1 }} onChange={e => onChange(+(e.target as HTMLInputElement).value)} />
+        <span class="small">{Math.round(bounce * 100)}%</span>
+      </div>
+    </div>
   );
 }
 

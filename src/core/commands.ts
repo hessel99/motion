@@ -10,6 +10,9 @@ import type { Store, Tx } from './store';
 
 const EPS = 1e-6;
 
+/** editor modes that affect editing commands */
+export const editMode = { autoKey: false };
+
 export function propDim(key: PropKey) { return PROP_DEFS[key].dim; }
 
 export function valueAt(layer: Layer, key: PropKey, t: number): number[] {
@@ -247,7 +250,7 @@ export function setPropTx(tx: Tx, l: Layer, key: PropKey, value: number[], t: nu
     p = { v: (PROP_DEFS[key].default as unknown as number[]).slice() };
     tx.set(l.props, key, p);
   }
-  if (p.kf && p.kf.length || forceKey) {
+  if ((p.kf && p.kf.length) || forceKey || editMode.autoKey) {
     tx.set(p, 'kf', upsertKey(p.kf ?? [], t, value));
   } else {
     tx.set(p, 'v', value.slice());
@@ -388,6 +391,23 @@ export function setEase(store: Store, keys: Iterable<string>, bez: [number, numb
           kf[i - 1] = { ...kf[i - 1], interp, out: [v[0], v[1]] };
           k.in = [v[2], v[3]];
         }
+      }
+      tx.set(g.prop, 'kf', kf);
+      tx.touch(g.layer.id);
+    }
+  });
+}
+
+/** spring easing on selected keyframes (segment leaving each key) */
+export function setSpring(store: Store, keys: Iterable<string>, bounce: number) {
+  const groups = groupKeySel(store, keys);
+  store.transact('Set spring', tx => {
+    for (const g of groups) {
+      const kf = g.prop.kf!.map(k => ({ ...k }));
+      for (const i of g.idx) {
+        const j = i < kf.length - 1 ? i : i - 1;
+        if (j < 0) continue;
+        kf[j] = { ...kf[j], interp: 'spring', bounce };
       }
       tx.set(g.prop, 'kf', kf);
       tx.touch(g.layer.id);

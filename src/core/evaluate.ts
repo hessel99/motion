@@ -3,7 +3,7 @@
 //  - the last used segment is cached (playback moves forward => O(1) lookup)
 //  - no allocation per evaluation (results are written into a caller supplied array)
 
-import { easeLUT, EASE_LUT_N } from './easing';
+import { easeLUT, springLUT, EASE_LUT_N } from './easing';
 import type { Keyframe, Prop } from './model';
 
 const INTERP_BEZIER = 0, INTERP_LINEAR = 1, INTERP_HOLD = 2;
@@ -54,7 +54,7 @@ export class Track {
       this.interps[i] = k.interp === 'hold' ? INTERP_HOLD : k.interp === 'linear' ? INTERP_LINEAR : INTERP_BEZIER;
       if (i < n - 1) {
         const nx = kf[i + 1];
-        this.eases[i] = this.interps[i] === INTERP_BEZIER ? easeLUT(k.out[0], k.out[1], nx.in[0], nx.in[1]) : null;
+        this.eases[i] = k.interp === 'spring' ? springLUT(k.bounce ?? 0.3) : this.interps[i] === INTERP_BEZIER ? easeLUT(k.out[0], k.out[1], nx.in[0], nx.in[1]) : null;
         if (spatial && dim === 2 && (nonZero(k.sOut) || nonZero(nx.sIn))) hasSpatial = true;
       } else this.eases[i] = null;
     }

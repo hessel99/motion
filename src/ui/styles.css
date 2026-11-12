@@ -135,3 +135,7 @@ code { background: #111; padding: 1px 4px; border-radius: 3px; }
 .toast { position: fixed; bottom: 320px; left: 50%; transform: translateX(-50%); background: #2a2a30; border: 1px solid #3a3a42; padding: 8px 14px; border-radius: 8px; z-index: 2000; transition: opacity .3s; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
 .toast.error { border-color: rgba(255,90,79,.6); color: #ffb3ad; }
 .toast.out { opacity: 0; }
+
+.ease-group { font-size: 11px; color: var(--muted); margin: 8px 0 4px; }
+.autokey { color: var(--muted); font-size: 11px; }
+.autokey.rec { color: #ff5a4f; background: rgba(255,90,79,.12); }

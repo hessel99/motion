@@ -365,7 +365,7 @@ describe('aep -> project', () => {
     parts.push(...enc('Roboto-BoldItalic'));
     push(') /2 1 >> >> >> ] >> >> /1 << /1 [ << /0 << /0 (');
     parts.push(...enc('Hi\r(there)\r').flatMap(b => (b === 0x28 || b === 0x29 ? [0x5c, b] : [b])));
-    push(') /5 << /0 [ << /0 << /0 () /5 << /0 2 >> /6 0 >> >> /1 3 >> ] >> /6 << /0 [ << /0 << /0 () /5 0 /6 << /0 0 /1 48.0 /4 true /5 .01 /53 << /99 /SimplePaint /0 << /0 1 /1 [ 1.0 .5 .25 0.0 ] >> >> >> >> >> /1 3 >> ] >> >> >> ] >> >>');
+    push(') /5 << /0 [ << /0 << /0 << /0 () /5 << /0 2 >> /6 0 >> >> /1 3 >> ] >> /6 << /0 [ << /0 << /0 << /0 () /5 0 /6 << /0 0 /1 48.0 /4 true /5 .01 /53 << /99 /SimplePaint /0 << /0 1 /1 [ 1.0 .5 .25 0.0 ] >> >> >> >> >> /1 3 >> ] >> >> >> ] >> >>');
     const docs = textDocs(Uint8Array.from(parts));
     expect(docs.length).toBe(1);
     expect(docs[0].text).toBe('Hi\n(there)');
@@ -390,6 +390,6 @@ describe('aep -> project', () => {
     const p = aepToProject(buf);
     const ms = performance.now() - t0;
     expect(Object.keys(p.layers).length).toBeGreaterThanOrEqual(3000);
-    expect(ms).toBeLessThan(3000);
+    expect(ms).toBeLessThan(1500);
   });
 });

@@ -7,7 +7,7 @@
 // lut index -1 = linear, -2 = hold. luts live in one shared Float32Array (deduplicated).
 // tracks with spatial (curved motion path) tangents fall back to a Track object.
 
-import { easeLUT, EASE_LUT_N } from './easing';
+import { easeLUT, springLUT, EASE_LUT_N } from './easing';
 import { Track } from './evaluate';
 import type { Prop } from './model';
 
@@ -33,8 +33,8 @@ export class TrackPool {
     this.data = next;
   }
 
-  private lut(x1: number, y1: number, x2: number, y2: number): number {
-    const t = easeLUT(x1, y1, x2, y2);
+  private lut(x1: number, y1: number, x2: number, y2: number, spring?: number): number {
+    const t = spring !== undefined ? springLUT(spring) : easeLUT(x1, y1, x2, y2);
     let i = this.lutIndex.get(t);
     if (i !== undefined) return i;
     i = this.lutCount++;
@@ -73,7 +73,7 @@ export class TrackPool {
       if (i === n - 1) D[lo + i] = -1;
       else if (k.interp === 'hold') D[lo + i] = -2;
       else if (k.interp === 'linear') D[lo + i] = -1;
-      else D[lo + i] = this.lut(k.out[0], k.out[1], kf[i + 1].in[0], kf[i + 1].in[1]);
+      else D[lo + i] = this.lut(k.out[0], k.out[1], kf[i + 1].in[0], kf[i + 1].in[1], k.interp === 'spring' ? k.bounce ?? 0.3 : undefined);
     }
     this.used += size;
     return o;

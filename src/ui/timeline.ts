@@ -9,8 +9,8 @@ import {
 } from '../core/commands';
 import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Layer, type PropKey } from '../core/model';
 import { showContextMenu, type MenuItem } from './menu';
-import { EASE_PRESETS } from '../core/easing';
-import { setEase, setInterp } from '../core/commands';
+import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
+import { setEase, setInterp, setSpring } from '../core/commands';
 
 const HEADER_H = 28;
 const ROW_H = 24;
@@ -381,14 +381,16 @@ export class Timeline {
       // segment line between keys when interpolated
       if (i < kf.length - 1 && kf[i].interp !== 'hold') {
         const x2 = this.tToX(kf[i + 1].t);
-        g.fillStyle = 'rgba(255,255,255,0.08)';
-        g.fillRect(Math.max(this.leftW, x), cy - 0.5, Math.max(0, Math.min(this.w, x2) - Math.max(this.leftW, x)), 1);
+        const segSel = selected && st.keySelection.has(keyId(l.id, key, i + 1));
+        g.fillStyle = segSel ? 'rgba(76,141,255,0.8)' : kf[i].interp === 'spring' ? 'rgba(255,190,90,0.35)' : 'rgba(255,255,255,0.12)';
+        g.fillRect(Math.max(this.leftW, x), cy - (segSel ? 1 : 0.5), Math.max(0, Math.min(this.w, x2) - Math.max(this.leftW, x)), segSel ? 2 : 1);
       }
       g.fillStyle = selected ? '#4c8dff' : '#d6d6dc';
       g.strokeStyle = selected ? '#bcd4ff' : '#16161a';
       g.lineWidth = 1;
       if (kf[i].interp === 'hold') { g.beginPath(); g.rect(x - 4, cy - 4, 8, 8); }
       else if (kf[i].interp === 'linear') diamond(g, x, cy, 5);
+      else if (kf[i].interp === 'spring') { g.beginPath(); g.arc(x, cy, 4.5, 0, Math.PI * 2); }
       else easeShape(g, x, cy, 5);
       g.fill();
       g.stroke();
@@ -405,6 +407,20 @@ export class Timeline {
       for (let k = kf.length - 1; k >= 0; k--) if (Math.abs(this.tToX(kf[k].t) - x) <= 6) return keyId(r.id, r.prop!, k);
     }
     return null;
+  }
+
+  /** click on the line between two keyframes (figma motion style): returns both keys */
+  private segmentAt(x: number, y: number): string[] {
+    const i = this.rowAtY(y);
+    if (i < 0) return [];
+    const r = this.rows[i];
+    if (r.kind !== 'prop') return [];
+    const cy = this.rowY(i) + ROW_H / 2;
+    if (Math.abs(y - cy) > 5) return [];
+    const kf = r.layer.props[r.prop!]?.kf ?? [];
+    const t = this.xToT(x);
+    for (let k = 0; k < kf.length - 1; k++) if (kf[k].t < t && t < kf[k + 1].t && kf[k].interp !== 'hold') return [keyId(r.id, r.prop!, k), keyId(r.id, r.prop!, k + 1)];
+    return [];
   }
 
   /** collapsed-layer summary diamonds: returns all keys of that layer at the hit time */
@@ -489,6 +505,13 @@ export class Timeline {
       const t0 = st.layer(first.layerId)!.props[first.key]!.kf![first.index].t;
       this.drag = { kind: 'keys', sx: x, t0, moved: false, dt: 0, key: keys[0] };
       st.beginGesture('keys');
+      return;
+    }
+    const segKeys = this.segmentAt(x, y);
+    if (segKeys.length) {
+      st.keySelection = new Set(e.shiftKey ? [...st.keySelection, ...segKeys] : segKeys);
+      if (!st.selection.includes(this.rows[i].id)) st.select([this.rows[i].id]);
+      st.emit('keys');
       return;
     }
     // layer bar drag (move / trim in-out)
@@ -683,6 +706,7 @@ export class Timeline {
       items.push({ label: 'Linear', action: () => setInterp(st, keys, 'linear') });
       items.push({ label: 'Hold', action: () => setInterp(st, keys, 'hold') });
       items.push({ label: 'Easing', submenu: EASE_PRESETS.map(p => ({ label: p.name, action: () => setEase(st, keys, p.name) })) });
+      items.push({ label: 'Spring', submenu: SPRING_PRESETS.map(p => ({ label: p.name, action: () => setSpring(st, keys, p.bounce) })) });
       items.push({ separator: true });
       items.push({ label: 'Delete keyframes', shortcut: '⌫', action: () => deleteKeyframes(st, keys) });
     } else {

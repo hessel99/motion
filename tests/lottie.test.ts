@@ -138,6 +138,17 @@ describe('lottie import', () => {
     expect(inner.inPoint).toBe(0.5);
   });
 
+  it('survives parent cycles and missing parents', () => {
+    const p = lottieToProject({ w: 10, h: 10, fr: 30, ip: 0, op: 30, layers: [
+      { ty: 3, ind: 1, parent: 2, nm: 'a', ks: {} }, { ty: 3, ind: 2, parent: 1, nm: 'b', ks: {} },
+      { ty: 3, ind: 3, parent: 1, nm: 'c', ks: {} }, { ty: 3, ind: 4, parent: 99, nm: 'd', ks: {} },
+    ] });
+    const by = layersByName(p);
+    expect(by['c'].parent).toBe(by['a'].id);
+    expect(by['d'].parent).toBeNull();
+    expect(Object.keys(p.layers).length).toBe(4);
+  });
+
   it('never throws on junk', () => {
     expect(() => lottieToProject({ layers: [null, { ty: 4, shapes: [{ ty: 'zz' }, null] }, { ty: 99 }] })).not.toThrow();
   });

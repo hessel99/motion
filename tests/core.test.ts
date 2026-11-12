@@ -111,3 +111,22 @@ describe('store + commands', () => {
     expect(Object.keys(s.project.layers).length).toBe(3);
   });
 });
+
+import { springAt } from '../src/core/easing';
+describe('spring', () => {
+  it('starts at 0, ends exactly at 1, overshoots when bouncy', () => {
+    for (const b of [0, 0.2, 0.5, 0.8]) {
+      expect(springAt(b, 0)).toBeCloseTo(0, 6);
+      expect(springAt(b, 1)).toBeCloseTo(1, 6);
+    }
+    expect(Math.max(...Array.from({ length: 100 }, (_, i) => springAt(0.5, i / 100)))).toBeGreaterThan(1.05);
+    expect(Math.max(...Array.from({ length: 100 }, (_, i) => springAt(0, i / 100)))).toBeLessThanOrEqual(1.0001);
+  });
+  it('track + pool agree for spring segments', async () => {
+    const { TrackPool } = await import('../src/core/trackpool');
+    const prop = { v: [0], kf: [{ t: 0, v: [0], interp: 'spring' as const, bounce: 0.4, out: [0, 0] as [number, number], in: [1, 1] as [number, number] }, { t: 1, v: [100], interp: 'linear' as const, out: [0, 0] as [number, number], in: [1, 1] as [number, number] }] };
+    const tr = new Track(prop, 1); const pool = new TrackPool(); const h = pool.add(prop, 1, false);
+    const o = new Float64Array(1);
+    for (let t = 0; t <= 1; t += 0.05) { pool.eval(h, t, o, 0); expect(o[0]).toBeCloseTo(tr.eval1(t), 9); }
+  });
+});

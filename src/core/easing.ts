@@ -80,6 +80,40 @@ export function easeLUT(x1: number, y1: number, x2: number, y2: number): Float32
 }
 export const EASE_LUT_N = LUT_N;
 
+/** spring progress curve for normalized time 0..1 with bounce 0..1 (figma / swiftui style:
+ *  perceptual duration = segment length). normalized so it ends exactly at 1. */
+export function springAt(bounce: number, t: number): number {
+  const b = Math.min(0.95, Math.max(0, bounce));
+  const zeta = 1 - b;
+  const w0 = 2 * Math.PI * 1.25; // a bit faster than 1 period so it visually settles inside the segment
+  const f = (x: number) => {
+    if (zeta >= 1) return 1 - Math.exp(-w0 * x) * (1 + w0 * x);
+    const wd = w0 * Math.sqrt(1 - zeta * zeta);
+    return 1 - Math.exp(-zeta * w0 * x) * (Math.cos(wd * x) + ((zeta * w0) / wd) * Math.sin(wd * x));
+  };
+  const end = f(1);
+  // blend the residual error into the tail so the curve lands on 1 without a jump
+  return f(t) + (1 - end) * t * t * t;
+}
+
+export function springLUT(bounce: number): Float32Array {
+  const key = `spring:${bounce}`;
+  let t = lutCache.get(key);
+  if (t) return t;
+  t = new Float32Array(LUT_N + 2);
+  for (let i = 0; i <= LUT_N; i++) t[i] = springAt(bounce, i / LUT_N);
+  t[LUT_N + 1] = t[LUT_N];
+  lutCache.set(key, t);
+  return t;
+}
+
+export const SPRING_PRESETS = [
+  { name: 'Gentle', bounce: 0.1 },
+  { name: 'Quick', bounce: 0.2 },
+  { name: 'Bouncy', bounce: 0.45 },
+  { name: 'Wobbly', bounce: 0.65 },
+];
+
 export interface EasePreset { name: string; v: [number, number, number, number]; group: string }
 
 /** presets (css + common motion design curves). values = out handle (x1,y1) of first kf, in handle (x2,y2) of next kf */

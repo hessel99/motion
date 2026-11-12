@@ -456,21 +456,29 @@ export function assemble(ctx: BuildCtx, src: SrcLayer[]): Layer[] {
   for (const s of src) byKey.set(s.key, s);
   const kids = new Map<string | number, SrcLayer[]>();
   const roots: SrcLayer[] = [];
-  for (const s of src) {
-    // validate the parent chain (missing / cyclic parents -> root)
-    let ok = s.parent != null && byKey.has(s.parent) && s.parent !== s.key;
-    if (ok) {
-      const seen = new Set<string | number>([s.key]);
-      let p: SrcLayer | undefined = byKey.get(s.parent!);
-      for (let n = 0; p && n < 512; n++) {
-        if (seen.has(p.key)) { ok = false; break; }
-        seen.add(p.key);
-        p = p.parent != null ? byKey.get(p.parent) : undefined;
-      }
+  // validate parent chains in linear time (missing / cyclic parents -> root)
+  const state = new Map<string | number, 1 | 2 | 3>(); // 1 visiting, 2 ok, 3 bad
+  const resolve = (start: SrcLayer) => {
+    const path: SrcLayer[] = [];
+    let cur: SrcLayer | undefined = start;
+    let cycleFrom = -1;
+    while (cur) {
+      const st = state.get(cur.key);
+      if (st === 2 || st === 3) break;
+      if (st === 1) { cycleFrom = path.indexOf(cur); break; }
+      state.set(cur.key, 1);
+      path.push(cur);
+      cur = cur.parent != null && cur.parent !== cur.key ? byKey.get(cur.parent) : undefined;
     }
-    if (ok) {
-      let arr = kids.get(s.parent!);
-      if (!arr) kids.set(s.parent!, (arr = []));
+    // only the members of a cycle are bad (they become roots); the rest attach normally
+    path.forEach((s, i) => state.set(s.key, cycleFrom >= 0 && i >= cycleFrom ? 3 : 2));
+  };
+  for (const s of src) if (!state.has(s.key)) resolve(s);
+  for (const s of src) {
+    const p = s.parent != null && s.parent !== s.key ? byKey.get(s.parent) : undefined;
+    if (p && state.get(s.key) !== 3) {
+      let arr = kids.get(p.key);
+      if (!arr) kids.set(p.key, (arr = []));
       arr.push(s);
     } else roots.push(s);
   }
