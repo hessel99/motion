@@ -258,3 +258,22 @@ describe('component library', () => {
     expect(b.project.comps[local.id].component!.props!.map(p => p.name)).toEqual(['Title']);
   });
 });
+
+describe('exports', () => {
+  it('lottie: an instance with values gets its own asset, its timing a time remap', async () => {
+    const { projectToLottie } = await import('../src/export/lottie');
+    const { s, comp, title } = titleCard();
+    exposeProperty(s, comp.id, { name: 'Title', targets: [{ layer: title.id, field: 'text' }] });
+    const b = addMotionInstance(s, comp.id, { start: 1, props: { Title: 'Other' }, play: { duration: 2 } });
+    const j = projectToLottie(s.project);
+    const assets = j.assets.filter((a: any) => a.layers);
+    expect(assets.map((a: any) => a.id).sort()).toEqual(['comp_' + comp.id, 'comp_' + comp.id + '_' + b.id]);
+    const own = assets.find((a: any) => a.id.endsWith(b.id));
+    const other = own.layers.find((l: any) => l.ty === 5);
+    expect(other.t.d.k[0].s.t).toBe('Other');
+    const pl = j.layers.find((l: any) => l.refId === own.id);
+    expect(pl.tm.k[0]).toMatchObject({ t: 60, s: [0] });
+    expect(pl.tm.k[1].t).toBe(180);
+    expect(pl.tm.k[1].s[0]).toBeCloseTo(4, 3);
+  });
+});
