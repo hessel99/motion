@@ -198,6 +198,31 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   const [dl] = await Promise.all([page.waitForEvent('download'), ev(async () => (await import('/src/app/actions.ts')).exportFramePng(0.25))]);
   check('MD-03: in a browser the export is a download with the same name', dl.suggestedFilename() === 'Logo reveal_0000.png', dl.suggestedFilename());
 
+  // MD-29: typing right after focusing a number field (before the next frame) keeps every digit.
+  // the old field selected its text a frame after focus, so the first typed digit got replaced
+  await ev(() => editor.store.select([]));
+  await page.waitForTimeout(150);
+  const fps = await ev(async () => {
+    const el = document.querySelector('input[aria-label="Frame rate"]');
+    if (!el) return 'no field';
+    el.focus();
+    document.execCommand('insertText', false, '2'); // same task as the focus: "busy" app
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    document.execCommand('insertText', false, '4');
+    el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await new Promise(r => setTimeout(r, 50));
+    return editor.store.comp.fps;
+  });
+  check('MD-29: a number field keeps the first digit typed right after focus', fps === 24, String(fps));
+  await ev(() => editor.store.undo());
+  // a click still selects the whole value: typing replaces it
+  const fr = page.locator('input[aria-label="Frame rate"]');
+  await fr.click();
+  await page.keyboard.type('25');
+  await page.keyboard.press('Enter');
+  check('MD-29: click + type replaces the value', (await ev(() => editor.store.comp.fps)) === 25, String(await ev(() => editor.store.comp.fps)));
+  await ev(() => editor.store.undo());
+
   check('MD: no page errors', errors.length === 0, JSON.stringify(errors.slice(0, 5)));
   await ctx.close();
 }
