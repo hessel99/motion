@@ -54,7 +54,7 @@ function TopActions() {
         <Button variant="ghost" icon size="sm" disabled={!s.canRedo} tip="Redo (⇧⌘Z)" onClick={() => s.redo()}><Redo2 /></Button>
       </>}
       <Button variant="ghost" icon size="sm" tip="Menu" aria-haspopup="menu" class="tb-menu" onClick={e => menuFrom(e.currentTarget as Element, appMenuItems(), { align: 'right' })}><Ellipsis /></Button>
-      <button type="button" class="pill-btn tb-share" disabled={!editing} aria-haspopup="menu" title="Share a preview or export a file (⌘E exports)" onClick={e => openShare(e.currentTarget as HTMLElement)}>Share</button>
+      {editing && <button type="button" class="pill-btn tb-share" aria-haspopup="menu" title="Share a preview or export a file (⌘E exports)" onClick={e => openShare(e.currentTarget as HTMLElement)}>Share</button>}
     </div>
   );
 }

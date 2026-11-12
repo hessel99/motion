@@ -226,7 +226,7 @@ export function Segmented<V extends string | number>(props: {
  */
 export function Section(props: {
   title: ComponentChildren; children?: ComponentChildren; right?: ComponentChildren; class?: string;
-  onAdd?: () => void; addLabel?: string; onRemove?: () => void; removeLabel?: string;
+  onAdd?: (e?: MouseEvent) => void; addLabel?: string; onRemove?: () => void; removeLabel?: string;
 }) {
   const empty = props.children === undefined || props.children === null || props.children === false || (Array.isArray(props.children) && props.children.every(c => c === null || c === undefined || c === false));
   return (
@@ -236,7 +236,7 @@ export function Section(props: {
         <span class="section-actions">
           {props.right}
           {props.onRemove && <Button variant="ghost" icon size="sm" tip={props.removeLabel ?? 'Remove'} onClick={props.onRemove}><Minus size={14} /></Button>}
-          {props.onAdd && <Button variant="ghost" icon size="sm" tip={props.addLabel ?? 'Add'} onClick={props.onAdd}><Plus size={14} /></Button>}
+          {props.onAdd && <Button variant="ghost" icon size="sm" tip={props.addLabel ?? 'Add'} onClick={props.onAdd as any}><Plus size={14} /></Button>}
         </span>
       </header>
       {props.children}

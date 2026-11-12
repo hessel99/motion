@@ -628,14 +628,22 @@ export class Timeline {
     const nameX = tx + 16;
     const maxW = this.leftW - nameX - 70;
     g.fillText(ellipsize(g, l.name, maxW), nameX, cy);
-    // solo + eye + lock
+    // solo + eye + lock: quiet by default. each shows when it is not in its default state (soloed,
+    // hidden, locked), and all three on the hovered / selected row (they stay clickable everywhere)
     const soloed = st.solo.has(l.id);
-    g.fillStyle = soloed ? T.tlSolo : T.tlControlOff;
-    g.beginPath(); g.arc(this.leftW - 58, cy, soloed ? 4 : 3, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = l.visible ? T.tlControl : T.tlControlOff;
-    strokeIcon(g, l.visible ? Eye : EyeOff, this.leftW - 40, cy, 13, 1.2);
-    g.strokeStyle = l.locked ? T.tlControlOn : T.tlControlOff;
-    strokeIcon(g, l.locked ? Lock : LockOpen, this.leftW - 20, cy, 12, 1.2);
+    const hot = isSel || this.rows[this.hoverRow] === r;
+    if (hot || soloed) {
+      g.fillStyle = soloed ? T.tlSolo : T.tlControlOff;
+      g.beginPath(); g.arc(this.leftW - 58, cy, soloed ? 4 : 3, 0, Math.PI * 2); g.fill();
+    }
+    if (hot || !l.visible) {
+      g.strokeStyle = l.visible ? T.tlControl : T.tlControlOff;
+      strokeIcon(g, l.visible ? Eye : EyeOff, this.leftW - 40, cy, 13, 1.2);
+    }
+    if (hot || l.locked) {
+      g.strokeStyle = l.locked ? T.tlControlOn : T.tlControlOff;
+      strokeIcon(g, l.locked ? Lock : LockOpen, this.leftW - 20, cy, 12, 1.2);
+    }
 
     // track: layer bar
     const comp = st.comp;

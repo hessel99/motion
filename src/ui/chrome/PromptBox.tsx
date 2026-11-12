@@ -62,7 +62,7 @@ export function PromptBox(props: { fresh: boolean }) {
       onDragOver={e => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)} onDrop={drop as any}>
       <h1 class="prompt-title">What do you want to make?</h1>
       <div class="prompt-box">
-        <textarea class="prompt-input" rows={props.fresh ? 3 : 2} value={text} placeholder="Describe the animation. Drop a logo, an SVG, an image or audio here, or paste a Figma frame."
+        <textarea class="prompt-input" rows={props.fresh ? 3 : 2} value={text} placeholder="A logo reveal: the mark draws in, the name follows with a soft overshoot…"
           aria-label="Describe the animation"
           onInput={e => setText((e.target as HTMLTextAreaElement).value)}
           onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } }} />
