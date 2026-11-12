@@ -566,7 +566,31 @@ function AnimatePanel({ ids }: { ids: string[] }) {
         <NumField label="Dur" step={0.05} min={0.05} value={dur} suffix="s" onChange={setDur} />
         {ids.length > 1 && <NumField label="Stagger" step={0.01} min={0} value={stagger} suffix="s" onChange={setStagger} />}
       </div>
+      {ids.length === 2 && <SmartRow ids={ids} dur={dur} />}
     </Section>
+  );
+}
+
+/** two selected versions of a design (e.g. two pasted figma frames): animate from one to the other */
+function SmartRow({ ids, dur }: { ids: string[]; dur: number }) {
+  const store = st();
+  const [swap, setSwap] = useState(false);
+  const [a, b] = swap ? [ids[1], ids[0]] : ids;
+  const name = (id: string) => store.layer(id)?.name ?? '?';
+  const run = async () => {
+    const { smartAnimate } = await import('../core/smart');
+    try {
+      const r = smartAnimate(store, a, b, { duration: dur });
+      store.select([a]);
+      (globalThis as any).timeline?.expand(a, true);
+      toast(`Smart animate: ${r.matched} matched layers, ${r.props} animated properties` + (r.fadedIn + r.fadedOut ? `, ${r.fadedIn} fade in, ${r.fadedOut} fade out` : ''));
+    } catch (e: any) { toast(e.message, 'error'); }
+  };
+  return (
+    <div class="row" title="Matches layers by name inside the two selected layers and animates every difference from the start to the end state. The end layer is removed.">
+      <button class="btn" style={{ flex: 1 }} onClick={run}>Smart animate {name(a)} → {name(b)}</button>
+      <button class="ghost" title="Swap start and end" onClick={() => setSwap(!swap)}>⇄</button>
+    </div>
   );
 }
 

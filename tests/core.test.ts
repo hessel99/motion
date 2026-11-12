@@ -318,3 +318,40 @@ describe('markers', () => {
     expect(s.comp.markers!.length).toBe(2);
   });
 });
+
+describe('smart animate', () => {
+  it('matches by name path, keys differences, fades unmatched, removes the end root', async () => {
+    const { smartAnimate } = await import('../src/core/smart');
+    const s = new Store();
+    const A = addLayer(s, 'group', { x: 0, y: 0, w: 400, h: 300, name: 'Card' } as any);
+    const a1 = addLayer(s, 'rect', { x: 10, y: 10, w: 50, h: 50, color: [1, 0, 0, 1], name: 'Box' } as any, A.id);
+    const a2 = addLayer(s, 'rect', { x: 100, y: 10, w: 50, h: 50, name: 'Gone' } as any, A.id);
+    const B = addLayer(s, 'group', { x: 800, y: 0, w: 400, h: 500, name: 'Card' } as any);
+    addLayer(s, 'rect', { x: 200, y: 40, w: 80, h: 50, color: [0, 0, 1, 1], name: 'Box' } as any, B.id);
+    const b2 = addLayer(s, 'rect', { x: 5, y: 200, w: 20, h: 20, name: 'New' } as any, B.id);
+    const before = s.historyLength;
+    s.setTime(1);
+    const r = smartAnimate(s, A.id, B.id, { duration: 0.5 });
+    expect(r).toMatchObject({ matched: 1, fadedIn: 1, fadedOut: 1 });
+    expect(s.layer(B.id)).toBeUndefined();
+    const box = s.layer(a1.id)!;
+    expect(box.props.position!.kf!.map(k => [k.t, ...k.v])).toEqual([[1, 35, 35], [1.5, 240, 65]]); // anchor is centered
+    expect(valueAt(box, 'fill', 1.5)).toEqual([0, 0, 1, 1]);
+    expect(valueAt(box, 'size', 1.5)).toEqual([80, 50]);
+    // root keeps its position, animates its size
+    expect(s.layer(A.id)!.props.position?.kf).toBeUndefined();
+    expect(valueAt(s.layer(A.id)!, 'size', 1.5)).toEqual([400, 500]);
+    // fades
+    expect(valueAt(s.layer(a2.id)!, 'opacity', 1.5)).toEqual([0]);
+    const nb = s.layer(b2.id)!;
+    expect(nb.parent).toBe(A.id);
+    expect(valueAt(nb, 'opacity', 1)).toEqual([0]);
+    expect(valueAt(nb, 'opacity', 1.5)).toEqual([100]);
+    // one undo step restores everything
+    expect(s.historyLength).toBe(before + 1);
+    s.undo();
+    expect(s.layer(B.id)).toBeDefined();
+    expect(s.layer(b2.id)!.parent).toBe(B.id);
+    expect(s.layer(a1.id)!.props.position?.kf).toBeUndefined();
+  });
+});

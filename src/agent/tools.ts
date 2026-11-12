@@ -295,6 +295,16 @@ export const TOOLS: ToolDef[] = [
     run: (a) => { setCompSettings(st(), { ...a, background: a.background !== undefined ? parseColor(a.background) as any : undefined }); return text('ok'); },
   },
   {
+    name: 'smart_animate',
+    description: 'Figma-style smart animate between two versions of a design (e.g. two pasted frames, start and end state). Layers are matched by name path inside the two roots; every differing property gets keys from t0 to t0+duration, unmatched layers fade in/out, and the end root is removed (the start root becomes the animated one).',
+    inputSchema: { type: 'object', properties: { start_id: { type: 'string' }, end_id: { type: 'string' }, t0: { type: 'number', description: 'seconds, default playhead' }, duration: { type: 'number', default: 0.6 }, ease: { type: 'string', description: 'ease preset name, default "Cubic Out"' }, spring: { type: 'number', description: 'use a spring with this bounce (0..1) instead of an ease' } }, required: ['start_id', 'end_id'] },
+    run: async ({ start_id, end_id, t0, duration, ease, spring }) => {
+      const { smartAnimate } = await import('../core/smart');
+      const r = smartAnimate(st(), start_id, end_id, { t0, duration, ease, spring });
+      return text(JSON.stringify(r));
+    },
+  },
+  {
     name: 'set_markers',
     description: 'Timeline markers (e.g. beats or story moments the user cares about). add: [{t, label}], remove: marker ids. Returns the markers. Markers are listed in get_document.',
     inputSchema: { type: 'object', properties: { add: { type: 'array', items: { type: 'object', properties: { t: { type: 'number' }, label: { type: 'string' } }, required: ['t'] } }, remove: { type: 'array', items: { type: 'string' } } } },
