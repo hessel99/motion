@@ -1,7 +1,7 @@
 {
- "date": "2026-11-12T20:32:26.484Z",
+ "date": "2026-11-12T20:58:21.837Z",
  "mode": "quick",
- "seconds": 229,
+ "seconds": 195,
  "summary": {
   "png": {
    "pass": 16,
@@ -1332,40 +1332,40 @@
    "info": {
     "preflight": [
      {
-      "id": "paint:l_a3qf10",
-      "layerId": "l_a3qf10",
+      "id": "paint:l_x5qx10",
+      "layerId": "l_x5qx10",
       "layer": "radial",
       "feature": "paint",
       "message": "elliptical radial gradient: Lottie can only draw one solid, linear or circular radial fill",
       "bakeable": true
      },
      {
-      "id": "paint:l_a3qf11",
-      "layerId": "l_a3qf11",
+      "id": "paint:l_x5qx11",
+      "layerId": "l_x5qx11",
       "layer": "angular",
       "feature": "paint",
       "message": "angular fill: Lottie can only draw one solid, linear or circular radial fill",
       "bakeable": true
      },
      {
-      "id": "paint:l_a3qf12",
-      "layerId": "l_a3qf12",
+      "id": "paint:l_x5qx12",
+      "layerId": "l_x5qx12",
       "layer": "diamond",
       "feature": "paint",
       "message": "diamond fill: Lottie can only draw one solid, linear or circular radial fill",
       "bakeable": true
      },
      {
-      "id": "paint:l_a3qf14",
-      "layerId": "l_a3qf14",
+      "id": "paint:l_x5qx14",
+      "layerId": "l_x5qx14",
       "layer": "image fill",
       "feature": "paint",
       "message": "image fill: Lottie can only draw one solid, linear or circular radial fill",
       "bakeable": true
      },
      {
-      "id": "paint:l_a3qf15",
-      "layerId": "l_a3qf15",
+      "id": "paint:l_x5qx15",
+      "layerId": "l_x5qx15",
       "layer": "noise",
       "feature": "paint",
       "message": "2 stacked fills: Lottie can only draw one solid, linear or circular radial fill",
@@ -1707,40 +1707,40 @@
    "info": {
     "preflight": [
      {
-      "id": "effects:l_a3qf1e",
-      "layerId": "l_a3qf1e",
+      "id": "effects:l_x5qx1e",
+      "layerId": "l_x5qx1e",
       "layer": "drop shadow",
       "feature": "effects",
       "message": "Drop shadow: Lottie players draw no shadows, blurs or noise",
       "bakeable": true
      },
      {
-      "id": "effects:l_a3qf1f",
-      "layerId": "l_a3qf1f",
+      "id": "effects:l_x5qx1f",
+      "layerId": "l_x5qx1f",
       "layer": "inner shadow",
       "feature": "effects",
       "message": "Inner shadow: Lottie players draw no shadows, blurs or noise",
       "bakeable": true
      },
      {
-      "id": "effects:l_a3qf1g",
-      "layerId": "l_a3qf1g",
+      "id": "effects:l_x5qx1g",
+      "layerId": "l_x5qx1g",
       "layer": "layer blur",
       "feature": "effects",
       "message": "Layer blur: Lottie players draw no shadows, blurs or noise",
       "bakeable": true
      },
      {
-      "id": "background-blur:l_a3qf1h",
-      "layerId": "l_a3qf1h",
+      "id": "background-blur:l_x5qx1h",
+      "layerId": "l_x5qx1h",
       "layer": "background blur",
       "feature": "background-blur",
       "message": "Background blur needs what is behind the layer: Lottie can't show it (baking would freeze the backdrop)",
       "bakeable": false
      },
      {
-      "id": "effects:l_a3qf1i",
-      "layerId": "l_a3qf1i",
+      "id": "effects:l_x5qx1i",
+      "layerId": "l_x5qx1i",
       "layer": "noise effect",
       "feature": "effects",
       "message": "Noise: Lottie players draw no shadows, blurs or noise",
@@ -2078,16 +2078,16 @@
    "info": {
     "preflight": [
      {
-      "id": "shader:l_a3qf1p",
-      "layerId": "l_a3qf1p",
+      "id": "shader:l_x5qx1p",
+      "layerId": "l_x5qx1p",
       "layer": "shader fill",
       "feature": "shader",
       "message": "shader fill: Lottie can only draw one solid, linear or circular radial fill",
       "bakeable": true
      },
      {
-      "id": "shader:l_a3qf1q",
-      "layerId": "l_a3qf1q",
+      "id": "shader:l_x5qx1q",
+      "layerId": "l_x5qx1q",
       "layer": "shader effect",
       "feature": "shader",
       "message": "Shader effects only run in Motion",
@@ -2753,16 +2753,16 @@
    "info": {
     "preflight": [
      {
-      "id": "blend:l_a3qf2e",
-      "layerId": "l_a3qf2e",
+      "id": "blend:l_x5qx2e",
+      "layerId": "l_x5qx2e",
       "layer": "linearBurn",
       "feature": "blend",
       "message": "blend mode \"linearBurn\" doesn't exist in Lottie (exported as normal)",
       "bakeable": false
      },
      {
-      "id": "blend:l_a3qf2i",
-      "layerId": "l_a3qf2i",
+      "id": "blend:l_x5qx2i",
+      "layerId": "l_x5qx2i",
       "layer": "add",
       "feature": "blend",
       "message": "blend mode \"add\" doesn't exist in Lottie (exported as normal)",
@@ -3211,10 +3211,10 @@
    "frames": 7,
    "worst": {
     "i": 28,
-    "mean": 0.59835546875,
+    "mean": 0.5983671875,
     "max": 84,
     "bad": 0.00028125,
-    "raw": 1.169796875,
+    "raw": 1.16983203125,
     "colour": 0.8449802994483846,
     "colourMax": 14
    },
@@ -3264,10 +3264,10 @@
    "frames": 7,
    "worst": {
     "i": 28,
-    "mean": 0.59835546875,
+    "mean": 0.5983671875,
     "max": 84,
     "bad": 0.00028125,
-    "raw": 1.169796875,
+    "raw": 1.16983203125,
     "colour": 0.8449802994483846,
     "colourMax": 14
    },
@@ -3317,10 +3317,10 @@
    "frames": 7,
    "worst": {
     "i": 0,
-    "mean": 0.2008125,
+    "mean": 0.20080859375,
     "max": 13,
     "bad": 0,
-    "raw": 0.677609375,
+    "raw": 0.67760546875,
     "colour": 0.6850484610944004,
     "colourMax": 7
    },
@@ -3370,7 +3370,7 @@
    "frames": 7,
    "worst": {
     "i": 20,
-    "mean": 0.19480078125,
+    "mean": 0.19333984375,
     "max": 11,
     "bad": 0
    },
@@ -3430,64 +3430,64 @@
    "info": {
     "preflight": [
      {
-      "id": "text:l_a3qf31",
-      "layerId": "l_a3qf31",
+      "id": "text:l_x5qx31",
+      "layerId": "l_x5qx31",
       "layer": "Text",
       "feature": "text",
       "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
       "bakeable": true
      },
      {
-      "id": "text:l_a3qf32",
-      "layerId": "l_a3qf32",
+      "id": "text:l_x5qx32",
+      "layerId": "l_x5qx32",
       "layer": "Text",
       "feature": "text",
       "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
       "bakeable": true
      },
      {
-      "id": "text:l_a3qf33",
-      "layerId": "l_a3qf33",
+      "id": "text:l_x5qx33",
+      "layerId": "l_x5qx33",
       "layer": "Text",
       "feature": "text",
       "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
       "bakeable": true
      },
      {
-      "id": "text:l_a3qf34",
-      "layerId": "l_a3qf34",
+      "id": "text:l_x5qx34",
+      "layerId": "l_x5qx34",
       "layer": "Text",
       "feature": "text",
       "message": "Lottie players lay text out themselves (no kerning, their own line breaks): underline",
       "bakeable": true
      },
      {
-      "id": "text:l_a3qf35",
-      "layerId": "l_a3qf35",
+      "id": "text:l_x5qx35",
+      "layerId": "l_x5qx35",
       "layer": "Text",
       "feature": "text",
       "message": "Lottie players lay text out themselves (no kerning, their own line breaks): text case",
       "bakeable": true
      },
      {
-      "id": "text:l_a3qf36",
-      "layerId": "l_a3qf36",
+      "id": "text:l_x5qx36",
+      "layerId": "l_x5qx36",
       "layer": "Text",
       "feature": "text",
       "message": "Lottie players lay text out themselves (no kerning, their own line breaks): mixed styles",
       "bakeable": true
      },
      {
-      "id": "text:l_a3qf37",
-      "layerId": "l_a3qf37",
+      "id": "text:l_x5qx37",
+      "layerId": "l_x5qx37",
       "layer": "Text",
       "feature": "text",
       "message": "Lottie players lay text out themselves (no kerning, their own line breaks): font \"serif\" is not embedded, italic",
       "bakeable": true
      },
      {
-      "id": "text:l_a3qf38",
-      "layerId": "l_a3qf38",
+      "id": "text:l_x5qx38",
+      "layerId": "l_x5qx38",
       "layer": "Text",
       "feature": "text",
       "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
@@ -3605,13 +3605,13 @@
    "fails": [],
    "frames": 7,
    "worst": {
-    "i": 0,
-    "mean": 0.23782552083333333,
-    "max": 40,
-    "bad": 0.0003385416666666667,
-    "raw": 0.9052864583333333,
-    "colour": 0.7634150248278071,
-    "colourMax": 18
+    "i": 1,
+    "mean": 0.2376171875,
+    "max": 48,
+    "bad": 0.0005989583333333333,
+    "raw": 0.9121614583333333,
+    "colour": 0.7514665389680354,
+    "colourMax": 16
    },
    "checks": [
     {
@@ -3646,7 +3646,7 @@
     "editor": "img/expressions-mp4-editor.png",
     "export": "img/expressions-mp4-export.png",
     "diff": "img/expressions-mp4-diff.png",
-    "frame": 0
+    "frame": 1
    }
   },
   {
@@ -3658,13 +3658,13 @@
    "fails": [],
    "frames": 7,
    "worst": {
-    "i": 0,
-    "mean": 0.23782552083333333,
-    "max": 40,
-    "bad": 0.0003385416666666667,
-    "raw": 0.9052864583333333,
-    "colour": 0.7634150248278071,
-    "colourMax": 18
+    "i": 1,
+    "mean": 0.2376171875,
+    "max": 48,
+    "bad": 0.0005989583333333333,
+    "raw": 0.9121614583333333,
+    "colour": 0.7514665389680354,
+    "colourMax": 16
    },
    "checks": [
     {
@@ -3699,7 +3699,7 @@
     "editor": "img/expressions-mp4hq-editor.png",
     "export": "img/expressions-mp4hq-export.png",
     "diff": "img/expressions-mp4hq-diff.png",
-    "frame": 0
+    "frame": 1
    }
   },
   {
@@ -3712,11 +3712,11 @@
    "frames": 7,
    "worst": {
     "i": 1,
-    "mean": 0.16043619791666666,
+    "mean": 0.15469401041666667,
     "max": 27,
     "bad": 0.00002604166666666667,
-    "raw": 0.86595703125,
-    "colour": 0.7166067864271457,
+    "raw": 0.8333528645833334,
+    "colour": 0.7095654255955944,
     "colourMax": 12
    },
    "checks": [
@@ -3764,9 +3764,9 @@
    "fails": [],
    "frames": 7,
    "worst": {
-    "i": 40,
-    "mean": 0.06815755208333334,
-    "max": 9,
+    "i": 30,
+    "mean": 0.12841796875,
+    "max": 16,
     "bad": 0
    },
    "checks": [
@@ -3795,7 +3795,7 @@
     "editor": "img/expressions-gif-editor.png",
     "export": "img/expressions-gif-export.png",
     "diff": "img/expressions-gif-diff.png",
-    "frame": 40
+    "frame": 30
    }
   },
   {
@@ -3807,10 +3807,10 @@
    "fails": [],
    "frames": 7,
    "worst": {
-    "i": 0,
-    "mean": 0.0994140625,
-    "max": 59,
-    "bad": 0.0031770833333333334
+    "i": 59,
+    "mean": 0.09291015625,
+    "max": 168,
+    "bad": 0.0012239583333333334
    },
    "checks": [
     {
@@ -3824,13 +3824,13 @@
    ],
    "info": {
     "preflight": [],
-    "bytes": 24365
+    "bytes": 24371
    },
    "imgs": {
     "editor": "img/expressions-lottie-editor.png",
     "export": "img/expressions-lottie-export.png",
     "diff": "img/expressions-lottie-diff.png",
-    "frame": 0
+    "frame": 59
    }
   },
   {
@@ -3843,12 +3843,12 @@
    "frames": 7,
    "worst": {
     "i": 0,
-    "mean": 0.442724609375,
+    "mean": 0.519990234375,
     "max": 60,
-    "bad": 0.0010611979166666667,
-    "raw": 0.81125,
-    "colour": 0.9522961148382187,
-    "colourMax": 23
+    "bad": 0.0009830729166666666,
+    "raw": 0.850390625,
+    "colour": 1.0261507052709726,
+    "colourMax": 19
    },
    "checks": [
     {
@@ -3861,7 +3861,7 @@
     }
    ],
    "info": {
-    "bytes": 105193
+    "bytes": 106213
    },
    "imgs": {
     "editor": "img/expressions-preview-editor.png",
@@ -5539,8 +5539,8 @@
    "info": {
     "preflight": [
      {
-      "id": "audio:l_a3qf4c",
-      "layerId": "l_a3qf4c",
+      "id": "audio:l_x5qx4c",
+      "layerId": "l_x5qx4c",
       "layer": "clicks",
       "feature": "audio",
       "message": "Lottie has no audio: this layer is left out",

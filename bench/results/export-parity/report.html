@@ -12,37 +12,9 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 .wrap{overflow-x:auto}.note{font-size:12px;color:var(--mut);font-weight:normal;margin-top:4px}
 </style></head><body><main>
 <h1>Export ↔ editor parity</h1>
-<p>full run · 2026-11-12T20:44:29.174Z · 712s · 167/173 passed. Errors are 0–255 per channel (premultiplied RGBA) against the editor's renderer at the same time; worst rows first.</p>
-<div class="sum"><div><b>png</b><span class="ok">21/21</span> · worst 0.00</div><div><b>pngseq</b><span class="bad">20/21</span> · worst 0.00</div><div><b>mp4</b><span class="ok">21/21</span> · worst 1.47</div><div><b>mp4hq</b><span class="ok">21/21</span> · worst 1.47</div><div><b>webm</b><span class="ok">21/21</span> · worst 0.84</div><div><b>gif</b><span class="ok">21/21</span> · worst 2.75</div><div><b>lottie</b><span class="ok">21/21</span> · worst 0.47</div><div><b>preview</b><span class="ok">21/21</span> · worst 1.77</div><div><b>lottie-native</b><span class="bad">0/5</span> · worst 78.94</div></div>
+<p>quick run · 2026-11-12T20:58:21.837Z · 195s · 128/128 passed. Errors are 0–255 per channel (premultiplied RGBA) against the editor's renderer at the same time; worst rows first.</p>
+<div class="sum"><div><b>png</b><span class="ok">16/16</span> · worst 0.00</div><div><b>pngseq</b><span class="ok">16/16</span> · worst 0.00</div><div><b>mp4</b><span class="ok">16/16</span> · worst 1.47</div><div><b>mp4hq</b><span class="ok">16/16</span> · worst 1.47</div><div><b>webm</b><span class="ok">16/16</span> · worst 0.82</div><div><b>gif</b><span class="ok">16/16</span> · worst 1.31</div><div><b>lottie</b><span class="ok">16/16</span> · worst 0.47</div><div><b>preview</b><span class="ok">16/16</span> · worst 1.77</div></div>
 <div class="wrap"><table><thead><tr><th>scene</th><th>path</th><th>result</th><th>worst frame</th><th>mean</th><th>max</th><th>&gt;24</th><th>raw</th><th>flat colour</th><th>editor / export / diff</th></tr></thead><tbody>
-<tr><td>text-anim<br><small style="color:var(--mut)">Text animators (per letter / word)</small></td><td>lottie-native</td>
-<td class="bad">FAIL<ul class="fails"><li>frame 0: mean 78.94 &gt; 2.5</li><li>frame 1: mean 78.94 &gt; 2.5</li><li>frame 2: mean 78.88 &gt; 2.5</li><li>frame 3: mean 78.67 &gt; 2.5</li><li>frame 4: mean 78.35 &gt; 2.5</li><li>frame 5: mean 77.66 &gt; 2.5</li><li>… 39 more</li></ul></td>
-<td>0</td><td>78.94</td><td>237</td><td>45.58%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/text-anim-lottie-native-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/text-anim-lottie-native-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-anim-lottie-native-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>shaders<br><small style="color:var(--mut)">Shader fill (animated) + shader effect (test shaders)</small></td><td>lottie-native</td>
-<td class="bad">FAIL<ul class="fails"><li>frame 0: mean 56.84 &gt; 2.5</li><li>frame 1: mean 56.84 &gt; 2.5</li><li>frame 2: mean 56.84 &gt; 2.5</li><li>frame 3: mean 56.84 &gt; 2.5</li><li>frame 4: mean 56.84 &gt; 2.5</li><li>frame 5: mean 56.84 &gt; 2.5</li><li>… 24 more</li></ul></td>
-<td>17</td><td>56.84</td><td>255</td><td>48.15%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/shaders-lottie-native-editor.png" alt="editor frame 17"><figcaption>editor</figcaption></figure><figure><img src="img/shaders-lottie-native-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/shaders-lottie-native-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>paints<br><small style="color:var(--mut)">Linear / radial / angular / diamond gradients, image fill, noise</small></td><td>lottie-native</td>
-<td class="bad">FAIL<ul class="fails"><li>frame 0: mean 24.89 &gt; 2.5</li><li>frame 1: mean 24.89 &gt; 2.5</li><li>frame 2: mean 24.89 &gt; 2.5</li><li>frame 3: mean 24.89 &gt; 2.5</li><li>frame 4: mean 24.89 &gt; 2.5</li><li>frame 5: mean 24.89 &gt; 2.5</li><li>… 39 more</li></ul></td>
-<td>0</td><td>24.89</td><td>239</td><td>43.11%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/paints-lottie-native-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/paints-lottie-native-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/paints-lottie-native-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>text<br><small style="color:var(--mut)">Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration</small></td><td>lottie-native</td>
-<td class="bad">FAIL<ul class="fails"><li>frame 0: mean 14.74 &gt; 2.5</li><li>frame 1: mean 14.74 &gt; 2.5</li><li>frame 2: mean 14.75 &gt; 2.5</li><li>frame 3: mean 14.77 &gt; 2.5</li><li>frame 4: mean 14.79 &gt; 2.5</li><li>frame 5: mean 14.82 &gt; 2.5</li><li>… 24 more</li></ul></td>
-<td>29</td><td>16.34</td><td>237</td><td>15.77%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/text-lottie-native-editor.png" alt="editor frame 29"><figcaption>editor</figcaption></figure><figure><img src="img/text-lottie-native-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-lottie-native-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>effects<br><small style="color:var(--mut)">Drop / inner shadow, layer blur, background blur, noise effect</small></td><td>lottie-native</td>
-<td class="bad">FAIL<div class="note">reported before export (excluded): background blur (background-blur)</div><ul class="fails"><li>frame 0: mean 2.83 &gt; 2.5</li><li>frame 1: mean 2.83 &gt; 2.5</li><li>frame 2: mean 2.83 &gt; 2.5</li><li>frame 3: mean 2.83 &gt; 2.5</li><li>frame 4: mean 2.83 &gt; 2.5</li><li>frame 5: mean 2.82 &gt; 2.5</li><li>… 24 more</li></ul></td>
-<td>29</td><td>3.35</td><td>122</td><td>9.98%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/effects-lottie-native-editor.png" alt="editor frame 29"><figcaption>editor</figcaption></figure><figure><img src="img/effects-lottie-native-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/effects-lottie-native-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>trim<br><small style="color:var(--mut)">Trim paths (animated) and path morph</small></td><td>pngseq</td>
-<td class="bad">FAIL<ul class="fails"><li>frame 3: max error 3 &gt; 2</li><li>frame 18: max error 4 &gt; 2</li><li>frame 25: max error 5 &gt; 2</li></ul></td>
-<td>25</td><td>0.00</td><td>5</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/trim-pngseq-editor.png" alt="editor frame 25"><figcaption>editor</figcaption></figure><figure><img src="img/trim-pngseq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-pngseq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>images<br><small style="color:var(--mut)">Image layer, scaled / rotated / faded</small></td><td>gif</td>
-<td class="ok">pass</td>
-<td>39</td><td>2.75</td><td>30</td><td>0.09%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/images-gif-editor.png" alt="editor frame 39"><figcaption>editor</figcaption></figure><figure><img src="img/images-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/images-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>blend<br><small style="color:var(--mut)">All 18 blend modes over a gradient backdrop</small></td><td>preview</td>
 <td class="ok">pass</td>
 <td>0</td><td>1.77</td><td>73</td><td>0.36%</td><td>2.02</td><td>1.64</td>
@@ -63,10 +35,6 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>0</td><td>1.45</td><td>72</td><td>0.08%</td><td>1.77</td><td>1.42</td>
 <td><div class="imgs"><figure><img src="img/paints-preview-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/paints-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/paints-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>images<br><small style="color:var(--mut)">Image layer, scaled / rotated / faded</small></td><td>preview</td>
-<td class="ok">pass</td>
-<td>44</td><td>1.43</td><td>35</td><td>0.72%</td><td>1.96</td><td>0.80</td>
-<td><div class="imgs"><figure><img src="img/images-preview-editor.png" alt="editor frame 44"><figcaption>editor</figcaption></figure><figure><img src="img/images-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/images-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>effects<br><small style="color:var(--mut)">Drop / inner shadow, layer blur, background blur, noise effect</small></td><td>preview</td>
 <td class="ok">pass</td>
 <td>0</td><td>1.35</td><td>71</td><td>0.18%</td><td>1.53</td><td>1.16</td>
@@ -103,26 +71,18 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>0</td><td>0.97</td><td>29</td><td>0.02%</td><td>1.97</td><td>0.73</td>
 <td><div class="imgs"><figure><img src="img/effects-mp4hq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/effects-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/effects-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>shaders<br><small style="color:var(--mut)">Shader fill (animated) + shader effect (test shaders)</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>2</td><td>0.84</td><td>39</td><td>0.06%</td><td>3.16</td><td>0.84</td>
-<td><div class="imgs"><figure><img src="img/shaders-webm-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/shaders-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/shaders-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>shapes<br><small style="color:var(--mut)">Rect / ellipse / path / strokes, animated transforms</small></td><td>preview</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.83</td><td>73</td><td>0.58%</td><td>1.22</td><td>1.18</td>
 <td><div class="imgs"><figure><img src="img/shapes-preview-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/shapes-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/shapes-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>images<br><small style="color:var(--mut)">Image layer, scaled / rotated / faded</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>0</td><td>0.83</td><td>32</td><td>0.03%</td><td>2.29</td><td>0.76</td>
-<td><div class="imgs"><figure><img src="img/images-mp4-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/images-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/images-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>images<br><small style="color:var(--mut)">Image layer, scaled / rotated / faded</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>0</td><td>0.83</td><td>32</td><td>0.03%</td><td>2.29</td><td>0.76</td>
-<td><div class="imgs"><figure><img src="img/images-mp4hq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/images-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/images-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>paints<br><small style="color:var(--mut)">Linear / radial / angular / diamond gradients, image fill, noise</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
 <td>0</td><td>0.82</td><td>21</td><td>0.00%</td><td>2.73</td><td>0.99</td>
 <td><div class="imgs"><figure><img src="img/paints-webm-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/paints-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/paints-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>shaders<br><small style="color:var(--mut)">Shader fill (animated) + shader effect (test shaders)</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td class="ok">pass</td>
+<td>1</td><td>0.79</td><td>33</td><td>0.03%</td><td>3.11</td><td>0.81</td>
+<td><div class="imgs"><figure><img src="img/shaders-webm-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/shaders-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/shaders-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>masks<br><small style="color:var(--mut)">Alpha / luminance / vector masks, clip group</small></td><td>preview</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.78</td><td>81</td><td>0.37%</td><td>1.12</td><td>1.16</td>
@@ -133,16 +93,16 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td><div class="imgs"><figure><img src="img/text-preview-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/text-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>blend<br><small style="color:var(--mut)">All 18 blend modes over a gradient backdrop</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>2</td><td>0.67</td><td>14</td><td>0.00%</td><td>1.17</td><td></td>
-<td><div class="imgs"><figure><img src="img/blend-webm-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/blend-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/blend-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>0</td><td>0.66</td><td>14</td><td>0.00%</td><td>1.17</td><td></td>
+<td><div class="imgs"><figure><img src="img/blend-webm-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/blend-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/blend-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>transparent<br><small style="color:var(--mut)">Transparent background, semi-transparent layers</small></td><td>preview</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.65</td><td>73</td><td>0.22%</td><td>0.70</td><td>0.77</td>
 <td><div class="imgs"><figure><img src="img/transparent-preview-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/transparent-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/transparent-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>effects<br><small style="color:var(--mut)">Drop / inner shadow, layer blur, background blur, noise effect</small></td><td>gif</td>
 <td class="ok">pass</td>
-<td>23</td><td>0.64</td><td>11</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/effects-gif-editor.png" alt="editor frame 23"><figcaption>editor</figcaption></figure><figure><img src="img/effects-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/effects-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>15</td><td>0.62</td><td>9</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/effects-gif-editor.png" alt="editor frame 15"><figcaption>editor</figcaption></figure><figure><img src="img/effects-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/effects-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>group-opacity<br><small style="color:var(--mut)">Group opacity (isolated), nested parents, precomp-free hierarchy</small></td><td>preview</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.62</td><td>81</td><td>0.25%</td><td>0.90</td><td>1.01</td>
@@ -163,30 +123,22 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>28</td><td>0.60</td><td>84</td><td>0.03%</td><td>1.17</td><td>0.84</td>
 <td><div class="imgs"><figure><img src="img/text-mp4hq-editor.png" alt="editor frame 28"><figcaption>editor</figcaption></figure><figure><img src="img/text-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>group-opacity<br><small style="color:var(--mut)">Group opacity (isolated), nested parents, precomp-free hierarchy</small></td><td>gif</td>
-<td class="ok">pass</td>
-<td>7</td><td>0.59</td><td>11</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/group-opacity-gif-editor.png" alt="editor frame 7"><figcaption>editor</figcaption></figure><figure><img src="img/group-opacity-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/group-opacity-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>paints<br><small style="color:var(--mut)">Linear / radial / angular / diamond gradients, image fill, noise</small></td><td>gif</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.58</td><td>16</td><td>0.00%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/paints-gif-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/paints-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/paints-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>images<br><small style="color:var(--mut)">Image layer, scaled / rotated / faded</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>3</td><td>0.57</td><td>24</td><td>0.00%</td><td>2.11</td><td>0.69</td>
-<td><div class="imgs"><figure><img src="img/images-webm-editor.png" alt="editor frame 3"><figcaption>editor</figcaption></figure><figure><img src="img/images-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/images-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>effects<br><small style="color:var(--mut)">Drop / inner shadow, layer blur, background blur, noise effect</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>5</td><td>0.56</td><td>22</td><td>0.00%</td><td>1.65</td><td>0.57</td>
-<td><div class="imgs"><figure><img src="img/effects-webm-editor.png" alt="editor frame 5"><figcaption>editor</figcaption></figure><figure><img src="img/effects-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/effects-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>shapes<br><small style="color:var(--mut)">Rect / ellipse / path / strokes, animated transforms</small></td><td>gif</td>
-<td class="ok">pass</td>
-<td>31</td><td>0.55</td><td>11</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/shapes-gif-editor.png" alt="editor frame 31"><figcaption>editor</figcaption></figure><figure><img src="img/shapes-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/shapes-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>1</td><td>0.53</td><td>19</td><td>0.00%</td><td>1.63</td><td>0.56</td>
+<td><div class="imgs"><figure><img src="img/effects-webm-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/effects-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/effects-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>precomp<br><small style="color:var(--mut)">Precomp with start offset, nested twice</small></td><td>preview</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.52</td><td>31</td><td>0.00%</td><td>0.76</td><td>1.02</td>
 <td><div class="imgs"><figure><img src="img/precomp-preview-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/precomp-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/precomp-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>expressions<br><small style="color:var(--mut)">Expressions: wiggle (seeded), random, time, loopOut</small></td><td>preview</td>
+<td class="ok">pass</td>
+<td>0</td><td>0.52</td><td>60</td><td>0.10%</td><td>0.85</td><td>1.03</td>
+<td><div class="imgs"><figure><img src="img/expressions-preview-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>timing<br><small style="color:var(--mut)">Frame barcode (30 fps)</small></td><td>preview</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.52</td><td>30</td><td>0.00%</td><td>0.73</td><td>0.97</td>
@@ -207,34 +159,14 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>0</td><td>0.51</td><td>60</td><td>0.02%</td><td>0.82</td><td>1.07</td>
 <td><div class="imgs"><figure><img src="img/springs-preview-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/springs-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/springs-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>text-anim<br><small style="color:var(--mut)">Text animators (per letter / word)</small></td><td>preview</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.50</td><td>3</td><td>0.00%</td><td>0.75</td><td>1.00</td>
-<td><div class="imgs"><figure><img src="img/text-anim-preview-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/text-anim-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-anim-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>effects<br><small style="color:var(--mut)">Drop / inner shadow, layer blur, background blur, noise effect</small></td><td>lottie</td>
-<td class="ok">pass<div class="note">reported before export (excluded): background blur (background-blur)</div></td>
-<td>21</td><td>0.47</td><td>52</td><td>0.91%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/effects-lottie-editor.png" alt="editor frame 21"><figcaption>editor</figcaption></figure><figure><img src="img/effects-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/effects-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>blend<br><small style="color:var(--mut)">All 18 blend modes over a gradient backdrop</small></td><td>lottie</td>
 <td class="ok">pass<div class="note">reported before export (excluded): linearBurn (blend), add (blend)</div></td>
 <td>0</td><td>0.47</td><td>47</td><td>0.04%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/blend-lottie-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/blend-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/blend-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-24to30<br><small style="color:var(--mut)">Frame barcode, 24 fps comp exported at 30 fps</small></td><td>preview</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.44</td><td>5</td><td>0.00%</td><td>0.66</td><td>0.89</td>
-<td><div class="imgs"><figure><img src="img/timing-24to30-preview-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-24to30-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-24to30-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>expressions<br><small style="color:var(--mut)">Expressions: wiggle (seeded), random, time, loopOut</small></td><td>preview</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.41</td><td>60</td><td>0.20%</td><td>0.83</td><td>0.93</td>
-<td><div class="imgs"><figure><img src="img/expressions-preview-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>shapes<br><small style="color:var(--mut)">Rect / ellipse / path / strokes, animated transforms</small></td><td>lottie</td>
 <td class="ok">pass</td>
 <td>22</td><td>0.39</td><td>62</td><td>0.60%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/shapes-lottie-editor.png" alt="editor frame 22"><figcaption>editor</figcaption></figure><figure><img src="img/shapes-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/shapes-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>group-opacity<br><small style="color:var(--mut)">Group opacity (isolated), nested parents, precomp-free hierarchy</small></td><td>lottie</td>
-<td class="ok">pass</td>
-<td>7</td><td>0.39</td><td>71</td><td>0.42%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/group-opacity-lottie-editor.png" alt="editor frame 7"><figcaption>editor</figcaption></figure><figure><img src="img/group-opacity-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/group-opacity-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>group-opacity<br><small style="color:var(--mut)">Group opacity (isolated), nested parents, precomp-free hierarchy</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
 <td>0</td><td>0.38</td><td>29</td><td>0.01%</td><td>1.13</td><td>0.84</td>
@@ -243,86 +175,58 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>0</td><td>0.38</td><td>29</td><td>0.01%</td><td>1.13</td><td>0.84</td>
 <td><div class="imgs"><figure><img src="img/group-opacity-mp4hq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/group-opacity-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/group-opacity-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>text-anim<br><small style="color:var(--mut)">Text animators (per letter / word)</small></td><td>gif</td>
+<tr><td>group-opacity<br><small style="color:var(--mut)">Group opacity (isolated), nested parents, precomp-free hierarchy</small></td><td>lottie</td>
 <td class="ok">pass</td>
-<td>13</td><td>0.32</td><td>8</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/text-anim-gif-editor.png" alt="editor frame 13"><figcaption>editor</figcaption></figure><figure><img src="img/text-anim-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-anim-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>masks<br><small style="color:var(--mut)">Alpha / luminance / vector masks, clip group</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>9</td><td>0.31</td><td>34</td><td>0.01%</td><td>1.51</td><td>0.75</td>
-<td><div class="imgs"><figure><img src="img/masks-webm-editor.png" alt="editor frame 9"><figcaption>editor</figcaption></figure><figure><img src="img/masks-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/masks-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>shapes<br><small style="color:var(--mut)">Rect / ellipse / path / strokes, animated transforms</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>7</td><td>0.31</td><td>24</td><td>0.00%</td><td>1.02</td><td>0.65</td>
-<td><div class="imgs"><figure><img src="img/shapes-webm-editor.png" alt="editor frame 7"><figcaption>editor</figcaption></figure><figure><img src="img/shapes-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/shapes-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>group-opacity<br><small style="color:var(--mut)">Group opacity (isolated), nested parents, precomp-free hierarchy</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>7</td><td>0.29</td><td>21</td><td>0.00%</td><td>1.07</td><td>0.82</td>
-<td><div class="imgs"><figure><img src="img/group-opacity-webm-editor.png" alt="editor frame 7"><figcaption>editor</figcaption></figure><figure><img src="img/group-opacity-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/group-opacity-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>transparent<br><small style="color:var(--mut)">Transparent background, semi-transparent layers</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>2</td><td>0.29</td><td>30</td><td>0.01%</td><td>0.50</td><td>0.26</td>
-<td><div class="imgs"><figure><img src="img/transparent-mp4-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/transparent-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/transparent-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>transparent<br><small style="color:var(--mut)">Transparent background, semi-transparent layers</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>2</td><td>0.29</td><td>30</td><td>0.01%</td><td>0.50</td><td>0.26</td>
-<td><div class="imgs"><figure><img src="img/transparent-mp4hq-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/transparent-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/transparent-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>text-anim<br><small style="color:var(--mut)">Text animators (per letter / word)</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>32</td><td>0.29</td><td>30</td><td>0.09%</td><td>0.72</td><td>0.70</td>
-<td><div class="imgs"><figure><img src="img/text-anim-mp4-editor.png" alt="editor frame 32"><figcaption>editor</figcaption></figure><figure><img src="img/text-anim-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-anim-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>text-anim<br><small style="color:var(--mut)">Text animators (per letter / word)</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>32</td><td>0.29</td><td>30</td><td>0.09%</td><td>0.72</td><td>0.70</td>
-<td><div class="imgs"><figure><img src="img/text-anim-mp4hq-editor.png" alt="editor frame 32"><figcaption>editor</figcaption></figure><figure><img src="img/text-anim-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-anim-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>43</td><td>0.32</td><td>52</td><td>0.04%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/group-opacity-lottie-editor.png" alt="editor frame 43"><figcaption>editor</figcaption></figure><figure><img src="img/group-opacity-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/group-opacity-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>audio<br><small style="color:var(--mut)">Audio clicks (offset 0.25 s) + flash frames</small></td><td>preview</td>
 <td class="ok">pass</td>
 <td>1</td><td>0.28</td><td>46</td><td>0.21%</td><td>0.70</td><td>0.79</td>
 <td><div class="imgs"><figure><img src="img/audio-preview-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/audio-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/audio-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>text<br><small style="color:var(--mut)">Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<tr><td>transparent<br><small style="color:var(--mut)">Transparent background, semi-transparent layers</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>8</td><td>0.25</td><td>15</td><td>0.00%</td><td>0.72</td><td>0.69</td>
-<td><div class="imgs"><figure><img src="img/text-webm-editor.png" alt="editor frame 8"><figcaption>editor</figcaption></figure><figure><img src="img/text-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>1</td><td>0.27</td><td>30</td><td>0.01%</td><td>0.47</td><td>0.22</td>
+<td><div class="imgs"><figure><img src="img/transparent-mp4-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/transparent-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/transparent-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>transparent<br><small style="color:var(--mut)">Transparent background, semi-transparent layers</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td class="ok">pass</td>
+<td>1</td><td>0.27</td><td>30</td><td>0.01%</td><td>0.47</td><td>0.22</td>
+<td><div class="imgs"><figure><img src="img/transparent-mp4hq-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/transparent-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/transparent-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>masks<br><small style="color:var(--mut)">Alpha / luminance / vector masks, clip group</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td class="ok">pass</td>
+<td>1</td><td>0.25</td><td>33</td><td>0.01%</td><td>1.47</td><td>0.71</td>
+<td><div class="imgs"><figure><img src="img/masks-webm-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/masks-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/masks-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>shapes<br><small style="color:var(--mut)">Rect / ellipse / path / strokes, animated transforms</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td class="ok">pass</td>
+<td>15</td><td>0.25</td><td>33</td><td>0.00%</td><td>0.94</td><td>0.62</td>
+<td><div class="imgs"><figure><img src="img/shapes-webm-editor.png" alt="editor frame 15"><figcaption>editor</figcaption></figure><figure><img src="img/shapes-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/shapes-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>expressions<br><small style="color:var(--mut)">Expressions: wiggle (seeded), random, time, loopOut</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>0</td><td>0.24</td><td>40</td><td>0.06%</td><td>0.89</td><td>0.78</td>
-<td><div class="imgs"><figure><img src="img/expressions-mp4-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>1</td><td>0.24</td><td>48</td><td>0.06%</td><td>0.91</td><td>0.75</td>
+<td><div class="imgs"><figure><img src="img/expressions-mp4-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>expressions<br><small style="color:var(--mut)">Expressions: wiggle (seeded), random, time, loopOut</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>0</td><td>0.24</td><td>40</td><td>0.06%</td><td>0.89</td><td>0.78</td>
-<td><div class="imgs"><figure><img src="img/expressions-mp4hq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-60<br><small style="color:var(--mut)">Frame barcode (60 fps, odd size 211×117)</small></td><td>preview</td>
+<td>1</td><td>0.24</td><td>48</td><td>0.06%</td><td>0.91</td><td>0.75</td>
+<td><div class="imgs"><figure><img src="img/expressions-mp4hq-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>group-opacity<br><small style="color:var(--mut)">Group opacity (isolated), nested parents, precomp-free hierarchy</small></td><td>gif</td>
 <td class="ok">pass</td>
-<td>0</td><td>0.21</td><td>46</td><td>0.07%</td><td>0.65</td><td>0.75</td>
-<td><div class="imgs"><figure><img src="img/timing-60-preview-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-60-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-60-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>masks<br><small style="color:var(--mut)">Alpha / luminance / vector masks, clip group</small></td><td>gif</td>
+<td>22</td><td>0.22</td><td>12</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/group-opacity-gif-editor.png" alt="editor frame 22"><figcaption>editor</figcaption></figure><figure><img src="img/group-opacity-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/group-opacity-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>group-opacity<br><small style="color:var(--mut)">Group opacity (isolated), nested parents, precomp-free hierarchy</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>7</td><td>0.21</td><td>11</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/masks-gif-editor.png" alt="editor frame 7"><figcaption>editor</figcaption></figure><figure><img src="img/masks-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/masks-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-60<br><small style="color:var(--mut)">Frame barcode (60 fps, odd size 211×117)</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td>15</td><td>0.21</td><td>15</td><td>0.00%</td><td>0.96</td><td>0.76</td>
+<td><div class="imgs"><figure><img src="img/group-opacity-webm-editor.png" alt="editor frame 15"><figcaption>editor</figcaption></figure><figure><img src="img/group-opacity-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/group-opacity-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>text<br><small style="color:var(--mut)">Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>2</td><td>0.21</td><td>30</td><td>0.00%</td><td>0.69</td><td>0.68</td>
-<td><div class="imgs"><figure><img src="img/timing-60-mp4-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/timing-60-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-60-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-60<br><small style="color:var(--mut)">Frame barcode (60 fps, odd size 211×117)</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>2</td><td>0.21</td><td>30</td><td>0.00%</td><td>0.69</td><td>0.68</td>
-<td><div class="imgs"><figure><img src="img/timing-60-mp4hq-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/timing-60-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-60-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>expressions<br><small style="color:var(--mut)">Expressions: wiggle (seeded), random, time, loopOut</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>4</td><td>0.20</td><td>30</td><td>0.00%</td><td>0.88</td><td>0.76</td>
-<td><div class="imgs"><figure><img src="img/expressions-webm-editor.png" alt="editor frame 4"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>expressions<br><small style="color:var(--mut)">Expressions: wiggle (seeded), random, time, loopOut</small></td><td>gif</td>
-<td class="ok">pass</td>
-<td>33</td><td>0.20</td><td>11</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/expressions-gif-editor.png" alt="editor frame 33"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>text<br><small style="color:var(--mut)">Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration</small></td><td>gif</td>
-<td class="ok">pass</td>
-<td>20</td><td>0.19</td><td>11</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/text-gif-editor.png" alt="editor frame 20"><figcaption>editor</figcaption></figure><figure><img src="img/text-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>0</td><td>0.20</td><td>13</td><td>0.00%</td><td>0.68</td><td>0.69</td>
+<td><div class="imgs"><figure><img src="img/text-webm-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/text-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>colour<br><small style="color:var(--mut)">Colour chart (flat patches)</small></td><td>lottie</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.19</td><td>32</td><td>0.09%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/colour-lottie-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/colour-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/colour-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>text<br><small style="color:var(--mut)">Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration</small></td><td>gif</td>
+<td class="ok">pass</td>
+<td>20</td><td>0.19</td><td>11</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/text-gif-editor.png" alt="editor frame 20"><figcaption>editor</figcaption></figure><figure><img src="img/text-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>audio<br><small style="color:var(--mut)">Audio clicks (offset 0.25 s) + flash frames</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
 <td>1</td><td>0.19</td><td>17</td><td>0.00%</td><td>0.70</td><td>0.66</td>
@@ -331,26 +235,22 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>1</td><td>0.19</td><td>17</td><td>0.00%</td><td>0.70</td><td>0.66</td>
 <td><div class="imgs"><figure><img src="img/audio-mp4hq-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/audio-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/audio-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>text-anim<br><small style="color:var(--mut)">Text animators (per letter / word)</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<tr><td>effects<br><small style="color:var(--mut)">Drop / inner shadow, layer blur, background blur, noise effect</small></td><td>lottie</td>
+<td class="ok">pass<div class="note">reported before export (excluded): background blur (background-blur)</div></td>
+<td>10</td><td>0.18</td><td>52</td><td>0.02%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/effects-lottie-editor.png" alt="editor frame 10"><figcaption>editor</figcaption></figure><figure><img src="img/effects-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/effects-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>shapes<br><small style="color:var(--mut)">Rect / ellipse / path / strokes, animated transforms</small></td><td>gif</td>
 <td class="ok">pass</td>
-<td>13</td><td>0.18</td><td>14</td><td>0.00%</td><td>0.62</td><td>0.69</td>
-<td><div class="imgs"><figure><img src="img/text-anim-webm-editor.png" alt="editor frame 13"><figcaption>editor</figcaption></figure><figure><img src="img/text-anim-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-anim-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>springs<br><small style="color:var(--mut)">Springs (bounce) on position / scale / rotation</small></td><td>gif</td>
-<td class="ok">pass</td>
-<td>30</td><td>0.17</td><td>7</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/springs-gif-editor.png" alt="editor frame 30"><figcaption>editor</figcaption></figure><figure><img src="img/springs-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/springs-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>transparent<br><small style="color:var(--mut)">Transparent background, semi-transparent layers</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>2</td><td>0.16</td><td>12</td><td>0.00%</td><td>0.38</td><td>0.16</td>
-<td><div class="imgs"><figure><img src="img/transparent-webm-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/transparent-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/transparent-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>1</td><td>0.17</td><td>10</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/shapes-gif-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/shapes-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/shapes-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>masks<br><small style="color:var(--mut)">Alpha / luminance / vector masks, clip group</small></td><td>lottie</td>
 <td class="ok">pass</td>
-<td>16</td><td>0.16</td><td>48</td><td>0.27%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/masks-lottie-editor.png" alt="editor frame 16"><figcaption>editor</figcaption></figure><figure><img src="img/masks-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/masks-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-60<br><small style="color:var(--mut)">Frame barcode (60 fps, odd size 211×117)</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td>15</td><td>0.16</td><td>48</td><td>0.26%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/masks-lottie-editor.png" alt="editor frame 15"><figcaption>editor</figcaption></figure><figure><img src="img/masks-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/masks-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>expressions<br><small style="color:var(--mut)">Expressions: wiggle (seeded), random, time, loopOut</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>5</td><td>0.15</td><td>22</td><td>0.00%</td><td>0.67</td><td>0.67</td>
-<td><div class="imgs"><figure><img src="img/timing-60-webm-editor.png" alt="editor frame 5"><figcaption>editor</figcaption></figure><figure><img src="img/timing-60-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-60-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>1</td><td>0.15</td><td>27</td><td>0.00%</td><td>0.83</td><td>0.71</td>
+<td><div class="imgs"><figure><img src="img/expressions-webm-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>colour<br><small style="color:var(--mut)">Colour chart (flat patches)</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
 <td>0</td><td>0.15</td><td>32</td><td>0.01%</td><td>1.34</td><td>0.33</td>
@@ -359,54 +259,42 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>0</td><td>0.15</td><td>32</td><td>0.01%</td><td>1.34</td><td>0.33</td>
 <td><div class="imgs"><figure><img src="img/colour-mp4hq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/colour-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/colour-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>trim<br><small style="color:var(--mut)">Trim paths (animated) and path morph</small></td><td>gif</td>
-<td class="ok">pass</td>
-<td>33</td><td>0.15</td><td>9</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/trim-gif-editor.png" alt="editor frame 33"><figcaption>editor</figcaption></figure><figure><img src="img/trim-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>colour<br><small style="color:var(--mut)">Colour chart (flat patches)</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>3</td><td>0.14</td><td>32</td><td>0.01%</td><td>1.34</td><td>0.31</td>
-<td><div class="imgs"><figure><img src="img/colour-webm-editor.png" alt="editor frame 3"><figcaption>editor</figcaption></figure><figure><img src="img/colour-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/colour-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>trim<br><small style="color:var(--mut)">Trim paths (animated) and path morph</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>2</td><td>0.14</td><td>22</td><td>0.00%</td><td>0.69</td><td>0.72</td>
-<td><div class="imgs"><figure><img src="img/trim-mp4-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/trim-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>1</td><td>0.14</td><td>24</td><td>0.00%</td><td>0.69</td><td>0.73</td>
+<td><div class="imgs"><figure><img src="img/trim-mp4-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/trim-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>trim<br><small style="color:var(--mut)">Trim paths (animated) and path morph</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>2</td><td>0.14</td><td>22</td><td>0.00%</td><td>0.69</td><td>0.72</td>
-<td><div class="imgs"><figure><img src="img/trim-mp4hq-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/trim-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>transparent<br><small style="color:var(--mut)">Transparent background, semi-transparent layers</small></td><td>lottie</td>
+<td>1</td><td>0.14</td><td>24</td><td>0.00%</td><td>0.69</td><td>0.73</td>
+<td><div class="imgs"><figure><img src="img/trim-mp4hq-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/trim-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>colour<br><small style="color:var(--mut)">Colour chart (flat patches)</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>4</td><td>0.14</td><td>64</td><td>0.14%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/transparent-lottie-editor.png" alt="editor frame 4"><figcaption>editor</figcaption></figure><figure><img src="img/transparent-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/transparent-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>1</td><td>0.14</td><td>32</td><td>0.01%</td><td>1.34</td><td>0.31</td>
+<td><div class="imgs"><figure><img src="img/colour-webm-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/colour-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/colour-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>trim<br><small style="color:var(--mut)">Trim paths (animated) and path morph</small></td><td>gif</td>
+<td class="ok">pass</td>
+<td>30</td><td>0.14</td><td>9</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/trim-gif-editor.png" alt="editor frame 30"><figcaption>editor</figcaption></figure><figure><img src="img/trim-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>audio<br><small style="color:var(--mut)">Audio clicks (offset 0.25 s) + flash frames</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
 <td>2</td><td>0.14</td><td>13</td><td>0.00%</td><td>0.66</td><td>0.62</td>
 <td><div class="imgs"><figure><img src="img/audio-webm-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/audio-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/audio-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>images<br><small style="color:var(--mut)">Image layer, scaled / rotated / faded</small></td><td>lottie</td>
+<tr><td>transparent<br><small style="color:var(--mut)">Transparent background, semi-transparent layers</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>36</td><td>0.13</td><td>7</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/images-lottie-editor.png" alt="editor frame 36"><figcaption>editor</figcaption></figure><figure><img src="img/images-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/images-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>1</td><td>0.13</td><td>12</td><td>0.00%</td><td>0.34</td><td>0.09</td>
+<td><div class="imgs"><figure><img src="img/transparent-webm-editor.png" alt="editor frame 1"><figcaption>editor</figcaption></figure><figure><img src="img/transparent-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/transparent-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>expressions<br><small style="color:var(--mut)">Expressions: wiggle (seeded), random, time, loopOut</small></td><td>gif</td>
+<td class="ok">pass</td>
+<td>30</td><td>0.13</td><td>16</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/expressions-gif-editor.png" alt="editor frame 30"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>paints<br><small style="color:var(--mut)">Linear / radial / angular / diamond gradients, image fill, noise</small></td><td>lottie</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.13</td><td>60</td><td>0.04%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/paints-lottie-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/paints-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/paints-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>transparent<br><small style="color:var(--mut)">Transparent background, semi-transparent layers</small></td><td>gif</td>
-<td class="ok">pass</td>
-<td>3</td><td>0.13</td><td>15</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/transparent-gif-editor.png" alt="editor frame 3"><figcaption>editor</figcaption></figure><figure><img src="img/transparent-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/transparent-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>audio<br><small style="color:var(--mut)">Audio clicks (offset 0.25 s) + flash frames</small></td><td>lottie</td>
 <td class="ok">pass</td>
 <td>31</td><td>0.13</td><td>59</td><td>0.36%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/audio-lottie-editor.png" alt="editor frame 31"><figcaption>editor</figcaption></figure><figure><img src="img/audio-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/audio-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>springs<br><small style="color:var(--mut)">Springs (bounce) on position / scale / rotation</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>52</td><td>0.12</td><td>67</td><td>0.05%</td><td>0.75</td><td>0.71</td>
-<td><div class="imgs"><figure><img src="img/springs-mp4-editor.png" alt="editor frame 52"><figcaption>editor</figcaption></figure><figure><img src="img/springs-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/springs-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>springs<br><small style="color:var(--mut)">Springs (bounce) on position / scale / rotation</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>52</td><td>0.12</td><td>67</td><td>0.05%</td><td>0.75</td><td>0.71</td>
-<td><div class="imgs"><figure><img src="img/springs-mp4hq-editor.png" alt="editor frame 52"><figcaption>editor</figcaption></figure><figure><img src="img/springs-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/springs-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>timing<br><small style="color:var(--mut)">Frame barcode (30 fps)</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
 <td>0</td><td>0.12</td><td>19</td><td>0.00%</td><td>0.62</td><td>0.66</td>
@@ -419,114 +307,86 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>30</td><td>0.12</td><td>67</td><td>0.35%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/springs-lottie-editor.png" alt="editor frame 30"><figcaption>editor</figcaption></figure><figure><img src="img/springs-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/springs-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>springs<br><small style="color:var(--mut)">Springs (bounce) on position / scale / rotation</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td class="ok">pass</td>
+<td>60</td><td>0.11</td><td>80</td><td>0.04%</td><td>0.73</td><td>0.73</td>
+<td><div class="imgs"><figure><img src="img/springs-mp4-editor.png" alt="editor frame 60"><figcaption>editor</figcaption></figure><figure><img src="img/springs-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/springs-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>springs<br><small style="color:var(--mut)">Springs (bounce) on position / scale / rotation</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td class="ok">pass</td>
+<td>60</td><td>0.11</td><td>80</td><td>0.04%</td><td>0.73</td><td>0.73</td>
+<td><div class="imgs"><figure><img src="img/springs-mp4hq-editor.png" alt="editor frame 60"><figcaption>editor</figcaption></figure><figure><img src="img/springs-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/springs-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>timing<br><small style="color:var(--mut)">Frame barcode (30 fps)</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
 <td>2</td><td>0.11</td><td>33</td><td>0.01%</td><td>0.63</td><td>0.65</td>
 <td><div class="imgs"><figure><img src="img/timing-webm-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/timing-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>trim<br><small style="color:var(--mut)">Trim paths (animated) and path morph</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>9</td><td>0.11</td><td>24</td><td>0.00%</td><td>0.69</td><td>0.70</td>
-<td><div class="imgs"><figure><img src="img/trim-webm-editor.png" alt="editor frame 9"><figcaption>editor</figcaption></figure><figure><img src="img/trim-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>expressions<br><small style="color:var(--mut)">Expressions: wiggle (seeded), random, time, loopOut</small></td><td>lottie</td>
-<td class="ok">pass</td>
-<td>2</td><td>0.11</td><td>55</td><td>0.38%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/expressions-lottie-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>trim<br><small style="color:var(--mut)">Trim paths (animated) and path morph</small></td><td>lottie</td>
 <td class="ok">pass</td>
-<td>34</td><td>0.11</td><td>76</td><td>0.33%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/trim-lottie-editor.png" alt="editor frame 34"><figcaption>editor</figcaption></figure><figure><img src="img/trim-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>precomp<br><small style="color:var(--mut)">Precomp with start offset, nested twice</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td>30</td><td>0.10</td><td>73</td><td>0.35%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/trim-lottie-editor.png" alt="editor frame 30"><figcaption>editor</figcaption></figure><figure><img src="img/trim-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>transparent<br><small style="color:var(--mut)">Transparent background, semi-transparent layers</small></td><td>lottie</td>
 <td class="ok">pass</td>
-<td>28</td><td>0.10</td><td>81</td><td>0.03%</td><td>0.73</td><td>0.72</td>
-<td><div class="imgs"><figure><img src="img/precomp-mp4-editor.png" alt="editor frame 28"><figcaption>editor</figcaption></figure><figure><img src="img/precomp-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/precomp-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>precomp<br><small style="color:var(--mut)">Precomp with start offset, nested twice</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>28</td><td>0.10</td><td>81</td><td>0.03%</td><td>0.73</td><td>0.72</td>
-<td><div class="imgs"><figure><img src="img/precomp-mp4hq-editor.png" alt="editor frame 28"><figcaption>editor</figcaption></figure><figure><img src="img/precomp-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/precomp-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>0</td><td>0.10</td><td>64</td><td>0.15%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/transparent-lottie-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/transparent-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/transparent-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>precomp<br><small style="color:var(--mut)">Precomp with start offset, nested twice</small></td><td>lottie</td>
 <td class="ok">pass</td>
-<td>24</td><td>0.10</td><td>58</td><td>0.25%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/precomp-lottie-editor.png" alt="editor frame 24"><figcaption>editor</figcaption></figure><figure><img src="img/precomp-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/precomp-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>20</td><td>0.10</td><td>55</td><td>0.24%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/precomp-lottie-editor.png" alt="editor frame 20"><figcaption>editor</figcaption></figure><figure><img src="img/precomp-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/precomp-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>precomp<br><small style="color:var(--mut)">Precomp with start offset, nested twice</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td class="ok">pass</td>
+<td>40</td><td>0.10</td><td>77</td><td>0.03%</td><td>0.73</td><td>0.73</td>
+<td><div class="imgs"><figure><img src="img/precomp-mp4-editor.png" alt="editor frame 40"><figcaption>editor</figcaption></figure><figure><img src="img/precomp-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/precomp-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>precomp<br><small style="color:var(--mut)">Precomp with start offset, nested twice</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td class="ok">pass</td>
+<td>40</td><td>0.10</td><td>77</td><td>0.03%</td><td>0.73</td><td>0.73</td>
+<td><div class="imgs"><figure><img src="img/precomp-mp4hq-editor.png" alt="editor frame 40"><figcaption>editor</figcaption></figure><figure><img src="img/precomp-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/precomp-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>trim<br><small style="color:var(--mut)">Trim paths (animated) and path morph</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
+<td class="ok">pass</td>
+<td>30</td><td>0.10</td><td>48</td><td>0.01%</td><td>0.78</td><td>0.68</td>
+<td><div class="imgs"><figure><img src="img/trim-webm-editor.png" alt="editor frame 30"><figcaption>editor</figcaption></figure><figure><img src="img/trim-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>transparent<br><small style="color:var(--mut)">Transparent background, semi-transparent layers</small></td><td>gif</td>
+<td class="ok">pass</td>
+<td>10</td><td>0.10</td><td>14</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/transparent-gif-editor.png" alt="editor frame 10"><figcaption>editor</figcaption></figure><figure><img src="img/transparent-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/transparent-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>expressions<br><small style="color:var(--mut)">Expressions: wiggle (seeded), random, time, loopOut</small></td><td>lottie</td>
+<td class="ok">pass</td>
+<td>59</td><td>0.09</td><td>168</td><td>0.12%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/expressions-lottie-editor.png" alt="editor frame 59"><figcaption>editor</figcaption></figure><figure><img src="img/expressions-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/expressions-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>springs<br><small style="color:var(--mut)">Springs (bounce) on position / scale / rotation</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>17</td><td>0.10</td><td>13</td><td>0.00%</td><td>0.69</td><td>0.68</td>
-<td><div class="imgs"><figure><img src="img/springs-webm-editor.png" alt="editor frame 17"><figcaption>editor</figcaption></figure><figure><img src="img/springs-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/springs-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>45</td><td>0.08</td><td>14</td><td>0.00%</td><td>0.71</td><td>0.65</td>
+<td><div class="imgs"><figure><img src="img/springs-webm-editor.png" alt="editor frame 45"><figcaption>editor</figcaption></figure><figure><img src="img/springs-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/springs-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>precomp<br><small style="color:var(--mut)">Precomp with start offset, nested twice</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
 <td class="ok">pass</td>
-<td>24</td><td>0.09</td><td>85</td><td>0.01%</td><td>0.68</td><td>0.69</td>
-<td><div class="imgs"><figure><img src="img/precomp-webm-editor.png" alt="editor frame 24"><figcaption>editor</figcaption></figure><figure><img src="img/precomp-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/precomp-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-60<br><small style="color:var(--mut)">Frame barcode (60 fps, odd size 211×117)</small></td><td>lottie</td>
-<td class="ok">pass</td>
-<td>16</td><td>0.07</td><td>57</td><td>0.25%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-60-lottie-editor.png" alt="editor frame 16"><figcaption>editor</figcaption></figure><figure><img src="img/timing-60-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-60-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-12<br><small style="color:var(--mut)">Frame barcode (12 fps, 3 s)</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>2</td><td>0.07</td><td>13</td><td>0.00%</td><td>0.49</td><td>0.64</td>
-<td><div class="imgs"><figure><img src="img/timing-12-webm-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/timing-12-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-12-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-24to30<br><small style="color:var(--mut)">Frame barcode, 24 fps comp exported at 30 fps</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>0</td><td>0.06</td><td>5</td><td>0.00%</td><td>0.48</td><td>0.63</td>
-<td><div class="imgs"><figure><img src="img/timing-24to30-mp4-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-24to30-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-24to30-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-24to30<br><small style="color:var(--mut)">Frame barcode, 24 fps comp exported at 30 fps</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>0</td><td>0.06</td><td>5</td><td>0.00%</td><td>0.48</td><td>0.63</td>
-<td><div class="imgs"><figure><img src="img/timing-24to30-mp4hq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-24to30-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-24to30-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-12<br><small style="color:var(--mut)">Frame barcode (12 fps, 3 s)</small></td><td>mp4<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>2</td><td>0.05</td><td>6</td><td>0.00%</td><td>0.48</td><td>0.64</td>
-<td><div class="imgs"><figure><img src="img/timing-12-mp4-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/timing-12-mp4-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-12-mp4-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-12<br><small style="color:var(--mut)">Frame barcode (12 fps, 3 s)</small></td><td>mp4hq<br><small style="color:var(--mut)">avc1.64001f yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>2</td><td>0.05</td><td>6</td><td>0.00%</td><td>0.48</td><td>0.64</td>
-<td><div class="imgs"><figure><img src="img/timing-12-mp4hq-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/timing-12-mp4hq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-12-mp4hq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-12<br><small style="color:var(--mut)">Frame barcode (12 fps, 3 s)</small></td><td>lottie</td>
-<td class="ok">pass</td>
-<td>31</td><td>0.05</td><td>59</td><td>0.12%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-12-lottie-editor.png" alt="editor frame 31"><figcaption>editor</figcaption></figure><figure><img src="img/timing-12-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-12-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>40</td><td>0.07</td><td>84</td><td>0.01%</td><td>0.71</td><td>0.69</td>
+<td><div class="imgs"><figure><img src="img/precomp-webm-editor.png" alt="editor frame 40"><figcaption>editor</figcaption></figure><figure><img src="img/precomp-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/precomp-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>timing<br><small style="color:var(--mut)">Frame barcode (30 fps)</small></td><td>lottie</td>
 <td class="ok">pass</td>
 <td>31</td><td>0.05</td><td>59</td><td>0.06%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/timing-lottie-editor.png" alt="editor frame 31"><figcaption>editor</figcaption></figure><figure><img src="img/timing-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-24to30<br><small style="color:var(--mut)">Frame barcode, 24 fps comp exported at 30 fps</small></td><td>webm<br><small style="color:var(--mut)">vp09.00.41.08 yuv420p<br>bt709/bt709/iec61966-2-1/tv</small></td>
-<td class="ok">pass</td>
-<td>2</td><td>0.05</td><td>13</td><td>0.00%</td><td>0.48</td><td>0.62</td>
-<td><div class="imgs"><figure><img src="img/timing-24to30-webm-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/timing-24to30-webm-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-24to30-webm-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>text<br><small style="color:var(--mut)">Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration</small></td><td>lottie</td>
 <td class="ok">pass</td>
-<td>24</td><td>0.04</td><td>2</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/text-lottie-editor.png" alt="editor frame 24"><figcaption>editor</figcaption></figure><figure><img src="img/text-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>text-anim<br><small style="color:var(--mut)">Text animators (per letter / word)</small></td><td>lottie</td>
+<td>29</td><td>0.04</td><td>2</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/text-lottie-editor.png" alt="editor frame 29"><figcaption>editor</figcaption></figure><figure><img src="img/text-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>masks<br><small style="color:var(--mut)">Alpha / luminance / vector masks, clip group</small></td><td>gif</td>
 <td class="ok">pass</td>
-<td>22</td><td>0.04</td><td>1</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/text-anim-lottie-editor.png" alt="editor frame 22"><figcaption>editor</figcaption></figure><figure><img src="img/text-anim-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-anim-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-12<br><small style="color:var(--mut)">Frame barcode (12 fps, 3 s)</small></td><td>preview</td>
-<td class="ok">pass</td>
-<td>2</td><td>0.03</td><td>7</td><td>0.00%</td><td>0.46</td><td>0.62</td>
-<td><div class="imgs"><figure><img src="img/timing-12-preview-editor.png" alt="editor frame 2"><figcaption>editor</figcaption></figure><figure><img src="img/timing-12-preview-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-12-preview-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-24to30<br><small style="color:var(--mut)">Frame barcode, 24 fps comp exported at 30 fps</small></td><td>lottie</td>
-<td class="ok">pass</td>
-<td>31</td><td>0.02</td><td>59</td><td>0.05%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-24to30-lottie-editor.png" alt="editor frame 31"><figcaption>editor</figcaption></figure><figure><img src="img/timing-24to30-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-24to30-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>precomp<br><small style="color:var(--mut)">Precomp with start offset, nested twice</small></td><td>gif</td>
-<td class="ok">pass</td>
-<td>21</td><td>0.01</td><td>11</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/precomp-gif-editor.png" alt="editor frame 21"><figcaption>editor</figcaption></figure><figure><img src="img/precomp-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/precomp-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>43</td><td>0.02</td><td>11</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/masks-gif-editor.png" alt="editor frame 43"><figcaption>editor</figcaption></figure><figure><img src="img/masks-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/masks-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>audio<br><small style="color:var(--mut)">Audio clicks (offset 0.25 s) + flash frames</small></td><td>gif</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.01</td><td>8</td><td>0.00%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/audio-gif-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/audio-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/audio-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-60<br><small style="color:var(--mut)">Frame barcode (60 fps, odd size 211×117)</small></td><td>gif</td>
+<tr><td>springs<br><small style="color:var(--mut)">Springs (bounce) on position / scale / rotation</small></td><td>gif</td>
 <td class="ok">pass</td>
-<td>8</td><td>0.01</td><td>11</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-60-gif-editor.png" alt="editor frame 8"><figcaption>editor</figcaption></figure><figure><img src="img/timing-60-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-60-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>25</td><td>0.01</td><td>9</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/springs-gif-editor.png" alt="editor frame 25"><figcaption>editor</figcaption></figure><figure><img src="img/springs-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/springs-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<tr><td>precomp<br><small style="color:var(--mut)">Precomp with start offset, nested twice</small></td><td>gif</td>
+<td class="ok">pass</td>
+<td>20</td><td>0.01</td><td>10</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/precomp-gif-editor.png" alt="editor frame 20"><figcaption>editor</figcaption></figure><figure><img src="img/precomp-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/precomp-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>shaders<br><small style="color:var(--mut)">Shader fill (animated) + shader effect (test shaders)</small></td><td>lottie</td>
 <td class="ok">pass</td>
-<td>25</td><td>0.01</td><td>60</td><td>0.01%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/shaders-lottie-editor.png" alt="editor frame 25"><figcaption>editor</figcaption></figure><figure><img src="img/shaders-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/shaders-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-12<br><small style="color:var(--mut)">Frame barcode (12 fps, 3 s)</small></td><td>gif</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.01</td><td>5</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-12-gif-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-12-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-12-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>20</td><td>0.01</td><td>60</td><td>0.01%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/shaders-lottie-editor.png" alt="editor frame 20"><figcaption>editor</figcaption></figure><figure><img src="img/shaders-lottie-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/shaders-lottie-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>shaders<br><small style="color:var(--mut)">Shader fill (animated) + shader effect (test shaders)</small></td><td>gif</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.00</td><td>8</td><td>0.00%</td><td></td><td></td>
@@ -535,10 +395,10 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>0</td><td>0.00</td><td>5</td><td>0.00%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/timing-gif-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-24to30<br><small style="color:var(--mut)">Frame barcode, 24 fps comp exported at 30 fps</small></td><td>gif</td>
+<tr><td>trim<br><small style="color:var(--mut)">Trim paths (animated) and path morph</small></td><td>pngseq</td>
 <td class="ok">pass</td>
-<td>0</td><td>0.00</td><td>5</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-24to30-gif-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-24to30-gif-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-24to30-gif-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
+<td>22</td><td>0.00</td><td>2</td><td>0.00%</td><td></td><td></td>
+<td><div class="imgs"><figure><img src="img/trim-pngseq-editor.png" alt="editor frame 22"><figcaption>editor</figcaption></figure><figure><img src="img/trim-pngseq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/trim-pngseq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>trim<br><small style="color:var(--mut)">Trim paths (animated) and path morph</small></td><td>png</td>
 <td class="ok">pass</td>
 <td>44</td><td>0.00</td><td>1</td><td>0.00%</td><td></td><td></td>
@@ -551,30 +411,6 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/timing-pngseq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-pngseq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-pngseq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-24to30<br><small style="color:var(--mut)">Frame barcode, 24 fps comp exported at 30 fps</small></td><td>png</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-24to30-png-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-24to30-png-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-24to30-png-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-24to30<br><small style="color:var(--mut)">Frame barcode, 24 fps comp exported at 30 fps</small></td><td>pngseq</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-24to30-pngseq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-24to30-pngseq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-24to30-pngseq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-60<br><small style="color:var(--mut)">Frame barcode (60 fps, odd size 211×117)</small></td><td>png</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-60-png-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-60-png-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-60-png-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-60<br><small style="color:var(--mut)">Frame barcode (60 fps, odd size 211×117)</small></td><td>pngseq</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-60-pngseq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-60-pngseq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-60-pngseq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-12<br><small style="color:var(--mut)">Frame barcode (12 fps, 3 s)</small></td><td>png</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-12-png-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-12-png-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-12-png-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>timing-12<br><small style="color:var(--mut)">Frame barcode (12 fps, 3 s)</small></td><td>pngseq</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/timing-12-pngseq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/timing-12-pngseq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/timing-12-pngseq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>colour<br><small style="color:var(--mut)">Colour chart (flat patches)</small></td><td>png</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
@@ -603,14 +439,6 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/paints-pngseq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/paints-pngseq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/paints-pngseq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>images<br><small style="color:var(--mut)">Image layer, scaled / rotated / faded</small></td><td>png</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/images-png-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/images-png-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/images-png-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>images<br><small style="color:var(--mut)">Image layer, scaled / rotated / faded</small></td><td>pngseq</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/images-pngseq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/images-pngseq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/images-pngseq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>effects<br><small style="color:var(--mut)">Drop / inner shadow, layer blur, background blur, noise effect</small></td><td>png</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
@@ -659,14 +487,6 @@ figcaption{font-size:11px;color:var(--mut)}.fails{font-size:12px;color:var(--bad
 <td class="ok">pass</td>
 <td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
 <td><div class="imgs"><figure><img src="img/text-pngseq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/text-pngseq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-pngseq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>text-anim<br><small style="color:var(--mut)">Text animators (per letter / word)</small></td><td>png</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/text-anim-png-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/text-anim-png-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-anim-png-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
-<tr><td>text-anim<br><small style="color:var(--mut)">Text animators (per letter / word)</small></td><td>pngseq</td>
-<td class="ok">pass</td>
-<td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
-<td><div class="imgs"><figure><img src="img/text-anim-pngseq-editor.png" alt="editor frame 0"><figcaption>editor</figcaption></figure><figure><img src="img/text-anim-pngseq-export.png" alt="export"><figcaption>export</figcaption></figure><figure><img src="img/text-anim-pngseq-diff.png" alt="difference"><figcaption>diff ×6</figcaption></figure></div></td></tr>
 <tr><td>expressions<br><small style="color:var(--mut)">Expressions: wiggle (seeded), random, time, loopOut</small></td><td>png</td>
 <td class="ok">pass</td>
 <td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td></td><td></td>
