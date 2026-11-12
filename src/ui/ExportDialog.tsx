@@ -5,10 +5,10 @@
 import { render } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
-import { download, exportFramePng, exportGifFile, exportLottie, toast } from '../app/actions';
+import { exportFileName, exportFramePng, exportGifFile, exportLottie, saveExportFile, toast } from '../app/actions';
 import { Button, Dialog, Segmented } from './ui';
 import {
-  evenDimensions, computeBitrate, frameCount, exportVideoDetailed, probeVideoSupport, videoFileName,
+  evenDimensions, computeBitrate, frameCount, exportVideoDetailed, probeVideoSupport,
   type VideoFormat, type VideoQuality, type ExportProgress,
 } from '../export/video';
 
@@ -38,27 +38,6 @@ function fmtDuration(ms: number) {
 
 function fmtBytes(n: number) {
   return n > 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1e3))} KB`;
-}
-
-async function blobToBase64(blob: Blob): Promise<string> {
-  const url = await new Promise<string>((res, rej) => {
-    const fr = new FileReader();
-    fr.onload = () => res(fr.result as string);
-    fr.onerror = () => rej(fr.error);
-    fr.readAsDataURL(blob);
-  });
-  return url.slice(url.indexOf(',') + 1);
-}
-
-async function saveVideo(blob: Blob, name: string, format: VideoFormat): Promise<string | null | 'downloaded'> {
-  const nat = (window as any).motionNative;
-  const save = nat?.saveFileAs ?? nat?.saveFile;
-  if (save) {
-    const filters = [format === 'mp4' ? { name: 'MP4 video', extensions: ['mp4'] } : { name: 'WebM video', extensions: ['webm'] }];
-    return await save({ defaultPath: name, data: await blobToBase64(blob), encoding: 'base64', filters });
-  }
-  download(name, blob, blob.type);
-  return 'downloaded';
 }
 
 type Kind = 'video' | 'gif' | 'image' | 'lottie';
@@ -104,10 +83,9 @@ export function ExportDialog(props: { onClose: () => void }) {
     setProg({ frame: 0, total: frames, progress: 0, elapsedMs: 0, etaMs: Infinity, fps: 0 });
     try {
       const res = await exportVideoDetailed({ format, scale, fps, quality }, p => setProg(p), ac.signal);
-      const name = videoFileName(editor.store.project.name, res.format);
+      const name = exportFileName(res.format);
       if (res.format !== format) toast(`H.264 is not available here, exported WebM (${res.codec}) instead`);
-      const saved = await saveVideo(res.blob, name, res.format);
-      if (saved) toast(`Exported ${res.frames} frames (${fmtBytes(res.blob.size)}) in ${fmtDuration(res.elapsedMs)} · ${Math.round(res.frames / (res.elapsedMs / 1000))} fps`);
+      await saveExportFile(name, res.blob, `Exported ${res.frames} frames (${fmtBytes(res.blob.size)}) in ${fmtDuration(res.elapsedMs)} · ${Math.round(res.frames / (res.elapsedMs / 1000))} fps`);
       props.onClose();
     } catch (e: any) {
       if (e?.name === 'AbortError') toast('Export cancelled');

@@ -4,7 +4,7 @@ import { evalProp } from './evaluate';
 import { EASE_PRESETS } from './easing';
 import {
   createComp, createLayer, defaultEase, PROP_DEFS, propDef, uid,
-  type Keyframe, type Layer, type LayerType, type Prop, type PropKey, type Interp,
+  type Keyframe, type Layer, type LayerType, type Prop, type PropKey, type Interp, type EffectType, type Effect,
 } from './model';
 import type { Store, Tx } from './store';
 
@@ -377,7 +377,8 @@ function upsertKey(kf: Keyframe[], t: number, v: number[]): Keyframe[] {
 
 /** stopwatch toggle: start animating (key at current time) or remove all keyframes */
 export function toggleAnimated(store: Store, ids: string[], key: PropKey) {
-  store.transact('Toggle animation', tx => {
+  const on = ids.some(id => store.layer(id)?.props[key]?.kf?.length);
+  store.transact(on ? `Remove ${propDef(key).label} animation` : `Animate ${propDef(key).label}`, tx => {
     for (const id of ids) {
       const l = store.layer(id);
       if (!l) continue;
@@ -393,6 +394,16 @@ export function toggleAnimated(store: Store, ids: string[], key: PropKey) {
       tx.touch(id);
     }
   });
+}
+
+/** after effects' Alt+Shift+P/S/R/T/A: toggle ONE keyframe at the playhead. when any of the
+ *  layers has a key there, those keys go (the others keep theirs); otherwise every layer gets a key
+ *  with its current value. never removes the other keys of the animation (only the stopwatch does) */
+export function toggleKeyAtTime(store: Store, ids: string[], key: PropKey, t = store.time) {
+  const keys: string[] = [];
+  for (const id of ids) store.layer(id)?.props[key]?.kf?.forEach((k, i) => { if (Math.abs(k.t - t) < EPS) keys.push(keyId(id, key, i)); });
+  if (keys.length) deleteKeyframes(store, keys);
+  else addKeyframe(store, ids, key, t);
 }
 
 /** add a keyframe at the current time with the current value */
@@ -698,23 +709,35 @@ export function addPrecompLayer(store: Store, compId: string) {
 export function precompose(store: Store, ids: string[], name?: string) {
   const P = store.project;
   const cur = store.comp;
-  // only layers directly in the active comp root (keeps the math simple and predictable)
-  const roots = cur.root.filter(id => ids.includes(id));
-  if (!roots.length) throw new Error('select top-level layers to pre-compose');
-  const comp = createComp({ name: name ?? `${P.layers[roots[roots.length - 1]].name} comp`, width: cur.width, height: cur.height, fps: cur.fps, duration: cur.duration, background: [0, 0, 0, 0] });
-  const pc = createLayer('precomp', { name: comp.name, w: cur.width, h: cur.height, x: 0, y: 0 });
+  // siblings at any depth (MD-08: part of a pasted figma frame): the new comp takes their parent's
+  // local space (its box), so the layers keep their values and the precomp layer sits where they were
+  // a selected layer inside another selected layer goes along with it
+  const sel = ids.filter(id => P.layers[id] && !ids.some(o => o !== id && store.isAncestor(o, id)));
+  if (!sel.length) throw new Error('select layers to pre-compose');
+  const parentId = P.layers[sel[0]].parent;
+  if (sel.some(id => P.layers[id].parent !== parentId)) throw new Error('select layers with the same parent to pre-compose');
+  const parent = parentId ? P.layers[parentId] : null;
+  const siblings = parent ? parent.children : cur.root;
+  const roots = siblings.filter(id => sel.includes(id));
+  if (!roots.length) throw new Error('select layers of this composition to pre-compose');
+  const box = parent ? (parent.props.size?.v ?? [cur.width, cur.height]) : [cur.width, cur.height];
+  const w = Math.max(1, Math.round(box[0])), h = Math.max(1, Math.round(box[1]));
+  const comp = createComp({ name: name ?? `${P.layers[roots[roots.length - 1]].name} comp`, width: w, height: h, fps: cur.fps, duration: cur.duration, background: [0, 0, 0, 0] });
+  const pc = createLayer('precomp', { name: comp.name, w, h, x: 0, y: 0 });
   pc.compRef = comp.id;
   pc.startTime = 0;
-  const index = cur.root.indexOf(roots[roots.length - 1]);
+  const index = siblings.indexOf(roots[roots.length - 1]);
   store.transact('Pre-compose', tx => {
     comp.root = roots.slice();
     tx.set(P.comps, comp.id, comp);
-    const rest = cur.root.filter(id => !roots.includes(id));
-    const at = rest.length - (cur.root.length - 1 - index);
+    for (const id of roots) if (P.layers[id].parent !== null) tx.set(P.layers[id], 'parent', null);
+    const rest = siblings.filter(id => !roots.includes(id));
+    const at = rest.length - (siblings.length - 1 - index);
     rest.splice(Math.max(0, at), 0, pc.id);
     tx.set(P.layers, pc.id, pc);
-    pc.parent = null;
-    tx.set(cur, 'root', rest);
+    pc.parent = parentId;
+    if (parent) tx.set(parent, 'children', rest);
+    else tx.set(cur, 'root', rest);
     tx.structure();
     tx.comp();
   });
@@ -745,4 +768,60 @@ export function setExpr(store: Store, ids: string[], key: PropKey, src: string |
       tx.touch(id);
     }
   }, mergeKey);
+}
+
+// ---------------- effects (MD-10) ----------------
+/** the animatable props that feed the live (first) effect of each type (see model.ts Effect) */
+export const EFFECT_PROPS: Partial<Record<EffectType, PropKey[]>> = {
+  dropShadow: ['shadowColor', 'shadowOffset', 'shadowBlur', 'shadowSpread'],
+  innerShadow: ['innerShadowColor', 'innerShadowOffset', 'innerShadowBlur', 'innerShadowSpread'],
+  layerBlur: ['blur'],
+  backgroundBlur: ['backgroundBlur'],
+  noise: ['noiseColor', 'noiseSize', 'noiseDensity'],
+};
+
+/** is the live effect of this type on (an implicit effect from props counts as on) */
+export function effectVisible(l: Layer, type: EffectType) {
+  return l.effects?.find(e => e.type === type)?.visible !== false;
+}
+
+/** show / hide the live effect of a type (the eye toggle). an effect that only exists through its
+ *  props gets an explicit entry to carry the flag; values and keyframes are kept */
+export function setEffectVisible(store: Store, ids: string[], type: EffectType, visible: boolean) {
+  store.transact(visible ? 'Show effect' : 'Hide effect', tx => {
+    for (const id of ids) {
+      const l = store.layer(id);
+      if (!l) continue;
+      const list = l.effects ? l.effects.slice() : [];
+      const i = list.findIndex(e => e.type === type);
+      if (i >= 0) list[i] = { ...list[i], visible };
+      else if ((EFFECT_PROPS[type] ?? []).some(k => l.props[k])) list.push(defaultEffect(type, visible));
+      else continue;
+      tx.set(l, 'effects', list);
+      tx.touch(id);
+    }
+    tx.structure();
+  });
+}
+
+/** remove the live effect of a type: its entry and its animatable props (keyframes included) */
+export function removeEffect(store: Store, ids: string[], type: EffectType) {
+  store.transact('Remove effect', tx => {
+    for (const id of ids) {
+      const l = store.layer(id);
+      if (!l) continue;
+      for (const k of EFFECT_PROPS[type] ?? []) if (l.props[k]) tx.set(l.props, k, undefined);
+      const i = l.effects?.findIndex(e => e.type === type) ?? -1;
+      if (i >= 0) {
+        const list = l.effects!.filter((_, j) => j !== i);
+        tx.set(l, 'effects', list.length ? list : undefined);
+      }
+      tx.touch(id);
+    }
+    tx.structure();
+  });
+}
+
+function defaultEffect(type: EffectType, visible: boolean): Effect {
+  return type === 'noise' ? { type, visible, noise: { mode: 'mono', size: 1, density: 0.5 } } : { type, visible };
 }

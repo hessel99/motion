@@ -4,15 +4,15 @@ import { editor } from './editor';
 import { setBusy } from './updates';
 import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
-  setCompSettings, toggleAnimated, parseKeyId, precompose, keyId,
+  setCompSettings, toggleKeyAtTime, parseKeyId, precompose, keyId, setProjectName,
 } from '../core/commands';
-import { uid, type Asset, type Composition, type Layer, type Project } from '../core/model';
+import { uid, type Asset, type Composition, type Layer, type Project, type PropKey } from '../core/model';
 import { boundsOf } from '../agent/tools';
 import { demoProject, stressProject } from './demo';
 import { importFigmaDesign, type DesignImportResult } from '../core/design-import';
 import { createComponent } from '../core/components';
 import type { FigmaDesignData } from '../import/figma/convert';
-import { activeDoc, closeDoc, cycleDocs, documents, isDocDirty, newDocument, openProject, restoreSession, serializeSession } from './documents';
+import { activeDoc, closeDoc, compAdoptsImportSize, cycleDocs, documents, isDocDirty, newDocument, openProject, restoreSession, serializeSession } from './documents';
 import { rememberRecent } from './recent';
 
 // importers are loaded lazily (keeps startup fast; missing modules are simply unavailable)
@@ -91,6 +91,75 @@ export function toast(msg: string, kind: 'info' | 'error' = 'info') {
   setTimeout(() => el.remove(), 2600);
 }
 
+/** a toast with one action button (e.g. "Show in Finder") */
+export function toastAction(msg: string, label: string, run: () => void) {
+  toast(msg);
+  const el = document.querySelector('.toasts')?.lastElementChild as HTMLElement | null;
+  if (!el) return;
+  // the plain toast fades after ~2 s: this one is a fresh copy that stays long enough to click
+  const keep = el.cloneNode(true) as HTMLElement;
+  el.replaceWith(keep);
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'toast-action';
+  b.textContent = label;
+  b.onclick = () => { run(); keep.remove(); };
+  keep.append(' ', b);
+  setTimeout(() => keep.classList.add('out'), 8000);
+  setTimeout(() => keep.remove(), 8400);
+}
+
+// ---------------- export files (MD-02 / MD-03) ----------------
+const cleanName = (s: string) => s.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '_').trim();
+/** one naming pattern for every export: "<Document> - <Composition>.<ext>", just "<Document>.<ext>"
+ *  for a single-comp document; frames of an image sequence add "_0000" */
+export function exportFileName(ext: string, opts: { frame?: number; project?: Project; comp?: string } = {}) {
+  const p = opts.project ?? st().project;
+  const doc = cleanName(p.name || 'Untitled') || 'Untitled';
+  const comp = cleanName(opts.comp ?? p.comps[p.activeComp]?.name ?? '');
+  let base = Object.keys(p.comps).length > 1 && comp ? `${doc} - ${comp}` : doc;
+  if (opts.frame !== undefined) base += `_${String(Math.max(0, opts.frame)).padStart(4, '0')}`;
+  return `${base}.${ext}`;
+}
+
+const EXPORT_TYPES: Record<string, { label: string; mime: string }> = {
+  mp4: { label: 'MP4 video', mime: 'video/mp4' }, webm: { label: 'WebM video', mime: 'video/webm' },
+  gif: { label: 'GIF', mime: 'image/gif' }, png: { label: 'PNG image', mime: 'image/png' },
+  json: { label: 'Lottie JSON', mime: 'application/json' }, html: { label: 'Preview page', mime: 'text/html' },
+};
+async function toBase64(blob: Blob): Promise<string> {
+  const url = await new Promise<string>((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result as string);
+    fr.onerror = () => rej(fr.error);
+    fr.readAsDataURL(blob);
+  });
+  return url.slice(url.indexOf(',') + 1);
+}
+const revealLabel = () => ((globalThis as any).motionNative?.platform === 'darwin' ? 'Show in Finder' : 'Show in folder');
+
+/** the one save flow for every export (video, GIF, PNG, Lottie, preview page). desktop: the native
+ *  save dialog with the format's extension, opening in the last export folder, then a toast with
+ *  "Show in Finder"; browser: a download and a toast. returns the saved path, 'downloaded', or
+ *  null when the dialog was cancelled */
+export async function saveExportFile(name: string, data: Blob | string, msg = 'Exported'): Promise<string | 'downloaded' | null> {
+  const ext = (name.match(/\.([^.]+)$/)?.[1] ?? '').toLowerCase();
+  const type = EXPORT_TYPES[ext] ?? { label: ext.toUpperCase(), mime: 'application/octet-stream' };
+  const blob = typeof data === 'string' ? new Blob([data], { type: type.mime }) : data;
+  const nat = (globalThis as any).motionNative;
+  const save = nat?.saveFileAs ?? nat?.saveFile;
+  if (save) {
+    const p: string | null = await save({ defaultPath: name, data: await toBase64(blob), encoding: 'base64', filters: [{ name: type.label, extensions: [ext] }], kind: 'export' });
+    if (!p) return null;
+    if (nat.revealFile) toastAction(`${msg}: ${p.split(/[\\/]/).pop()}`, revealLabel(), () => nat.revealFile(p));
+    else toast(`${msg}: ${p}`);
+    return p;
+  }
+  download(name, blob, type.mime);
+  toast(msg);
+  return 'downloaded';
+}
+
 // ---------------- files ----------------
 /** a new empty document in its own tab */
 export function newProject() { newDocument(); }
@@ -150,12 +219,25 @@ export async function saveProject(saveAs = false) {
   const currentPath = doc?.path ?? null;
   if (n) {
     const p = await n.saveFile({ defaultPath: saveAs || !currentPath ? name : currentPath, path: saveAs ? undefined : currentPath, data, filters: [{ name: 'Motion project', extensions: ['motion'] }] });
-    if (p) { if (doc) doc.path = p; markSaved(); toast('Saved'); rememberSaved(); }
+    if (!p) return;
+    if (doc) doc.path = p;
+    // MD-02: the document takes the file's name (tab, window title, export names, the file itself)
+    const fileName = docNameFromPath(p);
+    if (fileName && fileName !== st().project.name) {
+      setProjectName(st(), fileName);
+      await n.saveFile({ path: p, data: serialize() });
+    }
+    markSaved(); toast('Saved'); rememberSaved();
     return;
   }
   download(name, data, 'application/json');
   markSaved();
   rememberSaved();
+}
+
+/** "/a/b/Logo reveal.motion" -> "Logo reveal" */
+export function docNameFromPath(p: string) {
+  return (p.split(/[\\/]/).pop() ?? '').replace(/\.motion$/i, '').trim();
 }
 
 /** the saved project goes to the top of the recent files, with a thumbnail of the current frame */
@@ -235,7 +317,8 @@ export async function openData(name: string, data: string, path?: string) {
       const text = /^\s*[{[]/.test(data) ? data : new TextDecoder().decode(b64ToBuf(data.trim()));
       const p = JSON.parse(text) as Project;
       if (!p.comps || !p.layers) throw new Error('not a motion project');
-      p.name ||= name.replace(/\.motion$/i, '');
+      // a file from disk is named after the file (MD-02: a renamed / saved-as file keeps that name)
+      p.name = (path ? docNameFromPath(name) : '') || p.name || docNameFromPath(name);
       openProject(p, path ?? null);
       return;
     }
@@ -282,8 +365,8 @@ async function importAep(buf: ArrayBuffer, name: string) {
   }
 }
 
-/** gif export with a progress toast; desktop saves into the Motion export folder */
-export async function exportGifFile(opts: import('../export/gif').GifOptions = {}) {
+/** gif export with a progress toast, saved like every export (saveExportFile) */
+export async function exportGifFile(opts: import('../export/gif').GifOptions = {}, by: 'user' | 'agent' = 'user') {
   const { exportGif } = await import('../export/gif');
   const el = document.createElement('div');
   el.className = 'toast';
@@ -292,15 +375,14 @@ export async function exportGifFile(opts: import('../export/gif').GifOptions = {
   document.body.appendChild(el);
   try {
     const blob = await exportGif(opts, (d, n) => { el.textContent = `Exporting GIF… ${Math.round((d / n) * 100)}%`; });
-    const name = `${(st().project.name || 'motion').replace(/[^\w\- ]+/g, '_')} - ${st().comp.name}.gif`;
-    const nat = native() as any;
-    if (nat?.saveExport) {
-      const buf = new Uint8Array(await blob.arrayBuffer());
-      let bin = '';
-      for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
-      const p = await nat.saveExport({ name, data: btoa(bin), encoding: 'base64' });
-      toast(`GIF saved: ${p}`);
-    } else { download(name, blob, 'image/gif'); toast(`GIF exported (${Math.round(blob.size / 1024)} KB)`); }
+    el.remove();
+    const msg = `GIF exported (${Math.round(blob.size / 1024)} KB)`;
+    const nat = (globalThis as any).motionNative;
+    // agent tools never pick paths: their exports go to the Motion export folder without a dialog
+    if (by === 'agent' && nat?.saveExport) {
+      const p = await nat.saveExport({ name: exportFileName('gif'), data: await toBase64(blob), encoding: 'base64' });
+      if (nat.revealFile) toastAction(msg, revealLabel(), () => nat.revealFile(p)); else toast(`${msg}: ${p}`);
+    } else await saveExportFile(exportFileName('gif'), blob, msg);
     return blob;
   } catch (e: any) {
     toast('GIF export failed: ' + (e?.message ?? e), 'error');
@@ -314,7 +396,7 @@ export async function exportLottie() {
   const lot = m.projectToLottie(st().project);
   // text as glyph outlines so every lottie player draws it without the font (bundled Inter only)
   try { const g = await import('../export/lottie-glyphs'); await g.addGlyphs(lot); } catch (e) { console.warn('glyphs skipped', e); }
-  download((st().project.name || 'animation') + '.json', JSON.stringify(lot), 'application/json');
+  await saveExportFile(exportFileName('json'), JSON.stringify(lot), 'Lottie exported');
 }
 
 /** the current frame at full composition size */
@@ -323,7 +405,7 @@ export async function exportFramePng(scale = 1) {
   const url = editor.renderer.snapshot(s.time, Math.round(Math.max(c.width, c.height) * scale));
   const blob = await (await fetch(url)).blob();
   const frame = Math.round(s.time * c.fps);
-  download(`${s.project.name || 'frame'}_${String(frame).padStart(4, '0')}.png`, blob, 'image/png');
+  await saveExportFile(exportFileName('png', { frame }), blob, 'Frame exported');
 }
 
 // ---------------- inserting layers (paste / import) ----------------
@@ -345,7 +427,8 @@ export function insertLayers(res: { layers: Layer[]; roots: string[]; assets: As
   const comp = s.comp;
   let dx = 0, dy = 0;
   const single = res.roots.length === 1 ? byId.get(res.roots[0])! : null;
-  const frameToComp = opts.fitCompIfEmpty && wasEmpty && single && single.type === 'group' && single.children.length > 0;
+  // MD-38: only a brand-new untouched document takes the asset's size; a comp the user chose keeps its
+  const frameToComp = opts.fitCompIfEmpty && wasEmpty && compAdoptsImportSize() && single && single.type === 'group' && single.children.length > 0;
   if (frameToComp) {
     // pasting one frame into an empty project: the frame becomes the composition (figma motion style)
     const sz = single!.props.size!.v;
@@ -381,6 +464,8 @@ export function insertLayers(res: { layers: Layer[]; roots: string[]; assets: As
   const d = design as DesignImportResult | null;
   if (d && (d.linked || d.components)) { s.emit('tokens'); s.emit('components'); }
   s.select(res.roots);
+  // the comp changed size: show all of it
+  if (frameToComp) requestAnimationFrame(() => (globalThis as any).viewport?.fit?.());
   return design;
 }
 
@@ -679,6 +764,8 @@ export function restoreAutosave(): boolean {
 }
 
 // ---------------- keyboard ----------------
+/** after effects: P position, S scale, R rotation, T opacity, A anchor */
+export const PROP_SHORTCUTS: Record<string, PropKey | undefined> = { KeyP: 'position', KeyS: 'scale', KeyR: 'rotation', KeyT: 'opacity', KeyA: 'anchor' };
 export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; toggleAgent(): void; editText(id: string): void }) {
   window.addEventListener('copy', e => { if (!isTyping(e)) copySelection(e); });
   window.addEventListener('cut', e => {
@@ -738,6 +825,15 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) spaceTap = { panned: false }; return; }
     if (k === 'delete' || k === 'backspace') return run(() => (s.keySelection.size ? deleteKeyframes(s, [...s.keySelection]) : deleteLayers(s, s.selection)));
     if (k === 'escape') return run(() => { if (s.keySelection.size) { s.keySelection.clear(); s.emit('keys'); } else s.select([]); editor.setTool('select'); });
+    // after effects property shortcuts (MD-13), by key code (alt changes e.key on a mac):
+    // Alt+Shift+P/S/R/T/A adds or removes ONE key at the playhead, Shift+P/S/R/T/A reveals the
+    // property row in the timeline. never removes an animation (only the stopwatch does that)
+    const propKey = e.shiftKey && s.selection.length ? PROP_SHORTCUTS[e.code] : undefined;
+    if (propKey) return run(() => {
+      if (e.altKey) toggleKeyAtTime(s, s.selection, propKey);
+      const tl = (globalThis as any).timeline;
+      for (const id of s.selection) tl?.showProp?.(id, propKey);
+    });
     if (k === 'v') return run(() => editor.setTool('select'));
     if (k === 'r') return run(() => editor.setTool('rect'));
     if (k === 'o' || k === 'e') return run(() => editor.setTool('ellipse'));
@@ -757,9 +853,6 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (k === 'enter' && s.selection.length === 1 && s.layer(s.selection[0])?.type === 'text') return run(() => hooks.editText(s.selection[0]));
     if (e.key === 'F9') return run(() => setEase(s, [...s.keySelection], 'Easy Ease'));
     if (k === 'j' || k === 'k') return run(() => jumpToKey(k === 'j' ? -1 : 1));
-    // after effects-style property shortcuts: P S R T A add a keyframe on that property
-    const propKeys: Record<string, any> = { p: 'position', s: 'scale', a: 'anchor' };
-    if (e.shiftKey && propKeys[k] && s.selection.length) return run(() => toggleAnimated(s, s.selection, propKeys[k]));
     if (k.startsWith('arrow') && s.selection.length) {
       return run(() => {
         const d = e.shiftKey ? 10 : 1;

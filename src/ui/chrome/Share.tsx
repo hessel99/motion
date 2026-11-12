@@ -3,7 +3,7 @@
 //   or, with link sharing set up (Settings → Connections), uploaded with the link copied.
 // - Export a file: the export dialog (MP4 / WebM / GIF / PNG / Lottie).
 
-import { download, openExport, toast } from '../../app/actions';
+import { exportFileName, openExport, saveExportFile, toast } from '../../app/actions';
 import { setBusy } from '../../app/updates';
 import { activeProvider } from '../../app/share';
 import { buildPreviewPage } from '../../app/share/player';
@@ -33,15 +33,7 @@ async function makePage() {
 export async function sharePreviewFile() {
   const page = await makePage();
   if (!page) return;
-  const nat = (window as any).motionNative;
-  const save = nat?.saveFileAs ?? nat?.saveFile;
-  if (save) {
-    const p = await save({ defaultPath: page.name, data: page.html, filters: [{ name: 'Preview page', extensions: ['html'] }] });
-    if (p) toast(`Preview saved (${Math.round(page.bytes / 1024)} KB): open it in any browser or send it`);
-    return;
-  }
-  download(page.name, page.html, 'text/html');
-  toast(`Preview saved (${Math.round(page.bytes / 1024)} KB): open it in any browser or send it`);
+  await saveExportFile(exportFileName('html'), page.html, `Preview saved (${Math.round(page.bytes / 1024)} KB): open it in any browser or send it`);
 }
 
 /** upload the preview page with the configured provider and copy the link */
@@ -51,7 +43,7 @@ export async function sharePreviewLink() {
   const page = await makePage();
   if (!page) return;
   try {
-    const url = await prov.upload(new Blob([page.html], { type: 'text/html' }), page.name);
+    const url = await prov.upload(new Blob([page.html], { type: 'text/html' }), exportFileName('html'));
     await navigator.clipboard?.writeText(url).catch(() => {});
     toast('Link copied: ' + url);
   } catch (e: any) { toast('Link sharing failed: ' + (e?.message ?? e), 'error'); }

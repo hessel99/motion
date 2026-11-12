@@ -4,6 +4,7 @@ import { menuFrom } from './menu';
 import {
   addKeyframe, deleteKeyframes, isAnimated, keyId, parseKeyId, setCompSettings, setEase, setLayerField, setProp,
   setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, renameComp,
+  effectVisible, removeEffect, setEffectVisible,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { starGeometry } from '../core/shapes';
@@ -22,7 +23,7 @@ import { instanceComp } from '../core/motion-components';
 import {
   AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignHorizontalDistributeCenter, AlignStartHorizontal,
   AlignStartVertical, AlignVerticalDistributeCenter, ArrowUpRight, Blend, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Minus,
-  RotateCw, X, Clock, Gauge, SquareRoundCorner, ALargeSmall,
+  RotateCw, X, Clock, Gauge, SquareRoundCorner, ALargeSmall, Eye, EyeOff,
 } from './chrome/icons';
 
 const st = () => editor.store;
@@ -51,7 +52,7 @@ export function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
   const atKey = props.layers.some(l => l.props[props.prop]?.kf?.some(k => Math.abs(k.t - store.time) < 1e-6));
   const click = (e: MouseEvent) => {
     const ids = props.layers.map(l => l.id);
-    if (e.altKey || (animated && e.shiftKey)) { toggleAnimated(store, ids, props.prop); return; }
+    if (e.altKey) { toggleAnimated(store, ids, props.prop); return; }
     if (atKey) {
       const keys: string[] = [];
       for (const l of props.layers) l.props[props.prop]?.kf?.forEach((k, i) => { if (Math.abs(k.t - store.time) < 1e-6) keys.push(keyId(l.id, props.prop, i)); });
@@ -297,9 +298,17 @@ function EffectsPanel({ layers }: { layers: Layer[] }) {
     <Section title="Effects" onAdd={EFFECT_GROUPS.some(g => !has(g)) ? (e?: MouseEvent) => menuFrom((e?.currentTarget as Element) ?? document.activeElement!, EFFECT_GROUPS.filter(g => !has(g)).map(g => ({
       label: g.title, action: () => store.batch('fx', () => { for (const [k, v] of g.add) if (!l.props[k]) set(k, v); }),
     })), { align: 'right' }) : undefined} addLabel="Add effect">
-      {shown.map(g => (
+      {shown.map(g => {
+        const type = effectTypeOf(g.title) as import('../core/model').EffectType;
+        const ids = layers.map(x => x.id);
+        const on = effectVisible(l, type);
+        return (
         <>
-          <div class="muted small">{g.title}</div>
+          <div class="fx-head">
+            <span class={'muted small' + (on ? '' : ' fx-off')}>{g.title}</span>
+            <button type="button" class="ghost icon" title={on ? 'Hide effect' : 'Show effect'} aria-label={(on ? 'Hide ' : 'Show ') + g.title} aria-pressed={!on} onClick={() => setEffectVisible(store, ids, type, !on)}>{on ? <Eye /> : <EyeOff />}</button>
+            <button type="button" class="ghost icon" title="Remove effect" aria-label={'Remove ' + g.title} onClick={() => removeEffect(store, ids, type)}><Minus /></button>
+          </div>
           {g.keys.filter(k => l.props[k]).map(k => {
             const def = PROP_DEFS[k], v = valueAt(l, k, t);
             return (
@@ -312,7 +321,8 @@ function EffectsPanel({ layers }: { layers: Layer[] }) {
             );
           })}
         </>
-      ))}
+        );
+      })}
       {extra > 0 && <div class="muted small">{extra} more effect{extra > 1 ? 's' : ''} from Figma (not animatable)</div>}
     </Section>
   );

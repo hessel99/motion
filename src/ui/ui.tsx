@@ -82,6 +82,7 @@ export function NumField(props: NumFieldProps) {
   // the text being edited, readable synchronously (enter commits and then blurs in the same tick:
   // the state closure would still hold the old text and commit twice)
   const editing = useRef<string | null>(null);
+  const focusClick = useRef(false);
   // sensible precision for the space a field has: 1180, 480.1, 12.25
   const fmt = (v: number) => { const a = Math.abs(v), k = a >= 1000 ? 1 : a >= 100 ? 10 : 100; return (Math.round(v * k) / k).toString(); };
   const clamp = (v: number) => Math.min(props.max ?? Infinity, Math.max(props.min ?? -Infinity, v));
@@ -117,13 +118,27 @@ export function NumField(props: NumFieldProps) {
         aria-label={props.title ?? (typeof props.label === 'string' ? props.label : undefined)}
         inputMode="decimal"
         value={text ?? fmt(props.value) + (props.suffix ?? '')}
-        onFocus={e => { editing.current = fmt(props.value); setText(editing.current); const el = e.target as HTMLInputElement;
-          // select() also focuses: only while the field still has focus, or a quick Tab is pulled back here
-          requestAnimationFrame(() => { if (document.activeElement === el) el.select(); }); }}
+        onFocus={e => {
+          // MD-29: select right away (a deferred select used to swallow the first digit typed
+          // before it ran). the frame-later select is only a fallback for an untouched field
+          const el = e.target as HTMLInputElement, t = fmt(props.value);
+          editing.current = t;
+          el.value = t;
+          setText(t);
+          el.select();
+          focusClick.current = true;
+          requestAnimationFrame(() => { if (document.activeElement === el && editing.current === t && el.value === t) el.select(); });
+        }}
+        onMouseUp={e => {
+          // the mouseup of the click that focused the field would collapse the selection to a caret
+          if (focusClick.current && editing.current === fmt(props.value)) e.preventDefault();
+          focusClick.current = false;
+        }}
         onInput={e => { editing.current = (e.target as HTMLInputElement).value; setText(editing.current); }}
         onBlur={commit}
         onKeyDown={e => {
           e.stopPropagation();
+          focusClick.current = false;
           if (e.key === 'Enter') { commit(); (e.target as HTMLInputElement).blur(); }
           if (e.key === 'Escape') { editing.current = null; setText(null); (e.target as HTMLInputElement).blur(); }
           if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {

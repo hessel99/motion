@@ -4,13 +4,13 @@
 import { editor } from '../app/editor';
 import {
   addLayer, cloneLayers, deleteLayers, groupLayers, isAnimated, keyId, setCompSettings, setEase, setLayerField, setProp,
-  setPropTx, valueAt, setSpring, precompose, setExpr,
+  setPropTx, valueAt, setSpring, precompose, setExpr, EFFECT_PROPS, removeEffect, setEffectVisible,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { ANIM_PRESETS, applyPreset, setTextAnim, TEXT_ANIM_PRESETS } from '../core/presets';
 import { parsePathD } from '../import/svg';
-import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
+import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type EffectType, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
 import type { Tx } from '../core/store';
 import { animRange, describeLayerAnimation, fmtTime } from './describe';
 import { editorContext } from './context';
@@ -436,7 +436,7 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: 'precompose',
-    description: 'Pre-compose top-level layers of the active composition into a new composition (After Effects style). Returns the new comp id and the precomp layer id. Useful to animate a group of layers as one unit or to reuse it.',
+    description: 'Pre-compose layers of the active composition into a new composition (After Effects style). The layers must share a parent (top level, or e.g. children of a pasted frame: the new composition then takes the parent frame\'s size and space). Returns the new comp id and the precomp layer id. Useful to animate a group of layers as one unit or to reuse it.',
     inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, name: { type: 'string' } }, required: ['ids'] },
     run: ({ ids, name }) => { const r = precompose(st(), ids, name); return text({ compId: r.comp.id, layerId: r.layer.id }); },
   },
@@ -445,6 +445,19 @@ export const TOOLS: ToolDef[] = [
     description: 'Switch the editor (and all other tools) to another composition by id.',
     inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
     run: ({ id }) => { if (!st().project.comps[id]) throw new Error('no such composition'); st().openComp(id); return text('ok'); },
+  },
+  {
+    name: 'set_effect_state',
+    description: 'Turn a layer effect off/on (values and keyframes kept) or remove it (its effect props and keyframes go too). Effects are added by setting their props (shadowColor/shadowOffset/shadowBlur/shadowSpread, innerShadow*, blur, backgroundBlur, noiseColor/noiseSize/noiseDensity). One undo step.',
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, effect: { enum: ['dropShadow', 'innerShadow', 'layerBlur', 'backgroundBlur', 'noise'] }, action: { enum: ['hide', 'show', 'remove'] } }, required: ['ids', 'effect', 'action'] },
+    run: ({ ids, effect, action }) => {
+      if (!EFFECT_PROPS[effect as EffectType]) throw new Error('unknown effect ' + effect);
+      const known = (ids as string[]).filter(id => st().layer(id));
+      if (!known.length) throw new Error('no such layers');
+      if (action === 'remove') removeEffect(st(), known, effect);
+      else setEffectVisible(st(), known, effect, action === 'show');
+      return text('ok');
+    },
   },
   {
     name: 'set_expression',
@@ -466,12 +479,12 @@ export const TOOLS: ToolDef[] = [
       renderer(); // exports render the file on screen: not from a background tab
       if (a.format === 'gif') {
         const { exportGifFile } = await import('../app/actions');
-        const blob = await exportGifFile();
+        const blob = await exportGifFile({}, 'agent');
         return text({ format: 'gif', bytes: blob.size });
       }
       const { exportVideoDetailed } = await import('../export/video');
       const res = await exportVideoDetailed({ format: a.format ?? 'mp4', scale: a.scale ?? 1, quality: a.quality ?? 'high' });
-      const name = `${(st().project.name || 'motion').replace(/[^\w\- ]+/g, '_')} - ${st().comp.name}.${res.format}`;
+      const name = (await import('../app/actions')).exportFileName(res.format);
       const native = (globalThis as any).motionNative;
       if (native?.saveExport) {
         const buf = new Uint8Array(await res.blob.arrayBuffer());

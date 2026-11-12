@@ -4,6 +4,15 @@
 import { GIFEncoder, quantize, applyPalette } from 'gifenc';
 import { editor } from '../app/editor';
 
+/** per-frame delays in centiseconds (what GIF stores) for `n` frames at `fps`: the rounding is
+ *  spread over the frames (30 fps: 3,4,3,3,4,3…) so frame i starts at round(i * 100 / fps) and the
+ *  whole loop lasts exactly n / fps (MD-43: a flat round(100 / fps) made 30 fps 10% too fast) */
+export function gifDelaysCs(n: number, fps: number): number[] {
+  const out: number[] = [];
+  for (let i = 0; i < n; i++) out.push(Math.round(((i + 1) * 100) / fps) - Math.round((i * 100) / fps));
+  return out;
+}
+
 export interface GifOptions { maxSize?: number; fps?: number; start?: number; end?: number }
 
 export async function exportGif(opts: GifOptions = {}, onProgress?: (done: number, total: number) => void, signal?: AbortSignal): Promise<Blob> {
@@ -40,11 +49,11 @@ export async function exportGif(opts: GifOptions = {}, onProgress?: (done: numbe
     samples.forEach((s, i) => big.set(s, i * w * h * 4));
     const palette = quantize(big, 256, { format: 'rgb565' });
     const gif = GIFEncoder();
-    const delay = Math.round(1000 / fps);
+    const delays = gifDelaysCs(total, fps);
     for (let i = 0; i < total; i++) {
       if (signal?.aborted) throw new DOMException('cancelled', 'AbortError');
       const rgba = await read(t0 + i / fps);
-      gif.writeFrame(applyPalette(rgba, palette, 'rgb565'), w, h, { palette: i === 0 ? palette : undefined, delay });
+      gif.writeFrame(applyPalette(rgba, palette, 'rgb565'), w, h, { palette: i === 0 ? palette : undefined, delay: delays[i] * 10 });
       onProgress?.(i + 1, total);
       if (i % 10 === 9) await new Promise(z => setTimeout(z, 0)); // keep the ui responsive
     }
