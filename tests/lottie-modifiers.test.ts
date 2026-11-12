@@ -169,3 +169,31 @@ describe('lottie gradient strokes and stacked paints', () => {
     expect(all(q).filter(l => l.type === 'rect').length).toBe(1);
   });
 });
+
+describe('lottie expressions that read another property', () => {
+  const kf = (a: number, b: number) => ({ a: 1, k: [{ t: 0, s: [a], o: { x: [0.3], y: [0] }, i: { x: [0.7], y: [1] } }, { t: 30, s: [b] }] });
+  it('an effect slider on another layer drives a trim end', () => {
+    const ctrl = { ty: 3, ind: 1, nm: 'counter', ip: 0, op: 60, st: 0, ks: {}, ef: [{ ty: 5, nm: 'Slider Control', ef: [{ ty: 0, nm: 'Slider', v: kf(0, 80) }] }] };
+    const p = lottieToProject(doc([ctrl, { ...shapeLayer([
+      el(0, 0, 100), { ty: 'st', c: { k: [1, 1, 1, 1] }, o: { k: 100 }, w: { k: 4 } },
+      { ty: 'tm', s: { k: 0 }, e: { k: 100, x: "var $bm_rt;\n$bm_rt = thisComp.layer('counter').effect('Slider Control')('Slider');" }, o: { k: 0 } },
+    ]), ind: 2 }]));
+    const l = all(p).find(x => x.trimOn)!;
+    expect(l.props.trimEnd!.kf!.map(k => k.v[0])).toEqual([0, 80]);
+  });
+
+  it("a path linked to another layer's path, and a transform linked to another layer", () => {
+    const src = { ...shapeLayer([{ ty: 'gr', nm: 'G', it: [{ ty: 'sh', nm: 'P', ks: { k: sq(0, 0, 30) } }, tr()] }]), nm: 'Src', ks: { r: kf(0, 90) } };
+    const p = lottieToProject(doc([src, { ...shapeLayer([
+      { ty: 'sh', ks: { k: sq(0, 0, 5), x: "var $bm_rt;\n$bm_rt = thisComp.layer('Src').content('G').content('P').path;" } }, fl(),
+    ]), ind: 2, nm: 'Dst', ks: { r: { k: 0, x: "var $bm_rt;\n$bm_rt = thisComp.layer('Src').transform.rotation;" } } }]));
+    const dst = all(p).find(l => l.name === 'Dst')!;
+    expect(dst.props.size!.v).toEqual([30, 30]);
+    expect(dst.props.rotation!.kf!.map(k => k.v[0])).toEqual([0, 90]);
+  });
+
+  it('unresolvable references keep the property as it is', () => {
+    const p = lottieToProject(doc([{ ...shapeLayer([rc(0, 0, 10), fl()]), ks: { r: { k: 15, x: "var $bm_rt;\n$bm_rt = thisComp.layer('Nope').transform.rotation;" } } }]));
+    expect(all(p)[0].props.rotation!.v[0]).toBe(15);
+  });
+});

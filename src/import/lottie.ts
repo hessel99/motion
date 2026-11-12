@@ -901,7 +901,53 @@ function avg(x: any, d: number): number {
 function arr(x: any): number[] { return Array.isArray(x) ? x.map((v: any) => num(v)) : typeof x === 'number' ? [x] : []; }
 
 /** fr = global frame rate; tf maps a frame of the current (pre)comp to our comp seconds */
-interface LCtx { fr: number; tf: (frame: number) => number }
+interface LCtx {
+  fr: number; tf: (frame: number) => number;
+  /** the layers of the current comp and the layer being converted (for expression references) */
+  layers?: any[]; layer?: any;
+}
+
+const LAYER_PROPS: Record<string, string> = { position: 'p', rotation: 'r', scale: 's', opacity: 'o', anchorPoint: 'a', anchor_point: 'a' };
+const ITEM_PROPS: Record<string, string> = { path: 'ks', start: 's', end: 'e', offset: 'o', color: 'c', opacity: 'o', strokeWidth: 'w', size: 's', position: 'p', roundness: 'r' };
+
+/**
+ * an expression that just reads another property (`$bm_rt = thisComp.layer('Ctrl').effect('Slider
+ * Control')('Slider');`, `content('Group').content('Path').path`, `thisComp.layer(3).transform.rotation`)
+ * resolves to that property's json, so its keyframes drive this one. anything else: null.
+ */
+function exprRef(lp: any, c: LCtx, depth = 0): any {
+  if (!c.layers || typeof lp?.x !== 'string' || depth > 4) return null;
+  const body = lp.x.replace(/^\s*var\s+\$bm_rt\s*;\s*/, '').trim();
+  const m = /^\$bm_rt\s*=\s*([^;]+?)\s*;?\s*$/.exec(body);
+  if (!m) return null;
+  let e = m[1].trim();
+  const str = `(?:'([^']*)'|"([^"]*)"|(\\d+))`;
+  let cur: any = c.layer;
+  const lm = new RegExp(`^thisComp\\.layer\\(${str}\\)\\.?`).exec(e);
+  if (lm) {
+    const name = lm[1] ?? lm[2];
+    cur = name != null ? c.layers.find(l => l?.nm === name) : c.layers[Number(lm[3]) - 1];
+    e = e.slice(lm[0].length);
+  } else if (e.startsWith('thisLayer.')) e = e.slice(10);
+  if (!cur) return null;
+  let kind: 'layer' | 'effect' | 'item' | 'transform' = 'layer';
+  const sel = (list: any[], key: string | undefined, idx: string | undefined) => (Array.isArray(list) ? (key != null ? list.find(x => x?.nm === key || x?.mn === key) : list[Number(idx) - 1]) : undefined);
+  for (let guard = 0; e && guard < 16; guard++) {
+    let mm: RegExpExecArray | null;
+    if ((mm = new RegExp(`^\\.?effect\\(${str}\\)`).exec(e)) && kind === 'layer') { cur = sel(cur.ef, mm[1] ?? mm[2], mm[3]); kind = 'effect'; }
+    else if ((mm = new RegExp(`^\\(${str}\\)`).exec(e)) && kind === 'effect') { const p = sel(cur.ef, mm[1] ?? mm[2], mm[3]); cur = p?.v; kind = 'item'; if (!cur) return null; e = e.slice(mm[0].length); break; }
+    else if ((mm = new RegExp(`^\\.?content\\(${str}\\)`).exec(e)) && (kind === 'layer' || kind === 'item')) { cur = sel(kind === 'layer' ? cur.shapes : cur.it, mm[1] ?? mm[2], mm[3]); kind = 'item'; }
+    else if ((mm = /^\.?transform/.exec(e)) && kind === 'layer') { kind = 'transform'; }
+    else if ((mm = /^\.?(\w+)/.exec(e)) && (kind === 'layer' || kind === 'transform') && LAYER_PROPS[mm[1]]) { cur = cur.ks?.[LAYER_PROPS[mm[1]]]; e = e.slice(mm[0].length); break; }
+    else if ((mm = /^\.?(\w+)/.exec(e)) && kind === 'item' && ITEM_PROPS[mm[1]]) { cur = cur[ITEM_PROPS[mm[1]]]; e = e.slice(mm[0].length); break; }
+    else return null;
+    if (!cur) return null;
+    e = e.slice(mm[0].length);
+  }
+  e = e.replace(/^\.value/, '');
+  if (e || !cur || typeof cur !== 'object' || cur.k === undefined || cur === lp) return null;
+  return typeof cur.x === 'string' ? exprRef(cur, c, depth + 1) ?? cur : cur;
+}
 
 /**
  * convert a lottie animatable value to our prop.
@@ -909,6 +955,7 @@ interface LCtx { fr: number; tf: (frame: number) => number }
  */
 function lprop(lp: any, conv: (v: number[]) => number[], def: number[], c: LCtx, spatial = false): Prop {
   if (lp == null) return sprop(def);
+  if (typeof lp.x === 'string') lp = exprRef(lp, c) ?? lp;
   const k = lp.k;
   const animated = Array.isArray(k) && k.length > 0 && typeof k[0] === 'object' && k[0] !== null && 't' in k[0];
   if (!animated) {
@@ -1012,6 +1059,7 @@ function withExpr(p: Prop, lp: any): Prop {
 
 /** keyframed lottie shape (sh ks / mask pt) -> path source with keys */
 function lpathSrc(lp: any, c: LCtx, closed?: boolean): PathSrc {
+  if (typeof lp?.x === 'string') lp = exprRef(lp, c) ?? lp;
   const k = lp?.k;
   const animated = Array.isArray(k) && k.length > 0 && typeof k[0] === 'object' && k[0] !== null && 't' in k[0];
   // old exports put `closed` on the shape item instead of `c` on each shape
@@ -1625,9 +1673,10 @@ export function lottieToProject(json: any, name?: string, stats?: LottieImportSt
     const src: SrcLayerX[] = [];
     layers.forEach((L, index) => {
       if (!L || typeof L !== 'object') return;
+      const lc: LCtx = { ...c, layers, layer: L };
       const ty = L.ty;
       if (![0, 1, 2, 3, 4, 5].includes(ty)) return; // audio, camera, data, ... skipped
-      const tr = ltransform(L.ks, c);
+      const tr = ltransform(L.ks, lc);
       for (const p of [tr.position, tr.scale, tr.rotation, tr.opacity]) if (p.expr) st.expressions++;
       const lname = typeof L.nm === 'string' ? L.nm : `Layer ${index + 1}`;
       const lip = num(L.ip, ip), lop = num(L.op, op);
@@ -1644,7 +1693,7 @@ export function lottieToProject(json: any, name?: string, stats?: LottieImportSt
         : compBoxInLayer(tr, cw, ch);
       const content = (t: TR): Layer | null => {
         switch (ty) {
-          case 4: countShapes(L.shapes); return buildShapeLayer(ctx, lname, lshapes(L.shapes, c), t);
+          case 4: countShapes(L.shapes); return buildShapeLayer(ctx, lname, lshapes(L.shapes, lc), t);
           case 1: {
             const l = ctx.make('rect', lname, t);
             l.props.size = sprop([num(L.sw, 100), num(L.sh, 100)]);
@@ -1714,7 +1763,7 @@ export function lottieToProject(json: any, name?: string, stats?: LottieImportSt
         blend: blendMode(L.bm, note),
         build: (t: TR) => {
           try {
-            const regions = ty === 3 ? [] : maskRegions(masks, c, box);
+            const regions = ty === 3 ? [] : maskRegions(masks, lc, box);
             if (!regions.length) return content(t);
             st.masks++;
             st.maskRegions += regions.length;
