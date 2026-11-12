@@ -110,7 +110,13 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
         <button class={'ghost autokey' + (editMode.autoKey ? ' rec' : '')} title="Auto-keyframe: every change creates a keyframe at the playhead" onClick={() => { editMode.autoKey = !editMode.autoKey; editor.emit('view'); }}>● Auto-key</button>
       </div>
       <div class="tb-right">
-        <button class="ghost" disabled={!s.canUndo} title={`Undo ${s.undoLabel ?? ''} (⌘Z)`} onClick={() => s.undo()}>↶</button>
+        <button class="ghost" disabled={!s.canUndo} title={`Undo ${s.undoLabel ?? ''} (⌘Z) — right-click for history`} onClick={() => s.undo()} onContextMenu={e => {
+          // history: jump back several steps at once (newest first)
+          e.preventDefault();
+          const labels = s.historyLabels;
+          const items: MenuItem[] = labels.map((label, i) => ({ label: `${label}`, shortcut: i === labels.length - 1 ? 'last' : `${labels.length - i}`, action: () => s.undoTo(i) })).reverse().slice(0, 25);
+          if (items.length) showContextMenu(e.clientX, e.clientY + 8, items);
+        }}>↶</button>
         <button class="ghost" disabled={!s.canRedo} title="Redo (⇧⌘Z)" onClick={() => s.redo()}>↷</button>
         <button class="ghost zoom" title="Zoom to fit (⌘0)" onClick={() => vp?.fit()}>{Math.round((vp?.zoom ?? 1) * 100)}%</button>
         <button class={'ghost' + (props.agentOpen ? ' on' : '')} title="AI agent (⌘I)" onClick={props.toggleAgent}>✦ Agent</button>

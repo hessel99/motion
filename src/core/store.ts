@@ -177,6 +177,8 @@ export class Store {
     return n;
   }
   get canRedo() { return this.redoStack.length > 0; }
+  /** labels of the undo steps, oldest first */
+  get historyLabels(): string[] { return this.undoStack.map(e => e.label); }
   get undoLabel() { return this.undoStack[this.undoStack.length - 1]?.label; }
 
   /** the active comp can disappear (undo of "new composition"/"pre-compose", broken files): fall back */
