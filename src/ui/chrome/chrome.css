@@ -12,33 +12,36 @@
    full height on the right. --tl-h is the timeline's height (its top edge is a splitter). */
 .app {
   display: grid; height: 100%;
-  grid-template-columns: var(--left-w) minmax(0, 1fr) var(--right-w);
+  grid-template-columns: var(--rail-w) var(--left-w) minmax(0, 1fr) var(--right-w);
   grid-template-rows: var(--tabstrip-h) minmax(var(--stage-min), 1fr) var(--tl-h, var(--timeline-h));
-  grid-template-areas: 'tabs tabs tabs' 'left center right' 'bottom bottom right';
-  column-gap: var(--gap); row-gap: var(--gap);
-  padding: 0 var(--gap) var(--gap);
+  grid-template-areas: 'rail left tabs right' 'rail left center right' 'rail left bottom right';
   background: var(--bg-app);
 }
-.app.no-left { grid-template-columns: 0 minmax(0, 1fr) var(--right-w); column-gap: 0; }
-.app.no-left .center { margin-right: var(--gap); }
-.card { background: var(--surface-1); border-radius: var(--radius-panel); overflow: hidden; }
-.left { grid-area: left; min-width: 0; min-height: 0; contain: strict; }
+.app.no-left { grid-template-columns: var(--rail-w) 0 minmax(0, 1fr) var(--right-w); }
+/* Home replaces the stage; the sidebars step aside */
+.app.show-home { grid-template-columns: var(--rail-w) 0 minmax(0, 1fr) 0; }
+.app.show-home > .left, .app.show-home > .right { display: none; }
+/* the two fixed sidebars: flush to the window edges, full height, a hairline toward the stage */
+.sidebar { background: var(--sidebar-bg); min-width: 0; min-height: 0; contain: strict; }
+.left { grid-area: left; border-right: 1px solid var(--sidebar-line); }
 .left[hidden] { display: none; }
-.center { grid-area: center; position: relative; min-width: 0; min-height: 0; contain: strict; background: var(--vp-bg); }
-.right { grid-area: right; overflow: auto; contain: strict; scrollbar-width: thin; }
-.bottom { grid-area: bottom; display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--tl-bg); contain: strict; position: relative; }
-/* Home covers the cards (the editor stays mounted under it) */
-.home-host { grid-row: 2 / 4; grid-column: 1 / 4; z-index: var(--z-home); min-height: 0; overflow: auto; background: var(--bg-app); scrollbar-width: thin; }
+.right { grid-area: right; overflow: auto; scrollbar-width: thin; border-left: 1px solid var(--sidebar-line); }
+/* the stage: canvas and timeline as two inset cards (they zoom, scroll and resize independently;
+   the gap between them is the timeline's splitter) */
+.card { background: var(--surface-1); border-radius: var(--radius-panel); overflow: hidden; }
+.center { grid-area: center; position: relative; min-width: 0; min-height: 0; contain: strict; background: var(--vp-bg); margin: 0 var(--gap); }
+.bottom { grid-area: bottom; display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--tl-bg); contain: strict; position: relative; margin: var(--gap); }
+.home-host { grid-row: 2 / 4; grid-column: 3 / 4; z-index: var(--z-home); min-height: 0; overflow: auto; background: var(--bg-app); scrollbar-width: thin; }
 
 /* ---------------- top bar ---------------- */
-.topbar {
+.topbar { grid-area: tabs; padding: 0 var(--gap);
   grid-area: tabs; display: flex; align-items: center; gap: var(--space-2); min-width: 0; height: var(--tabstrip-h);
   -webkit-app-region: drag; contain: layout paint;
 }
 .topbar button, .topbar [role='tab'], .topbar input { -webkit-app-region: no-drag; }
 .tb-traffic { width: 70px; flex: none; }   /* the mac traffic lights sit here */
 .tb-lead { display: flex; align-items: center; gap: var(--space-1); flex: none; }
-.tb-lead .btn-icon, .tb-actions .btn-icon { width: 32px; min-width: 32px; min-height: 32px; border-radius: var(--radius-md); color: var(--text-secondary); }
+.tb-actions .btn-icon { width: 32px; min-width: 32px; min-height: 32px; border-radius: var(--radius-md); color: var(--text-secondary); }
 .tb-home.on, .tb-home.on:hover:not(:disabled) { background: var(--tab-active-bg); color: var(--text); box-shadow: var(--shadow-tab); }
 .tb-tabs { display: flex; align-items: center; gap: var(--space-2); min-width: 0; flex: 0 1 auto; padding-left: var(--space-3); overflow: hidden; }
 .tb-tab {
@@ -63,11 +66,12 @@
 .tb-close:hover:not(:disabled) { background: var(--surface-hover); color: var(--tab-active-text); }
 .tb-add { flex: none; width: 28px; min-width: 28px; min-height: 28px; color: var(--text-muted); border-radius: var(--radius-md); }
 .tb-drag { flex: 1; align-self: stretch; }
-.tb-actions { display: flex; align-items: center; gap: var(--space-1); flex: none; -webkit-app-region: no-drag; }
+.tb-actions { display: flex; align-items: center; gap: var(--space-1); height: var(--tabstrip-h); padding: 0 var(--space-4) 0 var(--space-5); position: sticky; top: 0; z-index: 3; background: var(--sidebar-bg); -webkit-app-region: drag; }
+.tb-actions button { -webkit-app-region: no-drag; }
 .pill-btn { min-height: 32px; padding: 0 var(--space-7); border-radius: var(--radius-pill); background: var(--primary-bg); color: var(--primary-text); border: 0; font-weight: var(--weight-medium); font-size: var(--text-md); }
 .pill-btn:hover:not(:disabled) { background: var(--primary-bg-hover); }
 .pill-btn:active:not(:disabled) { background: var(--primary-bg-hover); }
-.tb-export { margin-left: var(--space-3); }
+.tb-share { margin-left: var(--space-3); }
 
 /* ---------------- Home ---------------- */
 .home { display: flex; justify-content: center; padding: var(--space-9) var(--space-7) 64px; }
@@ -115,13 +119,14 @@
 
 /* ---------------- side panel (left card) ---------------- */
 .left-panel { display: flex; flex-direction: column; height: 100%; min-height: 0; position: relative; }
-.lp-head { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-5) var(--space-5) var(--space-3); flex: none; }
+.lp-head { display: flex; align-items: center; gap: var(--space-3); height: var(--tabstrip-h); padding: 0 var(--space-5) 0 var(--space-7); flex: none; -webkit-app-region: drag; }
+.lp-title { font-size: var(--text-md); font-weight: var(--weight-semibold); }
 .lp-tabs { flex: 0 0 auto; }
 .lp-tabs > button { min-width: 64px; }
 .lp-scroll { flex: 1; min-height: 0; overflow: auto; scrollbar-width: thin; }
 .left-content { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 /* the agent's own header (status dot, new conversation) sits in the tab row, right aligned */
-.left-panel .agent-head { position: absolute; top: -38px; right: var(--space-5); z-index: 2; padding: 0; min-height: 32px; gap: var(--space-3); }
+.left-panel .agent-head { position: absolute; top: calc(-1 * var(--tabstrip-h) + 6px); right: var(--space-5); z-index: 2; padding: 0; min-height: 32px; gap: var(--space-3); }
 .left-panel .agent-title { display: none; }
 .left-panel .agent-head .grow { display: none; }
 
@@ -200,7 +205,7 @@
 
 /* ---------------- inspector (right card) ---------------- */
 .right-panel { min-height: 100%; }
-.rp-title { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-6) var(--space-5) var(--space-4) var(--space-7); position: sticky; top: 0; z-index: 2; background: var(--surface-1); }
+.rp-title { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5) var(--space-4) var(--space-7); background: var(--sidebar-bg); }
 .rp-name { font-size: var(--text-md); font-weight: var(--weight-semibold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rp-sub { font-size: var(--text-sm); color: var(--text-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rp-align { padding: 0 var(--space-6) var(--space-4); border-bottom: 1px solid var(--border-subtle); }
@@ -384,7 +389,7 @@
 .sel-sep { width: 1px; height: 16px; background: var(--border); margin: 0 2px; }
 .app.previewing { grid-template-columns: 1fr; grid-template-rows: 1fr; grid-template-areas: 'center'; padding: 0; gap: 0; }
 .app.previewing > :not(.center):not(.dialog-backdrop):not(.askbar-backdrop) { display: none !important; }
-.app.previewing .center { border-radius: 0; }
+.app.previewing .center { border-radius: 0; margin: 0; }
 .app.previewing .vp-ui, .app.previewing .vp-empty { display: none !important; }
 .preview-exit { position: absolute; top: var(--space-5); right: var(--space-5); z-index: 5; min-height: 28px; padding: 0 var(--space-5); border-radius: var(--radius-pill); background: var(--surface-1); color: var(--text-secondary); font-size: var(--text-sm); opacity: 0.85; }
 :root[data-picking] .viewport { cursor: crosshair; }
@@ -436,3 +441,15 @@
 .left-panel .ag-icon-only { width: 28px; height: 28px; padding: 0; display: inline-grid; place-items: center; }
 .agent-list > * { flex-shrink: 0; }
 .left-panel .ag-result { height: auto; min-height: 0; }
+
+/* ---------------- icon rail ---------------- */
+.rail { grid-area: rail; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4) 0 var(--space-5); background: var(--bg-app); border-right: 1px solid var(--sidebar-line); -webkit-app-region: drag; }
+.rail.mac-app { padding-top: 40px; }
+.rail-btn { position: relative; width: 36px; height: 36px; min-height: 0; padding: 0; border: 0; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); -webkit-app-region: no-drag; }
+.rail-btn:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
+.rail-btn.on, .rail-btn[aria-pressed='true'], .rail-btn.on:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+.rail-sep { width: 20px; height: 1px; background: var(--sidebar-line); margin: var(--space-2) 0; }
+.rail-dot { position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.rail .grow { flex: 1; }
+[data-tooltip-side='right']::after { left: calc(100% + 8px); top: 50%; transform: translate(-2px, -50%); }
+[data-tooltip-side='right']:hover::after, [data-tooltip-side='right']:focus-visible::after { transform: translate(0, -50%); }

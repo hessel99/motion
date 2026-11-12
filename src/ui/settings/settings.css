@@ -86,3 +86,4 @@
 .upd-notes ul { margin: 0 0 var(--space-3); padding-left: 18px; }
 .upd-notes p { margin: 0 0 var(--space-3); }
 .upd-notice .set-card-sub { color: var(--text-secondary); }
+.set-input { width: 240px; min-height: 30px; }

@@ -16,6 +16,7 @@ import { cloneLayers, deleteLayers } from '../core/commands';
 import { Button, Dialog, Kbd } from './ui';
 import { IconProvider, X } from './chrome/icons';
 import { TopBar } from './chrome/TopBar';
+import { Rail } from './chrome/Rail';
 import { Home } from './chrome/Home';
 import { LeftPanel } from './chrome/LeftPanel';
 import { RightPanel } from './chrome/RightPanel';
@@ -47,16 +48,17 @@ export function App() {
   // the panels changed size: the canvases follow on the next frame (their ResizeObservers also
   // fire, this only avoids one frame at the old size)
   useEffect(() => { requestAnimationFrame(() => { vp?.resize(); tl?.resize(); }); }, [ui.leftOpen, ui.view]);
-  // the window: the top bar (window tabs) on the window color, then white cards with a gap between
-  // them: the side panel (agent / assets) beside the canvas, the timeline under both, the
-  // inspector the full height on the right. Home covers the cards; Settings is a modal.
+  // the window: the icon rail, two fixed full-height sidebars (agent / assets on the left, the
+  // inspector on the right) and between them the stage: the file tabs, then the canvas and the
+  // timeline as two inset cards. Home replaces the stage; Settings is a modal.
   const home = ui.view === 'home';
   return (
     <IconProvider>
       <div class={'app' + (ui.leftOpen ? '' : ' no-left') + (home ? ' show-home' : '') + (ui.previewing ? ' previewing' : '')} style={tlHeightStyle()}>
+        <Guard name="Rail"><Rail /></Guard>
         <Guard name="Top bar"><TopBar /></Guard>
         {/* the editor stays mounted under Home: its canvases and WebGL context live for the session */}
-        <aside class="left card" aria-label="Agent and assets" hidden={!ui.leftOpen}><Guard name="Side panel"><LeftPanel /></Guard></aside>
+        <aside class="left sidebar" aria-label="Agent and assets" hidden={!ui.leftOpen}><Guard name="Side panel"><LeftPanel /></Guard></aside>
         <main class="center card" aria-label="Canvas">
           <Viewport />
           {ui.previewing && <button type="button" class="preview-exit" onClick={stopPreview}>Esc · leave preview</button>}
@@ -65,7 +67,7 @@ export function App() {
           <Guard name="Timeline header"><TimelineHeader /></Guard>
           <TimelineHost />
         </section>
-        <aside class="right card" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
+        <aside class="right sidebar" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
         {home && <div class="home-host"><Guard name="Home"><Home /></Guard></div>}
         {ui.settingsOpen && <SettingsModal />}
         <Guard name="Sync"><SyncReview /></Guard>

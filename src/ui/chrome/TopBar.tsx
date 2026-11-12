@@ -7,23 +7,41 @@
 
 import { useRef, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
-import { loadDemo, loadStress, newProject, openExport, openFileDialog, saveProject } from '../../app/actions';
+import { loadDemo, loadStress, newProject, openFileDialog, saveProject } from '../../app/actions';
+import { openShare } from './Share';
 import { activeDoc, closeDoc, docName, documents, isDocDirty, moveDoc, switchTo, type Doc } from '../../app/documents';
 import { setProjectName } from '../../core/commands';
 import { useChannels } from '../hooks';
 import { menuFrom, showContextMenu, type MenuItem } from '../menu';
 import { Button } from '../ui';
-import { Ellipsis, File, House, PanelLeft, Plus, Redo2, Undo2, X } from './icons';
-import { openSettings, setUi, showHome, ui } from './ui-state';
+import { Ellipsis, File, Plus, Redo2, Undo2, X } from './icons';
+import { openSettings, setUi, ui } from './ui-state';
 
 const native = (globalThis as any).motionNative as { platform?: string } | undefined;
 const MAC_APP = native?.platform === 'darwin';
 
+/** the open files as tabs, at the top of the middle area (between the two sidebars) */
 export function TopBar() {
+  useChannels(['history', 'doc'], ['ui', 'docs']);
+  const home = ui.view === 'home';
+  const docs = documents();
+  return (
+    <header class={'topbar' + (MAC_APP && !ui.leftOpen ? ' mac-app' : '')}>
+      {MAC_APP && !ui.leftOpen && <div class="tb-traffic" aria-hidden="true" />}
+      <div class="tb-tabs" role="tablist" aria-label="Open files">
+        {docs.map(d => <DocTab key={d.id} doc={d} active={!home && d === activeDoc()} />)}
+        <Button variant="ghost" icon size="sm" class="tb-add" tip="New file (⌘N)" onClick={() => newProject()}><Plus /></Button>
+      </div>
+      <div class="tb-drag" />
+    </header>
+  );
+}
+
+/** the inspector's top row (top right of the window): undo / redo, the app menu, Share */
+export function TopActions() {
   useChannels(['history', 'doc'], ['ui', 'docs']);
   const s = editor.store;
   const home = ui.view === 'home';
-  const docs = documents();
   const history = (e: MouseEvent) => {
     e.preventDefault();
     const labels = s.historyLabels;
@@ -32,26 +50,15 @@ export function TopBar() {
   };
   const editing = !home && !!activeDoc();
   return (
-    <header class={'topbar' + (MAC_APP ? ' mac-app' : '')}>
-      {MAC_APP && <div class="tb-traffic" aria-hidden="true" />}
-      <div class="tb-lead">
-        <Button variant="ghost" icon class={'tb-home' + (home ? ' on' : '')} tip="Home" aria-pressed={home} onClick={showHome}><House /></Button>
-        <Button variant="ghost" icon tip={ui.leftOpen ? 'Hide side panel (⌘I)' : 'Show side panel (⌘I)'} disabled={home} onClick={() => setUi({ leftOpen: !ui.leftOpen })}><PanelLeft /></Button>
-      </div>
-      <div class="tb-tabs" role="tablist" aria-label="Open files">
-        {docs.map(d => <DocTab key={d.id} doc={d} active={!home && d === activeDoc()} />)}
-        <Button variant="ghost" icon size="sm" class="tb-add" tip="New file (⌘N)" onClick={() => newProject()}><Plus /></Button>
-      </div>
-      <div class="tb-drag" />
-      <div class="tb-actions">
+    <div class="tb-actions">
         {editing && <>
           <Button variant="ghost" icon disabled={!s.canUndo} aria-label="Undo" data-tooltip={`Undo${s.undoLabel ? ' ' + s.undoLabel : ''} (⌘Z)`} onClick={() => s.undo()} onContextMenu={history as any}><Undo2 /></Button>
           <Button variant="ghost" icon disabled={!s.canRedo} tip="Redo (⇧⌘Z)" onClick={() => s.redo()}><Redo2 /></Button>
         </>}
         <Button variant="ghost" icon tip="Menu" aria-haspopup="menu" class="tb-menu" onClick={e => menuFrom(e.currentTarget as Element, appMenuItems(), { align: 'right' })}><Ellipsis /></Button>
-        <button type="button" class="pill-btn tb-export" disabled={!editing} title="Export video, GIF, image, Lottie or After Effects (⌘E)" onClick={openExport}>Export</button>
-      </div>
-    </header>
+        <span class="grow" />
+        <button type="button" class="pill-btn tb-share" disabled={!editing} aria-haspopup="menu" title="Share a preview or export a file (⌘E exports)" onClick={e => openShare(e.currentTarget as HTMLElement)}>Share</button>
+    </div>
   );
 }
 
