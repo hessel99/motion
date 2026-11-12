@@ -3,7 +3,7 @@
 import { editor } from './editor';
 import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
-  setCompSettings, toggleAnimated, parseKeyId, precompose,
+  setCompSettings, toggleAnimated, parseKeyId, precompose, addMarker,
 } from '../core/commands';
 import { createProject, uid, type Asset, type Layer, type Project } from '../core/model';
 import { boundsOf } from '../agent/tools';
@@ -578,6 +578,7 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (k === '.' || k === 'pagedown') return run(() => editor.stepFrames(e.shiftKey ? 10 : 1));
     if (k === 'enter' && s.selection.length === 1 && s.layer(s.selection[0])?.type === 'text') return run(() => hooks.editText(s.selection[0]));
     if (e.key === 'F9') return run(() => setEase(s, [...s.keySelection], 'Easy Ease'));
+    if (k === 'm' && !mod && !e.shiftKey && !e.altKey) return run(() => addMarker(s, s.time));
     if (k === 'j' || k === 'k') {
       // jump to previous / next keyframe of selection (after effects)
       return run(() => {
@@ -586,6 +587,7 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
           const l = s.layer(id);
           if (l) for (const p of Object.values(l.props)) p?.kf?.forEach(f => times.add(f.t));
         }
+        for (const m of s.comp.markers ?? []) times.add(m.t);
         const sorted = [...times].sort((a, b) => a - b);
         const t = k === 'j' ? [...sorted].reverse().find(x => x < s.time - 1e-6) : sorted.find(x => x > s.time + 1e-6);
         if (t !== undefined) s.setTime(t);

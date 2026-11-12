@@ -217,6 +217,8 @@ try {
     var bg = main.layers.addSolid(DATA.bg, 'Background', DATA.w, DATA.h, 1);
     bg.moveToEnd();
   }
+  var mks = DATA.markers || [];
+  for (var mi = 0; mi < mks.length; mi++) { try { main.markerProperty.setValueAtTime(mks[mi].tm / fr, new MarkerValue(mks[mi].cm || '')); } catch (e3) {} }
   main.openInViewer();
 } catch (err) {
   alert('Motion import failed: ' + err.toString() + (err.line ? ' (line ' + err.line + ')' : ''));

@@ -293,3 +293,28 @@ describe('path morphing', () => {
     expect(interpPathKeys(kf, [lin, lin], 2)[0].cmds[1]).toEqual(['L', 200, 0]);
   });
 });
+
+describe('markers', () => {
+  it('add (frame snapped, deduped), move with merge, rename, delete, undo', async () => {
+    const { addMarker, updateMarker, deleteMarker } = await import('../src/core/commands');
+    const { projectToLottie } = await import('../src/export/lottie');
+    const s = new Store();
+    const fps = s.comp.fps;
+    const a = addMarker(s, 1.004);
+    expect(a.t).toBeCloseTo(Math.round(1.004 * fps) / fps, 9);
+    expect(addMarker(s, a.t).id).toBe(a.id); // same frame: no duplicate
+    const b = addMarker(s, 0.5, 'start');
+    expect(s.comp.markers!.map(m => m.id)).toEqual([b.id, a.id]); // sorted
+    updateMarker(s, a.id, { t: 0.2 }, 'drag');
+    updateMarker(s, a.id, { t: 0.3 }, 'drag');
+    expect(s.comp.markers!.map(m => m.id)).toEqual([a.id, b.id]);
+    s.undo(); // both moves are one step
+    expect(s.comp.markers!.find(m => m.id === a.id)!.t).toBeCloseTo(a.t, 9);
+    updateMarker(s, a.id, { label: 'hit' });
+    expect(projectToLottie(s.project).markers).toEqual([{ tm: 30, cm: 'start', dr: 0 }, { tm: Math.round(a.t * fps * 1e6) / 1e6, cm: 'hit', dr: 0 }]);
+    deleteMarker(s, b.id);
+    expect(s.comp.markers!.length).toBe(1);
+    s.undo();
+    expect(s.comp.markers!.length).toBe(2);
+  });
+});

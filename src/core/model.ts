@@ -179,7 +179,11 @@ export interface Composition {
   duration: number;
   background: [number, number, number, number];
   root: string[]; // top-level layers, first = bottom
+  /** timeline markers (comp time, sorted) */
+  markers?: Marker[];
 }
+
+export interface Marker { id: string; t: number; label: string }
 
 export interface Asset {
   id: string;

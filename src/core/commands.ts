@@ -4,7 +4,7 @@ import { evalProp } from './evaluate';
 import { EASE_PRESETS } from './easing';
 import {
   createComp, createLayer, defaultEase, PROP_DEFS, uid,
-  type Keyframe, type Layer, type LayerType, type Prop, type PropKey, type Interp,
+  type Keyframe, type Layer, type LayerType, type Marker, type Prop, type PropKey, type Interp,
 } from './model';
 import type { Store, Tx } from './store';
 
@@ -535,6 +535,35 @@ export function setCompSettings(store: Store, patch: Partial<{ width: number; he
 
 export function setProjectName(store: Store, name: string) {
   store.transact('Rename file', tx => { tx.set(store.project, 'name', name); tx.change.meta = true; });
+}
+
+// ---------------- markers ----------------
+
+const sortMarkers = (m: Marker[]) => m.sort((a, b) => a.t - b.t);
+
+/** adds a marker at time t (snapped to frames); a marker already on that frame is kept */
+export function addMarker(store: Store, t: number, label = ''): Marker {
+  const c = store.comp, fps = c.fps;
+  const tt = Math.max(0, Math.min(c.duration, Math.round(t * fps) / fps));
+  const existing = c.markers?.find(m => Math.abs(m.t - tt) < 0.5 / fps);
+  if (existing) return existing;
+  const m: Marker = { id: uid('m'), t: tt, label };
+  store.transact('Add marker', tx => { tx.set(c, 'markers', sortMarkers([...(c.markers ?? []), m])); tx.comp(); });
+  return m;
+}
+
+export function updateMarker(store: Store, id: string, patch: Partial<Omit<Marker, 'id'>>, mergeKey?: string) {
+  const c = store.comp;
+  const ms = c.markers ?? [];
+  if (!ms.some(m => m.id === id)) return;
+  const next = sortMarkers(ms.map(m => (m.id === id ? { ...m, ...patch, t: patch.t !== undefined ? Math.max(0, Math.min(c.duration, patch.t)) : m.t } : m)));
+  store.transact(patch.label !== undefined ? 'Rename marker' : 'Move marker', tx => { tx.set(c, 'markers', next); tx.comp(); }, mergeKey);
+}
+
+export function deleteMarker(store: Store, id: string) {
+  const c = store.comp;
+  if (!c.markers?.some(m => m.id === id)) return;
+  store.transact('Delete marker', tx => { tx.set(c, 'markers', c.markers!.filter(m => m.id !== id)); tx.comp(); });
 }
 
 // ---------------- compositions ----------------

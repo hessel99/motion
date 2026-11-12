@@ -227,7 +227,7 @@ function startTextEdit(id: string) {
 }
 
 const SHORTCUTS: [string, string][] = [
-  ['Space', 'Play / pause'], [', / .', 'Previous / next frame (shift: 10)'], ['J / K', 'Previous / next keyframe'], ['Home / End', 'Start / end'],
+  ['Space', 'Play / pause'], [', / .', 'Previous / next frame (shift: 10)'], ['J / K', 'Previous / next keyframe or marker'], ['M', 'Add marker at playhead (drag to move, double-click to name)'], ['Home / End', 'Start / end'],
   ['V R O T P H', 'Move, rectangle, ellipse, text, pen, hand'], ['⌘Z / ⇧⌘Z', 'Undo / redo'], ['⌘C ⌘V ⌘X', 'Copy, paste (also from Figma), cut — layers or keyframes'],
   ['⌘D', 'Duplicate'], ['Alt-drag', 'Duplicate while moving'], ['⌘G / ⇧⌘G', 'Group / ungroup'], ['⇧⌘C', 'Pre-compose'],
   ['⌘[ / ⌘]', 'Send backward / bring forward (alt: to back / front)'], ['Arrows', 'Nudge (shift: 10px)'], ['⇧P ⇧S ⇧A', 'Animate position / scale / anchor'],

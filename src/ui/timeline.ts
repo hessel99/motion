@@ -12,7 +12,7 @@ import { showContextMenu, type MenuItem } from './menu';
 import { GraphView } from './graph';
 import { audioDuration, audioFailed, audioPeaks } from '../audio/engine';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
-import { setEase, setInterp, setSpring } from '../core/commands';
+import { setEase, setInterp, setSpring, updateMarker, deleteMarker } from '../core/commands';
 
 const HEADER_H = 28;
 const ROW_H = 24;
@@ -37,6 +37,7 @@ type Drag =
   | { kind: 'vscroll'; sy: number; s0: number }
   | { kind: 'hscroll'; sx: number; s0: number }
   | { kind: 'compEnd' }
+  | { kind: 'marker'; id: string; sx: number; moved: boolean }
   | { kind: 'bar'; id: string; sx: number; in0: number; out0: number; mode: 'in' | 'out' }
   | { kind: 'shift'; sx: number; moved: boolean; orig: Map<string, { inP: number; outP: number; start: number; kf: Partial<Record<PropKey, Keyframe[]>> }> };
 
@@ -359,6 +360,16 @@ export class Timeline {
         g.fillRect(bx, HEADER_H, Math.max(0, this.w - bx), this.h);
       }
     }
+    // markers: a small flag in the ruler, a faint line through the rows, label next to it
+    for (const m of comp.markers ?? []) {
+      const mx = Math.round(this.tToX(m.t)) + 0.5;
+      if (mx < this.leftW - 2 || mx > this.w + 2) continue;
+      g.fillStyle = 'rgba(255,176,64,0.18)';
+      g.fillRect(mx - 0.5, HEADER_H, 1, this.h);
+      g.fillStyle = '#ffb040';
+      g.beginPath(); g.moveTo(mx - 4, HEADER_H - 13); g.lineTo(mx + 4, HEADER_H - 13); g.lineTo(mx + 4, HEADER_H - 6); g.lineTo(mx, HEADER_H - 2); g.lineTo(mx - 4, HEADER_H - 6); g.closePath(); g.fill();
+      if (m.label) { g.font = '10px system-ui, sans-serif'; g.fillText(m.label, mx + 6, HEADER_H - 7); }
+    }
     const endX = this.tToX(comp.duration);
     if (endX > this.leftW && endX < this.w) {
       g.fillStyle = '#4c8dff';
@@ -581,6 +592,8 @@ export class Timeline {
     }
     const hs = this.hScroll();
     if (hs && y > this.h - 10 && x > this.leftW) { this.drag = { kind: 'hscroll', sx: x, s0: this.scrollT }; return; }
+    const mk = this.markerAt(x, y);
+    if (mk) { this.drag = { kind: 'marker', id: mk.id, sx: x, moved: false }; st.beginGesture('marker'); return; }
     if (y < HEADER_H && Math.abs(x - this.tToX(st.comp.duration)) < 5) { this.drag = { kind: 'compEnd' }; st.beginGesture('duration'); return; }
     if (y < HEADER_H && x < this.leftW && x >= this.leftW - 150 && x < this.leftW - 6) {
       const i = Math.floor((x - (this.leftW - 150)) / 48);
@@ -726,6 +739,12 @@ export class Timeline {
       if (hs) { this.scrollT = Math.max(0, d.s0 + (x - d.sx) * ((hs.total - hs.visible) / Math.max(1, (this.w - this.leftW) - hs.w))); this.baseDirty = true; }
       return;
     }
+    if (d.kind === 'marker') {
+      if (!d.moved && Math.abs(x - d.sx) < 3) return;
+      d.moved = true;
+      updateMarker(st, d.id, { t: st.snapTime(this.xToT(x)) });
+      return;
+    }
     if (d.kind === 'compEnd') {
       const dur = Math.max(1 / st.comp.fps, st.snapTime(this.xToT(x)));
       if (dur !== st.comp.duration) st.transact('Composition duration', tx => { tx.set(st.comp, 'duration', dur); tx.comp(); });
@@ -803,6 +822,7 @@ export class Timeline {
     const st = this.ed.store;
     if (d?.kind === 'graph') this.graph.up();
     st.endGesture();
+    if (d?.kind === 'marker' && !d.moved) { const m = st.comp.markers?.find(q => q.id === d.id); if (m) st.setTime(m.t); }
     if (d?.kind === 'rows' && d.moved) {
       const tgt = this.dropTarget(d.y);
       if (tgt) moveLayers(st, d.ids, tgt.parent, tgt.index);
@@ -837,6 +857,8 @@ export class Timeline {
 
   private dbl(e: MouseEvent) {
     const [x, y] = this.local(e);
+    const mk = this.markerAt(x, y);
+    if (mk) { this.renameMarker(mk.id); return; }
     if (y < HEADER_H && x > this.leftW) {
       // double click on the work area bar clears it, elsewhere fits the time
       if (this.ed.store.workArea && y > HEADER_H - 8) { this.ed.store.workArea = null; this.ed.store.emit('workarea'); return; }
@@ -853,6 +875,42 @@ export class Timeline {
       const st = this.ed.store;
       addKeyframe(st, [r.id], r.prop!, st.snapTime(this.xToT(x)));
     }
+  }
+
+  /** marker flag under the pointer (ruler only) */
+  private markerAt(x: number, y: number) {
+    if (y >= HEADER_H || x < this.leftW) return null;
+    let best: { id: string; t: number } | null = null, bd = 6;
+    for (const m of this.ed.store.comp.markers ?? []) {
+      const d = Math.abs(this.tToX(m.t) - x);
+      if (d < bd) { bd = d; best = m; }
+    }
+    return best;
+  }
+
+  private renameMarker(id: string) {
+    const st = this.ed.store;
+    const m = st.comp.markers?.find(q => q.id === id);
+    if (!m) return;
+    this.input?.remove();
+    const inp = document.createElement('input');
+    inp.className = 'tl-rename';
+    inp.value = m.label;
+    inp.placeholder = 'Marker name';
+    const x = Math.min(this.w - 160, Math.max(this.leftW, this.tToX(m.t) + 6));
+    Object.assign(inp.style, { left: x + 'px', top: '3px', width: '150px', height: HEADER_H - 8 + 'px' });
+    this.host.appendChild(inp);
+    inp.focus();
+    inp.select();
+    const done = (ok: boolean) => {
+      if (!this.input) return;
+      this.input = null;
+      if (ok && inp.value !== m.label) updateMarker(st, id, { label: inp.value.trim() });
+      inp.remove();
+    };
+    inp.addEventListener('keydown', ev => { ev.stopPropagation(); if (ev.key === 'Enter') done(true); if (ev.key === 'Escape') done(false); });
+    inp.addEventListener('blur', () => done(true));
+    this.input = inp;
   }
 
   private startRename(r: Row, i: number) {
@@ -901,6 +959,14 @@ export class Timeline {
     const k = this.keyAt(x, y);
     if (k && !st.keySelection.has(k)) { st.keySelection = new Set([k]); st.emit('keys'); }
     const items: MenuItem[] = [];
+    const mk = this.markerAt(x, y);
+    if (mk) {
+      showContextMenu(e.clientX, e.clientY, [
+        { label: 'Rename marker', action: () => this.renameMarker(mk.id) },
+        { label: 'Delete marker', action: () => deleteMarker(st, mk.id) },
+      ]);
+      return;
+    }
     if (st.keySelection.size) {
       const keys = [...st.keySelection];
       items.push({ label: 'Easy Ease', shortcut: 'F9', action: () => setEase(st, keys, 'Easy Ease') });
