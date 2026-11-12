@@ -293,8 +293,12 @@ The look is token driven, so a visual pass should only need to edit `tokens.css`
 
 ## Known limitations / next
 
-- Only the nearest clip ancestor clips (no nested clip intersection). No effects yet (on purpose).
-- **Design pass** (visual polish of all panels) is still to do. The current UI is functional on purpose.
-- Lottie export of text for lottie-web's *canvas* renderer (it needs glyph outlines).
-- AE: effects, expressions beyond the safe subset, 3D, cameras, luma/inverted mattes.
+- **Effects: none yet, on purpose.** The renderer is prepared (effect-pipeline design + motion blur / gaussian blur prototypes, see "Architecture decisions"); effects get added one by one after v0.5, in the order of `docs/research-2026-11.md` (drop shadow, blur, motion blur, glow, …).
+- **Design pass** still to do: the design system (`src/ui/tokens.css`, `?styleguide`) is ready to be re-themed by changing tokens only, once the visual direction is set.
+- Only the nearest clip ancestor clips (no nested clip intersection).
+- Lottie text glyphs only for the bundled Inter; other fonts export by name.
+- AE: effects, expressions beyond the safe subset, 3D, cameras, luma mattes (as alpha), mask feather; the .jsx export uses the first stop of gradients and skips audio.
 - Audio: no scrubbing sound, no fades/volume keyframes yet, no audio in Lottie/GIF.
+- Perform (gesture recording) and the feel pad were only tested with automated mouse input: needs a real-hand pass.
+- Performance numbers come from a container with a software GPU: CPU budgets are measured, GPU costs are estimated. Re-run `npm run stress` and `scripts/cpu-bench.mjs` on real hardware to get a baseline.
+- Known bottlenecks (stress lab): very large scenes still evaluate every animated layer each frame (GPU-side evaluation is the long-term lever); structural edits recompile the whole scene; precomp instances are evaluated per instance.
