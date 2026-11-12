@@ -30,4 +30,6 @@ bench/results/figma-fidelity/
 bench/results/figma-fidelity-*/
 bench/results/svg-fidelity/
 fixtures/figma-paste/
+# export parity harness: decoded intermediates (report.html, results and images are committed)
+bench/results/export-parity/tmp/
 tests/layout-baselines/.out/

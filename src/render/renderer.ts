@@ -403,6 +403,9 @@ export class Renderer {
   cssW = 1;
   cssH = 1;
   editorBg: [number, number, number] = [0.1, 0.1, 0.11];
+  /** exports with alpha: clear to transparent (outside the comp and under a see-through comp
+   *  background) instead of compositing over editorBg. output stays premultiplied */
+  transparentBg = false;
   clipToComp = true;
   /** exports/snapshots: rasterize everything synchronously (no workers, no frame budget) */
   syncRaster = false;
@@ -1275,7 +1278,9 @@ export class Renderer {
     if (it.dyn) return this.resolveDyn(i, scale, budgetEnd);
     // fast path (no allocation): current raster is sharp enough and not wastefully large.
     // the 1x..2.83x window is hysteresis so animated scale doesn't thrash re-rasters.
-    if (it.entry && !it.entry.dead && it.rasterScale >= scale * 0.999 && it.rasterScale <= scale * 2.83) {
+    // exports (syncRaster) always use the exact bucket: the pixels of a frame must not depend on
+    // which frames (or zoom levels) were rendered before it
+    if (it.entry && !it.entry.dead && it.rasterScale >= scale * 0.999 && it.rasterScale <= scale * 2.83 && (!this.syncRaster || it.rasterScale === this.bucketOf(scale))) {
       it.entry.lastUsed = this.atlas.frame;
       return true;
     }
@@ -1590,7 +1595,7 @@ export class Renderer {
   private resolveDyn(i: number, scale: number, budgetEnd: number): boolean {
     const it = this.items[i], d = it.dyn!, l = it.layer;
     const alive = !!it.entry && !it.entry.dead;
-    if (!d.need && alive && it.rasterScale >= scale * 0.999 && it.rasterScale <= scale * 2.83) { it.entry!.lastUsed = this.atlas.frame; return true; }
+    if (!d.need && alive && it.rasterScale >= scale * 0.999 && it.rasterScale <= scale * 2.83 && (!this.syncRaster || it.rasterScale === this.bucketOf(scale))) { it.entry!.lastUsed = this.atlas.frame; return true; }
     // over budget: keep showing the last drawn frame, draw for real on the next render
     // (a shape with nothing to show is always drawn: layers never disappear)
     // (canvas drawing is deferred until the upload, so count what this frame drew at last frame's cost)
@@ -2150,7 +2155,8 @@ export class Renderer {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.target?.fb ?? null);
     gl.viewport(0, 0, cw, ch);
     gl.disable(gl.SCISSOR_TEST);
-    gl.clearColor(this.editorBg[0], this.editorBg[1], this.editorBg[2], 1);
+    const tb = this.transparentBg, eb = this.editorBg, ea = tb ? 0 : 1;
+    gl.clearColor(eb[0] * ea, eb[1] * ea, eb[2] * ea, ea);
     gl.clear(gl.COLOR_BUFFER_BIT);
     {
       const x0 = this.panX * this.dpr, y0 = this.panY * this.dpr;
@@ -2161,7 +2167,9 @@ export class Renderer {
       gl.scissor(sx, sy, sw0, sh0);
       this.baseScissor = this.clipToComp ? [sx, sy, sw0, sh0] : null;
       const bg = comp.background;
-      gl.clearColor(bg[0] * bg[3] + this.editorBg[0] * (1 - bg[3]), bg[1] * bg[3] + this.editorBg[1] * (1 - bg[3]), bg[2] * bg[3] + this.editorBg[2] * (1 - bg[3]), 1);
+      // premultiplied comp background over the editor background (or over nothing: transparentBg)
+      const k = (1 - bg[3]) * ea;
+      gl.clearColor(bg[0] * bg[3] + eb[0] * k, bg[1] * bg[3] + eb[1] * k, bg[2] * bg[3] + eb[2] * k, bg[3] + (1 - bg[3]) * ea);
       gl.clear(gl.COLOR_BUFFER_BIT);
       if (!this.clipToComp) gl.disable(gl.SCISSOR_TEST);
     }
@@ -2393,7 +2401,7 @@ export class Renderer {
     const lt = this.itemT(i, t);
     for (const u of units) {
       // raster per unit (cached in the atlas like any other raster)
-      if (!u.entry || u.entry.dead || u.scale < scale * 0.999 || u.scale > scale * 2.83) {
+      if (!u.entry || u.entry.dead || u.scale < scale * 0.999 || u.scale > scale * 2.83 || (this.syncRaster && u.scale !== bucket)) {
         const key = `${it.rasterBase}#${ta.by}:${u.unit.index}:${u.unit.text}@${bucket}`;
         let e = this.atlas.get(key);
         let r = this.rasterMeta.get(key);
@@ -2866,6 +2874,31 @@ export class Renderer {
     return out;
   }
 
+  /** release workers and the gl context (a renderer made for one job, e.g. export bakes) */
+  dispose() {
+    for (const w of this.workers) w.terminate();
+    this.workers = [];
+    this.shaders.dispose();
+    try { this.gl.getExtension('WEBGL_lose_context')?.loseContext(); } catch { /* */ }
+  }
+
+  /** evaluated local transform / style of a layer at comp time t, exactly as rendered (keyframes,
+   *  springs, expressions with their seeds and index). exports bake expressions with it. the first
+   *  instance of the layer (layers inside precomps can appear several times). null = not in the comp */
+  sampleLayer(id: string, t: number): { anchor: number[]; position: number[]; scale: number[]; rotation: number; opacity: number; size: number[]; radius: number[]; fill: number[]; stroke: number[]; strokeWidth: number } | null {
+    if (this.needsCompile || this.dirtyLayers.size) this.render(this.lastTime < 0 ? t : this.lastTime);
+    const i = this.index.get(id);
+    if (i === undefined) return null;
+    this.evaluate(t, true);
+    this.evalTime = NaN; // the next frame re-evaluates its own time
+    const X = this.xf, S = this.style, o8 = i * 8, os = i * ST;
+    const sl = (A: Float64Array, o: number, n: number) => Array.from(A.subarray(o, o + n));
+    return {
+      anchor: sl(X, o8, 2), position: sl(X, o8 + 2, 2), scale: sl(X, o8 + 4, 2), rotation: X[o8 + 6] * 180 / Math.PI, opacity: this.lopa[i] * 100,
+      size: sl(S, os, 2), radius: sl(S, os + 2, 4), fill: sl(S, os + 6, 4), stroke: sl(S, os + 10, 4), strokeWidth: S[os + 14],
+    };
+  }
+
   /** read back current frame as png data url (for agent screenshots / thumbnails) */
   snapshot(t: number, maxSize = 1024): string {
     const comp = this.store.comp;
@@ -2875,7 +2908,8 @@ export class Renderer {
     this.setView(s, 0, 0);
     const prevSync = this.syncRaster;
     this.syncRaster = true;
-    try { this.render(t); } finally { this.syncRaster = prevSync; }
+    // until nothing is pending (first-time rasters / upgrades): one render can be incomplete
+    try { this.render(t); for (let k = 0; k < 20 && this.dirty; k++) this.render(t); } finally { this.syncRaster = prevSync; }
     const url = this.canvas.toDataURL('image/png');
     this.resize(prev.w, prev.h, prev.dpr);
     this.setView(prev.zoom, prev.panX, prev.panY);

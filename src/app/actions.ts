@@ -125,7 +125,8 @@ export function exportFileName(ext: string, opts: { frame?: number; project?: Pr
 const EXPORT_TYPES: Record<string, { label: string; mime: string }> = {
   mp4: { label: 'MP4 video', mime: 'video/mp4' }, webm: { label: 'WebM video', mime: 'video/webm' },
   gif: { label: 'GIF', mime: 'image/gif' }, png: { label: 'PNG image', mime: 'image/png' },
-  json: { label: 'Lottie JSON', mime: 'application/json' }, html: { label: 'Preview page', mime: 'text/html' },
+  json: { label: 'Lottie JSON', mime: 'application/json' },
+  zip: { label: 'PNG sequence (zip)', mime: 'application/zip' }, html: { label: 'Preview page', mime: 'text/html' },
 };
 async function toBase64(blob: Blob): Promise<string> {
   const url = await new Promise<string>((res, rej) => {
@@ -390,22 +391,49 @@ export async function exportGifFile(opts: import('../export/gif').GifOptions = {
   } finally { el.remove(); setBusy('export-gif', false); }
 }
 
-export async function exportLottie() {
-  const m = await mod('../export/lottie.ts');
-  if (!m) { toast('Lottie export not available yet', 'error'); return; }
-  const lot = m.projectToLottie(st().project);
-  // text as glyph outlines so every lottie player draws it without the font (bundled Inter only)
-  try { const g = await import('../export/lottie-glyphs'); await g.addGlyphs(lot); } catch (e) { console.warn('glyphs skipped', e); }
-  await saveExportFile(exportFileName('json'), JSON.stringify(lot), 'Lottie exported');
+/** lottie export. `ignore`: preflight issue ids the user chose to export natively instead of baking */
+export async function exportLottie(ignore: string[] = []) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = 'Exporting Lottie…';
+  document.body.appendChild(el);
+  editor.pause();
+  editor.stop();
+  try {
+    const { exportLottieFull } = await import('../export/lottie-bake');
+    const { lottie } = await exportLottieFull(st().project, ignore);
+    await saveExportFile(exportFileName('json'), JSON.stringify(lottie), 'Lottie exported');
+  } catch (e: any) {
+    console.error(e);
+    toast('Lottie export failed: ' + (e?.message ?? e), 'error');
+  } finally { el.remove(); editor.resume(); }
 }
 
-/** the current frame at full composition size */
+/** the current frame at full composition size (times scale), with transparency */
 export async function exportFramePng(scale = 1) {
   const s = st(), c = s.comp;
-  const url = editor.renderer.snapshot(s.time, Math.round(Math.max(c.width, c.height) * scale));
-  const blob = await (await fetch(url)).blob();
+  const { framePng } = await import('../export/png');
+  const blob = await framePng(s.time, scale);
   const frame = Math.round(s.time * c.fps);
   await saveExportFile(exportFileName('png', { frame }), blob, 'Frame exported');
+}
+
+/** every frame as a numbered PNG, in a zip */
+export async function exportPngSequence(scale = 1) {
+  const s = st();
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = 'Exporting PNG sequence…';
+  setBusy('export-png', true);
+  document.body.appendChild(el);
+  try {
+    const { pngSequence } = await import('../export/png');
+    const file = exportFileName('zip');
+    const res = await pngSequence({ scale, name: file.replace(/\.zip$/, '') }, (d, n) => { el.textContent = `Exporting PNG sequence… ${Math.round((d / n) * 100)}%`; });
+    await saveExportFile(file, res.blob, `PNG sequence exported (${res.files} frames)`);
+  } catch (e: any) {
+    toast('PNG export failed: ' + (e?.message ?? e), 'error');
+  } finally { el.remove(); setBusy('export-png', false); }
 }
 
 // ---------------- inserting layers (paste / import) ----------------

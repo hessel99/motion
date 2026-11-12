@@ -1,69 +1,100 @@
-// animated GIF export (gifenc). frames are read straight from the webgl canvas; one global
-// palette (built from sampled frames) avoids color flicker between frames.
+// animated GIF export (gifenc). frames are the editor's own (FrameGrabber), at the same frame
+// times as the video export. timing: GIF delays are whole centiseconds, so each frame's delay is
+// the difference of the rounded start times (3, 3, 4 cs at 30 fps): frames never drift and the
+// loop lasts exactly the comp. colours: one global palette from frames sampled across the comp;
+// a frame the global palette can't represent well gets its own local palette (no colour drift on
+// late, differently coloured frames). transparent comps keep 1-bit transparency (a GIF limit:
+// semi-transparent pixels become opaque from 50% alpha up, clear below).
 
 import { GIFEncoder, quantize, applyPalette } from 'gifenc';
 import { editor } from '../app/editor';
+import { FrameGrabber, frameTime, unpremultiply } from './frames';
+import { prepareExport } from './prepare';
+import { gifDelayCs, gifFrameCount, gifSize } from './gif-timing';
 
 /** per-frame delays in centiseconds (what GIF stores) for `n` frames at `fps`: the rounding is
  *  spread over the frames (30 fps: 3,4,3,3,4,3…) so frame i starts at round(i * 100 / fps) and the
  *  whole loop lasts exactly n / fps (MD-43: a flat round(100 / fps) made 30 fps 10% too fast) */
 export function gifDelaysCs(n: number, fps: number): number[] {
-  const out: number[] = [];
-  for (let i = 0; i < n; i++) out.push(Math.round(((i + 1) * 100) / fps) - Math.round((i * 100) / fps));
-  return out;
+  return Array.from({ length: n }, (_, i) => gifDelayCs(i, fps));
 }
 
 export interface GifOptions { maxSize?: number; fps?: number; start?: number; end?: number }
 
+export { gifFrameCount, gifDelayCs, gifSize };
+
+/** mean squared rgb error of a frame against a palette (sampled) */
+function paletteError(rgba: Uint8Array, palette: number[][], idx: Uint8Array) {
+  let e = 0, n = 0;
+  for (let p = 0; p < idx.length; p += 7) {
+    const c = palette[idx[p]], o = p * 4;
+    if (rgba[o + 3] < 128) continue;
+    e += (c[0] - rgba[o]) ** 2 + (c[1] - rgba[o + 1]) ** 2 + (c[2] - rgba[o + 2]) ** 2;
+    n++;
+  }
+  return n ? e / n : 0;
+}
+
+/** transparent comps: the clear colour at index 0 (the background index decoders clear to on
+ *  disposal), added when the palette has none */
+function clearFirst(pal: number[][], alpha: boolean): number[][] {
+  if (!alpha) return pal;
+  const i = pal.findIndex(c => c[3] === 0);
+  const rest = pal.filter((_, k) => k !== i);
+  return [[0, 0, 0, 0], ...rest].slice(0, 256);
+}
+
 export async function exportGif(opts: GifOptions = {}, onProgress?: (done: number, total: number) => void, signal?: AbortSignal): Promise<Blob> {
-  const r = editor.renderer, store = editor.store, comp = store.comp;
-  const maxSize = opts.maxSize ?? 640;
-  const scale = Math.min(1, maxSize / Math.max(comp.width, comp.height));
-  const w = Math.max(2, Math.round(comp.width * scale)), h = Math.max(2, Math.round(comp.height * scale));
+  const store = editor.store, comp = store.comp;
+  const { width: w, height: h } = gifSize(comp.width, comp.height, opts.maxSize ?? 640);
+  // browsers stretch delays below 2 cs to 10 cs: 50 fps is the fastest a GIF can really play
   const fps = Math.min(opts.fps ?? Math.min(comp.fps, 30), 50);
-  const t0 = opts.start ?? 0, t1 = opts.end ?? comp.duration;
-  const total = Math.max(1, Math.round((t1 - t0) * fps));
-  const gl = r.gl;
-  const prev = { zoom: r.zoom, panX: r.panX, panY: r.panY, w: r.cssW, h: r.cssH, dpr: r.dpr };
+  const t0 = Math.max(0, opts.start ?? 0), t1 = Math.min(comp.duration, opts.end ?? comp.duration);
+  const total = gifFrameCount(t1 - t0, fps);
+  const alpha = comp.background[3] < 1;
+  const format = alpha ? 'rgba4444' : 'rgb565';
   editor.pause();
   editor.stop();
-  editor.renderer.syncRaster = true; // every frame complete and sharp (no async rasters)
-  r.resize(w, h, 1);
-  r.setView(scale, 0, 0);
-  const px = new Uint8Array(w * h * 4);
+  await prepareExport();
+  const g = new FrameGrabber(editor.renderer, comp, { width: w, height: h });
+  g.begin();
   const read = async (t: number) => {
-    // let async rasters settle so early frames are complete
-    for (let k = 0; k < 30; k++) { r.render(t); if (!r.dirty) break; await new Promise(z => setTimeout(z, 16)); }
-    await r.settleShaders(t); // figma shaders: wait for this exact frame
-    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
-    // flip vertically (webgl origin is bottom-left)
-    const out = new Uint8Array(w * h * 4);
-    for (let y = 0; y < h; y++) out.set(px.subarray((h - 1 - y) * w * 4, (h - y) * w * 4), y * w * 4);
-    return out;
+    const px = unpremultiply((await g.grab(t)).slice());
+    // 1-bit alpha; clear pixels lose their colour (palette matching weighs rgb and alpha alike)
+    if (alpha) for (let i = 3; i < px.length; i += 4) { if (px[i] < 128) px[i] = px[i - 1] = px[i - 2] = px[i - 3] = 0; else px[i] = 255; }
+    return px;
   };
   try {
-    // global palette from ~8 sampled frames
-    const samples: Uint8Array[] = [];
-    for (let i = 0; i < 8; i++) samples.push(await read(t0 + ((t1 - t0) * (i + 0.5)) / 8));
-    const big = new Uint8Array(samples.length * w * h * 4);
-    samples.forEach((s, i) => big.set(s, i * w * h * 4));
-    const palette = quantize(big, 256, { format: 'rgb565' });
+    // global palette from up to 16 frames across the range
+    const ns = Math.min(16, total), sample = new Uint8Array(ns * w * h * 4);
+    for (let i = 0; i < ns; i++) sample.set(await read(frameTime(Math.floor(((i + 0.5) * total) / ns), fps, t0, t1)), i * w * h * 4);
+    const qopt = alpha ? { format, oneBitAlpha: true, clearAlpha: true } : { format };
+    const palette = clearFirst(quantize(sample, 256, qopt as any), alpha);
+    const tIndex = alpha ? 0 : -1;
     const gif = GIFEncoder();
-    const delays = gifDelaysCs(total, fps);
     for (let i = 0; i < total; i++) {
       if (signal?.aborted) throw new DOMException('cancelled', 'AbortError');
-      const rgba = await read(t0 + i / fps);
-      gif.writeFrame(applyPalette(rgba, palette, 'rgb565'), w, h, { palette: i === 0 ? palette : undefined, delay: delays[i] * 10 });
+      const rgba = await read(frameTime(i, fps, t0, t1));
+      let pal = palette, idx = applyPalette(rgba, palette, format as any), ti = tIndex;
+      // > ~6 levels rms off: this frame's colours are not in the global palette
+      if (i > 0 && paletteError(rgba, palette, idx) > 40) {
+        pal = clearFirst(quantize(rgba, 256, qopt as any), alpha);
+        idx = applyPalette(rgba, pal, format as any);
+      }
+      gif.writeFrame(idx, w, h, {
+        palette: i === 0 || pal !== palette ? pal : undefined,
+        delay: gifDelayCs(i, fps) * 10,
+        transparent: ti >= 0, transparentIndex: Math.max(0, ti),
+        // transparent frames replace the previous one instead of drawing over it
+        dispose: alpha ? 2 : -1,
+      });
       onProgress?.(i + 1, total);
       if (i % 10 === 9) await new Promise(z => setTimeout(z, 0)); // keep the ui responsive
     }
     gif.finish();
     return new Blob([gif.bytes() as unknown as BlobPart], { type: 'image/gif' });
   } finally {
-    r.resize(prev.w, prev.h, prev.dpr);
-    r.setView(prev.zoom, prev.panX, prev.panY);
-    r.dirty = true;
-    editor.renderer.syncRaster = false;
+    g.end();
     editor.resume();
   }
 }

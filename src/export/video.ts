@@ -12,7 +12,9 @@ import {
 import { mixAudio } from '../audio/engine';
 import { setBusy } from '../app/updates';
 import { editor } from '../app/editor';
-import { getBitmap } from '../render/raster';
+import { FrameGrabber, frameTime } from './frames';
+import { prepareExport } from './prepare';
+import { i420Size, rgbaToI420, VIDEO_COLOR_SPACE } from './yuv';
 
 export type VideoFormat = 'mp4' | 'webm';
 export type VideoQuality = 'low' | 'medium' | 'high';
@@ -63,12 +65,15 @@ export function evenDimensions(width: number, height: number, scale = 1): { widt
   return { width: ev(width), height: ev(height) };
 }
 
-const BPP: Record<VideoQuality, number> = { low: 0.05, medium: 0.1, high: 0.2 };
+const BPP: Record<VideoQuality, number> = { low: 0.05, medium: 0.1, high: 0.3 };
+/** floors: small comps with fine detail (thin stripes, text, shader patterns) need a minimum rate
+ *  to look like the editor (measured, scripts/export-parity.mjs) */
+const MIN_BITRATE: Record<VideoQuality, number> = { low: 500_000, medium: 1_000_000, high: 3_000_000 };
 
-/** target bitrate in bits/s: width*height*fps*bits-per-pixel, clamped to [0.5, 80] Mbit/s */
+/** target bitrate in bits/s: width*height*fps*bits-per-pixel, clamped to [floor, 80] Mbit/s */
 export function computeBitrate(width: number, height: number, fps: number, quality: VideoQuality = 'medium'): number {
   const raw = width * height * fps * BPP[quality];
-  return Math.round(Math.min(80_000_000, Math.max(500_000, raw)));
+  return Math.round(Math.min(80_000_000, Math.max(MIN_BITRATE[quality], raw)));
 }
 
 /** number of frames that cover [start, end) at fps (at least 1) */
@@ -160,14 +165,6 @@ export async function probeVideoSupport(width = 1920, height = 1080, fps = 30): 
 
 const yieldTask = () => new Promise<void>(r => { const c = new MessageChannel(); c.port1.onmessage = () => r(); c.port2.postMessage(0); });
 
-async function waitForAssets() {
-  try { await (document as any).fonts?.ready; } catch { /* */ }
-  const assets = Object.values(editor.store.project.assets ?? {});
-  const until = performance.now() + 5000;
-  for (const a of assets) {
-    while (a.kind === 'image' && !getBitmap(a) && performance.now() < until) await new Promise(r => setTimeout(r, 20));
-  }
-}
 
 let exporting = false;
 export const isExportingVideo = () => exporting;
@@ -195,16 +192,11 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
   const wasPlaying = store.playing;
   editor.pause();
   editor.stop();
-  editor.renderer.syncRaster = true; // every frame complete and sharp (no async rasters)
-  const prev = { zoom: r.zoom, panX: r.panX, panY: r.panY, w: r.cssW, h: r.cssH, dpr: r.dpr, bg: r.editorBg };
-  // cover the output exactly (even-rounding may change the aspect by < 1px): scale to cover, center
-  const zoom = Math.max(width / comp.width, height / comp.height);
-  const panX = (width - comp.width * zoom) / 2, panY = (height - comp.height * zoom) / 2;
-  r.editorBg = [0, 0, 0]; // transparent comp backgrounds become black, as in other tools
-  // the canvas is drawn at export size during the export: hide it so the compositor doesn't have
-  // to present (and scale) every frame. VideoFrame capture reads the drawing buffer regardless.
-  const prevVisibility = r.canvas.style.visibility;
-  r.canvas.style.visibility = 'hidden';
+  // the editor's own frames (offscreen, export-sized: the canvas on screen is left alone), converted
+  // to BT.709 limited-range 4:2:0 here and tagged as such (see yuv.ts): transparent comp
+  // backgrounds come out black, as in other tools (premultiplied rgba = the frame over black)
+  const grabber = new FrameGrabber(r, comp, { width, height });
+  const yuv = new Uint8Array(i420Size(width, height));
 
   const output = new Output({
     format: picked.format === 'mp4' ? new Mp4OutputFormat({ fastStart: 'in-memory' }) : new WebMOutputFormat(),
@@ -243,7 +235,8 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
     // audio first (it is small): the muxer can then interleave each video packet immediately
     if (audio) { await audio.src.add(audio.buf); audio.src.close(); }
     encoder.configure(picked.config);
-    await waitForAssets();
+    await prepareExport();
+    grabber.begin();
     const keyEvery = Math.max(1, Math.round(fps * 2));
     let lastYield = performance.now(), lastReport = 0;
     for (let i = 0; i < total; i++) {
@@ -258,16 +251,9 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
         });
         if (encErr) throw encErr;
       }
-      const t = Math.min(t0 + i / fps, comp.duration);
-      // (re)apply each frame: a ResizeObserver could have reset the canvas between tasks
-      r.resize(width, height, 1);
-      r.setView(zoom, panX, panY);
-      r.render(t);
-      // first-time rasters are spread over frames in the editor: for export, finish them now
-      for (let k = 0; k < 50 && r.dirty; k++) r.render(t);
-      await r.settleShaders(t); // figma shaders: wait for this exact frame
-      // capture synchronously: the drawing buffer is only valid until this task ends
-      const frame = new VideoFrame(r.canvas, { timestamp: frameTimestampUs(i, fps), duration: frameDurationUs(i, fps) });
+      const px = await grabber.grab(frameTime(i, fps, t0, comp.duration));
+      rgbaToI420(px, width, height, yuv);
+      const frame = new VideoFrame(yuv, { format: 'I420', codedWidth: width, codedHeight: height, timestamp: frameTimestampUs(i, fps), duration: frameDurationUs(i, fps), colorSpace: VIDEO_COLOR_SPACE });
       encoder.encode(frame, { keyFrame: i % keyEvery === 0 });
       frame.close();
       const now = performance.now();
@@ -289,14 +275,9 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
   } finally {
     try { if (encoder.state !== 'closed') encoder.close(); } catch { /* */ }
     if (!finished) { try { await output.cancel(); } catch { /* */ } }
-    r.editorBg = prev.bg;
-    r.canvas.style.visibility = prevVisibility;
-    r.resize(prev.w, prev.h, prev.dpr);
-    r.setView(prev.zoom, prev.panX, prev.panY);
-    r.dirty = true;
+    grabber.end();
     exporting = false;
     setBusy('export-video', false);
-    editor.renderer.syncRaster = false;
     editor.resume();
     if (wasPlaying) editor.play();
   }

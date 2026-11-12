@@ -108,6 +108,7 @@ export interface RasterClip { x: number; y: number; pw: number; ph: number }
 let assetLookup: ((id: string) => Asset | undefined) | null = null;
 /** main thread: how image paints find their asset (workers have none: those layers raster here) */
 export function setAssetLookup(fn: (id: string) => Asset | undefined) { assetLookup = fn; }
+export function getAssetLookup() { return assetLookup; }
 
 const hasImagePaint = (ps: Paint[] | undefined) => !!ps && ps.some(p => p.type === 'image');
 /** layers whose raster needs main-thread data (image bitmaps) */
@@ -323,6 +324,7 @@ function setStrokeStyle(c: Ctx, l: Layer, width: number, doubled: boolean) {
   c.lineJoin = l.strokeJoin ?? (l.type === 'path' ? 'round' : 'miter');
   c.lineCap = l.strokeCap ?? (l.type === 'path' ? 'round' : 'butt');
   c.miterLimit = l.miterLimit ?? 4;
+  c.lineDashOffset = 0; // trims set it on this shared context: never let it leak into the next path
   if (l.dash?.length) {
     // figma dashes are measured along the visible stroke (inside/outside strokes use a doubled width,
     // the dash lengths stay the same)
@@ -785,9 +787,14 @@ export function fontMetrics(l: Layer): { asc: number; desc: number } {
   const key = fontString(l, { fontSize: 1000 });
   let m = metricsCache.get(key);
   if (!m) {
+    // the measuring context is shared: callers (layoutText) keep measuring with their own font
+    // afterwards, so it is restored (it used to stay at 1000 px: the first layout of a font after a
+    // load wrapped every word onto its own line, found by the export parity harness)
     const c = mctx();
+    const prev = c.font;
     c.font = key;
     const mt = c.measureText('Hg') as TextMetrics & { fontBoundingBoxAscent?: number; fontBoundingBoxDescent?: number };
+    c.font = prev;
     const fs = 1000;
     m = mt.fontBoundingBoxAscent ? { asc: mt.fontBoundingBoxAscent / fs, desc: (mt.fontBoundingBoxDescent ?? 0) / fs } : { asc: 0.9, desc: 0.25 };
     if (metricsCache.size > 256) metricsCache.clear();

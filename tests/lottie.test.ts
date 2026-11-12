@@ -264,7 +264,7 @@ d2('lottie export: springs + expressions', () => {
     e2(r.k.length).toBeGreaterThan(30);
     e2(r.x).toContain('value + 0');
     const back = fromL(JSON.parse(JSON.stringify(lot)));
-    const bl = Object.values(back.layers)[0] as any;
+    const bl = Object.values(back.layers).find((x: any) => x.props.rotation?.kf) as any;
     const a = new Tr(l.props.rotation, 1), b = new Tr({ v: [0], kf: bl.props.rotation.kf }, 1);
     for (let t = 0; t <= 1; t += 0.05) e2(Math.abs(a.eval1(t) - b.eval1(t))).toBeLessThan(1.5);
   });
