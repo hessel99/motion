@@ -1,6 +1,7 @@
 // Agent CLI providers: detection + spawning one non-interactive turn per chat message.
 // Each turn is a fresh process; conversation continuity uses the CLI's own session resume.
 import { spawn, execFile } from 'node:child_process';
+import fs from 'node:fs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -21,6 +22,11 @@ export function augmentedEnv(extra = {}) {
     '/usr/local/bin',
     IS_WIN ? path.join(process.env.APPDATA ?? '', 'npm') : '',
   ].filter(Boolean);
+  // nvm installs: every node version's bin dir (newest first)
+  try {
+    const nvm = path.join(home, '.nvm', 'versions', 'node');
+    for (const v of fs.readdirSync(nvm).sort().reverse()) dirs.push(path.join(nvm, v, 'bin'));
+  } catch { /* no nvm */ }
   const cur = (process.env.PATH ?? '').split(path.delimiter);
   const PATH = [...cur, ...dirs.filter((d) => !cur.includes(d))].join(path.delimiter);
   return { ...process.env, PATH, ...extra };

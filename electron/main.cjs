@@ -11,6 +11,20 @@ const isDev = process.argv.includes('--dev');
 const DEV_URL = process.env.MOTION_DEV_URL || 'http://localhost:5173';
 
 // Smooth rendering: GPU raster + zero-copy uploads. Vsync stays on.
+// apps started from the dock/finder don't get the terminal PATH (claude/codex/gemini/node live in
+// homebrew, npm-global or nvm dirs). ask the login shell once and merge its PATH in.
+if (process.platform !== 'win32') {
+  try {
+    const { execFileSync } = require('node:child_process');
+    const shell = process.env.SHELL || '/bin/zsh';
+    const out = execFileSync(shell, ['-ilc', 'printf "__PATH__%s__PATH__" "$PATH"'], { encoding: 'utf8', timeout: 3000, stdio: ['ignore', 'pipe', 'ignore'] });
+    const m = /__PATH__(.*)__PATH__/.exec(out);
+    if (m && m[1]) {
+      const cur = (process.env.PATH || '').split(':');
+      process.env.PATH = [...m[1].split(':'), ...cur].filter((d, i, a) => d && a.indexOf(d) === i).join(':');
+    }
+  } catch { /* keep the default PATH; bridge/providers.mjs adds common install dirs too */ }
+}
 app.commandLine.appendSwitch('enable-gpu-rasterization');
 app.commandLine.appendSwitch('ignore-gpu-blocklist');
 app.commandLine.appendSwitch('enable-zero-copy');
