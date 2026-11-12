@@ -36,6 +36,8 @@ Two features let you build a motion design from a design system rather than from
 ![Instance with an override and a linked fill](shots/20-inspector-instance.png)
 
 ### Components
+> Animated, reusable pieces (logo stings, lower thirds, title cards, showreels) are **animated components**: a composition with properties, variants and time-aware instances. See [components-design.md](components-design.md). The linked copies below are for static design elements.
+
 - **Make a component**: select a layer or group, then use **⌥⌘K**, the timeline's right-click menu → *Create component*, or Library → **＋ Make**. Agents use `create_component`.
 - **Add instances** from:
   - the Library (**Add**)
@@ -213,6 +215,6 @@ Variable nodes in real clipboards could not be checked against a capture (none o
 - Gradient stops, text styles (font family, size, weight) and effect styles are not linkable yet. Figma text styles are recognized but not imported as styles.
 - One link per layer: an instance nested inside another pasted instance follows the outer instance (Figma behaves the same through the outer main).
 - Deleting a layer inside an instance is allowed, and it comes back only when the main's structure changes. Hide layers instead of deleting them.
-- Component variants (Figma component sets) paste as separate components.
+- Component variants (Figma component sets) paste as separate components; *Make animated* turns a set into one animated component with variants (components-design.md).
 - Browser builds cannot re-read a picked file without asking. The desktop app re-reads and watches it.
 - The REST API path has only been tested with recorded responses, not live, because it needs an Enterprise plan.
