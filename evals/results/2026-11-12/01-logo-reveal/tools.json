@@ -1,0 +1,245 @@
+[
+ {
+  "name": "set_composition",
+  "argsBytes": 24,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 1,
+  "input": {
+   "background": "#0B1530"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 155,
+  "ok": true,
+  "ms": 59,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Wordmark",
+   "x": 860,
+   "y": 420,
+   "w": 440,
+   "h": 140,
+   "fill": "#FFFFFF",
+   "text": {
+    "content": "NOVA",
+    "fontSize": 130,
+    "fontWeight": 800,
+    "align": "left"
+   }
+  },
+  "result": "{\"id\":\"l_03jm1\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 166,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Tagline",
+   "x": 864,
+   "y": 575,
+   "w": 440,
+   "h": 50,
+   "fill": "#8FA0C8",
+   "text": {
+    "content": "Money, made simple",
+    "fontSize": 36,
+    "fontWeight": 400,
+    "align": "left"
+   }
+  },
+  "result": "{\"id\":\"l_03jm2\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 124,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "type": "ellipse",
+   "name": "Mark Ring",
+   "x": 650,
+   "y": 410,
+   "w": 160,
+   "h": 160,
+   "stroke": "#2EE6A6",
+   "strokeWidth": 14,
+   "fill": "#0B153000"
+  },
+  "result": "{\"id\":\"l_03jm3\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 119,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Mark Slash",
+   "d": "M0 80 L80 0",
+   "x": 690,
+   "y": 450,
+   "w": 80,
+   "h": 80,
+   "stroke": "#2EE6A6",
+   "strokeWidth": 14
+  },
+  "result": "{\"id\":\"l_03jm4\"}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 742,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 3,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm3",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 0.2,
+       "v": 0,
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 1,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "rotation",
+     "keyframes": [
+      {
+       "t": 0.2,
+       "v": -90,
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 1,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 0.9,
+       "v": 0,
+       "ease": "Expo Out"
+      },
+      {
+       "t": 1.4,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm1",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 1.4,
+       "v": [
+        960,
+        490
+       ],
+       "ease": "Expo Out"
+      },
+      {
+       "t": 2.2,
+       "v": [
+        1080,
+        490
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm1",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 1.4,
+       "v": 0,
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 1.9,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 2.4,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 2.4,
+       "v": [
+        1084,
+        610
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 3,
+       "v": [
+        1084,
+        600
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 7 tracks on 4 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 82,
+  "editorMs": 66,
+  "input": {
+   "times": [
+    0.6,
+    1.2,
+    1.7,
+    2.2,
+    2.8,
+    3.5
+   ],
+   "cell": 400
+  },
+  "result": "6 frames left→right, top→bottom at 0.6s, 1.2s, 1.7s, 2.2s, 2.8s, 3.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/7705ac9d-7f0f-46ab-a7c8-d3c4ede063c5/tool-results/mcp-motion-blob-1794501701281-t98l0o.jpg]"
+ }
+]

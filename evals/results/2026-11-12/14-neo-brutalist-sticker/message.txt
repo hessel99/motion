@@ -1,0 +1,6 @@
+Neo-brutalist social post for a "SUMMER SALE -40%". Flat saturated colors (acid yellow, hot pink, cobalt), thick black outlines and hard offset drop shadows (a black copy offset 12px down-right), stickers and badges that slap on with a quick rotation snap and overshoot, slightly tilted. A starburst badge with "-40%" spins in last. Punchy, loud, fun.
+
+<editor_context>
+comp "Main" 1080x1080 30fps 5s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

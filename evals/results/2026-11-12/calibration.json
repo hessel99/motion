@@ -1,0 +1,212 @@
+{
+ "judgeModel": "opus",
+ "briefs": [
+  {
+   "name": "01-logo-reveal",
+   "runs": 2,
+   "spread": {
+    "brief_fit": {
+     "values": [
+      4,
+      4
+     ],
+     "range": 0
+    },
+    "style_match": {
+     "values": [
+      6,
+      6
+     ],
+     "range": 0
+    },
+    "timing_easing": {
+     "values": [
+      4,
+      5
+     ],
+     "range": 1
+    },
+    "composition": {
+     "values": [
+      6,
+      6
+     ],
+     "range": 0
+    },
+    "richness": {
+     "values": [
+      3,
+      3
+     ],
+     "range": 0
+    },
+    "polish": {
+     "values": [
+      3,
+      3
+     ],
+     "range": 0
+    },
+    "overall": {
+     "values": [
+      4.33,
+      4.5
+     ],
+     "range": 0.17
+    }
+   },
+   "critiques": [
+    [
+     "The mark never assembles: the trim keys on the ring and slash can't render, so the finished mark sits static from frame 0 through 1.4s (dead time where the opening beat should be), and the wordmark isn't revealed from behind it; it fades in visibly over and through the mark (see 1.45s) with no mask or clip.",
+     "Make the mark actually draw on (use stroke-dash/trim that renders, ring over about 0.2–0.8s, slash snapping in with a slight overshoot after it), then put a clip or mask at the ring's right edge so NOVA slides out from behind the mark at full opacity instead of cross-fading over it. Also remove the stray #6b8cff slash fill so the palette is navy, white, grey-blue and one accent."
+    ],
+    [
+     "The opening beat is missing: both trim paths fail to render, so the circle and slash sit fully drawn from frame 0. The first 1.4s is a static mark on navy. Meanwhile the wordmark simply fades in on top of the ring (visible ghosted 'N' over the circle at 1.45s) instead of sliding out from behind it.",
+     "Make the mark actually build: use a renderable stroke reveal for the ring (~0.2-0.9s) followed by the slash snapping in with a slight overshoot. Then mask the wordmark with a clip edge at the mark's right side so it emerges from behind the mark rather than cross-fading over it. Drop the stray #6b8cff slash fill so the palette is navy, white, grey-blue and one green accent."
+    ]
+   ]
+  },
+  {
+   "name": "07-product-promo",
+   "runs": 2,
+   "spread": {
+    "brief_fit": {
+     "values": [
+      5,
+      5
+     ],
+     "range": 0
+    },
+    "style_match": {
+     "values": [
+      6,
+      6
+     ],
+     "range": 0
+    },
+    "timing_easing": {
+     "values": [
+      5,
+      5
+     ],
+     "range": 0
+    },
+    "composition": {
+     "values": [
+      6,
+      6
+     ],
+     "range": 0
+    },
+    "richness": {
+     "values": [
+      4,
+      4
+     ],
+     "range": 0
+    },
+    "polish": {
+     "values": [
+      4,
+      5
+     ],
+     "range": 1
+    },
+    "overall": {
+     "values": [
+      5,
+      5.17
+     ],
+     "range": 0.17
+    }
+   },
+   "critiques": [
+    [
+     "The comp is 7s instead of the briefed 10s, and all motion ends at 4.4s. That leaves a 2.6s dead hold on a static end card, plus a near-static 2.85–4s stretch after the slam, so the '120 BPM' energy dies halfway. On top of that, Flash Wipe holds at 35% orange from 0–0.5s, so the piece opens on a muddy brown frame instead of black.",
+     "Extend to 10s and keep cutting on the 0.5s grid through the back half. Add a beat-synced secondary hit after the slam (e.g. a second ring or a letter-spaced pulse on PULSE 2 at 3s/3.5s), stagger the pill and its label onto separate beats with a glint or underline sweep, and add a final out-beat. Also key Flash Wipe to 0 at 0s and give each feature word a real directional exit (whip, mask or scale-through) instead of just a hold-cut on opacity."
+    ],
+    [
+     "The piece runs 7s instead of the briefed 10s and all motion stops at 4.4s, leaving a 2.6s fully static end card; with only ~5 hit points (feature words on hold-cuts at 0.5/1/1.5, slam at 2.5, CTA at 4), the 120 BPM energy dies right after the slam, and 2.8–4.0s is nearly dead air apart from the fading ring.",
+     "Extend to 10s and keep hitting the 0.5s grid after the slam: give the feature words real exits (push/scale-out or a whip cut instead of hold-opacity pops), add a secondary ring or camera shake on the slam, stagger the CTA pill and text with a beat-synced pulse or glow loop, and finish with a deliberate out-beat (flash or cut to black) instead of a frozen hold."
+    ]
+   ]
+  },
+  {
+   "name": "13-parallax-depth",
+   "runs": 2,
+   "spread": {
+    "brief_fit": {
+     "values": [
+      7,
+      7
+     ],
+     "range": 0
+    },
+    "style_match": {
+     "values": [
+      6,
+      6
+     ],
+     "range": 0
+    },
+    "timing_easing": {
+     "values": [
+      5,
+      5
+     ],
+     "range": 0
+    },
+    "composition": {
+     "values": [
+      5,
+      5
+     ],
+     "range": 0
+    },
+    "richness": {
+     "values": [
+      4,
+      4
+     ],
+     "range": 0
+    },
+    "polish": {
+     "values": [
+      5,
+      5
+     ],
+     "range": 0
+    },
+    "overall": {
+     "values": [
+      5.33,
+      5.33
+     ],
+     "range": 0
+    }
+   },
+   "critiques": [
+    [
+     "The parallax is too timid to read as 3D: across 12 frames the far, mid and tree layers barely shift, so only the grass visibly moves. The title floats in the empty sky near the sun, so it reads as a flat overlay rather than sitting between hills and trees. The sky is a flat dusty slab with no visible gradient.",
+     "Exaggerate the depth spread: give near trees and grass much larger pan/scale deltas than far mountains. Lower the title so the tree tops partially occlude it as the camera pushes. Replace the flat sky and banded haze ellipses with real vertical gradients. Add small secondary motion (drifting mist, subtle tree sway) so the shot feels alive rather than a single 8s Easy Ease slide."
+    ],
+    [
+     "The depth effect is too weak to sell a 3D shot: the sky is a flat pink slab with a hard-edged translucent rect band instead of a gradient, the haze reads as opaque horizontal stripes, and every layer runs the same single 0–8s Easy Ease. The parallax is technically present but barely felt, and the title floats in empty sky where nothing occludes it, so its 'between hills and trees' depth only exists in the layer order.",
+     "Replace the sky and haze with real vertical gradients that fade to transparent so far layers dissolve into atmosphere. Run the camera on a shared null with a longer, gentler ease-out and a short end settle. Drop the title lower so the near trees partially overlap its baseline and the hills sit behind it, and add a small blur/opacity rise or tracking settle so it visibly lives at its depth."
+    ]
+   ]
+  }
+ ],
+ "meanRange": {
+  "brief_fit": 0,
+  "style_match": 0,
+  "timing_easing": 0.33,
+  "composition": 0,
+  "richness": 0,
+  "polish": 0.33,
+  "overall": 0.11
+ },
+ "exactAgreementPct": 89,
+ "within1Pct": 100,
+ "costUsd": 0.166
+}

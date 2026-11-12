@@ -1,0 +1,151 @@
+[
+ {
+  "kind": "session",
+  "sessionId": "926c9d57-4e1e-4fce-81b9-f2b22fa405a7",
+  "at": 1794501685091
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01HYiqmb2mNxrBiDMptir5Hm",
+  "name": "set_composition",
+  "input": "{\"background\":\"#f2f2f7\"}",
+  "at": 1794501687073
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01HYiqmb2mNxrBiDMptir5Hm",
+  "isError": false,
+  "summary": "ok",
+  "at": 1794501687098
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_014opQSQVAreNW7E1wqGw5wP",
+  "name": "add_layer",
+  "input": "{\"type\":\"rect\",\"name\":\"Track Off\",\"x\":280,\"y\":235,\"w\":240,\"h\":130,\"radius\":65,\"fill\":\"#d1d1d6\"}",
+  "at": 1794501688053
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_014opQSQVAreNW7E1wqGw5wP",
+  "isError": false,
+  "summary": "{\"id\":\"l_03jm1\"}",
+  "at": 1794501688065
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01RxSYTWyZkxkseZ5pDDmdzG",
+  "name": "add_layer",
+  "input": "{\"type\":\"rect\",\"name\":\"Track On\",\"x\":280,\"y\":235,\"w\":240,\"h\":130,\"radius\":65,\"fill\":\"#34c759\",\"opacity\":0}",
+  "at": 1794501689085
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01RxSYTWyZkxkseZ5pDDmdzG",
+  "isError": false,
+  "summary": "{\"id\":\"l_03jm2\"}",
+  "at": 1794501689098
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01WPJPuuVdk7vPAK87erx1pX",
+  "name": "add_layer",
+  "input": "{\"type\":\"ellipse\",\"name\":\"Knob\",\"x\":292,\"y\":247,\"w\":106,\"h\":106,\"fill\":\"#ffffff\"}",
+  "at": 1794501689900
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01WPJPuuVdk7vPAK87erx1pX",
+  "isError": false,
+  "summary": "{\"id\":\"l_03jm3\"}",
+  "at": 1794501689914
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01CxadF2ugYGhwqN8TH7X4wJ",
+  "name": "add_layer",
+  "input": "{\"type\":\"path\",\"name\":\"Check\",\"d\":\"M0 18 L14 32 L38 4\",\"x\":436,\"y\":283,\"w\":38,\"h\":34,\"stroke\":\"#34c759\",\"strokeWidth\":8,\"opacity\":0}",
+  "at": 1794501691181
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01CxadF2ugYGhwqN8TH7X4wJ",
+  "isError": false,
+  "summary": "{\"id\":\"l_03jm4\"}",
+  "at": 1794501691212
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01TyMGhwXjxAX9D7KaLve14A",
+  "name": "animate",
+  "input": "{\"tracks\":[{\"id\":\"l_03jm3\",\"prop\":\"position\",\"keyframes\":[{\"t\":0.4,\"v\":[345,300],\"ease\":\"Quad In\"},{\"t\":0.62,\"v\":[464,300],\"ease\":\"Quad Out\"},{\"t\":0.9,\"v\":[455,300],\"ease\":\"Easy Ease\"}]},{\"id\":\"l_03jm3\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.34,\"v\":[100,100],\"ease\":\"Quad Out\"},{\"t\":0.4,\"v\":[94,106],\"ease\":\"Quad Out\"},{\"t\":0.52,\"v\":[126,88],\"ease\":\"Quad In Out\"},{\"t\":0.64,\"v\":[92,108],\"ease\":\"Quad Out\"},{\"t\":0.8,\"v\":[102,98],\"ease\":\"Easy Ease\"},{\"t\":1,\"v\":[100,100]}]},{\"id\":\"l_03jm2\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":0.4,\"v\":0,\"ease\":\"Easy Ease\"},{\"t\":0.8,\"v\":100}]},{\"id\":\"l_03jm4\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":0.62,\"v\":0,\"ease\":\"Ease Out\"},{\"t\":0.85,\"v\":100}]},{\"id\":\"l_03jm4\",\"prop\":\"trimEnd\",\"keyframes\":[{\"t\":0.62,\"v\":0,\"ease\":\"Cubic Out\"},{\"t\":1,\"v\":100}]}]}",
+  "at": 1794501696081
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01TyMGhwXjxAX9D7KaLve14A",
+  "isError": false,
+  "summary": "ok: 5 tracks on 3 layers",
+  "at": 1794501696101
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01F1RJUDFzyKRyo9GPexWzZK",
+  "name": "contact_sheet",
+  "input": "{\"times\":[0.2,0.46,0.56,0.7,0.9,1.2],\"cell\":260}",
+  "at": 1794501696516
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01F1RJUDFzyKRyo9GPexWzZK",
+  "isError": false,
+  "summary": "6 frames left→right, top→bottom at 0.2s, 0.47s, 0.57s, 0.7s, 0.9s, 1.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/926c9d57-4e1e-4fce-81b9-f2b22fa405a7/tool-results/mcp-motion-blob-1794501696588-4j4kj5.jpg]",
+  "at": 1794501696596
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01FVsGHgqJk2m8vRdh9kqPF9",
+  "name": "update_layer",
+  "input": "{\"id\":\"l_03jm4\",\"props\":{\"fill\":[0,0,0,0]}}",
+  "at": 1794501698061
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01FVsGHgqJk2m8vRdh9kqPF9",
+  "isError": false,
+  "summary": "ok",
+  "at": 1794501698081
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_017diNHEXRnMwhf76Tq2CDSC",
+  "name": "screenshot",
+  "input": "{\"t\":1.2,\"maxSize\":400}",
+  "at": 1794501698313
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_017diNHEXRnMwhf76Tq2CDSC",
+  "isError": false,
+  "summary": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/926c9d57-4e1e-4fce-81b9-f2b22fa405a7/tool-results/mcp-motion-blob-1794501698339-bguddu.png]",
+  "at": 1794501698344
+ },
+ {
+  "kind": "text",
+  "text": "The toggle is built and starts in the off state. I checked it in a contact sheet and a final frame at 1.2s, but I haven't played it through live.\n\n- **Layers:** `Track Off` (grey), `Track On` (green), `Knob` and `Check`.\n- **Timing:** the toggle starts at 0.4s and everything has settled by about 1.0s, inside your 1.2s target.\n- **Knob:** it slides from left to right, stretching wide mid-travel and then squashing tall on arrival. It overshoots by about 9px before settling.\n- **Track:** `Track On` fades in over the grey one between 0.4s and 0.8s, which gives the colour crossfade.\n- **Checkmark:** it draws itself in and fades up in green inside the knob, starting at 0.62s as the knob lands.\n\nI also set the background to a light grey (`#f2f2f7`) so the white knob stands out. The overshoot and squash amounts are easy to change if you want it snappier or softer.",
+  "at": 1794501701336
+ },
+ {
+  "kind": "done",
+  "result": "The toggle is built and starts in the off state. I checked it in a contact sheet and a final frame at 1.2s, but I haven't played it through live.\n\n- **Layers:** `Track Off` (grey), `Track On` (green), `Knob` and `Check`.\n- **Timing:** the toggle starts at 0.4s and everything has settled by about 1.0s, inside your 1.2s target.\n- **Knob:** it slides from left to right, stretching wide mid-travel and then squashing tall on arrival. It overshoots by about 9px before settling.\n- **Track:** `Track On` fades in over the grey one between 0.4s and 0.8s, which gives the colour crossfade.\n- **Checkmark:** it draws itself in and fades up in green inside the knob, starting at 0.62s as the knob lands.\n\nI also set the background to a light grey (`#f2f2f7`) so the white knob stands out. The overshoot and squash amounts are easy to change if you want it snappier or softer.",
+  "costUsd": 0.0471829,
+  "durationMs": 17745,
+  "numTurns": 10,
+  "usage": {
+   "input": 63074,
+   "cached": 58789,
+   "output": 2418
+  },
+  "at": 1794501702813
+ }
+]

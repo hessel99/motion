@@ -1,0 +1,71 @@
+{
+  "id": "08-swiss-brutalist",
+  "title": "Swiss / brutalist poster",
+  "complexity": "medium",
+  "style": [
+    "swiss",
+    "brutalist",
+    "grid"
+  ],
+  "comp": {
+    "width": 1080,
+    "height": 1350,
+    "fps": 30,
+    "duration": 6
+  },
+  "prompt": "An animated poster in a strict Swiss / brutalist style for \"ZÜRICH TYPE WEEK 2027\". Hard grid, huge bold grotesk type, black/white plus one signal red. Motion should be mechanical: hard linear or stepped moves, blocks that wipe in on the grid, no soft bounces, no fades. Rotate one big word 90°. Dates \"03—07 MAR\" in small caps aligned to the grid.",
+  "checklist": [
+    {
+      "text": "title words present",
+      "check": {
+        "type": "textContains",
+        "text": "TYPE"
+      }
+    },
+    {
+      "text": "dates present",
+      "check": {
+        "type": "textContains",
+        "text": "MAR"
+      }
+    },
+    {
+      "text": "palette black/white/red only (≤3 colors)",
+      "check": {
+        "type": "paletteMax",
+        "max": 3
+      }
+    },
+    {
+      "text": "no bouncy eases (no Back/spring)",
+      "check": {
+        "type": "noOvershoot"
+      }
+    },
+    {
+      "text": "linear or hold (stepped) interpolation used",
+      "check": {
+        "type": "mechanicalEases"
+      }
+    },
+    {
+      "text": "a word rotated 90°",
+      "check": {
+        "type": "rotated90"
+      }
+    },
+    {
+      "text": "huge type (font size ≥150px)",
+      "check": {
+        "type": "fontSizeMin",
+        "size": 150
+      }
+    },
+    {
+      "text": "blocks wipe in (rect size/scale animated)",
+      "check": {
+        "type": "wipes"
+      }
+    }
+  ]
+}

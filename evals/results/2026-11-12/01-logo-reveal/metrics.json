@@ -1,0 +1,133 @@
+{
+ "run": {
+  "id": "01-logo-reveal",
+  "name": "01-logo-reveal",
+  "model": "sonnet",
+  "seed": 1,
+  "wallMs": 21831,
+  "timedOut": false,
+  "turns": 8,
+  "costUsd": 0.0536351,
+  "durationMs": 21070,
+  "usage": {
+   "input": 47343,
+   "cached": 41991,
+   "output": 2804
+  },
+  "errors": [],
+  "toolCalls": 7,
+  "toolErrors": 0,
+  "toolsAvailable": 37,
+  "finalText": "The NOVA logo reveal is built, and I checked it in a contact sheet at six points across the 4 seconds. It isn't exported.\n\n- **Look:** The background is navy (#0B1530) and the only accent is mint (#2EE6A6). The mark is a ring with a diagonal slash.\n- **0.2–1.4s:** The ring draws itself while rotating slightly. The slash then draws across it.\n- **1.4–2.2s:** The \"NOVA\" wordmark fades in and slides right from behind the mark.\n- **2.4–3.0s:** The tagline \"Money, made simple\" fades in underneath, rising a little as it appears.\n- **3.0–4.0s:** The full lockup holds for a full second.\n\nThe wordmark isn't masked behind the ring. It fades in as it slides, which hides that. The lockup also sits slightly left of center, and the tagline is fairly small. I can re-center it and make the tagline bigger, or add a bit of spacing between the letters of NOVA."
+ },
+ "metrics": {
+  "layers": 4,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "text": 2,
+   "ellipse": 1,
+   "path": 1
+  },
+  "groups": 0,
+  "animatedLayers": 4,
+  "keys": 14,
+  "segments": 7,
+  "easesUsed": {
+   "Expo Out": 2,
+   "Cubic Out": 4,
+   "Sine Out": 1
+  },
+  "distinctEases": 3,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#ffffff",
+   "#8fa0c8",
+   "#2ee6a6",
+   "#6b8cff",
+   "#0b1530"
+  ],
+  "keyCoverage": 0.65,
+  "visualActivity": 0.435,
+  "firstMotion": 0.2,
+  "lastMotion": 3,
+  "endHold": 1,
+  "longestHold": 0.536,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 4,
+  "missingFonts": [],
+  "deadTrimLayers": [
+   "Mark Ring",
+   "Mark Slash"
+  ],
+  "neverVisible": [],
+  "loopDiff": 0.01,
+  "midLuma": 0.094,
+  "toolErrors": 0,
+  "toolCalls": 7
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"NOVA\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "tagline present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "sequenced: mark → wordmark → tagline (≥3 entrance waves)",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "holds the final lockup ≥1s",
+    "type": "endHoldMin",
+    "pass": true
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": false
+   },
+   {
+    "text": "wordmark revealed from behind the mark (mask/clip or layer order)",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 5,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": {
+  "frames": 240,
+  "sourceCodec": "avc1.640020",
+  "bytes": 15799
+ }
+}

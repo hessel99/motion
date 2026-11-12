@@ -1,0 +1,64 @@
+{
+  "id": "11-glitch-retro",
+  "title": "Glitch / retro",
+  "complexity": "medium",
+  "style": [
+    "glitch",
+    "retro",
+    "vhs"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration": 5
+  },
+  "prompt": "Glitchy retro title card for a synthwave podcast called \"NIGHT SIGNAL\". RGB-split text (offset magenta/cyan copies of the title that jitter), horizontal scanline bars that tear across, a few hard flicker frames, CRT-ish dark purple background with a sun-gradient stripe. Glitches come in bursts — stable moments in between.",
+  "checklist": [
+    {
+      "text": "title present",
+      "check": {
+        "type": "textContains",
+        "text": "NIGHT SIGNAL"
+      }
+    },
+    {
+      "text": "RGB split: ≥3 copies of the title text",
+      "check": {
+        "type": "textCopiesMin",
+        "text": "NIGHT",
+        "min": 3
+      }
+    },
+    {
+      "text": "jitter (hold keys, many small keys or random/wiggle expressions)",
+      "check": {
+        "type": "jitter"
+      }
+    },
+    {
+      "text": "hard flickers (≥4 hold keys)",
+      "check": {
+        "type": "holdKeysMin",
+        "min": 4
+      }
+    },
+    {
+      "text": "scanline bars (≥3 thin rects)",
+      "check": {
+        "type": "thinRectsMin",
+        "min": 3
+      }
+    },
+    {
+      "text": "magenta + cyan colors present",
+      "check": {
+        "type": "rgbSplitColors"
+      }
+    },
+    {
+      "text": "bursts with stable moments in between",
+      "check": null
+    }
+  ]
+}

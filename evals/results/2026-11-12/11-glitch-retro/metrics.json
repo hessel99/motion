@@ -1,0 +1,134 @@
+{
+ "run": {
+  "id": "11-glitch-retro",
+  "name": "11-glitch-retro",
+  "model": "sonnet",
+  "seed": 1,
+  "wallMs": 60046,
+  "timedOut": false,
+  "turns": 21,
+  "costUsd": 0.15598589999999998,
+  "durationMs": 59254,
+  "usage": {
+   "input": 82267,
+   "cached": 68899,
+   "output": 9564
+  },
+  "errors": [],
+  "toolCalls": 20,
+  "toolErrors": 0,
+  "toolsAvailable": 37,
+  "finalText": "The \"NIGHT SIGNAL\" title card is built in the Main comp (5s), and the title now sits on one line. I checked the layout in a still at 1.07s and it looks right. I haven't played it back, and I haven't re-checked the other burst frames since shrinking the title.\n\n- **Background and sun:** a dark purple CRT background with a pink sun disc. Four stripe bars (yellow, orange, pink, violet) run across the bottom as the sun-gradient stripe. A \"A SYNTHWAVE PODCAST\" subtitle sits under the title.\n- **RGB split:** the title is three copies. Magenta and cyan sit about ±6px apart when stable. During bursts they jump around horizontally and vertically with hard cuts, and the white title jitters slightly.\n- **Scanline tears:** `Tear A`, `Tear B` and `Tear C` are bars (cyan, magenta, white) that snap to different heights and blink on and off during bursts.\n- **Flicker:** a white `Flicker` overlay gives short hard flashes. The title also dips in opacity, and the sun dims briefly.\n- **Bursts:** glitches hit at about 1.0–1.4s, 2.8–3.1s and 4.3–4.6s. Everything else is stable.\n\nI can make the bursts longer or more violent, add a fade-in at the start, or give the sun a gradient look with cut-out bands."
+ },
+ "metrics": {
+  "layers": 13,
+  "drawableLayers": 13,
+  "layerTypes": {
+   "ellipse": 1,
+   "rect": 8,
+   "text": 4
+  },
+  "groups": 0,
+  "animatedLayers": 8,
+  "keys": 154,
+  "segments": 136,
+  "easesUsed": {
+   "Hold": 136
+  },
+  "distinctEases": 1,
+  "easeFamilies": 1,
+  "overshootSegments": 0,
+  "keyedOvershoots": 5,
+  "springSegments": 0,
+  "holdKeys": 136,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 9,
+  "palette": [
+   "#ff5e7e",
+   "#ffd23f",
+   "#ff8a3d",
+   "#ff3d8b",
+   "#8a2be2",
+   "#ff2bd6",
+   "#00f0ff",
+   "#ffffff",
+   "#140826"
+  ],
+  "keyCoverage": 0.92,
+  "visualActivity": 0.201,
+  "firstMotion": 0.933,
+  "lastMotion": 4.6,
+  "endHold": 0.4,
+  "longestHold": 1.34,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 5.092,
+  "exits": 4,
+  "beats": 4,
+  "missingFonts": [
+   "Arial Black"
+  ],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.213,
+  "toolErrors": 0,
+  "toolCalls": 20
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "RGB split: ≥3 copies of the title text",
+    "type": "textCopiesMin",
+    "pass": true
+   },
+   {
+    "text": "jitter (hold keys, many small keys or random/wiggle expressions)",
+    "type": "jitter",
+    "pass": true
+   },
+   {
+    "text": "hard flickers (≥4 hold keys)",
+    "type": "holdKeysMin",
+    "pass": true
+   },
+   {
+    "text": "scanline bars (≥3 thin rects)",
+    "type": "thinRectsMin",
+    "pass": false
+   },
+   {
+    "text": "magenta + cyan colors present",
+    "type": "rgbSplitColors",
+    "pass": true
+   },
+   {
+    "text": "bursts with stable moments in between",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 5,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": {
+  "frames": 150,
+  "sourceCodec": "avc1.64001f",
+  "bytes": 88689
+ }
+}

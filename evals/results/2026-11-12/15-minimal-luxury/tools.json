@@ -1,0 +1,396 @@
+[
+ {
+  "name": "set_composition",
+  "argsBytes": 24,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 2,
+  "input": {
+   "background": "#0a0908"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 119,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Gold Line",
+   "d": "M1 0 L1 560",
+   "x": 539,
+   "y": 300,
+   "w": 2,
+   "h": 560,
+   "stroke": "#d4b886",
+   "strokeWidth": 1.5
+  },
+  "result": "{\"id\":\"l_03jm1\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 205,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "ÉCLAT",
+   "x": 40,
+   "y": 930,
+   "w": 1000,
+   "h": 130,
+   "fill": "#d9c08f",
+   "text": {
+    "content": "ÉCLAT",
+    "fontFamily": "Cormorant Garamond, Georgia, serif",
+    "fontSize": 104,
+    "fontWeight": 300,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jm2\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 215,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Subtitle",
+   "x": 40,
+   "y": 1090,
+   "w": 1000,
+   "h": 50,
+   "fill": "#b8a27a",
+   "text": {
+    "content": "EAU DE PARFUM",
+    "fontFamily": "Cormorant Garamond, Georgia, serif",
+    "fontSize": 28,
+    "fontWeight": 400,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jm3\"}"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm2"
+  },
+  "result": "{\"id\":\"l_03jm2\",\"name\":\"ÉCLAT\",\"type\":\"text\",\"parent\":null,\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[500,65]},\"position\":{\"v\":[540,995]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[1000,130]},\"fill\":{\"v\":[0.8509803921568627,0.7529411764705882,0.5607843137254902,1]}},\"text\":{\"content\":\"ÉCLAT\",\"fontFamily…"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm2",
+   "text": {
+    "letterSpacing": 36
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm3",
+   "text": {
+    "letterSpacing": 12
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_text_animation",
+  "argsBytes": 143,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm2"
+   ],
+   "by": "char",
+   "mode": "in",
+   "start": 2.2,
+   "duration": 1.6,
+   "stagger": 0.45,
+   "from": {
+    "opacity": 0,
+    "dy": 0,
+    "scale": 100
+   },
+   "ease": "Sine Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 327,
+  "ok": true,
+  "ms": 1108,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm1",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 0.5,
+       "v": 0,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.5,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 2.2,
+       "v": [
+        105,
+        105
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 6.8,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 4.6,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 6.2,
+       "v": 100
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 3 tracks on 3 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 251,
+  "editorMs": 187,
+  "input": {
+   "times": [
+    0.5,
+    2,
+    3.2,
+    4.5,
+    5.5,
+    6.9
+   ],
+   "cell": 240
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 2s, 3.2s, 4.5s, 5.5s, 6.9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/ab7ed556-8656-494a-98c3-1c99c4f3f5d5/tool-results/mcp-motion-blob-1794502010591-vaog6y.jpg]"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 19,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 0,
+  "input": {
+   "ids": [
+    "l_03jm1"
+   ]
+  },
+  "result": "comp 7s @30fps\n\"Gold Line\" (path l_03jm1)\n  trimEnd: 0.5s 0 ─Sine In Out→ 4.5s 100"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 148,
+  "editorMs": 80,
+  "input": {
+   "times": [
+    0.3,
+    1.5,
+    3
+   ],
+   "maxSize": 300
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/ab7ed556-8656-494a-98c3-1c99c4f3f5d5/tool-results/mcp-motion-blob-1794502014714-ddon35.png]\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/ab7ed556-8656-494a-98c3-1c99c4f3f5d5/tool-results/mcp-motion-blob-1794502014714-rn25da.png]\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/ab7ed5…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm1"
+  },
+  "result": "{\"id\":\"l_03jm1\",\"name\":\"Gold Line\",\"type\":\"path\",\"parent\":null,\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[1,280]},\"position\":{\"v\":[540,580]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[2,560]},\"fill\":{\"v\":[0.42,0.55,1,1]},\"stroke\":{\"v\":[0.8313725490196079,0.7215686274509804,0.5254901960784314,1]},\"stroke…"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 40,
+  "ok": true,
+  "ms": 26,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm1",
+   "props": {
+    "trimStart": 0
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 31,
+  "ok": true,
+  "ms": 139,
+  "editorMs": 81,
+  "input": {
+   "times": [
+    1,
+    2.5
+   ],
+   "maxSize": 300
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/ab7ed556-8656-494a-98c3-1c99c4f3f5d5/tool-results/mcp-motion-blob-1794502017923-1yegau.png]\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/ab7ed556-8656-494a-98c3-1c99c4f3f5d5/tool-results/mcp-motion-blob-1794502017923-ku2ftk.png]"
+ },
+ {
+  "name": "delete_layers",
+  "argsBytes": 19,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm1"
+   ]
+  },
+  "result": "ok"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 81,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Gold Line",
+   "x": 539,
+   "y": 300,
+   "w": 2,
+   "h": 560,
+   "fill": "#d4b886"
+  },
+  "result": "{\"id\":\"l_03jm4\"}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 238,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm4",
+     "prop": "size",
+     "keyframes": [
+      {
+       "t": 0.5,
+       "v": [
+        2,
+        0
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.5,
+       "v": [
+        2,
+        560
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0.5,
+       "v": [
+        540,
+        300
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.5,
+       "v": [
+        540,
+        580
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 2 tracks on 1 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 42,
+  "ok": true,
+  "ms": 176,
+  "editorMs": 152,
+  "input": {
+   "times": [
+    0.4,
+    1.5,
+    2.5,
+    4.5,
+    6.9
+   ],
+   "cell": 240
+  },
+  "result": "5 frames left→right, top→bottom at 0.4s, 1.5s, 2.5s, 4.5s, 6.9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/ab7ed556-8656-494a-98c3-1c99c4f3f5d5/tool-results/mcp-motion-blob-1794502023682-e5e1l6.jpg]"
+ }
+]

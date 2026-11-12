@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 6,
+  "style_match": 7,
+  "timing_easing": 5,
+  "composition": 7,
+  "richness": 4,
+  "polish": 4
+ },
+ "overall": 5.5,
+ "critique": [
+  "The bars do not grow from the baseline: the frames at 1.63s, 2.17s and 2.73s show Q2, Q3 and Q4 as boxes floating in mid-air above the axis while they grow. Position and size are keyed separately and drift out of sync, so the chart's core beat looks like a glitch. Value labels only fade and slide; they don't count up, and the static end is a flat 2.5s.",
+  "Set each bar's anchor to its bottom edge, pin position at y=900, and animate only height (or scaleY) with a strong ease-out such as an expo or a light spring. Then drive each label's number with a 0→value count tied to its bar's growth, and give the Q4 pop a real overshoot on both the bar and the label."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0626438,
+ "ms": 11485,
+ "raw": "```json\n{\"brief_fit\": 6, \"style_match\": 7, \"timing_easing\": 5, \"composition\": 7, \"richness\": 4, \"polish\": 4,\n \"critique\": [\"The bars do not grow from the baseline: the frames at 1.63s, 2.17s and 2.73s show Q2, Q3 and Q4 as boxes floating in mid-air above the axis while they grow. Position and size are keyed separately and drift out of sync, so the chart's core beat looks like a glitch. Value labels only fade and slide; they don't count up, and the static end is a flat 2.5s.\", \"Set each bar's anchor to its bottom edge, pin position at y=900, and animate only height (or scaleY) with a strong ease-out such as an expo or a light spring. Then drive each label's number with a 0→value count tied to its bar's growth, and give the Q4 pop a real overshoot on both the bar and the label.\"]}\n```"
+}

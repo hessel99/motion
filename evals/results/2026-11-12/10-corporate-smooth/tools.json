@@ -1,0 +1,333 @@
+[
+ {
+  "name": "set_composition",
+  "argsBytes": 24,
+  "ok": true,
+  "ms": 33,
+  "editorMs": 1,
+  "input": {
+   "background": "#18202a"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 92,
+  "ok": true,
+  "ms": 74,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Panel",
+   "x": 120,
+   "y": 800,
+   "w": 760,
+   "h": 140,
+   "fill": "#5f7a96d9",
+   "radius": 4
+  },
+  "result": "{\"id\":\"l_03jm1\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 119,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Accent Line",
+   "d": "M0 2 L760 2",
+   "x": 120,
+   "y": 790,
+   "w": 760,
+   "h": 4,
+   "stroke": "#a9c4de",
+   "strokeWidth": 3
+  },
+  "result": "{\"id\":\"l_03jm2\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 181,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Name",
+   "x": 156,
+   "y": 816,
+   "w": 700,
+   "h": 58,
+   "fill": "#f2f6fa",
+   "text": {
+    "content": "Dr. Amelia Hart",
+    "fontSize": 46,
+    "fontWeight": 600,
+    "align": "left",
+    "fontFamily": "Inter"
+   }
+  },
+  "result": "{\"id\":\"l_03jm3\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 198,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Title",
+   "x": 156,
+   "y": 880,
+   "w": 700,
+   "h": 38,
+   "fill": "#c9d6e3",
+   "text": {
+    "content": "Head of Research, Larkspur Labs",
+    "fontSize": 27,
+    "fontWeight": 400,
+    "align": "left",
+    "fontFamily": "Inter"
+   }
+  },
+  "result": "{\"id\":\"l_03jm4\"}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 789,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm2",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 0.2,
+       "v": 0,
+       "ease": "Quart In Out"
+      },
+      {
+       "t": 1.4,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "trimStart",
+     "keyframes": [
+      {
+       "t": 5,
+       "v": 0,
+       "ease": "Quart In Out"
+      },
+      {
+       "t": 5.8,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm1",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0.6,
+       "v": [
+        380,
+        870
+       ],
+       "ease": "Quart In Out"
+      },
+      {
+       "t": 1.8,
+       "v": [
+        500,
+        870
+       ],
+       "ease": "Quart In Out"
+      },
+      {
+       "t": 5,
+       "v": [
+        500,
+        870
+       ],
+       "ease": "Quart In Out"
+      },
+      {
+       "t": 5.8,
+       "v": [
+        380,
+        870
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm1",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0.6,
+       "v": 0,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 1.6,
+       "v": 100
+      },
+      {
+       "t": 5,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.8,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 5,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.6,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 5.1,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.7,
+       "v": 0
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 6 tracks on 4 layers"
+ },
+ {
+  "name": "set_text_animation",
+  "argsBytes": 117,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm3"
+   ],
+   "mode": "in",
+   "by": "line",
+   "start": 1.2,
+   "duration": 1,
+   "ease": "Quart Out",
+   "from": {
+    "dx": -30,
+    "opacity": 0
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_text_animation",
+  "argsBytes": 117,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm4"
+   ],
+   "mode": "in",
+   "by": "line",
+   "start": 1.5,
+   "duration": 1,
+   "ease": "Quart Out",
+   "from": {
+    "dx": -30,
+    "opacity": 0
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 103,
+  "editorMs": 69,
+  "input": {
+   "times": [
+    0.8,
+    1.4,
+    2.2,
+    3.5,
+    5.3,
+    5.9
+   ],
+   "cell": 400
+  },
+  "result": "6 frames left→right, top→bottom at 0.8s, 1.4s, 2.2s, 3.5s, 5.3s, 5.9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/8a2fa085-cb0b-4aed-89ec-50d601346726/tool-results/mcp-motion-blob-1794501865701-o5flog.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 115,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm2",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 5.3,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.9,
+       "v": 0
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 6,
+  "input": {
+   "t": 5.9,
+   "maxSize": 400
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/8a2fa085-cb0b-4aed-89ec-50d601346726/tool-results/mcp-motion-blob-1794501869872-rktsbb.png]"
+ }
+]

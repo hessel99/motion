@@ -1,0 +1,131 @@
+{
+ "run": {
+  "id": "13-parallax-depth",
+  "name": "13-parallax-depth",
+  "model": "sonnet",
+  "seed": 1,
+  "wallMs": 50282,
+  "timedOut": false,
+  "turns": 18,
+  "costUsd": 0.12127819999999999,
+  "durationMs": 49491,
+  "usage": {
+   "input": 99393,
+   "cached": 88942,
+   "output": 7060
+  },
+  "errors": [],
+  "toolCalls": 17,
+  "toolErrors": 0,
+  "toolsAvailable": 37,
+  "finalText": "I built the parallax shot as a 10-layer, 8-second scene with a slow push-in and a pan to the right. I checked the frames and tweaked the sky tint, haze and sun. After the last change, which moved the sun to the right so the title no longer touches it, I did not re-render.\n\n- **Depth layers:** Sky (with a Sky Top tint) and Sun Glow sit at the back. In front of them, in order, are Far Mountains, Mid Hills, Near Trees and Foreground Grass.\n- **Parallax:** Over the 8 seconds, the farther layers pan and scale less than the near ones.\n  - Far Mountains: about 35px of pan and 105% scale.\n  - Mid Hills: about 90px and 112%.\n  - Near Trees: about 190px and 122%.\n  - Foreground Grass: about 360px and 145%.\n  - The sky and sun barely move.\n- **Atmospheric haze:** The far layers use lighter, lower-contrast colours (pale blue-grey for the mountains, mid blue-grey for the hills). Two soft haze bands, Haze Far and Haze Near, move with the layers they sit behind.\n- **Title:** \"Into the Quiet\" sits in the stack between Mid Hills and Near Trees. It fades in from 2.5s to 4.2s and moves with a depth between the hills and trees.\n\nI could only fake the sky gradient with two overlapping rectangles, since layers take a single fill colour. If you want it smoother, I can add a few more bands. I can also make the push stronger or change the title timing."
+ },
+ "metrics": {
+  "layers": 10,
+  "drawableLayers": 10,
+  "layerTypes": {
+   "rect": 2,
+   "ellipse": 3,
+   "path": 4,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 10,
+  "keys": 36,
+  "segments": 18,
+  "easesUsed": {
+   "Easy Ease": 18
+  },
+  "distinctEases": 1,
+  "easeFamilies": 1,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 4,
+  "gradientLayers": 0,
+  "paletteSize": 7,
+  "palette": [
+   "#f0cdb8",
+   "#8ea4cf",
+   "#fff1d6",
+   "#bcc6dc",
+   "#dfe6ea",
+   "#33505a",
+   "#14262a"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.988,
+  "firstMotion": 0.067,
+  "lastMotion": 7.933,
+  "endHold": 0.067,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 8.107,
+  "exits": 0,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.038,
+  "midLuma": 0.661,
+  "toolErrors": 0,
+  "toolCalls": 17
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 depth layers",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "parallax: ≥3 layers moving at clearly different speeds",
+    "type": "parallax",
+    "pass": true
+   },
+   {
+    "text": "camera push (scale animated on ≥2 layers)",
+    "type": "propAnimatedMin",
+    "pass": true
+   },
+   {
+    "text": "custom path shapes for mountains/hills (≥2)",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "gradient sky or haze (gradient paint or translucent layers)",
+    "type": "gradientOrHaze",
+    "pass": true
+   },
+   {
+    "text": "title sits between hills and trees in the layer order",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": {
+  "frames": 240,
+  "sourceCodec": "avc1.64001f",
+  "bytes": 46363
+ }
+}

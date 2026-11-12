@@ -1,0 +1,44 @@
+- Blob terracotta [path] box 318,230,624,600 #e8b08a
+- Blob mustard [path] box 1393,54,374,393 #f0cb7a
+- Blob sage [path] box 1286,667,528,327 #b5bf96
+- Blob rust [path] box 27,776,326,269 #d98e6a
+- Wheat stem [path] box 149,202,244,641 #000000 a0 stroke #4a3426 7px
+- Wheat grains [path] box 149,202,244,641 #000000 a0 stroke #4a3426 7px
+- Loaf outline [path] box 478,421,482,303 #000000 a0 stroke #4a3426 8px
+- Loaf scores [path] box 478,421,482,303 #000000 a0 stroke #4a3426 6px
+- Title [text] box 950,380,900,170 #4a3426 "Crumb & Co" Georgia 140px w700
+- Tagline [text] box 1000,580,700,60 #8a5a3c "baked slowly, with love" Georgia 44px w400
+
+comp 1920x1080 6s @24fps, background #f7eedc
+"Blob terracotta" (path l_03jm1)
+  scale: 0s 92 ─Sine In Out→ 3s [104,100] ─Sine In Out→ 6s 92
+  opacity: 0s 0 ─Easy Ease→ 1.2s 85
+"Blob mustard" (path l_03jm2)
+  scale: 0s 100 ─Sine In Out→ 2.4s [93,98] ─Sine In Out→ 6s 100
+  opacity: 0.3s 0 ─Easy Ease→ 1.5s 85
+"Blob sage" (path l_03jm3)
+  scale: 0s [95,100] ─Sine In Out→ 3.4s [106,96] ─Sine In Out→ 6s [95,100]
+  opacity: 0.5s 0 ─Easy Ease→ 1.7s 80
+"Blob rust" (path l_03jm4)
+  scale: 0s 100 ─Sine In Out→ 2s [110,104] ─Sine In Out→ 6s 100
+  opacity: 0.7s 0 ─Easy Ease→ 1.9s 75
+"Wheat stem" (path l_03jm5)
+  position: expr "[270 + sin(floor(time*12)*78.2)*2.5, 520 + cos(floor(time*12)*37.7)*2.5]"
+  rotation: expr "sin(floor(time*12)*12.9898)*0.7"
+  trimEnd: 0.4s 0 ─Easy Ease→ 2s 100
+"Wheat grains" (path l_03jm6)
+  position: expr "[270 + sin(floor(time*12)*78.2)*2.5, 520 + cos(floor(time*12)*37.7)*2.5]"
+  rotation: expr "sin(floor(time*12)*12.9898)*0.7"
+  trimEnd: 1.6s 0 ─Easy Ease→ 3s 100
+"Loaf outline" (path l_03jm7)
+  position: expr "[720 + sin(floor(time*12)*51.3)*2.5, 570 + cos(floor(time*12)*23.9)*2.5]"
+  rotation: expr "sin(floor(time*12)*12.9898)*0.7"
+  trimEnd: 1s 0 ─Easy Ease→ 2.9s 100
+"Loaf scores" (path l_03jm8)
+  position: expr "[720 + sin(floor(time*12)*51.3)*2.5, 570 + cos(floor(time*12)*23.9)*2.5]"
+  rotation: expr "sin(floor(time*12)*12.9898)*0.7"
+  trimEnd: 2.7s 0 ─Easy Ease→ 3.6s 100
+"Title" (text l_03jm9)
+  text animator: in by char, start 3s, 0.7s each, stagger 0.07s, ease spring:0.45
+"Tagline" (text l_03jma)
+  text animator: in by word, start 3.9s, 0.7s each, stagger 0.18s, ease Sine Out

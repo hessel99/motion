@@ -1,0 +1,221 @@
+[
+ {
+  "kind": "session",
+  "sessionId": "a46814ff-fe15-474c-9936-c1d32374c94b",
+  "at": 1794501685473
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_011hd3sV8rAaXTQ8SnEE1e9J",
+  "name": "set_composition",
+  "input": "{\"background\":\"#0f1020\"}",
+  "at": 1794501690509
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_011hd3sV8rAaXTQ8SnEE1e9J",
+  "isError": false,
+  "summary": "ok",
+  "at": 1794501690534
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_017cASRKbDXMzNXraBwZd47Z",
+  "name": "add_layer",
+  "input": "{\"type\":\"text\",\"name\":\"P1\",\"x\":60,\"y\":440,\"w\":960,\"h\":200,\"fill\":\"#ffffff\",\"text\":{\"content\":\"Design is not\",\"fontSize\":120,\"fontWeight\":600,\"align\":\"center\",\"fontFamily\":\"Inter\"}}",
+  "at": 1794501691645
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_017cASRKbDXMzNXraBwZd47Z",
+  "isError": false,
+  "summary": "{\"id\":\"l_03jm1\"}",
+  "at": 1794501691715
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01FYaeyRcThNX5eD6jgRi8Fj",
+  "name": "add_layer",
+  "input": "{\"type\":\"text\",\"name\":\"P2\",\"x\":60,\"y\":440,\"w\":960,\"h\":200,\"fill\":\"#c9cbe8\",\"text\":{\"content\":\"just what it looks like.\",\"fontSize\":84,\"fontWeight\":400,\"align\":\"center\",\"fontFamily\":\"Inter\"}}",
+  "at": 1794501692926
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01FYaeyRcThNX5eD6jgRi8Fj",
+  "isError": false,
+  "summary": "{\"id\":\"l_03jm2\"}",
+  "at": 1794501692937
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01LHk8JZSbWKgqBXnaQnaA4D",
+  "name": "add_layer",
+  "input": "{\"type\":\"text\",\"name\":\"P3\",\"x\":60,\"y\":300,\"w\":960,\"h\":160,\"fill\":\"#ffffff\",\"text\":{\"content\":\"Design is\",\"fontSize\":100,\"fontWeight\":600,\"align\":\"center\",\"fontFamily\":\"Inter\"}}",
+  "at": 1794501694064
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01LHk8JZSbWKgqBXnaQnaA4D",
+  "isError": false,
+  "summary": "{\"id\":\"l_03jm3\"}",
+  "at": 1794501694086
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_012G94ufcysbYaFRrjUURcrj",
+  "name": "add_layer",
+  "input": "{\"type\":\"text\",\"name\":\"P4 emphasis\",\"x\":40,\"y\":430,\"w\":1000,\"h\":240,\"fill\":\"#ff5c8a\",\"text\":{\"content\":\"how it works.\",\"fontSize\":170,\"fontWeight\":900,\"align\":\"center\",\"fontFamily\":\"Inter\"}}",
+  "at": 1794501695341
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_012G94ufcysbYaFRrjUURcrj",
+  "isError": false,
+  "summary": "{\"id\":\"l_03jm4\"}",
+  "at": 1794501695353
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_012jxzRGzhqTNsXh8qeii5pR",
+  "name": "add_layer",
+  "input": "{\"type\":\"text\",\"name\":\"Attribution\",\"x\":60,\"y\":880,\"w\":960,\"h\":60,\"fill\":\"#9a9cc0\",\"text\":{\"content\":\"— Steve Jobs\",\"fontSize\":36,\"fontWeight\":400,\"align\":\"center\",\"fontFamily\":\"Inter\"}}",
+  "at": 1794501696481
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_012jxzRGzhqTNsXh8qeii5pR",
+  "isError": false,
+  "summary": "{\"id\":\"l_03jm5\"}",
+  "at": 1794501696501
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01V6vajNt1MDB1Dn1BsbhJMB",
+  "name": "set_text_animation",
+  "input": "{\"ids\":[\"l_03jm1\"],\"mode\":\"in\",\"by\":\"word\",\"start\":0.2,\"duration\":0.5,\"stagger\":0.25,\"from\":{\"dy\":60,\"opacity\":0,\"scale\":80},\"ease\":\"Expo Out\"}",
+  "at": 1794501700850
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01V6vajNt1MDB1Dn1BsbhJMB",
+  "isError": false,
+  "summary": "ok",
+  "at": 1794501700861
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_014MdR9vPoyznzTo5vspZnVU",
+  "name": "set_text_animation",
+  "input": "{\"ids\":[\"l_03jm2\"],\"mode\":\"in\",\"by\":\"char\",\"start\":2,\"duration\":0.5,\"stagger\":0.035,\"from\":{\"dy\":50,\"opacity\":0},\"ease\":\"Cubic Out\"}",
+  "at": 1794501701953
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_014MdR9vPoyznzTo5vspZnVU",
+  "isError": false,
+  "summary": "ok",
+  "at": 1794501701963
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01JxLr68Z8grVnNgJEtJ8BLE",
+  "name": "set_text_animation",
+  "input": "{\"ids\":[\"l_03jm3\"],\"mode\":\"in\",\"by\":\"word\",\"start\":3.8,\"duration\":0.5,\"stagger\":0.2,\"from\":{\"dy\":-50,\"opacity\":0},\"ease\":\"Expo Out\"}",
+  "at": 1794501703052
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01JxLr68Z8grVnNgJEtJ8BLE",
+  "isError": false,
+  "summary": "ok",
+  "at": 1794501703063
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01B2KyeTBvzmR7S3AxzC6Shj",
+  "name": "set_text_animation",
+  "input": "{\"ids\":[\"l_03jm4\"],\"mode\":\"in\",\"by\":\"char\",\"start\":4.7,\"duration\":0.6,\"stagger\":0.05,\"from\":{\"scale\":0,\"opacity\":0,\"rotation\":-12},\"ease\":\"spring:0.5\"}",
+  "at": 1794501704225
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01B2KyeTBvzmR7S3AxzC6Shj",
+  "isError": false,
+  "summary": "ok",
+  "at": 1794501704232
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01L8FJtdgmfEwDbKHnPSLcfg",
+  "name": "animate",
+  "input": "{\"tracks\":[{\"id\":\"l_03jm1\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":1.8,\"v\":100},{\"t\":2.3,\"v\":0,\"ease\":\"Ease In\"}]},{\"id\":\"l_03jm1\",\"prop\":\"position\",\"keyframes\":[{\"t\":1.8,\"v\":[540,540]},{\"t\":2.3,\"v\":[540,460],\"ease\":\"Ease In\"}]},{\"id\":\"l_03jm2\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":3.4,\"v\":100},{\"t\":3.9,\"v\":0,\"ease\":\"Ease In\"}]},{\"id\":\"l_03jm2\",\"prop\":\"position\",\"keyframes\":[{\"t\":3.4,\"v\":[540,540]},{\"t\":3.9,\"v\":[540,470],\"ease\":\"Ease In\"}]},{\"id\":\"l_03jm3\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":4.6,\"v\":100},{\"t\":5.2,\"v\":45,\"ease\":\"Ease Out\"}]},{\"id\":\"l_03jm3\",\"prop\":\"position\",\"keyframes\":[{\"t\":4.6,\"v\":[540,380]},{\"t\":5.2,\"v\":[540,350],\"ease\":\"Ease Out\"}]},{\"id\":\"l_03jm4\",\"prop\":\"scale\",\"keyframes\":[{\"t\":5.5,\"v\":[100,100]},{\"t\":6,\"v\":[108,108],\"ease\":\"Easy Ease\"},{\"t\":7.5,\"v\":[104,104],\"ease\":\"Easy Ease\"}]},{\"id\":\"l_03jm5\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":6.4,\"v\":0},{\"t\":7,\"v\":100,\"ease\":\"Ease Out\"}]}]}",
+  "at": 1794501707243
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01L8FJtdgmfEwDbKHnPSLcfg",
+  "isError": false,
+  "summary": "ok: 8 tracks on 5 layers",
+  "at": 1794501707271
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01RkqXvA46pYuEvjagaenEFY",
+  "name": "contact_sheet",
+  "input": "{\"times\":[0.6,1.5,2.6,3.6,4.4,5.2,6.2,7.5],\"cell\":300}",
+  "at": 1794501708521
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01RkqXvA46pYuEvjagaenEFY",
+  "isError": false,
+  "summary": "8 frames left→right, top→bottom at 0.6s, 1.5s, 2.6s, 3.6s, 4.4s, 5.2s, 6.2s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/a46814ff-fe15-474c-9936-c1d32374c94b/tool-results/mcp-motion-blob-1794501708635-jm5e75.jpg]",
+  "at": 1794501708649
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01BDRpwhzcS3eMj7cA1kbqsz",
+  "name": "update_layer",
+  "input": "{\"id\":\"l_03jm4\",\"text\":{\"fontSize\":135}}",
+  "at": 1794501710997
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01BDRpwhzcS3eMj7cA1kbqsz",
+  "isError": false,
+  "summary": "ok",
+  "at": 1794501711015
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01TXyYyQMmopsYm2ZFRsR2eZ",
+  "name": "screenshot",
+  "input": "{\"times\":[1.5,6.5],\"maxSize\":400}",
+  "at": 1794501711356
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01TXyYyQMmopsYm2ZFRsR2eZ",
+  "isError": false,
+  "summary": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/a46814ff-fe15-474c-9936-c1d32374c94b/tool-results/mcp-motion-blob-1794501711405-o0lryy.png]\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/a46814ff-fe15-474c-9936-c1d32374c94b/tool-results/mcp-motion-blob-1794501711405-ifb3n9.png]",
+  "at": 1794501711413
+ },
+ {
+  "kind": "text",
+  "text": "The quote is built as four phrases on the 8s \"Main\" composition, each handing off to the next. I checked it on a contact sheet and two stills. The last two stills, taken after I shrank the emphasis line, look right.\n\n| Time | Phrase | Animation |\n|---|---|---|\n| 0.2s | \"Design is not\" | Words pop up one by one, then it lifts and fades out around 2s. |\n| 2.0s | \"just what it looks like.\" | Letters rise in one at a time as the first phrase leaves, then it drifts up and fades around 3.5s. |\n| 3.8s | \"Design is\" | Words drop in from above. It stays on screen, shifts up and dims to a grey header. |\n| 4.7s | \"how it works.\" | Pink, heavy, 135px, so it's the biggest and boldest line. Letters spring in with a slight rotation, then it slowly scales up. |\n| 6.4s | \"— Steve Jobs\" | Small grey line that fades in last. |\n\nThe first frame of the contact sheet showed \"how it works.\" wrapping onto two lines at 170px, so I dropped it to 135px to keep it on one line.\n\nI can make the emphasis line even bigger by stacking \"how it\" over \"works.\", or add a background colour shift when it lands.",
+  "at": 1794501715294
+ },
+ {
+  "kind": "done",
+  "result": "The quote is built as four phrases on the 8s \"Main\" composition, each handing off to the next. I checked it on a contact sheet and two stills. The last two stills, taken after I shrank the emphasis line, look right.\n\n| Time | Phrase | Animation |\n|---|---|---|\n| 0.2s | \"Design is not\" | Words pop up one by one, then it lifts and fades out around 2s. |\n| 2.0s | \"just what it looks like.\" | Letters rise in one at a time as the first phrase leaves, then it drifts up and fades around 3.5s. |\n| 3.8s | \"Design is\" | Words drop in from above. It stays on screen, shifts up and dims to a grey header. |\n| 4.7s | \"how it works.\" | Pink, heavy, 135px, so it's the biggest and boldest line. Letters spring in with a slight rotation, then it slowly scales up. |\n| 6.4s | \"— Steve Jobs\" | Small grey line that fades in last. |\n\nThe first frame of the contact sheet showed \"how it works.\" wrapping onto two lines at 170px, so I dropped it to 135px to keep it on one line.\n\nI can make the emphasis line even bigger by stacking \"how it\" over \"works.\", or add a background colour shift when it lands.",
+  "costUsd": 0.0862965,
+  "durationMs": 31817,
+  "numTurns": 15,
+  "usage": {
+   "input": 87855,
+   "cached": 79665,
+   "output": 4559
+  },
+  "at": 1794501717266
+ }
+]

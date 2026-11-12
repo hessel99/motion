@@ -1,0 +1,64 @@
+{
+  "id": "01-logo-reveal",
+  "title": "Logo reveal",
+  "complexity": "simple",
+  "style": [
+    "brand",
+    "clean"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 60,
+    "duration": 4
+  },
+  "prompt": "Logo reveal for \"NOVA\", a small fintech. Build a simple geometric mark (a circle and a diagonal slash work) next to the wordmark. The mark draws/assembles first, then the wordmark slides out from behind it, then a tagline \"Money, made simple\" fades in underneath. Navy background, one accent color. End on a clean hold of the full lockup for at least a second.",
+  "checklist": [
+    {
+      "text": "wordmark \"NOVA\" present",
+      "check": {
+        "type": "textContains",
+        "text": "NOVA"
+      }
+    },
+    {
+      "text": "tagline present",
+      "check": {
+        "type": "textContains",
+        "text": "made simple"
+      }
+    },
+    {
+      "text": "mark built from shapes (≥2 non-text layers)",
+      "check": {
+        "type": "nonTextLayersMin",
+        "min": 2
+      }
+    },
+    {
+      "text": "sequenced: mark → wordmark → tagline (≥3 entrance waves)",
+      "check": {
+        "type": "beatsMin",
+        "min": 3
+      }
+    },
+    {
+      "text": "holds the final lockup ≥1s",
+      "check": {
+        "type": "endHoldMin",
+        "seconds": 1
+      }
+    },
+    {
+      "text": "palette of ≤4 colors",
+      "check": {
+        "type": "paletteMax",
+        "max": 4
+      }
+    },
+    {
+      "text": "wordmark revealed from behind the mark (mask/clip or layer order)",
+      "check": null
+    }
+  ]
+}

@@ -63,6 +63,8 @@ URL=http://localhost:4173/ node scripts/cpu-bench.mjs 10000,25000 [--animated 0.
 URL=http://localhost:5173/ node scripts/fx-bench.mjs 1000,10000  # effect prototypes (dev server only)
 node scripts/agent-loop.mjs out.png    # drives the editor through MCP like an agent (bridge + dev server)
 node scripts/agent-chat.mjs out.png "prompt"  # REAL claude code run through the sidebar
+node scripts/agent-eval.mjs --concurrency 3      # REAL agent eval: 16 briefs → evals/results/<date>/ (see below)
+node scripts/agent-eval-compare.mjs <dirA> <dirB> # per-brief deltas between two eval runs
 ```
 
 Useful URL parameters: `?stress=5000`, `&kinds=rect,ellipse,text,path`, `&nested`, `&play`, `&hud`, `?demo`, `?blank`, `?nobridge`.
@@ -334,6 +336,9 @@ Current numbers from `scripts/cpu-bench.mjs` (the table above is older and came 
 - **Errors** are typed in the bridge (`bridge/errors.mjs`: not installed, auth, rate limit, overloaded, network, timeout, cancelled) and shown with the fix plus Retry. A turn whose CLI prints nothing for 5 min is killed (`MOTION_AGENT_IDLE_MS`). A bridge disconnect ends running turns cleanly.
 - **Persistence**: the conversation and CLI session ids are stored per project (keyed by the first composition id, which is saved in the file). Review cards from earlier sessions are marked stale, because the undo history is gone.
 - Checks: `tests/agent.test.ts` (schema validation, tools against a real store, diff/context, guides load + only name real eases/springs + their expressions compile, prompt size budget, storyboard flow with per-beat undo), `tests/bridge-agent.test.mjs` (a fake `claude` replays recorded stream-json: success, auth, crash, timeout, cancel, lean fallback), `scripts/agent-ui-check.mjs` (Playwright, full panel against `tests/fixtures/fake-claude/claude`, which really calls the MCP tools), `scripts/agent-real-check.mjs` (real subscription runs: build, variations, critique), `scripts/agent-director-check.mjs` (real run of the director flow: style chip → storyboard card → approve → beats → critique).
+
+- **Eval harness** (`scripts/agent-eval.mjs`, briefs in `evals/briefs/`, judge rubric in `evals/judge.md`, baseline findings in `evals/BASELINE.md`): each brief runs as a real headless agent turn (own in-process bridge + Playwright editor page per worker, blank doc, comp set from the brief, seeded `Math.random`, same model for all, `--model/--only/--repeat/--concurrency 1..3`). Records every tool call (args size, ok/error, editor ms), turns, wall time, tokens, cost; saves the final document, a 12-frame contact sheet, an MP4 (editor export → ffmpeg H.264, < 2 MB), automatic metrics (eases, springs, text animators, expressions, precomps, animated coverage, off-canvas / text-overlap time, loop seam, beats, exits) and machine checks of the brief's checklist; then a read-only judge call (`claude -p --tools ""`, contact sheet image + timeline text) scores brief fit, style, timing/easing, composition, richness, polish. `--dry` tests the pipeline without a model; `--judge-only DIR --judge-repeat N` re-judges saved runs (calibration). Compare runs with `scripts/agent-eval-compare.mjs`.
+- Checks: `tests/agent.test.ts` (schema validation, tools against a real store, diff/context), `tests/bridge-agent.test.mjs` (a fake `claude` replays recorded stream-json: success, auth, crash, timeout, cancel, lean fallback), `scripts/agent-ui-check.mjs` (Playwright, full panel against `tests/fixtures/fake-claude/claude`, which really calls the MCP tools), `scripts/agent-real-check.mjs` (real subscription runs: build, variations, critique).
 
 ## Quality process used
 

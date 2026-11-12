@@ -1,0 +1,39 @@
+- Card [group] #ffffff a0
+  - Card Shadow [rect] box 78,119,928,606 #000000
+  - Card Face [rect] box 66,107,928,606 #1f3bff stroke #000000 8px
+  - Summer Shadow [text] box 80,159,910,267 #000000 "SUMMER" Inter 200px w900
+  - Summer [text] box 68,147,910,267 #e6ff00 "SUMMER" Inter 200px w900
+- SaleBar [group] #ffffff a0
+  - Bar Shadow [rect] box 116,536,651,253 #000000
+  - Bar Face [rect] box 105,523,651,253 #ffffff stroke #000000 8px
+  - Sale [text] box 106,543,649,223 #000000 "SALE" Inter 180px w900
+- EndsSticker [group] #ffffff a0
+  - Ends Shadow [rect] box 657,50,349,136 #000000
+  - Ends Face [rect] box 646,36,349,136 #ff2e93 stroke #000000 8px
+  - Ends Text [text] box 649,56,344,97 #000000 "ENDS SUNDAY" Inter 44px w900
+- ShipSticker [group] #ffffff a0
+  - Ship Shadow [rect] box 68,828,449,158 #000000
+  - Ship Face [rect] box 55,817,449,158 #1f3bff stroke #000000 8px
+  - Ship Text [text] box 58,845,445,108 #ffffff "FREE SHIPPING" Inter 56px w900
+- Starburst [group] #ffffff a0
+  - Burst Shadow [path] box 733,736,180,180 #000000
+  - Burst Face [path] box 739,736,180,180 #ff2e93 stroke #000000 8px
+  - Burst Text [text] box 770,763,117,125 #ffffff "-40%" Inter 96px w900
+
+comp 1080x1080 5s @30fps, background #e6ff00
+"Card" (group l_03jm1)
+  scale: 0.1s 0 ─Easy Ease→ 0.5s 100
+  rotation: 0.1s -25 ─Easy Ease→ 0.5s -3
+"SaleBar" (group l_03jm2)
+  scale: 0.8s 0 ─Easy Ease→ 1.15s 100
+  rotation: 0.8s -20 ─Easy Ease→ 1.15s 3
+"EndsSticker" (group l_03jm3)
+  scale: 1.4s 0 ─Easy Ease→ 1.7s 100
+  rotation: 1.4s -30 ─Easy Ease→ 1.7s 8
+"ShipSticker" (group l_03jm4)
+  scale: 1.8s 0 ─Easy Ease→ 2.1s 100
+  rotation: 1.8s 25 ─Easy Ease→ 2.1s -5
+"Starburst" (group l_03jm5)
+  scale: 2.3s 0 ─Easy Ease→ 2.9s 100
+  scale: expr "value * (1 + (time > 3.2 ? 0.04 * Math.abs(sin((time - 3.2) * 4)) : 0))"
+  rotation: 2.3s -350 ─Easy Ease→ 2.9s 10

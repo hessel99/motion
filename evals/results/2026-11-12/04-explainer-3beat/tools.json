@@ -1,0 +1,590 @@
+[
+ {
+  "name": "set_composition",
+  "argsBytes": 24,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 1,
+  "input": {
+   "background": "#FFF4E2"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 93,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "ellipse",
+   "name": "Glow",
+   "x": 960,
+   "y": 500,
+   "w": 620,
+   "h": 620,
+   "fill": "#8FE3FF",
+   "opacity": 0
+  },
+  "result": "{\"id\":\"l_03jm1\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 175,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 2,
+  "input": {
+   "type": "path",
+   "name": "Shield",
+   "d": "M150 0 L300 50 L300 180 C300 270 230 330 150 360 C70 330 0 270 0 180 L0 50 Z",
+   "x": 960,
+   "y": 500,
+   "w": 300,
+   "h": 360,
+   "fill": "#4F7CFF",
+   "opacity": 0
+  },
+  "result": "{\"id\":\"l_03jm2\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 125,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Check",
+   "d": "M0 55 L50 105 L140 0",
+   "x": 960,
+   "y": 500,
+   "w": 140,
+   "h": 105,
+   "stroke": "#FFFFFF",
+   "strokeWidth": 26
+  },
+  "result": "{\"id\":\"l_03jm3\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 195,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Headline",
+   "x": 460,
+   "y": 830,
+   "w": 1000,
+   "h": 120,
+   "fill": "#2D2A55",
+   "text": {
+    "content": "One key. Every login.",
+    "fontSize": 96,
+    "fontWeight": 800,
+    "align": "center",
+    "fontFamily": "Inter"
+   }
+  },
+  "result": "{\"id\":\"l_03jm4\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 78,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 1,
+  "input": {
+   "type": "group",
+   "name": "Note 1",
+   "x": 700,
+   "y": 420,
+   "w": 200,
+   "h": 200,
+   "rotation": -8
+  },
+  "result": "{\"id\":\"l_03jm5\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 77,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "type": "group",
+   "name": "Note 2",
+   "x": 880,
+   "y": 360,
+   "w": 200,
+   "h": 200,
+   "rotation": 6
+  },
+  "result": "{\"id\":\"l_03jm6\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 79,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 1,
+  "input": {
+   "type": "group",
+   "name": "Note 3",
+   "x": 1070,
+   "y": 430,
+   "w": 200,
+   "h": 200,
+   "rotation": -4
+  },
+  "result": "{\"id\":\"l_03jm7\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 78,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "type": "group",
+   "name": "Note 4",
+   "x": 780,
+   "y": 620,
+   "w": 200,
+   "h": 200,
+   "rotation": 10
+  },
+  "result": "{\"id\":\"l_03jm8\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 79,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "group",
+   "name": "Note 5",
+   "x": 980,
+   "y": 640,
+   "w": 200,
+   "h": 200,
+   "rotation": -10
+  },
+  "result": "{\"id\":\"l_03jm9\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 78,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "type": "group",
+   "name": "Note 6",
+   "x": 1190,
+   "y": 580,
+   "w": 200,
+   "h": 200,
+   "rotation": 7
+  },
+  "result": "{\"id\":\"l_03jma\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 108,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Paper 1",
+   "parent": "l_03jm5",
+   "x": 0,
+   "y": 0,
+   "w": 200,
+   "h": 200,
+   "radius": 12,
+   "fill": "#FFD84D"
+  },
+  "result": "{\"id\":\"l_03jmb\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 171,
+  "ok": true,
+  "ms": 26,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Pw 1",
+   "parent": "l_03jm5",
+   "x": 10,
+   "y": 70,
+   "w": 180,
+   "h": 60,
+   "fill": "#3B3355",
+   "text": {
+    "content": "hunter2",
+    "fontSize": 30,
+    "fontWeight": 700,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jmc\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 108,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Paper 2",
+   "parent": "l_03jm6",
+   "x": 0,
+   "y": 0,
+   "w": 200,
+   "h": 200,
+   "radius": 12,
+   "fill": "#FF9EB5"
+  },
+  "result": "{\"id\":\"l_03jmd\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 173,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Pw 2",
+   "parent": "l_03jm6",
+   "x": 10,
+   "y": 70,
+   "w": 180,
+   "h": 60,
+   "fill": "#3B3355",
+   "text": {
+    "content": "Pa$$w0rd!",
+    "fontSize": 30,
+    "fontWeight": 700,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jme\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 108,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Paper 3",
+   "parent": "l_03jm7",
+   "x": 0,
+   "y": 0,
+   "w": 200,
+   "h": 200,
+   "radius": 12,
+   "fill": "#8FE0B8"
+  },
+  "result": "{\"id\":\"l_03jmf\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 173,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Pw 3",
+   "parent": "l_03jm7",
+   "x": 10,
+   "y": 70,
+   "w": 180,
+   "h": 60,
+   "fill": "#3B3355",
+   "text": {
+    "content": "qwerty123",
+    "fontSize": 30,
+    "fontWeight": 700,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jmg\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 108,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Paper 4",
+   "parent": "l_03jm8",
+   "x": 0,
+   "y": 0,
+   "w": 200,
+   "h": 200,
+   "radius": 12,
+   "fill": "#FFB36B"
+  },
+  "result": "{\"id\":\"l_03jmh\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 174,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Pw 4",
+   "parent": "l_03jm8",
+   "x": 10,
+   "y": 70,
+   "w": 180,
+   "h": 60,
+   "fill": "#3B3355",
+   "text": {
+    "content": "fluffy1987",
+    "fontSize": 30,
+    "fontWeight": 700,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jmi\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 108,
+  "ok": true,
+  "ms": 22,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Paper 5",
+   "parent": "l_03jm9",
+   "x": 0,
+   "y": 0,
+   "w": 200,
+   "h": 200,
+   "radius": 12,
+   "fill": "#A9C7FF"
+  },
+  "result": "{\"id\":\"l_03jmj\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 175,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Pw 5",
+   "parent": "l_03jm9",
+   "x": 10,
+   "y": 70,
+   "w": 180,
+   "h": 60,
+   "fill": "#3B3355",
+   "text": {
+    "content": "admin/admin",
+    "fontSize": 28,
+    "fontWeight": 700,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jmk\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 108,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Paper 6",
+   "parent": "l_03jma",
+   "x": 0,
+   "y": 0,
+   "w": 200,
+   "h": 200,
+   "radius": 12,
+   "fill": "#C9B2FF"
+  },
+  "result": "{\"id\":\"l_03jml\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 172,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Pw 6",
+   "parent": "l_03jma",
+   "x": 10,
+   "y": 70,
+   "w": 180,
+   "h": 60,
+   "fill": "#3B3355",
+   "text": {
+    "content": "P@ssw0rd",
+    "fontSize": 30,
+    "fontWeight": 700,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jmm\"}"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 21,
+  "ok": true,
+  "ms": 51,
+  "editorMs": 20,
+  "input": {
+   "t": 0,
+   "maxSize": 640
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/749f33ae-3b74-4efe-9ca3-a71301171996/tool-results/mcp-motion-blob-1794501778614-k2wcgy.png]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm1",
+   "props": {
+    "position": [
+     960,
+     500
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm2",
+   "props": {
+    "position": [
+     960,
+     500
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm3",
+   "props": {
+    "position": [
+     960,
+     505
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 65,
+  "ok": true,
+  "ms": 32,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "props": {
+    "position": [
+     960,
+     880
+    ],
+    "size": [
+     1500,
+     120
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 5061,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 2,
+  "input": "{\"tracks\":[{\"id\":\"l_03jm5\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[700,420]},{\"t\":4,\"v\":[700,420]},{\"t\":4.9,\"v\":[960,500],\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm5\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0,\"v\":[0,0]},{\"t\":0.2,\"v\":[0,0]},{\"t\":0.7,\"v\":[100,100],\"ease\":\"Back Out\"},{\"t\":4,\"v\":[100,100]},{\"t\":4.9,\"v\":[15,15],\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm5\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":4.8,\"v\":100},{\"t\":4.9,\"v\":0}]},{\"id\":\"l_03jm5\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":0,\"v\":-8},{\"t\":4,\"v\":-8},{\"t\":4.9,\"v\":212,\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm6\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[880,360]},{\"t\":4.18,\"v\":[880,360]},{\"t\":5.08,\"v\":[960,500],\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm6\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0,\"v\":[0,0]},{\"t\":0.35,\"v\":[0,0]},{\"t\":0.85,\"v\":[100,100],\"ease\":\"Back Out\"},{\"t\":4.18,\"v\":[100,100]},{\"t\":5.08,\"v\":[15,15],\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm6\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":4.98,\"v\":100},{\"t\":5.08,\"v\":0}]},{\"id\":\"l_03jm6\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":0,\"v\":6},{\"t\":4.18,\"v\":6},{\"t\":5.08,\"v\":226,\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm7\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[1070,430]},{\"t\":4.36,\"v\":[1070,430]},{\"t\":5.26,\"v\":[960,500],\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm7\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0,\"v\":[0,0]},{\"t\":0.5,\"v\":[0,0]},{\"t\":1,\"v\":[100,100],\"ease\":\"Back Out\"},{\"t\":4.36,\"v\":[100,100]},{\"t\":5.26,\"v\":[15,15],\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm7\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":5.16,\"v\":100},{\"t\":5.26,\"v\":0}]},{\"id\":\"l_03jm7\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":0,\"v\":-4},{\"t\":4.36,\"v\":-4},{\"t\":5.26,\"v\":216,\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm8\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[780,620]},{\"t\":4.54,\"v\":[780,620]},{\"t\":5.44,\"v\":[960,500],\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm8\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0,\"v\":[0,0]},{\"t\":0.65,\"v\":[0,0]},{\"t\":1.15,\"v\":[100,100],\"ease\":\"Back Out\"},{\"t\":4.54,\"v\":[100,100]},{\"t\":5.44,\"v\":[15,15],\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm8\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":5.34,\"v\":100},{\"t\":5.44,\"v\":0}]},{\"id\":\"l_03jm8\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":0,\"v\":10},{\"t\":4.54,\"v\":10},{\"t\":5.44,\"v\":230,\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm9\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[980,640]},{\"t\":4.72,\"v\":[980,640]},{\"t\":5.62,\"v\":[960,500],\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm9\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0,\"v\":[0,0]},{\"t\":0.8,\"v\":[0,0]},{\"t\":1.3,\"v\":[100,100],\"ease\":\"Back Out\"},{\"t\":4.72,\"v\":[100,100]},{\"t\":5.62,\"v\":[15,15],\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jm9\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":5.52,\"v\":100},{\"t\":5.62,\"v\":0}]},{\"id\":\"l_03jm9\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":0,\"v\":-10},{\"t\":4.72,\"v\":-10},{\"t\":5.62,\"v\":210,\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jma\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[1190,580]},{\"t\":4.9,\"v\":[1190,580]},{\"t\":5.8,\"v\":[960,500],\"ease\":\"Cubic In\"}]},{\"id\":\"l_03jma\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0,\"v\":[0,0]},{\"t\":0.95,\"v\":[0,0]},{\"t\":1.45,\"v\":[100,100],\"ease\":\"Back Out\"},{\"t\":4.9,\"v\":[100,100]},{\"t\":5.8,\"v\":[15,15],\"ease\":\"Cubic In\"}]…",
+  "result": "ok: 35 tracks on 10 layers"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 144,
+  "ok": true,
+  "ms": 22,
+  "editorMs": 3,
+  "input": {
+   "ids": [
+    "l_03jm5",
+    "l_03jm6",
+    "l_03jm7",
+    "l_03jm8",
+    "l_03jm9",
+    "l_03jma"
+   ],
+   "prop": "rotation",
+   "expr": "value + (time < 4.0 ? wiggle(9, 5) - value : 0)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 202,
+  "editorMs": 183,
+  "input": {
+   "times": [
+    0.1,
+    1.5,
+    3,
+    4.6,
+    5.4,
+    6,
+    7.2,
+    8,
+    9,
+    11.5
+   ],
+   "frames": 10,
+   "cell": 360
+  },
+  "result": "10 frames left→right, top→bottom at 0.1s, 1.5s, 3s, 4.6s, 5.4s, 6s, 7.2s, 8s, 9s, 11.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/749f33ae-3b74-4efe-9ca3-a71301171996/tool-results/mcp-motion-blob-1794501812245-vlqg2h.jpg]"
+ }
+]
