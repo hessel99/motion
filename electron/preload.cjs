@@ -26,6 +26,24 @@ contextBridge.exposeInMainWorld('motionNative', {
     ipcRenderer.on('file:changed', listener);
     return () => ipcRenderer.removeListener('file:changed', listener);
   },
+  /** app updates (electron/updates/index.cjs, docs/updates.md) */
+  updates: {
+    /** the renderer started fine: keeps a freshly installed interface (otherwise it is rolled back) */
+    appReady: () => ipcRenderer.send('updates:app-ready'),
+    state: () => ipcRenderer.invoke('updates:state'),
+    check: () => ipcRenderer.invoke('updates:check'),
+    /** {channel?: 'stable'|'beta', auto?: boolean} */
+    setPrefs: (p) => ipcRenderer.invoke('updates:prefs', p || {}),
+    /** tell the updater not to check/install now (e.g. while exporting) */
+    setBusy: (reason, on) => ipcRenderer.invoke('updates:busy', reason, !!on),
+    restart: () => ipcRenderer.invoke('updates:restart'),
+    revertUi: () => ipcRenderer.invoke('updates:revert-ui'),
+    onState: (cb) => {
+      const listener = (_e, s) => cb(s);
+      ipcRenderer.on('updates:state', listener);
+      return () => ipcRenderer.removeListener('updates:state', listener);
+    },
+  },
   /** cb(action) for 'new'|'open'|'save'|'saveAs'|'import'|'export-lottie'; returns unsubscribe. */
   onMenu: (cb) => {
     const listener = (_e, action) => cb(action);

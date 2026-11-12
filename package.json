@@ -17,7 +17,11 @@
     "dist": "npm run build && electron-builder",
     "dist:dir": "npm run build && electron-builder --dir",
     "stress": "vite build && node scripts/stress-lab.mjs",
-    "stress:quick": "vite build && node scripts/stress-lab.mjs --quick"
+    "stress:quick": "vite build && node scripts/stress-lab.mjs --quick",
+    "release:local": "npm run build && node scripts/release.mjs --out release/updates",
+    "release:local:mac": "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac zip --publish never && node scripts/release.mjs --out release/updates",
+    "release:serve": "node scripts/serve-release.mjs release/updates",
+    "update-key": "node scripts/gen-update-key.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
@@ -40,6 +44,12 @@
     "vite": "^5.4.0",
     "vitest": "^2.1.0"
   },
+  "motionUpdates": {
+    "repo": "hessel99/motion",
+    "publicKey": "",
+    "macShellUpdater": "helper",
+    "bootTimeoutMs": 20000
+  },
   "build": {
     "appId": "app.motion.editor",
     "productName": "Motion",
@@ -60,17 +70,20 @@
       "target": [
         "dmg",
         "zip"
-      ]
+      ],
+      "artifactName": "${productName}-${version}-mac-${arch}.${ext}"
     },
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "artifactName": "${productName}-${version}-win-${arch}.${ext}"
     },
     "linux": {
       "target": [
         "AppImage"
-      ]
+      ],
+      "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
     }
   },
   "author": "Motion"

@@ -76,3 +76,13 @@
 .kbd-row + .kbd-row { border-top: 1px solid var(--card-divider); }
 .licenses { list-style: none; margin: 0; padding: 0; }
 .licenses li { display: flex; justify-content: space-between; padding: var(--space-3) 0; border-bottom: 1px solid var(--border-subtle); }
+
+/* updates */
+.upd-progress { margin: 0 var(--space-5) var(--space-4); height: 4px; border-radius: 2px; background: var(--surface-hover); overflow: hidden; }
+.upd-progress > div { height: 100%; background: var(--accent, var(--text)); transition: width 0.2s; }
+.upd-error { color: var(--danger-text); }
+.upd-error a { color: inherit; text-decoration: underline; }
+.upd-notes { padding: 0 var(--space-5) var(--space-4); font-size: var(--text-md); line-height: var(--leading); }
+.upd-notes ul { margin: 0 0 var(--space-3); padding-left: 18px; }
+.upd-notes p { margin: 0 0 var(--space-3); }
+.upd-notice .set-card-sub { color: var(--text-secondary); }

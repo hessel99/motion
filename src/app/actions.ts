@@ -1,6 +1,7 @@
 // app level actions: files, import/export, clipboard (incl. figma paste), shortcuts.
 
 import { editor } from './editor';
+import { setBusy } from './updates';
 import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
   setCompSettings, toggleAnimated, parseKeyId, precompose, addMarker, keyId,
@@ -245,6 +246,7 @@ export async function exportGifFile() {
   const el = document.createElement('div');
   el.className = 'toast';
   el.textContent = 'Exporting GIF…';
+  setBusy('export-gif', true); // no update restarts mid-export
   document.body.appendChild(el);
   try {
     const blob = await exportGif({}, (d, n) => { el.textContent = `Exporting GIF… ${Math.round((d / n) * 100)}%`; });
@@ -261,7 +263,7 @@ export async function exportGifFile() {
   } catch (e: any) {
     toast('GIF export failed: ' + (e?.message ?? e), 'error');
     throw e;
-  } finally { el.remove(); }
+  } finally { el.remove(); setBusy('export-gif', false); }
 }
 
 export async function exportLottie() {
@@ -570,6 +572,11 @@ export function setupAutosave() {
     lastEdit = performance.now();
     if (!timer) timer = window.setTimeout(due, QUIET);
   });
+}
+/** write the autosave copy now (before an update restart reloads the window) */
+export async function flushAutosave() {
+  const nat = native() as any;
+  if (nat?.autosaveWrite) await nat.autosaveWrite(serialize());
 }
 export async function restoreAutosaveNative(): Promise<boolean> {
   const nat = native() as any;

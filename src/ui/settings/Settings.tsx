@@ -1,16 +1,17 @@
 // Settings: its own tab in the tab strip. a left nav (Account / Agents / Workspace / App) and
 // card sections. Appearance, Connections, Keyboard shortcuts, Models and Agent runs are real;
-// Profile, Notifications, Members and Updates are placeholders.
+// Updates is real too (src/app/updates.ts, electron/updates/). Profile, Notifications and Members are placeholders.
 
 import { useEffect, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 import { editor } from '../../app/editor';
-import { toast } from '../../app/actions';
+import { flushAutosave, toast } from '../../app/actions';
+import { checkForUpdates, formatBytes, getUpdateStatus, isBusy, onUpdateStatus, restartToUpdate, revertUi, setUpdatePrefs, updatesAvailable, type UpdateStatus } from '../../app/updates';
 import { prefs, setPref } from '../../app/prefs';
 import { agentClient } from '../../agent/client';
 import { useChannels } from '../hooks';
 import { getThemePref, onThemeChange, setTheme, type ThemePref } from '../theme';
-import { Button, Dialog, Kbd } from '../ui';
+import { Button, Dialog, Kbd, Segmented } from '../ui';
 import { SHORTCUTS } from '../chrome/shortcuts';
 import { ui, setUi, type SettingsSection } from '../chrome/ui-state';
 import { agentPrefs, setAgentPref, CLAUDE_MODELS, PROVIDER_LABEL } from '../agent/agent-prefs';
@@ -345,9 +346,104 @@ function Fonts() {
 
 // ---------------- updates ----------------
 function Updates() {
+  const st = useUpdateStatus();
+  const [, tick] = useState(0);
+  useEffect(() => { const t = setInterval(() => tick(x => x + 1), 30_000); return () => clearInterval(t); }, []);
+  if (!st) {
+    return (
+      <Card title={`Motion ${APP_VERSION}`} sub="Updates install automatically in the desktop app.">
+        <div class="set-empty muted">You are using Motion in a browser, which always loads the latest build.</div>
+      </Card>
+    );
+  }
+  const busy = isBusy();
+  const ready = st.ready;
+  const checking = st.phase === 'checking';
+  const downloading = st.phase === 'downloading' && st.progress;
+  const pct = downloading ? Math.min(100, Math.round((st.progress!.received / Math.max(1, st.progress!.total)) * 100)) : 0;
+  const ver = st.uiVersion;
+  const shellNote = st.uiVersion !== st.shellVersion ? ` · app ${st.shellVersion}` : '';
+  let line: ComponentChildren = st.lastCheck ? `Last checked ${ago(st.lastCheck)}` : 'Not checked yet';
+  if (checking) line = 'Checking…';
+  else if (downloading) line = `Downloading ${st.available?.version ?? ''}… ${formatBytes(st.progress!.received)} of ${formatBytes(st.progress!.total)}`;
+  else if (ready) line = ready.kind === 'shell' ? `Motion ${ready.version} is ready. It installs when you restart or quit.` : `Motion ${ready.version} is ready to use.`;
+  else if (st.phase === 'up-to-date') line = `You're up to date · checked ${ago(st.lastCheck)}`;
+  const restart = async () => {
+    const err = await restartToUpdate(flushAutosave);
+    if (err) toast(err, 'error');
+  };
   return (
-    <Card title="Motion 0.1.0" sub="Updates are delivered with new builds of the desktop app.">
-      <Row label="You're on the latest version you installed"><Button size="sm" onClick={() => toast('Automatic updates are not set up yet')}>Check for updates</Button></Row>
-    </Card>
+    <>
+      {st.notice && <Card class="upd-notice" sub={st.notice.text} />}
+      <Card title={`Motion ${ver}`} sub={<span>{st.channel === 'beta' ? 'Beta channel' : 'Stable channel'}{shellNote}{st.uiSource === 'downloaded' ? ' · updated in place' : ''}</span>}
+        right={ready
+          ? <Button size="sm" variant="primary" disabled={busy} title={busy ? 'Available when the export has finished' : undefined} onClick={restart}>Restart to update</Button>
+          : <Button size="sm" disabled={!st.enabled || checking || !!downloading} onClick={() => checkForUpdates()}>{checking ? 'Checking…' : 'Check for updates'}</Button>}>
+        {!st.enabled && <div class="set-line muted">{st.disabledReason}</div>}
+        {st.enabled && <div class="set-line muted" aria-live="polite">{line}</div>}
+        {downloading && <div class="upd-progress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}><div style={{ width: pct + '%' }} /></div>}
+        {st.phase === 'error' && st.error && (
+          <div class="set-line upd-error">
+            {st.error}
+            {st.available?.manual && st.releasesUrl && <> <a href={st.releasesUrl} target="_blank" rel="noreferrer">Open downloads</a></>}
+          </div>
+        )}
+        {busy && ready && <div class="set-line muted">Exporting: the update waits until the export has finished.</div>}
+      </Card>
+      {(ready || st.available) && (ready || st.available)!.notes && (
+        <Card title={`What's new in ${(ready || st.available)!.version}`}>
+          <div class="upd-notes">{renderNotes((ready || st.available)!.notes)}</div>
+        </Card>
+      )}
+      <Card title="Settings">
+        <Row label="Check automatically" sub="When Motion starts and every 6 hours. Updates download in the background and never interrupt your work.">
+          <Switch label="Check automatically" checked={st.auto} disabled={!st.enabled} onChange={v => setUpdatePrefs({ auto: v })} />
+        </Row>
+        <Row label="Channel" sub={st.channel === 'beta' ? 'Early builds: new features sooner, a little less tested' : 'Tested releases'}>
+          <Segmented size="sm" label="Update channel" value={st.channel} disabled={!st.enabled}
+            options={[{ value: 'stable', label: 'Stable' }, { value: 'beta', label: 'Beta' }]} onChange={v => setUpdatePrefs({ channel: v })} />
+        </Row>
+        {st.uiSource === 'downloaded' && (
+          <Row label="Use the built-in version" sub={`Go back to Motion ${st.bundledVersion} on the next start, if this version misbehaves`}>
+            <Button size="sm" onClick={() => revertUi().then(() => toast(`Motion ${st.bundledVersion} is used after a restart`))}>Revert</Button>
+          </Row>
+        )}
+        {!st.shellSupported && st.shellBlocked && st.enabled && (
+          <Row label="Full app updates" sub={st.shellBlocked}><Status kind="off">Manual</Status></Row>
+        )}
+      </Card>
+    </>
   );
+}
+
+const APP_VERSION = (import.meta as any).env?.VITE_APP_VERSION ?? '';
+
+function useUpdateStatus(): UpdateStatus | null {
+  const [s, setS] = useState<UpdateStatus | null>(getUpdateStatus());
+  useEffect(() => onUpdateStatus(x => setS(x ? { ...x } : null)), []);
+  return updatesAvailable() ? s : null;
+}
+
+function ago(t: number) {
+  const s = Math.max(0, (Date.now() - t) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.round(s / 60)} min ago`;
+  if (s < 86400) return `${Math.round(s / 3600)} h ago`;
+  return new Date(t).toLocaleDateString();
+}
+
+/** release notes are short markdown-ish text: "- item" lines become a list, other lines paragraphs */
+function renderNotes(notes: string) {
+  const out: ComponentChildren[] = [];
+  let items: string[] = [];
+  const flush = () => { if (items.length) out.push(<ul>{items.map(i => <li>{i}</li>)}</ul>); items = []; };
+  for (const raw of notes.split(/\r?\n/)) {
+    const l = raw.trim().replace(/\*\*/g, '');
+    if (!l) { flush(); continue; }
+    const m = /^[-*•]\s+(.*)$/.exec(l);
+    if (m) items.push(m[1]);
+    else { flush(); out.push(<p>{l.replace(/^#+\s*/, '')}</p>); }
+  }
+  flush();
+  return out;
 }

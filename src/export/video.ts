@@ -10,6 +10,7 @@ import {
   AudioBufferSource, getFirstEncodableAudioCodec,
 } from 'mediabunny';
 import { mixAudio } from '../audio/engine';
+import { setBusy } from '../app/updates';
 import { editor } from '../app/editor';
 import { getBitmap } from '../render/raster';
 
@@ -190,6 +191,7 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
   throwIfAborted();
 
   exporting = true;
+  setBusy('export-video', true); // no update restarts mid-export
   const wasPlaying = store.playing;
   editor.pause();
   editor.stop();
@@ -292,6 +294,7 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
     r.setView(prev.zoom, prev.panX, prev.panY);
     r.dirty = true;
     exporting = false;
+    setBusy('export-video', false);
     editor.renderer.syncRaster = false;
     editor.resume();
     if (wasPlaying) editor.play();

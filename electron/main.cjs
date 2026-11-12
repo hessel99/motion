@@ -8,6 +8,11 @@ const fs = require('node:fs/promises');
 const { pathToFileURL } = require('node:url');
 
 const isDev = process.argv.includes('--dev');
+// tests run with their own app data folder (scripts/update-check.mjs)
+if (process.env.MOTION_USER_DATA) app.setPath('userData', path.resolve(process.env.MOTION_USER_DATA));
+const { createUpdates } = require('./updates/index.cjs');
+/** @type {ReturnType<typeof createUpdates> | null} */
+let updates = null;
 const DEV_URL = process.env.MOTION_DEV_URL || 'http://localhost:5173';
 
 // Smooth rendering: GPU raster + zero-copy uploads. Vsync stays on.
@@ -250,6 +255,7 @@ function createWindow() {
       message: 'You have unsaved changes', detail: 'An autosave copy is kept and restored next time, but the project file itself is not saved.',
     });
     if (choice === 0) e.preventDefault(); // ignore beforeunload and close
+    else if (updates) updates.cancelLoad(); // "Restart to update" was cancelled: keep the running UI
   });
   win.on('closed', () => { win = null; });
 
@@ -259,14 +265,20 @@ function createWindow() {
     return { action: 'deny' };
   });
 
+  if (updates) updates.attach(win);
+  // the built renderer: dist/ inside the app, or a newer verified UI bundle from an update
+  // (electron/updates/index.cjs, with automatic rollback when it does not start)
   if (isDev) win.loadURL(DEV_URL);
+  else if (updates) updates.loadRenderer(win);
   else win.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
 }
 
 app.whenReady().then(() => {
+  try { updates = createUpdates({ isDev }); } catch (e) { console.error('[motion] updates unavailable:', e); }
   startBridge();
   buildMenu();
   createWindow();
+  if (updates) updates.schedule();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
 
@@ -276,4 +288,5 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
   if (bridge) bridge.close().catch(() => {});
+  if (updates) updates.onWillQuit();
 });

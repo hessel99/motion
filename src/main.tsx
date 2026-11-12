@@ -4,6 +4,7 @@ import './ui/styles.css';
 import { initTheme } from './ui/theme';
 import { editor } from './app/editor';
 import { agentClient } from './agent/client';
+import { signalAppReady, updatesAvailable } from './app/updates';
 import { loadDemo, loadStress, preloadImporters, restoreAutosave, restoreAutosaveNative, setupAutosave, setupTitle } from './app/actions';
 
 const q = new URLSearchParams(location.search);
@@ -26,7 +27,16 @@ function startEditor() {
     setupAutosave();
     setupTitle();
     preloadImporters();
+    // the editor is up: a freshly installed update is kept (no signal = automatic rollback)
+    signalAppReady();
   });
+  if (updatesAvailable()) {
+    import('./ui/updates/UpdateNotice').then(({ UpdateNotice }) => {
+      const el = document.body.appendChild(document.createElement('div'));
+      el.id = 'update-notice';
+      render(<UpdateNotice />, el);
+    });
+  }
   if (!q.has('nobridge')) agentClient.connect();
   // stress lab (scripts/stress-lab.mjs): scene builders + measurement loops, never loaded otherwise
   if (q.has('lab')) import('./lab/index');

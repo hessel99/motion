@@ -1,8 +1,12 @@
 import { defineConfig } from 'vite';
 import preact from '@preact/preset-vite';
+import { readFileSync } from 'node:fs';
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 export default defineConfig({
   plugins: [preact()],
   base: './',
+  // the version this renderer was built as (Settings → Updates; update bundles carry their own)
+  define: { 'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version) },
   build: { target: 'es2022', sourcemap: true },
   // agent worktrees live in .claude/: never watch or scan them (they re-triggered dep optimization)
   server: { port: 5173, watch: { ignored: ['**/.claude/**', '**/release/**', '**/bench/results/**'] } },
