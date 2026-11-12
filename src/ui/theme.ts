@@ -71,6 +71,10 @@ const COLOR_TOKENS = {
   tlTabText: '--tl-tab-text',
   tlTabOn: '--tl-tab-on',
   tlTabOnText: '--tl-tab-on-text',
+  tlLabel1: '--tl-label-1', tlLabel2: '--tl-label-2', tlLabel3: '--tl-label-3', tlLabel4: '--tl-label-4',
+  tlLabel5: '--tl-label-5', tlLabel6: '--tl-label-6', tlLabel7: '--tl-label-7', tlLabel8: '--tl-label-8',
+  tlHot: '--tl-hot',
+  tlVelocity: '--tl-velocity',
   // graph editor
   graphBg: '--graph-bg',
   graphGrid: '--graph-grid',

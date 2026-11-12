@@ -24,7 +24,7 @@ export function Inspector() {
   if (store.playing) return <div class="inspector"><div class="insp-empty">Playing…</div></div>;
   const sel = store.selection.map(id => store.layer(id)).filter(Boolean) as Layer[];
   return (
-    <div class="inspector">
+    <div class={'inspector' + (store.keySelection.size > 0 ? ' has-keys' : '')}>
       {store.keySelection.size > 0 && <EasePanel />}
       {sel.length === 0 && <CompPanel />}
       {sel.length > 0 && <LayerPanel layers={sel} />}

@@ -1,20 +1,21 @@
 // window layouts (docs/layouts.md). every layout composes the SAME mounted panels (viewport,
 // timeline, inspector, agent): switching only changes classes on .app, so no canvas, renderer,
-// timeline or agent conversation is ever re-created. `?layout=stage|score|director|classic`
-// (or a / b / c) picks one at startup; the choice is remembered.
+// timeline or agent conversation is ever re-created. `?layout=stage|score|director|studio|classic`
+// (or a / b / c / d) picks one at startup; the choice is remembered.
 import { editor } from '../../app/editor';
 
-export type LayoutId = 'classic' | 'stage' | 'score' | 'director';
+export type LayoutId = 'classic' | 'stage' | 'score' | 'director' | 'studio';
 
 export const LAYOUTS: { id: LayoutId; label: string; short: string; blurb: string }[] = [
   { id: 'classic', label: 'Classic', short: 'Classic', blurb: 'Agent left, canvas, inspector right, timeline below' },
   { id: 'stage', label: 'A · Stage', short: 'Stage', blurb: 'Canvas first: properties float by the selection, the timeline follows it' },
   { id: 'score', label: 'B · Score', short: 'Score', blurb: 'Time is the main axis: every property is a row with its value, ease and keys' },
   { id: 'director', label: 'C · Director', short: 'Director', blurb: 'Talk to the agent, steer by key moments; panels are summoned' },
+  { id: 'studio', label: 'D · Studio', short: 'Studio', blurb: 'Timeline-centric: colored layer bars, slim contextual inspector, preset browser' },
 ];
 
 const KEY = 'motion.layout';
-const ALIAS: Record<string, LayoutId> = { a: 'stage', b: 'score', c: 'director', classic: 'classic', stage: 'stage', score: 'score', director: 'director' };
+const ALIAS: Record<string, LayoutId> = { a: 'stage', b: 'score', c: 'director', d: 'studio', classic: 'classic', stage: 'stage', score: 'score', director: 'director', studio: 'studio' };
 
 function initial(): LayoutId {
   const q = new URLSearchParams(location.search).get('layout');

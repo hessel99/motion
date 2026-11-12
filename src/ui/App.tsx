@@ -20,6 +20,7 @@ import { ScoreFields } from './layouts/ScoreFields';
 import { ScoreTabs, Transport } from './layouts/Transport';
 import { Storyboard, SummonBar } from './layouts/Storyboard';
 import { CommandPalette } from './layouts/CommandPalette';
+import { StudioEffects, StudioFps, StudioRail, StudioTransport, studioExportMenu } from './layouts/Studio';
 import './layouts/layouts.css';
 
 let vp: ViewportController | null = null;
@@ -65,6 +66,10 @@ export function App() {
       {L === 'score' && <ScoreTabs key="score-tabs" />}
       {L === 'director' && <Storyboard key="story" />}
       {L === 'director' && <SummonBar key="summon" />}
+      {L === 'studio' && <StudioRail key="studio-rail" agentOpen={agentOpen} toggleAgent={() => setAgentOpen(o => !o)} />}
+      {L === 'studio' && <StudioTransport key="studio-transport" />}
+      {L === 'studio' && <StudioFps key="studio-fps" />}
+      {L === 'studio' && <StudioEffects key="studio-fx" />}
       <CommandPalette toggleAgent={() => setAgentOpen(o => !o)} fit={() => vp?.fit()} />
       <ShortcutHelp />
       <Welcome />
@@ -122,6 +127,7 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
     <header class="topbar">
       <div class="tb-left">
         <Button variant="ghost" class="logo" onClick={fileMenu as any} aria-haspopup="menu" tip="Menu">◆ Motion ▾</Button>
+        <span class="studio-status" title={s.canUndo ? 'Edited' : 'Up to date'} />
         <input class="filename" aria-label="Project name" value={s.project.name} onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
           onChange={e => setProjectName(s, (e.target as HTMLInputElement).value || 'Untitled')} spellcheck={false} />
         <Button variant="ghost" class="comp-switch" tip="Compositions" aria-haspopup="menu" onClick={(e: MouseEvent) => {
@@ -137,6 +143,7 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
         }}>▣ {s.comp.name} ▾</Button>
         <span class="muted small tb-meta">{s.comp.width}×{s.comp.height} · {s.comp.fps}fps · {s.comp.duration}s</span>
       </div>
+      {layout() === 'studio' && <div class="tb-tools"><Toolbar /></div>}
       <div class="tb-center">
         <Button variant="ghost" icon tip="Go to start (Home)" onClick={() => s.setTime(0)}>⏮</Button>
         <Button variant="ghost" icon tip="Previous frame (,)" onClick={() => editor.stepFrames(-1)}>◂</Button>
@@ -160,6 +167,7 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
           showContextMenu(r.left, r.bottom + 4, LAYOUTS.map(x => ({ label: (x.id === layout() ? '● ' : '   ') + x.label, action: () => setLayout(x.id) })));
         }}>▦ {LAYOUTS.find(x => x.id === layout())!.short} ▾</Button>
         <Button variant="ghost" active={props.agentOpen} tip="AI agent (⌘I)" onClick={props.toggleAgent}>✦ Agent</Button>
+        {layout() === 'studio' && <Button variant="primary" size="sm" class="studio-export" aria-haspopup="menu" onClick={studioExportMenu as any}>Export</Button>}
       </div>
     </header>
   );
@@ -263,13 +271,14 @@ function applyTimelineMode(L: LayoutId) {
   const t = tl;
   t.focusSelection = L === 'stage' && !summon.timeline;
   t.allProps = L === 'score';
+  t.studio = L === 'studio';
   t.leftW = L === 'score' ? 440 : 300;
   if (L !== 'score') t.hideValues = false;
   unsubSel?.(); unsubSel = null;
   for (const id of autoExpanded) t.expand(id, false);
   autoExpanded = new Set();
-  // stage + score: the selected layers open up (and close again when deselected)
-  if (L === 'stage' || L === 'score') {
+  // stage, score, studio: the selected layers open up (and close again when deselected)
+  if (L === 'stage' || L === 'score' || L === 'studio') {
     const sync = () => {
       const sel = new Set(editor.store.selection);
       for (const id of autoExpanded) if (!sel.has(id)) t.expand(id, false);

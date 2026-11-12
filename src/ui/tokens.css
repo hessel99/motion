@@ -133,6 +133,17 @@
   --tl-tab-text: #8a8a93;
   --tl-tab-on: rgba(76, 141, 255, 0.25);
   --tl-tab-on-text: #cfe0ff;
+  /* studio timeline: per-layer label colors (saturated bars), the "hot" color of selected keys + playhead */
+  --tl-label-1: #4a90e2;
+  --tl-label-2: #e8619d;
+  --tl-label-3: #3fa66a;
+  --tl-label-4: #e8833a;
+  --tl-label-5: #8b6cf0;
+  --tl-label-6: #2fa8b5;
+  --tl-label-7: #d9534f;
+  --tl-label-8: #c9a227;
+  --tl-hot: #ffa31a;
+  --tl-velocity: rgba(255, 255, 255, 0.16);
 
   /* ---------- canvas: graph editor ---------- */
   --graph-bg: #141416;
@@ -273,6 +284,16 @@
   --tl-tab-text: #62626c;
   --tl-tab-on: rgba(37, 99, 235, 0.14);
   --tl-tab-on-text: #1747b8;
+  --tl-label-1: #3b7fd4;
+  --tl-label-2: #d64f8b;
+  --tl-label-3: #2f9159;
+  --tl-label-4: #d9722a;
+  --tl-label-5: #7a5ae0;
+  --tl-label-6: #1f97a4;
+  --tl-label-7: #c8443f;
+  --tl-label-8: #b08d16;
+  --tl-hot: #e98a00;
+  --tl-velocity: rgba(0, 0, 0, 0.14);
 
   --graph-bg: #ffffff;
   --graph-grid: rgba(0, 0, 0, 0.06);

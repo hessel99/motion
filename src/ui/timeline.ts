@@ -125,6 +125,8 @@ export class Timeline {
   allProps = false;
   /** prop rows skip the value text (a DOM overlay edits the values in place) */
   hideValues = false;
+  /** studio look: label-colored layer bars, per-component value columns, velocity lines, hot keys */
+  studio = false;
   /** called after the rows were redrawn (rows, scroll or selection changed; never during playback) */
   onBase: (() => void) | null = null;
 
@@ -357,7 +359,7 @@ export class Timeline {
 
   private drawPlayhead(x: number) {
     const g = this.og;
-    g.fillStyle = T.tlPlayhead;
+    g.fillStyle = this.studio ? T.tlHot : T.tlPlayhead;
     g.fillRect(x - 0.5, HEADER_H - 6, 1, this.h);
     g.beginPath();
     g.moveTo(x - 6, 4); g.lineTo(x + 6, 4); g.lineTo(x + 6, HEADER_H - 10); g.lineTo(x, HEADER_H - 4); g.lineTo(x - 6, HEADER_H - 10);
@@ -520,6 +522,8 @@ export class Timeline {
     const cy = y + ROW_H / 2;
     const ix = 8 + r.depth * INDENT;
     const animated = hasAnim(l);
+    const label = this.studio ? this.labelColor(l) : '';
+    if (this.studio) { g.fillStyle = label; g.beginPath(); g.arc(4.5, cy, 3, 0, Math.PI * 2); g.fill(); }
     // twirl
     if (r.hasChildren || animated || this.allProps) {
       g.fillStyle = T.tlTwirl;
@@ -554,7 +558,16 @@ export class Timeline {
     const comp = st.comp;
     const inX = Math.max(this.leftW, this.tToX(Math.max(0, l.inPoint)));
     const outX = Math.min(this.w, this.tToX(Math.min(comp.duration, l.outPoint)));
-    if (outX > inX) {
+    if (this.studio) {
+      // a saturated bar over the layer's life; past the comp end / out point a darker tint of it
+      const endX = this.tToX(Math.min(comp.duration, l.outPoint));
+      g.fillStyle = label;
+      g.globalAlpha = isSel ? 1 : 0.82;
+      if (outX > inX) { g.beginPath(); g.roundRect(inX, y + 2, outX - inX, ROW_H - 4, 2); g.fill(); }
+      const tailX = Math.max(this.leftW, endX);
+      if (tailX < this.w) { g.globalAlpha = 0.28; g.fillRect(tailX, y + 2, this.w - tailX, ROW_H - 4); }
+      g.globalAlpha = 1;
+    } else if (outX > inX) {
       g.fillStyle = isSel ? T.tlBarSelected : T.tlBar;
       g.beginPath();
       g.roundRect(inX, y + 4, outX - inX, ROW_H - 8, 3);
@@ -596,7 +609,7 @@ export class Timeline {
     if (!this.expanded.has(l.id) && animated) {
       let times = this.keyTimesCache.get(l.id);
       if (!times) this.keyTimesCache.set(l.id, (times = layerKeyTimes(l)));
-      g.fillStyle = isSel ? T.tlKeySummarySelected : T.tlKeySummary;
+      g.fillStyle = this.studio ? 'rgba(255,255,255,0.85)' : isSel ? T.tlKeySummarySelected : T.tlKeySummary;
       let lastX = -10;
       // only the keys inside the visible time range (times are sorted)
       const tMax = this.xToT(this.w);
@@ -623,8 +636,9 @@ export class Timeline {
     // keyframe nav: ◆ at current time indicator
     const kf = l.props[key]?.kf ?? [];
     const atKey = kf.some(k => Math.abs(k.t - st.time) < 1e-6);
-    g.fillStyle = atKey ? T.tlKeySelected : T.tlKeyOff;
-    diamond(g, ix + 18, cy, 4);
+    // studio: the add-key diamond sits right before the track
+    g.fillStyle = atKey ? (this.studio ? T.tlHot : T.tlKeySelected) : T.tlKeyOff;
+    diamond(g, this.studio ? this.leftW - 13 : ix + 18, cy, this.studio ? 3.5 : 4);
     atKey ? g.fill() : (g.strokeStyle = T.tlKeyOffStroke, g.stroke());
     g.fillStyle = T.tlPropName;
     g.font = T.font.ui;
@@ -634,10 +648,21 @@ export class Timeline {
     const v = valueAt(l, key, st.time);
     g.fillStyle = T.tlValue;
     g.font = T.font.monoSm;
+    if (this.studio && PROP_DEFS[key].unit !== 'color' && v.length <= 2) {
+      // two compact value columns ("242  150")
+      const cols = v.length === 2 ? v : [v[0]];
+      for (let c = 0; c < cols.length; c++) {
+        const t = fmtValue(key, [cols[c]]);
+        const right = this.leftW - 26 - (cols.length - 1 - c) * 46;
+        g.fillText(t, right - g.measureText(t).width, cy);
+      }
+    } else {
     const txt = fmtValue(key, v);
     const tw = g.measureText(txt).width;
-    g.fillText(txt, this.leftW - 12 - tw, cy);
+    g.fillText(txt, this.leftW - (this.studio ? 26 : 12) - tw, cy);
     }
+    }
+    if (this.studio) this.drawVelocity(g, l, key, kf, cy);
     // keyframes: only the visible time range (keys are sorted by time)
     for (let i = lowerBound(kf, this.xToT(this.leftW - 6) - 1e-9); i < kf.length; i++) {
       const x = this.tToX(kf[i].t);
@@ -645,11 +670,18 @@ export class Timeline {
       if (x < this.leftW - 6) continue;
       const selected = st.keySelection.has(keyId(l.id, key, i));
       // segment line between keys when interpolated
-      if (i < kf.length - 1 && kf[i].interp !== 'hold') {
+      if (!this.studio && i < kf.length - 1 && kf[i].interp !== 'hold') {
         const x2 = this.tToX(kf[i + 1].t);
         const segSel = selected && st.keySelection.has(keyId(l.id, key, i + 1));
         g.fillStyle = segSel ? T.tlSegmentSelected : kf[i].interp === 'spring' ? T.tlSegmentSpring : T.tlSegment;
         g.fillRect(Math.max(this.leftW, x), cy - (segSel ? 1 : 0.5), Math.max(0, Math.min(this.w, x2) - Math.max(this.leftW, x)), segSel ? 2 : 1);
+      }
+      if (this.studio) {
+        // small diamonds; selected keys turn hot
+        g.fillStyle = selected ? T.tlHot : T.tlKey;
+        diamond(g, x, cy, selected ? 4.5 : 3.5);
+        g.fill();
+        continue;
       }
       g.fillStyle = selected ? T.tlKeySelected : T.tlKey;
       g.strokeStyle = selected ? T.tlKeySelectedStroke : T.tlKeyStroke;
@@ -660,6 +692,45 @@ export class Timeline {
       else easeShape(g, x, cy, 5);
       g.fill();
       g.stroke();
+    }
+  }
+
+  /** studio: label color of a layer = its top-level ancestor's slot in the comp (a group and its
+   *  children share a color) */
+  private labelColor(l: Layer) {
+    const st = this.ed.store;
+    let top = l;
+    while (top.parent) { const p = st.layer(top.parent); if (!p) break; top = p; }
+    const root = st.comp.root;
+    const i = Math.max(0, root.length - 1 - root.indexOf(top.id));
+    const L = [T.tlLabel1, T.tlLabel2, T.tlLabel3, T.tlLabel4, T.tlLabel5, T.tlLabel6, T.tlLabel7, T.tlLabel8];
+    return L[i % L.length];
+  }
+
+  /** studio: a faint speed profile between keys, so the motion's feel is visible in the track */
+  private drawVelocity(g: CanvasRenderingContext2D, l: Layer, key: PropKey, kf: Keyframe[], cy: number) {
+    if (kf.length < 2) return;
+    const N = 18, H = 7;
+    g.fillStyle = T.tlVelocity;
+    for (let i = 0; i < kf.length - 1; i++) {
+      const a = kf[i], b = kf[i + 1];
+      const x0 = this.tToX(a.t), x1 = this.tToX(b.t);
+      if (x1 < this.leftW || x0 > this.w || x1 - x0 < 6 || a.interp === 'hold') continue;
+      const sp: number[] = [];
+      let prev = valueAt(l, key, a.t), max = 0;
+      for (let k = 1; k <= N; k++) {
+        const v = valueAt(l, key, a.t + ((b.t - a.t) * k) / N);
+        let d = 0;
+        for (let c = 0; c < v.length; c++) d += (v[c] - prev[c]) ** 2;
+        d = Math.sqrt(d); sp.push(d); if (d > max) max = d; prev = v;
+      }
+      if (max <= 1e-9) continue;
+      g.beginPath();
+      g.moveTo(x0, cy);
+      for (let k = 0; k < N; k++) g.lineTo(x0 + ((x1 - x0) * (k + 0.5)) / N, cy - (sp[k] / max) * H);
+      g.lineTo(x1, cy);
+      g.closePath();
+      g.fill();
     }
   }
 
@@ -782,7 +853,7 @@ export class Timeline {
         this.drag = { kind: 'rows', ids: st.selection.slice(), sy: y, y, moved: false };
       } else {
         // prop row: diamond toggles key at current time, else select layer
-        if (x >= ix + 10 && x <= ix + 26) {
+        if (this.studio ? x >= this.leftW - 22 && x < this.leftW - 4 : x >= ix + 10 && x <= ix + 26) {
           const kf = r.layer.props[r.prop!]?.kf ?? [];
           const idx = kf.findIndex(k => Math.abs(k.t - st.time) < 1e-6);
           if (idx >= 0) deleteKeyframes(st, [keyId(r.id, r.prop!, idx)]);

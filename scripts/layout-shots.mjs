@@ -7,7 +7,7 @@ import { mkdirSync } from 'node:fs';
 const BASE = process.env.URL || 'http://localhost:5173/';
 const [outDir = 'docs/layouts', ...only] = process.argv.slice(2);
 mkdirSync(outDir, { recursive: true });
-const LAYOUTS = only.length ? only : ['classic', 'stage', 'score', 'director'];
+const LAYOUTS = only.length ? only : ['classic', 'stage', 'score', 'director', 'studio'];
 
 // a short, plausible conversation (seeded through localStorage, the panel's own persistence)
 const CHAT = {
@@ -57,7 +57,7 @@ const selectPill = page => page.evaluate(() => {
 for (const L of LAYOUTS) {
   // 1. composing / timing: a layer selected, a segment of keys selected
   {
-    const page = await open(L, { agent: L !== 'stage' });
+    const page = await open(L, { agent: L !== 'stage' && L !== 'studio' });
     await selectPill(page);
     await page.waitForTimeout(900);
     await page.screenshot({ path: `${outDir}/${L}-1-selected.png` });
@@ -102,6 +102,16 @@ if (LAYOUTS.includes('director')) {
   await page.evaluate(() => { const b = [...document.querySelectorAll('.summon-bar button')].find(b => b.textContent.includes('Properties')); b?.click(); });
   await page.waitForTimeout(700);
   await page.screenshot({ path: `${outDir}/director-5-sheets.png` });
+  await page.close();
+}
+
+// studio: the transitions & effects browser, a layer selected
+if (LAYOUTS.includes('studio')) {
+  const page = await open('studio', { agent: false });
+  await page.evaluate(() => { const s = editor.store; s.select([s.comp.root.find(i => s.layer(i).name === 'Pill')]); s.setTime(0.9); });
+  await page.locator('.studio-fx-pill').click();
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: `${outDir}/studio-4-effects.png` });
   await page.close();
 }
 
