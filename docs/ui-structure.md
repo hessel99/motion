@@ -4,36 +4,63 @@ Canvas and timeline are the core of the window; the agent supports them. Dark is
 theme (light works through the same tokens). Screenshots: `docs/shots/ui-v3/`
 (`node scripts/ui-shots.mjs`, `node scripts/agent-panel-shots.mjs` against the fake claude).
 
-## The window (v4: rail + fixed sidebars + stage)
+## The window (v5: title bar + rail + fixed sidebars + full-bleed stage) — LOCKED
 
 ```
-┌──┬──────────────┬───────────────────────────────────────┬──────────────────────┐
-│⌂ │ Agent    ● ✎ │ [file tab ●] [file tab] +             │ ↶ ↷ …        [Share] │
-│+ │              │ ┌ canvas (inset card) ──────────────┐ │ Pill                 │
-│⌕ │  thread      │ │   ┌ selection bar ┐               │ │ Rectangle · 5 keys   │
-│──│              │ │   [ layer ]                       │ │ align · Position ·   │
-│✦ │              │ │        [tool pill · zoom]         │ │ Layout · Appearance ·│
-│◇ │              │ └───────────────────────────────────┘ │ Fill · Stroke ·      │
-│  │              │ ┌ timeline (inset card) ────────────┐ │ Effects · Animate …  │
-│🔔│  composer    │ │ comp tabs · transport · tools     │ │                      │
-│⚙ │              │ └───────────────────────────────────┘ │                      │
+┌───────────────────────────────── title bar (40px) ─────────────────────────────┐
+│ ● ● ●  [file tab ●] [file tab] +            (drag)              ↶ ↷ …  [Share] │
+├──┬──────────────┬───────────────────────────────────────┬──────────────────────┤
+│⌂ │ Agent    ● ✎ │                                       │ Pill               … │
+│+ │              │   canvas, full bleed (no card)        │ Rectangle · 5 keys   │
+│⌕ │  thread      │        [ layer ]                      │ align · Position ·   │
+│──│              │        [tool pill · zoom]             │ Layout · Appearance ·│
+│✦ │              ├───────────────────────────────────────┤ Fill · Stroke ·      │
+│◇ │              │ comp tabs · transport · tools         │ Effects · Animate …  │
+│🔔│  composer    │ timeline                              │                      │
+│⚙ │              │                                       │                      │
 └──┴──────────────┴───────────────────────────────────────┴──────────────────────┘
  rail   left sidebar          the stage (middle)             right sidebar
 ```
 
+**Why a title bar row.** The mac app hides the native title bar (`titleBarStyle: hiddenInset`), so
+the traffic lights float over whatever the renderer draws at the window's top left. In v4 that was
+the rail and the left sidebar's header, and they collided. Now one 40px row spans the window: its
+left `--traffic-w` (80px) is reserved for the traffic lights (electron `trafficLightPosition`
+x 20 / y 14 centres them in the row), and everything else (rail, sidebars, stage) starts below
+it, so nothing can reach them at any window size. The frame is read once at startup
+(`src/ui/chrome/platform.ts` → `<html data-platform data-traffic-lights data-fullscreen>`):
+- **mac app**: the zone is reserved; **mac full screen** (no traffic lights): it collapses to a
+  small gutter (main.cjs forwards `enter/leave-full-screen`).
+- **windows / linux app**: the native frame stays; the row is an in-app bar, no reserve.
+- **browser**: nothing reserved. `?platform=mac` emulates the mac frame with stand-in circles at
+  the real position (`&fullscreen` for full screen), so screenshots prove there is no overlap.
+
+**The grid is locked.** Five regions in `grid-template-areas` (`chrome.css .app`), every size in
+`tokens.css` "app shell" (`--titlebar-h`, `--traffic-w`, `--rail-w`, `--left-w`, `--right-w`,
+`--panel-head-h`, `--stage-min`, `--timeline-h`, `--tl-min`, `--app-min-w/h`); no absolute
+positioning or negative margins between regions. Below 1280px the sidebars narrow (264 / 280).
+The window can't get smaller than 1100×700 (`BrowserWindow minWidth/minHeight`). The timeline
+row is `minmax(--tl-min, --tl-h)`, so a saved tall timeline gives way before the canvas drops
+under `--stage-min`.
+
+**Guard: `npm run layout:check`** (`scripts/layout-lock.mjs`). States (empty doc, shape selected,
+agent running against the fake claude, Home, Settings, Share popover) × 1100×700, 1280×800,
+1440×900, 1728×1117, 1920×1080, 2560×1440 × mac / browser frame. It asserts the region boxes don't
+intersect or leave the window, no control sits in the traffic-light zone, no page scroll, and no
+primary control's label is clipped, then compares 1x screenshots with `tests/layout-baselines/`
+(failures + diffs land in `tests/layout-baselines/.out/`). After an intended change:
+`node scripts/layout-lock.mjs --update` and commit the new baselines.
+
 - **Rail** (icon only, tooltips with shortcuts): Home, New file (⌘N), Ask / commands (⌘K),
   Agent (⌘I), Assets, Updates (desktop app, with a dot when one is ready), Settings at the bottom.
-  Clicking the active Agent / Assets icon collapses the left sidebar. It replaces the old Agent |
-  Assets tabs and the Home / panel buttons of the top bar.
-- **Two fixed sidebars**, flush to the window edges and full height, a hairline toward the
-  stage (a slightly lighter tone than the window): the agent or assets on the left, the inspector on
-  the right. No inset, no radius: they are tools around the work, not part of it.
-- **The stage** (the middle) keeps the inset + radius look: the file tabs on top, then the canvas
-  and the timeline as **two inset cards**. Why two cards and not one: the canvas and the timeline
-  zoom, scroll and resize independently, the gap between them is where the timeline's splitter
-  lives, and a timeline in the same card as the canvas reads as part of the picture. Both stay
-  inside the stage, so "canvas + timeline" still reads as one area between the sidebars.
-- **Top right** (the inspector's first row): undo / redo, the app menu (…), and **Share**
+  Clicking the active Agent / Assets icon collapses the left sidebar.
+- **Two fixed sidebars** under the title bar, flush to the window edges, a hairline toward the
+  stage. Each starts with a 40px header row (`--panel-head-h`): "Agent" with its status dot and
+  new-conversation button, "Assets", or the inspector's selection title.
+- **The stage**: the canvas full bleed (the pasteboard colour around the composition, no inset
+  card, no name label over the frame), the timeline below one divider (its top edge is the
+  splitter).
+- **Title bar right**: undo / redo, the app menu (…), and **Share**
   (neutral primary). Share opens a popover with two ways out:
   - *Share a preview file*: one self-contained html page (the animation rendered frame-accurately
     as an embedded video + a small player: play / pause, scrub, loop, frame time, Space and , .

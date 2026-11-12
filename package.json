@@ -19,6 +19,7 @@
     "stress": "vite build && node scripts/stress-lab.mjs",
     "stress:quick": "vite build && node scripts/stress-lab.mjs --quick",
     "fidelity": "node scripts/figma-fidelity.mjs",
+    "layout:check": "node scripts/layout-lock.mjs",
     "qa": "node scripts/qa-flows.mjs",
     "qa:electron": "xvfb-run -a node scripts/qa-electron.mjs",
     "release:local": "npm run build && node scripts/release.mjs --out release/updates",
