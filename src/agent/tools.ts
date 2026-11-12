@@ -1,0 +1,351 @@
+// tools the ai agents can call (exposed over mcp by the bridge). every tool goes through the
+// same commands as the ui, so agent edits are undoable and show up live.
+
+import { editor } from '../app/editor';
+import {
+  addLayer, cloneLayers, deleteLayers, groupLayers, isAnimated, keyId, setCompSettings, setEase, setLayerField, setProp,
+  setPropTx, valueAt,
+} from '../core/commands';
+import { EASE_PRESETS } from '../core/easing';
+import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
+
+export interface ToolDef {
+  name: string;
+  description: string;
+  inputSchema: any;
+  run: (args: any) => Promise<ToolContent[]> | ToolContent[];
+}
+export type ToolContent = { type: 'text'; text: string } | { type: 'image'; data: string; mimeType: string };
+
+const st = () => editor.store;
+const text = (v: unknown): ToolContent[] => [{ type: 'text', text: typeof v === 'string' ? v : JSON.stringify(v, null, 1) }];
+
+const colorSchema = { description: 'color as "#rrggbb", "#rrggbbaa" or [r,g,b,a] with 0..1 floats', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'number' } }] };
+const propValueSchema = { description: 'number, number array, or color (for fill/stroke)', anyOf: [{ type: 'number' }, { type: 'array', items: { type: 'number' } }, { type: 'string' }] };
+const easeSchema = { description: `ease preset name (${EASE_PRESETS.map(p => p.name).join(', ')}) or cubic-bezier [x1,y1,x2,y2]`, anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'number' } }] };
+
+export function parseColor(c: any): number[] {
+  if (Array.isArray(c)) {
+    const v = c.map(Number);
+    const scale = v.slice(0, 3).some(x => x > 1) ? 1 / 255 : 1;
+    return [v[0] * scale, v[1] * scale, v[2] * scale, v[3] ?? 1];
+  }
+  if (typeof c === 'string') {
+    const h = c.trim().replace('#', '');
+    const full = h.length === 3 || h.length === 4 ? h.split('').map(x => x + x).join('') : h;
+    const n = (i: number) => parseInt(full.slice(i, i + 2), 16) / 255;
+    if (/^[0-9a-f]{6}([0-9a-f]{2})?$/i.test(full)) return [n(0), n(2), n(4), full.length === 8 ? n(6) : 1];
+    const m = c.match(/rgba?\(([^)]+)\)/);
+    if (m) { const p = m[1].split(',').map(s => parseFloat(s)); return [p[0] / 255, p[1] / 255, p[2] / 255, p[3] ?? 1]; }
+  }
+  throw new Error(`invalid color ${JSON.stringify(c)}`);
+}
+
+function toValue(key: PropKey, v: any): number[] {
+  const def = PROP_DEFS[key];
+  if (def.unit === 'color') return parseColor(v);
+  if (typeof v === 'number') {
+    if (key === 'scale') return [v, v];
+    if (key === 'radius') return [v, v, v, v];
+    return def.dim === 1 ? [v] : new Array(def.dim).fill(v);
+  }
+  if (!Array.isArray(v)) throw new Error(`invalid value for ${key}: ${JSON.stringify(v)}`);
+  if (key === 'radius' && v.length === 1) return [v[0], v[0], v[0], v[0]];
+  return v.map(Number);
+}
+
+function checkProp(p: string): PropKey {
+  if (!(PROP_KEYS as string[]).includes(p)) throw new Error(`unknown property "${p}". valid: ${PROP_KEYS.join(', ')}`);
+  return p as PropKey;
+}
+
+function need(id: string): Layer {
+  const l = st().layer(id);
+  if (!l) throw new Error(`no layer with id "${id}"`);
+  return l;
+}
+
+function round(v: number[]) { return v.map(x => Math.round(x * 1000) / 1000); }
+
+function summarize(l: Layer, deep: boolean): any {
+  const t = st().time;
+  const o: any = { id: l.id, name: l.name, type: l.type };
+  if (!l.visible) o.visible = false;
+  const keys = [...TRANSFORM_KEYS, ...TYPE_PROPS[l.type]];
+  const vals: any = {};
+  const anim: any = {};
+  for (const k of keys) {
+    if (!l.props[k]) continue;
+    vals[k] = round(valueAt(l, k, t));
+    if (isAnimated(l, k)) anim[k] = l.props[k]!.kf!.length;
+  }
+  if (deep) o.props = vals;
+  else { o.position = vals.position; o.size = vals.size; }
+  if (Object.keys(anim).length) o.animated = anim;
+  if (l.text) o.text = l.text.content.slice(0, 80);
+  if (l.children.length) o.children = deep ? l.children.map(c => summarize(st().layer(c)!, deep)) : l.children.length;
+  return o;
+}
+
+export const TOOLS: ToolDef[] = [
+  {
+    name: 'get_document',
+    description: 'Get the composition settings and the layer tree (top-level first in draw order bottom→top). Call this first. Set deep=false for big documents.',
+    inputSchema: { type: 'object', properties: { deep: { type: 'boolean', default: true }, limit: { type: 'number', default: 300 } } },
+    run: ({ deep = true, limit = 300 }) => {
+      const s = st();
+      const c = s.comp;
+      const total = Object.keys(s.project.layers).length;
+      const big = total > limit;
+      return text({
+        file: s.project.name,
+        composition: { width: c.width, height: c.height, fps: c.fps, duration: c.duration, background: round(c.background) },
+        currentTime: s.time,
+        selection: s.selection,
+        layerCount: total,
+        note: big ? `large document: showing shallow summary of root layers; use get_layer for details` : undefined,
+        layers: c.root.map(id => summarize(s.layer(id)!, deep && !big)),
+      });
+    },
+  },
+  {
+    name: 'get_layer',
+    description: 'Get the full JSON of one layer including all keyframes (times in seconds).',
+    inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
+    run: ({ id }) => text(need(id)),
+  },
+  {
+    name: 'add_layer',
+    description: 'Add a layer. Coordinates are composition pixels (top-left origin, y down). x/y/w/h define the box; the anchor point is put at the center. Returns the new id. For text use type "text" with text options. Use parent to put it inside a group (coordinates then relative to the group box).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        type: { enum: ['rect', 'ellipse', 'text', 'group'] },
+        name: { type: 'string' },
+        x: { type: 'number' }, y: { type: 'number' }, w: { type: 'number' }, h: { type: 'number' },
+        fill: colorSchema,
+        stroke: colorSchema,
+        strokeWidth: { type: 'number' },
+        radius: { type: 'number' },
+        opacity: { type: 'number', description: '0..100' },
+        rotation: { type: 'number', description: 'degrees clockwise' },
+        parent: { type: 'string' },
+        text: { type: 'object', properties: { content: { type: 'string' }, fontFamily: { type: 'string' }, fontSize: { type: 'number' }, fontWeight: { type: 'number' }, align: { enum: ['left', 'center', 'right'] }, lineHeight: { type: 'number' } } },
+      },
+      required: ['type'],
+    },
+    run: (a) => {
+      const s = st();
+      const type = a.type as LayerType;
+      if (!['rect', 'ellipse', 'text', 'group'].includes(type)) throw new Error('type must be rect, ellipse, text or group');
+      if (a.parent) need(a.parent);
+      const init: any = { x: a.x ?? 0, y: a.y ?? 0, w: a.w ?? (type === 'text' ? 0 : 200), h: a.h ?? (type === 'text' ? 0 : 200), name: a.name };
+      if (a.fill !== undefined) init.color = parseColor(a.fill);
+      if (type === 'text') {
+        init.text = { content: 'Text', fontFamily: 'Inter', fontSize: 64, fontWeight: 600, lineHeight: 1.2, letterSpacing: 0, align: 'left', ...(a.text ?? {}) };
+        init.color ??= [1, 1, 1, 1];
+      }
+      if (!init.name) delete init.name;
+      const l = addLayer(s, type, init, a.parent ?? null);
+      s.transact('Agent: layer props', tx => {
+        const L = s.layer(l.id)!;
+        if (a.stroke !== undefined) setPropTx(tx, L, 'stroke', parseColor(a.stroke), s.time);
+        if (a.strokeWidth !== undefined) setPropTx(tx, L, 'strokeWidth', [a.strokeWidth], s.time);
+        if (a.radius !== undefined && L.props.radius) setPropTx(tx, L, 'radius', [a.radius, a.radius, a.radius, a.radius], s.time);
+        if (a.opacity !== undefined) setPropTx(tx, L, 'opacity', [a.opacity], s.time);
+        if (a.rotation !== undefined) setPropTx(tx, L, 'rotation', [a.rotation], s.time);
+      });
+      return text({ id: l.id });
+    },
+  },
+  {
+    name: 'update_layer',
+    description: 'Change a layer. props sets values: if the property is animated this creates/updates a keyframe at the current time (like After Effects), otherwise it sets the static value. Properties: ' + PROP_KEYS.map(k => `${k} (${PROP_DEFS[k].dim}d, ${PROP_DEFS[k].unit})`).join(', '),
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        name: { type: 'string' },
+        visible: { type: 'boolean' },
+        props: { type: 'object', additionalProperties: propValueSchema },
+        text: { type: 'object' },
+        inPoint: { type: 'number' }, outPoint: { type: 'number' },
+      },
+      required: ['id'],
+    },
+    run: (a) => {
+      const s = st();
+      const l = need(a.id);
+      s.transact('Agent: update layer', tx => {
+        if (a.name !== undefined) tx.set(l, 'name', String(a.name));
+        if (a.visible !== undefined) { tx.set(l, 'visible', !!a.visible); tx.structure(); }
+        if (a.inPoint !== undefined) tx.set(l, 'inPoint', a.inPoint);
+        if (a.outPoint !== undefined) tx.set(l, 'outPoint', a.outPoint);
+        if (a.text && l.text) tx.set(l, 'text', { ...l.text, ...a.text });
+        for (const [k, v] of Object.entries(a.props ?? {})) setPropTx(tx, l, checkProp(k), toValue(k as PropKey, v), s.time);
+        tx.touch(l.id);
+      });
+      return text('ok');
+    },
+  },
+  {
+    name: 'set_keyframes',
+    description: 'Animate a property with explicit keyframes (replaces existing keyframes of that property unless merge=true). t is seconds. ease applies to the segment leaving that keyframe. Position keyframes may have spatial tangents sOut/sIn ([dx,dy] relative) for curved motion paths.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        prop: { enum: PROP_KEYS },
+        keyframes: {
+          type: 'array',
+          items: { type: 'object', properties: { t: { type: 'number' }, v: propValueSchema, ease: easeSchema, interp: { enum: ['bezier', 'linear', 'hold'] }, sOut: { type: 'array' }, sIn: { type: 'array' } }, required: ['t', 'v'] },
+        },
+        merge: { type: 'boolean' },
+      },
+      required: ['id', 'prop', 'keyframes'],
+    },
+    run: (a) => {
+      const s = st();
+      const l = need(a.id);
+      const key = checkProp(a.prop);
+      const incoming: Keyframe[] = (a.keyframes as any[]).map(k => {
+        const ease = resolveEase(k.ease);
+        return { t: +k.t, v: toValue(key, k.v), interp: k.interp ?? (ease.linear ? 'linear' : 'bezier'), out: [ease.v[0], ease.v[1]], in: [0.667, 1], sOut: k.sOut, sIn: k.sIn } as Keyframe;
+      });
+      incoming.sort((x, y) => x.t - y.t);
+      // the "in" handle of key i+1 comes from the ease of key i
+      const eases = (a.keyframes as any[]).slice().sort((x, y) => x.t - y.t).map(k => resolveEase(k.ease));
+      for (let i = 1; i < incoming.length; i++) incoming[i].in = [eases[i - 1].v[2], eases[i - 1].v[3]];
+      s.transact('Agent: keyframes', tx => {
+        const p = l.props[key] ?? { v: valueAt(l, key, s.time) };
+        if (!l.props[key]) tx.set(l.props, key, p);
+        let kf = incoming;
+        if (a.merge && p.kf) {
+          const rest = p.kf.filter(k => !incoming.some(n => Math.abs(n.t - k.t) < 1e-6));
+          kf = [...rest, ...incoming].sort((x, y) => x.t - y.t);
+        }
+        tx.set(p, 'kf', kf);
+        tx.touch(l.id);
+      });
+      (globalThis as any).timeline?.expand(l.id, true);
+      return text(`set ${incoming.length} keyframes on ${l.name}.${key}`);
+    },
+  },
+  {
+    name: 'set_easing',
+    description: 'Set easing on existing keyframes of a property (indices default to all).',
+    inputSchema: { type: 'object', properties: { id: { type: 'string' }, prop: { enum: PROP_KEYS }, indices: { type: 'array', items: { type: 'number' } }, ease: easeSchema }, required: ['id', 'prop', 'ease'] },
+    run: (a) => {
+      const l = need(a.id);
+      const key = checkProp(a.prop);
+      const kf = l.props[key]?.kf ?? [];
+      const idx: number[] = a.indices ?? kf.map((_, i) => i);
+      const e = resolveEase(a.ease);
+      setEase(st(), idx.map(i => keyId(l.id, key, i)), e.v, e.linear ? 'linear' : 'bezier');
+      return text('ok');
+    },
+  },
+  {
+    name: 'delete_layers',
+    description: 'Delete layers (and their children).',
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } } }, required: ['ids'] },
+    run: ({ ids }) => { deleteLayers(st(), ids); return text('ok'); },
+  },
+  {
+    name: 'duplicate_layers',
+    description: 'Duplicate layers; returns new ids.',
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, offset: { type: 'number' } }, required: ['ids'] },
+    run: ({ ids, offset = 0 }) => text({ ids: cloneLayers(st(), ids, offset) }),
+  },
+  {
+    name: 'group_layers',
+    description: 'Group sibling layers into a new group. Returns the group id.',
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, name: { type: 'string' } }, required: ['ids'] },
+    run: ({ ids, name }) => {
+      const b = editor.renderer ? boundsOf(ids) : { x: 0, y: 0, w: 100, h: 100 };
+      const g = groupLayers(st(), ids, b);
+      if (g && name) setLayerField(st(), [g.id], 'name', name);
+      return text({ id: g?.id });
+    },
+  },
+  {
+    name: 'set_composition',
+    description: 'Change composition settings.',
+    inputSchema: { type: 'object', properties: { width: { type: 'number' }, height: { type: 'number' }, fps: { type: 'number' }, duration: { type: 'number', description: 'seconds' }, background: colorSchema, name: { type: 'string' } } },
+    run: (a) => { setCompSettings(st(), { ...a, background: a.background !== undefined ? parseColor(a.background) as any : undefined }); return text('ok'); },
+  },
+  {
+    name: 'set_time',
+    description: 'Move the playhead (seconds). Values set with update_layer on animated properties go to this time.',
+    inputSchema: { type: 'object', properties: { t: { type: 'number' } }, required: ['t'] },
+    run: ({ t }) => { editor.pause(); st().setTime(t); return text('ok'); },
+  },
+  {
+    name: 'playback',
+    description: 'Play or pause the preview.',
+    inputSchema: { type: 'object', properties: { play: { type: 'boolean' } }, required: ['play'] },
+    run: ({ play }) => { play ? editor.play() : editor.pause(); return text('ok'); },
+  },
+  {
+    name: 'select_layers',
+    description: 'Select layers in the editor (shows them to the user).',
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } } }, required: ['ids'] },
+    run: ({ ids }) => { st().select(ids.filter((id: string) => st().layer(id))); return text('ok'); },
+  },
+  {
+    name: 'screenshot',
+    description: 'Render the composition at a time (seconds, default current) and return a PNG. Use it to check your work. times: render several frames side by side info as separate images (max 4).',
+    inputSchema: { type: 'object', properties: { t: { type: 'number' }, times: { type: 'array', items: { type: 'number' } }, maxSize: { type: 'number', default: 768 } } },
+    run: ({ t, times, maxSize = 768 }) => {
+      const list: number[] = times?.length ? times.slice(0, 4) : [t ?? st().time];
+      return list.map(tt => ({ type: 'image' as const, data: editor.renderer.snapshot(tt, maxSize).split(',')[1], mimeType: 'image/png' }));
+    },
+  },
+  {
+    name: 'undo',
+    description: 'Undo the last change (also user changes!).',
+    inputSchema: { type: 'object', properties: {} },
+    run: () => { st().undo(); return text('ok'); },
+  },
+];
+
+function resolveEase(e: any): { v: [number, number, number, number]; linear: boolean } {
+  if (e === undefined || e === null) return { v: [0.333, 0, 0.667, 1], linear: false };
+  if (Array.isArray(e) && e.length === 4) return { v: e.map(Number) as any, linear: false };
+  if (typeof e === 'string') {
+    const p = EASE_PRESETS.find(p => p.name.toLowerCase() === e.toLowerCase().replace(/[-_]/g, ' '));
+    if (!p) throw new Error(`unknown ease "${e}". presets: ${EASE_PRESETS.map(p => p.name).join(', ')}`);
+    return { v: p.v, linear: p.name === 'Linear' };
+  }
+  throw new Error('ease must be a preset name or [x1,y1,x2,y2]');
+}
+
+export function boundsOf(ids: string[]) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const r = editor.renderer;
+  for (const id of ids) {
+    // bounds in the parent's space: use world corners mapped through the parent inverse
+    const l = st().layer(id);
+    const c = r.corners(id);
+    if (!c || !l) continue;
+    const pw = l.parent ? r.worldMatrix(l.parent)! : [1, 0, 0, 1, 0, 0];
+    const det = pw[0] * pw[3] - pw[1] * pw[2] || 1;
+    for (let i = 0; i < 4; i++) {
+      const dx = c[i * 2] - pw[4], dy = c[i * 2 + 1] - pw[5];
+      const x = (pw[3] * dx - pw[2] * dy) / det, y = (-pw[1] * dx + pw[0] * dy) / det;
+      x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+    }
+  }
+  if (!isFinite(x0)) return { x: 0, y: 0, w: 100, h: 100 };
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+}
+
+export const AGENT_SYSTEM_PROMPT = `You are working inside "Motion", a motion design editor (like After Effects / Figma Motion).
+You can see and edit the user's open document only through the mcp__motion__* tools.
+Conventions: composition pixels, origin top-left, y down. Times in seconds. Rotation in degrees clockwise.
+Opacity and scale are percent (100 = normal). Colors are "#rrggbb" or [r,g,b,a] 0..1.
+Each layer has an anchor point (default: center of its box) and position = where the anchor sits in the parent.
+Layers inside a group use coordinates relative to the group's box.
+Prefer set_keyframes for animation with good easing (e.g. "Expo Out" for entrances, "Back Out" for playful pops, "Easy Ease" for neutral moves).
+Always call get_document first, and use screenshot (optionally several times) to verify the result visually.
+Keep the user's existing work intact unless asked; every change is undoable by the user.`;

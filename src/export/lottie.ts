@@ -1,0 +1,249 @@
+// export our model to lottie / bodymovin json (v5 schema).
+//
+// mapping:
+//  - rect / ellipse  -> shape layer (ty 4) with one group: rc / el + fl (+ st). the shape's
+//                       centre follows size/2 so the layer transform maps 1:1 (our box = layer space)
+//  - path            -> shape layer with one sh per subpath (geometry scaled by size/geomSize, static)
+//  - group           -> null layer (ty 3) used as parent; a group with a visible fill also gets a rect
+//  - text            -> text layer (ty 5), exported as box text (sz/ps) so the box round-trips
+//  - image           -> image layer (ty 2) with an embedded asset
+//  - our tree        -> ae parenting (`parent` = ind of the parent layer)
+// keyframes keep times (frames), values, bezier handles (o of key k / i of key k+1), hold (h:1)
+// and spatial tangents (to/ti).
+// known gaps: our group opacity multiplies into children but ae parenting does not inherit
+// opacity, so group opacity only affects the group's own fill; clip is not exported.
+
+import type { Keyframe, Layer, PathCmd, Project, Prop } from '../core/model';
+
+const R = (x: number) => Math.round(x * 1e6) / 1e6;
+
+function firstV(p: Prop | undefined, def: number[]): number[] {
+  if (!p) return def;
+  return p.kf && p.kf.length ? p.kf[0].v : p.v;
+}
+
+function exportProp(p: Prop | undefined, def: number[], fr: number, conv: (v: number[]) => number[] = v => v, spatial = false): any {
+  if (!p) return { a: 0, k: conv(def).map(R) };
+  const kf = p.kf;
+  if (!kf || kf.length < 2) {
+    const v = conv(kf && kf.length ? kf[0].v : p.v).map(R);
+    return { a: 0, k: v.length === 1 ? v[0] : v };
+  }
+  const k = kf.map((key: Keyframe, i: number) => {
+    const nx = kf[i + 1];
+    const o: any = { t: R(key.t * fr), s: conv(key.v).map(R) };
+    if (key.interp === 'hold') o.h = 1;
+    if (key.interp === 'linear') {
+      o.o = { x: [0], y: [0] };
+      o.i = { x: [1], y: [1] };
+    } else {
+      o.o = { x: [R(key.out[0])], y: [R(key.out[1])] };
+      o.i = nx ? { x: [R(nx.in[0])], y: [R(nx.in[1])] } : { x: [0.667], y: [1] };
+    }
+    if (spatial && nx && (key.sOut || nx.sIn)) {
+      o.to = (key.sOut ?? [0, 0]).slice(0, 2).map(R);
+      o.ti = (nx.sIn ?? [0, 0]).slice(0, 2).map(R);
+    }
+    return o;
+  });
+  return { a: 1, k };
+}
+
+function mapPropValues(p: Prop | undefined, fn: (v: number[]) => number[]): Prop | undefined {
+  if (!p) return p;
+  return { v: fn(p.v), kf: p.kf?.map(k => ({ ...k, v: fn(k.v) })) };
+}
+
+function transform(l: Layer, fr: number, anchorOverride?: Prop): any {
+  return {
+    a: exportProp(anchorOverride ?? l.props.anchor, [0, 0], fr),
+    p: exportProp(l.props.position, [0, 0], fr, v => v, true),
+    s: exportProp(l.props.scale, [100, 100], fr),
+    r: exportProp(l.props.rotation, [0], fr),
+    o: exportProp(l.props.opacity, [100], fr),
+  };
+}
+
+const IDENTITY_TR = {
+  ty: 'tr', p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 },
+  sk: { a: 0, k: 0 }, sa: { a: 0, k: 0 }, nm: 'Transform',
+};
+
+function paintItems(l: Layer, fr: number): any[] {
+  const out: any[] = [];
+  const fill = l.props.fill;
+  const fv = firstV(fill, [0, 0, 0, 0]);
+  if (fill && (fill.kf?.length || fv[3] > 0)) {
+    out.push({
+      ty: 'fl', nm: 'Fill', r: l.geometry?.[0]?.fillRule === 'evenodd' ? 2 : 1,
+      c: exportProp(mapPropValues(fill, v => [v[0], v[1], v[2], 1]), [0, 0, 0, 1], fr),
+      o: exportProp(mapPropValues(fill, v => [(v[3] ?? 1) * 100]), [100], fr),
+    });
+  }
+  const sw = firstV(l.props.strokeWidth, [0])[0];
+  const st = l.props.stroke;
+  if (st && (sw > 0 || l.props.strokeWidth?.kf?.length)) {
+    out.push({
+      ty: 'st', nm: 'Stroke', lc: 2, lj: 2, ml: 4,
+      c: exportProp(mapPropValues(st, v => [v[0], v[1], v[2], 1]), [0, 0, 0, 1], fr),
+      o: exportProp(mapPropValues(st, v => [(v[3] ?? 1) * 100]), [100], fr),
+      w: exportProp(l.props.strokeWidth, [0], fr),
+    });
+  }
+  return out;
+}
+
+/** our path commands -> lottie shape objects (one per subpath) */
+export function cmdsToLottieShapes(cmds: PathCmd[], sx = 1, sy = 1): { v: number[][]; i: number[][]; o: number[][]; c: boolean }[] {
+  const out: { v: number[][]; i: number[][]; o: number[][]; c: boolean }[] = [];
+  let cur: { v: number[][]; i: number[][]; o: number[][]; c: boolean } | null = null;
+  let px = 0, py = 0;
+  const flush = () => {
+    if (!cur || !cur.v.length) return;
+    // closed path whose last vertex duplicates the first: merge
+    const n = cur.v.length;
+    if (cur.c && n > 1) {
+      const a = cur.v[0], b = cur.v[n - 1];
+      if (Math.abs(a[0] - b[0]) < 1e-6 && Math.abs(a[1] - b[1]) < 1e-6) {
+        cur.i[0] = cur.i[n - 1];
+        cur.v.pop(); cur.i.pop(); cur.o.pop();
+      }
+    }
+    out.push(cur);
+  };
+  const vtx = (x: number, y: number) => { cur!.v.push([R(x * sx), R(y * sy)]); cur!.i.push([0, 0]); cur!.o.push([0, 0]); };
+  for (const c of cmds) {
+    switch (c[0]) {
+      case 'M':
+        flush();
+        cur = { v: [], i: [], o: [], c: false };
+        vtx(c[1], c[2]); px = c[1]; py = c[2];
+        break;
+      case 'L':
+        if (!cur) { cur = { v: [], i: [], o: [], c: false }; vtx(px, py); }
+        vtx(c[1], c[2]); px = c[1]; py = c[2];
+        break;
+      case 'C': {
+        if (!cur) { cur = { v: [], i: [], o: [], c: false }; vtx(px, py); }
+        const last = cur.v.length - 1;
+        cur.o[last] = [R((c[1] - px) * sx), R((c[2] - py) * sy)];
+        vtx(c[5], c[6]);
+        cur.i[cur.v.length - 1] = [R((c[3] - c[5]) * sx), R((c[4] - c[6]) * sy)];
+        px = c[5]; py = c[6];
+        break;
+      }
+      case 'Q': {
+        if (!cur) { cur = { v: [], i: [], o: [], c: false }; vtx(px, py); }
+        const c1x = px + (2 / 3) * (c[1] - px), c1y = py + (2 / 3) * (c[2] - py);
+        const c2x = c[3] + (2 / 3) * (c[1] - c[3]), c2y = c[4] + (2 / 3) * (c[2] - c[4]);
+        const last = cur.v.length - 1;
+        cur.o[last] = [R((c1x - px) * sx), R((c1y - py) * sy)];
+        vtx(c[3], c[4]);
+        cur.i[cur.v.length - 1] = [R((c2x - c[3]) * sx), R((c2y - c[4]) * sy)];
+        px = c[3]; py = c[4];
+        break;
+      }
+      case 'Z':
+        if (cur) { cur.c = true; px = cur.v[0][0] / sx; py = cur.v[0][1] / sy; flush(); cur = null; }
+        break;
+    }
+  }
+  flush();
+  return out;
+}
+
+function hex(c: number[]) {
+  const h = (x: number) => Math.round(Math.min(1, Math.max(0, x)) * 255).toString(16).padStart(2, '0');
+  return `#${h(c[0] ?? 0)}${h(c[1] ?? 0)}${h(c[2] ?? 0)}`;
+}
+
+export function projectToLottie(project: Project): any {
+  const comp = project.comps[project.activeComp] ?? Object.values(project.comps)[0];
+  if (!comp) throw new Error('project has no composition');
+  const fr = comp.fps || 30;
+  const op = Math.max(1, Math.round(comp.duration * fr));
+  const L = project.layers;
+  // draw order (bottom -> top), parents before children
+  const order: string[] = [];
+  const walk = (ids: string[]) => { for (const id of ids) { const l = L[id]; if (!l) continue; order.push(id); walk(l.children); } };
+  walk(comp.root);
+  const n = order.length;
+  const ind = new Map<string, number>();
+  // lottie order is top -> bottom; ind = position in that list (1-based)
+  for (let i = 0; i < n; i++) ind.set(order[i], n - i);
+  const assets: any[] = [];
+  const assetIds = new Map<string, string>();
+  const fonts = new Map<string, any>();
+  const layers: any[] = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const l = L[order[i]];
+    const base: any = {
+      ddd: 0, ind: ind.get(l.id), nm: l.name, sr: 1, st: 0, bm: 0,
+      ip: Math.max(0, R(l.inPoint * fr)), op: R(Math.min(l.outPoint, comp.duration) * fr),
+      ks: transform(l, fr),
+    };
+    if (!(base.op > base.ip)) base.op = Math.max(op, base.ip + 1);
+    if (l.parent && ind.has(l.parent)) base.parent = ind.get(l.parent);
+    if (!l.visible) base.hd = true;
+    const size = firstV(l.props.size, [100, 100]);
+    switch (l.type) {
+      case 'rect':
+      case 'ellipse': {
+        const prim: any = l.type === 'rect'
+          ? { ty: 'rc', nm: 'Rectangle Path', d: 1, s: exportProp(l.props.size, [100, 100], fr), p: exportProp(mapPropValues(l.props.size, v => [v[0] / 2, v[1] / 2]), [50, 50], fr), r: exportProp(mapPropValues(l.props.radius, v => [v[0] ?? 0]), [0], fr) }
+          : { ty: 'el', nm: 'Ellipse Path', d: 1, s: exportProp(l.props.size, [100, 100], fr), p: exportProp(mapPropValues(l.props.size, v => [v[0] / 2, v[1] / 2]), [50, 50], fr) };
+        layers.push({ ...base, ty: 4, shapes: [{ ty: 'gr', nm: l.type === 'rect' ? 'Rectangle' : 'Ellipse', it: [prim, ...paintItems(l, fr), IDENTITY_TR] }] });
+        break;
+      }
+      case 'path': {
+        const gs = l.geomSize ?? (size as [number, number]);
+        const sx = gs[0] ? size[0] / gs[0] : 1, sy = gs[1] ? size[1] / gs[1] : 1;
+        const it: any[] = [];
+        for (const g of l.geometry ?? []) for (const s of cmdsToLottieShapes(g.cmds, sx, sy)) it.push({ ty: 'sh', nm: 'Path', ks: { a: 0, k: s } });
+        layers.push({ ...base, ty: 4, shapes: [{ ty: 'gr', nm: 'Path', it: [...it, ...paintItems(l, fr), IDENTITY_TR] }] });
+        break;
+      }
+      case 'group': {
+        const fv = firstV(l.props.fill, [0, 0, 0, 0]);
+        if (fv[3] > 0 || l.props.fill?.kf?.length) {
+          const prim = { ty: 'rc', nm: 'Rectangle Path', d: 1, s: exportProp(l.props.size, [100, 100], fr), p: exportProp(mapPropValues(l.props.size, v => [v[0] / 2, v[1] / 2]), [50, 50], fr), r: exportProp(mapPropValues(l.props.radius, v => [v[0] ?? 0]), [0], fr) };
+          layers.push({ ...base, ty: 4, shapes: [{ ty: 'gr', nm: 'Rectangle', it: [prim, ...paintItems(l, fr), IDENTITY_TR] }] });
+        } else layers.push({ ...base, ty: 3 });
+        break;
+      }
+      case 'text': {
+        const t = l.text!;
+        const fill = firstV(l.props.fill, [1, 1, 1, 1]);
+        const fName = (t.fontFamily || 'Inter').replace(/\s+/g, '') + (t.fontWeight >= 700 ? '-Bold' : '-Regular');
+        fonts.set(fName, { fName, fFamily: t.fontFamily, fStyle: `${t.fontWeight >= 700 ? 'Bold' : 'Regular'}${t.fontStyle === 'italic' ? ' Italic' : ''}`, ascent: 75 });
+        const doc = {
+          s: t.fontSize, f: fName, t: t.content.replace(/\n/g, '\r'), j: t.align === 'right' ? 1 : t.align === 'center' ? 2 : 0,
+          tr: t.fontSize ? R((t.letterSpacing / t.fontSize) * 1000) : 0, lh: R(t.fontSize * t.lineHeight), ls: 0,
+          fc: [R(fill[0]), R(fill[1]), R(fill[2])], sz: size.slice(0, 2).map(R), ps: [0, 0],
+        };
+        layers.push({ ...base, ty: 5, t: { d: { k: [{ t: 0, s: doc }] }, p: {}, m: { g: 1, a: { a: 0, k: [0, 0] } }, a: [] } });
+        break;
+      }
+      case 'image': {
+        const a = l.imageRef ? project.assets[l.imageRef] : undefined;
+        if (a) {
+          let id = assetIds.get(a.id);
+          if (!id) {
+            id = `image_${assetIds.size}`;
+            assetIds.set(a.id, id);
+            assets.push({ id, w: a.width, h: a.height, u: '', p: a.data, e: a.data.startsWith('data:') ? 1 : 0 });
+          }
+          layers.push({ ...base, ty: 2, refId: id });
+        } else layers.push({ ...base, ty: 3 });
+        break;
+      }
+    }
+  }
+  const out: any = {
+    v: '5.7.4', fr, ip: 0, op, w: comp.width, h: comp.height, nm: comp.name, ddd: 0, assets, layers, markers: [],
+  };
+  if (fonts.size) out.fonts = { list: Array.from(fonts.values()) };
+  return out;
+}
+
+export { hex as _hex };

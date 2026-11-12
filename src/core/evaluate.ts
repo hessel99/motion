@@ -3,7 +3,7 @@
 //  - the last used segment is cached (playback moves forward => O(1) lookup)
 //  - no allocation per evaluation (results are written into a caller supplied array)
 
-import { cubicBezier, type Ease } from './easing';
+import { easeLUT, EASE_LUT_N } from './easing';
 import type { Keyframe, Prop } from './model';
 
 const INTERP_BEZIER = 0, INTERP_LINEAR = 1, INTERP_HOLD = 2;
@@ -22,7 +22,7 @@ export class Track {
   readonly times: Float64Array;
   readonly vals: Float64Array;
   readonly interps: Uint8Array;
-  readonly eases: (Ease | null)[];
+  readonly eases: (Float32Array | null)[];
   readonly spatial: (SpatialSeg | null)[] | null;
   private last = 0;
 
@@ -54,7 +54,7 @@ export class Track {
       this.interps[i] = k.interp === 'hold' ? INTERP_HOLD : k.interp === 'linear' ? INTERP_LINEAR : INTERP_BEZIER;
       if (i < n - 1) {
         const nx = kf[i + 1];
-        this.eases[i] = this.interps[i] === INTERP_BEZIER ? cubicBezier(k.out[0], k.out[1], nx.in[0], nx.in[1]) : null;
+        this.eases[i] = this.interps[i] === INTERP_BEZIER ? easeLUT(k.out[0], k.out[1], nx.in[0], nx.in[1]) : null;
         if (spatial && dim === 2 && (nonZero(k.sOut) || nonZero(nx.sIn))) hasSpatial = true;
       } else this.eases[i] = null;
     }
@@ -93,7 +93,12 @@ export class Track {
     }
     const t0 = times[i], t1 = times[i + 1];
     let p = (t - t0) / (t1 - t0);
-    if (interp === INTERP_BEZIER) p = this.eases[i]!(p);
+    if (interp === INTERP_BEZIER) {
+      const lut = this.eases[i]!;
+      const x = p * EASE_LUT_N;
+      const j = x | 0;
+      p = lut[j] + (lut[j + 1] - lut[j]) * (x - j);
+    }
     const sp = this.spatial ? this.spatial[i] : null;
     if (sp) {
       evalSpatial(sp, p, out, off);

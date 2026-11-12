@@ -15,6 +15,7 @@ export function useChannels(storeChannels: string[], editorChannels: string[] = 
       ...storeChannels.map(c => editor.store.on(c, fn)),
       ...editorChannels.map(c => editor.on(c, fn)),
     ];
+    fn(); // catch events that fired before we subscribed
     return () => offs.forEach(o => o());
   }, []);
 }

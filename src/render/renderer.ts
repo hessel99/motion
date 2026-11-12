@@ -8,6 +8,7 @@
 // one bufferSubData, one draw. static layers skip evaluation entirely.
 
 import { Track } from '../core/evaluate';
+import { TrackPool } from '../core/trackpool';
 import { PROP_DEFS, type Layer, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
 import { Atlas } from './atlas';
@@ -153,6 +154,10 @@ interface Item {
   kind: number;
   tracks: Track[]; // indexed by TR_* constants
   animated: boolean;
+  /** bitmask of animated tracks (bit = TR_* index) */
+  animMask: number;
+  /** track pool handles for animated tracks (indexed by TR_*) */
+  h: Int32Array;
   hidden: boolean; // visible=false (self or ancestor)
   rasterBase: string | null;
   rasterKey: string | null; // last resolved atlas key
@@ -217,6 +222,9 @@ export class Renderer {
   opa = new Float64Array(0);
   /** local (own) opacity 0..1 */
   lopa = new Float64Array(0);
+  /** per item cached transform components: anchor2 pos2 scale2 rot(rad) pad */
+  private xf = new Float64Array(0);
+  private pool = new TrackPool();
   style = new Float64Array(0);
   /** items that were drawn last frame (for hit testing) */
   drawnMask = new Uint8Array(0);
@@ -303,6 +311,7 @@ export class Renderer {
     const order = store.drawOrder();
     const L = store.project.layers;
     const n = order.length;
+    this.pool.reset();
     this.items = new Array(n);
     this.index.clear();
     for (let i = 0; i < n; i++) this.index.set(order[i], i);
@@ -313,13 +322,14 @@ export class Renderer {
       this.opa = new Float64Array(cap);
       this.lopa = new Float64Array(cap);
       this.style = new Float64Array(cap * ST);
+      this.xf = new Float64Array(cap * 8);
       this.drawnMask = new Uint8Array(cap);
     }
     for (let i = 0; i < n; i++) {
       const layer = L[order[i]];
       const parent = layer.parent ? this.index.get(layer.parent) ?? -1 : -1;
       const it: Item = {
-        id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false,
+        id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10),
         hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden),
         rasterBase: null, rasterKey: null, raster: null,
       };
@@ -332,20 +342,23 @@ export class Renderer {
     }
     this.needsCompile = false;
     this.dirtyLayers.clear();
+    this.poolLive = this.pool.used;
   }
+  private poolLive = 0;
 
   private compileItem(i: number) {
     const it = this.items[i];
     const l = it.layer;
-    let animated = false;
+    let mask = 0;
     for (let k = 0; k < TR_KEYS.length; k++) {
       const key = TR_KEYS[k];
       const p = l.props[key];
       const tr = p ? new Track(p, PROP_DEFS[key].dim, key === 'position') : defaultTrack(key);
       it.tracks[k] = tr;
-      if (tr.animated) animated = true;
+      if (tr.animated) { mask |= 1 << k; it.h[k] = this.pool.add(p!, PROP_DEFS[key].dim, key === 'position'); }
     }
-    it.animated = animated;
+    it.animMask = mask;
+    it.animated = mask !== 0;
     const complex = !!l.paints?.some(p => p.type !== 'solid');
     switch (l.type) {
       case 'rect': case 'group': it.kind = complex ? KIND_RGBA : KIND_RECT; break;
@@ -378,32 +391,56 @@ export class Renderer {
 
   private scratch = new Float64Array(8);
 
-  /** evaluate local transform + style of item i at time t (static items only once) */
+  /** evaluate local transform + style of item i at time t (static items only once).
+   *  cached transform components let us skip static tracks entirely. */
   private evalItem(i: number, t: number, force = false) {
     const it = this.items[i];
-    if (!it.animated && !force) return;
-    const tr = it.tracks, s = this.scratch, o6 = i * 6, os = i * ST;
-    tr[TR_ANCHOR].eval(t, s, 0);
-    const ax = s[0], ay = s[1];
-    tr[TR_POS].eval(t, s, 0);
-    const px = s[0], py = s[1];
-    tr[TR_SCALE].eval(t, s, 0);
-    const sx = s[0] / 100, sy = s[1] / 100;
-    const rot = tr[TR_ROT].eval1(t) * (Math.PI / 180);
-    const cs = Math.cos(rot), sn = Math.sin(rot);
-    // M = T(p) R S T(-a)
+    const X = this.xf, o8 = i * 8, os = i * ST, S = this.style;
+    if (force) {
+      // compile time: evaluate everything once with the track objects (static values)
+      const tr = it.tracks;
+      tr[TR_ANCHOR].eval(t, X, o8);
+      tr[TR_POS].eval(t, X, o8 + 2);
+      tr[TR_SCALE].eval(t, X, o8 + 4);
+      X[o8 + 6] = tr[TR_ROT].eval1(t) * (Math.PI / 180);
+      this.lopa[i] = Math.min(1, Math.max(0, tr[TR_OPA].eval1(t) / 100));
+      tr[TR_SIZE].eval(t, S, os);
+      tr[TR_RAD].eval(t, S, os + 2);
+      tr[TR_FILL].eval(t, S, os + 6);
+      tr[TR_STROKE].eval(t, S, os + 10);
+      tr[TR_SW].eval(t, S, os + 14);
+      this.composeLocal(i);
+      return;
+    }
+    const m = it.animMask;
+    if (!m) return;
+    const h = it.h, P = this.pool;
+    if (m & 0x0f) {
+      if (m & (1 << TR_ANCHOR)) P.eval(h[TR_ANCHOR], t, X, o8);
+      if (m & (1 << TR_POS)) P.eval(h[TR_POS], t, X, o8 + 2);
+      if (m & (1 << TR_SCALE)) P.eval(h[TR_SCALE], t, X, o8 + 4);
+      if (m & (1 << TR_ROT)) { P.eval(h[TR_ROT], t, X, o8 + 6); X[o8 + 6] *= Math.PI / 180; }
+      this.composeLocal(i);
+    }
+    if (m & (1 << TR_OPA)) { P.eval(h[TR_OPA], t, X, o8 + 7); this.lopa[i] = Math.min(1, Math.max(0, X[o8 + 7] / 100)); }
+    if (m & (1 << TR_SIZE)) P.eval(h[TR_SIZE], t, S, os);
+    if (m & (1 << TR_RAD)) P.eval(h[TR_RAD], t, S, os + 2);
+    if (m & (1 << TR_FILL)) P.eval(h[TR_FILL], t, S, os + 6);
+    if (m & (1 << TR_STROKE)) P.eval(h[TR_STROKE], t, S, os + 10);
+    if (m & (1 << TR_SW)) P.eval(h[TR_SW], t, S, os + 14);
+  }
+
+  /** local matrix = T(pos) R S T(-anchor) from cached components */
+  private composeLocal(i: number) {
+    const X = this.xf, o8 = i * 8;
+    const ax = X[o8], ay = X[o8 + 1], px = X[o8 + 2], py = X[o8 + 3];
+    const sx = X[o8 + 4] / 100, sy = X[o8 + 5] / 100, rot = X[o8 + 6];
+    const cs = rot === 0 ? 1 : Math.cos(rot), sn = rot === 0 ? 0 : Math.sin(rot);
     const a = cs * sx, b = sn * sx, c = -sn * sy, d = cs * sy;
-    const L = this.local;
+    const L = this.local, o6 = i * 6;
     L[o6] = a; L[o6 + 1] = b; L[o6 + 2] = c; L[o6 + 3] = d;
     L[o6 + 4] = px - (a * ax + c * ay);
     L[o6 + 5] = py - (b * ax + d * ay);
-    const S = this.style;
-    this.lopa[i] = Math.min(1, Math.max(0, tr[TR_OPA].eval1(t) / 100));
-    tr[TR_SIZE].eval(t, S, os);
-    tr[TR_RAD].eval(t, S, os + 2);
-    tr[TR_FILL].eval(t, S, os + 6);
-    tr[TR_STROKE].eval(t, S, os + 10);
-    tr[TR_SW].eval(t, S, os + 14);
   }
 
   /** compute world matrices and opacities for all items at time t */
@@ -504,6 +541,9 @@ export class Renderer {
     const store = this.store;
     if (this.needsCompile) this.compile();
     if (this.dirtyLayers.size) {
+      // incremental recompiles append to the pool; repack when it has grown a lot
+      if (this.pool.used > 1_000_000 && this.pool.used > this.poolLive * 3) this.needsCompile = true;
+      if (this.needsCompile) { this.compile(); }
       for (const id of this.dirtyLayers) {
         const i = this.index.get(id);
         if (i !== undefined) { this.items[i].layer = store.project.layers[id]; this.compileItem(i); }
@@ -525,10 +565,8 @@ export class Renderer {
     const budgetEnd = performance.now() + this.rasterBudgetMs;
     this.pendingUpgrade = false;
 
-    // instance 0: composition background
+    // composition background is a scissored clear (no fragment shader work)
     let k = 0;
-    writeRect(I, 0, [1, 0, 0, 1, 0, 0], comp.width, comp.height, comp.background);
-    k = 1;
     const mask = this.drawnMask;
     for (let i = 0; i < n; i++) {
       const it = items[i];
@@ -604,12 +642,16 @@ export class Renderer {
     gl.disable(gl.SCISSOR_TEST);
     gl.clearColor(this.editorBg[0], this.editorBg[1], this.editorBg[2], 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    if (this.clipToComp) {
+    {
       const x0 = this.panX * this.dpr, y0 = this.panY * this.dpr;
       const x1 = x0 + comp.width * z, y1 = y0 + comp.height * z;
-      const sx = Math.max(0, Math.floor(x0)), sy = Math.max(0, Math.floor(ch - y1));
+      const sx = Math.max(0, Math.round(x0)), sy = Math.max(0, Math.round(ch - y1));
       gl.enable(gl.SCISSOR_TEST);
-      gl.scissor(sx, sy, Math.max(0, Math.ceil(Math.min(cw, x1)) - sx), Math.max(0, Math.ceil(Math.min(ch, ch - y0)) - sy));
+      gl.scissor(sx, sy, Math.max(0, Math.round(Math.min(cw, x1)) - sx), Math.max(0, Math.round(Math.min(ch, ch - y0)) - sy));
+      const bg = comp.background;
+      gl.clearColor(bg[0] * bg[3] + this.editorBg[0] * (1 - bg[3]), bg[1] * bg[3] + this.editorBg[1] * (1 - bg[3]), bg[2] * bg[3] + this.editorBg[2] * (1 - bg[3]), 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      if (!this.clipToComp) gl.disable(gl.SCISSOR_TEST);
     }
     gl.useProgram(this.prog);
     gl.uniform3f(this.uView, z, this.panX * this.dpr, this.panY * this.dpr);
