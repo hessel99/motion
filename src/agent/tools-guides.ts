@@ -57,7 +57,7 @@ export const GUIDE_TOOLS: ToolDef[] = [
         styleReason: { type: 'string', description: 'one line: why this style fits the brief' },
         duration: { type: 'number', description: 'total seconds' },
         beats: { type: 'array', items: beatSchema, description: '3-5 beats of 2-4 s are typical' },
-        notes: { type: 'string', description: 'optional: palette, typography, music/markers, open questions' },
+        notes: { type: 'string', description: 'optional: palette, typography, music, open questions' },
         concepts: { type: 'array', items: { type: 'object', properties: { name: { type: 'string', description: 'e.g. "Door opens"' }, idea: { type: 'string', description: 'what moves and how, rooted in what the artwork depicts' }, why: { type: 'string', description: 'why it fits the brand' } }, required: ['name', 'idea'] }, description: 'logo / brand / artwork briefs: 2-3 concepts the user picks from; the beats describe the recommended one' },
         recommended: { type: 'number', description: 'index of the recommended concept (0-based)' },
       },

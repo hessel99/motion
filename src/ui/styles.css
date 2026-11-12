@@ -183,7 +183,6 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
 .swatch-row { display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-h-md); background: var(--input-bg); border-radius: var(--radius-md); padding: 0 var(--space-4) 0 var(--space-2); }
 .swatch-row-label { flex: 1; min-width: 0; }
 .swatch-row-value { color: var(--text-muted); font-variant-numeric: tabular-nums; }
-.panel-header { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border-bottom: 1px solid var(--border); min-height: 40px; }
 .label-xs, .ease-group { font-size: var(--text-xs); color: var(--text-muted); margin: var(--space-4) 0 var(--space-2); }
 
 /* ---------------- tooltip (css only: [data-tooltip]) ----------------
@@ -273,7 +272,6 @@ kbd, .kbd {
 /* ================= inspector ================= */
 .inspector { padding-bottom: 40px; }
 .insp-empty { padding: var(--space-7); color: var(--text-muted); }
-.hint-text { line-height: var(--leading-loose); }
 .name-input { font-weight: var(--weight-medium); }
 .insp-type { font-weight: var(--weight-regular); color: var(--text-muted); font-size: var(--text-xs); }
 .row { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
@@ -317,10 +315,6 @@ kbd, .kbd {
 .prop-row.animated .prop-label { color: var(--text); }
 .prop-fields { flex: 1; min-width: 0; display: flex; gap: var(--space-2); }
 .prop-fields > .num { flex: 1; min-width: 0; }
-.marker-row { display: flex; align-items: center; gap: var(--space-3); min-height: 26px; }
-.marker-time { min-height: 22px; padding: 0 var(--space-3); border: 0; background: var(--surface-hover); color: var(--text); font: var(--text-xs) var(--font-mono); font-variant-numeric: tabular-nums; border-radius: var(--radius-sm); }
-.marker-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
-.marker-x { width: 22px; height: 22px; min-height: 0; padding: 0; color: var(--text-muted); }
 .align-bar { display: flex; gap: var(--space-1); padding: 2px; background: var(--input-bg); border-radius: var(--radius-md); }
 .align-bar .icon { flex: 1; width: auto; min-width: 0; min-height: 28px; color: var(--text-secondary); border-radius: var(--radius-sm); }
 .align-bar .icon:hover:not(:disabled) { background: var(--surface-1); color: var(--text); }
@@ -329,8 +323,6 @@ kbd, .kbd {
 .preset:hover:not(:disabled) { background: var(--input-bg-hover); }
 .preset::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--text-disabled); }
 .preset.in::before { background: var(--preset-in); }
-.preset.out::before { background: var(--preset-out); }
-.preset.loop::before { background: var(--preset-loop); }
 .expr-add { font-size: var(--text-xs); padding: 1px var(--space-2); min-height: var(--control-h-sm); }
 .expr-row { margin-bottom: var(--space-5); }
 .expr-edit { width: 100%; font: var(--text-xs) var(--font-mono); resize: vertical; user-select: text; }
@@ -382,7 +374,6 @@ kbd, .kbd {
 .lib-comp-icon, .comp-icon { color: var(--preset-loop); font-size: 11px; }
 .lib-empty p { margin: 0 0 var(--space-3); }
 .lib-hint { margin: 0; line-height: 1.45; }
-.lib-source { margin-top: var(--space-4); }
 .link { background: none; border: 0; padding: 0; min-height: 0; color: var(--accent-text); cursor: pointer; font: inherit; }
 .link:hover { text-decoration: underline; background: none; }
 .chip { display: inline-block; flex: none; width: 16px; height: 16px; border-radius: var(--radius-xs); border: 1px solid var(--border-strong); background-clip: padding-box; }
@@ -419,7 +410,7 @@ kbd, .kbd {
 .range-name { width: 100%; min-width: 0; height: 22px; padding: 0 var(--space-2); background: transparent; border-color: transparent; color: var(--text-secondary); font-size: var(--text-xs); }
 .range-name:hover { border-color: var(--border); }
 .lib-actions { flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
-/* sync review dialog */
+/* review dialog (component library updates) */
 .sync-summary { font-size: var(--text-md, 14px); font-weight: var(--weight-semibold); margin: 0 0 var(--space-4); }
 .sync-list { list-style: none; margin: 0 0 var(--space-4); padding: 0; max-height: 50vh; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-md); }
 .sync-list li { display: grid; grid-template-columns: 64px 1fr auto auto; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); }
@@ -432,8 +423,6 @@ kbd, .kbd {
 .fill-kind { margin-top: var(--space-3); }
 .fill-kind .seg { flex: 0 0 auto; }
 .fill-kind .num { flex: 1; }
-.preset-pick { flex: 1; justify-content: flex-start; background: var(--input-bg); font-weight: var(--weight-regular); }
-.preset-pick:hover:not(:disabled) { background: var(--input-bg-hover); }
 /* key navigation: the diamond stays; the ‹ › arrows show on hover of an animated row */
 .field-row-trail { position: relative; }
 .prop-row .keynav-step { position: absolute; top: 50%; transform: translateY(-50%); visibility: hidden !important; }

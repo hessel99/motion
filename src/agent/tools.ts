@@ -4,7 +4,7 @@
 import { editor } from '../app/editor';
 import {
   addLayer, cloneLayers, deleteLayers, groupLayers, isAnimated, keyId, setCompSettings, setEase, setLayerField, setProp,
-  setPropTx, valueAt, setSpring, precompose, setExpr, addMarker, updateMarker, deleteMarker,
+  setPropTx, valueAt, setSpring, precompose, setExpr,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
@@ -14,7 +14,6 @@ import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type L
 import type { Tx } from '../core/store';
 import { animRange, describeLayerAnimation, fmtTime } from './describe';
 import { editorContext } from './context';
-import { variations } from './variations';
 import { addToken, BINDABLE, findToken, linkProp, prettyName, setTokenMode, setTokenValue, tokenUsage, tokenValue, linkOf } from '../core/tokens';
 import { toHex } from '../core/token-sync';
 import { createComponent, createInstance, instanceRootOf, instancesOf } from '../core/components';
@@ -167,7 +166,7 @@ export const TOOLS: ToolDef[] = [
       const big = total > limit;
       return text({
         file: s.project.name,
-        composition: { id: c.id, name: c.name, width: c.width, height: c.height, fps: c.fps, duration: c.duration, background: round(c.background), markers: (c.markers ?? []).map(m => ({ id: m.id, t: m.t, label: m.label })) },
+        composition: { id: c.id, name: c.name, width: c.width, height: c.height, fps: c.fps, duration: c.duration, background: round(c.background) },
         compositions: Object.values(s.project.comps).map(x => ({ id: x.id, name: x.name, active: x.id === c.id })),
         currentTime: s.time,
         selection: s.selection,
@@ -370,18 +369,6 @@ export const TOOLS: ToolDef[] = [
     },
   },
   {
-    name: 'set_markers',
-    description: 'Timeline markers (e.g. beats or story moments the user cares about). add: [{t, label}], remove: marker ids. Returns the markers. Markers are listed in get_document.',
-    inputSchema: { type: 'object', properties: { add: { type: 'array', items: { type: 'object', properties: { t: { type: 'number' }, label: { type: 'string' } }, required: ['t'] } }, remove: { type: 'array', items: { type: 'string' } } } },
-    run: ({ add, remove }) => {
-      st().batch('Agent markers', () => {
-        for (const id of remove ?? []) deleteMarker(st(), id);
-        for (const m of add ?? []) { const mk = addMarker(st(), +m.t, m.label ?? ''); if (m.label && mk.label !== m.label) updateMarker(st(), mk.id, { label: m.label }); }
-      }, 'Agent: markers');
-      return text(JSON.stringify(st().comp.markers ?? []));
-    },
-  },
-  {
     name: 'set_time',
     readOnly: true,
     description: 'Move the playhead (seconds). Values set with update_layer on animated properties go to this time.',
@@ -503,7 +490,7 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: 'get_editor_context',
-    description: 'What the user is looking at right now: composition, playhead, work area, markers, selected layers (with what is animated) and selected keyframes. "this"/"these" in the user\'s message usually mean the selection.',
+    description: 'What the user is looking at right now: composition, playhead, work area, selected layers (with what is animated) and selected keyframes. "this"/"these" in the user\'s message usually mean the selection.',
     inputSchema: { type: 'object', properties: {} },
     readOnly: true,
     run: () => text(editorContext(st())),
@@ -631,21 +618,6 @@ export const TOOLS: ToolDef[] = [
       const img = await contactSheet(ts, Math.max(96, Math.min(512, cell)));
       return [{ type: 'text', text: `${ts.length} frames left→right, top→bottom at ${ts.map(fmtTime).join(', ')}` }, { type: 'image', data: img, mimeType: 'image/jpeg' }];
     },
-  },
-  {
-    name: 'save_variation',
-    description: 'Save the current animation of some layers as a named variation the user can preview and pick in the sidebar (A/B/C). Workflow: build version A, save_variation; change it into version B, save_variation; ... The last saved one stays applied. Use distinct ideas (e.g. snappy / bouncy / elegant), not tiny tweaks.',
-    inputSchema: { type: 'object', properties: { ids: { ...idsSchema, description: 'every layer whose animation differs between the variations' }, label: { type: 'string', description: 'short, e.g. "B · Bouncy"' }, note: { type: 'string', description: 'one line: what is different' } }, required: ['ids', 'label'] },
-    run: ({ ids, label, note }) => {
-      const v = variations.capture(st(), ids, label, note);
-      return text(`saved variation ${JSON.stringify(v.label)} (${Object.keys(v.layers).length} layers, id ${v.id}); ${variations.list.length} variations so far.`);
-    },
-  },
-  {
-    name: 'apply_variation',
-    description: 'Apply a saved variation (by id) to the document, e.g. to go back to a base before building the next one.',
-    inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
-    run: ({ id }) => { const v = variations.apply(st(), id); return text(`applied ${JSON.stringify(v.label)}`); },
   },
   ...STYLE_TOOLS,
   ...SCENE_TOOLS,

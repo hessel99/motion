@@ -48,14 +48,11 @@ export function toolLabel(rawName: string, input: any, layerName: (id: string) =
     case 'precompose': return `Pre-compose ${lns(a.ids)}`;
     case 'set_composition': return `Composition settings · ${Object.keys(a).join(', ')}`;
     case 'smart_animate': return 'Smart animate between two states';
-    case 'set_markers': return 'Update markers';
     case 'set_time': return `Move playhead to ${a.t}s`;
     case 'playback': return a.play ? 'Play preview' : 'Pause preview';
     case 'select_layers': return `Select ${lns(a.ids)}`;
     case 'screenshot': return a.times?.length ? `Look at ${plural(Math.min(4, a.times.length), 'frame')}` : `Look at frame${a.t !== undefined ? ' ' + a.t + 's' : ''}`;
     case 'contact_sheet': return `Contact sheet${a.times?.length ? ` (${a.times.length} frames)` : a.frames ? ` (${a.frames} frames)` : ''}`;
-    case 'save_variation': return `Save variation ${q(a.label ?? '')}`;
-    case 'apply_variation': return 'Apply a variation';
     case 'open_composition': return 'Open composition';
     case 'export_video': return `Export ${a.format ?? 'mp4'}`;
     case 'undo': return 'Undo';
@@ -88,7 +85,7 @@ export function toolLabel(rawName: string, input: any, layerName: (id: string) =
     case 'get_audio_analysis': return a.from !== undefined || a.to !== undefined ? `Listen to ${a.from ?? 0}–${a.to ?? 'end'}s` : 'Listen to the music';
     case 'sync_to_audio': return `Sync ${a.ids?.length ? lns(a.ids) : 'animation'} to the ${a.mode ?? 'beats'}`;
     case 'audio_reactive': return `${a.prop ?? ''} of ${lns(a.ids)} follows the ${a.band ?? 'music'}`;
-    case 'place_on_beats': return a.what === 'markers' ? `Markers on ${a.pattern ?? 'beats'}` : `Entrances on ${a.pattern ?? 'beats'}`;
+    case 'place_on_beats': return `Entrances on ${a.pattern ?? 'beats'}`;
     case 'list_sfx_families': return 'Sound families';
     case 'preview_sfx': return `Preview ${q(a.family ?? '')} sounds`;
     case 'add_sound_effects': return `Sound effects · ${a.family ?? ''}`;

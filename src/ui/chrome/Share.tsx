@@ -1,7 +1,7 @@
 // Share (top right): a small popover with the two ways out of the app.
 // - Share a preview: a self-contained html player page (src/app/share/player.ts), saved as a file
 //   or, with link sharing set up (Settings → Connections), uploaded with the link copied.
-// - Export a file: the export dialog (MP4 / WebM / GIF / PNG / Lottie / After Effects).
+// - Export a file: the export dialog (MP4 / WebM / GIF / PNG / Lottie).
 
 import { download, openExport, toast } from '../../app/actions';
 import { setBusy } from '../../app/updates';

@@ -314,7 +314,7 @@ export function projectToLottie(project: Project): any {
   };
   const layers = buildLayers(comp, [comp.id]);
   const out: any = {
-    v: '5.7.4', fr, ip: 0, op, w: comp.width, h: comp.height, nm: comp.name, ddd: 0, assets, layers, markers: (comp.markers ?? []).filter(m => m.t <= comp.duration).map(m => ({ tm: R(m.t * fr), cm: m.label, dr: 0 })),
+    v: '5.7.4', fr, ip: 0, op, w: comp.width, h: comp.height, nm: comp.name, ddd: 0, assets, layers,
   };
   if (fonts.size) out.fonts = { list: Array.from(fonts.values()) };
   return out;

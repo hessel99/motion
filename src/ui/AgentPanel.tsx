@@ -9,10 +9,8 @@ import { briefScope } from '../agent/quick';
 import { approvalMessage, storyboards, type Storyboard } from '../agent/storyboard';
 import { TOOLS } from '../agent/tools';
 import { animRange } from '../agent/describe';
-import { variations } from '../agent/variations';
 import { MentionInput, mentionToken, type Mention } from './agent/MentionInput';
 import { TurnReview } from './agent/TurnReview';
-import { VariationTray, installVariationThumbs } from './agent/VariationTray';
 import { StoryboardCard } from './agent/StoryboardCard';
 import { styleLabel, stylePrefix } from './agent/StylePicker';
 import { STYLE_GUIDES } from '../agent/guides';
@@ -66,7 +64,6 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   useEffect(() => agentClient.on(() => force(x => x + 1)), []);
   useEffect(() => editor.store.on('history', () => force(x => x + 1)), []);
   useEffect(() => editor.store.on('selection', () => force(x => x + 1)), []);
-  useEffect(() => installVariationThumbs(), []);
   // a drafted message from elsewhere (e.g. "Ask the agent" on the audio sync card)
   useEffect(() => editor.on('agent-draft', () => { const t = (editor as any).agentDraft; if (t) { (editor as any).agentDraft = ''; setInput(t); } }), []);
   // keep scrolled to the bottom unless the user scrolled up to read
@@ -93,7 +90,6 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
       key.current = k;
       const c = loadChat(k);
       session.current = c?.sessions ?? {};
-      variations.clear();
       setMsgs(c?.msgs ?? []);
     };
     sync();
@@ -292,7 +288,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
     else blocks.push({ kind: 'msg', m, i });
   });
 
-  const newChat = () => { session.current = {}; setMsgs([]); variations.clear(); };
+  const newChat = () => { session.current = {}; setMsgs([]); };
   const modelItems = (): MenuItem[] => {
     const list = providers.length ? providers : [{ id: 'claude', name: 'Claude Code', available: false }];
     const items: MenuItem[] = [];
@@ -348,6 +344,8 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
       {props.chat ? (
         <div class="agent-chat">
           <div class="agent-head">
+            <h2 class="lp-title">Agent</h2>
+            <span class="grow" />
             <span class={'dot ' + status} title={`Agent ${status === 'connected' ? `connected · ${modelLabel(provider, model)}` : status}`} />
             <Button variant="ghost" icon size="sm" tip="New conversation" disabled={!!turn || !msgs.length} onClick={newChat}><SquarePen /></Button>
           </div>
@@ -418,7 +416,6 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
             )}
           </div>
           {scrolledUp && <button type="button" class="ag-jump" onClick={() => { stick.current = true; setScrolledUp(false); list.current?.scrollTo({ top: 1e9, behavior: 'smooth' }); }}>Jump to latest <ArrowDown size={13} /></button>}
-          <VariationTray />
         </div>
       ) : <div class="left-content">{props.children}</div>}
       <div class={'ag-composer composer' + (dropping ? ' dropping' : '')}

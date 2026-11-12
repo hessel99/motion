@@ -2,7 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { Store } from '../src/core/store';
 import { addLayer, setProp, toggleAnimated, valueAt } from '../src/core/commands';
 import { addToken, linkProp, setTokenMode, setTokenValue, tokenUsage, deleteToken, linkOf } from '../src/core/tokens';
-import { applySync, parseTokenFile, planSync, summarizePlan, parseColorValue, exportTokenFile, parseFigmaVariablesApi } from '../src/core/token-sync';
+import { applySync, planSync, summarizePlan, parseColorValue, type IncomingToken } from '../src/core/token-sync';
+
+const hex = (h: string) => parseColorValue(h)!;
+const color = (name: string, values: Record<string, string>, key = name): IncomingToken => ({ key, name, type: 'color', kind: 'figma-variable', values: Object.fromEntries(Object.entries(values).map(([m, v]) => [m, hex(v)])) });
+const num = (name: string, v: number): IncomingToken => ({ key: name, name, type: 'number', kind: 'figma-variable', values: { Default: [v] } });
 
 const near = (a: number[], b: number[]) => a.every((x, i) => Math.abs(x - b[i]) < 1e-3);
 
@@ -83,7 +87,7 @@ describe('styles: linking', () => {
 
   it('light / dark modes switch every linked value in one step', () => {
     const { s, a } = setup();
-    const plan = planSync(s.project, parseTokenFile({ light: { bg: { $type: 'color', $value: '#ffffff' } }, dark: { bg: { $type: 'color', $value: '#000000' } } }));
+    const plan = planSync(s.project, [color('bg', { Light: '#ffffff', Dark: '#000000' })]);
     applySync(s, plan);
     expect(s.project.tokens!.modes).toEqual(['Light', 'Dark']);
     const bg = Object.values(s.project.tokens!.items).find(t => t.name === 'bg')!;
@@ -106,13 +110,13 @@ describe('styles: linking', () => {
 });
 
 describe('styles: sync', () => {
-  const v1 = { Brand: { $type: 'color', Primary: { $value: '#ff0000' }, Accent: { $value: '#00ff00' }, Old: { $value: '#123456' } }, Radius: { M: { $type: 'dimension', $value: '8px' } } };
-  const v2 = { Brand: { $type: 'color', Primary: { $value: '#0000ff' }, Accent: { $value: '#00ff00' }, New: { $value: '#ffffff' } }, Radius: { M: { $type: 'dimension', $value: '12px' } } };
+  const v1 = [color('Brand/Primary', { Default: '#ff0000' }), color('Brand/Accent', { Default: '#00ff00' }), color('Brand/Old', { Default: '#123456' }), num('Radius/M', 8)];
+  const v2 = [color('Brand/Primary', { Default: '#0000ff' }), color('Brand/Accent', { Default: '#00ff00' }), color('Brand/New', { Default: '#ffffff' }), num('Radius/M', 12)];
 
   it('plans a readable diff, applies it as one undo step and rewrites linked values', () => {
     const s = new Store();
     const a = addLayer(s, 'rect', { name: 'A' });
-    applySync(s, planSync(s.project, parseTokenFile(v1), { from: 'file:brand.json' }), { kind: 'file', label: 'brand.json', location: 'brand.json' });
+    applySync(s, planSync(s.project, v1, { from: 'figma' }));
     const items = () => Object.values(s.project.tokens!.items);
     expect(items().map(t => t.name).sort()).toEqual(['Brand/Accent', 'Brand/Old', 'Brand/Primary', 'Radius/M']);
     const primary = items().find(t => t.name === 'Brand/Primary')!;
@@ -120,7 +124,7 @@ describe('styles: sync', () => {
     linkProp(s, [a.id], 'fill', primary.id);
     linkProp(s, [a.id], 'radius', radius.id);
 
-    const plan = planSync(s.project, parseTokenFile(v2), { from: 'file:brand.json', removeMissing: true });
+    const plan = planSync(s.project, v2, { from: 'figma', removeMissing: true });
     expect(plan.changed.map(c => c.name).sort()).toEqual(['Brand/Primary', 'Radius/M']);
     expect(plan.added.map(t => t.name)).toEqual(['Brand/New']);
     expect(plan.removed.map(t => t.name)).toEqual(['Brand/Old']);
@@ -142,10 +146,10 @@ describe('styles: sync', () => {
   it('a removed style that is still used is kept and marked missing', () => {
     const s = new Store();
     const a = addLayer(s, 'rect');
-    applySync(s, planSync(s.project, parseTokenFile(v1), { from: 'f' }));
+    applySync(s, planSync(s.project, v1, { from: 'f' }));
     const old = Object.values(s.project.tokens!.items).find(t => t.name === 'Brand/Old')!;
     linkProp(s, [a.id], 'fill', old.id);
-    const plan = planSync(s.project, parseTokenFile(v2), { from: 'f', removeMissing: true });
+    const plan = planSync(s.project, v2, { from: 'f', removeMissing: true });
     expect(plan.removed[0].used).toBe(1);
     applySync(s, plan);
     expect(s.project.tokens!.items[old.id].missing).toBe(true);
@@ -154,10 +158,10 @@ describe('styles: sync', () => {
 
   it('a renamed variable (same key) is a rename, not remove + add', () => {
     const s = new Store();
-    const api = (name: string, hex: { r: number; g: number; b: number }) => ({ meta: { variableCollections: { c1: { modes: [{ modeId: 'm1', name: 'Light' }, { modeId: 'm2', name: 'Dark' }] } }, variables: { v1: { id: 'v1', key: 'KEY1', name, resolvedType: 'COLOR', variableCollectionId: 'c1', valuesByMode: { m1: { ...hex, a: 1 }, m2: { r: 0, g: 0, b: 0, a: 1 } } } } } });
-    applySync(s, planSync(s.project, parseFigmaVariablesApi(api('Brand/Primary', { r: 1, g: 0, b: 0 }))));
+    const api = (name: string) => [color(name, { Light: '#ff0000', Dark: '#000000' }, 'KEY1')];
+    applySync(s, planSync(s.project, api('Brand/Primary')));
     expect(s.project.tokens!.modes).toEqual(['Light', 'Dark']);
-    const plan = planSync(s.project, parseFigmaVariablesApi(api('Brand/Main', { r: 1, g: 0, b: 0 })));
+    const plan = planSync(s.project, api('Brand/Main'));
     expect(plan.added.length).toBe(0);
     expect(plan.changed[0].rename).toBe('Brand/Main');
     applySync(s, plan);
@@ -165,7 +169,7 @@ describe('styles: sync', () => {
   });
 });
 
-describe('styles: token files', () => {
+describe('styles: colors', () => {
   it('parses colors in every common form', () => {
     expect(parseColorValue('#f00')).toEqual([1, 0, 0, 1]);
     expect(parseColorValue('#ff000080')![3]).toBeCloseTo(0.5, 2);
@@ -175,31 +179,4 @@ describe('styles: token files', () => {
     expect(parseColorValue({ colorSpace: 'srgb', components: [0, 0.5, 1], alpha: 1 })).toEqual([0, 0.5, 1, 1]);
   });
 
-  it('resolves aliases and inherits group types (W3C DTCG)', () => {
-    const t = parseTokenFile({ base: { $type: 'color', blue: { $value: '#0000ff' } }, brand: { primary: { $type: 'color', $value: '{base.blue}' } } });
-    const p = t.find(x => x.name === 'brand/primary')!;
-    expect(p.values.Default).toEqual([0, 0, 1, 1]);
-  });
-
-  it('reads Tokens Studio multi-set files (light / dark sets become modes)', () => {
-    const t = parseTokenFile({
-      global: { blue: { value: '#0000ff', type: 'color' }, radius: { value: '4', type: 'borderRadius' } },
-      light: { bg: { value: '#ffffff', type: 'color' }, accent: { value: '{blue}', type: 'color' } },
-      dark: { bg: { value: '#000000', type: 'color' }, accent: { value: '{blue}', type: 'color' } },
-      $metadata: { tokenSetOrder: ['global', 'light', 'dark'] },
-    });
-    const bg = t.find(x => x.name === 'bg')!;
-    expect(bg.values).toEqual({ Light: [1, 1, 1, 1], Dark: [0, 0, 0, 1] });
-    expect(t.find(x => x.name === 'accent')!.values.Dark).toEqual([0, 0, 1, 1]);
-    expect(t.find(x => x.name === 'radius')!.type).toBe('number');
-  });
-
-  it('exports the library as DTCG and reads it back', () => {
-    const s = new Store();
-    addToken(s, { name: 'Brand/Primary', type: 'color', value: [1, 0, 0, 1] });
-    addToken(s, { name: 'Space/S', type: 'number', value: [4] });
-    const back = parseTokenFile(exportTokenFile(s.project.tokens!));
-    expect(back.map(t => t.name).sort()).toEqual(['Brand/Primary', 'Space/S']);
-    expect(planSync(s.project, back).changed.length).toBe(0);
-  });
 });

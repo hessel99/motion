@@ -4,7 +4,7 @@ import { editor } from './editor';
 import { setBusy } from './updates';
 import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
-  setCompSettings, toggleAnimated, parseKeyId, precompose, addMarker, keyId,
+  setCompSettings, toggleAnimated, parseKeyId, precompose, keyId,
 } from '../core/commands';
 import { uid, type Asset, type Layer, type Project } from '../core/model';
 import { boundsOf } from '../agent/tools';
@@ -16,7 +16,7 @@ import { activeDoc, closeDoc, cycleDocs, documents, isDocDirty, newDocument, ope
 import { rememberRecent } from './recent';
 
 // importers are loaded lazily (keeps startup fast; missing modules are simply unavailable)
-const mods = import.meta.glob(['../import/figma/index.ts', '../import/svg.ts', '../import/lottie.ts', '../import/aep/index.ts', '../export/lottie.ts', '../export/aejsx.ts']);
+const mods = import.meta.glob(['../import/figma/index.ts', '../import/svg.ts', '../import/lottie.ts', '../import/aep/index.ts', '../export/lottie.ts']);
 async function mod(path: string): Promise<any | null> {
   const m = mods[path];
   return m ? m() : null;
@@ -222,7 +222,9 @@ export async function openData(name: string, data: string, path?: string) {
   const ext = name.split('.').pop()!.toLowerCase();
   try {
     if (ext === 'motion') {
-      const p = JSON.parse(data) as Project;
+      // older desktop shells hand .motion files over as base64: decode them as utf-8 json
+      const text = /^\s*[{[]/.test(data) ? data : new TextDecoder().decode(b64ToBuf(data.trim()));
+      const p = JSON.parse(text) as Project;
       if (!p.comps || !p.layers) throw new Error('not a motion project');
       p.name ||= name.replace(/\.motion$/i, '');
       openProject(p, path ?? null);
@@ -313,15 +315,6 @@ export async function exportFramePng(scale = 1) {
   const blob = await (await fetch(url)).blob();
   const frame = Math.round(s.time * c.fps);
   download(`${s.project.name || 'frame'}_${String(frame).padStart(4, '0')}.png`, blob, 'image/png');
-}
-
-/** extendscript that rebuilds the active comp in after effects (File > Scripts > Run Script File) */
-export async function exportAeScript() {
-  const m = await mod('../export/aejsx.ts');
-  if (!m) { toast('After Effects export not available', 'error'); return; }
-  download((st().project.name || 'animation') + '.jsx', m.projectToAeScript(st().project), 'text/javascript');
-  const hasAudio = Object.values(st().project.layers).some(l => l.type === 'audio');
-  toast('In After Effects: File › Scripts › Run Script File…' + (hasAudio ? ' (audio layers are not included)' : ''));
 }
 
 // ---------------- inserting layers (paste / import) ----------------
@@ -570,7 +563,8 @@ export async function handlePaste(e: ClipboardEvent) {
     for (const it of cd.items ?? []) { const f = it.kind === 'file' ? it.getAsFile() : null; if (f && (f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name))) return openBrowserFile(f); }
     if (textData.trim().startsWith('{')) {
       const json = JSON.parse(textData);
-      if (json.layers && (json.v || json.fr)) return openData('clipboard.json', textData);
+      // the new tab is named after the animation (lottie "nm"), not "clipboard"
+      if (json.layers && (json.v || json.fr)) return openData(`${String(json.nm || 'Pasted Lottie').replace(/[\\/]/g, ' ')}.json`, textData);
     }
     if (memClipboard && !textData) return memClipboard.startsWith(KEYS_PREFIX) ? pasteKeys(memClipboard) : pasteMotion(memClipboard);
     if (html && /figma/i.test(html)) toast('Figma data found but could not be decoded', 'error');
@@ -722,7 +716,6 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (k === '.' || k === 'pagedown') return run(() => editor.stepFrames(e.shiftKey ? 10 : 1));
     if (k === 'enter' && s.selection.length === 1 && s.layer(s.selection[0])?.type === 'text') return run(() => hooks.editText(s.selection[0]));
     if (e.key === 'F9') return run(() => setEase(s, [...s.keySelection], 'Easy Ease'));
-    if (k === 'm' && !mod && !e.shiftKey && !e.altKey) return run(() => addMarker(s, s.time));
     if (k === 'j' || k === 'k') return run(() => jumpToKey(k === 'j' ? -1 : 1));
     // after effects-style property shortcuts: P S R T A add a keyframe on that property
     const propKeys: Record<string, any> = { p: 'position', s: 'scale', a: 'anchor' };
@@ -750,7 +743,6 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     else if (cmd === 'save') saveProject(false);
     else if (cmd === 'saveAs') saveProject(true);
     else if (cmd === 'export-lottie') exportLottie();
-    else if (cmd === 'export-ae') exportAeScript();
     else if (cmd === 'selectAll') {
       const a = document.activeElement as HTMLElement | null;
       if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) (a as HTMLInputElement).select();
@@ -770,7 +762,7 @@ function isTyping(e: Event) {
 }
 
 /** J / K: move the playhead to the previous / next keyframe of the selection (every layer of
- *  the active comp when nothing is selected) or marker, like after effects */
+ *  the active comp when nothing is selected), like after effects */
 export function jumpToKey(dir: -1 | 1) {
   const s = editor.store;
   const times = new Set<number>();
@@ -781,7 +773,6 @@ export function jumpToKey(dir: -1 | 1) {
     const l = s.layer(id);
     if (l) for (const p of Object.values(l.props)) p?.kf?.forEach(f => times.add(f.t));
   }
-  for (const m of s.comp.markers ?? []) if (m.t <= s.comp.duration) times.add(m.t);
   const sorted = [...times].sort((a, b) => a - b);
   const t = dir < 0 ? [...sorted].reverse().find(x => x < s.time - 1e-6) : sorted.find(x => x > s.time + 1e-6);
   if (t !== undefined) s.setTime(t);

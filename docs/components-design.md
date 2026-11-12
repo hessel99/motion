@@ -159,7 +159,6 @@ Layer (precomp) = an instance:
 
 ## 6. Limits and next steps
 - **Audio** inside a component plays at its start offset, but speed, loop and reverse do not retime it yet (`src/audio/engine.ts`).
-- **After Effects `.jsx`** embeds the Lottie data, so it gets the per-instance assets and the time remap only through that path. Values and variants are not yet native AE Essential Properties.
 - Variant "set" differences (colors, opacity) apply to still values. On a keyframed color, use a color *property* instead: it recolors the keys.
 - Responsive layout for a new format is a first pass: backgrounds stretch, content fits. Tune each format by editing its variant (`edit_variant`).
 - Library files are read on demand (*Use library…*). Watching a library file in the desktop app, as token files are watched, is the next step.

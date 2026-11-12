@@ -157,8 +157,6 @@ describe('agent audio tools', () => {
     const ids = [box('W1', { opacity: [key(0, [0]), key(0.3, [100])] }), box('W2', { opacity: [key(0, [0]), key(0.3, [100])] }), box('W3', { opacity: [key(0, [0]), key(0.3, [100])] })];
     expect(await run('place_on_beats', { what: 'entrances', pattern: 'bar', ids, from: 4, anchor: 'land' })).toMatch(/3 entrances/);
     expect(st().layer(ids[2])!.props.opacity!.kf![1].t).toBeCloseTo(8, 2);
-    expect(await run('place_on_beats', { what: 'markers', pattern: 'bar', to: 8 })).toMatch(/^5 markers/);
-    expect(st().comp.markers!.length).toBe(5);
     await run('audio_reactive', { ids: [ids[0]], prop: 'scale', band: 'low', amount: 8 });
     expect(st().layer(ids[0])!.props.scale!.expr).toBe("value + [8, 8] * audio('low', 0.12, 0)");
     await run('audio_reactive', { ids: [ids[1]], prop: 'rotation', band: 'beat', amount: 5, bake: true, from: 0, to: 1 });
