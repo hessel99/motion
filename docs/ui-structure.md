@@ -69,7 +69,7 @@ primary control's label is clipped, then compares 1x screenshots with `tests/lay
     `configured()`, `upload(blob, name) → url`). Shipped with one provider, "your upload endpoint"
     (POST to an https URL you control, optional Authorization header). Off by default: the popover
     then shows **Set up link sharing…**, which opens Settings → Connections → Link sharing.
-  - *Export a file…* (⌘E): the export dialog (MP4 / WebM / GIF / PNG / Lottie / After Effects).
+  - *Export a file…* (⌘E): the export dialog (MP4 / WebM / GIF / PNG / Lottie).
 
 ### v3 layout notes (still valid inside the stage)
 
@@ -82,10 +82,9 @@ primary control's label is clipped, then compares 1x screenshots with `tests/lay
   options), a selection bar over the selected layer, the brief box on an empty composition, a suggestion after an import.
 - **Timeline**: compositions as pill tabs (+ new, close, double-click a precomp layer opens its
   tab), the agent's progress pill when the panel is hidden, compact transport (start, frame step,
-  play, loop, full-screen preview, editable timecode, duration and fps menus), range, marker, auto-key, Keys | Graph |
-  Speed, a zoom slider. 28px rows; the beat the agent is building is highlighted.
+  play, loop, full-screen preview, editable timecode, duration and fps menus), range, auto-key, Keys | Graph, a zoom slider. 28px rows; the beat the agent is building is highlighted.
 - **Inspector**: calm field rows (label · fields · keyframe diamond; ‹ › on hover when
-  animated), sections with "+" / "−" where something can be added (Stroke, Markers). Section,
+  animated), sections with "+" / "−" where something can be added (Stroke). Section,
   FieldRow and SwatchRow (`src/ui/ui.tsx`) and PropRow (`Inspector.tsx`) are the building blocks for
   new rows (shader params, effect props).
 - **Settings**: a modal (⌘, or the app menu). **Ask bar**: ⌘K or "/" anywhere.
@@ -172,7 +171,7 @@ Every remaining control was clicked through after the change (e2e plus the scree
 
 | pattern (from AI design tools) | adapted here as |
 |---|---|
-| Floating bottom tool pill, active tool filled, zoom inside | Same, neutral filled active tool; the zoom's menu carries canvas view options (pixel grid, snapping, comp-fps playback, HUD). |
+| Floating bottom tool pill, active tool filled, zoom inside | Same, neutral filled active tool; the zoom's menu carries the zoom steps (pixel grid, snapping, comp-fps playback and the HUD only in dev builds / `?dev`). |
 | Second floating pill for page actions (preview, export, full screen) | Not a second pill: playback already lives in the timeline transport, and a duplicate play/loop/range on the canvas was noise. The canvas-specific part, **full-screen preview** (only the canvas, playing; Esc leaves), is a button in the transport. |
 | Mini toolbar above the selected element | **Motion actions** above the selected layer: keyframe at the playhead (on what is animated, else position), ease its keys (springs and curves), show in the timeline, Ask. Hidden while dragging, playing or using another tool. |
 | Inline links to created items | Layer chips in agent replies: select the layer **and** jump the playhead to its animation start. Neutral chip with the layer-type icon. |
@@ -199,3 +198,30 @@ Every remaining control was clicked through after the change (e2e plus the scree
 | Export button | top right | **replace** with Share | Share covers sending a preview (file now, link when set up) and exporting files. |
 | Rhythm panel | inspector | **removed** (on the main branch) | Asked for by the user. |
 | Timeline header labels (Range, Auto-key, duration, zoom) | always | **shrink** in a narrow stage | Container queries drop labels first, then the duration and zoom slider. |
+
+## Removed in 0.4
+
+The app keeps its core (canvas, tools, timeline + graph editor, eases / springs, inspector, precomps,
+the agent, Figma paste, imports, audio, Share / export, components, updates). Everything below was
+removed from the UI, code, tests and agent tools; old documents still open (unknown fields are
+dropped or ignored).
+
+| feature | why | what replaces it |
+|---|---|---|
+| Timeline markers (ruler flags, inspector section, M, J/K marker stops, drag / rename / delete, `set_markers`, `build_scene` markers, Lottie markers) | Extra UI and a second timing system next to the music grid; nobody needed named moments | Audio beat / bar / section grids (analysis, ruler ticks, snapping). `align_to_beats` defaults to the music's beats (or explicit times / bpm); `place_on_beats` places entrances. Old files drop `comp.markers` on open |
+| Audio inspector "Markers on bars" / "On hits" | Wrote markers | Snapping to the beat grid, Sync timing |
+| Ease studio: feel pad, knob, live swatches, A/B lane, Perform recording (`src/ui/patterns/*`) | Experiments that doubled the easing UI | Easing section: spring + curve presets, the bezier editor with influence, the graph editor |
+| Speed graph mode | A second graph editor; the value graph covers editing, the speed view was read-only | Keys \| Graph |
+| Inspector Animate panel (preset menu, duration, stagger, Smart animate row) | The agent does presets, stagger and smart animate better and in context | Agent tools `apply_preset`, `stagger`, `smart_animate` (⌘K / chat) |
+| Variations (tray, `save_variation` / `apply_variation`, "3 variations" quick action) | The review card + undo already cover trying alternatives | The agent builds one strong option and names the others; undo / revert per turn |
+| Style sync from W3C / Tokens Studio files, URLs, Figma variables REST API; Sync ▾ menu, review dialog, tokens-file export, desktop file watching | Rarely used, needed tokens / Enterprise plans | Figma paste still syncs variables / color styles (one undo step); linked colours / numbers and light / dark modes stay |
+| After Effects script export (`.jsx`) | Untested in real AE, a large embedded interpreter | Lottie (also imports into AE through plugins), MP4 / WebM, GIF, PNG |
+| Pixel grid, snap to pixel grid, comp-fps playback and Performance HUD toggles; stress scenes and demo in the app menu | Developer tools | Shown in dev builds, with `?dev`, or `localStorage motion.dev = 1` |
+| Settings: Profile, Notifications, Members placeholders; "coming soon" sound switches; the Default mode (Edit / Ask) card | Placeholders and a dead setting (the agent always edits) | — |
+| Dead code: `src/audio/beats.ts`, debug scripts (`hang*.mjs`, `probe.mjs`, `atlas-probe.mjs`, `library-shots.mjs`), unused CSS | Unused | — |
+
+Kept on purpose: `.aep` import (lazy-loaded, no cost to the main bundle; removing it also means
+changing the desktop shell's open dialog), text animation presets (text is core), the expression
+editor, the store's preview-override hook (harmless, in the renderer's hot path), and the
+`@preact/signals` dependency. It is unused, but removing a dependency changes the shell
+fingerprint and would force a full app update, so it goes with the next shell release.

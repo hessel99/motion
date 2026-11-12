@@ -74,8 +74,6 @@
 .ag-error summary { cursor: pointer; font-size: 11px; }
 
 /* composer */
-.ag-chip { background: var(--surface-hover); border-radius: 4px; padding: 0 5px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ag-chip.mention { background: color-mix(in srgb, var(--ag-accent) 22%, transparent); }
 .ag-qchip { flex: none; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ag-line); background: transparent; color: var(--text-secondary); cursor: pointer; white-space: nowrap; font-weight: var(--weight-regular); min-height: 22px; }
 .ag-qchip:hover:not(:disabled) { border-color: var(--ag-accent); color: var(--ag-text); }
 .ag-qchip.ask { border-style: dashed; }

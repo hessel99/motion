@@ -69,7 +69,7 @@ function startBridge() {
   return bridgeReady;
 }
 
-const TEXT_EXT = new Set(['.json', '.svg', '.txt', '.csv', '.lottie.json']);
+const TEXT_EXT = new Set(['.json', '.svg', '.txt', '.csv', '.lottie.json', '.motion']);
 
 const OPEN_FILTERS = [
   { name: 'All supported', extensions: ['motion', 'aep', 'json', 'svg', 'png', 'jpg', 'jpeg', 'gif', 'webp'] },
