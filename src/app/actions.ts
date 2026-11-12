@@ -585,6 +585,11 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     else if (cmd === 'save') saveProject(false);
     else if (cmd === 'saveAs') saveProject(true);
     else if (cmd === 'export-lottie') exportLottie();
+    else if (cmd === 'selectAll') {
+      const a = document.activeElement as HTMLElement | null;
+      if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) (a as HTMLInputElement).select();
+      else st().select(st().comp.root.slice());
+    }
   });
 }
 

@@ -166,7 +166,7 @@ function buildMenu() {
         { label: 'Save', accelerator: 'CmdOrCtrl+S', click: () => sendMenu('save') },
         { label: 'Save As…', accelerator: 'CmdOrCtrl+Shift+S', click: () => sendMenu('saveAs') },
         { type: 'separator' },
-        { label: 'Import…', accelerator: 'CmdOrCtrl+I', click: () => sendMenu('import') },
+        { label: 'Import…', click: () => sendMenu('import') }, // ⌘I is the agent sidebar toggle in the app; ⌘O opens + imports
         { label: 'Export Lottie…', accelerator: 'CmdOrCtrl+E', click: () => sendMenu('export-lottie') },
         { type: 'separator' },
         isMac ? { role: 'close' } : { role: 'quit' },
@@ -175,7 +175,8 @@ function buildMenu() {
     {
       label: 'Edit',
       // Note: undo/redo are left to the renderer (its own history), only clipboard roles here.
-      submenu: [{ role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'pasteAndMatchStyle' }, { role: 'delete' }, { role: 'selectAll' }],
+      // select all: text in a focused field, otherwise all layers (handled in the renderer)
+      submenu: [{ role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'pasteAndMatchStyle' }, { role: 'delete' }, { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => sendMenu('selectAll') }],
     },
     {
       label: 'View',
