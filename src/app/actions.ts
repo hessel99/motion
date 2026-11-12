@@ -472,17 +472,25 @@ export async function handlePaste(e: ClipboardEvent) {
 
 // ---------------- autosave ----------------
 const AUTOSAVE_KEY = 'motion.autosave';
+let autosaveWarned = false;
+function warnAutosave() {
+  if (autosaveWarned) return;
+  autosaveWarned = true;
+  toast('Project too large for browser autosave: save it as a file (⌘S)', 'error');
+}
+
 export function setupAutosave() {
   let timer = 0;
   const save = () => {
     const nat = native() as any;
     if (nat?.autosaveWrite) { Promise.resolve(nat.autosaveWrite(serialize())).catch(() => {}); return; } // desktop: file in app data, any size
     // big projects don't fit local storage anyway (~5MB): skip instead of serializing megabytes on the main thread
-    if (Object.keys(st().project.layers).length > 1500) return;
+    if (Object.keys(st().project.layers).length > 1500) { warnAutosave(); return; }
     try {
       const s = serialize();
-      if (s.length < 4_000_000) localStorage.setItem(AUTOSAVE_KEY, s);
-    } catch { /* quota */ }
+      if (s.length < 4_000_000) { localStorage.setItem(AUTOSAVE_KEY, s); autosaveWarned = false; }
+      else warnAutosave();
+    } catch { warnAutosave(); /* quota */ }
   };
   st().on('doc', () => {
     clearTimeout(timer);

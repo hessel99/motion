@@ -25,7 +25,9 @@ export function augmentedEnv(extra = {}) {
   // nvm installs: every node version's bin dir (newest first)
   try {
     const nvm = path.join(home, '.nvm', 'versions', 'node');
-    for (const v of fs.readdirSync(nvm).sort().reverse()) dirs.push(path.join(nvm, v, 'bin'));
+    const ver = (v) => v.replace(/^v/, '').split('.').map((x) => parseInt(x, 10) || 0);
+    const cmp = (a, b) => { const x = ver(a), y = ver(b); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return y[i] - x[i]; return 0; };
+    for (const v of fs.readdirSync(nvm).sort(cmp)) dirs.push(path.join(nvm, v, 'bin'));
   } catch { /* no nvm */ }
   const cur = (process.env.PATH ?? '').split(path.delimiter);
   const PATH = [...cur, ...dirs.filter((d) => !cur.includes(d))].join(path.delimiter);

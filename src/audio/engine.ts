@@ -2,7 +2,7 @@
 // the playback clock stays the editor's (frame accurate); audio is (re)scheduled on play,
 // on loop wrap and whenever the playhead jumps while playing.
 
-import type { Asset, Layer } from '../core/model';
+import type { Asset, Composition, Layer } from '../core/model';
 import type { Editor } from '../app/editor';
 
 const buffers = new Map<string, AudioBuffer | 'loading' | 'error'>();
@@ -23,7 +23,7 @@ export function getAudioBuffer(asset: Asset): AudioBuffer | null {
     buffers.set(asset.id, 'loading');
     pending.set(asset.id, fetch(asset.data).then(r => r.arrayBuffer()).then(ab => audioCtx().decodeAudioData(ab))
       .then(buf => { buffers.set(asset.id, buf); onDecoded?.(); return buf; })
-      .catch(() => { buffers.set(asset.id, 'error'); return null; }));
+      .catch(() => { buffers.set(asset.id, 'error'); onDecoded?.(); return null; }));
   }
   return null;
 }
@@ -31,34 +31,6 @@ export function getAudioBuffer(asset: Asset): AudioBuffer | null {
 /** waits for the decoded buffer (null if decoding failed) */
 export async function loadAudioBuffer(asset: Asset): Promise<AudioBuffer | null> {
   return getAudioBuffer(asset) ?? (await pending.get(asset.id)) ?? null;
-}
-
-/**
- * mixes the visible audio layers of the root comp for [t0, t1) into one stereo buffer, honoring
- * start time, in/out points and volume. returns null when there is no audible audio.
- */
-export async function mixAudio(project: { layers: Record<string, Layer>; assets: Record<string, Asset> }, root: string[], t0: number, t1: number, sampleRate = 48000): Promise<AudioBuffer | null> {
-  const layers = Object.values(project.layers).filter(l => l.type === 'audio' && l.visible && root.includes(l.id) && (l.volume ?? 1) > 0);
-  const len = Math.max(1, Math.ceil((t1 - t0) * sampleRate));
-  let oc: OfflineAudioContext | null = null;
-  for (const l of layers) {
-    const asset = l.imageRef ? project.assets[l.imageRef] : undefined;
-    if (!asset) continue;
-    const buf = await loadAudioBuffer(asset);
-    if (!buf) continue;
-    const start = l.startTime ?? 0;
-    const from = Math.max(t0, l.inPoint, start);
-    const to = Math.min(t1, l.outPoint, start + buf.duration);
-    if (to <= from) continue;
-    oc ??= new OfflineAudioContext(2, len, sampleRate);
-    const src = oc.createBufferSource();
-    src.buffer = buf;
-    const gain = oc.createGain();
-    gain.gain.value = l.volume ?? 1;
-    src.connect(gain).connect(oc.destination);
-    src.start(from - t0, from - start, to - from);
-  }
-  return oc ? oc.startRendering() : null;
 }
 
 /** min/max peaks per bucket for waveform drawing (cached) */
@@ -85,26 +57,109 @@ export function audioDuration(asset: Asset): number | null {
   return b ? b.duration : null;
 }
 
+export function audioFailed(asset: Asset): boolean { return buffers.get(asset.id) === 'error'; }
+
+/** drop decoded audio of assets that no longer exist (call after a project load / asset removal) */
+export function pruneAudio(assets: Record<string, Asset>) {
+  for (const id of [...buffers.keys()]) if (!assets[id]) { buffers.delete(id); pending.delete(id); peaksCache.delete(id); }
+}
+
+type ProjectLike = { layers: Record<string, Layer>; assets: Record<string, Asset>; comps: Record<string, Composition> };
+
+/** one audible clip in root comp time: buffer time 0 is at `offset`, audible within [from, to) */
+export interface AudioClip { layer: Layer; asset: Asset; offset: number; from: number; to: number; volume: number }
+
+/**
+ * every visible audio layer reachable from the root list, through groups and precomps
+ * (precomp start offset, the precomp layer's in/out points and the inner comp's duration).
+ */
+export function collectAudioClips(project: ProjectLike, root: string[]): AudioClip[] {
+  const out: AudioClip[] = [];
+  const walk = (ids: string[], tOff: number, lo: number, hi: number, gain: number, stack: string[]) => {
+    for (const id of ids) {
+      const l = project.layers[id];
+      if (!l || !l.visible) continue;
+      // layer in/out are in the time of the comp that holds it
+      const a = Math.max(lo, l.inPoint + tOff), b = Math.min(hi, l.outPoint + tOff);
+      if (b <= a) continue;
+      if (l.type === 'audio') {
+        const asset = l.imageRef ? project.assets[l.imageRef] : undefined;
+        const v = gain * (l.volume ?? 1);
+        if (asset && v > 0) out.push({ layer: l, asset, offset: tOff + (l.startTime ?? 0), from: a, to: b, volume: v });
+      } else if (l.type === 'precomp') {
+        const c = l.compRef ? project.comps[l.compRef] : undefined;
+        if (!c || stack.includes(c.id)) continue;
+        const off = tOff + (l.startTime ?? 0);
+        walk(c.root, off, a, Math.min(b, off + c.duration), gain, [...stack, c.id]);
+      } else if (l.children.length) walk(l.children, tOff, a, b, gain, stack);
+    }
+  };
+  walk(root, 0, -Infinity, Infinity, 1, []);
+  return out;
+}
+
+/**
+ * mixes the audible audio of the root comp for [t0, t1) into one stereo buffer, honoring
+ * nesting, start time, in/out points and volume. returns null when there is no audible audio.
+ */
+export async function mixAudio(project: ProjectLike, root: string[], t0: number, t1: number, sampleRate = 48000): Promise<AudioBuffer | null> {
+  const clips = collectAudioClips(project, root);
+  const len = Math.max(1, Math.ceil((t1 - t0) * sampleRate));
+  let oc: OfflineAudioContext | null = null;
+  for (const c of clips) {
+    const buf = await loadAudioBuffer(c.asset);
+    if (!buf) continue;
+    const from = Math.max(t0, c.from, c.offset);
+    const to = Math.min(t1, c.to, c.offset + buf.duration);
+    if (to <= from) continue;
+    oc ??= new OfflineAudioContext(2, len, sampleRate);
+    const src = oc.createBufferSource();
+    src.buffer = buf;
+    const gain = oc.createGain();
+    gain.gain.value = c.volume;
+    src.connect(gain).connect(oc.destination);
+    src.start(from - t0, from - c.offset, to - from);
+  }
+  return oc ? oc.startRendering() : null;
+}
+
 export class AudioEngine {
   private sources: AudioBufferSourceNode[] = [];
-  private lastTime = 0;
   private wasPlaying = false;
+  /** audio clock anchor of the last (re)start: comp time tStart was at ctx time ctxStart */
+  private tStart = 0;
+  private ctxStart = 0;
+  private sig = '';
+  private clips: AudioClip[] = [];
+  private stale = true;
 
   constructor(private ed: Editor) {
     onDecoded = () => { ed.emit('audio'); if (ed.store.playing) this.restart(); };
-    // react to the playhead: start/stop with playback, resync on jumps (scrub, loop wrap)
+    // clips are re-collected only after a document change (not every frame)
+    ed.store.on('doc', () => { this.stale = true; });
+    ed.store.on('comps', () => { this.stale = true; pruneAudio(ed.store.project.assets); });
     ed.onFrame((_now, t, playing) => {
       if (playing && !this.wasPlaying) this.restart();
       else if (!playing && this.wasPlaying) this.stopAll();
-      else if (playing && (t < this.lastTime - 0.05 || t > this.lastTime + 0.25)) this.restart();
+      else if (playing) {
+        // resync when the clips changed (edit, delete, comp switch) or the playhead drifted from
+        // the audio clock (scrub, loop wrap, frame step, long frames where the editor clock is capped)
+        const sig = this.signature();
+        const expected = this.tStart + (this.ctxStart ? audioCtx().currentTime - this.ctxStart : 0);
+        if (sig !== this.sig || Math.abs(expected - t) > 0.06) this.restart();
+      }
       this.wasPlaying = playing;
-      this.lastTime = t;
     });
   }
 
-  private layers(): Layer[] {
+  private signature(): string {
+    if (!this.stale) return this.sig;
+    this.stale = false;
     const st = this.ed.store;
-    return Object.values(st.project.layers).filter(l => l.type === 'audio' && l.visible && st.comp.root.includes(l.id));
+    this.clips = collectAudioClips(st.project, st.comp.root);
+    let s = st.comp.id;
+    for (const c of this.clips) s += `|${c.layer.id}:${c.asset.id}:${c.offset}:${c.from}:${c.to}:${c.volume}`;
+    return s;
   }
 
   stopAll() {
@@ -112,29 +167,33 @@ export class AudioEngine {
     this.sources = [];
   }
 
+  /** stop now and resync on the next playing frame (the frame loop is about to stop, e.g. export) */
+  halt() { this.stopAll(); this.wasPlaying = false; }
+
   restart() {
     this.stopAll();
     const st = this.ed.store;
     const t = st.time;
+    this.stale = true;
+    this.sig = this.signature();
     const wa = this.ed.validWorkArea();
     const end = wa ? wa[1] : st.comp.duration;
+    if (!this.clips.length) { this.tStart = t; this.ctxStart = 0; return; }
     const ac = audioCtx();
     if (ac.state === 'suspended') ac.resume();
-    for (const l of this.layers()) {
-      const asset = l.imageRef ? st.project.assets[l.imageRef] : undefined;
-      if (!asset) continue;
-      const buf = getAudioBuffer(asset);
+    this.tStart = t; this.ctxStart = ac.currentTime;
+    for (const c of this.clips) {
+      const buf = getAudioBuffer(c.asset);
       if (!buf) continue;
-      const start = l.startTime ?? 0;
-      const from = Math.max(t, l.inPoint, start);
-      const to = Math.min(end, l.outPoint, start + buf.duration);
+      const from = Math.max(t, c.from, c.offset);
+      const to = Math.min(end, c.to, c.offset + buf.duration);
       if (to <= from) continue;
       const src = ac.createBufferSource();
       src.buffer = buf;
       const gain = ac.createGain();
-      gain.gain.value = l.volume ?? 1;
+      gain.gain.value = c.volume;
       src.connect(gain).connect(ac.destination);
-      src.start(ac.currentTime + (from - t), from - start, to - from);
+      src.start(ac.currentTime + (from - t), from - c.offset, to - from);
       this.sources.push(src);
     }
   }

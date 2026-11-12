@@ -87,7 +87,7 @@ export class Editor {
     this.raf = requestAnimationFrame(loop);
   }
 
-  stop() { cancelAnimationFrame(this.raf); }
+  stop() { cancelAnimationFrame(this.raf); this.audio?.halt(); }
   /** restart the loop after stop() (e.g. after a video export) */
   resume() { this.stop(); this.lastNow = performance.now(); this.start(); }
 

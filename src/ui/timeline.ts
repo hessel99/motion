@@ -10,7 +10,7 @@ import {
 import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type PropKey } from '../core/model';
 import { showContextMenu, type MenuItem } from './menu';
 import { GraphView } from './graph';
-import { audioDuration, audioPeaks } from '../audio/engine';
+import { audioDuration, audioFailed, audioPeaks } from '../audio/engine';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { setEase, setInterp, setSpring } from '../core/commands';
 
@@ -427,7 +427,7 @@ export class Timeline {
           const ph = Math.max(0.5, p * h);
           g.fillRect(x, cy - ph, 1.5, ph * 2);
         }
-      } else { g.fillStyle = '#6a6a72'; g.font = '10px system-ui'; g.fillText('decoding audio…', Math.max(this.leftW + 6, this.tToX(l.startTime ?? 0)), cy); }
+      } else { g.fillStyle = '#6a6a72'; g.font = '10px system-ui'; g.fillText(asset && audioFailed(asset) ? 'audio could not be decoded' : 'decoding audio…', Math.max(this.leftW + 6, this.tToX(l.startTime ?? 0)), cy); }
     }
     // text animation range (per-unit reveal) as a bar
     if (l.textAnim && l.text) {

@@ -106,6 +106,7 @@ export class GraphView {
         const dt = (t1 - t0) / steps;
         const prev = new Float64Array(4);
         tr.eval(t0 - dt, prev, 0);
+        let cmax = -Infinity;
         for (let s = 0; s <= steps; s++) {
           tr.eval(t0 + (t1 - t0) * (s / steps), tmp, 0);
           let d2 = 0;
@@ -113,12 +114,15 @@ export class GraphView {
           arr[s] = Math.sqrt(d2) / dt;
           prev.set(tmp);
           if (arr[s] < lo) lo = arr[s];
-          if (arr[s] > hi) hi = arr[s];
+          if (arr[s] > cmax) cmax = arr[s];
         }
         lo = Math.min(lo, 0);
-        // hold keys make near-infinite one-sample spikes: scale to the 98th percentile instead
+        // hold keys make near-infinite one-sample spikes. per curve: when the peak is far above
+        // the 98th percentile it is such a spike, so scale to the percentile instead
         const sorted = Array.from(arr).sort((x, y) => x - y);
-        hi = Math.min(hi, sorted[Math.floor(sorted.length * 0.98)] * 1.15 || hi);
+        const p98 = sorted[Math.floor(sorted.length * 0.98)];
+        if (p98 > 0 && cmax > p98 * 8) cmax = p98 * 1.15;
+        if (cmax > hi) hi = cmax;
         samples.push(arr);
         continue;
       }

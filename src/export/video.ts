@@ -210,11 +210,12 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
   });
   const source = new EncodedVideoPacketSource(picked.codec.startsWith('avc1') ? 'avc' : picked.codec.startsWith('vp09') ? 'vp9' : 'vp8');
   output.addVideoTrack(source, { frameRate: fps });
-  // audio: all audio layers mixed offline into one stereo track
+  // audio: all audible audio layers mixed offline into one stereo track. any failure here
+  // (no AudioEncoder, codec check) just exports without audio.
   let audio: { src: AudioBufferSource; buf: AudioBuffer } | null = null;
-  {
+  try {
     const st = editor.store;
-    const mixed = await mixAudio(st.project, st.comp.root, t0, t1).catch(() => null);
+    const mixed = await mixAudio(st.project, st.comp.root, t0, t1);
     if (mixed) {
       const codec = await getFirstEncodableAudioCodec(picked.format === 'mp4' ? ['aac', 'opus'] : ['opus', 'vorbis'], { numberOfChannels: 2, sampleRate: mixed.sampleRate });
       if (codec) {
@@ -223,7 +224,7 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
         audio = { src, buf: mixed };
       } else console.warn('no encodable audio codec; exporting without audio');
     }
-  }
+  } catch (e) { console.warn('audio export skipped:', e); audio = null; }
   let encErr: unknown = null;
   let mux: Promise<void> = Promise.resolve();
   const encoder = new VideoEncoder({
