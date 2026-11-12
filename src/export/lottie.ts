@@ -64,6 +64,7 @@ const BM: Partial<Record<BlendMode, number>> = {
 };
 void BLEND_MODES;
 
+const EFFECT_NAME: Record<string, string> = { dropShadow: 'Drop shadow', innerShadow: 'Inner shadow', layerBlur: 'Layer blur', noise: 'Noise', texture: 'Texture', glass: 'Glass' };
 const visibleEffects = (l: Layer) => (l.effects ?? []).filter(e => e.visible !== false);
 const hasEffectProps = (l: Layer, prefix: string) => Object.keys(l.props).some(k => k.startsWith(prefix));
 
@@ -120,7 +121,7 @@ export function layerIssues(project: Project, l: Layer): LottieIssue[] {
   const bb = fx.some(e => e.type === 'backgroundBlur') || (l.props.backgroundBlur?.v[0] ?? 0) > 0;
   const other = fx.filter(e => e.type !== 'backgroundBlur');
   const implicit = (['shadowColor', 'innerShadowColor', 'noiseColor'] as const).filter(k => l.props[k] && !fx.some(e => e.type === (k === 'shadowColor' ? 'dropShadow' : k === 'innerShadowColor' ? 'innerShadow' : 'noise')));
-  if (other.length || implicit.length || (l.props.blur?.v[0] ?? 0) > 0 || l.props.blur?.kf?.length) add('effects', `${[...new Set(other.map(e => e.type))].join(', ') || 'effects'}: Lottie has no layer effects`);
+  if (other.length || implicit.length || (l.props.blur?.v[0] ?? 0) > 0 || l.props.blur?.kf?.length) add('effects', `${[...new Set(other.map(e => EFFECT_NAME[e.type] ?? e.type))].join(', ') || 'Effects'}: Lottie players draw no shadows, blurs or noise`);
   if (bb) add('background-blur', 'Background blur needs what is behind the layer: Lottie can\'t show it (baking would freeze the backdrop)', false);
   if (l.shaderEffects?.some(r => r.enabled !== false)) add('shader', 'Shader effects only run in Motion');
   if (l.type !== 'image' && l.type !== 'precomp' && l.type !== 'text') {

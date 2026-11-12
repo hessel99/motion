@@ -2401,7 +2401,7 @@ export class Renderer {
     const lt = this.itemT(i, t);
     for (const u of units) {
       // raster per unit (cached in the atlas like any other raster)
-      if (!u.entry || u.entry.dead || u.scale < scale * 0.999 || u.scale > scale * 2.83) {
+      if (!u.entry || u.entry.dead || u.scale < scale * 0.999 || u.scale > scale * 2.83 || (this.syncRaster && u.scale !== bucket)) {
         const key = `${it.rasterBase}#${ta.by}:${u.unit.index}:${u.unit.text}@${bucket}`;
         let e = this.atlas.get(key);
         let r = this.rasterMeta.get(key);
