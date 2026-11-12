@@ -11,6 +11,7 @@ The existing `scripts/e2e.mjs`, `scripts/ui-check.mjs`, `scripts/audio-smoke.mjs
 |---|---|---|---|
 | QA-1 | A file opened from Home (size preset, brief) was zoomed to fit against the full-width Home stage (the sidebars are hidden there). Once the editor showed, the comp was too big and hung off the left edge of the canvas (the "Main 1920×1080" label was cut to "20×1080" at 1280×800). Fix: the viewport keeps following size changes while the view is still the automatic fit, and stops once the user zooms or pans (`src/ui/viewport-controller.ts`). | fixed, `qa-flows` check | see `git log --grep QA-1` |
 | QA-2 | A Lottie pasted as text opened in a new tab called "clipboard". It is now named after the animation (`nm`), or "Pasted Lottie". | fixed, `qa-flows` check | see `git log --grep QA-2` |
+| QA-3 | Inspector number fields with a long label shrank the label so it ran into the value: "Spread0", "Density50%", "Background Blur" and the Timing "Out" clipped. The label no longer shrinks (`.num-label`, `src/ui/styles.css`). | fixed, `qa-flows` check | see `git log --grep QA-3` |
 
 ## Handed off (layout / chrome: shell agent)
 
@@ -41,3 +42,7 @@ context menus; paste SVG, PNG, Lottie and the synthetic Figma fidelity scene; Sh
 save and reopen a project (same layers and comps); agent panel with the fake claude: storyboard, approve, review card;
 the Electron app under xvfb (preload, bridge, updater, no main-process errors). e2e, ui-check, audio-smoke and
 shader-e2e pass.
+
+Performance: no long tasks (>100 ms) while nudging, stepping frames, switching Keys / Graph or playing the demo. The first
+frame that draws a layer with blur + noise + shadow costs ~300–500 ms once in headless Chromium (effect shaders compile on
+software GL); later frames are fast. Not treated as a bug.

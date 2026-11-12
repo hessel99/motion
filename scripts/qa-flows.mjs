@@ -48,6 +48,25 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   const lot = await ev(() => ({ name: editor.store.project.name, n: editor.store.comp.root.length, tabs: document.querySelectorAll('.tb-tab').length }));
   check(`${w}: pasted Lottie opens in a tab named after it`, lot.name === 'Bounce' && lot.n === 1, JSON.stringify(lot));
 
+  // QA-3: effect field labels ("Spread", "Density") shrank and ran into their value ("Spread0")
+  await ev(async () => {
+    const M = await import('/src/core/model.ts');
+    const C = await import('/src/core/commands.ts');
+    const s = editor.store;
+    const l = M.createLayer('rect', { name: 'Fx', x: 0, y: 0, w: 100, h: 100 });
+    s.transact('add', tx => C.insertLayer(s, tx, l, null));
+    s.select([l.id]);
+  });
+  await page.waitForTimeout(200);
+  for (const o of await page.locator('select[aria-label="Add effect"] option').allTextContents()) {
+    if (o === 'Add…') continue;
+    await page.selectOption('select[aria-label="Add effect"]', { label: o }).catch(() => {});
+    await page.waitForTimeout(100);
+  }
+  await page.waitForTimeout(200);
+  const clipped = await ev(() => [...document.querySelectorAll('.inspector .num-label')].filter(e => e.offsetParent && e.scrollWidth > e.clientWidth + 1).map(e => e.textContent));
+  check(`${w}: inspector field labels are not clipped`, clipped.length === 0, JSON.stringify(clipped));
+
   // no horizontal page overflow
   const overflow = await ev(() => document.documentElement.scrollWidth - innerWidth);
   check(`${w}: no horizontal page overflow`, overflow <= 0, `${overflow}px`);
