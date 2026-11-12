@@ -358,6 +358,12 @@ function EasePanel() {
       {a && b && seg && a.interp !== 'hold' && a.interp !== 'spring' && (
         <CurveEditor value={cur} onChange={(v, mk) => setSegmentHandles(store, seg!.layerId, seg!.key, seg!.i, [v[0], v[1]], [v[2], v[3]], mk)} />
       )}
+      {a && b && seg && a.interp === 'bezier' && (
+        <div class="row" title="After Effects style influence: how far each handle reaches into the segment">
+          <NumField label="Out" min={0.1} max={100} suffix="%" value={Math.round(cur[0] * 1000) / 10} onChange={(n, mk) => setSegmentHandles(store, seg!.layerId, seg!.key, seg!.i, [n / 100, cur[1]], [cur[2], cur[3]], mk)} />
+          <NumField label="In" min={0.1} max={100} suffix="%" value={Math.round((1 - cur[2]) * 1000) / 10} onChange={(n, mk) => setSegmentHandles(store, seg!.layerId, seg!.key, seg!.i, [cur[0], cur[1]], [1 - n / 100, cur[3]], mk)} />
+        </div>
+      )}
       {a?.interp === 'hold' && <div class="muted small">Hold keyframe (no interpolation)</div>}
       <div class="ease-group">Springs</div>
       <div class="ease-presets">
