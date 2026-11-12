@@ -110,6 +110,8 @@ export class Timeline {
   scrollY = 0;
   rows: Row[] = [];
   expanded = new Set<string>();
+  /** properties revealed per layer (Shift+P/S/R/T/A, after effects): listed even when not animated */
+  shownProps = new Map<string, Set<PropKey>>();
   private rowsDirty = true;
   private baseDirty = true;
   private drag: Drag | null = null;
@@ -175,9 +177,9 @@ export class Timeline {
     st.on('workarea', () => { this.baseDirty = true; });
     st.on('keys', () => { this.baseDirty = true; });
     st.on('time', () => { if (!st.playing) this.baseDirty = true; });
-    st.on('comps', () => { this.expanded.clear(); this.scrollY = 0; this.fitTime(); this.rowsDirty = true; this.baseDirty = true; });
+    st.on('comps', () => { this.expanded.clear(); this.shownProps.clear(); this.scrollY = 0; this.fitTime(); this.rowsDirty = true; this.baseDirty = true; });
     ed.on('loaded', () => {
-      lastDur = st.comp.duration; this.expanded.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
+      lastDur = st.comp.duration; this.expanded.clear(); this.shownProps.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
     ed.onFrame(() => this.frame());
     ed.on('audio', () => { this.baseDirty = true; });
     ed.on('agent-turn', () => { this.baseDirty = true; });
@@ -335,7 +337,7 @@ export class Timeline {
           for (let k = 0; k < keys.length; k++) {
             const p = l.props[keys[k]];
             if (p && (p.kf?.length || p.expr)) m |= 1 << k;
-            if (p && (this.allProps || p.kf?.length || p.expr)) { rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: keys[k], hasChildren: false, mask: -1 }); }
+            if ((p && (this.allProps || p.kf?.length || p.expr)) || this.shownProps.get(l.id)?.has(keys[k])) { rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: keys[k], hasChildren: false, mask: -1 }); }
           }
           if (l.paints || l.shaderEffects) {
             let n = 0;
@@ -402,6 +404,16 @@ export class Timeline {
       else if (y + ROW_H > this.scrollY + this.h - HEADER_H) this.scrollY = y + ROW_H - (this.h - HEADER_H);
     }
     this.baseDirty = true;
+  }
+
+  /** after effects Shift+<prop>: add a property row to what the layer shows (and open it) */
+  showProp(id: string, key: PropKey) {
+    let set = this.shownProps.get(id);
+    if (!set) this.shownProps.set(id, (set = new Set()));
+    set.add(key);
+    this.expanded.add(id);
+    this.rowsDirty = true;
+    this.reveal(id);
   }
 
   expand(id: string, on = true) {

@@ -4,9 +4,9 @@ import { editor } from './editor';
 import { setBusy } from './updates';
 import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
-  setCompSettings, toggleAnimated, parseKeyId, precompose, keyId,
+  setCompSettings, toggleKeyAtTime, parseKeyId, precompose, keyId,
 } from '../core/commands';
-import { uid, type Asset, type Layer, type Project } from '../core/model';
+import { uid, type Asset, type Layer, type Project, type PropKey } from '../core/model';
 import { boundsOf } from '../agent/tools';
 import { demoProject, stressProject } from './demo';
 import { importFigmaDesign, type DesignImportResult } from '../core/design-import';
@@ -639,6 +639,8 @@ export function restoreAutosave(): boolean {
 }
 
 // ---------------- keyboard ----------------
+/** after effects: P position, S scale, R rotation, T opacity, A anchor */
+export const PROP_SHORTCUTS: Record<string, PropKey | undefined> = { KeyP: 'position', KeyS: 'scale', KeyR: 'rotation', KeyT: 'opacity', KeyA: 'anchor' };
 export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; toggleAgent(): void; editText(id: string): void }) {
   window.addEventListener('copy', e => { if (!isTyping(e)) copySelection(e); });
   window.addEventListener('cut', e => {
@@ -698,6 +700,15 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) spaceTap = { panned: false }; return; }
     if (k === 'delete' || k === 'backspace') return run(() => (s.keySelection.size ? deleteKeyframes(s, [...s.keySelection]) : deleteLayers(s, s.selection)));
     if (k === 'escape') return run(() => { if (s.keySelection.size) { s.keySelection.clear(); s.emit('keys'); } else s.select([]); editor.setTool('select'); });
+    // after effects property shortcuts (MD-13), by key code (alt changes e.key on a mac):
+    // Alt+Shift+P/S/R/T/A adds or removes ONE key at the playhead, Shift+P/S/R/T/A reveals the
+    // property row in the timeline. never removes an animation (only the stopwatch does that)
+    const propKey = e.shiftKey && s.selection.length ? PROP_SHORTCUTS[e.code] : undefined;
+    if (propKey) return run(() => {
+      if (e.altKey) toggleKeyAtTime(s, s.selection, propKey);
+      const tl = (globalThis as any).timeline;
+      for (const id of s.selection) tl?.showProp?.(id, propKey);
+    });
     if (k === 'v') return run(() => editor.setTool('select'));
     if (k === 'r') return run(() => editor.setTool('rect'));
     if (k === 'o' || k === 'e') return run(() => editor.setTool('ellipse'));
@@ -717,9 +728,6 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (k === 'enter' && s.selection.length === 1 && s.layer(s.selection[0])?.type === 'text') return run(() => hooks.editText(s.selection[0]));
     if (e.key === 'F9') return run(() => setEase(s, [...s.keySelection], 'Easy Ease'));
     if (k === 'j' || k === 'k') return run(() => jumpToKey(k === 'j' ? -1 : 1));
-    // after effects-style property shortcuts: P S R T A add a keyframe on that property
-    const propKeys: Record<string, any> = { p: 'position', s: 'scale', a: 'anchor' };
-    if (e.shiftKey && propKeys[k] && s.selection.length) return run(() => toggleAnimated(s, s.selection, propKeys[k]));
     if (k.startsWith('arrow') && s.selection.length) {
       return run(() => {
         const d = e.shiftKey ? 10 : 1;

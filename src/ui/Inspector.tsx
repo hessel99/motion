@@ -48,7 +48,7 @@ export function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
   const atKey = props.layers.some(l => l.props[props.prop]?.kf?.some(k => Math.abs(k.t - store.time) < 1e-6));
   const click = (e: MouseEvent) => {
     const ids = props.layers.map(l => l.id);
-    if (e.altKey || (animated && e.shiftKey)) { toggleAnimated(store, ids, props.prop); return; }
+    if (e.altKey) { toggleAnimated(store, ids, props.prop); return; }
     if (atKey) {
       const keys: string[] = [];
       for (const l of props.layers) l.props[props.prop]?.kf?.forEach((k, i) => { if (Math.abs(k.t - store.time) < 1e-6) keys.push(keyId(l.id, props.prop, i)); });

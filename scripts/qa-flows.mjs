@@ -55,6 +55,46 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   check(`${w}: no page errors`, errors.length === 0, JSON.stringify(errors.slice(0, 5)));
   await ctx.close();
 }
+// motion-designer QA (MD-xx, docs/next-up.md): one blank document, real keyboard / mouse
+{
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'dark' });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const ev = (fn, arg) => page.evaluate(fn, arg);
+  await page.goto(`${base}?nobridge&theme=dark&blank`);
+  await page.waitForFunction(() => window.editor?.renderer);
+  await page.waitForTimeout(300);
+
+  // MD-13: Shift+P / Alt+Shift+P / Shift+S / Shift+A never delete keys
+  await ev(async () => {
+    const c = await import('/src/core/commands.ts');
+    const s = editor.store;
+    const l = c.addLayer(s, 'rect', { x: 100, y: 100, w: 200, h: 120 });
+    s.setTime(0); c.toggleAnimated(s, [l.id], 'position');
+    s.setTime(1); c.setProp(s, l.id, 'position', [600, 200]);
+    s.setTime(2); c.setProp(s, l.id, 'position', [900, 400]);
+    s.setTime(0.5); s.select([l.id]);
+    window.__md13 = l.id;
+  });
+  await page.mouse.click(5, 5); // focus the page, not a field
+  await ev(() => editor.store.select([window.__md13]));
+  const keys = () => ev(() => editor.store.layer(window.__md13).props.position.kf?.map(k => k.t) ?? []);
+  for (const k of ['Shift+P', 'Shift+S', 'Shift+A', 'Shift+R', 'Shift+T']) await page.keyboard.press(k);
+  await page.waitForTimeout(100);
+  check('MD-13: Shift+P/S/A/R/T keep every keyframe', JSON.stringify(await keys()) === '[0,1,2]', JSON.stringify(await keys()));
+  const shown = await ev(() => [...(timeline.shownProps.get(window.__md13) ?? [])].sort().join());
+  check('MD-13: Shift+<prop> reveals the property rows', shown === 'anchor,opacity,position,rotation,scale', shown);
+  await page.keyboard.press('Alt+Shift+P');
+  check('MD-13: Alt+Shift+P adds a key at the playhead', JSON.stringify(await keys()) === '[0,0.5,1,2]', JSON.stringify(await keys()));
+  await page.keyboard.press('Alt+Shift+P');
+  check('MD-13: Alt+Shift+P again removes only that key', JSON.stringify(await keys()) === '[0,1,2]', JSON.stringify(await keys()));
+  const tool = await ev(() => editor.tool);
+  check('MD-13: Shift+R / Shift+T on a selection do not switch tools', tool === 'select', tool);
+
+  check('MD: no page errors', errors.length === 0, JSON.stringify(errors.slice(0, 5)));
+  await ctx.close();
+}
 await browser.close();
 console.log(failed ? `${failed} FAILED` : 'OK');
 process.exit(failed ? 1 : 0);

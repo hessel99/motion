@@ -377,7 +377,8 @@ function upsertKey(kf: Keyframe[], t: number, v: number[]): Keyframe[] {
 
 /** stopwatch toggle: start animating (key at current time) or remove all keyframes */
 export function toggleAnimated(store: Store, ids: string[], key: PropKey) {
-  store.transact('Toggle animation', tx => {
+  const on = ids.some(id => store.layer(id)?.props[key]?.kf?.length);
+  store.transact(on ? `Remove ${propDef(key).label} animation` : `Animate ${propDef(key).label}`, tx => {
     for (const id of ids) {
       const l = store.layer(id);
       if (!l) continue;
@@ -393,6 +394,16 @@ export function toggleAnimated(store: Store, ids: string[], key: PropKey) {
       tx.touch(id);
     }
   });
+}
+
+/** after effects' Alt+Shift+P/S/R/T/A: toggle ONE keyframe at the playhead. when any of the
+ *  layers has a key there, those keys go (the others keep theirs); otherwise every layer gets a key
+ *  with its current value. never removes the other keys of the animation (only the stopwatch does) */
+export function toggleKeyAtTime(store: Store, ids: string[], key: PropKey, t = store.time) {
+  const keys: string[] = [];
+  for (const id of ids) store.layer(id)?.props[key]?.kf?.forEach((k, i) => { if (Math.abs(k.t - t) < EPS) keys.push(keyId(id, key, i)); });
+  if (keys.length) deleteKeyframes(store, keys);
+  else addKeyframe(store, ids, key, t);
 }
 
 /** add a keyframe at the current time with the current value */
