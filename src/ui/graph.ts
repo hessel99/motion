@@ -9,6 +9,7 @@ import { keyId, setSegmentHandles } from '../core/commands';
 import { T } from './theme';
 
 export interface GraphArea { x0: number; y0: number; x1: number; y1: number; tToX(t: number): number; xToT(x: number): number }
+const MAX_CURVES = 12;
 interface Curve { layer: Layer; key: PropKey; dim: number; color: string; handles: boolean }
 
 
@@ -48,16 +49,21 @@ export class GraphView {
       }
       for (let d = 0; d < dim; d++) out.push({ layer: l, key, dim: d, handles: d === best, color: PROP_DEFS[key].unit === 'color' || dim > 1 ? T.axes[d] : T.axisScalar });
     };
+    // only the first MAX curves are shown: stop as soon as they are found. with tens of thousands
+    // of selected keys, scanning (and splitting) every key id on each redraw cost ~25ms
     for (const k of st.keySelection) {
-      const [lid, key] = k.split('|');
-      const l = st.layer(lid);
-      if (l) add(l, key as PropKey);
+      if (out.length >= MAX_CURVES) break;
+      const a = k.indexOf('|'), b = k.indexOf('|', a + 1);
+      if (seen.has(k.slice(0, b).replace('|', ''))) continue;
+      const l = st.layer(k.slice(0, a));
+      if (l) add(l, k.slice(a + 1, b) as PropKey);
     }
     if (!out.length) for (const id of st.selection) {
+      if (out.length >= MAX_CURVES) break;
       const l = st.layer(id);
       if (l) for (const key in l.props) add(l, key as PropKey);
     }
-    return out.slice(0, 12);
+    return out.slice(0, MAX_CURVES);
   }
 
   private vToY(v: number) {

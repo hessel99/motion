@@ -1,13 +1,16 @@
 // canvas timeline: layer list (left) + time tracks with keyframes (right).
-// fully virtualized (only visible rows are drawn) and the static part is cached in an
-// offscreen canvas, so during playback each frame is one drawImage + the playhead.
+// fully virtualized (only visible rows are drawn). the rows are drawn straight into the visible
+// canvas only when something changed; the playhead lives on its own overlay canvas, so during
+// playback a frame only clears and redraws the playhead strip (no full-canvas copy).
+// rows are rebuilt lazily (once per frame at most) and incrementally: edits that don't change
+// the row structure (key drags, value edits) don't walk the layer tree at all.
 
 import type { Editor } from '../app/editor';
 import {
   isAnimated, keyId, layerKeyTimes, moveKeyframes, moveLayers, parseKeyId, renameLayer, setLayerField, valueAt,
   addKeyframe, deleteKeyframes, toggleAnimated, precompose, snapshotKeys, moveKeysFrom, type KeySnapshot,
 } from '../core/commands';
-import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type PropKey } from '../core/model';
+import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
 import { showContextMenu, type MenuItem } from './menu';
 import { GraphView } from './graph';
 import { T, onThemeChange } from './theme';
@@ -19,13 +22,52 @@ const HEADER_H = 28;
 const ROW_H = 24;
 const INDENT = 14;
 
+/** prop rows a layer type can show, in row order (built once per type, not per layer per rebuild) */
+const ROW_KEYS = new Map<LayerType, PropKey[]>();
+function rowKeys(type: LayerType) {
+  let k = ROW_KEYS.get(type);
+  if (!k) ROW_KEYS.set(type, (k = [...TRANSFORM_KEYS, ...TYPE_PROPS[type]]));
+  return k;
+}
+/** which prop rows an expanded layer shows, as a bit mask over rowKeys(type) */
+function propRowMask(l: Layer) {
+  const keys = rowKeys(l.type);
+  let m = 0;
+  for (let i = 0; i < keys.length; i++) { const p = l.props[keys[i]]; if (p && (p.kf?.length || p.expr)) m |= 1 << i; }
+  return m;
+}
+function hasAnim(l: Layer) {
+  for (const k in l.props) { const p = l.props[k as PropKey]; if (p && (p.kf?.length || p.expr)) return true; }
+  return false;
+}
+/** lower-cased name / text per layer, reused across keystrokes while they don't change */
+const lowered = new WeakMap<Layer, { n: string; t: string | undefined; ln: string; lt: string }>();
+function matchesFilter(l: Layer, f: string) {
+  const t = l.text?.content;
+  let c = lowered.get(l);
+  if (!c || c.n !== l.name || c.t !== t) lowered.set(l, (c = { n: l.name, t, ln: l.name.toLowerCase(), lt: t ? t.toLowerCase() : '' }));
+  return c.ln.includes(f) || (t !== undefined && c.lt.includes(f));
+}
+function anyIn(ids: string[], set: Set<string>) {
+  for (const id of ids) if (set.has(id)) return true;
+  return false;
+}
+/** first index with kf[i].t >= t (keys are sorted by time) */
+function lowerBound(kf: Keyframe[], t: number) {
+  let lo = 0, hi = kf.length;
+  while (lo < hi) { const m = (lo + hi) >> 1; if (kf[m].t < t) lo = m + 1; else hi = m; }
+  return lo;
+}
+
 interface Row {
   kind: 'layer' | 'prop';
   id: string;
   layer: Layer;
   depth: number;
-  prop?: PropKey;
-  hasChildren?: boolean;
+  prop: PropKey | undefined;
+  hasChildren: boolean;
+  /** layer rows: the prop rows shown under it as a propRowMask (-1: collapsed / prop row) */
+  mask: number;
 }
 
 type Drag =
@@ -44,9 +86,11 @@ type Drag =
 
 export class Timeline {
   canvas: HTMLCanvasElement;
+  /** the rows / ruler (redrawn only when baseDirty) */
   g: CanvasRenderingContext2D;
-  base: HTMLCanvasElement;
-  bg: CanvasRenderingContext2D;
+  /** transparent playhead layer stacked over `canvas` (no pointer events) */
+  over: HTMLCanvasElement;
+  og: CanvasRenderingContext2D;
   w = 0; h = 0; dpr = 1;
   leftW = 300;
   pxPerSec = 120;
@@ -58,6 +102,16 @@ export class Timeline {
   private baseDirty = true;
   private drag: Drag | null = null;
   private lastPlayheadX = -1;
+  /** last drawn playhead strip on the overlay (null: nothing drawn) */
+  private playheadDrawn: number | null = null;
+  /** incremental rows: direct search matches of the last build */
+  private matched = new Set<string>();
+  /** the filter `matched` was computed for (null: stale) */
+  private matchedFor: string | null = null;
+  /** layer id -> index of its layer row (built lazily, for reveal) */
+  private rowIndex: Map<string, number> | null = null;
+  /** collapsed-row key summary per layer (dropped when the layer changes) */
+  private keyTimesCache = new Map<string, number[]>();
   private hoverRow = -1;
   private input: HTMLInputElement | null = null;
   private autoFit = true;
@@ -72,14 +126,22 @@ export class Timeline {
     this.canvas.className = 'tl-canvas';
     host.appendChild(this.canvas);
     this.g = this.canvas.getContext('2d')!;
-    this.base = document.createElement('canvas');
-    this.bg = this.base.getContext('2d')!;
+    this.over = document.createElement('canvas');
+    this.over.className = 'tl-overlay';
+    host.appendChild(this.over);
+    this.og = this.over.getContext('2d')!;
     new ResizeObserver(() => this.resize()).observe(host);
     this.resize();
     const st = ed.store;
     let lastDur = st.comp.duration;
+    st.onChange(c => {
+      if (c.structure || c.comp || c.layers.size) this.matchedFor = null;
+      if (c.structure || c.comp) { this.rowsDirty = true; this.keyTimesCache.clear(); return; }
+      for (const id of c.layers) this.keyTimesCache.delete(id);
+      if (!this.rowsDirty) this.rowsDirty = this.rowsChanged(c.layers);
+    });
     st.on('doc', () => {
-      this.rowsDirty = true; this.baseDirty = true;
+      this.baseDirty = true;
       if (st.comp.duration !== lastDur) { lastDur = st.comp.duration; if (this.drag?.kind !== 'compEnd') this.fitTime(); }
     });
     st.on('selection', () => { this.baseDirty = true; });
@@ -91,7 +153,7 @@ export class Timeline {
       lastDur = st.comp.duration; this.expanded.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
     ed.onFrame(() => this.frame());
     ed.on('audio', () => { this.baseDirty = true; });
-    onThemeChange(() => { this.baseDirty = true; });
+    onThemeChange(() => { this.baseDirty = true; this.lastPlayheadX = -1; });
     this.canvas.addEventListener('pointerdown', e => this.down(e));
     this.canvas.addEventListener('pointermove', e => this.move(e));
     this.canvas.addEventListener('pointerup', e => this.up(e));
@@ -112,12 +174,13 @@ export class Timeline {
     const r = this.host.getBoundingClientRect();
     this.dpr = window.devicePixelRatio || 1;
     this.w = r.width; this.h = r.height;
-    for (const c of [this.canvas, this.base]) {
+    for (const c of [this.canvas, this.over]) {
       c.width = Math.max(1, Math.round(r.width * this.dpr));
       c.height = Math.max(1, Math.round(r.height * this.dpr));
+      c.style.width = r.width + 'px';
+      c.style.height = r.height + 'px';
     }
-    this.canvas.style.width = r.width + 'px';
-    this.canvas.style.height = r.height + 'px';
+    this.playheadDrawn = null; this.lastPlayheadX = -1;
     if (this.autoFit && r.width > 0) { this.fitTime(); this.autoFit = false; }
     this.baseDirty = true;
   }
@@ -148,31 +211,75 @@ export class Timeline {
     const f = this.filter;
     let keep: Set<string> | null = null;
     if (f) {
-      keep = new Set();
-      for (const l of Object.values(L)) {
-        if (!l.name.toLowerCase().includes(f) && !l.text?.content.toLowerCase().includes(f)) continue;
-        let cur: string | null = l.id;
-        while (cur && !keep.has(cur)) { keep.add(cur); cur = L[cur]?.parent ?? null; }
-      }
-    }
+      const k = (keep = new Set<string>());
+      // typing more characters only narrows the previous matches: rescan just those
+      // (valid while the document hasn't changed since they were computed)
+      const narrow = this.matchedFor !== null && f.includes(this.matchedFor);
+      const prev = this.matched;
+      const matched = new Set<string>();
+      const test = (id: string) => {
+        const l = L[id];
+        if (!l || !matchesFilter(l, f)) return;
+        matched.add(id);
+        let cur: string | null = id;
+        while (cur && !k.has(cur)) { k.add(cur); cur = L[cur]?.parent ?? null; }
+      };
+      if (narrow) for (const id of prev) test(id);
+      else for (const id in L) test(id);
+      this.matched = matched;
+      this.matchedFor = f;
+    } else this.matchedFor = null;
+    const expanded = this.expanded;
+    // all rows share one object shape (monomorphic access in the draw / hit-test loops)
     const walk = (ids: string[], depth: number) => {
       // list order: top-most first (reverse draw order)
       for (let i = ids.length - 1; i >= 0; i--) {
         const l = L[ids[i]];
         if (!l) continue;
         if (keep && !keep.has(l.id)) continue;
-        rows.push({ kind: 'layer', id: l.id, layer: l, depth, hasChildren: l.children.length > 0 });
-        if (this.expanded.has(l.id) || (keep && l.children.some(c => keep!.has(c)))) {
-          const keys = [...TRANSFORM_KEYS, ...TYPE_PROPS[l.type]];
-          for (const k of keys) if (isAnimated(l, k) || l.props[k]?.expr) rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: k });
+        const row: Row = { kind: 'layer', id: l.id, layer: l, depth, prop: undefined, hasChildren: l.children.length > 0, mask: -1 };
+        rows.push(row);
+        if (expanded.has(l.id) || (keep && anyIn(l.children, keep))) {
+          const keys = rowKeys(l.type);
+          let m = 0;
+          for (let k = 0; k < keys.length; k++) {
+            const p = l.props[keys[k]];
+            if (p && (p.kf?.length || p.expr)) { m |= 1 << k; rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: keys[k], hasChildren: false, mask: -1 }); }
+          }
+          row.mask = m;
           walk(l.children, depth + 1);
         }
       }
     };
     walk(st.comp.root, 0);
     this.rows = rows;
+    this.rowIndex = null;
     this.rowsDirty = false;
     this.clampScroll();
+  }
+
+  /** after a non-structural edit of `ids`: could the row list differ? (prop rows of open layers
+   *  appear/disappear, or a search match changes). O(changed layers), no tree walk */
+  private rowsChanged(ids: Set<string>) {
+    const L = this.ed.store.project.layers;
+    const f = this.filter;
+    for (const id of ids) {
+      const l = L[id];
+      if (!l) return true;
+      const i = this.layerRowIndex(id);
+      if (i >= 0 && this.rows[i].mask >= 0 && this.rows[i].mask !== propRowMask(l)) return true;
+      if (f && matchesFilter(l, f) !== this.matched.has(id)) return true;
+    }
+    return false;
+  }
+
+  /** index of a layer's row (-1 when not listed) */
+  private layerRowIndex(id: string) {
+    if (!this.rowIndex) {
+      this.rowIndex = new Map();
+      for (let i = 0; i < this.rows.length; i++) if (this.rows[i].kind === 'layer') this.rowIndex.set(this.rows[i].id, i);
+    }
+    return this.rowIndex.get(id) ?? -1;
   }
 
   private clampScroll() {
@@ -184,10 +291,10 @@ export class Timeline {
   reveal(id: string) {
     const st = this.ed.store;
     let p = st.layer(id)?.parent;
-    while (p) { this.expanded.add(p); p = st.layer(p)?.parent; }
-    this.rowsDirty = true;
-    this.buildRows();
-    const i = this.rows.findIndex(r => r.kind === 'layer' && r.id === id);
+    while (p) { if (!this.expanded.has(p)) { this.expanded.add(p); this.rowsDirty = true; } p = st.layer(p)?.parent; }
+    // rows only change when an ancestor had to be expanded (or an edit is pending)
+    if (this.rowsDirty) this.buildRows();
+    const i = this.layerRowIndex(id);
     if (i >= 0) {
       const y = i * ROW_H;
       if (y < this.scrollY) this.scrollY = y;
@@ -197,6 +304,7 @@ export class Timeline {
   }
 
   expand(id: string, on = true) {
+    if (on === this.expanded.has(id)) return;
     if (on) this.expanded.add(id); else this.expanded.delete(id);
     this.rowsDirty = true;
     this.baseDirty = true;
@@ -205,23 +313,19 @@ export class Timeline {
   // ---------- drawing ----------
   private frame() {
     if (this.rowsDirty) { this.buildRows(); this.baseDirty = true; }
-    const st = this.ed.store;
-    const px = Math.round(this.tToX(st.time));
-    if (!this.baseDirty && px === this.lastPlayheadX) return;
     if (this.baseDirty) { this.drawBase(); this.baseDirty = false; }
-    const g = this.g;
-    g.setTransform(1, 0, 0, 1, 0, 0);
-    g.globalCompositeOperation = 'copy';
-    g.drawImage(this.base, 0, 0);
-    g.globalCompositeOperation = 'source-over';
-    g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    this.drawPlayhead(px);
+    const px = Math.round(this.tToX(this.ed.store.time));
+    if (px === this.lastPlayheadX) return;
     this.lastPlayheadX = px;
+    // overlay: clear only the previous playhead strip, then draw the new one
+    const g = this.og;
+    g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    if (this.playheadDrawn !== null) { g.clearRect(this.playheadDrawn - 8, 0, 16, this.h); this.playheadDrawn = null; }
+    if (px >= this.leftW) { this.drawPlayhead(px); this.playheadDrawn = px; }
   }
 
   private drawPlayhead(x: number) {
-    const g = this.g;
-    if (x < this.leftW) return;
+    const g = this.og;
     g.fillStyle = T.tlPlayhead;
     g.fillRect(x - 0.5, HEADER_H - 6, 1, this.h);
     g.beginPath();
@@ -231,7 +335,7 @@ export class Timeline {
   }
 
   private drawBase() {
-    const g = this.bg;
+    const g = this.g;
     const st = this.ed.store;
     const comp = st.comp;
     g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
@@ -384,7 +488,7 @@ export class Timeline {
     const st = this.ed.store;
     const cy = y + ROW_H / 2;
     const ix = 8 + r.depth * INDENT;
-    const animated = Object.values(l.props).some(p => p?.kf?.length || p?.expr);
+    const animated = hasAnim(l);
     // twirl
     if (r.hasChildren || animated) {
       g.fillStyle = T.tlTwirl;
@@ -459,10 +563,18 @@ export class Timeline {
     }
     // keyframe summary (collapsed) — union of key times
     if (!this.expanded.has(l.id) && animated) {
-      const times = layerKeyTimes(l);
+      let times = this.keyTimesCache.get(l.id);
+      if (!times) this.keyTimesCache.set(l.id, (times = layerKeyTimes(l)));
       g.fillStyle = isSel ? T.tlKeySummarySelected : T.tlKeySummary;
       let lastX = -10;
-      for (const t of times) {
+      // only the keys inside the visible time range (times are sorted)
+      const tMax = this.xToT(this.w);
+      let j0 = 0, hi = times.length;
+      const tMin = this.xToT(this.leftW);
+      while (j0 < hi) { const m = (j0 + hi) >> 1; if (times[m] < tMin) j0 = m + 1; else hi = m; }
+      for (let j = j0; j < times.length; j++) {
+        const t = times[j];
+        if (t > tMax) break;
         const x = this.tToX(t);
         if (x < this.leftW || x > this.w || x - lastX < 2) continue;
         lastX = x;
@@ -493,10 +605,11 @@ export class Timeline {
     const txt = fmtValue(key, v);
     const tw = g.measureText(txt).width;
     g.fillText(txt, this.leftW - 12 - tw, cy);
-    // keyframes
-    for (let i = 0; i < kf.length; i++) {
+    // keyframes: only the visible time range (keys are sorted by time)
+    for (let i = lowerBound(kf, this.xToT(this.leftW - 6) - 1e-9); i < kf.length; i++) {
       const x = this.tToX(kf[i].t);
-      if (x < this.leftW - 6 || x > this.w + 6) continue;
+      if (x > this.w + 6) break;
+      if (x < this.leftW - 6) continue;
       const selected = st.keySelection.has(keyId(l.id, key, i));
       // segment line between keys when interpolated
       if (i < kf.length - 1 && kf[i].interp !== 'hold') {
@@ -788,11 +901,14 @@ export class Timeline {
       for (let i = a; i <= b; i++) {
         const r = this.rows[i];
         if (!r) continue;
-        if (r.kind === 'prop') {
-          (r.layer.props[r.prop!]?.kf ?? []).forEach((k, j) => { if (k.t >= t0 && k.t <= t1) sel.add(keyId(r.id, r.prop!, j)); });
-        } else if (!this.expanded.has(r.id)) {
-          for (const pk in r.layer.props) (r.layer.props[pk as PropKey]?.kf ?? []).forEach((k, j) => { if (k.t >= t0 && k.t <= t1) sel.add(keyId(r.id, pk as PropKey, j)); });
-        }
+        // keys are sorted by time: binary search to the first one inside [t0, t1]
+        const addRange = (pk: PropKey) => {
+          const kf = r.layer.props[pk]?.kf;
+          if (!kf) return;
+          for (let j = lowerBound(kf, t0); j < kf.length && kf[j].t <= t1; j++) sel.add(keyId(r.id, pk, j));
+        };
+        if (r.kind === 'prop') addRange(r.prop!);
+        else if (!this.expanded.has(r.id)) for (const pk in r.layer.props) addRange(pk as PropKey);
       }
       st.keySelection = sel;
       st.emit('keys');
