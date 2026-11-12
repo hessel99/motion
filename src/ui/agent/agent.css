@@ -160,4 +160,4 @@
 .sel-ask-sugg button:hover { color: var(--text); border-color: var(--accent); }
 
 /* the brief box (Home / empty canvas) says when the agent is not connected */
-.prompt-offline { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; font-size: 12px; color: var(--text-secondary); }
+.prompt-offline { display: inline-flex; align-items: center; gap: 6px; }

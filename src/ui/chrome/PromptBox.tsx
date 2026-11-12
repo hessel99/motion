@@ -76,18 +76,17 @@ export function PromptBox(props: { fresh: boolean }) {
               <button type="button" class={(format ?? formatFromBrief(text) ?? '16:9') === f ? 'on' : ''} aria-pressed={(format ?? formatFromBrief(text) ?? '16:9') === f} onClick={() => setFormat(f)}>{f}</button>
             ))}
           </div>
-          <span class="prompt-drop muted"><Upload size={14} />Drop files</span>
+          {/* the agent's connection, where "Drop files" sits (no layout shift): a brief sent while
+              offline waits in the agent panel and starts once it connects */}
+          {status === 'connected' ? <span class="prompt-drop muted"><Upload size={14} />Drop files</span> : (
+            <span class="prompt-drop muted prompt-offline" role="status" data-testid="prompt-offline" title="Your brief will wait and start once the agent connects">
+              <span class={'dot ' + status} aria-hidden="true" />{status === 'connecting' ? 'Connecting…' : <>Agent offline · <button type="button" class="link" onClick={() => agentClient.reconnect()}>Reconnect</button></>}
+            </span>
+          )}
           <span class="grow" />
           <button type="button" class="send-btn primary" aria-label="Start" title="Start (Enter)" disabled={!text.trim()} onClick={submit}><ArrowUp /></button>
         </div>
       </div>
-      {status !== 'connected' && (
-        <div class="prompt-offline" role="status" data-testid="prompt-offline">
-          <span class={'dot ' + status} aria-hidden="true" />
-          {status === 'connecting' ? 'Connecting to the agent…' : 'The agent is offline: your brief will wait and start once it connects.'}
-          {status === 'offline' && <button type="button" class="link" onClick={() => agentClient.reconnect()}>Reconnect</button>}
-        </div>
-      )}
       <div class="prompt-chips">
         {STARTERS.map(s => (
           <button type="button" class="prompt-chip" onClick={() => { setText(s.brief); if (s.format) setFormat(s.format); }}>{s.label}</button>

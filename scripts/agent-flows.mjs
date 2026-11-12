@@ -152,7 +152,7 @@ await bridge.close();
 await page.waitForSelector('[data-testid=agent-reconnect]', { timeout: 10000 });
 await page.click('.tb-add');
 await page.waitForSelector('.prompt-offline', { timeout: 5000 });
-check(/offline/.test(await page.locator('.prompt-offline').innerText()), 'AIUX-21: the brief box says the agent is offline');
+check(/offline/i.test(await page.locator('.prompt-offline').innerText()), 'AIUX-21: the brief box says the agent is offline');
 await page.fill('.vp-empty .prompt-input', 'Build two shapes for the offline test');
 await page.press('.vp-empty .prompt-input', 'Enter');
 await page.waitForTimeout(300);

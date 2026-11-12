@@ -436,7 +436,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   const chipLabel = selLayer?.name ?? `${selCount} layers`;
   const ChipIcon = selLayer ? LAYER_ICON[selLayer.type] : Layers;
   const styleGuide = style ? STYLE_GUIDES.find(g => g.name === style) : undefined;
-  const placeholder = status !== 'connected' ? 'The agent is offline (messages wait until it connects)'
+  const placeholder = status !== 'connected' ? 'The agent is offline (messages will wait)'
     : turn ? 'The agent is working… Enter queues a follow-up, Esc stops'
     : selCount ? 'What should happen to the selection?' : msgs.length ? 'Reply or ask for a change…' : 'Describe an animation…';
   /** Enter: send, or (busy / offline) queue it with a visible "queued" bubble */
@@ -466,7 +466,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
             onWheel={e => { const el = e.currentTarget as HTMLDivElement; requestAnimationFrame(() => { const up = el.scrollHeight - el.scrollTop - el.clientHeight >= 40; if (up !== scrolledUp) setScrolledUp(up); }); }}>
             {status !== 'connected' && (
               <div class="agent-note agent-offline" title="The desktop app starts the bridge automatically; in the browser run npm run bridge. It uses the Claude Code / Codex / Gemini CLI on your computer (your own subscription).">
-                <span class="dot" aria-hidden="true" />{status === 'connecting' ? 'Connecting to the agent…' : 'Agent offline'} · <button class="link" data-testid="agent-reconnect" disabled={status === 'connecting'} onClick={() => agentClient.reconnect()}>Reconnect</button> · <button class="link" onClick={() => openSettings('connections')}>How to connect</button>
+                <span class="dot" aria-hidden="true" />{status === 'connecting' ? 'Connecting…' : 'Offline'} · <button class="link" data-testid="agent-reconnect" disabled={status === 'connecting'} onClick={() => agentClient.reconnect()}>Reconnect</button> · <button class="link" onClick={() => openSettings('connections')}>How to connect</button>
               </div>
             )}
             {status === 'connected' && providers.length > 0 && !avail && (
