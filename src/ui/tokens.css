@@ -503,8 +503,11 @@
        │    │ sidebar  ├────────────────────────────────────────┤ (--right-w)      │
        │    │(--left-w)│ timeline (--tl-h, header --tl-head-h)  │                  │
        └────┴──────────┴────────────────────────────────────────┴──────────────────┘ */
-  --titlebar-h: 40px;      /* the full-width title row; the mac traffic lights are centred in it */
-  --traffic-w: 80px;       /* its left end on mac (electron trafficLightPosition x 20 y 14: 3 × 12px, 20px apart) */
+  --titlebar-h: 52px;      /* the full-width title row, as tall as a Notes / Finder toolbar; the mac
+                              traffic lights are centred in it (= TITLEBAR_H in electron/main.cjs) */
+  --traffic-x: 20px;       /* mac: the close button's left edge (electron trafficLightPosition x) */
+  --traffic-w: 94px;       /* mac: the reserved left end: x 20 + buttons 54 (3 × 14 + 2 × 6) + 20.
+                              the app takes the real width from env(titlebar-area-x) when larger */
   --rail-w: 48px;
   --left-w: 300px;
   --right-w: 300px;
