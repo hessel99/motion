@@ -55,8 +55,6 @@ const COLOR_TOKENS = {
   tlValue: '--tl-value',
   tlHint: '--tl-hint',
   tlPlayhead: '--tl-playhead',
-  tlMarker: '--tl-marker',
-  tlMarkerLine: '--tl-marker-line',
   tlWorkArea: '--tl-work-area',
   tlWorkAreaDim: '--tl-work-area-dim',
   tlCompEnd: '--tl-comp-end',
@@ -225,7 +223,14 @@ export function getThemePref(): ThemePref { return pref; }
 
 function apply(name: ThemeName) {
   const root = document.documentElement;
+  // no transitions during the swap (every color transition would fire at once and smear): override,
+  // switch, flush styles, remove the override after the next frame
+  const off = document.createElement('style');
+  off.textContent = '*,*::before,*::after{transition:none!important}';
+  document.head.appendChild(off);
   root.dataset.theme = name;
+  void document.body?.offsetHeight;
+  requestAnimationFrame(() => requestAnimationFrame(() => off.remove()));
   // the mutation observer refreshes asynchronously; refresh now so callers can draw immediately
   refreshTheme();
 }

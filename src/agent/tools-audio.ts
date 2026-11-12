@@ -1,6 +1,6 @@
 // agent tools for music and sound: read the analysis of the comp's music (tempo, bars, sections,
 // accents, an energy strip), retime animation onto it, drive properties from it (audio() expressions),
-// put markers / entrances on beat patterns, and (only when the user asks) synthesized sound effects
+// put entrances on beat patterns, and (only when the user asks) synthesized sound effects
 // that follow the motion. results are compact text.
 
 import { PROP_DEFS, type PropKey } from '../core/model';
@@ -8,10 +8,10 @@ import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { setExpr } from '../core/commands';
 import { audioLevel, bandIndex, AUDIO_BANDS } from '../core/audio-env';
 import { editor } from '../app/editor';
-import { st, text, idsSchema, checkProp, need, writeTrack, type ToolDef, type ToolContent } from './tool-kit';
+import { st, text, idsSchema, checkProp, need, writeTrack, hasRenderer, type ToolDef, type ToolContent } from './tool-kit';
 import { ensureAnalysis } from '../audio/analysis-store';
 import { music, musicLayer, beats, bars, accents, sections, onsets, refreshAudioEnv, beatPeriod, type Music } from '../audio/timing';
-import { syncToMusic, patternTimes, markersOnBeats, distributeOnBeats, type SyncMode, type BeatPattern } from '../audio/sync';
+import { syncToMusic, patternTimes, distributeOnBeats, type SyncMode, type BeatPattern } from '../audio/sync';
 import { SFX_FAMILIES, SFX_TYPES, findFamily, renderAudition, renderSfx, type SfxType } from '../audio/sfx';
 import { addSoundEffects, setSfxFamily, sfxLayers, hasMotion, type MotionKind } from '../audio/sfx-place';
 import { encodeWav, bytesToBase64 } from '../audio/wav';
@@ -30,7 +30,7 @@ async function needMusic(): Promise<Music> {
   if (!a) throw new Error('the audio could not be decoded / analysed');
   const m = music(s);
   if (!m) throw new Error('the audio layer is hidden or muted');
-  if (refreshAudioEnv(s) && editor.renderer) editor.renderer.dirty = true;
+  if (refreshAudioEnv(s) && hasRenderer()) editor.renderer.dirty = true;
   return m;
 }
 
@@ -80,7 +80,7 @@ export const AUDIO_TOOLS: ToolDef[] = [
         `sections: ${sec.map(x => `${x.label} ${f2(x.t0)}–${f2(x.t1)} (energy ${x.energy})`).join(' | ')}`,
         `accents (strongest hits, time:strength): ${[...acc].sort((x, y) => y.s - x.s).slice(0, 16).sort((x, y) => x.t - y.t).map(x => `${f2(x.t)}:${f2(x.s)}`).join(' ')}`,
         `energy per bar (▁ quiet .. █ loud): ${strip(m, br[0] ?? m.from, m.to, bar)}`,
-        `tools: sync_to_audio (retime existing keys), place_on_beats (markers / staggered entrances), audio_reactive or expression audio('${AUDIO_BANDS.join("'|'")}', smoothing, threshold)`,
+        `tools: sync_to_audio (retime existing keys), place_on_beats (staggered entrances), audio_reactive or expression audio('${AUDIO_BANDS.join("'|'")}', smoothing, threshold)`,
       ];
       return text(lines.join('\n'));
     },
@@ -146,23 +146,19 @@ export const AUDIO_TOOLS: ToolDef[] = [
   },
   {
     name: 'place_on_beats',
-    description: 'Musical timing patterns. what markers: comp markers on the pattern times. what entrances: shift each layer\'s animation (in ids order, rigidly, eases kept) so layer i starts (anchor start) or lands (anchor land) on pattern time i. pattern: beat, half-bar, bar, two-bars, accents, build (accelerating toward the next drop or `to`: bars, then beats, then half beats). from/to limit the range; count caps the number of times.',
+    description: 'Musical timing patterns: shift each layer\'s animation (in ids order, rigidly, eases kept) so layer i starts (anchor start) or lands (anchor land) on pattern time i. pattern: beat, half-bar, bar, two-bars, accents, build (accelerating toward the next drop or `to`: bars, then beats, then half beats). from/to limit the range; count caps the number of times.',
     inputSchema: {
       type: 'object',
-      properties: { what: { enum: ['markers', 'entrances'] }, pattern: { enum: ['beat', 'half-bar', 'bar', 'two-bars', 'accents', 'build'] }, ids: idsSchema, from: { type: 'number' }, to: { type: 'number' }, count: { type: 'number' }, anchor: { enum: ['start', 'land'] } },
-      required: ['what', 'pattern'],
+      properties: { pattern: { enum: ['beat', 'half-bar', 'bar', 'two-bars', 'accents', 'build'] }, ids: idsSchema, from: { type: 'number' }, to: { type: 'number' }, count: { type: 'number' }, anchor: { enum: ['start', 'land'] } },
+      required: ['pattern', 'ids'],
     },
     run: async a => {
+      if (!a.ids?.length) throw new Error('place_on_beats needs ids (in the order they should enter)');
       const m = await needMusic();
       const s = st();
-      const n = a.what === 'entrances' ? Math.min(a.count ?? Infinity, a.ids?.length ?? 0) : a.count ?? Infinity;
+      const n = Math.min(a.count ?? Infinity, a.ids.length);
       const times = patternTimes(m, a.pattern as BeatPattern, a.from ?? 0, a.to ?? (a.pattern === 'build' ? Infinity : s.comp.duration), n);
       if (!times.length) throw new Error('no pattern times in that range');
-      if (a.what === 'markers') {
-        markersOnBeats(s, times, a.pattern === 'accents' ? 'accent' : a.pattern === 'build' ? 'build' : a.pattern === 'beat' ? 'beat' : 'bar');
-        return text(`${times.length} markers: ${times.slice(0, 32).map(f2).join(' ')}${times.length > 32 ? ' …' : ''}`);
-      }
-      if (!a.ids?.length) throw new Error('entrances need ids (in the order they should enter)');
       const r = distributeOnBeats(s, a.ids, times, a.anchor ?? 'start');
       return text(`${r.length} entrances: ${r.map(x => `${s.layer(x.id)?.name ?? x.id} ${f2(x.t)}`).join(', ')}${r.length < a.ids.length ? ` (${a.ids.length - r.length} without a beat or animation, left)` : ''}`);
     },

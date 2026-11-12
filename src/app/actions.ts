@@ -4,9 +4,9 @@ import { editor } from './editor';
 import { setBusy } from './updates';
 import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
-  setCompSettings, toggleAnimated, parseKeyId, precompose, addMarker, keyId,
+  setCompSettings, toggleAnimated, parseKeyId, precompose, keyId,
 } from '../core/commands';
-import { uid, type Asset, type Layer, type Project } from '../core/model';
+import { uid, type Asset, type Composition, type Layer, type Project } from '../core/model';
 import { boundsOf } from '../agent/tools';
 import { demoProject, stressProject } from './demo';
 import { importFigmaDesign, type DesignImportResult } from '../core/design-import';
@@ -16,7 +16,7 @@ import { activeDoc, closeDoc, cycleDocs, documents, isDocDirty, newDocument, ope
 import { rememberRecent } from './recent';
 
 // importers are loaded lazily (keeps startup fast; missing modules are simply unavailable)
-const mods = import.meta.glob(['../import/figma/index.ts', '../import/svg.ts', '../import/lottie.ts', '../import/aep/index.ts', '../export/lottie.ts', '../export/aejsx.ts']);
+const mods = import.meta.glob(['../import/figma/index.ts', '../import/svg.ts', '../import/lottie.ts', '../import/aep/index.ts', '../export/lottie.ts']);
 async function mod(path: string): Promise<any | null> {
   const m = mods[path];
   return m ? m() : null;
@@ -65,21 +65,30 @@ function isTypingTarget(t: EventTarget | null) {
   return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
 }
 
-export function confirmDiscard(what = 'This replaces the current project.'): boolean {
-  if (!isDirty() || (window as any).__noUnloadGuard || navigator.webdriver || st().historyLength === 0) return true;
-  return window.confirm(`${what}\nUnsaved changes will be lost. Continue?`);
-}
-
 export function toast(msg: string, kind: 'info' | 'error' = 'info') {
   let host = document.querySelector('.toasts') as HTMLElement | null;
   if (!host) { host = document.createElement('div'); host.className = 'toasts'; host.setAttribute('role', 'status'); host.setAttribute('aria-live', 'polite'); document.body.appendChild(host); }
   const el = document.createElement('div');
   el.className = 'toast ' + kind;
-  el.textContent = msg;
   host.appendChild(el);
   while (host.children.length > 3) host.firstElementChild!.remove();
-  setTimeout(() => el.classList.add('out'), kind === 'error' ? 5000 : 2200);
-  setTimeout(() => el.remove(), kind === 'error' ? 5400 : 2600);
+  if (kind === 'error') {
+    // errors stay until dismissed: there is time to read them (and they are announced right away)
+    el.setAttribute('role', 'alert');
+    const t = document.createElement('span');
+    t.textContent = msg;
+    const x = document.createElement('button');
+    x.type = 'button';
+    x.className = 'toast-x';
+    x.setAttribute('aria-label', 'Dismiss');
+    x.textContent = '✕';
+    x.onclick = () => el.remove();
+    el.append(t, x);
+    return;
+  }
+  el.textContent = msg;
+  setTimeout(() => el.classList.add('out'), 2200);
+  setTimeout(() => el.remove(), 2600);
 }
 
 // ---------------- files ----------------
@@ -222,7 +231,9 @@ export async function openData(name: string, data: string, path?: string) {
   const ext = name.split('.').pop()!.toLowerCase();
   try {
     if (ext === 'motion') {
-      const p = JSON.parse(data) as Project;
+      // older desktop shells hand .motion files over as base64: decode them as utf-8 json
+      const text = /^\s*[{[]/.test(data) ? data : new TextDecoder().decode(b64ToBuf(data.trim()));
+      const p = JSON.parse(text) as Project;
       if (!p.comps || !p.layers) throw new Error('not a motion project');
       p.name ||= name.replace(/\.motion$/i, '');
       openProject(p, path ?? null);
@@ -313,15 +324,6 @@ export async function exportFramePng(scale = 1) {
   const blob = await (await fetch(url)).blob();
   const frame = Math.round(s.time * c.fps);
   download(`${s.project.name || 'frame'}_${String(frame).padStart(4, '0')}.png`, blob, 'image/png');
-}
-
-/** extendscript that rebuilds the active comp in after effects (File > Scripts > Run Script File) */
-export async function exportAeScript() {
-  const m = await mod('../export/aejsx.ts');
-  if (!m) { toast('After Effects export not available', 'error'); return; }
-  download((st().project.name || 'animation') + '.jsx', m.projectToAeScript(st().project), 'text/javascript');
-  const hasAudio = Object.values(st().project.layers).some(l => l.type === 'audio');
-  toast('In After Effects: File › Scripts › Run Script File…' + (hasAudio ? ' (audio layers are not included)' : ''));
 }
 
 // ---------------- inserting layers (paste / import) ----------------
@@ -434,11 +436,23 @@ function copyPayload(ids: string[]): string {
   const s = st();
   const layers: Layer[] = [];
   const assets = new Set<string>();
-  const walk = (id: string) => { const l = s.layer(id)!; layers.push(l); if (l.imageRef) assets.add(l.imageRef); l.children.forEach(walk); };
+  // precomp layers carry the compositions they show (and those nested in them): pasted into
+  // another document, a precomp layer would otherwise point at a comp that isn't there
+  const comps: Composition[] = [];
+  const compLayers: Layer[] = [];
+  const seen = new Set<string>();
+  const addComp = (cid: string) => {
+    const c = s.project.comps[cid];
+    if (!c || seen.has(cid)) return;
+    seen.add(cid); comps.push(c);
+    const w = (id: string) => { const l = s.project.layers[id]; if (!l) return; compLayers.push(l); if (l.imageRef) assets.add(l.imageRef); if (l.compRef) addComp(l.compRef); l.children.forEach(w); };
+    c.root.forEach(w);
+  };
+  const walk = (id: string) => { const l = s.layer(id)!; layers.push(l); if (l.imageRef) assets.add(l.imageRef); if (l.compRef) addComp(l.compRef); l.children.forEach(walk); };
   const roots = ids.filter(id => s.layer(id) && !ids.some(o => o !== id && s.isAncestor(o, id)));
   roots.forEach(walk);
   // roots are stored in comp space-ish: we copy local values; parent space differences are ignored
-  return CLIP_PREFIX + JSON.stringify({ roots, layers, assets: [...assets].map(a => s.project.assets[a]).filter(Boolean) });
+  return CLIP_PREFIX + JSON.stringify({ roots, layers, comps, compLayers, assets: [...assets].map(a => s.project.assets[a]).filter(Boolean) });
 }
 
 const KEYS_PREFIX = 'motion-keys:';
@@ -525,9 +539,28 @@ function pasteMotion(text: string) {
   }));
   const roots = (data.roots as string[]).map(r => map.get(r)!);
   const s = st();
-  const offset = roots.every(r => s.comp.root.length) ? 0 : 0;
-  void offset;
-  insertLayers({ layers, roots, assets: (data.assets ?? []).filter((a: Asset) => !s.project.assets[a.id]) }, { label: 'Paste' });
+  const assets = (data.assets ?? []).filter((a: Asset) => !s.project.assets[a.id]);
+  // compositions the pasted precomps need that this document doesn't have (a paste from another tab)
+  const missing = ((data.comps ?? []) as Composition[]).filter(c => !s.project.comps[c.id]);
+  if (!missing.length) { insertLayers({ layers, roots, assets }, { label: 'Paste' }); return; }
+  const src = new Map(((data.compLayers ?? []) as Layer[]).map(l => [l.id, l]));
+  const ids = new Map<string, string>();
+  const collect = (id: string) => { const l = src.get(id); if (!l || ids.has(id)) return; ids.set(id, uid()); l.children.forEach(collect); };
+  for (const c of missing) c.root.forEach(collect);
+  const newLayers: Layer[] = [...ids].map(([old, id]) => {
+    const l = structuredClone(src.get(old)!);
+    return { ...l, id, parent: l.parent ? ids.get(l.parent) ?? null : null, children: l.children.map(c => ids.get(c)!).filter(Boolean) };
+  });
+  s.batch('paste', () => {
+    s.transact('Paste', tx => {
+      const P = s.project;
+      for (const c of missing) tx.set(P.comps, c.id, { ...structuredClone(c), root: c.root.map(r => ids.get(r)!).filter(Boolean) });
+      for (const l of newLayers) tx.set(P.layers, l.id, l);
+      tx.structure(); tx.comp();
+    });
+    insertLayers({ layers, roots, assets }, { label: 'Paste' });
+  }, 'Paste');
+  s.emit('comps');
 }
 
 export async function handlePaste(e: ClipboardEvent) {
@@ -570,7 +603,8 @@ export async function handlePaste(e: ClipboardEvent) {
     for (const it of cd.items ?? []) { const f = it.kind === 'file' ? it.getAsFile() : null; if (f && (f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name))) return openBrowserFile(f); }
     if (textData.trim().startsWith('{')) {
       const json = JSON.parse(textData);
-      if (json.layers && (json.v || json.fr)) return openData('clipboard.json', textData);
+      // the new tab is named after the animation (lottie "nm"), not "clipboard"
+      if (json.layers && (json.v || json.fr)) return openData(`${String(json.nm || 'Pasted Lottie').replace(/[\\/]/g, ' ')}.json`, textData);
     }
     if (memClipboard && !textData) return memClipboard.startsWith(KEYS_PREFIX) ? pasteKeys(memClipboard) : pasteMotion(memClipboard);
     if (html && /figma/i.test(html)) toast('Figma data found but could not be decoded', 'error');
@@ -722,7 +756,6 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (k === '.' || k === 'pagedown') return run(() => editor.stepFrames(e.shiftKey ? 10 : 1));
     if (k === 'enter' && s.selection.length === 1 && s.layer(s.selection[0])?.type === 'text') return run(() => hooks.editText(s.selection[0]));
     if (e.key === 'F9') return run(() => setEase(s, [...s.keySelection], 'Easy Ease'));
-    if (k === 'm' && !mod && !e.shiftKey && !e.altKey) return run(() => addMarker(s, s.time));
     if (k === 'j' || k === 'k') return run(() => jumpToKey(k === 'j' ? -1 : 1));
     // after effects-style property shortcuts: P S R T A add a keyframe on that property
     const propKeys: Record<string, any> = { p: 'position', s: 'scale', a: 'anchor' };
@@ -750,7 +783,6 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     else if (cmd === 'save') saveProject(false);
     else if (cmd === 'saveAs') saveProject(true);
     else if (cmd === 'export-lottie') exportLottie();
-    else if (cmd === 'export-ae') exportAeScript();
     else if (cmd === 'selectAll') {
       const a = document.activeElement as HTMLElement | null;
       if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) (a as HTMLInputElement).select();
@@ -770,7 +802,7 @@ function isTyping(e: Event) {
 }
 
 /** J / K: move the playhead to the previous / next keyframe of the selection (every layer of
- *  the active comp when nothing is selected) or marker, like after effects */
+ *  the active comp when nothing is selected), like after effects */
 export function jumpToKey(dir: -1 | 1) {
   const s = editor.store;
   const times = new Set<number>();
@@ -781,7 +813,6 @@ export function jumpToKey(dir: -1 | 1) {
     const l = s.layer(id);
     if (l) for (const p of Object.values(l.props)) p?.kf?.forEach(f => times.add(f.t));
   }
-  for (const m of s.comp.markers ?? []) if (m.t <= s.comp.duration) times.add(m.t);
   const sorted = [...times].sort((a, b) => a - b);
   const t = dir < 0 ? [...sorted].reverse().find(x => x < s.time - 1e-6) : sorted.find(x => x > s.time + 1e-6);
   if (t !== undefined) s.setTime(t);

@@ -254,7 +254,7 @@ export const ANALYSIS_TOOLS: ToolDef[] = [
         if (op && op.length > 1 && op[op.length - 1].v[0] < 1) tags.push('out');
         return { l, r: r ?? [0, D], props, expr, tags };
       }).filter(Boolean) as { l: Layer; r: [number, number]; props: PropKey[]; expr: PropKey[]; tags: string[] }[];
-      const out: string[] = [`comp "${comp.name}" ${fmtTime(D)} @${comp.fps}fps, ${Object.keys(s.project.layers).length} layers, ${rows.length} animated${comp.markers?.length ? `; markers ${comp.markers.map(m => `${fmtTime(m.t)}${m.label ? ' ' + m.label : ''}`).join(', ')}` : ''}`];
+      const out: string[] = [`comp "${comp.name}" ${fmtTime(D)} @${comp.fps}fps, ${Object.keys(s.project.layers).length} layers, ${rows.length} animated`];
       if (!rows.length) { out.push('nothing is animated yet'); return text(out.join('\n')); }
       // beats: starts within 120ms of a beat's first start
       const starts = rows.slice().sort((a, b) => a.r[0] - b.r[0]);

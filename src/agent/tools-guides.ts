@@ -2,7 +2,7 @@
 // (propose_storyboard → the user approves an editable card → update_progress per beat).
 // registered in TOOLS (tools.ts) next to the editing tools.
 
-import { editor } from '../app/editor';
+import { st } from './tool-kit';
 import type { ToolContent, ToolDef } from './tools';
 import { findGuide, findExamples, guideIndex, guideSection, guideSections, GUIDES, EXAMPLES } from './guides';
 import { beatNote, noteStyle, tasteOn, TASTE_GUIDE_HINT } from './taste';
@@ -64,7 +64,7 @@ export const GUIDE_TOOLS: ToolDef[] = [
         styleReason: { type: 'string', description: 'one line: why this style fits the brief' },
         duration: { type: 'number', description: 'total seconds' },
         beats: { type: 'array', items: beatSchema, description: '3-5 beats of 2-4 s are typical' },
-        notes: { type: 'string', description: 'optional: palette, typography, music/markers, open questions' },
+        notes: { type: 'string', description: 'optional: palette, typography, music, open questions' },
         concepts: { type: 'array', items: { type: 'object', properties: { name: { type: 'string', description: 'e.g. "Door opens"' }, idea: { type: 'string', description: 'what moves and how, rooted in what the artwork depicts' }, why: { type: 'string', description: 'why it fits the brand' } }, required: ['name', 'idea'] }, description: 'logo / brand / artwork briefs: 2-3 concepts the user picks from; the beats describe the recommended one' },
         recommended: { type: 'number', description: 'index of the recommended concept (0-based)' },
       },
@@ -90,10 +90,10 @@ export const GUIDE_TOOLS: ToolDef[] = [
       required: ['beat', 'status'],
     },
     run: ({ beat, status, note }) => {
-      const r = storyboards.progress(editor.store, beat, status, note);
+      const r = storyboards.progress(st(), beat, status, note);
       const sb = storyboards.current!;
       const done = sb.beats.filter(b => b.status === 'done' || b.status === 'skipped').length;
-      return text(`beat ${r.index + 1} "${r.beat.name}" ${status}; ${done}/${sb.beats.length} beats finished${sb.state === 'done' ? ' — now critique (the critique tool, then contact_sheet; rubric: get_guide handbook, section "Critique")' : ''}${status === 'done' ? beatNote(editor.store, [r.beat.start, r.beat.end]) : ''}`);
+      return text(`beat ${r.index + 1} "${r.beat.name}" ${status}; ${done}/${sb.beats.length} beats finished${sb.state === 'done' ? ' — now critique (the critique tool, then contact_sheet; rubric: get_guide handbook, section "Critique")' : ''}${status === 'done' ? beatNote(st(), [r.beat.start, r.beat.end]) : ''}`);
     },
   },
 ];

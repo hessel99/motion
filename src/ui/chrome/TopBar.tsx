@@ -1,45 +1,43 @@
-// the window's top bar, on the window color: Home, the left panel toggle, the open documents as
-// tabs (a white pill for the active one, "+" for a new file; drag to reorder, middle-click or ✕ to
-// close, double-click to rename, a dot for unsaved changes), then undo / redo, the app menu and the
-// one primary action, Export.
-// in the mac desktop app the window has no title bar (electron/main.cjs: hiddenInset): the
-// traffic lights sit at the bar's left and its empty space drags the window.
+// the window's title bar: one slim row across the whole window, above the rail, the sidebars and
+// the stage. its left end is reserved for the mac traffic lights (desktop app, not full screen:
+// platform.ts, chrome.css --traffic-w), then the open documents as tabs (drag to reorder,
+// middle-click or ✕ to close, double-click to rename, a dot for unsaved changes) and "+", the empty
+// middle drags the window, and at the right undo / redo, the app menu and Share.
 
 import { useRef, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
+import { DEV } from '../../app/prefs';
 import { loadDemo, loadStress, newProject, openFileDialog, saveProject } from '../../app/actions';
 import { openShare } from './Share';
-import { activeDoc, closeDoc, docName, documents, isDocDirty, moveDoc, switchTo, type Doc } from '../../app/documents';
+import { activeDoc, closeDoc, docName, documents, isDocBusy, isDocDirty, moveDoc, switchTo, type Doc } from '../../app/documents';
 import { setProjectName } from '../../core/commands';
 import { useChannels } from '../hooks';
 import { menuFrom, showContextMenu, type MenuItem } from '../menu';
 import { Button } from '../ui';
 import { Ellipsis, File, Plus, Redo2, Undo2, X } from './icons';
 import { openSettings, setUi, ui } from './ui-state';
+import { EMULATED } from './platform';
 
-const native = (globalThis as any).motionNative as { platform?: string } | undefined;
-const MAC_APP = native?.platform === 'darwin';
-
-/** the open files as tabs, at the top of the middle area (between the two sidebars) */
 export function TopBar() {
   useChannels(['history', 'doc'], ['ui', 'docs']);
   const home = ui.view === 'home';
   const docs = documents();
   return (
-    <header class={'topbar' + (MAC_APP && !ui.leftOpen ? ' mac-app' : '')}>
-      {MAC_APP && !ui.leftOpen && <div class="tb-traffic" aria-hidden="true" />}
+    <header class="titlebar">
+      {/* the mac traffic lights float here; the browser emulation (?platform=mac) draws stand-ins */}
+      <div class="tb-traffic" aria-hidden="true">{EMULATED && <><i /><i /><i /></>}</div>
       <div class="tb-tabs" role="tablist" aria-label="Open files">
         {docs.map(d => <DocTab key={d.id} doc={d} active={!home && d === activeDoc()} />)}
         <Button variant="ghost" icon size="sm" class="tb-add" tip="New file (⌘N)" onClick={() => newProject()}><Plus /></Button>
       </div>
       <div class="tb-drag" />
+      <TopActions />
     </header>
   );
 }
 
-/** the inspector's top row (top right of the window): undo / redo, the app menu, Share */
-export function TopActions() {
-  useChannels(['history', 'doc'], ['ui', 'docs']);
+/** the title bar's right end: undo / redo, the app menu, Share */
+function TopActions() {
   const s = editor.store;
   const home = ui.view === 'home';
   const history = (e: MouseEvent) => {
@@ -51,13 +49,12 @@ export function TopActions() {
   const editing = !home && !!activeDoc();
   return (
     <div class="tb-actions">
-        {editing && <>
-          <Button variant="ghost" icon disabled={!s.canUndo} aria-label="Undo" data-tooltip={`Undo${s.undoLabel ? ' ' + s.undoLabel : ''} (⌘Z)`} onClick={() => s.undo()} onContextMenu={history as any}><Undo2 /></Button>
-          <Button variant="ghost" icon disabled={!s.canRedo} tip="Redo (⇧⌘Z)" onClick={() => s.redo()}><Redo2 /></Button>
-        </>}
-        <Button variant="ghost" icon tip="Menu" aria-haspopup="menu" class="tb-menu" onClick={e => menuFrom(e.currentTarget as Element, appMenuItems(), { align: 'right' })}><Ellipsis /></Button>
-        <span class="grow" />
-        <button type="button" class="pill-btn tb-share" disabled={!editing} aria-haspopup="menu" title="Share a preview or export a file (⌘E exports)" onClick={e => openShare(e.currentTarget as HTMLElement)}>Share</button>
+      {editing && <>
+        <Button variant="ghost" icon size="sm" disabled={!s.canUndo} aria-label="Undo" data-tooltip={`Undo${s.undoLabel ? ' ' + s.undoLabel : ''} (⌘Z)`} onClick={() => s.undo()} onContextMenu={history as any}><Undo2 /></Button>
+        <Button variant="ghost" icon size="sm" disabled={!s.canRedo} tip="Redo (⇧⌘Z)" onClick={() => s.redo()}><Redo2 /></Button>
+      </>}
+      <Button variant="ghost" icon size="sm" tip="Menu" aria-haspopup="menu" class="tb-menu" onClick={e => menuFrom(e.currentTarget as Element, appMenuItems(), { align: 'right' })}><Ellipsis /></Button>
+      {editing && <button type="button" class="pill-btn tb-share" aria-haspopup="menu" title="Share a preview or export a file (⌘E exports)" onClick={e => openShare(e.currentTarget as HTMLElement)}>Share</button>}
     </div>
   );
 }
@@ -82,7 +79,7 @@ function DocTab({ doc, active }: { doc: Doc; active: boolean }) {
       { label: 'Save', shortcut: '⌘S', action: () => { switchTo(doc.id); saveProject(false); } },
       { separator: true },
       { label: 'Close', shortcut: '⌘W', action: () => closeDoc(doc.id) },
-      { label: 'Close others', disabled: !others.length, action: () => { for (const d of others) if (!closeDoc(d.id)) break; } },
+      { label: 'Close others', disabled: !others.length, action: async () => { for (const d of others) if (!(await closeDoc(d.id))) break; } },
     ]);
   };
   // drag to reorder (pointer events: no html5 drag image, the tab itself follows the pointer)
@@ -131,6 +128,7 @@ function DocTab({ doc, active }: { doc: Doc; active: boolean }) {
             onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter') commit((e.target as HTMLInputElement).value); if (e.key === 'Escape') setRenaming(false); }}
             onBlur={e => commit((e.target as HTMLInputElement).value)} />
         : <span class="tb-name">{name}</span>}
+      {isDocBusy(doc) && <span class="tb-run" data-testid="tab-running" role="img" aria-label="The agent is working in this file" title="The agent is working in this file" />}
       {dirty && <span class="tb-dirty" aria-label="Unsaved changes" />}
       <button type="button" class="tb-close" aria-label={`Close ${name}`} title="Close (⌘W)" onClick={close}><X size={13} /></button>
     </div>
@@ -146,6 +144,7 @@ export function appMenuItems(): MenuItem[] {
     { label: 'Save', shortcut: '⌘S', disabled: !editing, action: () => saveProject(false) },
     { label: 'Save as…', shortcut: '⇧⌘S', disabled: !editing, action: () => saveProject(true) },
     { separator: true },
+    ...(!DEV ? [] : [
     { label: 'Open the demo animation', action: () => loadDemo() },
     {
       label: 'Performance', submenu: [
@@ -159,6 +158,7 @@ export function appMenuItems(): MenuItem[] {
         { label: 'Performance HUD', checked: editor.showHud, action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
       ],
     },
+    ] as MenuItem[]),
     { separator: true },
     { label: 'Keyboard shortcuts', shortcut: '?', action: () => editor.emit('help') },
     { label: 'Settings…', shortcut: '⌘,', action: () => openSettings() },

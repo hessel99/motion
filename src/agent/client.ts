@@ -5,6 +5,8 @@ import { TOOLS, READ_ONLY_TOOLS } from './tools';
 import { AGENT_SYSTEM_PROMPT, AGENT_SYSTEM_PROMPT_PLAIN, ASK_MODE_PROMPT } from './prompt';
 import { tasteOn, TASTE_TOOLS, TASTE_GUIDE_HINT } from './taste';
 import { GUIDES } from './guides';
+import { withToolStore } from './tool-kit';
+import type { Store } from '../core/store';
 
 export interface Provider { id: string; name: string; available: boolean; version?: string }
 export interface ChatEvent { kind: string; [k: string]: any }
@@ -35,7 +37,14 @@ class AgentClient {
   private ws: WebSocket | null = null;
   private listeners = new Set<() => void>();
   private chatHandlers = new Map<string, (e: ChatEvent) => void>();
-  private imageListeners = new Set<(img: { tool: string; data: string; mimeType: string }) => void>();
+  private imageListeners = new Set<(img: { tool: string; data: string; mimeType: string; chatId?: string }) => void>();
+  /** chatId -> the store of the document the chat works in (runs belong to their document: a tool
+   *  call of a chat whose document is in a background tab edits that document, never the visible one) */
+  private targets = new Map<string, () => Store | null>();
+  /** tool calls run one at a time (a background document's store is swapped in for one call) */
+  private toolQueue: Promise<unknown> = Promise.resolve();
+  /** the chat whose tool call is running right now (tools that report to the ui: storyboards) */
+  toolChat: string | undefined;
   /** chats running in Ask (read-only) mode: editing tools are refused while any is active */
   private readOnlyChats = new Set<string>();
   private retry = 500;
@@ -45,7 +54,7 @@ class AgentClient {
   on(fn: () => void) { this.listeners.add(fn); return () => { this.listeners.delete(fn); }; }
   private emit() { this.listeners.forEach(f => f()); }
   /** images produced by tools (screenshot, contact sheet): lets the ui show what the agent saw */
-  onToolImage(fn: (img: { tool: string; data: string; mimeType: string }) => void) { this.imageListeners.add(fn); return () => { this.imageListeners.delete(fn); }; }
+  onToolImage(fn: (img: { tool: string; data: string; mimeType: string; chatId?: string }) => void) { this.imageListeners.add(fn); return () => { this.imageListeners.delete(fn); }; }
 
   async connect() {
     const native = (globalThis as any).motionNative;
@@ -79,6 +88,7 @@ class AgentClient {
         h({ kind: 'done' });
         this.chatHandlers.delete(id);
         this.readOnlyChats.delete(id);
+        this.targets.delete(id);
       }
       this.emit();
       this.scheduleReconnect();
@@ -87,40 +97,71 @@ class AgentClient {
     ws.onmessage = ev => { try { this.handle(JSON.parse(String(ev.data))); } catch (e) { console.warn('agent bridge message', e); } };
   }
 
+  private reconnectTimer: ReturnType<typeof setTimeout> | undefined;
   private scheduleReconnect() {
-    setTimeout(() => this.open(), this.retry);
+    clearTimeout(this.reconnectTimer);
+    this.reconnectTimer = setTimeout(() => this.open(), this.retry);
     this.retry = Math.min(10000, this.retry * 2);
   }
 
+  /** try now instead of waiting for the backoff ("Reconnect") */
+  reconnect() {
+    if (this.status === 'connected' || this.ws) return;
+    clearTimeout(this.reconnectTimer);
+    this.retry = 500;
+    this.open();
+  }
+
   /** run a tool locally (used by the bridge relay; exported for tests / scripted use) */
-  async runTool(name: string, args: any) {
+  async runTool(name: string, args: any, chatId?: string) {
     const tool = TOOLS.find(t => t.name === name);
     if (!tool) throw new Error(`unknown tool ${name}`);
-    if (this.readOnlyChats.size && !tool.readOnly) throw new Error(`"${name}" is disabled: this turn is in Ask (read-only) mode. Describe the change you would make instead; the user can switch to Edit mode.`);
-    const content = await tool.run(args ?? {});
-    for (const c of content) if (c.type === 'image') this.imageListeners.forEach(f => f({ tool: name, data: c.data, mimeType: c.mimeType }));
+    // without a chat id (an older bridge, scripted use) the only running chat is the caller
+    if (!chatId && this.chatHandlers.size === 1) chatId = [...this.chatHandlers.keys()][0];
+    const readOnly = chatId && this.chatHandlers.has(chatId) ? this.readOnlyChats.has(chatId) : this.readOnlyChats.size > 0;
+    if (readOnly && !tool.readOnly) throw new Error(`"${name}" is disabled: this turn is read-only (critique / explain). Describe the change you would make instead; the user can ask for it.`);
+    const store = chatId ? this.targets.get(chatId)?.() ?? null : null;
+    // a call never waits on a stuck earlier one for more than a minute (the bridge gave up on it)
+    const prev = Promise.race([this.toolQueue, new Promise(r => setTimeout(r, 60000))]);
+    const run = prev.then(() => {
+      this.toolChat = chatId;
+      return withToolStore(store, () => tool.run(args ?? {})).finally(() => { this.toolChat = undefined; });
+    });
+    this.toolQueue = run.catch(() => {});
+    const content = await run;
+    for (const c of content) if (c.type === 'image') this.imageListeners.forEach(f => f({ tool: name, data: c.data, mimeType: c.mimeType, chatId }));
     return content;
   }
+
+  /** the document store a chat's tool calls work on (see `targets`) */
+  setTarget(chatId: string, store: () => Store | null) { this.targets.set(chatId, store); }
 
   private async handle(m: any) {
     if (m.type === 'providers') { this.providers = m.list; this.emit(); }
     else if (m.type === 'tool_call') {
       try {
-        const content = await this.runTool(m.name, m.args);
+        const content = await this.runTool(m.name, m.args, typeof m.chatId === 'string' ? m.chatId : undefined);
         this.send({ type: 'tool_result', id: m.id, ok: true, content });
       } catch (e: any) {
         this.send({ type: 'tool_result', id: m.id, ok: false, error: String(e?.message ?? e) });
       }
+    } else if (m.type !== 'chat_event') {
+      this.extra.forEach(f => f(m));
     } else if (m.type === 'chat_event') {
       this.chatHandlers.get(m.chatId)?.(m.event);
-      if (m.event.kind === 'done') { this.chatHandlers.delete(m.chatId); this.readOnlyChats.delete(m.chatId); }
+      if (m.event.kind === 'done') { this.chatHandlers.delete(m.chatId); this.readOnlyChats.delete(m.chatId); this.targets.delete(m.chatId); }
     }
   }
 
   private send(m: any) { this.ws?.readyState === 1 && this.ws.send(JSON.stringify(m)); }
+  /** other bridge services (figma shader sources): raw messages both ways */
+  private extra = new Set<(m: any) => void>();
+  listen(fn: (m: any) => void) { this.extra.add(fn); return () => { this.extra.delete(fn); }; }
+  post(m: any): boolean { if (this.ws?.readyState !== 1) return false; this.send(m); return true; }
 
-  chat(opts: { provider: string; message: string; sessionId?: string; model?: string; mode?: ChatMode; maxTurns?: number }, onEvent: (e: ChatEvent) => void) {
+  chat(opts: { provider: string; message: string; sessionId?: string; model?: string; mode?: ChatMode; maxTurns?: number; store?: () => Store | null }, onEvent: (e: ChatEvent) => void) {
     const chatId = 'c' + Math.random().toString(36).slice(2);
+    if (opts.store) this.targets.set(chatId, opts.store);
     if (this.ws?.readyState !== 1) {
       queueMicrotask(() => { onEvent({ kind: 'error', errorKind: 'bridge', message: 'The agent bridge is offline.' }); onEvent({ kind: 'done' }); });
       return chatId;
@@ -143,6 +184,7 @@ class AgentClient {
    *  cancel safety net, a detached turn) whose 'done' may never arrive from the bridge */
   forget(chatId: string) {
     this.chatHandlers.delete(chatId);
+    this.targets.delete(chatId);
     if (this.readOnlyChats.delete(chatId)) this.emit();
   }
 

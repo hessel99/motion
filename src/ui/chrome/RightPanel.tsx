@@ -9,7 +9,6 @@ import { useChannels } from '../hooks';
 import { menuFrom, type MenuItem } from '../menu';
 import { Button } from '../ui';
 import { Ellipsis } from './icons';
-import { TopActions } from './TopBar';
 
 const TYPE_NAME: Record<string, string> = { rect: 'Rectangle', ellipse: 'Ellipse', group: 'Group', text: 'Text', image: 'Image', path: 'Path', precomp: 'Composition', audio: 'Audio' };
 
@@ -19,7 +18,6 @@ export function RightPanel() {
   const sel = s.selection.filter(id => s.layer(id));
   return (
     <div class="right-panel">
-      <TopActions />
       <TitleBlock />
       {sel.length > 0 && !s.playing && !sel.every(id => s.layer(id)!.type === 'audio') && <div class="rp-align"><AlignBar ids={sel} /></div>}
       <Inspector />
@@ -40,7 +38,7 @@ function TitleBlock() {
     sub = [
       l.shape ? (l.shape.kind === 'star' ? 'Star' : 'Polygon') : (TYPE_NAME[l.type] ?? l.type),
       parent ? `in ${parent.name}` : null,
-      keys ? `${keys} key${keys === 1 ? '' : 's'}` : null,
+      keys ? `${keys} keyframe${keys === 1 ? '' : 's'}` : null,
     ].filter(Boolean).join(' · ');
     menu = [
       { label: 'Rename…', action: () => { const n = prompt('Layer name', l.name); if (n) renameLayer(s, l.id, n); } },

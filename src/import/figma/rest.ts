@@ -282,7 +282,7 @@ class Builder {
         if (s.fontName && (s.fontName.family !== nc.fontName.family || s.fontName.style !== nc.fontName.style)) o.fontName = { family: s.fontName.family, style: s.fontName.style, postscript: '' };
         if (typeof s.fontSize === 'number' && s.fontSize !== nc.fontSize) o.fontSize = s.fontSize;
         if (Array.isArray(s.fills)) o.fillPaints = this.paints(s.fills);
-        if (s.textDecoration && s.textDecoration !== 'NONE') o.textDecoration = s.textDecoration;
+        if (s.textDecoration) o.textDecoration = s.textDecoration;
         if (s.letterSpacing) o.letterSpacing = { value: num(s.letterSpacing.value, 0), units: s.letterSpacing.unit === 'PIXELS' ? 'PIXELS' : 'PERCENT' };
         if (Object.keys(o).length === 1) return;
         table.push(o);

@@ -10,6 +10,43 @@ import { componentLabels, isDiscrete, shaderPropKey, shaderRefs, type ShaderAsse
 import { ColorField, KeyNav } from './Inspector';
 import { Checkbox, NumField, Section, Slider } from './ui';
 import { ChevronLeft, ChevronRight, X } from './chrome/icons';
+import { useEffect, useState } from 'preact/hooks';
+import { shaderSources } from '../app/shader-sources';
+import { SHADER_MAIN } from '../core/shaders';
+
+/** pick shader files (main.ts, features.json) and hand them to the library */
+export function importShaderFiles(target?: string) {
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.multiple = true;
+  inp.accept = '.ts,.js,.json,.md,.wgsl';
+  inp.onchange = async () => {
+    const files: Record<string, string> = {};
+    for (const f of Array.from(inp.files ?? [])) files[/\.(ts|js)$/.test(f.name) && !files[SHADER_MAIN] ? SHADER_MAIN : f.name] = await f.text();
+    try { shaderSources.importFiles(editor.store, files, target); } catch (e) { alert(String((e as Error).message ?? e)); }
+  };
+  inp.click();
+}
+
+/** "Fetching shader…" / why it is missing, with the ways to get it */
+function SourceStatus({ ref_, asset }: { ref_: ShaderRef; asset: ShaderAsset }) {
+  const [, force] = useState(0);
+  useEffect(() => shaderSources.on(() => force(x => x + 1)), []);
+  const st = shaderSources.states.get(ref_.shader);
+  if (asset.files[SHADER_MAIN]) return st?.state === 'done' && st.warning ? <div class="small muted">{st.warning}</div> : null;
+  return (
+    <div class="small" role="status">
+      {st?.state === 'fetching' ? <span class="muted">Fetching the shader from Figma…</span>
+        : st?.state === 'error' ? <span style={{ color: 'var(--danger, #e5534b)' }}>{st.error}. Shown as a placeholder.</span>
+        : <span class="muted">Figma doesn't copy a shader's code: it's shown as a placeholder until Motion fetches it (connect Figma) or you import its files.</span>}
+      {st?.state !== 'fetching' && <div class="row" style={{ gap: 'var(--space-2)', marginTop: 4 }}>
+        {shaderSources.status?.figma !== 'connected' && <button type="button" class="ghost btn-sm" onClick={() => { shaderSources.connect(); }}>Connect Figma</button>}
+        <button type="button" class="ghost btn-sm" onClick={() => shaderSources.retry()}>Retry</button>
+        <button type="button" class="ghost btn-sm" onClick={() => importShaderFiles(ref_.shader)}>Import shader…</button>
+      </div>}
+    </div>
+  );
+}
 
 const st = () => editor.store;
 
@@ -29,14 +66,14 @@ export function ShaderPanel({ layer }: { layer: Layer }) {
   return (
     <Section title="Shaders" right={keys.length ? (
       <select class="expr-add" value="" onChange={add} aria-label="Add shader">
-        <option value="">+ add</option>
+        <option value="">Add…</option>
         {keys.filter(k => lib[k].kind === 'fill').map(k => <option value={`fill|${k}`}>Fill: {lib[k].name}</option>)}
         {keys.filter(k => lib[k].kind === 'effect').map(k => <option value={`effect|${k}`}>Effect: {lib[k].name}</option>)}
       </select>
     ) : undefined}>
       {refs.length === 0 && <div class="muted small">Add a shader from this document's library (shaders arrive with pasted Figma layers).</div>}
       {refs.map(({ ref, kind }) => {
-        const a = lib[ref.shader];
+        const a = lib[ref.shader] ?? ref.asset;
         return a ? <ShaderBlock key={ref.slot} layer={layer} ref_={ref} kind={kind} asset={a} /> : <div class="muted small">Missing shader {ref.shader}</div>;
       })}
     </Section>
@@ -60,7 +97,8 @@ function ShaderBlock({ layer, ref_, kind, asset }: { layer: Layer; ref_: ShaderR
         </>}
         <button type="button" class="ghost icon btn-sm" title="Remove shader" aria-label={`Remove ${asset.name}`} onClick={() => removeShader(store, layer.id, ref_.slot)}><X size={14} /></button>
       </div>
-      {err && <div class="small" style={{ color: 'var(--danger, #e5534b)' }}>{err}</div>}
+      <SourceStatus ref_={ref_} asset={asset} />
+      {err && asset.files[SHADER_MAIN] && <div class="small" style={{ color: 'var(--danger, #e5534b)' }}>{err}</div>}
       {on && asset.params.map(def => <ParamRow key={def.key} layer={layer} slot={ref_.slot} def={def} />)}
     </div>
   );

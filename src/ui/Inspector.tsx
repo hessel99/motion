@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
+import { menuFrom } from './menu';
 import {
   addKeyframe, deleteKeyframes, isAnimated, keyId, parseKeyId, setCompSettings, setEase, setLayerField, setProp,
-  setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, addMarker, deleteMarker, renameComp,
+  setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, renameComp,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { starGeometry } from '../core/shapes';
@@ -10,17 +11,17 @@ import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
 import { BLEND_MODES, PROP_DEFS, propDef, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
 import { ShaderPanel } from './ShaderPanel';
 import { useChannels } from './hooks';
-import { menuFrom, type MenuItem } from './menu';
-import { ANIM_PRESETS, alignLayers, applyPreset, distributeLayers, setTextAnim, TEXT_ANIM_PRESETS, type Align } from '../core/presets';
+import { alignLayers, distributeLayers, setTextAnim, TEXT_ANIM_PRESETS, type Align } from '../core/presets';
 import { invert } from './viewport-controller';
 import { toast } from '../app/actions';
-import { EaseStudio, showClassicEase, studioEnabled, StudioSwitch } from './patterns/EaseStudio';
 import { AudioInspector } from './audio/AudioInspector';
 import { Button, Checkbox, ColorSwatch, FieldRow, NumField, Section, Segmented, Slider, Toggle } from './ui';
 import { ComponentBox, LinkButton, LinkedChip, sharedLink } from './LinkControls';
+import { ComponentPanel, ExposeSection, InstancePanel } from './ComponentPanels';
+import { instanceComp } from '../core/motion-components';
 import {
   AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignHorizontalDistributeCenter, AlignStartHorizontal,
-  AlignStartVertical, AlignVerticalDistributeCenter, ArrowRightLeft, ArrowUpRight, Blend, ChevronLeft, ChevronRight, Minus,
+  AlignStartVertical, AlignVerticalDistributeCenter, ArrowUpRight, Blend, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Minus,
   RotateCw, X, Clock, Gauge, SquareRoundCorner, ALargeSmall,
 } from './chrome/icons';
 
@@ -59,8 +60,8 @@ export function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
     (globalThis as any).timeline?.expand(ids[0], true);
   };
   return (
-    <button type="button" tabIndex={-1} class={'keybtn' + (animated ? ' animated' : '') + (atKey ? ' at' : '')} title={animated ? 'Add/remove keyframe (alt: stop animating)' : 'Animate this property'} aria-label={(atKey ? 'Remove keyframe: ' : 'Add keyframe: ') + propDef(props.prop).label} onClick={click}>
-      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0.8 L9.2 5 L5 9.2 L0.8 5 Z" /></svg>
+    <button type="button" class={'keybtn' + (animated ? ' animated' : '') + (atKey ? ' at' : '')} title={animated ? 'Add/remove keyframe (alt: stop animating)' : 'Animate this property'} aria-label={(atKey ? 'Remove keyframe: ' : 'Add keyframe: ') + propDef(props.prop).label} onClick={click}>
+      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0.8 L9.2 5 L5 9.2 L0.8 5 Z" /><circle class="keybtn-dot" cx="5" cy="5" r="1.3" /></svg>
     </button>
   );
 }
@@ -79,9 +80,9 @@ export function KeyNav(props: { layers: Layer[]; prop: PropKey }) {
   const label = propDef(props.prop).label;
   return (
     <span class={'keynav' + (animated ? ' animated' : '')}>
-      <button type="button" tabIndex={-1} class="keynav-step" disabled={!animated || prev === -Infinity} aria-label={`Previous ${label} keyframe`} title="Previous keyframe" onClick={() => store.setTime(prev)}><ChevronLeft size={12} /></button>
+      <button type="button" class="keynav-step" disabled={!animated || prev === -Infinity} aria-label={`Previous ${label} keyframe`} title="Previous keyframe" onClick={() => store.setTime(prev)}><ChevronLeft size={12} /></button>
       <KeyButton layers={props.layers} prop={props.prop} />
-      <button type="button" tabIndex={-1} class="keynav-step" disabled={!animated || next === Infinity} aria-label={`Next ${label} keyframe`} title="Next keyframe" onClick={() => store.setTime(next)}><ChevronRight size={12} /></button>
+      <button type="button" class="keynav-step" disabled={!animated || next === Infinity} aria-label={`Next ${label} keyframe`} title="Next keyframe" onClick={() => store.setTime(next)}><ChevronRight size={12} /></button>
     </span>
   );
 }
@@ -104,9 +105,16 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
   return <VisualLayerPanel layers={layers} />;
 }
 
+/** progressive disclosure: anchor, blend, mask, visible range and expressions sit behind "More
+ *  options" unless they hold something (animated, not normal, on, trimmed, written). persisted */
+const MORE_KEY = 'motion.inspector.more';
+function readMore() { try { return localStorage.getItem(MORE_KEY) === '1'; } catch { return false; } }
+
 function VisualLayerPanel({ layers }: { layers: Layer[] }) {
   const store = st();
   const l = layers[0];
+  const [more, setMoreState] = useState(readMore);
+  const setMore = (on: boolean) => { setMoreState(on); try { localStorage.setItem(MORE_KEY, on ? '1' : '0'); } catch { /* private mode */ } };
   const t = store.time;
   const ids = layers.map(x => x.id);
   const set = (key: PropKey, v: number[], mk?: string) => store.batch('insp', () => { for (const x of layers) setProp(store, x.id, key, v, { mergeKey: mk }); });
@@ -130,26 +138,35 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
     }
   }, 'Add stroke');
   const removeStroke = () => store.batch('stroke', () => { for (const x of layers) setProp(store, x.id, 'strokeWidth', [0]); }, 'Remove stroke');
+  // what "More options" holds, and which of it is in use (always shown)
+  const showAnchor = more || layers.some(x => isAnimated(x, 'anchor') || x.props.anchor?.expr !== undefined);
+  const showBlend = more || layers.some(x => (x.blend ?? 'normal') !== 'normal');
+  const showMask = layers.length === 1 && (more || !!l.mask);
+  const showTiming = more || layers.some(x => x.inPoint > 1e-6 || x.outPoint < store.comp.duration - 1e-6);
+  const showExpr = more || layers.some(x => Object.values(x.props).some(p => p?.expr !== undefined));
+  const hidden = !(showAnchor && showBlend && (layers.length !== 1 || showMask) && showTiming && showExpr);
   return (
     <>
+      {layers.length === 1 && instanceComp(store.project, l) && <InstancePanel layer={l} />}
+      {layers.length === 1 && store.comp.component && <ExposeSection layer={l} />}
       <Section title="Position">
         <PropRow layers={layers} prop="position" label="Position">
-          <NumField label="X" value={pos[0]} onChange={(n, mk) => vecMulti('position', 0, n, mk)} />
-          <NumField label="Y" value={pos[1]} onChange={(n, mk) => vecMulti('position', 1, n, mk)} />
+          <NumField label="X" title="Position X" value={pos[0]} onChange={(n, mk) => vecMulti('position', 0, n, mk)} />
+          <NumField label="Y" title="Position Y" value={pos[1]} onChange={(n, mk) => vecMulti('position', 1, n, mk)} />
         </PropRow>
         <PropRow layers={layers} prop="rotation" label="Rotation">
           <NumField label={<RotateCw size={13} />} title="Rotation" value={rot} suffix="°" onChange={(n, mk) => set('rotation', [n], mk)} />
         </PropRow>
-        <PropRow layers={layers} prop="anchor" label="Anchor">
+        {showAnchor && <PropRow layers={layers} prop="anchor" label="Anchor">
           <NumField label="X" title="Anchor X" value={anchor[0]} onChange={(n, mk) => vec('anchor', 0, n, anchor, mk)} />
           <NumField label="Y" title="Anchor Y" value={anchor[1]} onChange={(n, mk) => vec('anchor', 1, n, anchor, mk)} />
-        </PropRow>
+        </PropRow>}
       </Section>
       <Section title="Layout">
         {common.includes('size') && (
           <PropRow layers={layers} prop="size" label="Size">
-            <NumField label="W" min={0} value={size[0]} onChange={(n, mk) => sizeChange(layers, 0, n, mk)} />
-            <NumField label="H" min={0} value={size[1]} onChange={(n, mk) => sizeChange(layers, 1, n, mk)} />
+            <NumField label="W" title="Width" min={0} value={size[0]} onChange={(n, mk) => sizeChange(layers, 0, n, mk)} />
+            <NumField label="H" title="Height" min={0} value={size[1]} onChange={(n, mk) => sizeChange(layers, 1, n, mk)} />
           </PropRow>
         )}
         <PropRow layers={layers} prop="scale" label="Scale">
@@ -174,12 +191,12 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
             </>}
           </FieldRow>
         )}
-        <FieldRow label="Blend">
+        {showBlend && <FieldRow label="Blend">
           <select class="grow" aria-label="Blend mode" value={l.blend ?? 'normal'} onChange={e => setLayerField(store, ids, 'blend', (e.target as HTMLSelectElement).value as any, 'Blend mode')}>
             {BLEND_MODES.map(m => <option value={m}>{m[0].toUpperCase() + m.slice(1).replace(/([A-Z])/g, ' $1').toLowerCase()}</option>)}
           </select>
-        </FieldRow>
-        {layers.length === 1 && (
+        </FieldRow>}
+        {showMask && (
           <FieldRow label="Mask" title="Masks the layers above it in the same group">
             <Checkbox checked={!!l.mask} onChange={on => setLayerField(store, ids, 'mask', on, 'Use as mask')}>Use as mask</Checkbox>
           </FieldRow>
@@ -231,7 +248,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
         </Section>
       )}
       {layers.every(x => x.type === 'text') && <TextAnimPanel layers={layers} />}
-      {layers.length === 1 && l.type === 'precomp' && l.compRef && (
+      {layers.length === 1 && l.type === 'precomp' && l.compRef && !instanceComp(store.project, l) && (
         <Section title="Composition" right={<Button variant="ghost" size="sm" onClick={() => store.openComp(l.compRef!)}>Open <ArrowUpRight size={14} /></Button>}>
           <FieldRow label="Start">
             <NumField label={<Clock size={13} />} title="Start offset" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={(n, mk) => store.transact('Precomp start', tx => { for (const id of ids) { const x = store.layer(id); if (x) { tx.set(x, 'startTime', n); tx.touch(id); } } tx.structure(); }, mk)} />
@@ -240,15 +257,22 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
         </Section>
       )}
       {common.includes('shadowColor') && <EffectsPanel layers={layers} />}
-      <AnimatePanel ids={ids} />
-      <Section title="Timing">
+      {showTiming && <Section title="Timing">
         <FieldRow label="Visible">
-          <NumField label="In" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
-          <NumField label="Out" step={1 / store.comp.fps} min={0} value={Math.min(l.outPoint, store.comp.duration)} suffix="s" onChange={n => setLayerField(store, ids, 'outPoint', n >= store.comp.duration ? 1e9 : n)} />
+          <NumField label="In" title="Visible from" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
+          <NumField label="Out" title="Visible until" step={1 / store.comp.fps} min={0} value={Math.min(l.outPoint, store.comp.duration)} suffix="s" onChange={n => setLayerField(store, ids, 'outPoint', n >= store.comp.duration ? 1e9 : n)} />
         </FieldRow>
-      </Section>
-      <ExprPanel layers={layers} />
+      </Section>}
+      {showExpr && <ExprPanel layers={layers} />}
       {layers.length === 1 && <ComponentBox layer={l} />}
+      {(hidden || more) && (
+        <div class="insp-more">
+          <button type="button" class="btn-ghost btn-sm insp-more-btn" aria-expanded={more} onClick={() => setMore(!more)}>
+            {more ? <ChevronUp size={14} /> : <ChevronDown size={14} />}{more ? 'Fewer options' : 'More options'}
+          </button>
+          {!more && <span class="insp-more-hint">Anchor, blend, mask, timing, expressions</span>}
+        </div>
+      )}
     </>
   );
 }
@@ -270,10 +294,9 @@ function EffectsPanel({ layers }: { layers: Layer[] }) {
   const shown = EFFECT_GROUPS.filter(has);
   const extra = (l.effects ?? []).filter((e, i, a) => a.findIndex(x => x.type === e.type) !== i).length;
   return (
-    <Section title="Effects" right={<select value="" aria-label="Add effect" onChange={e => { const g = EFFECT_GROUPS.find(x => x.title === (e.target as HTMLSelectElement).value); if (g) store.batch('fx', () => { for (const [k, v] of g.add) if (!l.props[k]) set(k, v); }); (e.target as HTMLSelectElement).value = ''; }}>
-      <option value="">Add…</option>
-      {EFFECT_GROUPS.filter(g => !has(g)).map(g => <option value={g.title}>{g.title}</option>)}
-    </select>}>
+    <Section title="Effects" onAdd={EFFECT_GROUPS.some(g => !has(g)) ? (e?: MouseEvent) => menuFrom((e?.currentTarget as Element) ?? document.activeElement!, EFFECT_GROUPS.filter(g => !has(g)).map(g => ({
+      label: g.title, action: () => store.batch('fx', () => { for (const [k, v] of g.add) if (!l.props[k]) set(k, v); }),
+    })), { align: 'right' }) : undefined} addLabel="Add effect">
       {shown.map(g => (
         <>
           <div class="muted small">{g.title}</div>
@@ -331,7 +354,7 @@ function TextPanel({ layer }: { layer: Layer }) {
       </div>
       <div class="row">
         <NumField label={<ALargeSmall size={14} />} title="Font size" min={1} value={t.fontSize} onChange={n => set({ fontSize: n })} />
-        <NumField label="↕" title="Line height" step={0.01} min={0.5} value={t.lineHeight} onChange={n => set({ lineHeight: n })} />
+        <NumField label="↕" title="Line height" step={0.01} min={0.5} value={t.lineHeight} onChange={n => set({ lineHeight: n, lineHeightAuto: undefined })} />
         <NumField label="↔" title="Letter spacing" step={0.1} value={t.letterSpacing} onChange={n => set({ letterSpacing: n })} />
       </div>
       <Segmented class="row" label="Text align" value={t.align} options={(['left', 'center', 'right'] as const).map(a => ({ value: a, label: a[0].toUpperCase() + a.slice(1) }))} onChange={a => set({ align: a })} />
@@ -451,14 +474,15 @@ const SIZE_PRESETS: [string, number, number][] = [
   ['Feed · 1080×1350', 1080, 1350], ['HD · 1280×720', 1280, 720], ['4K · 3840×2160', 3840, 2160], ['Icon · 512×512', 512, 512],
 ];
 
-/** nothing selected: the composition's settings (name, size, frame rate, duration, background)
- *  and its markers. exporting lives in one place: the Export button (top right, ⌘E) */
+/** nothing selected: the composition's settings (name, size, frame rate, duration, background).
+ *  exporting lives in one place: the Export button (top right, ⌘E) */
 function CompPanel() {
   const store = st();
   const c = store.comp;
   const preset = SIZE_PRESETS.find(p => p[1] === c.width && p[2] === c.height);
   return (
     <>
+      {c.component && <ComponentPanel comp={c} />}
       <Section title="Composition">
         <FieldRow label="Name">
           <input class="grow name-input" aria-label="Composition name" value={c.name} spellcheck={false}
@@ -473,8 +497,8 @@ function CompPanel() {
           </select>
         </FieldRow>
         <FieldRow label="">
-          <NumField label="W" min={1} value={c.width} onChange={n => setCompSettings(store, { width: Math.round(n) })} />
-          <NumField label="H" min={1} value={c.height} onChange={n => setCompSettings(store, { height: Math.round(n) })} />
+          <NumField label="W" title="Width" min={1} value={c.width} onChange={n => setCompSettings(store, { width: Math.round(n) })} />
+          <NumField label="H" title="Height" min={1} value={c.height} onChange={n => setCompSettings(store, { height: Math.round(n) })} />
         </FieldRow>
         <FieldRow label="Timing">
           <NumField label={<Gauge size={13} />} title="Frame rate" min={1} max={240} value={c.fps} hint="fps" onChange={n => setCompSettings(store, { fps: Math.round(n) })} />
@@ -483,16 +507,6 @@ function CompPanel() {
       </Section>
       <Section title="Background">
         <FieldRow><ColorField value={c.background} onChange={col => setCompSettings(store, { background: col as any })} /></FieldRow>
-      </Section>
-      <Section title="Markers" onAdd={() => addMarker(store, store.time)} addLabel="Add a marker at the playhead (M)">
-        {(c.markers ?? []).length === 0 && <div class="muted small" title="From an audio layer's beats too. J / K and key drags snap to them.">Press M to mark a moment at the playhead.</div>}
-        {[...(c.markers ?? [])].sort((a, b) => a.t - b.t).map(m => (
-          <div class="marker-row list-row">
-            <button type="button" class="marker-time" title="Go to this marker" onClick={() => store.setTime(m.t)}>{m.t.toFixed(2)}s</button>
-            <span class="marker-label">{m.label || 'Marker'}</span>
-            <button type="button" class="ghost icon marker-x" aria-label="Delete marker" title="Delete marker" onClick={() => deleteMarker(store, m.id)}><X size={12} /></button>
-          </div>
-        ))}
       </Section>
     </>
   );
@@ -514,9 +528,7 @@ function EasePanel() {
   const cur: [number, number, number, number] = a && b ? (a.interp === 'linear' ? [0, 0, 1, 1] : [a.out[0], a.out[1], b.in[0], b.in[1]]) : [0.333, 0, 0.667, 1];
   const active = EASE_PRESETS.find(p => p.v.every((x, i) => Math.abs(x - cur[i]) < 1e-3));
   return (
-    <Section title={`Easing · ${keys.length} key${keys.length > 1 ? 's' : ''}`} right={<span class="row" style={{ margin: 0 }}>{seg && <span class="insp-type">{propDef(seg.key).label}</span>}<StudioSwitch /></span>}>
-      {studioEnabled() && <EaseStudio />}
-      {showClassicEase() && <>
+    <Section title={`Easing · ${keys.length} keyframe${keys.length > 1 ? 's' : ''}`} right={<span class="row" style={{ margin: 0 }}>{seg && <span class="insp-type">{propDef(seg.key).label}</span>}</span>}>
       {a && b && seg && a.interp === 'spring' && <SpringView bounce={a.bounce ?? 0.3} onChange={v => setSpring(store, keys, v)} />}
       {a && b && seg && a.interp !== 'hold' && a.interp !== 'spring' && (
         <CurveEditor value={cur} onChange={(v, mk) => setSegmentHandles(store, seg!.layerId, seg!.key, seg!.i, [v[0], v[1]], [v[2], v[3]], mk)} />
@@ -528,8 +540,6 @@ function EasePanel() {
         </div>
       )}
       {a?.interp === 'hold' && <div class="muted small">Hold keyframe (no interpolation)</div>}
-      {/* the studio has its own swatches: the preset chips are the classic editor's (studio off) */}
-      {!studioEnabled() && <>
       <div class="ease-group label-xs">Springs</div>
       <div class="ease-presets">
         {SPRING_PRESETS.map(p => (
@@ -548,8 +558,6 @@ function EasePanel() {
           </button>
         ))}
       </div>
-      </>}
-      </>}
       {/* footer: what the segment really is (a spring's handles are meaningless) */}
       {a?.interp === 'spring' ? <div class="row small muted">spring · bounce {Math.round((a.bounce ?? 0.3) * 100)}%</div>
         : a?.interp === 'hold' ? null
@@ -658,7 +666,7 @@ function CurveEditor({ value, onChange }: { value: [number, number, number, numb
 import { cubicBezier } from '../core/easing';
 function bez(v: number[]) { return cubicBezier(v[0], v[1], v[2], v[3]); }
 
-// ---------------- align / animate ----------------
+// ---------------- align ----------------
 const vpBounds = (id: string) => (globalThis as any).viewport?.boundsOf([id]) ?? null;
 const parentInv = (id: string) => {
   const l = st().layer(id);
@@ -681,58 +689,6 @@ export function AlignBar({ ids }: { ids: string[] }) {
   );
 }
 
-function AnimatePanel({ ids }: { ids: string[] }) {
-  const store = st();
-  const [dur, setDur] = useState(0.6);
-  const [stagger, setStagger] = useState(0.08);
-  const apply = (name: string) => {
-    try { applyPreset(store, ids, name, { duration: dur, stagger: ids.length > 1 ? stagger : 0 }); (globalThis as any).timeline?.expand(ids[0], true); }
-    catch (e: any) { toast(e.message, 'error'); }
-  };
-  // presets live in one compact menu (in / out / loop); the agent does the rest (⌘K, the chat)
-  const menu = (e: MouseEvent) => {
-    const group = (kind: string) => ANIM_PRESETS.filter(p => p.kind === kind).map(p => ({ label: p.name, hint: kind === 'out' ? 'ends at playhead' : undefined, action: () => apply(p.name) }));
-    const items: MenuItem[] = [...group('in'), { separator: true }, ...group('out')];
-    const loops = group('loop');
-    if (loops.length) items.push({ separator: true }, ...loops);
-    menuFrom(e.currentTarget as Element, items);
-  };
-  return (
-    <Section title="Animate">
-      <FieldRow label="Preset" title="Adds keys at the playhead">
-        <button type="button" class="btn preset-pick" aria-haspopup="menu" onClick={menu as any}>Choose…</button>
-        <NumField label={<Clock size={13} />} title="Duration" step={0.05} min={0.05} value={dur} suffix="s" onChange={setDur} />
-      </FieldRow>
-      {ids.length > 1 && <FieldRow label="Stagger"><NumField label={<Clock size={13} />} title="Stagger: delay between layers" step={0.01} min={0} value={stagger} suffix="s" onChange={setStagger} /></FieldRow>}
-      {ids.length === 2 && <SmartRow key={ids.join(',')} ids={ids} dur={dur} />}
-    </Section>
-  );
-}
-
-/** two selected versions of a design (e.g. two pasted figma frames): animate from one to the other */
-function SmartRow({ ids, dur }: { ids: string[]; dur: number }) {
-  const store = st();
-  const [swap, setSwap] = useState(false);
-  const [a, b] = swap ? [ids[1], ids[0]] : ids;
-  const name = (id: string) => store.layer(id)?.name ?? '?';
-  const run = async () => {
-    const { smartAnimate } = await import('../core/smart');
-    try {
-      const r = smartAnimate(store, a, b, { duration: dur });
-      store.select([a]);
-      (globalThis as any).timeline?.expand(a, true);
-      if (!r.props) toast('Smart animate: the two versions have no differences inside them (the frames’ own positions are not animated). Undo to get the second one back.', 'error');
-      else toast(`Smart animate: ${r.matched} matched layers, ${r.props} animated properties` + (r.fadedIn + r.fadedOut ? `, ${r.fadedIn} fade in, ${r.fadedOut} fade out` : ''));
-    } catch (e: any) { toast(e.message, 'error'); }
-  };
-  return (
-    <div class="row" title="Matches layers by name inside the two selected layers and animates every difference from the start to the end state. The end layer is removed.">
-      <button class="btn" style={{ flex: 1 }} onClick={run}>Smart animate {name(a)} → {name(b)}</button>
-      <button type="button" class="ghost icon" title="Swap start and end" aria-label="Swap start and end" onClick={() => setSwap(!swap)}><ArrowRightLeft /></button>
-    </div>
-  );
-}
-
 function TextAnimPanel({ layers }: { layers: Layer[] }) {
   const store = st();
   const ids = layers.map(l => l.id);
@@ -741,7 +697,7 @@ function TextAnimPanel({ layers }: { layers: Layer[] }) {
   return (
     <Section title="Text animation" right={ta && <button class="ghost" onClick={() => setTextAnim(store, ids, undefined)}>Remove</button>}>
       <div class="preset-grid">
-        {TEXT_ANIM_PRESETS.map(p => <button class="preset in" onClick={() => setTextAnim(store, ids, { ...p.anim, start: store.time - layers[0].inPoint })}>{p.name}</button>)}
+        {TEXT_ANIM_PRESETS.map(p => <button class={'preset ' + (p.anim.mode === 'out' ? 'out' : 'in')} title={p.anim.mode === 'out' ? 'Animates the text out' : 'Animates the text in'} onClick={() => setTextAnim(store, ids, { ...p.anim, start: store.time - layers[0].inPoint })}>{p.name}</button>)}
       </div>
       {ta && (
         <>
@@ -794,18 +750,9 @@ function ExprPanel({ layers }: { layers: Layer[] }) {
   const ids = layers.map(x => x.id);
   const keys = [...TRANSFORM_KEYS_LOCAL, ...TYPE_PROPS[l.type]].filter((k, i, a) => a.indexOf(k) === i && EXPR_PROPS.includes(k));
   const withExpr = keys.filter(k => l.props[k]?.expr !== undefined);
-  const add = (e: Event) => {
-    const k = (e.target as HTMLSelectElement).value as PropKey;
-    (e.target as HTMLSelectElement).value = '';
-    if (k) setExpr(store, ids, k, EXPR_SUGGEST[k]?.[0] ?? 'value');
-  };
   return (
-    <Section title="Expressions" right={
-      <select class="expr-add" value="" onChange={add}>
-        <option value="">+ add</option>
-        {keys.filter(k => !withExpr.includes(k)).map(k => <option value={k}>{propDef(k).label}</option>)}
-      </select>
-    }>
+    <Section title="Expressions" addLabel="Add expression" onAdd={keys.some(k => !withExpr.includes(k)) ? (e?: MouseEvent) => menuFrom((e?.currentTarget as Element) ?? document.activeElement!,
+      keys.filter(k => !withExpr.includes(k)).map(k => ({ label: propDef(k).label, action: () => setExpr(store, ids, k, EXPR_SUGGEST[k]?.[0] ?? 'value') })), { align: 'right' }) : undefined}>
       {withExpr.length === 0 && <div class="muted small">e.g. wiggle(2, 20), time * 90, loopOut('cycle')</div>}
       {withExpr.map(k => <ExprRow key={k} ids={ids} k={k} src={l.props[k]!.expr!} />)}
     </Section>

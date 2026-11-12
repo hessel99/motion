@@ -24,16 +24,20 @@ const QUICK: Record<AskTarget, (n: number) => [string, string][]> = {
   ],
   comp: () => [
     ['Animate everything in', 'Animate the layers of this composition in with a clear hierarchy.'],
-    ['Critique the motion', 'Critique the motion in this composition and suggest improvements.'],
+    ['Critique the motion', 'Critique the motion in this composition and suggest improvements (numbered, so I can say "do 1 and 3"). Do not change anything.'],
   ],
 };
+
+/** quick asks that only look and advise */
+const READ_ONLY = new Set(['Critique the motion']);
 
 /** the agent's part of a context menu: one-click asks, then "Ask agent…" (the ⌘K bar) */
 export function agentMenuItems(target: AskTarget): MenuItem[] {
   const s = editor.store;
   const quick = QUICK[target](s.selection.length);
   return [
-    ...quick.map(([label, text]) => ({ label, hint: 'agent', action: () => askAgent(text, { chip: label, context: selectionContext() }) })),
+    // critiques look and advise: read-only (the editor refuses editing tools for that turn)
+    ...quick.map(([label, text]) => ({ label, hint: 'agent', action: () => askAgent(text, { chip: label, context: selectionContext(), ...(READ_ONLY.has(label) ? { mode: 'ask' as const } : {}) }) })),
     { label: 'Ask agent…', shortcut: '⌘K', action: () => editor.emit('ask-bar') },
   ];
 }

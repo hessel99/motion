@@ -4,36 +4,63 @@ Canvas and timeline are the core of the window; the agent supports them. Dark is
 theme (light works through the same tokens). Screenshots: `docs/shots/ui-v3/`
 (`node scripts/ui-shots.mjs`, `node scripts/agent-panel-shots.mjs` against the fake claude).
 
-## The window (v4: rail + fixed sidebars + stage)
+## The window (v5: title bar + rail + fixed sidebars + full-bleed stage) — LOCKED
 
 ```
-┌──┬──────────────┬───────────────────────────────────────┬──────────────────────┐
-│⌂ │ Agent    ● ✎ │ [file tab ●] [file tab] +             │ ↶ ↷ …        [Share] │
-│+ │              │ ┌ canvas (inset card) ──────────────┐ │ Pill                 │
-│⌕ │  thread      │ │   ┌ selection bar ┐               │ │ Rectangle · 5 keys   │
-│──│              │ │   [ layer ]                       │ │ align · Position ·   │
-│✦ │              │ │        [tool pill · zoom]         │ │ Layout · Appearance ·│
-│◇ │              │ └───────────────────────────────────┘ │ Fill · Stroke ·      │
-│  │              │ ┌ timeline (inset card) ────────────┐ │ Effects · Animate …  │
-│🔔│  composer    │ │ comp tabs · transport · tools     │ │                      │
-│⚙ │              │ └───────────────────────────────────┘ │                      │
+┌───────────────────────────────── title bar (40px) ─────────────────────────────┐
+│ ● ● ●  [file tab ●] [file tab] +            (drag)              ↶ ↷ …  [Share] │
+├──┬──────────────┬───────────────────────────────────────┬──────────────────────┤
+│⌂ │ Agent    ● ✎ │                                       │ Pill               … │
+│+ │              │   canvas, full bleed (no card)        │ Rectangle · 5 keys   │
+│⌕ │  thread      │        [ layer ]                      │ align · Position ·   │
+│──│              │        [tool pill · zoom]             │ Layout · Appearance ·│
+│✦ │              ├───────────────────────────────────────┤ Fill · Stroke ·      │
+│◇ │              │ comp tabs · transport · tools         │ Effects · Animate …  │
+│🔔│  composer    │ timeline                              │                      │
+│⚙ │              │                                       │                      │
 └──┴──────────────┴───────────────────────────────────────┴──────────────────────┘
  rail   left sidebar          the stage (middle)             right sidebar
 ```
 
+**Why a title bar row.** The mac app hides the native title bar (`titleBarStyle: hiddenInset`), so
+the traffic lights float over whatever the renderer draws at the window's top left. In v4 that was
+the rail and the left sidebar's header, and they collided. Now one 40px row spans the window: its
+left `--traffic-w` (80px) is reserved for the traffic lights (electron `trafficLightPosition`
+x 20 / y 14 centres them in the row), and everything else (rail, sidebars, stage) starts below
+it, so nothing can reach them at any window size. The frame is read once at startup
+(`src/ui/chrome/platform.ts` → `<html data-platform data-traffic-lights data-fullscreen>`):
+- **mac app**: the zone is reserved; **mac full screen** (no traffic lights): it collapses to a
+  small gutter (main.cjs forwards `enter/leave-full-screen`).
+- **windows / linux app**: the native frame stays; the row is an in-app bar, no reserve.
+- **browser**: nothing reserved. `?platform=mac` emulates the mac frame with stand-in circles at
+  the real position (`&fullscreen` for full screen), so screenshots prove there is no overlap.
+
+**The grid is locked.** Five regions in `grid-template-areas` (`chrome.css .app`), every size in
+`tokens.css` "app shell" (`--titlebar-h`, `--traffic-w`, `--rail-w`, `--left-w`, `--right-w`,
+`--panel-head-h`, `--stage-min`, `--timeline-h`, `--tl-min`, `--app-min-w/h`); no absolute
+positioning or negative margins between regions. Below 1280px the sidebars narrow (264 / 280).
+The window can't get smaller than 1100×700 (`BrowserWindow minWidth/minHeight`). The timeline
+row is `minmax(--tl-min, --tl-h)`, so a saved tall timeline gives way before the canvas drops
+under `--stage-min`.
+
+**Guard: `npm run layout:check`** (`scripts/layout-lock.mjs`). States (empty doc, shape selected,
+agent running against the fake claude, Home, Settings, Share popover) × 1100×700, 1280×800,
+1440×900, 1728×1117, 1920×1080, 2560×1440 × mac / browser frame. It asserts the region boxes don't
+intersect or leave the window, no control sits in the traffic-light zone, no page scroll, and no
+primary control's label is clipped, then compares 1x screenshots with `tests/layout-baselines/`
+(failures + diffs land in `tests/layout-baselines/.out/`). After an intended change:
+`node scripts/layout-lock.mjs --update` and commit the new baselines.
+
 - **Rail** (icon only, tooltips with shortcuts): Home, New file (⌘N), Ask / commands (⌘K),
   Agent (⌘I), Assets, Updates (desktop app, with a dot when one is ready), Settings at the bottom.
-  Clicking the active Agent / Assets icon collapses the left sidebar. It replaces the old Agent |
-  Assets tabs and the Home / panel buttons of the top bar.
-- **Two fixed sidebars**, flush to the window edges and full height, a hairline toward the
-  stage (a slightly lighter tone than the window): the agent or assets on the left, the inspector on
-  the right. No inset, no radius: they are tools around the work, not part of it.
-- **The stage** (the middle) keeps the inset + radius look: the file tabs on top, then the canvas
-  and the timeline as **two inset cards**. Why two cards and not one: the canvas and the timeline
-  zoom, scroll and resize independently, the gap between them is where the timeline's splitter
-  lives, and a timeline in the same card as the canvas reads as part of the picture. Both stay
-  inside the stage, so "canvas + timeline" still reads as one area between the sidebars.
-- **Top right** (the inspector's first row): undo / redo, the app menu (…), and **Share**
+  Clicking the active Agent / Assets icon collapses the left sidebar.
+- **Two fixed sidebars** under the title bar, flush to the window edges, a hairline toward the
+  stage. Each starts with a 40px header row (`--panel-head-h`): "Agent" with its status dot and
+  new-conversation button, "Assets", or the inspector's selection title.
+- **The stage**: the canvas full bleed (the pasteboard colour around the composition, no inset
+  card, no name label over the frame), the timeline below one divider (its top edge is the
+  splitter).
+- **Title bar right**: undo / redo, the app menu (…), and **Share**
   (neutral primary). Share opens a popover with two ways out:
   - *Share a preview file*: one self-contained html page (the animation rendered frame-accurately
     as an embedded video + a small player: play / pause, scrub, loop, frame time, Space and , .
@@ -42,7 +69,7 @@ theme (light works through the same tokens). Screenshots: `docs/shots/ui-v3/`
     `configured()`, `upload(blob, name) → url`). Shipped with one provider, "your upload endpoint"
     (POST to an https URL you control, optional Authorization header). Off by default: the popover
     then shows **Set up link sharing…**, which opens Settings → Connections → Link sharing.
-  - *Export a file…* (⌘E): the export dialog (MP4 / WebM / GIF / PNG / Lottie / After Effects).
+  - *Export a file…* (⌘E): the export dialog (MP4 / WebM / GIF / PNG / Lottie).
 
 ### v3 layout notes (still valid inside the stage)
 
@@ -55,10 +82,9 @@ theme (light works through the same tokens). Screenshots: `docs/shots/ui-v3/`
   options), a selection bar over the selected layer, the brief box on an empty composition, a suggestion after an import.
 - **Timeline**: compositions as pill tabs (+ new, close, double-click a precomp layer opens its
   tab), the agent's progress pill when the panel is hidden, compact transport (start, frame step,
-  play, loop, full-screen preview, editable timecode, duration and fps menus), range, marker, auto-key, Keys | Graph |
-  Speed, a zoom slider. 28px rows; the beat the agent is building is highlighted.
+  play, loop, full-screen preview, editable timecode, duration and fps menus), range, auto-key, Keys | Graph, a zoom slider. 28px rows; the beat the agent is building is highlighted.
 - **Inspector**: calm field rows (label · fields · keyframe diamond; ‹ › on hover when
-  animated), sections with "+" / "−" where something can be added (Stroke, Markers). Section,
+  animated), sections with "+" / "−" where something can be added (Stroke). Section,
   FieldRow and SwatchRow (`src/ui/ui.tsx`) and PropRow (`Inspector.tsx`) are the building blocks for
   new rows (shader params, effect props).
 - **Settings**: a modal (⌘, or the app menu). **Ask bar**: ⌘K or "/" anywhere.
@@ -113,12 +139,26 @@ Every remaining control was clicked through after the change (e2e plus the scree
 - ⌘K / "/" opens the ask bar: commands filter as you type; a sentence goes to the agent with
   the selection, selected keys and preview range as context (chips show it).
 - Right-click on layers (canvas, timeline), keyframes and the ruler: two or three one-click asks
-  plus "Ask agent…". The selection bar has "Ask".
+  plus "Ask agent…" ("Critique the motion" runs read-only: editing tools are refused, the bubble
+  says "read-only"). The selection bar's "Ask" opens a small prompt anchored to the layer, with
+  suggestions for it (Animate in, Bouncier, Add follow-through), not the command palette.
 - After artwork (Figma paste, SVG, image) or audio comes in: one dismissible suggestion,
   "Animate this" / "Sync to music". Never automatic.
 - While the agent works the user keeps working; with the panel hidden its progress shows as a
   pill in the timeline header; the storyboard beat being built is highlighted in the timeline.
-- All of these go through `askAgent(text, { chip, context })` (`src/ui/agent-bridge.ts`).
+- All of these go through `askAgent(text, { chip, context, mode })` (`src/ui/agent-bridge.ts`).
+  They never touch the composer's draft: when the agent is busy or offline they wait as "queued"
+  bubbles (removable, "Send now" interrupts) and go out in order when it is free / connected. The
+  context (selected keys, preview range) stays with the ask as a chip on its bubble.
+- **Runs belong to their document**: switching or opening a tab never stops a run. Its tool calls
+  carry the chat id (per-chat MCP url `/mcp?chat=…`) and edit that document's own store
+  (`docStore` in `src/app/documents.ts`); the tab shows a spinner. Rendered previews are paused
+  for a document in a background tab (the tool says so). Closing the tab stops the run.
+- **A turn is one undo step** ("Agent: …"): ⌘Z right after it undoes the whole turn, like Revert.
+- **After a turn** the changed range plays once and the playhead rests on its end state
+  (Settings → Models → After a turn: play / jump to the end / leave it).
+- **Errors have one fix**: step limit → Continue; not signed in → steps in the app + Check again;
+  bridge lost → Reconnect. The raw text is behind "details". Error toasts stay until closed.
 
 ## The agent panel: what is in it and why
 
@@ -134,7 +174,7 @@ Every remaining control was clicked through after the change (e2e plus the scree
   The storyboard card (concepts as a pick-one list with large rows, beats, approve) and the review
   card (diff, compare, revert, result contact sheet) stay: they are the director workflow and the
   safety net. A "Jump to latest" pill appears when you scroll up while it streams. One row per turn: while it runs, the activity row; once it changed the file, the review card ("added 3 layers · 13 steps") whose details hold the diff and the steps. Run stats (time, cost, tokens) go to the console, not the thread.
-- **Composer**: one rounded box. Enter sends, Shift+Enter is a newline, Esc stops a run (the send
+- **Composer**: one rounded box. Enter sends (while the agent works: queues the message), Shift+Enter is a newline, Esc stops a run (the send
   button turns into stop). Bottom left: "+" (add an image/SVG/audio, mention a layer, style,
   model) and "point at a layer on the canvas" (the next layer clicked becomes an @mention). Files
   pasted or dropped into it come into the document and get selected, so "animate this" refers to
@@ -145,7 +185,7 @@ Every remaining control was clicked through after the change (e2e plus the scree
 
 | pattern (from AI design tools) | adapted here as |
 |---|---|
-| Floating bottom tool pill, active tool filled, zoom inside | Same, neutral filled active tool; the zoom's menu carries canvas view options (pixel grid, snapping, comp-fps playback, HUD). |
+| Floating bottom tool pill, active tool filled, zoom inside | Same, neutral filled active tool; the zoom's menu carries the zoom steps (pixel grid, snapping, comp-fps playback and the HUD only in dev builds / `?dev`). |
 | Second floating pill for page actions (preview, export, full screen) | Not a second pill: playback already lives in the timeline transport, and a duplicate play/loop/range on the canvas was noise. The canvas-specific part, **full-screen preview** (only the canvas, playing; Esc leaves), is a button in the transport. |
 | Mini toolbar above the selected element | **Motion actions** above the selected layer: keyframe at the playhead (on what is animated, else position), ease its keys (springs and curves), show in the timeline, Ask. Hidden while dragging, playing or using another tool. |
 | Inline links to created items | Layer chips in agent replies: select the layer **and** jump the playhead to its animation start. Neutral chip with the layer-type icon. |
@@ -172,3 +212,30 @@ Every remaining control was clicked through after the change (e2e plus the scree
 | Export button | top right | **replace** with Share | Share covers sending a preview (file now, link when set up) and exporting files. |
 | Rhythm panel | inspector | **removed** (on the main branch) | Asked for by the user. |
 | Timeline header labels (Range, Auto-key, duration, zoom) | always | **shrink** in a narrow stage | Container queries drop labels first, then the duration and zoom slider. |
+
+## Removed in 0.4
+
+The app keeps its core (canvas, tools, timeline + graph editor, eases / springs, inspector, precomps,
+the agent, Figma paste, imports, audio, Share / export, components, updates). Everything below was
+removed from the UI, code, tests and agent tools; old documents still open (unknown fields are
+dropped or ignored).
+
+| feature | why | what replaces it |
+|---|---|---|
+| Timeline markers (ruler flags, inspector section, M, J/K marker stops, drag / rename / delete, `set_markers`, `build_scene` markers, Lottie markers) | Extra UI and a second timing system next to the music grid; nobody needed named moments | Audio beat / bar / section grids (analysis, ruler ticks, snapping). `align_to_beats` defaults to the music's beats (or explicit times / bpm); `place_on_beats` places entrances. Old files drop `comp.markers` on open |
+| Audio inspector "Markers on bars" / "On hits" | Wrote markers | Snapping to the beat grid, Sync timing |
+| Ease studio: feel pad, knob, live swatches, A/B lane, Perform recording (`src/ui/patterns/*`) | Experiments that doubled the easing UI | Easing section: spring + curve presets, the bezier editor with influence, the graph editor |
+| Speed graph mode | A second graph editor; the value graph covers editing, the speed view was read-only | Keys \| Graph |
+| Inspector Animate panel (preset menu, duration, stagger, Smart animate row) | The agent does presets, stagger and smart animate better and in context | Agent tools `apply_preset`, `stagger`, `smart_animate` (⌘K / chat) |
+| Variations (tray, `save_variation` / `apply_variation`, "3 variations" quick action) | The review card + undo already cover trying alternatives | The agent builds one strong option and names the others; undo / revert per turn |
+| Style sync from W3C / Tokens Studio files, URLs, Figma variables REST API; Sync ▾ menu, review dialog, tokens-file export, desktop file watching | Rarely used, needed tokens / Enterprise plans | Figma paste still syncs variables / color styles (one undo step); linked colours / numbers and light / dark modes stay |
+| After Effects script export (`.jsx`) | Untested in real AE, a large embedded interpreter | Lottie (also imports into AE through plugins), MP4 / WebM, GIF, PNG |
+| Pixel grid, snap to pixel grid, comp-fps playback and Performance HUD toggles; stress scenes and demo in the app menu | Developer tools | Shown in dev builds, with `?dev`, or `localStorage motion.dev = 1` |
+| Settings: Profile, Notifications, Members placeholders; "coming soon" sound switches; the Default mode (Edit / Ask) card | Placeholders and a dead setting (the agent always edits) | — |
+| Dead code: `src/audio/beats.ts`, debug scripts (`hang*.mjs`, `probe.mjs`, `atlas-probe.mjs`, `library-shots.mjs`), unused CSS | Unused | — |
+
+Kept on purpose: `.aep` import (lazy-loaded, no cost to the main bundle; removing it also means
+changing the desktop shell's open dialog), text animation presets (text is core), the expression
+editor, the store's preview-override hook (harmless, in the renderer's hot path), and the
+`@preact/signals` dependency. It is unused, but removing a dependency changes the shell
+fingerprint and would force a full app update, so it goes with the next shell release.

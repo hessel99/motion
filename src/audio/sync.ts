@@ -4,7 +4,7 @@
 // relative timing between layers is kept, and the whole edit is one undo step.
 // also: patterns of beat times (place_on_beats) and musically sensible comp lengths.
 
-import { PROP_DEFS, PROP_KEYS, uid, type Layer, type Marker, type PropKey } from '../core/model';
+import { PROP_DEFS, PROP_KEYS, uid, type Layer, type PropKey } from '../core/model';
 import type { Store, Tx } from '../core/store';
 import { music, beats, bars, accents, sections, beatPeriod, type Music } from './timing';
 import { refollowSfx } from './sfx-place';
@@ -241,17 +241,6 @@ export function patternTimes(m: Music, pattern: BeatPattern, from = -Infinity, t
     }
   }
   return out.filter(within).slice(0, count);
-}
-
-/** markers on pattern times (replacing earlier markers named like these) */
-export function markersOnBeats(store: Store, times: number[], label: string, replace = true) {
-  store.transact('Markers on beats', tx => {
-    const keep = replace ? (store.comp.markers ?? []).filter(m => !/^(beat|bar|accent|build|drop)\b/i.test(m.label)) : (store.comp.markers ?? []);
-    const add: Marker[] = times.map((t, i) => ({ id: uid('m'), t: Math.round(t * 1e4) / 1e4, label: `${label} ${i + 1}` }));
-    tx.set(store.comp, 'markers', [...keep, ...add].sort((a, b) => a.t - b.t));
-    tx.comp();
-  });
-  store.emit('markers');
 }
 
 /** start each layer's animation (rigidly shifted) on successive pattern times */

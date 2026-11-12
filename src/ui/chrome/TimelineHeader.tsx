@@ -1,7 +1,7 @@
 // the timeline card's header row: the open compositions as small pill tabs ("+" makes a new one;
 // double-click a precomp layer to open its tab), the transport (start, frame step, play, loop, an
-// editable timecode, duration and fps), the preview range, markers, auto-key, the track view
-// (keys / graph / speed) and the time zoom. its top edge (in the gap above the card) is the
+// editable timecode, duration and fps), the preview range, auto-key, the track view
+// (keys / graph) and the time zoom. its top edge (in the gap above the card) is the
 // splitter that sizes the timeline.
 // the timecode is written straight into its input every frame while it is not being edited
 // (fixed width, tabular digits: no relayout during playback); the rest renders on its channels.
@@ -9,11 +9,11 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
 import { toast } from '../../app/actions';
-import { addMarker, addPrecompLayer, editMode, newComposition, renameComp, setCompSettings } from '../../core/commands';
+import { addPrecompLayer, editMode, newComposition, renameComp, setCompSettings } from '../../core/commands';
 import { useChannels } from '../hooks';
 import { menuFrom, showContextMenu, type MenuItem } from '../menu';
 import { Button, Segmented } from '../ui';
-import { Bookmark, Brackets, Maximize2, Pause, Play, Plus, Repeat, SkipBack, StepBack, StepForward, X } from './icons';
+import { Brackets, Maximize2, Pause, Play, Plus, Repeat, SkipBack, StepBack, StepForward, X } from './icons';
 import { startPreview } from './CanvasBars';
 import { fmtDuration, fmtTimecode, view } from './view';
 import { setUi, STAGE_MIN, TL_MIN, ui } from './ui-state';
@@ -138,7 +138,7 @@ function Transport() {
         {s.playing ? <Pause size={14} /> : <Play size={14} />}
       </button>
       <Button variant="ghost" icon size="sm" tip="Next frame (.) · next key (K)" tipSide="top" onClick={() => editor.stepFrames(1)}><StepForward /></Button>
-      <Button variant="ghost" icon size="sm" class="tp-loop" active={s.loop} tip={s.loop ? 'Loop: on' : 'Loop: off'} tipSide="top"
+      <Button variant="ghost" icon size="sm" class="tp-loop" active={s.loop} tip="Loop" tipSide="top"
         onClick={() => { s.loop = !s.loop; editor.emit('view'); }}><Repeat /></Button>
       <Button variant="ghost" icon size="sm" tip="Full-screen preview (Esc to leave)" tipSide="top" onClick={() => startPreview()}><Maximize2 /></Button>
       <input ref={time} class="tp-time" aria-label="Current time (minutes:seconds:frames)" title="Current time: type 1:12, 2.5 (seconds) or 90f" spellcheck={false} defaultValue="00:00:00"
@@ -174,13 +174,12 @@ function TrackTools() {
         onClick={() => { s.workArea = wa ? null : [s.time, s.comp.duration]; s.emit('workarea'); }}>
         <Brackets size={14} />{wa ? `${wa[0].toFixed(2)}–${wa[1].toFixed(2)}s` : <span class="tt-label">Range</span>}
       </button>
-      <Button variant="ghost" icon size="sm" tip="Add marker at playhead (M)" tipSide="top" onClick={() => addMarker(s, s.time)}><Bookmark /></Button>
       <button type="button" class={'tt-chip autokey' + (editMode.autoKey ? ' rec' : '')} aria-pressed={editMode.autoKey} aria-label="Auto-key"
         data-tooltip="Auto-key: every change creates a keyframe at the playhead" data-tooltip-side="top"
         onClick={() => { editMode.autoKey = !editMode.autoKey; editor.emit('view'); }}>
         <span class="rec-dot" aria-hidden="true" /><span class="tt-label">Auto-key</span>
       </button>
-      <Segmented class="tt-mode" size="sm" label="Track view" value={tl?.mode ?? 'keys'} options={[{ value: 'keys', label: 'Keys' }, { value: 'graph', label: 'Graph', title: 'Value curves' }, { value: 'speed', label: 'Speed', title: 'Speed curves' }]}
+      <Segmented class="tt-mode" size="sm" label="Track view" value={tl?.mode ?? 'keys'} options={[{ value: 'keys', label: 'Keys' }, { value: 'graph', label: 'Graph', title: 'Value curves' }]}
         onChange={m => view.tl?.setMode(m as any)} />
       <input ref={zoom} type="range" class="tt-zoom slider" aria-label="Timeline zoom" title="Timeline zoom (⌘ wheel). Double-click: fit" min={0} max={4} step={0.01} defaultValue="0"
         onInput={e => view.tl?.setZoomLevel(Math.exp(+(e.target as HTMLInputElement).value))}
@@ -218,8 +217,27 @@ function Grip() {
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', up);
   };
-  return <div class="tl-grip" role="separator" aria-orientation="horizontal" aria-label="Resize timeline" title="Drag to resize the timeline (double-click: default)"
-    onPointerDown={down as any} onDblClick={() => { (document.querySelector('.app') as HTMLElement | null)?.style.removeProperty('--tl-h'); setUi({ tlH: 0 }); }} />;
+  const reset = () => { (document.querySelector('.app') as HTMLElement | null)?.style.removeProperty('--tl-h'); setUi({ tlH: 0 }); };
+  // keyboard: ↑ / ↓ grow / shrink by 16px (shift: 64px), Home / End: smallest / largest, Enter: default
+  const key = (e: KeyboardEvent) => {
+    const app = document.querySelector('.app') as HTMLElement | null;
+    const tl = document.querySelector('.bottom') as HTMLElement | null;
+    if (!app || !tl) return;
+    const max = Math.max(TL_MIN, window.innerHeight - STAGE_MIN - 60);
+    const h0 = tl.getBoundingClientRect().height, d = e.shiftKey ? 64 : 16;
+    let h: number | null = null;
+    if (e.key === 'ArrowUp') h = h0 + d; else if (e.key === 'ArrowDown') h = h0 - d;
+    else if (e.key === 'Home') h = TL_MIN; else if (e.key === 'End') h = max;
+    else if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); reset(); return; }
+    if (h === null) return;
+    e.preventDefault(); e.stopPropagation();
+    h = Math.round(Math.min(max, Math.max(TL_MIN, h)));
+    app.style.setProperty('--tl-h', h + 'px');
+    setUi({ tlH: h });
+  };
+  return <div class="tl-grip" role="separator" tabIndex={0} aria-orientation="horizontal" aria-label="Resize timeline" aria-valuemin={TL_MIN} aria-valuenow={ui.tlH || undefined}
+    title="Drag or use ↑ ↓ to resize the timeline (double-click: default)"
+    onPointerDown={down as any} onKeyDown={key as any} onDblClick={reset} />;
 }
 
 /** the timeline height as a css value for the app grid (0: the default from tokens) */

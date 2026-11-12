@@ -3,17 +3,18 @@ import { Component, type ComponentChildren } from 'preact';
 import { editor } from '../app/editor';
 import { ViewportController } from './viewport-controller';
 import { Timeline } from './timeline';
-import { SyncReview, STYLE_MIME, applyStyle } from './LibraryPanel';
+import { STYLE_MIME, applyStyle } from './LibraryPanel';
+import { LibraryReview } from './ComponentPanels';
 import { useChannels } from './hooks';
-import { menuFrom, showContextMenu } from './menu';
+import { menuFrom, showContextMenu, type MenuItem } from './menu';
 import { agentMenuItems } from './agent-menu';
 import { AskBar } from './chrome/AskBar';
 import { EmptyCanvas, ImportSuggestion } from './chrome/CanvasAgent';
 import { SelectionBar, stopPreview } from './chrome/CanvasBars';
 import { openBrowserFile, setupShortcuts, runBenchmark, toast } from '../app/actions';
-import { prefs, setPref } from '../app/prefs';
+import { DEV, prefs, setPref } from '../app/prefs';
 import { cloneLayers, deleteLayers } from '../core/commands';
-import { Button, Dialog, Kbd } from './ui';
+import { Button, Dialog, Kbd, trapTab } from './ui';
 import { IconProvider, X } from './chrome/icons';
 import { TopBar } from './chrome/TopBar';
 import { Rail } from './chrome/Rail';
@@ -26,6 +27,10 @@ import { SettingsPage } from './settings/Settings';
 import { ui, closeSettings, openSettings, toggleAgent } from './chrome/ui-state';
 import { view } from './chrome/view';
 import { SHORTCUTS } from './chrome/shortcuts';
+import { setupPlatform } from './chrome/platform';
+
+// the window frame (mac traffic lights, full screen) as <html> attributes before the first render
+setupPlatform();
 
 let vp: ViewportController | null = null;
 let tl: Timeline | null = null;
@@ -48,9 +53,10 @@ export function App() {
   // the panels changed size: the canvases follow on the next frame (their ResizeObservers also
   // fire, this only avoids one frame at the old size)
   useEffect(() => { requestAnimationFrame(() => { vp?.resize(); tl?.resize(); }); }, [ui.leftOpen, ui.view]);
-  // the window: the icon rail, two fixed full-height sidebars (agent / assets on the left, the
-  // inspector on the right) and between them the stage: the file tabs, then the canvas and the
-  // timeline as two inset cards. Home replaces the stage; Settings is a modal.
+  // the window (the grid lives in chrome.css, its sizes in tokens.css "app shell"): a full-width
+  // title bar (traffic lights, file tabs, Share), under it the icon rail, two fixed sidebars
+  // (agent / assets on the left, the inspector on the right) and between them the stage: the
+  // canvas full bleed over the timeline. Home replaces the stage; Settings is a modal.
   const home = ui.view === 'home';
   return (
     <IconProvider>
@@ -59,18 +65,18 @@ export function App() {
         <Guard name="Top bar"><TopBar /></Guard>
         {/* the editor stays mounted under Home: its canvases and WebGL context live for the session */}
         <aside class="left sidebar" aria-label="Agent and assets" hidden={!ui.leftOpen}><Guard name="Side panel"><LeftPanel /></Guard></aside>
-        <main class="center card" aria-label="Canvas">
+        <main class="center" aria-label="Canvas">
           <Viewport />
           {ui.previewing && <button type="button" class="preview-exit" onClick={stopPreview}>Esc · leave preview</button>}
         </main>
-        <section class="bottom card" aria-label="Timeline">
+        <section class="bottom" aria-label="Timeline">
           <Guard name="Timeline header"><TimelineHeader /></Guard>
           <TimelineHost />
         </section>
         <aside class="right sidebar" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
         {home && <div class="home-host"><Guard name="Home"><Home /></Guard></div>}
         {ui.settingsOpen && <SettingsModal />}
-        <Guard name="Sync"><SyncReview /></Guard>
+        <Guard name="Library"><LibraryReview /></Guard>
         <AskBar />
         <ShortcutHelp />
         <Welcome />
@@ -92,7 +98,7 @@ function SettingsModal() {
   }, []);
   return (
     <div class="dialog-backdrop settings-backdrop" onPointerDown={e => { if (e.target === e.currentTarget) closeSettings(); }}>
-      <div ref={ref} class="settings-modal" role="dialog" aria-modal="true" aria-label="Settings" tabIndex={-1}>
+      <div ref={ref} class="settings-modal" role="dialog" aria-modal="true" aria-label="Settings" tabIndex={-1} onKeyDown={e => trapTab(e as any, ref.current!)}>
         <Guard name="Settings"><SettingsPage /></Guard>
         <Button variant="ghost" icon size="sm" class="settings-close" tip="Close (Esc)" onClick={closeSettings}><X size={14} /></Button>
       </div>
@@ -171,11 +177,13 @@ function ZoomBadge() {
       { label: 'Zoom to 100%', action: () => vp?.setZoom(1) },
       { label: 'Zoom in', shortcut: '⌘+', action: () => vp?.setZoom(vp.zoom * 1.25) },
       { label: 'Zoom out', shortcut: '⌘−', action: () => vp?.setZoom(vp.zoom / 1.25) },
+      ...(!DEV ? [] : [
       { separator: true },
       { label: 'Pixel grid (400% and above)', checked: prefs.pixelGrid, action: () => setPref('pixelGrid', !prefs.pixelGrid) },
       { label: 'Snap to pixel grid', checked: prefs.snapToPixels, action: () => setPref('snapToPixels', !prefs.snapToPixels) },
       { label: 'Play at composition fps', checked: editor.snapPlaybackToFrames, action: () => { editor.snapPlaybackToFrames = !editor.snapPlaybackToFrames; toast(editor.snapPlaybackToFrames ? 'Playback snaps to composition frames' : 'Playback is smooth (every display frame)'); } },
       { label: 'Performance HUD', checked: editor.showHud, action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
+      ] as MenuItem[]),
     ], { align: 'right', above: true });
   };
   return <button type="button" ref={el} class="zoom-badge" aria-haspopup="menu" data-tooltip="Zoom and view options" data-tooltip-side="top" onClick={menu}>100%</button>;
@@ -317,7 +325,7 @@ function Welcome() {
           <li><b>Paste from Figma</b>: select layers in Figma, ⌘C, then ⌘V here. A single frame becomes the composition.</li>
           <li><b>Animate</b>: click a property's keyframe diamond to add keyframes, or use <i>Animate</i> presets and <i>Text animation</i> in the right panel. Press F9 for easy ease.</li>
           <li><b>AI agent</b> (left panel, ⌘I): describe an animation and Claude Code builds it in your file, with your own subscription. One click undoes everything it did.</li>
-          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video, GIF, Lottie or After Effects from the Export button (top right, ⌘E).</li>
+          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video, GIF or Lottie from the Export button (top right, ⌘E).</li>
         </ol>
     </Dialog>
   );

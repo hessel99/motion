@@ -15,6 +15,8 @@ import { menuFrom } from '../menu';
 import { Diamond, Sparkles, Spline, Rows3 } from './icons';
 import { setUi, ui } from './ui-state';
 import { view } from './view';
+import { askAgent, selectionContext } from '../agent-bridge';
+import '../agent/agent.css';
 
 const TRANSFORM: PropKey[] = ['position', 'scale', 'rotation', 'opacity', 'anchor'];
 
@@ -33,8 +35,12 @@ export function SelectionBar() {
   useChannels(['selection', 'playing'], ['tool']);
   const el = useRef<HTMLDivElement>(null);
   const [down, setDown] = useState(false);
+  /** the inline ask under the bar is open */
+  const [asking, setAsking] = useState(false);
   const s = editor.store;
   const ids = s.selection.filter(id => s.layer(id));
+  const selKey = ids.join();
+  useEffect(() => setAsking(false), [selKey]);
   useEffect(() => {
     // hidden while the pointer is down on the canvas (dragging, resizing)
     const host = document.querySelector('.viewport') as HTMLElement | null;
@@ -79,11 +85,38 @@ export function SelectionBar() {
   };
   return (
     <div ref={el} class="sel-bar vp-ui" role="toolbar" aria-label="Selection" style={{ visibility: 'hidden' }}>
-      <button type="button" class="sel-btn" data-tooltip="Keyframe at the playhead" data-tooltip-side="top" onClick={key}><Diamond size={14} /></button>
-      <button type="button" class="sel-btn" aria-haspopup="menu" data-tooltip="Ease its keys" data-tooltip-side="top" onClick={ease as any}><Spline size={14} /></button>
-      <button type="button" class="sel-btn" data-tooltip="Show in the timeline" data-tooltip-side="top" onClick={() => { for (const id of ids) view.tl?.expand(id, true); view.tl?.reveal(ids[0]); }}><Rows3 size={14} /></button>
+      <button type="button" class="sel-btn" aria-label="Add a keyframe at the playhead" data-tooltip="Keyframe at the playhead" data-tooltip-side="top" onClick={key}><Diamond size={14} /></button>
+      <button type="button" class="sel-btn" aria-haspopup="menu" aria-label="Ease its keyframes" data-tooltip="Ease its keyframes" data-tooltip-side="top" onClick={ease as any}><Spline size={14} /></button>
+      <button type="button" class="sel-btn" aria-label="Show in the timeline" data-tooltip="Show in the timeline" data-tooltip-side="top" onClick={() => { for (const id of ids) view.tl?.expand(id, true); view.tl?.reveal(ids[0]); }}><Rows3 size={14} /></button>
       <span class="sel-sep" aria-hidden="true" />
-      <button type="button" class="sel-btn sel-ask" onClick={() => editor.emit('ask-bar')}><Sparkles size={14} />Ask</button>
+      <button type="button" class="sel-btn sel-ask" aria-expanded={asking} onClick={() => setAsking(a => !a)}><Sparkles size={14} />Ask</button>
+      {asking && <InlineAsk count={ids.length} onClose={() => setAsking(false)} />}
+    </div>
+  );
+}
+
+/** the selection bar's ask: a small prompt anchored to the selected layer(s). it goes to the agent
+ *  with the selection (and selected keys / preview range) as context; suggestions are about it */
+function InlineAsk(props: { count: number; onClose: () => void }) {
+  const [text, setText] = useState('');
+  const inp = useRef<HTMLInputElement>(null);
+  useEffect(() => { requestAnimationFrame(() => inp.current?.focus()); }, []);
+  const go = (t: string, chip?: string) => {
+    if (!t.trim()) return;
+    askAgent(t.trim(), { chip, context: selectionContext() });
+    props.onClose();
+  };
+  const many = props.count > 1;
+  return (
+    <div class="sel-ask-pop" role="dialog" aria-label="Ask the agent about the selection" onPointerDown={e => e.stopPropagation()}>
+      <input aria-label="Ask the agent about the selection" placeholder={many ? `What should these ${props.count} layers do?` : 'What should this layer do?'} value={text} spellcheck={false}
+        ref={inp}
+        onInput={e => setText((e.target as HTMLInputElement).value)}
+        onKeyDown={e => {
+          e.stopPropagation();
+          if (e.key === 'Escape') { e.preventDefault(); props.onClose(); }
+          else if (e.key === 'Enter') { e.preventDefault(); go(text); }
+        }} />
     </div>
   );
 }

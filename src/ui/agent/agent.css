@@ -1,4 +1,4 @@
-/* agent panel additions (review cards, quick actions, mentions, variations).
+/* agent panel additions (review cards, quick actions, mentions).
    uses the design-system variables when present, with fallbacks. */
 
 .ag-panel { --ag-accent: var(--accent); --ag-line: var(--border); --ag-panel2: var(--surface-2); --ag-muted: var(--text-muted); --ag-danger: var(--danger); --ag-ok: var(--success); --ag-text: var(--text); --ag-radius: var(--radius-lg); }
@@ -74,8 +74,6 @@
 .ag-error summary { cursor: pointer; font-size: 11px; }
 
 /* composer */
-.ag-chip { background: var(--surface-hover); border-radius: 4px; padding: 0 5px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ag-chip.mention { background: color-mix(in srgb, var(--ag-accent) 22%, transparent); }
 .ag-qchip { flex: none; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ag-line); background: transparent; color: var(--text-secondary); cursor: pointer; white-space: nowrap; font-weight: var(--weight-regular); min-height: 22px; }
 .ag-qchip:hover:not(:disabled) { border-color: var(--ag-accent); color: var(--ag-text); }
 .ag-qchip.ask { border-style: dashed; }
@@ -89,19 +87,6 @@
 .ag-mention.on .ag-muted { color: inherit; opacity: 0.75; }
 .ag-mention-icon { width: 14px; text-align: center; color: var(--ag-muted); }
 .ag-mention.on .ag-mention-icon { color: inherit; }
-
-/* variations */
-.ag-variations { border-top: 1px solid var(--ag-line); padding: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
-.ag-var-head { display: flex; align-items: center; gap: 6px; }
-.ag-var-list { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
-.ag-var { flex: 0 0 auto; width: 120px; border: 1px solid var(--ag-line); border-radius: var(--ag-radius); padding: 4px; cursor: pointer; background: var(--ag-panel2); }
-.ag-var:hover { border-color: color-mix(in srgb, var(--ag-accent) 60%, transparent); }
-.ag-var.on { border-color: var(--ag-accent); box-shadow: 0 0 0 1px var(--ag-accent) inset; }
-.ag-var-strip { display: flex; gap: 1px; height: 30px; align-items: center; justify-content: center; background: var(--surface-code); border-radius: 4px; overflow: hidden; }
-.ag-var-strip img { height: 100%; width: 33.3%; object-fit: cover; }
-.ag-var-label { margin-top: 4px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ag-var-note { color: var(--ag-muted); font-size: 10.5px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.ag-var-foot { display: flex; gap: 6px; align-items: center; }
 
 /* style picker: one chip per style recipe, prefixes the next brief */
 .ag-styles { display: flex; flex-wrap: nowrap; gap: var(--space-2); align-items: center; padding: 0 var(--space-6) var(--space-2); flex: none; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); }
@@ -150,3 +135,26 @@
 .ag-sb-concept-name { font-weight: 600; display: flex; gap: 6px; align-items: center; }
 .ag-sb-concept-name .ag-tag { margin: 0; }
 .ag-sb-concept-idea { line-height: 1.35; }
+
+/* context sent with a message (keyframes, a time range) */
+.ag-msg-ctx { display: block; width: fit-content; max-width: 100%; margin-top: 4px; font-size: 11px; padding: 0 6px; border-radius: 4px; background: var(--surface-hover); color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* a message waiting for its turn (typed while the agent works, or an ask from ⌘K / a menu / Home) */
+.left-panel .msg.user.ag-queued { background: transparent; border: 1px dashed var(--ag-line); color: var(--text-secondary); }
+.ag-queued-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--ag-muted); margin-right: 6px; vertical-align: 1px; }
+.ag-queued-actions { float: right; display: inline-flex; gap: 6px; align-items: center; margin-left: 6px; font-size: 11px; }
+
+/* a window tab whose document an agent run is working in (the run keeps going in the background) */
+.tb-tab .tb-run { width: 8px; height: 8px; flex: none; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--accent) 30%, transparent); border-top-color: var(--accent); animation: ag-spin .8s linear infinite; }
+
+/* error toasts stay until dismissed (actions.ts toast): a close button, clickable */
+.toast.error { pointer-events: auto; display: flex; align-items: center; gap: 8px; }
+.toast-x { background: none; border: 0; padding: 0 2px; color: inherit; opacity: .7; cursor: pointer; font: inherit; line-height: 1; }
+.toast-x:hover { opacity: 1; }
+
+/* selection bar: the inline ask anchored to the layer (CanvasBars.tsx) */
+.sel-ask-pop { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); width: 280px; padding: 6px; border-radius: var(--radius-lg); background: var(--surface-2); border: 1px solid var(--border); box-shadow: var(--shadow-2); display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.sel-ask-pop input { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; padding: 5px 8px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--input-bg); color: var(--text); }
+
+/* the brief box (Home / empty canvas) says when the agent is not connected */
+.prompt-offline { display: inline-flex; align-items: center; gap: 6px; }

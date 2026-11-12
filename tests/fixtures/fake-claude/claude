@@ -3,9 +3,10 @@
 // (scripts/agent-ui-check.mjs). It really calls the editor's MCP tools through the bridge, and
 // prints the same stream-json lines Claude Code does, so the whole pipeline runs without
 // spending a subscription. Behaviour is picked from the prompt:
-//   "variations" → builds 3 variations;  "Ask mode"/"Critique" → read-only look + a refused edit;
+//   "Ask mode"/"Critique" → read-only look + a refused edit;
 //   "storyboard" → director flow (propose, then build the approved plan with update_progress);
-//   "fail auth" → auth error;  "slow" → waits (for cancel tests);  otherwise builds two shapes.
+//   "fail auth" → auth error;  "fail budget" → turn budget used up;  "slow" → waits (for cancel
+//   tests);  "wait Ns" → waits N seconds, then builds;  otherwise builds two shapes.
 const args = process.argv.slice(2);
 if (args.includes('--version')) { console.log('0.0.0 (fake claude for tests)'); process.exit(0); }
 const mcp = JSON.parse(args[args.indexOf('--mcp-config') + 1]).mcpServers.motion.url;
@@ -35,6 +36,9 @@ process.stdin.on('end', async () => {
   out({ type: 'system', subtype: 'init', session_id: session });
   if (/fail auth/.test(prompt)) { out({ type: 'result', subtype: 'success', is_error: true, result: 'Invalid API key · Please run /login', session_id: session }); return; }
   if (/\bslow\b/.test(prompt)) { say('Working slowly…'); await sleep(60000); }
+  if (/fail budget/.test(prompt)) { await rpc('initialize', {}); await tool('get_document', {}); out({ type: 'result', subtype: 'error_max_turns', is_error: true, num_turns: 1, session_id: session }); return; }
+  const wait = prompt.match(/\bwait (\d+)s\b/);
+  if (wait) { say('Taking a moment…'); await sleep(+wait[1] * 1000); }
   await rpc('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'fake-claude', version: '1' } });
   const ctxIds = [...prompt.matchAll(/id=(\S+)/g)].map((m) => m[1].replace(/[),;]$/, ''));
   if (/Ask mode|READ-ONLY/.test(prompt)) {
@@ -66,15 +70,6 @@ process.stdin.on('end', async () => {
       { name: 'Pages flip', idea: 'week pages flip to a calm one' },
     ] });
     say(`Storyboard ready (style prefix: ${/\[Style: Swiss/.test(prompt)}; wait: ${/Wait for approval/.test(r.text)}) — approve or edit it.`);
-  } else if (/variations/.test(prompt)) {
-    const ids = ctxIds.length ? ctxIds : [JSON.parse((await tool('add_layer', { type: 'rect', name: 'Card', x: 860, y: 440, w: 200, h: 200, fill: '#4c8dff', radius: 24 })).text).id];
-    const looks = [['A · Snappy', 'Expo Out', 0.4], ['B · Bouncy', 'spring Bouncy', 0.8], ['C · Elegant', 'Sine In Out', 1.2]];
-    for (const [label, ease, d] of looks) {
-      await tool('animate', { tracks: ids.flatMap((id) => [{ id, prop: 'scale', keyframes: [{ t: 0, v: 0, ease }, { t: d, v: 100 }] }, { id, prop: 'rotation', keyframes: [{ t: 0, v: label.startsWith('B') ? -45 : 0, ease }, { t: d, v: 0 }] }]) });
-      await tool('save_variation', { ids, label, note: `${ease}, ${d}s` });
-    }
-    await tool('contact_sheet', { frames: 4, end: 1.2 });
-    say('Made 3 variations:\n- **A · Snappy**: quick Expo Out\n- **B · Bouncy**: spring with a twist\n- **C · Elegant**: slow Sine');
   } else {
     say('Building two shapes that pop in.');
     const a = JSON.parse((await tool('add_layer', { type: 'rect', name: 'Box', x: 700, y: 440, w: 200, h: 200, fill: '#4c8dff', radius: 30 })).text).id;

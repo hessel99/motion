@@ -5,21 +5,21 @@
 import { useState } from 'preact/hooks';
 import { editor } from '../app/editor';
 import { toast } from '../app/actions';
-import { confirmSync, exportTokens, importTokensFile, pendingSync, reviewSync, syncFromFigmaApi, syncFromUrl, syncSource } from '../app/library';
 import { addToken, deleteToken, layersUsing, linkProp, prettyName, renameToken, setTokenMode, setTokenValue, splitName, tokenUsage, tokenValue, canBind } from '../core/tokens';
-import { summarizePlan, toHex, parseColorValue } from '../core/token-sync';
+import { toHex, parseColorValue } from '../core/token-sync';
 import { createComponent, createInstance, instancesOf, removeComponent, renameComponent } from '../core/components';
 import { valueAt } from '../core/commands';
 import type { PropKey, Token } from '../core/model';
 import { useChannels } from './hooks';
-import { showContextMenu, type MenuItem } from './menu';
-import { Button, ColorSwatch, Dialog, Section, Segmented } from './ui';
-import { ChevronDown, Component, Plus } from './chrome/icons';
+import { showContextMenu } from './menu';
+import { Button, ColorSwatch, Section, Segmented } from './ui';
+import { Component, Plus } from './chrome/icons';
+import { MotionComponentRows } from './ComponentPanels';
+import { makeComponent } from '../core/motion-components';
 
 const st = () => editor.store;
 export const STYLE_MIME = 'application/x-motion-style';
 
-const css = (c: number[]) => `rgba(${Math.round(c[0] * 255)}, ${Math.round(c[1] * 255)}, ${Math.round(c[2] * 255)}, ${c[3] ?? 1})`;
 const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? '' : 's'}`;
 
 /** link a style to the layers: colors go to fill (or stroke with `asStroke`), numbers to the first property that takes them */
@@ -55,20 +55,6 @@ export function StylesSection() {
   const usage = tokenUsage(s.project);
   const colors = items.filter(t => t.type === 'color');
   const numbers = items.filter(t => t.type === 'number');
-  const syncMenu = (e: MouseEvent) => {
-    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const sources = lib?.sources ?? [];
-    const menu: MenuItem[] = [
-      ...sources.map(src => ({ label: `Update from ${src.label}`, action: () => { syncSource(src); } })),
-      ...(sources.length ? [{ separator: true } as MenuItem] : []),
-      { label: 'Import tokens file (.json)…', action: () => { importTokensFile(); } },
-      { label: 'Sync from a URL…', action: () => { syncFromUrl(); } },
-      { label: 'Sync Figma variables (API)…', action: () => { syncFromFigmaApi(); } },
-      { separator: true },
-      { label: 'Export as tokens file', action: exportTokens, disabled: !items.length },
-    ];
-    showContextMenu(r.left, r.bottom + 4, menu);
-  };
   const addColor = () => {
     const sel = s.selection.map(id => s.layer(id)).find(l => l?.props.fill);
     const v = sel ? valueAt(sel, 'fill', s.time) : [0.3, 0.55, 1, 1];
@@ -84,13 +70,11 @@ export function StylesSection() {
     if (!isFinite(v)) return;
     addToken(s, { name: name.replace(/\s*\/\s*/g, '/'), type: 'number', value: [v] });
   };
-  const src = lib?.sources?.[lib.sources.length - 1];
   return (
     <>
       <Section title="Colors" right={
         <span class="lib-actions">
           <Button variant="ghost" size="sm" tip="Save a new color (from the selected layer's fill)" aria-label="Add color" icon onClick={addColor}><Plus /></Button>
-          <Button variant="ghost" size="sm" tip="Import or update colors from a design library" onClick={syncMenu as any} aria-haspopup="menu">Sync <ChevronDown size={12} /></Button>
         </span>}>
         {lib && lib.modes.length > 1 && (
           <div class="lib-modes" title="Light / dark (or other) versions of the same colors">
@@ -101,8 +85,8 @@ export function StylesSection() {
         {!colors.length && (
           <div class="lib-empty">
             <p>No colors yet.</p>
-            <p class="muted small">Paste a design from Figma (its color styles and variables come along), import a tokens file, or select a layer and press + to save its fill.</p>
-            <div class="row"><Button size="sm" onClick={() => importTokensFile()}>Import tokens file</Button><Button size="sm" variant="ghost" onClick={addColor}>Save a color</Button></div>
+            <p class="muted small">Paste a design from Figma (its color styles and variables come along), or select a layer and press + to save its fill.</p>
+            <div class="row"><Button size="sm" onClick={addColor}>Save a color</Button></div>
           </div>
         )}
         {groups(colors).map(([group, list]) => (
@@ -111,7 +95,6 @@ export function StylesSection() {
             {list.map(t => <StyleRow t={t} used={usage.get(t.id)?.layers.size ?? 0} />)}
           </div>
         ))}
-        {src && <div class="lib-source muted small">From {src.label}{src.lastSync ? ` · ${ago(src.lastSync)}` : ''} · <button class="link" onClick={() => syncSource(src)}>Check for updates</button></div>}
       </Section>
       <Section title="Numbers" right={<Button variant="ghost" size="sm" tip="Save a named number (corner radius, stroke width, opacity)" aria-label="Add number" icon onClick={addNumber}><Plus /></Button>}>
         {!numbers.length && <p class="muted small lib-hint">Named numbers for corner radius, stroke width or opacity. Change one, every linked layer follows.</p>}
@@ -124,14 +107,6 @@ export function StylesSection() {
       </Section>
     </>
   );
-}
-
-function ago(t: number) {
-  const s = (Date.now() - t) / 1000;
-  if (s < 60) return 'just now';
-  if (s < 3600) return `${Math.round(s / 60)} min ago`;
-  if (s < 86400) return `${Math.round(s / 3600)} h ago`;
-  return new Date(t).toLocaleDateString();
 }
 
 function groups(list: Token[]): [string, Token[]][] {
@@ -198,15 +173,23 @@ export function ComponentsSection() {
   const comps = Object.entries(P.components ?? {}).filter(([id]) => P.layers[id]);
   const sel = s.selection.length === 1 ? s.layer(s.selection[0]) : undefined;
   const canMake = !!sel && !P.components?.[sel.id] && !sel.link;
+  // top-level layers of a composition become an animated component (its own timeline, instances
+  // with properties / variants / timing); a nested layer becomes a linked-copy component
+  const top = s.selection.filter(id => s.comp.root.includes(id));
   const make = () => {
+    if (top.length && top.length === s.selection.length && !s.comp.component) {
+      try { const { comp } = makeComponent(s, top); toast(`${comp.name} is a component: expose its text or colors, then add instances`); } catch (e: any) { toast(e.message, 'error'); }
+      return;
+    }
     if (!sel) { toast('Select a layer or group first'); return; }
     try { createComponent(s, sel.id); toast(`${sel.name} is now a component: add instances from here, edit or animate it and they follow`); } catch (e: any) { toast(e.message, 'error'); }
   };
   const compOf = (id: string) => Object.values(P.comps).find(c => { let cur: string | null = id; while (cur) { const l: import("../core/model").Layer | undefined = P.layers[cur]; if (!l?.parent) return c.root.includes(cur); cur = l.parent; } return false; });
   const goMain = (id: string) => { const c = compOf(id); if (c) s.openComp(c.id); s.select([id]); };
   return (
-    <Section title="Components" right={<Button variant="ghost" size="sm" disabled={!canMake} tip="Make the selected layer a reusable component (⌥⌘K)" onClick={make}><Plus size={14} /> Make</Button>}>
-      {!comps.length && <p class="muted small lib-hint">A component is a layer you can reuse: animate it once, add instances anywhere, and changes to the main show up in every instance. Select a layer and press Make, or paste components from Figma.</p>}
+    <Section title="Components" right={<Button variant="ghost" size="sm" disabled={!canMake && !top.length} tip="Make the selected layers a reusable animated component" onClick={make}><Plus size={14} /> Make</Button>}>
+      <MotionComponentRows />
+      {!comps.length && !Object.values(P.comps).some(c => c.component) && <p class="muted small lib-hint">A component is a layer you can reuse: animate it once, add instances anywhere, and changes to the main show up in every instance. Select a layer and press Make, or paste components from Figma.</p>}
       {comps.map(([id, c]) => {
         const n = instancesOf(P, id).length;
         return (
@@ -227,47 +210,5 @@ export function ComponentsSection() {
         );
       })}
     </Section>
-  );
-}
-
-// ---------------- sync review ----------------
-/** "3 colors changed": before → after per style, new and removed ones; Update applies (one undo step) */
-export function SyncReview() {
-  useChannels([], ['sync']);
-  const p = pendingSync;
-  if (!p) return null;
-  const s = st();
-  const lib = s.project.tokens;
-  const mode = lib?.mode;
-  const show = (v: number[] | undefined, type: Token['type']) => !v ? <span class="muted">–</span> : type === 'color'
-    ? <span class="chip" style={{ background: css(v) }} title={toHex(v)} />
-    : <span class="lib-num">{Math.round(v[0] * 100) / 100}</span>;
-  return (
-    <Dialog title={`Update styles from ${p.source.label}`} onClose={() => reviewSync(null)} width={460} class="sync-review"
-      actions={<><Button onClick={() => reviewSync(null)}>Not now</Button><Button variant="primary" autofocus onClick={confirmSync}>Update</Button></>}>
-      <p class="sync-summary">{summarizePlan(p.plan)}</p>
-      <ul class="sync-list">
-        {p.plan.changed.map(c => {
-          const modes = Object.keys(c.values);
-          const m = modes.includes(mode ?? '') ? mode! : modes[0];
-          const used = lib ? layersUsing(s.project, c.id).length : 0;
-          return (
-            <li>
-              <span class="sync-tag changed">changed</span>
-              <span class="lib-name">{prettyName(c.name)}{c.rename && <span class="muted"> → {prettyName(c.rename)}</span>}</span>
-              {m && <span class="sync-vals">{show(c.values[m][0], c.type)}<span class="muted">→</span>{show(c.values[m][1], c.type)}</span>}
-              <span class="muted small">{used ? plural(used, 'layer') : ''}{modes.length > 1 ? ` · ${modes.length} modes` : ''}</span>
-            </li>
-          );
-        })}
-        {p.plan.added.map(t => (
-          <li><span class="sync-tag added">new</span><span class="lib-name">{prettyName(t.name)}</span><span class="sync-vals">{show(Object.values(t.values)[0], t.type)}</span><span /></li>
-        ))}
-        {p.plan.removed.map(r => (
-          <li><span class="sync-tag removed">removed</span><span class="lib-name">{prettyName(r.name)}</span><span /><span class="muted small">{r.used ? `kept: ${plural(r.used, 'layer')} use it` : 'deleted'}</span></li>
-        ))}
-      </ul>
-      <p class="muted small">Linked layers and keyframes update everywhere. You can undo this in one step.</p>
-    </Dialog>
   );
 }

@@ -9,6 +9,7 @@ import { toHex } from '../core/token-sync';
 import { valueAt } from '../core/commands';
 import { createInstance, detachInstance, FIELD_LABELS, instanceRootOf, instancesOf, isMain, overridesOf, removeComponent, resetOverrides, setInstanceDelay } from '../core/components';
 import { PROP_DEFS, type Layer, type PropKey } from '../core/model';
+import { promoteToMotionComponent } from '../core/figma-components';
 import { showContextMenu, type MenuItem } from './menu';
 import { NumField, Section, Button } from './ui';
 import { Component, Diamond, RotateCcw, SwatchBook, Unlink } from './chrome/icons';
@@ -48,7 +49,7 @@ export function LinkedChip({ layers, prop }: { layers: Layer[]; prop: PropKey })
 /** small "link to a style" button next to a value */
 export function LinkButton({ layers, prop }: { layers: Layer[]; prop: PropKey }) {
   return (
-    <button type="button" class="link-btn" tabIndex={-1} data-tooltip={PROP_DEFS[prop].unit === 'color' ? 'Use a color style' : 'Use a named number'} aria-label={`Link ${PROP_DEFS[prop].label} to a style`}
+    <button type="button" class="link-btn" data-tooltip={PROP_DEFS[prop].unit === 'color' ? 'Use a color style' : 'Use a named number'} aria-label={`Link ${PROP_DEFS[prop].label} to a style`}
       onClick={e => pickStyle(e, layers, prop)}>
       <SwatchBook size={14} />
     </button>
@@ -106,6 +107,8 @@ export function ComponentBox({ layer }: { layer: Layer }) {
           <Button size="sm" onClick={() => createInstance(s, layer.id)}>Add instance</Button>
           <Button size="sm" variant="ghost" onClick={() => { const here = new Set(s.drawOrder()); const ids = instancesOf(P, layer.id).filter(x => here.has(x)); if (ids.length) s.select(ids); else toast('No instances in this composition'); }} disabled={!n}>Select instances</Button>
           <Button size="sm" variant="ghost" onClick={() => removeComponent(s, layer.id)} tip="Instances become plain layers">Unmake</Button>
+          <Button size="sm" variant="ghost" onClick={() => { try { const c = promoteToMotionComponent(s, layer.id); toast(`${c.name} is an animated component${c.component?.props?.length ? ` with ${c.component.props.length} properties` : ''}${c.component?.variants?.length ? ` and ${c.component.variants.length} variants` : ''}`); } catch (e: any) { toast(e.message, 'error'); } }}
+            tip="Own timeline, properties (from Figma's) and variants (from its component set); instances keep their values">Make animated</Button>
         </div>
       </Section>
     );

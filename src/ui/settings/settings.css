@@ -14,10 +14,10 @@
 
 .set-main { overflow: auto; padding: var(--space-7) var(--space-9) 64px; background: var(--surface-1); scrollbar-width: thin; }
 .set-col { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-7); }
-.set-title { font-size: var(--text-md); font-weight: var(--weight-medium); padding: 0 var(--space-6); }
+.set-title { font-size: var(--text-lg); font-weight: var(--weight-semibold); padding: 0 var(--space-6); }
 .set-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: var(--space-6) var(--space-3) var(--space-3); }
 .set-card-head { display: flex; align-items: flex-start; gap: var(--space-5); padding: 0 var(--space-5) var(--space-5); }
-.set-card-title { font-size: var(--text-sm); font-weight: var(--weight-regular); color: var(--text-secondary); }
+.set-card-title { font-size: var(--text-md); font-weight: var(--weight-semibold); color: var(--text); }
 .set-card-sub { font-size: var(--text-md); color: var(--text); margin-top: var(--space-2); line-height: var(--leading); }
 .set-line { padding: var(--space-3) var(--space-5) var(--space-4); font-size: var(--text-md); }
 .set-row { display: flex; align-items: center; gap: var(--space-6); min-height: 48px; padding: var(--space-4) var(--space-5); }

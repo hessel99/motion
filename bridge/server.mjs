@@ -5,10 +5,11 @@ import http from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { tmpdir, homedir } from 'node:os';
 import { join } from 'node:path';
 import { WebSocketServer } from 'ws';
-import { detectProviders, runTurn, PROVIDERS } from './providers.mjs';
+import { detectProviders, runTurn, PROVIDERS, augmentedEnv } from './providers.mjs';
+import { createShaderSources, fileSecrets, claudeProvider } from './figma-shaders.mjs';
 
 export const TOOL_TIMEOUT_MS = 120_000;
 const MAX_PREVIEW_FILE = 32 * 1024 * 1024;
@@ -80,7 +81,7 @@ function isAllowedHost(host) {
   return h === '127.0.0.1' || h === 'localhost' || h === '::1';
 }
 
-export async function startBridge({ port = 7823, host = '127.0.0.1', log = console.log, workDir, token } = {}) {
+export async function startBridge({ port = 7823, host = '127.0.0.1', log = console.log, workDir, token, dataDir = join(homedir(), '.motion'), secretBox = null, figmaMcpUrl, fetchImpl, claudeShaders = true } = {}) {
   if (host !== '127.0.0.1' && host !== 'localhost' && host !== '::1') throw new Error('bridge must bind to loopback only');
   const say = typeof log === 'function' ? log : () => {};
 
@@ -98,8 +99,24 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
     if (ws && ws.readyState === 1) ws.send(JSON.stringify(msg));
   };
 
+  // figma shader sources (bridge/figma-shaders.mjs): the editor asks, the bridge signs in to
+  // figma's mcp server (or uses claude code's) and keeps an app-level cache
+  let actualPort = 0;
+  const shaders = createShaderSources({
+    cacheDir: join(dataDir, 'shader-cache'),
+    secrets: fileSecrets(join(dataDir, secretBox ? 'figma-auth.bin' : 'figma-auth.json'), secretBox),
+    fetchImpl: fetchImpl ?? globalThis.fetch,
+    mcpUrl: figmaMcpUrl,
+    callbackUrl: () => `http://127.0.0.1:${actualPort}/oauth/figma/callback`,
+    log: say,
+    claude: claudeShaders ? claudeProvider({ env: augmentedEnv(), log: say }) : null,
+  });
+  const figmaStatus = async (ws) => send(ws ?? editor, { type: 'figma_status', ...(await shaders.status()) });
+
   // ---------- tool calls into the editor ----------
-  function callEditorTool(name, args) {
+  /** chatId: the editor chat whose CLI made the call (from the per-chat MCP url, /mcp?chat=…), so
+   *  the editor runs the tool on that chat's document even when another tab is in front */
+  function callEditorTool(name, args, chatId) {
     return new Promise((resolve) => {
       if (!editor || editor.readyState !== 1) {
         return resolve({ ok: false, error: 'The Motion editor is not open (no editor connected to the bridge). Ask the user to open the editor and try again.' });
@@ -110,7 +127,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
         resolve({ ok: false, error: `Tool "${name}" timed out after ${TOOL_TIMEOUT_MS / 1000}s waiting for the editor.` });
       }, TOOL_TIMEOUT_MS);
       pending.set(id, { resolve, timer, ws: editor });
-      send(editor, { type: 'tool_call', id, name, args: args ?? {} });
+      send(editor, { type: 'tool_call', id, name, args: args ?? {}, ...(chatId ? { chatId } : {}) });
     });
   }
 
@@ -125,7 +142,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
   }
 
   // ---------- MCP (Streamable HTTP, JSON responses only) ----------
-  async function handleRpc(msg) {
+  async function handleRpc(msg, chatId) {
     const isRequest = msg && typeof msg === 'object' && 'id' in msg && msg.id !== null;
     const reply = (result) => ({ jsonrpc: '2.0', id: msg.id, result });
     const fail = (code, message) => ({ jsonrpc: '2.0', id: msg?.id ?? null, error: { code, message } });
@@ -160,7 +177,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
         if (editor && tools.length && !tools.some((t) => t.name === name)) {
           return reply({ content: [{ type: 'text', text: `Unknown tool: ${name}` }], isError: true });
         }
-        const r = await callEditorTool(name, msg.params?.arguments);
+        const r = await callEditorTool(name, msg.params?.arguments, chatId);
         if (r.ok) {
           const content = Array.isArray(r.content) && r.content.length ? materializeFiles(r.content) : [{ type: 'text', text: 'ok' }];
           return reply({ content: compactContent(content), isError: false });
@@ -209,6 +226,15 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
 
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url ?? '/', 'http://127.0.0.1');
+    // figma sign-in: the system browser lands here (top-level navigation; checked by the oauth state)
+    if (url.pathname === '/oauth/figma/callback' && req.method === 'GET' && isAllowedHost(req.headers.host)) {
+      let ok = false, msg = '';
+      try { ok = await shaders.callback(url.searchParams); } catch (e) { msg = String(e?.message ?? e); }
+      res.writeHead(ok ? 200 : 400, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(`<!doctype html><meta charset="utf-8"><title>Motion</title><body style="font:15px system-ui;padding:40px">${ok ? 'Motion is connected to Figma. You can close this tab.' : 'Could not connect Motion to Figma: ' + msg.replace(/[<>&]/g, '')}</body>`);
+      figmaStatus().catch(() => {});
+      return;
+    }
     if (!isAllowedHost(req.headers.host) || !isAuthorized(req, url, token)) {
       return json(res, 403, { error: 'forbidden' });
     }
@@ -229,6 +255,8 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
     }
     if (url.pathname === '/mcp') {
       if (req.method !== 'POST') return json(res, 405, { error: 'method not allowed' }, { Allow: 'POST' });
+      const chat = url.searchParams.get('chat');
+      const chatId = chat && /^[\w-]{1,64}$/.test(chat) ? chat : undefined;
       let body;
       try {
         body = JSON.parse(await readBody(req));
@@ -236,11 +264,11 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
         return json(res, 400, { jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } });
       }
       if (Array.isArray(body)) {
-        const results = (await Promise.all(body.map(handleRpc))).filter(Boolean);
+        const results = (await Promise.all(body.map((m) => handleRpc(m, chatId)))).filter(Boolean);
         if (!results.length) { res.writeHead(202); return res.end(); }
         return json(res, 200, results);
       }
-      const result = await handleRpc(body);
+      const result = await handleRpc(body, chatId);
       if (!result) { res.writeHead(202); return res.end(); }
       return json(res, 200, result);
     }
@@ -305,7 +333,8 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
               systemPrompt: typeof msg.systemPrompt === 'string' && msg.systemPrompt ? msg.systemPrompt : undefined,
               maxTurns: Number.isInteger(msg.maxTurns) && msg.maxTurns > 0 ? Math.min(msg.maxTurns, 500) : undefined,
               readOnlyTools: Array.isArray(msg.readOnlyTools) ? msg.readOnlyTools.filter((t) => typeof t === 'string' && /^[\w-]+$/.test(t)) : undefined,
-              mcpUrl: `http://127.0.0.1:${actualPort}/mcp`,
+              // per chat: tool calls carry the chat id back to the editor (runs belong to a document)
+              mcpUrl: `http://127.0.0.1:${actualPort}/mcp${/^[\w-]{1,64}$/.test(chatId) ? `?chat=${chatId}` : ''}`,
               workDir,
             },
             emit,
@@ -314,6 +343,27 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
           chats.set(chatId, { run, ws });
           break;
         }
+        case 'figma_status':
+          figmaStatus(ws).catch(() => {});
+          break;
+        case 'figma_connect':
+          shaders.connect().then(r => send(ws, { type: 'figma_connect', ...r }), e => send(ws, { type: 'figma_connect', error: String(e?.message ?? e) }));
+          break;
+        case 'figma_disconnect':
+          shaders.disconnect();
+          figmaStatus(ws).catch(() => {});
+          break;
+        case 'shader_fetch':
+          if (msg.req && typeof msg.req === 'object') {
+            shaders.resolve(msg.req).then(
+              shader => send(ws, { type: 'shader_fetch_result', reqId: msg.reqId, ok: true, shader }),
+              e => send(ws, { type: 'shader_fetch_result', reqId: msg.reqId, ok: false, error: String(e?.message ?? e) }),
+            );
+          }
+          break;
+        case 'shader_put':
+          if (msg.shader?.id && msg.shader?.files) { try { shaders.put(msg.shader); } catch { /* cache is best effort */ } }
+          break;
         case 'chat_cancel':
           chats.get(msg.chatId)?.run.cancel();
           break;
@@ -334,7 +384,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
     server.once('error', reject);
     server.listen(port, host, () => { server.off('error', reject); resolve(); });
   });
-  const actualPort = server.address().port;
+  actualPort = server.address().port;
   say(`[bridge] listening on http://${host}:${actualPort} (ws /ws, mcp /mcp)`);
 
   return {

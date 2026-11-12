@@ -5,6 +5,7 @@
 // rows are rebuilt lazily (once per frame at most) and incrementally: edits that don't change
 // the row structure (key drags, value edits) don't walk the layer tree at all.
 
+import { effectivePlay, instanceComp, instanceSpan } from '../core/motion-components';
 import type { Editor } from '../app/editor';
 import {
   isAnimated, keyId, layerKeyTimes, moveKeyframes, moveLayers, parseKeyId, renameLayer, setLayerField, valueAt,
@@ -22,7 +23,7 @@ import { Eye, EyeOff, LAYER_ICON, Lock, LockOpen, Square, strokeIcon } from './c
 import { audioFailed } from '../audio/engine';
 import { drawWaveform, drawMusicRuler, snapMusicTime, onMusicSnap, type TlView } from './audio/timeline-audio';
 import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
-import { setEase, setInterp, setSpring, updateMarker, deleteMarker, cloneLayers, deleteLayers } from '../core/commands';
+import { setEase, setInterp, setSpring, cloneLayers, deleteLayers } from '../core/commands';
 
 export const HEADER_H = 28;
 export const ROW_H = 28;
@@ -93,7 +94,6 @@ type Drag =
   | { kind: 'vscroll'; sy: number; s0: number }
   | { kind: 'hscroll'; sx: number; s0: number }
   | { kind: 'compEnd' }
-  | { kind: 'marker'; id: string; sx: number; moved: boolean }
   | { kind: 'bar'; id: string; sx: number; in0: number; out0: number; mode: 'in' | 'out' }
   | { kind: 'shift'; sx: number; moved: boolean; orig: Map<string, { inP: number; outP: number; start: number; kf: Partial<Record<PropKey, Keyframe[]>> }> };
 
@@ -191,9 +191,19 @@ export class Timeline {
     this.canvas.addEventListener('wheel', e => this.wheel(e), { passive: false });
     this.canvas.addEventListener('contextmenu', e => this.context(e));
     this.canvas.addEventListener('pointerleave', () => { this.hoverRow = -1; this.baseDirty = true; });
+    // keyboard path for the layer list (it is drawn, so it has no dom rows): focus the canvas
+    // (Tab), ↑ / ↓ select the previous / next layer (shift extends), → / ← unfold / fold it,
+    // Shift+F10 or the menu key opens its menu (hide, lock, solo, rename, delete…)
+    this.canvas.tabIndex = 0;
+    this.canvas.setAttribute('role', 'group');
+    this.canvas.setAttribute('aria-roledescription', 'layer list');
+    this.canvas.setAttribute('aria-label', 'Layers: arrow keys select and fold layers, Shift+F10 opens a layer’s menu');
+    this.canvas.addEventListener('keydown', e => this.key(e));
     const search = document.createElement('input');
     search.className = 'tl-search';
     search.placeholder = 'Search layers';
+    search.type = 'search';
+    search.setAttribute('aria-label', 'Search layers');
     search.addEventListener('input', () => { this.filter = search.value.trim().toLowerCase(); this.scrollY = 0; this.rowsDirty = true; this.baseDirty = true; });
     search.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { search.value = ''; this.filter = ''; this.rowsDirty = true; search.blur(); } });
     host.appendChild(search);
@@ -254,11 +264,10 @@ export class Timeline {
     this.baseDirty = true;
   }
 
-  /** what the track area shows: keyframes, value curves or speed curves */
-  get mode(): 'keys' | 'graph' | 'speed' { return !this.graphMode ? 'keys' : this.graph.speed ? 'speed' : 'graph'; }
-  setMode(m: 'keys' | 'graph' | 'speed') {
-    this.graphMode = m !== 'keys';
-    this.graph.speed = m === 'speed';
+  /** what the track area shows: keyframes or value curves */
+  get mode(): 'keys' | 'graph' { return this.graphMode ? 'graph' : 'keys'; }
+  setMode(m: 'keys' | 'graph') {
+    this.graphMode = m === 'graph';
     this.baseDirty = true;
     this.ed.emit('tlmode');
   }
@@ -461,6 +470,17 @@ export class Timeline {
     g.beginPath();
     g.rect(0, HEADER_H, this.w, this.h - HEADER_H);
     g.clip();
+    // empty states point forward: no layers yet, or nothing matches the search
+    if (!this.rows.length && this.h > HEADER_H + ROW_H * 2) {
+      const cx = this.leftW / 2, cy = HEADER_H + Math.min(64, (this.h - HEADER_H) / 2);
+      g.save();
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillStyle = T.tlLayerName; g.font = T.font.ui;
+      g.fillText(this.filter ? `No layers match “${this.filter}”` : 'No layers yet', cx, cy);
+      g.fillStyle = T.tlHint; g.font = T.font.uiSm;
+      g.fillText(this.filter ? 'Press Esc in the search to clear it' : 'Draw with the tools or drop a file', cx, cy + 18);
+      g.restore();
+    }
     for (let i = first; i < last; i++) {
       const r = this.rows[i];
       const y = this.rowY(i);
@@ -488,7 +508,7 @@ export class Timeline {
     g.fillStyle = T.tlDivider;
     g.fillRect(0, HEADER_H - 1, this.w, 1);
     this.drawRuler(g);
-    // (keys / graph / speed is a segmented control in the timeline header: TimelineHeader.tsx)
+    // (keys / graph is a segmented control in the timeline header: TimelineHeader.tsx)
 
     // scrollbars
     const vs = this.vScroll(), hs = this.hScroll();
@@ -563,16 +583,6 @@ export class Timeline {
         g.fillRect(bx, HEADER_H, Math.max(0, this.w - bx), this.h);
       }
     }
-    // markers: a small flag in the ruler, a faint line through the rows, label next to it
-    for (const m of comp.markers ?? []) {
-      const mx = Math.round(this.tToX(m.t)) + 0.5;
-      if (mx < this.leftW - 2 || mx > this.w + 2) continue;
-      g.fillStyle = T.tlMarkerLine;
-      g.fillRect(mx - 0.5, HEADER_H, 1, this.h);
-      g.fillStyle = T.tlMarker;
-      g.beginPath(); g.moveTo(mx - 4, HEADER_H - 13); g.lineTo(mx + 4, HEADER_H - 13); g.lineTo(mx + 4, HEADER_H - 6); g.lineTo(mx, HEADER_H - 2); g.lineTo(mx - 4, HEADER_H - 6); g.closePath(); g.fill();
-      if (m.label) { g.font = T.font.uiXs; g.fillText(m.label, mx + 6, HEADER_H - 7); }
-    }
     // music: beat / bar ticks, section bands
     drawMusicRuler(g, this.view(), this.ed.store);
     const endX = this.tToX(comp.duration);
@@ -618,14 +628,22 @@ export class Timeline {
     const nameX = tx + 16;
     const maxW = this.leftW - nameX - 70;
     g.fillText(ellipsize(g, l.name, maxW), nameX, cy);
-    // solo + eye + lock
+    // solo + eye + lock: quiet by default. each shows when it is not in its default state (soloed,
+    // hidden, locked), and all three on the hovered / selected row (they stay clickable everywhere)
     const soloed = st.solo.has(l.id);
-    g.fillStyle = soloed ? T.tlSolo : T.tlControlOff;
-    g.beginPath(); g.arc(this.leftW - 58, cy, soloed ? 4 : 3, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = l.visible ? T.tlControl : T.tlControlOff;
-    strokeIcon(g, l.visible ? Eye : EyeOff, this.leftW - 40, cy, 13, 1.2);
-    g.strokeStyle = l.locked ? T.tlControlOn : T.tlControlOff;
-    strokeIcon(g, l.locked ? Lock : LockOpen, this.leftW - 20, cy, 12, 1.2);
+    const hot = isSel || this.rows[this.hoverRow] === r;
+    if (hot || soloed) {
+      g.fillStyle = soloed ? T.tlSolo : T.tlControlOff;
+      g.beginPath(); g.arc(this.leftW - 58, cy, soloed ? 4 : 3, 0, Math.PI * 2); g.fill();
+    }
+    if (hot || !l.visible) {
+      g.strokeStyle = l.visible ? T.tlControl : T.tlControlOff;
+      strokeIcon(g, l.visible ? Eye : EyeOff, this.leftW - 40, cy, 13, 1.2);
+    }
+    if (hot || l.locked) {
+      g.strokeStyle = l.locked ? T.tlControlOn : T.tlControlOff;
+      strokeIcon(g, l.locked ? Lock : LockOpen, this.leftW - 20, cy, 12, 1.2);
+    }
 
     // track: layer bar
     const comp = st.comp;
@@ -645,6 +663,13 @@ export class Timeline {
       g.beginPath();
       g.roundRect(inX, y + 4, outX - inX, ROW_H - 8, 3);
       g.fill();
+    }
+    // component instance: where it actually plays (start .. start + its timed span)
+    const ic = instanceComp(st.project, l);
+    if (ic) {
+      const t0 = Math.max(l.inPoint, l.startTime ?? 0), t1 = Math.min(l.outPoint, comp.duration, (l.startTime ?? 0) + instanceSpan(ic, effectivePlay(st.project, l)));
+      const x0 = Math.max(this.leftW, this.tToX(t0)), x1 = Math.min(this.w, this.tToX(t1));
+      if (x1 > x0) { g.fillStyle = T.tlKeySelected; g.globalAlpha = 0.7; g.beginPath(); g.roundRect(x0, y + ROW_H - 9, x1 - x0, 3, 1.5); g.fill(); g.globalAlpha = 1; }
     }
     // audio waveform (cached tiles, see ui/audio/timeline-audio.ts)
     if (l.type === 'audio' && l.imageRef) {
@@ -892,6 +917,40 @@ export class Timeline {
     return out;
   }
 
+  /** keyboard navigation of the layer rows (see the constructor) */
+  private key(e: KeyboardEvent) {
+    const st = this.ed.store;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (this.rowsDirty) this.buildRows();
+    const layerRows = this.rows.filter(r => r.kind === 'layer');
+    if (!layerRows.length) return;
+    const cur = st.selection.length ? layerRows.findIndex(r => r.id === st.selection[st.selection.length - 1]) : -1;
+    const done = () => { e.preventDefault(); e.stopPropagation(); };
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      const n = cur < 0 ? (e.key === 'ArrowDown' ? 0 : layerRows.length - 1) : Math.max(0, Math.min(layerRows.length - 1, cur + (e.key === 'ArrowDown' ? 1 : -1)));
+      const id = layerRows[n].id;
+      if (e.shiftKey && st.selection.length) st.select([...st.selection.filter(x => x !== id), id]); else st.select([id]);
+      this.reveal(id);
+      this.canvas.setAttribute('aria-label', `Layers: ${layerRows[n].layer.name}${layerRows[n].layer.visible ? '' : ', hidden'}${layerRows[n].layer.locked ? ', locked' : ''} (${n + 1} of ${layerRows.length})`);
+      return done();
+    }
+    if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && cur >= 0) {
+      const r = layerRows[cur];
+      this.expand(r.id, e.key === 'ArrowRight');
+      return done();
+    }
+    if ((e.key === 'F10' && e.shiftKey) || e.key === 'ContextMenu') {
+      const id = cur >= 0 ? layerRows[cur].id : layerRows[0].id;
+      if (cur < 0) st.select([id]);
+      this.reveal(id);
+      const i = this.layerRowIndex(id);
+      const b = this.canvas.getBoundingClientRect();
+      const y = HEADER_H + i * ROW_H - this.scrollY + ROW_H / 2;
+      this.context(new MouseEvent('contextmenu', { clientX: b.left + 48, clientY: b.top + y }));
+      return done();
+    }
+  }
+
   private local(e: MouseEvent) {
     const r = this.canvas.getBoundingClientRect();
     return [e.clientX - r.left, e.clientY - r.top];
@@ -912,8 +971,6 @@ export class Timeline {
     const hs = this.hScroll();
     if (hs && y > this.h - 10 && x > this.leftW) { this.drag = { kind: 'hscroll', sx: x, s0: this.scrollT }; return; }
     if (y < HEADER_H && Math.abs(x - this.tToX(st.comp.duration)) < 5) { this.drag = { kind: 'compEnd' }; st.beginGesture('duration'); return; }
-    const mk = this.markerAt(x, y);
-    if (mk) { this.drag = { kind: 'marker', id: mk.id, sx: x, moved: false }; st.beginGesture('marker'); return; }
     if (this.graphMode && x > this.leftW && y > HEADER_H) {
       if (this.graph.down(x, y, e.shiftKey)) { this.drag = { kind: 'graph' }; this.baseDirty = true; }
       else if (!e.shiftKey) { st.keySelection = new Set(); st.emit('keys'); }
@@ -1071,12 +1128,6 @@ export class Timeline {
       if (hs) { this.scrollT = Math.max(0, d.s0 + (x - d.sx) * ((hs.total - hs.visible) / Math.max(1, (this.w - this.leftW) - hs.w))); this.baseDirty = true; }
       return;
     }
-    if (d.kind === 'marker') {
-      if (!d.moved && Math.abs(x - d.sx) < 3) return;
-      d.moved = true;
-      updateMarker(st, d.id, { t: st.snapTime(this.xToT(x)) });
-      return;
-    }
     if (d.kind === 'compEnd') {
       const dur = Math.max(1 / st.comp.fps, st.snapTime(this.xToT(x)));
       if (dur !== st.comp.duration) st.transact('Composition duration', tx => { tx.set(st.comp, 'duration', dur); tx.comp(); });
@@ -1089,15 +1140,13 @@ export class Timeline {
       let dt = (x - d.sx) / this.pxPerSec;
       if (!d.moved && Math.abs(x - d.sx) < 3) return;
       d.moved = true;
-      // snap the dragged key to frames (and the playhead / markers within 6px; alt: frames only)
+      // snap the dragged key to frames (and the playhead within 6px, then the music grid; alt: frames only)
       let nt = st.snapTime(d.t0 + dt);
       if (!e.altKey) {
         const rawX = this.tToX(d.t0 + dt);
         let best = 6;
-        for (const t of [st.time, ...(st.comp.markers ?? []).map(m => m.t)]) {
-          const dd = Math.abs(this.tToX(t) - rawX);
-          if (dd < best) { best = dd; nt = t; }
-        }
+        const dd = Math.abs(this.tToX(st.time) - rawX);
+        if (dd < best) { best = dd; nt = st.time; }
         if (best >= 6) { const m = snapMusicTime(st, d.t0 + dt, this.pxPerSec); if (m !== null) nt = m; }
       }
       dt = Math.max(-d.snap.minT, nt - d.t0);
@@ -1180,7 +1229,6 @@ export class Timeline {
     const st = this.ed.store;
     if (d?.kind === 'graph') this.graph.up();
     st.endGesture();
-    if (d?.kind === 'marker' && !d.moved) { const m = st.comp.markers?.find(q => q.id === d.id); if (m) st.setTime(m.t); }
     if (d?.kind === 'rows' && d.moved) {
       const tgt = this.dropTarget(d.y);
       if (tgt) { moveLayers(st, d.ids, tgt.parent, tgt.index, { keepWorld: true }); if (tgt.parent) this.expand(tgt.parent); }
@@ -1221,8 +1269,6 @@ export class Timeline {
 
   private dbl(e: MouseEvent) {
     const [x, y] = this.local(e);
-    const mk = this.markerAt(x, y);
-    if (mk) { this.renameMarker(mk.id); return; }
     if (y < HEADER_H && x > this.leftW) {
       // double click on the work area bar clears it, elsewhere fits the time
       if (this.ed.store.workArea && y > HEADER_H - 8) { this.ed.store.workArea = null; this.ed.store.emit('workarea'); return; }
@@ -1239,43 +1285,6 @@ export class Timeline {
       const st = this.ed.store;
       addKeyframe(st, [r.id], r.prop!, st.snapTime(this.xToT(x)));
     }
-  }
-
-  /** marker flag under the pointer (ruler only) */
-  private markerAt(x: number, y: number) {
-    // only the flag strip at the bottom of the ruler: the playhead knob above it stays draggable
-    if (y >= HEADER_H || y < HEADER_H - 14 || x < this.leftW) return null;
-    let best: { id: string; t: number } | null = null, bd = 6;
-    for (const m of this.ed.store.comp.markers ?? []) {
-      const d = Math.abs(this.tToX(m.t) - x);
-      if (d < bd) { bd = d; best = m; }
-    }
-    return best;
-  }
-
-  private renameMarker(id: string) {
-    const st = this.ed.store;
-    const m = st.comp.markers?.find(q => q.id === id);
-    if (!m) return;
-    this.input?.remove();
-    const inp = document.createElement('input');
-    inp.className = 'tl-rename';
-    inp.value = m.label;
-    inp.placeholder = 'Marker name';
-    const x = Math.min(this.w - 160, Math.max(this.leftW, this.tToX(m.t) + 6));
-    Object.assign(inp.style, { left: x + 'px', top: '3px', width: '150px', height: HEADER_H - 8 + 'px' });
-    this.host.appendChild(inp);
-    inp.focus();
-    inp.select();
-    const done = (ok: boolean) => {
-      if (!this.input) return;
-      this.input = null;
-      if (ok && inp.value !== m.label) updateMarker(st, id, { label: inp.value.trim() });
-      inp.remove();
-    };
-    inp.addEventListener('keydown', ev => { ev.stopPropagation(); if (ev.key === 'Enter') done(true); if (ev.key === 'Escape') done(false); });
-    inp.addEventListener('blur', () => done(true));
-    this.input = inp;
   }
 
   private startRename(r: Row, i: number) {
@@ -1324,14 +1333,6 @@ export class Timeline {
     const k = this.keyAt(x, y);
     if (k && !st.keySelection.has(k)) { st.keySelection = new Set([k]); st.emit('keys'); }
     const items: MenuItem[] = [];
-    const mk = this.markerAt(x, y);
-    if (mk) {
-      showContextMenu(e.clientX, e.clientY, [
-        { label: 'Rename marker', action: () => this.renameMarker(mk.id) },
-        { label: 'Delete marker', action: () => deleteMarker(st, mk.id) },
-      ]);
-      return;
-    }
     if (st.keySelection.size) {
       const keys = [...st.keySelection];
       items.push({ label: 'Easy Ease', shortcut: 'F9', action: () => setEase(st, keys, 'Easy Ease') });
@@ -1353,6 +1354,8 @@ export class Timeline {
         const props = rowKeys(r.layer.type);
         items.push({ label: 'Animate', submenu: props.map(p => ({ label: PROP_DEFS[p].label, checked: isAnimated(r.layer, p), action: () => { toggleAnimated(st, st.selection, p); this.expand(r.id); } })) });
         items.push({ label: r.layer.visible ? 'Hide' : 'Show', action: () => setLayerField(st, st.selection, 'visible', !r.layer.visible) });
+        items.push({ label: r.layer.locked ? 'Unlock' : 'Lock', action: () => setLayerField(st, st.selection, 'locked', !r.layer.locked, 'Toggle lock') });
+        items.push({ label: st.solo.has(r.id) ? 'Unsolo' : 'Solo', action: () => { st.toggleSolo(r.id); this.baseDirty = true; } });
         items.push({ label: 'Rename', action: () => this.startRename(r, i) });
         items.push({ label: 'Duplicate', shortcut: '⌘D', action: () => { const ids = cloneLayers(st, st.selection); if (ids?.length) st.select(ids); } });
         items.push({ label: 'Delete', shortcut: '⌫', action: () => deleteLayers(st, st.selection) });
