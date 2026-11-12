@@ -5,25 +5,27 @@ import { composeMessage, editorContext, resolveMentions } from '../agent/context
 import { diffDocs, diffIsEmpty, snapshotDoc, type DocSnapshot } from '../agent/diff';
 import { loadChat, projectKey, saveChat, type Msg, type ReviewInfo } from '../agent/history';
 import { toolLabel } from '../agent/labels';
-import { availableActions, briefScope, targetPhrase, type QuickAction } from '../agent/quick';
+import { briefScope } from '../agent/quick';
 import { approvalMessage, storyboards, type Storyboard } from '../agent/storyboard';
 import { TOOLS } from '../agent/tools';
 import { animRange } from '../agent/describe';
 import { variations } from '../agent/variations';
-import { MentionInput, type Mention } from './agent/MentionInput';
+import { MentionInput, mentionToken, type Mention } from './agent/MentionInput';
 import { TurnReview } from './agent/TurnReview';
 import { VariationTray, installVariationThumbs } from './agent/VariationTray';
 import { StoryboardCard } from './agent/StoryboardCard';
-import { StylePicker, styleLabel, stylePrefix } from './agent/StylePicker';
+import { styleLabel, stylePrefix } from './agent/StylePicker';
 import { STYLE_GUIDES } from '../agent/guides';
 import { agentPrefs, setAgentPref, CLAUDE_MODELS, PROVIDER_LABEL, modelLabel, resolveModel, turnBudget } from './agent/agent-prefs';
 import { showContextMenu, type MenuItem } from './menu';
 import { openSettings } from './chrome/ui-state';
 import { useChannels } from './hooks';
 import { Button } from './ui';
-import { ArrowUp, Check, ChevronDown, CircleX, File, LAYER_ICON, Layers, LoaderCircle, Plus, Sparkle, Square, SquarePen, X } from './chrome/icons';
+import { ArrowDown, ArrowUp, Check, ChevronRight, MousePointerClick, CircleX, LAYER_ICON, Layers, LoaderCircle, Palette, Plus, Square, SquarePen, X } from './chrome/icons';
+import { lastImport, openBrowserFile } from '../app/actions';
 import type { ComponentChildren } from 'preact';
 import './agent/agent.css';
+import { setAgentProgress, setChatStarted, takeAsk } from './agent-bridge';
 
 interface Turn { chatId: string; startedAt: number; activity: string; stopping: boolean; live: number; snap: DocSnapshot; startId: number }
 
@@ -43,10 +45,17 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   const [mentions, setMentions] = useState<Mention[]>([]);
   /** style picked in the style row: prefixes the next brief */
   const [style, setStyle] = useState('');
+  const [dropping, setDropping] = useState(false);
+  /** the thread is scrolled up (reading): a "Jump to latest" pill shows */
+  const [scrolledUp, setScrolledUp] = useState(false);
+  /** pick mode: the next layer clicked on the canvas becomes an @mention */
+  const [picking, setPicking] = useState(false);
   const [turn, setTurn] = useState<Turn | null>(null);
   const turnRef = useRef<Turn | null>(null);
   turnRef.current = turn;
-  const { mode, provider, model } = agentPrefs;
+  // one mode: the agent works in the document (read-only "Ask" was dropped: a question is just a message)
+  const mode: ChatMode = 'edit';
+  const { provider, model } = agentPrefs;
   const list = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
   const [, tick] = useState(0);
@@ -123,7 +132,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
     text = text.trim();
     if (!text || turnRef.current || agentClient.status !== 'connected') return;
     const s = editor.store;
-    const m = opts.mode ?? mode;
+    const m: ChatMode = 'edit';
     const m0 = m;
     const st = opts.style ?? '';
     const pre = st ? stylePrefix(st) : '';
@@ -163,7 +172,8 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
         resultPreview(review.range).then(src => append(x => x.map(y => (y.review?.endId === review.endId && y.role === 'review' ? { ...y, preview: src } : y))));
       }
       const bits = [e.durationMs ? `${(e.durationMs / 1000).toFixed(1)}s` : '', e.costUsd ? `$${e.costUsd.toFixed(3)}` : '', e.usage ? `${fmtTok(e.usage.input)} in · ${fmtTok(e.usage.output)} out` : ''].filter(Boolean);
-      if (bits.length) append(x => [...x, { role: 'info', text: bits.join(' · ') }]);
+      // run stats (time, cost, tokens) are developer detail: the console, not the thread
+      if (bits.length) console.info('[agent turn]', bits.join(' · '));
     };
 
     const chatId = agentClient.chat({ provider, message, sessionId: session.current[provider], model: provider === 'claude' ? resolveModel(scope, model) : undefined, mode: m, maxTurns: turnBudget() }, (e: ChatEvent) => {
@@ -204,7 +214,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
         case 'done': finish(e); break;
       }
     });
-    setTurn({ chatId, startedAt: Date.now(), activity: m === 'ask' ? 'Looking…' : 'Starting…', stopping: false, live: 0, snap, startId });
+    setTurn({ chatId, startedAt: Date.now(), activity: 'Starting…', stopping: false, live: 0, snap, startId });
     // safety net: if the bridge never confirms a cancel, finish locally
     if (!finished) finishers.current.set(chatId, (drop?: boolean) => finish({ kind: 'done' }, drop));
   };
@@ -217,11 +227,46 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
     setTimeout(() => { if (turnRef.current?.chatId === t.chatId) finishers.current.get(t.chatId)?.(); finishers.current.delete(t.chatId); }, 6000);
   };
 
-  const runQuick = (a: QuickAction) => send(a.prompt(targetPhrase(editor.store)), { mode: a.mode, chip: a.label });
   const approveStoryboard = (sb: Storyboard) => send(approvalMessage(storyboards.approve(sb)), { mode: 'edit', chip: sb.edited ? 'Approved storyboard (edited)' : 'Approved storyboard' });
   /** the storyboard being built right now (for the working indicator) */
   const building = turn ? [...msgs].reverse().find(x => x.storyboard)?.storyboard : undefined;
   const activeBeat = building?.state === 'building' ? building.beats.findIndex(b => b.status === 'active') : -1;
+
+  // asks from elsewhere (Home prompt, ⌘K, context menus, import suggestions: ./agent-bridge.ts).
+  // offline or busy: the text lands in the composer instead of getting lost
+  const sendRef = useRef(send);
+  sendRef.current = send;
+  useEffect(() => editor.on('agent-ask', () => {
+    const a = takeAsk();
+    if (!a) return;
+    const text = a.context ? `${a.text}
+
+(This refers to ${a.context}.)` : a.text;
+    if (agentClient.status === 'connected' && !turnRef.current) sendRef.current(text, { chip: a.chip });
+    else setInput(a.text);
+  }), []);
+  useEffect(() => setChatStarted(msgs.length > 0), [msgs.length > 0]);
+  const beatRange: [number, number] | undefined = activeBeat >= 0 ? [building!.beats[activeBeat].start, building!.beats[activeBeat].end] : undefined;
+  useEffect(() => {
+    setAgentProgress(turn ? { activity: activeBeat >= 0 ? `${building!.beats[activeBeat].name} · ${turn.activity}` : turn.activity, live: turn.live, startedAt: turn.startedAt, range: beatRange } : null);
+  }, [turn?.activity, turn?.live, !!turn, activeBeat, beatRange?.[0], beatRange?.[1]]);
+  // pick from canvas: the next selected layer is mentioned
+  useEffect(() => {
+    if (!picking) return;
+    const off = editor.store.on('selection', () => {
+      const id = editor.store.selection[0];
+      const l = id ? editor.store.layer(id) : null;
+      if (!l) return;
+      setMentions(x => [...x.filter(y => y.id !== l.id), { id: l.id, name: l.name }]);
+      setInput(v => v + (v && !v.endsWith(' ') ? ' ' : '') + mentionToken(l.name) + ' ');
+      setPicking(false);
+      requestAnimationFrame(() => (document.querySelector('.agent-input textarea') as HTMLTextAreaElement | null)?.focus());
+    });
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setPicking(false); };
+    window.addEventListener('keydown', esc, true);
+    document.documentElement.dataset.picking = '';
+    return () => { off(); window.removeEventListener('keydown', esc, true); delete document.documentElement.dataset.picking; };
+  }, [picking]);
 
   const setReview = (i: number, state: ReviewInfo['state'], note?: string) => setMsgs(all => all.map((x, j) => (j === i && x.review ? { ...x, review: { ...x.review, state }, text: note ?? x.text } : x)));
 
@@ -233,6 +278,10 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   const ready = status === 'connected' && !turn;
   const mentioned = resolveMentions(s, input, mentions).filter(l => !s.selection.includes(l.id));
 
+  /** the review card that closes the turn a message belongs to (-1: none yet) */
+  const reviewOf = (i: number) => { for (let j = i + 1; j < msgs.length; j++) { if (msgs[j].role === 'user') return -1; if (msgs[j].role === 'review') return j; } return -1; };
+  /** the tool steps of the turn a review card closes */
+  const toolsOf = (r: number) => { const out: Msg[] = []; for (let j = r - 1; j >= 0 && msgs[j].role !== 'user'; j--) if (msgs[j].role === 'tool') out.unshift(msgs[j]); return out; };
   // render: consecutive tool steps collapse into one group
   const blocks: ({ kind: 'msg'; m: Msg; i: number } | { kind: 'tools'; items: { m: Msg; i: number }[] })[] = [];
   msgs.forEach((m, i) => {
@@ -242,8 +291,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   });
 
   const newChat = () => { session.current = {}; setMsgs([]); variations.clear(); };
-  const pickModel = (e: MouseEvent) => {
-    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+  const modelItems = (): MenuItem[] => {
     const list = providers.length ? providers : [{ id: 'claude', name: 'Claude Code', available: false }];
     const items: MenuItem[] = [];
     for (const p of list) {
@@ -253,28 +301,44 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
       } else items.push({ label: PROVIDER_LABEL[p.id] ?? p.name, hint: p.available ? 'CLI' : 'not installed', checked: provider === p.id, action: () => setAgentPref('provider', p.id) });
     }
     items.push({ separator: true }, { label: 'Model settings…', action: () => openSettings('models') });
-    showContextMenu(r.left, r.top - 8, items);
+    return items;
+  };
+  /** "+": bring in a file (it lands in the document, selected, so it is the context), mention a
+   *  layer, pick a style recipe, the model */
+  const attach = (e: MouseEvent) => {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    showContextMenu(r.left, r.top, [
+      { label: 'Add an image, SVG or audio…', action: () => pickFiles() },
+      { label: 'Mention a layer', shortcut: '@', action: () => { setInput(input + (input && !input.endsWith(' ') ? ' @' : '@')); requestAnimationFrame(() => (document.querySelector('.agent-input textarea') as HTMLTextAreaElement | null)?.focus()); } },
+      { label: 'Style', submenu: [{ label: 'Let the agent choose', checked: !style, action: () => setStyle('') }, { separator: true }, ...STYLE_GUIDES.map(g => ({ label: styleLabel(g), hint: g.summary.length > 42 ? g.summary.slice(0, 40) + '…' : g.summary, checked: style === g.name, action: () => setStyle(g.name) }))] },
+      { separator: true },
+      { label: `Model: ${modelLabel(provider, model)}`, submenu: modelItems() },
+    ]);
     // open upward: the composer sits at the bottom of the window
     const m = document.querySelector('.ctx-menu') as HTMLElement | null;
     if (m) m.style.top = Math.max(4, r.top - m.offsetHeight - 6) + 'px';
   };
-  const attach = (e: MouseEvent) => {
-    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    showContextMenu(r.left, r.top, [
-      { label: 'Mention a layer (@)', action: () => { setInput(input + (input && !input.endsWith(' ') ? ' @' : '@')); requestAnimationFrame(() => (document.querySelector('.agent-input textarea') as HTMLTextAreaElement | null)?.focus()); } },
-      { label: 'Quick actions', submenu: availableActions(selCount).map(a => ({ label: a.label, disabled: !ready, action: () => { props.onSent?.(); runQuick(a); } })) },
-      { separator: true },
-      { label: 'New conversation', disabled: !!turn, action: newChat },
-    ]);
-    const m = document.querySelector('.ctx-menu') as HTMLElement | null;
-    if (m) m.style.top = Math.max(4, r.top - m.offsetHeight - 6) + 'px';
+  /** files pasted / dropped into the composer (or picked from +) come into the document as layers
+   *  and get selected: "animate this" then refers to them */
+  const takeFiles = async (files: File[]) => {
+    for (const f of files) await openBrowserFile(f);
+    const imp = lastImport;
+    if (imp && imp.ids.every(id => editor.store.layer(id))) editor.store.select(imp.ids);
+    requestAnimationFrame(() => (document.querySelector('.agent-input textarea') as HTMLTextAreaElement | null)?.focus());
+  };
+  const pickFiles = () => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.multiple = true; inp.accept = '.svg,image/*,audio/*';
+    inp.onchange = () => takeFiles([...(inp.files ?? [])]);
+    inp.click();
   };
   const selLayer = selCount === 1 ? s.layer(s.selection[0]) : null;
-  const chipLabel = selCount ? (selLayer?.name ?? `${selCount} layers`) : s.comp.name;
-  const ChipIcon = selLayer ? LAYER_ICON[selLayer.type] : selCount ? Layers : File;
-  const placeholder = status !== 'connected' ? 'Agent offline: start the bridge to chat'
-    : mode === 'ask' ? (selCount ? 'Ask about the selection…' : 'Ask about this composition…')
-    : selCount ? 'What should happen to the selection?' : 'Describe an animation…';
+  const chipLabel = selLayer?.name ?? `${selCount} layers`;
+  const ChipIcon = selLayer ? LAYER_ICON[selLayer.type] : Layers;
+  const styleGuide = style ? STYLE_GUIDES.find(g => g.name === style) : undefined;
+  const placeholder = status !== 'connected' ? 'The agent is offline'
+    : turn ? 'The agent is working… (Esc stops it)'
+    : selCount ? 'What should happen to the selection?' : msgs.length ? 'Reply or ask for a change…' : 'Describe an animation…';
   const submit = () => { if (input.trim()) { props.onSent?.(); send(input, { style }); } };
 
   return (
@@ -282,16 +346,14 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
       {props.chat ? (
         <div class="agent-chat">
           <div class="agent-head">
-            <span class="agent-title">Agent</span>
-            <span class={'dot ' + status} title={`Bridge: ${status}${status === 'connected' ? ` · port ${agentClient.port}` : ''}`} />
-            <span class="grow" />
-            <Button variant="ghost" icon size="sm" tip="New conversation" disabled={!!turn} onClick={newChat}><SquarePen /></Button>
+            <span class={'dot ' + status} title={`Agent ${status === 'connected' ? `connected · ${modelLabel(provider, model)}` : status}`} />
+            <Button variant="ghost" icon size="sm" tip="New conversation" disabled={!!turn || !msgs.length} onClick={newChat}><SquarePen /></Button>
           </div>
-          <div class="agent-list" ref={list} onScroll={e => { const el = e.currentTarget as HTMLDivElement; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40; }}>
+          <div class="agent-list" ref={list} onScroll={e => { const el = e.currentTarget as HTMLDivElement; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40; if (stick.current && scrolledUp) setScrolledUp(false); }}
+            onWheel={e => { const el = e.currentTarget as HTMLDivElement; requestAnimationFrame(() => { const up = el.scrollHeight - el.scrollTop - el.clientHeight >= 40; if (up !== scrolledUp) setScrolledUp(up); }); }}>
             {status !== 'connected' && (
-              <div class="agent-note">
-                <b>Agent bridge offline.</b> The desktop app starts it automatically. In the browser run <code>npm run bridge</code>.
-                The bridge uses the Claude Code / Codex / Gemini CLI on your computer, so your own subscription is used.
+              <div class="agent-note agent-offline" title="The desktop app starts the bridge automatically; in the browser run npm run bridge. It uses the Claude Code / Codex / Gemini CLI on your computer (your own subscription).">
+                <span class="dot" aria-hidden="true" />Agent offline · <button class="link" onClick={() => openSettings('connections')}>How to connect</button>
               </div>
             )}
             {status === 'connected' && providers.length > 0 && !avail && (
@@ -302,24 +364,27 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
             )}
             {msgs.length === 0 && status === 'connected' && (
               <div class="agent-empty">
-                <div>Direct the agent: describe an animation, or select layers and use the quick actions below. Type <code>@</code> to mention a layer.</div>
-                {['Make a logo reveal with 3 shapes popping in', 'Add a bouncy entrance to the selected layers', 'Critique my animation'].map(t => (
-                  <button class="suggest" onClick={() => setInput(t)}>{t}</button>
+                <div class="agent-empty-line">Describe the animation you want. The agent builds it in this file; every turn can be reviewed and undone.</div>
+                {['A logo reveal: the mark draws in, the name follows with a soft overshoot', 'Kinetic type for “Make it move”, word by word, on a 120 bpm beat', 'Animate the selected layers in with a staggered, springy entrance'].map(t => (
+                  <button class="suggest" onClick={() => setInput(t)}>{t}<ChevronRight size={14} /></button>
                 ))}
-                <button class="link" onClick={() => openSettings('connections')}>Connect other AI apps (MCP)…</button>
               </div>
             )}
             {blocks.map(b => b.kind === 'tools' ? (
+              // a finished turn with a review card: its steps live inside the card (one row per turn)
+              reviewOf(b.items[b.items.length - 1].i) >= 0 ? null :
               <ToolGroup items={b.items.map(x => x.m)} running={!!turn && b.items[b.items.length - 1].i === lastToolIndex(msgs)} layerName={layerName} />
             ) : (() => {
               const { m, i } = b;
               if (m.role === 'storyboard' && m.storyboard) return <StoryboardCard sb={m.storyboard} busy={!ready} onApprove={approveStoryboard} />;
               if (m.role === 'review') return (
                 <>
-                  <TurnReview review={m.review!} busy={!!turn} onState={(st, note) => setReview(i, st, note)} />
+                  <TurnReview review={m.review!} busy={!!turn} onState={(st, note) => setReview(i, st, note)}>
+                    {toolsOf(i).length > 0 && <ToolGroup items={toolsOf(i)} running={false} shots={false} layerName={layerName} />}
+                  </TurnReview>
                   {/* below the card: arriving late, it must not shift the card's buttons */}
                   {m.preview === 'pending' && <div class="ag-result pending" style={{ aspectRatio: previewAspect() }} />}
-                  {m.preview && m.preview !== 'pending' && <button type="button" class="ag-result" title="Replay the result" onClick={() => { const r = m.review!.range; s.setTime(Math.max(0, (r?.[0] ?? 0) - 0.1)); editor.play(); }}><img src={m.preview} alt="Result: frames over time" data-testid="result-preview" /></button>}
+                  {m.preview && m.preview !== 'pending' && <button type="button" class="ag-result" title="Replay the result" onClick={() => { const r = m.review!.range; s.setTime(Math.max(0, (r?.[0] ?? 0) - 0.1)); editor.play(); }}><img src={m.preview} alt="Result: frames over time" data-testid="result-preview" onLoad={() => { if (stick.current) list.current?.scrollTo({ top: 1e9 }); }} /></button>}
                 </>
               );
               if (m.role === 'error') return (
@@ -335,8 +400,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
                 </div>
               );
               if (m.role === 'user') return (
-                <div class={'msg user' + (m.mode === 'ask' ? ' ask' : '')}>
-                  {m.mode === 'ask' && <span class="ag-tag">Ask</span>}
+                <div class="msg user">
                   {m.style && <span class="ag-tag">{styleLabel(STYLE_GUIDES.find(g => g.name === m.style) ?? { title: m.style } as any)}</span>}
                   {m.chip ? <span title={m.text}><b>{m.chip}</b></span> : m.text}
                 </div>
@@ -344,31 +408,42 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
               return <div class={'msg ' + m.role}>{m.role === 'assistant' ? <Markdown text={m.text} /> : m.text}</div>;
             })())}
             {turn && (
-              <div class="ag-working" data-testid="agent-working">
+              <div class="ag-working ag-status" data-testid="agent-working">
                 <span class="ag-spinner" />
-                <span class="ag-grow">{activeBeat >= 0 && <b>Beat {activeBeat + 1}/{building!.beats.length} · {building!.beats[activeBeat].name} · </b>}{turn.activity}{turn.live > 0 && <span class="ag-muted"> · {turn.live} layer{turn.live === 1 ? '' : 's'} changed</span>}</span>
+                <span>{activeBeat >= 0 ? <>Beat {activeBeat + 1}/{building!.beats.length} · <b>{building!.beats[activeBeat].name}</b> · </> : null}{turn.activity}{turn.live > 0 && <span class="ag-muted"> · {turn.live} layer{turn.live === 1 ? '' : 's'} changed</span>}</span>
                 <span class="ag-muted">{Math.floor((Date.now() - turn.startedAt) / 1000)}s</span>
               </div>
             )}
           </div>
+          {scrolledUp && <button type="button" class="ag-jump" onClick={() => { stick.current = true; setScrolledUp(false); list.current?.scrollTo({ top: 1e9, behavior: 'smooth' }); }}>Jump to latest <ArrowDown size={13} /></button>}
           <VariationTray />
-          <StylePicker value={style} onChange={setStyle} disabled={status !== 'connected'} />
-          <div class="ag-quick" role="toolbar" aria-label="Quick actions">
-            {availableActions(selCount).map(a => (
-              <button class={'ag-qchip' + (a.mode === 'ask' ? ' ask' : '')} disabled={!ready} title={`${a.title}${a.mode === 'ask' ? ' (read-only)' : ''}\nfor: ${selCount ? targetPhrase(s) : 'the whole animation'}`} onClick={() => runQuick(a)}>{a.label}</button>
-            ))}
-          </div>
         </div>
       ) : <div class="left-content">{props.children}</div>}
-      <div class="ag-composer composer">
-        <div class="ag-context" onPointerEnter={e => { (e.currentTarget as HTMLElement).title = editorContext(s, mentioned); }}>
-          <span class="ctx-chip" title={selCount ? 'The selection is sent as context' : 'The composition is sent as context'}>
-            <ChipIcon size={12} />
-            <span class="ctx-chip-name">{chipLabel}</span>
-            {selCount > 0 && <button type="button" class="ctx-chip-x" aria-label="Clear selection" onClick={() => s.select([])}><X size={12} /></button>}
-          </span>
-          {mentioned.map(l => <span class="ag-chip mention">@{l.name}</span>)}
-        </div>
+      <div class={'ag-composer composer' + (dropping ? ' dropping' : '')}
+        onDragOver={e => { if (e.dataTransfer?.types.includes('Files')) { e.preventDefault(); setDropping(true); } }}
+        onDragLeave={() => setDropping(false)}
+        onDrop={e => { const f = [...(e.dataTransfer?.files ?? [])]; setDropping(false); if (f.length) { e.preventDefault(); e.stopPropagation(); takeFiles(f); } }}
+        onPaste={e => { const f = [...(e.clipboardData?.files ?? [])]; if (f.length) { e.preventDefault(); e.stopPropagation(); takeFiles(f); } }}>
+        {/* context chips only when there is something beyond the composition: the selection, mentions, a style */}
+        {(selCount > 0 || mentioned.length > 0 || styleGuide) && (
+          <div class="ag-context" onPointerEnter={e => { (e.currentTarget as HTMLElement).title = editorContext(s, mentioned); }}>
+            {selCount > 0 && (
+              <span class="ctx-chip" title="The selection is sent as context">
+                <ChipIcon size={12} />
+                <span class="ctx-chip-name">{chipLabel}</span>
+                <button type="button" class="ctx-chip-x" aria-label="Clear selection" onClick={() => s.select([])}><X size={12} /></button>
+              </span>
+            )}
+            {mentioned.map(l => <span class="ctx-chip mention"><span class="ctx-chip-name">@{l.name}</span></span>)}
+            {styleGuide && (
+              <span class="ctx-chip" title={styleGuide.summary}>
+                <Palette size={12} />
+                <span class="ctx-chip-name">{styleLabel(styleGuide)}</span>
+                <button type="button" class="ctx-chip-x" aria-label="No style" onClick={() => setStyle('')}><X size={12} /></button>
+              </span>
+            )}
+          </div>
+        )}
         <div class="agent-input">
           <MentionInput
             value={input}
@@ -379,14 +454,8 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
             placeholder={placeholder}
           />
           <div class="composer-foot">
-            <Button variant="ghost" icon size="sm" tip="Add context" tipSide="top" onClick={attach as any} aria-haspopup="menu"><Plus /></Button>
-            <button type="button" class="model-pick" aria-haspopup="menu" title="Agent and model" onClick={pickModel as any}>
-              <Sparkle size={14} /><span>{modelLabel(provider, model)}</span><ChevronDown size={12} />
-            </button>
-            <div class="ag-mode" role="radiogroup" aria-label="Mode">
-              <button role="radio" aria-checked={mode === 'edit'} class={mode === 'edit' ? 'on' : ''} title="The agent edits your document" onClick={() => setAgentPref('mode', 'edit')}>Edit</button>
-              <button role="radio" aria-checked={mode === 'ask'} class={mode === 'ask' ? 'on' : ''} title="Read-only: critique / explain, no edits" onClick={() => setAgentPref('mode', 'ask')}>Ask</button>
-            </div>
+            <Button variant="ghost" icon size="sm" class="ag-plus" tip="Add a file, mention a layer, style, model" tipSide="top" onClick={attach as any} aria-haspopup="menu"><Plus /></Button>
+            <Button variant="ghost" icon size="sm" active={picking} tip={picking ? 'Click a layer on the canvas (Esc cancels)' : 'Point at a layer on the canvas'} tipSide="top" onClick={() => setPicking(p => !p)}><MousePointerClick /></Button>
             <span class="grow" />
             {turn
               ? <button class="send-btn stop" title="Stop (Esc)" aria-label="Stop" disabled={turn.stopping} onClick={stop}><Square size={12} /></button>
@@ -436,8 +505,9 @@ function fmtTok(n: number) { return n >= 1000 ? `${(n / 1000).toFixed(n >= 10000
 
 function lastToolIndex(msgs: Msg[]) { for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].role === 'tool') return i; return -1; }
 
-/** a run of tool steps: human labels, status, duration; screenshots inline */
-function ToolGroup(props: { items: Msg[]; running: boolean; layerName: (id: string) => string | undefined }) {
+/** a run of tool steps as one quiet row ("Worked through 12 steps"; while running: the current
+ *  step) that expands into the steps; what the agent looked at stays visible */
+function ToolGroup(props: { items: Msg[]; running: boolean; shots?: boolean; layerName: (id: string) => string | undefined }) {
   const { items, running } = props;
   const errors = items.filter(m => m.tool?.isError).length;
   const steps = items.map(m => {
@@ -459,23 +529,45 @@ function ToolGroup(props: { items: Msg[]; running: boolean; layerName: (id: stri
     );
   });
   const images = items.map(m => m.tool?.image).filter(Boolean) as string[];
+  const last = items[items.length - 1]?.tool;
+  const n = items.length;
   return (
     <div class="ag-steps">
-      {items.length > 3 && !running ? (
-        <details class="ag-steps-group">
-          <summary>{items.length} steps{errors ? <span class="ag-err-text"> · {errors} failed</span> : ''}</summary>
-          {steps}
-        </details>
-      ) : steps}
-      {images.length > 0 && <div class="ag-shots">{images.slice(-2).map(src => <img src={src} alt="What the agent looked at" title="What the agent looked at" />)}</div>}
+      <details class="ag-steps-group">
+        <summary>
+          <span class="ag-step-icon">{running ? <LoaderCircle size={12} class="ag-spin" /> : errors ? <CircleX size={12} /> : <Check size={12} />}</span>
+          <span class="ag-grow">{running && last ? toolLabel(last.name, last.input, props.layerName) : `Worked through ${n} step${n === 1 ? '' : 's'}`}</span>
+          {errors > 0 && <span class="ag-err-text">{errors} failed</span>}
+          <ChevronRight size={12} class="ag-steps-chev" />
+        </summary>
+        {steps}
+      </details>
+      {props.shots !== false && images.length > 0 && <div class="ag-shots">{images.slice(-2).map(src => <img src={src} alt="What the agent looked at" title="What the agent looked at" />)}</div>}
     </div>
   );
 }
 
 /** tiny markdown renderer: **bold**, `code`, - bullets, 1. lists. builds vnodes (never innerHTML) */
 function Markdown({ text }: { text: string }) {
+  // a **bold** or `code` span that names a layer becomes a link: select it and jump to where its
+  // animation starts (the motion equivalent of "open what was made")
+  const term = (t: string, bold: boolean) => {
+    const s = editor.store;
+    const l = Object.values(s.project.layers).find(x => x.name === t);
+    if (l) {
+      const Icon = LAYER_ICON[l.type] ?? Square;
+      return <button type="button" class="ag-ref" title="Select it and go to its animation" onClick={() => {
+        const owner = (() => { let top = l; while (top.parent && s.layer(top.parent)) top = s.layer(top.parent)!; return Object.values(s.project.comps).find(c => c.root.includes(top.id)); })();
+        if (owner && owner.id !== s.comp.id) s.openComp(owner.id);
+        s.select([l.id]);
+        const r = animRange(l);
+        if (r) { editor.pause(); s.setTime(r[0]); }
+      }}><Icon size={12} />{t}</button>;
+    }
+    return bold ? <b>{t}</b> : <code>{t}</code>;
+  };
   const inline = (s: string) => s.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map(part =>
-    part.startsWith('**') && part.endsWith('**') ? <b>{part.slice(2, -2)}</b> : part.startsWith('`') && part.endsWith('`') ? <code>{part.slice(1, -1)}</code> : part);
+    part.startsWith('**') && part.endsWith('**') ? term(part.slice(2, -2), true) : part.startsWith('`') && part.endsWith('`') ? term(part.slice(1, -1), false) : part);
   return <>{text.split('\n').map(line => {
     const b = line.match(/^\s*[-*]\s+(.*)/);
     if (b) return <div class="md-li">• {inline(b[1])}</div>;

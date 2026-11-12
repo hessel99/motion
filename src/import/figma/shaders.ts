@@ -18,7 +18,33 @@ import type { Store } from '../../core/store';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SHA = /^[0-9a-f]{40}$/i;
 
-interface Found { id?: string; version?: string; name?: string; main?: string; features?: string; files: Record<string, string>; values?: Record<string, unknown> }
+interface Found { id?: string; version?: string; name?: string; main?: string; features?: string; files: Record<string, string>; values?: Record<string, unknown>; meta?: Record<string, { name: string; type: string; defaultValue: unknown }> }
+
+// ---- known sources: figma payloads carry the shader's identity and values, never its source.
+// sources come from the document's library (same build sha), or from a registry the host fills
+// (a shader library file, the figma mcp cache in tests / the fidelity harness)
+const known = new Map<string, ShaderAsset>();
+/** make shader sources available to imports (matched by build sha or shader id) */
+export function registerShaderSources(list: { id: string; name?: string; kind: ShaderKind; version?: string; files: Record<string, string> }[]) {
+  for (const x of list) {
+    const a = makeShaderAsset(x);
+    if (x.version) known.set(x.version, a);
+    known.set(x.id, a);
+  }
+}
+
+/** figma's shader property values: { "<hash>": value } + propertyMetadata { "<hash>": { name, type, defaultValue } } */
+function propsByName(props: unknown, meta: unknown): { values: Record<string, unknown>; meta: Found['meta'] } | null {
+  if (!props || typeof props !== 'object' || !meta || typeof meta !== 'object') return null;
+  const values: Record<string, unknown> = {}, out: NonNullable<Found['meta']> = {};
+  for (const [k, m] of Object.entries(meta as Record<string, { name?: string; type?: string; defaultValue?: unknown }>)) {
+    if (!m?.name) continue;
+    out[m.name] = { name: m.name, type: String(m.type ?? 'NUMBER'), defaultValue: m.defaultValue };
+    const v = (props as Record<string, unknown>)[k];
+    if (v !== undefined) values[m.name] = v;
+  }
+  return { values, meta: out };
+}
 
 function tryJson(s: string): unknown { try { return JSON.parse(s); } catch { return undefined; } }
 
@@ -65,6 +91,15 @@ export function findShaderData(x: unknown): Found {
       visit(c, k, depth + 1);
     }
   };
+  // plugin api / rest shape: { shaderId | id: "<hash>/<build sha>", properties, propertyMetadata }
+  const o = x as Record<string, unknown> | null;
+  if (o && typeof o === 'object') {
+    for (const idv of [o.shaderId, o.id]) {
+      if (typeof idv === 'string' && /^[0-9a-f]{6,64}\/[0-9a-f]{40}$/i.test(idv)) { const [h, v] = idv.split('/'); f.version ??= v; f.id ??= h; }
+    }
+    const pm = propsByName(o.properties, o.propertyMetadata);
+    if (pm) { f.values = pm.values; f.meta = pm.meta; }
+  }
   visit(x, '', 0);
   if (f.main) f.files['main.ts'] ??= f.main;
   if (f.features) f.files['features.json'] ??= f.features;
@@ -82,9 +117,19 @@ function usedSlots(layer: Layer): Set<string> {
 /** a ref (with its params as props on the layer) from a figma shader paint / effect */
 export function shaderRefFromFigma(raw: unknown, kind: ShaderKind, ctx: { layer: Layer; warn(m: string): void }): ShaderRef | null {
   const f = findShaderData(raw);
-  if (!f.id && !f.files['main.ts']) { ctx.warn(`shader ${kind}: no shader id or source in the clipboard (skipped)`); return null; }
-  const asset: ShaderAsset = makeShaderAsset({ id: f.id ?? `local-${hash(f.files['main.ts'] ?? '')}`, name: f.name, kind, version: f.version, files: f.files });
-  if (!f.files['main.ts']) ctx.warn(`shader "${asset.name}": its source is not in the clipboard (placeholder; add it from the library)`);
+  if (!f.id && !f.version && !f.files['main.ts']) { ctx.warn(`shader ${kind}: no shader id or source in the clipboard (skipped)`); return null; }
+  let asset: ShaderAsset;
+  const src = !f.files['main.ts'] ? (f.version && known.get(f.version)) || (f.id && known.get(f.id)) : null;
+  if (src) asset = { ...src, kind };
+  else {
+    // the schema from figma's property metadata when the source is not available
+    const params = f.files['main.ts'] ? undefined : Object.values(f.meta ?? {}).map(m => ({
+      key: m.name, label: m.name, defaultValue: m.defaultValue,
+      type: m.type === 'COLOR' ? 'color' : m.type === 'BOOLEAN' ? 'boolean' : m.type === 'STRING' || m.type === 'TEXT' ? 'string' : m.type === 'GRADIENT' ? 'gradient' : m.type === 'NUMBER' || typeof m.defaultValue === 'number' ? 'number' : m.type.toLowerCase().replace(/_/g, '-'),
+    }));
+    asset = makeShaderAsset({ id: f.id ?? `local-${hash(f.files['main.ts'] ?? '')}`, name: f.name, kind, version: f.version, files: f.files, params });
+    if (!f.files['main.ts']) ctx.warn(`shader "${asset.name}" (${f.version ?? f.id}): its source is not in the paste (placeholder until the library has it)`);
+  }
   const used = usedSlots(ctx.layer);
   const p = kind === 'fill' ? 'f' : 'e';
   let i = 0;
@@ -136,6 +181,10 @@ export function hoistShaderAssets(store: Store, layerIds: string[]) {
     if (!P.shaders) tx.set(P, 'shaders', {});
     for (const r of refs) {
       const a = r.asset!;
+      if (!a.files['main.ts'] && a.version) {
+        const hit = Object.entries(P.shaders!).find(([, x]) => x.version === a.version && x.files['main.ts']);
+        if (hit) { tx.set(r, 'shader', hit[0]); tx.set(r, 'asset', undefined); continue; }
+      }
       const cur = P.shaders![r.shader];
       // a pasted copy with source beats a source-less reference already in the library
       if (!cur || (!cur.files['main.ts'] && a.files['main.ts'])) tx.set(P.shaders!, r.shader, a);

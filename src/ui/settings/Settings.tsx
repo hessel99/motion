@@ -1,4 +1,4 @@
-// Settings: its own tab in the tab strip. a left nav (Account / Agents / Workspace / App) and
+// Settings: a large modal over the window (⌘, or the app menu in the top bar). a left nav (Account / Agents / Workspace / App) and
 // card sections. Appearance, Connections, Keyboard shortcuts, Models and Agent runs are real;
 // Updates is real too (src/app/updates.ts, electron/updates/). Profile, Notifications and Members are placeholders.
 
@@ -8,6 +8,7 @@ import { editor } from '../../app/editor';
 import { flushAutosave, toast } from '../../app/actions';
 import { checkForUpdates, formatBytes, getUpdateStatus, isBusy, onUpdateStatus, restartToUpdate, revertUi, setUpdatePrefs, updatesAvailable, type UpdateStatus } from '../../app/updates';
 import { prefs, setPref } from '../../app/prefs';
+import { activeProvider, setShareSettings, shareSettings, SHARE_PROVIDERS } from '../../app/share';
 import { agentClient } from '../../agent/client';
 import { useChannels } from '../hooks';
 import { getThemePref, onThemeChange, setTheme, type ThemePref } from '../theme';
@@ -141,7 +142,7 @@ function Appearance() {
   useEffect(() => onThemeChange(() => setT(getThemePref())), []);
   const cards: { id: ThemePref; label: string; sub: string; Icon: LucideIcon; note?: string }[] = [
     { id: 'dark', label: 'Dark', sub: 'Default', Icon: Moon },
-    { id: 'light', label: 'Light', sub: 'Paper white', Icon: Sun },
+    { id: 'light', label: 'Light', sub: 'Light greys', Icon: Sun },
     { id: 'system', label: 'System', sub: 'Follows your OS', Icon: Monitor, note: 'Switches with your computer.' },
   ];
   const gpu = gpuName();
@@ -255,7 +256,34 @@ function Connections() {
           {status === 'connected' ? <Status kind="ok">Running</Status> : <Status kind="off">Offline</Status>}
         </Row>
       </Card>
+      <LinkSharing />
     </>
+  );
+}
+
+/** Share → "Copy a preview link": where the preview page is uploaded (src/app/share). off by default */
+function LinkSharing() {
+  useChannels([], ['share']);
+  const prov = SHARE_PROVIDERS.find(p => p.id === shareSettings.provider);
+  const ready = !!activeProvider();
+  return (
+    <Card title="Link sharing" sub="Share → Copy a preview link uploads the preview page (a self-contained player) and copies its link. Without a service, Share saves the page as a file to send.">
+      <Row label="Service" sub={prov ? prov.description : 'Off: previews are shared as files'}>
+        <Select size="sm" aria-label="Link sharing service" value={shareSettings.provider} onChange={v => setShareSettings({ provider: v })}
+          options={[{ value: '', label: 'Off' }, ...SHARE_PROVIDERS.map(p => ({ value: p.id, label: p.name }))]} />
+      </Row>
+      {prov?.id === 'http' && <>
+        <Row label="Upload URL" sub="https only. The page is POSTed as text/html; answer with the link (text or { url }).">
+          <input class="set-input" aria-label="Upload URL" placeholder="https://…" value={shareSettings.endpoint} spellcheck={false}
+            onChange={e => setShareSettings({ endpoint: (e.target as HTMLInputElement).value.trim() })} onKeyDown={e => e.stopPropagation()} />
+        </Row>
+        <Row label="Authorization" sub="Optional header value, e.g. Bearer …">
+          <input class="set-input" type="password" aria-label="Authorization header" value={shareSettings.header} spellcheck={false}
+            onChange={e => setShareSettings({ header: (e.target as HTMLInputElement).value })} onKeyDown={e => e.stopPropagation()} />
+        </Row>
+        <Row label="Status">{ready ? <Status kind="ok">Ready</Status> : <Status kind="off">Needs an https URL</Status>}</Row>
+      </>}
+    </Card>
   );
 }
 

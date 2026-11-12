@@ -1,11 +1,11 @@
-// "Export video" dialog: format, resolution, fps, quality, progress with eta + cancel.
+// the Export dialog (every format; video with format, resolution, fps, quality, progress with eta + cancel).
 // mounted on demand into its own container (openExportDialog) so App only needs a menu item,
 // and lazy-loaded so the muxer stays out of the main bundle.
 
 import { render } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
-import { download, toast } from '../app/actions';
+import { download, exportAeScript, exportFramePng, exportGifFile, exportLottie, toast } from '../app/actions';
 import { Button, Dialog, Segmented } from './ui';
 import {
   evenDimensions, computeBitrate, frameCount, exportVideoDetailed, probeVideoSupport, videoFileName,
@@ -61,12 +61,24 @@ async function saveVideo(blob: Blob, name: string, format: VideoFormat): Promise
   return 'downloaded';
 }
 
+type Kind = 'video' | 'gif' | 'image' | 'lottie' | 'ae';
+const KINDS: { value: Kind; label: string }[] = [
+  { value: 'video', label: 'Video' }, { value: 'gif', label: 'GIF' }, { value: 'image', label: 'Image' }, { value: 'lottie', label: 'Lottie' }, { value: 'ae', label: 'After Effects' },
+];
+const remembered = (): Kind => { try { const v = localStorage.getItem('motion.export.kind') as Kind; return KINDS.some(k => k.value === v) ? v : 'video'; } catch { return 'video'; } };
+
+/** the export dialog: the one place to export (top bar Export, ⌘E). video (MP4 / WebM with
+ *  progress, eta, cancel), GIF, the current frame as PNG, Lottie JSON, an After Effects script */
 export function ExportDialog(props: { onClose: () => void }) {
   const comp = editor.store.comp;
+  const [kind, setKindState] = useState<Kind>(remembered);
+  const setKind = (k: Kind) => { setKindState(k); try { localStorage.setItem('motion.export.kind', k); } catch { /* */ } };
   const [format, setFormat] = useState<VideoFormat>('mp4');
   const [scale, setScale] = useState(1);
   const [fps, setFps] = useState(comp.fps);
   const [quality, setQuality] = useState<VideoQuality>('high');
+  const [gifSize, setGifSize] = useState(640);
+  const [gifFps, setGifFps] = useState(Math.min(comp.fps, 30));
   const [support, setSupport] = useState<Record<VideoFormat, string | null> | null>(null);
   const [prog, setProg] = useState<ExportProgress | null>(null);
   const [busy, setBusy] = useState(false);
@@ -85,7 +97,7 @@ export function ExportDialog(props: { onClose: () => void }) {
   const bitrate = computeBitrate(dims.width, dims.height, fps, quality);
   const estBytes = (bitrate / 8) * comp.duration;
 
-  const start = async () => {
+  const startVideo = async () => {
     const ac = new AbortController();
     abort.current = ac;
     setBusy(true);
@@ -106,6 +118,15 @@ export function ExportDialog(props: { onClose: () => void }) {
       abort.current = null;
     }
   };
+  const start = () => {
+    if (kind === 'video') return startVideo();
+    // the other formats run with their own progress toast (or instantly): the dialog closes
+    props.onClose();
+    if (kind === 'gif') exportGifFile({ maxSize: gifSize, fps: gifFps }).catch(() => {});
+    else if (kind === 'image') exportFramePng(scale).catch(() => {});
+    else if (kind === 'lottie') exportLottie();
+    else if (kind === 'ae') exportAeScript();
+  };
 
   const cancel = () => { if (busy) abort.current?.abort(); else props.onClose(); };
   const cancelRef = useRef(cancel);
@@ -121,32 +142,58 @@ export function ExportDialog(props: { onClose: () => void }) {
     return () => window.removeEventListener('keydown', onKey, true);
   }, []);
 
+  const gifScale = Math.min(1, gifSize / Math.max(comp.width, comp.height));
+  const label: Record<Kind, string> = { video: busy ? 'Exporting…' : 'Export video', gif: 'Export GIF', image: 'Export PNG', lottie: 'Export Lottie', ae: 'Export script' };
   return (
-    <Dialog title="Export video" class="xv-dialog" actionsClass="xv-actions" onClose={() => cancelRef.current()} dismissable={!busy}
+    <Dialog title="Export" class="xv-dialog" actionsClass="xv-actions" onClose={() => cancelRef.current()} dismissable={!busy}
       actions={<>
         <Button onClick={cancel}>Cancel</Button>
-        <Button variant="primary" disabled={busy || (support !== null && !support[format])} onClick={start}>{busy ? 'Exporting…' : 'Export'}</Button>
+        <Button variant="primary" class="xv-go" disabled={busy || (kind === 'video' && support !== null && !support[format])} onClick={start}>{label[kind]}</Button>
       </>}>
-        <div class="xv-grid">
-          <label for="xv-format">Format</label>
-          <select id="xv-format" value={format} disabled={busy} onChange={e => setFormat((e.target as HTMLSelectElement).value as VideoFormat)}>
-            <option value="mp4" disabled={support !== null && !support.mp4}>MP4 (H.264){support && !support.mp4 ? ' – unavailable' : ''}</option>
-            <option value="webm" disabled={support !== null && !support.webm}>WebM (VP9)</option>
-          </select>
-          <label>Resolution</label>
-          <Segmented class="xv-seg" label="Resolution" value={scale} disabled={busy} options={SCALES.map(s => ({ value: s, label: `${s}×` }))} onChange={setScale} />
-          <label for="xv-fps">Frame rate</label>
-          <select id="xv-fps" value={String(fps)} disabled={busy} onChange={e => setFps(Number((e.target as HTMLSelectElement).value))}>
-            {[...new Set([comp.fps, 24, 25, 30, 50, 60])].sort((a, b) => a - b).map(f => (
-              <option value={String(f)}>{f} fps{f === comp.fps ? ' (comp)' : ''}</option>
-            ))}
-          </select>
-          <label>Quality</label>
-          <Segmented class="xv-seg" label="Quality" value={quality} disabled={busy} options={(['low', 'medium', 'high'] as VideoQuality[]).map(q => ({ value: q, label: q[0].toUpperCase() + q.slice(1) }))} onChange={setQuality} />
-        </div>
-        <div class="xv-info muted">
-          {dims.width}×{dims.height} · {frames} frames · {(bitrate / 1e6).toFixed(1)} Mbit/s · ~{fmtBytes(estBytes)}
-        </div>
+        <Segmented class="xv-kinds" label="Format" value={kind} disabled={busy} options={KINDS} onChange={setKind} />
+        <div class="xv-sub muted">{comp.name} · {comp.width}×{comp.height} · {fmtDurationS(comp.duration)}</div>
+        {kind === 'video' && <>
+          <div class="xv-grid">
+            <label for="xv-format">Format</label>
+            <select id="xv-format" value={format} disabled={busy} onChange={e => setFormat((e.target as HTMLSelectElement).value as VideoFormat)}>
+              <option value="mp4" disabled={support !== null && !support.mp4}>MP4 (H.264){support && !support.mp4 ? ' – unavailable' : ''}</option>
+              <option value="webm" disabled={support !== null && !support.webm}>WebM (VP9)</option>
+            </select>
+            <label>Resolution</label>
+            <Segmented class="xv-seg" label="Resolution" value={scale} disabled={busy} options={SCALES.map(s => ({ value: s, label: `${s}×` }))} onChange={setScale} />
+            <label for="xv-fps">Frame rate</label>
+            <select id="xv-fps" value={String(fps)} disabled={busy} onChange={e => setFps(Number((e.target as HTMLSelectElement).value))}>
+              {[...new Set([comp.fps, 24, 25, 30, 50, 60])].sort((a, b) => a - b).map(f => (
+                <option value={String(f)}>{f} fps{f === comp.fps ? ' (comp)' : ''}</option>
+              ))}
+            </select>
+            <label>Quality</label>
+            <Segmented class="xv-seg" label="Quality" value={quality} disabled={busy} options={(['low', 'medium', 'high'] as VideoQuality[]).map(q => ({ value: q, label: q[0].toUpperCase() + q.slice(1) }))} onChange={setQuality} />
+          </div>
+          <div class="xv-info muted">
+            {dims.width}×{dims.height} · {frames} frames · {(bitrate / 1e6).toFixed(1)} Mbit/s · ~{fmtBytes(estBytes)} · audio layers are mixed in
+          </div>
+        </>}
+        {kind === 'gif' && <>
+          <div class="xv-grid">
+            <label>Size</label>
+            <Segmented class="xv-seg" label="GIF size" value={gifSize} options={[320, 480, 640, 960].map(v => ({ value: v, label: `${v}px` }))} onChange={setGifSize} />
+            <label for="xv-gfps">Frame rate</label>
+            <select id="xv-gfps" value={String(gifFps)} onChange={e => setGifFps(Number((e.target as HTMLSelectElement).value))}>
+              {[12, 15, 24, 25, 30, 50].map(f => <option value={String(f)}>{f} fps</option>)}
+            </select>
+          </div>
+          <div class="xv-info muted">{Math.round(comp.width * gifScale)}×{Math.round(comp.height * gifScale)} · {Math.max(1, Math.round(comp.duration * gifFps))} frames · loops forever</div>
+        </>}
+        {kind === 'image' && <>
+          <div class="xv-grid">
+            <label>Scale</label>
+            <Segmented class="xv-seg" label="Scale" value={scale} options={[0.5, 1, 2, 4].map(s => ({ value: s, label: `${s}×` }))} onChange={setScale} />
+          </div>
+          <div class="xv-info muted">The frame under the playhead ({editor.store.time.toFixed(2)}s) as a PNG.</div>
+        </>}
+        {kind === 'lottie' && <div class="xv-info muted">Lottie JSON for the web and apps (lottie-web, iOS, Android): shapes, text, gradients, precomps and markers.</div>}
+        {kind === 'ae' && <div class="xv-info muted">A script (.jsx) that rebuilds this composition in After Effects: File › Scripts › Run Script File… Shape layers, text, precomps, keyframes with their easing.</div>}
         {prog && (
           <div class="xv-progress">
             <div class="xv-bar progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(prog.progress * 100)}><div style={{ width: `${(prog.progress * 100).toFixed(1)}%` }} /></div>
@@ -159,3 +206,5 @@ export function ExportDialog(props: { onClose: () => void }) {
     </Dialog>
   );
 }
+
+function fmtDurationS(d: number) { return `${+d.toFixed(2)}s`; }
