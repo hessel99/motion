@@ -111,9 +111,10 @@ await page.click('.sel-bar .sel-ask');
 check(await page.locator('.sel-ask-pop input').count() === 1 && (await page.locator('.askbar').count()) === 0, 'AIUX-14: Ask opens an inline prompt (not the command palette)');
 await shot('04-inline-ask');
 const nUsers = await page.locator('.agent-list .msg.user').count();
-await page.locator('.sel-ask-pop button', { hasText: 'Bouncier' }).click();
+await page.fill('.sel-ask-pop input', 'make it bouncier');
+await page.press('.sel-ask-pop input', 'Enter');
 await working(); await idle();
-check(await page.locator('.agent-list .msg.user').count() === nUsers + 1 && /Bouncier/.test(await page.locator('.agent-list .msg.user').last().innerText()), 'AIUX-14: the inline suggestion is sent with the layer');
+check(await page.locator('.agent-list .msg.user').count() === nUsers + 1 && /bouncier/.test(await page.locator('.agent-list .msg.user').last().innerText()), 'AIUX-14: the inline ask is sent with the layer');
 
 // ---------- AIUX-22: critique runs read-only ----------
 const n0 = (await rootNames()).length;

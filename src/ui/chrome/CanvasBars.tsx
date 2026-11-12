@@ -107,11 +107,6 @@ function InlineAsk(props: { count: number; onClose: () => void }) {
     props.onClose();
   };
   const many = props.count > 1;
-  const sugg: [string, string][] = [
-    ['Animate in', many ? 'Animate the selected layers in with a clean, staggered entrance.' : 'Animate the selected layer in with a clean entrance.'],
-    ['Bouncier', 'Make the selected layers bouncier: springy overshoot on the main moves.'],
-    ['Add follow-through', 'Add follow-through and overlapping action to the selected layers so the motion settles naturally.'],
-  ];
   return (
     <div class="sel-ask-pop" role="dialog" aria-label="Ask the agent about the selection" onPointerDown={e => e.stopPropagation()}>
       <input aria-label="Ask the agent about the selection" placeholder={many ? `What should these ${props.count} layers do?` : 'What should this layer do?'} value={text} spellcheck={false}
@@ -122,7 +117,6 @@ function InlineAsk(props: { count: number; onClose: () => void }) {
           if (e.key === 'Escape') { e.preventDefault(); props.onClose(); }
           else if (e.key === 'Enter') { e.preventDefault(); go(text); }
         }} />
-      <div class="sel-ask-sugg">{sugg.map(([label, t]) => <button type="button" onClick={() => go(t, label)}>{label}</button>)}</div>
     </div>
   );
 }
