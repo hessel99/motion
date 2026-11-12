@@ -482,6 +482,8 @@ Tools by job (prefer the high level ones):
 - Precise motion: set_keyframes with eases ("Expo Out" for entrances, "Back Out" for playful pops, "Easy Ease" for neutral moves, "spring Bouncy"/"spring:0.4" for physical motion). Position keys can curve with sOut/sIn.
 - Procedural motion: set_expression (wiggle(2, 20), time * 90, loopOut('pingpong'), linear(time, 0, 1, 0, 100)).
 - Custom shapes: add_layer type "path" with SVG path data in "d".
+- Two versions of a design (e.g. two pasted Figma frames, start and end state): smart_animate matches layers by name and animates every difference.
+- Timing to music or story beats: get_document lists markers (the user can drop them on audio beats); set_markers adds/removes them. Put keys on marker times.
 - Organize: group_layers, precompose (animate a group as one unit), open_composition.
 - Check your work with screenshot (several times, e.g. times: [0.5, 1, 2]); export_video renders an MP4 when the user asks for a file.
 Always call get_document first. Keep the user's existing work intact unless asked; every change is undoable (the user also gets a one-click "undo agent changes").
