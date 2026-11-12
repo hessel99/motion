@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { Component, type ComponentChildren } from 'preact';
 import { editor, type Tool } from '../app/editor';
 import { ViewportController } from './viewport-controller';
 import { Timeline, fmtTime } from './timeline';
@@ -27,10 +28,10 @@ export function App() {
   }, []);
   return (
     <div class={'app' + (agentOpen ? '' : ' no-agent')}>
-      <TopBar agentOpen={agentOpen} toggleAgent={() => setAgentOpen(o => !o)} />
-      {agentOpen && <aside class="left"><AgentPanel /></aside>}
+      <Guard name="Top bar"><TopBar agentOpen={agentOpen} toggleAgent={() => setAgentOpen(o => !o)} /></Guard>
+      {agentOpen && <aside class="left"><Guard name="Agent"><AgentPanel /></Guard></aside>}
       <main class="center"><Viewport /></main>
-      <aside class="right"><Inspector /></aside>
+      <aside class="right"><Guard name="Inspector"><Inspector /></Guard></aside>
       <section class="bottom"><TimelineHost /></section>
       <ShortcutHelp />
       <Benchmark />
@@ -266,4 +267,25 @@ function Benchmark() {
       </div>
     </div>
   );
+}
+
+/** error boundary: a crashing panel shows a retry button instead of blanking the whole app */
+class Guard extends Component<{ name: string; children: ComponentChildren }, { error: string | null }> {
+  state = { error: null as string | null };
+  componentDidCatch(err: any) {
+    console.error(`[${this.props.name}]`, err);
+    this.setState({ error: String(err?.message ?? err) });
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div class="panel-error">
+          <b>{this.props.name} crashed</b>
+          <div class="muted small">{this.state.error}</div>
+          <button onClick={() => this.setState({ error: null })}>Retry</button>
+        </div>
+      );
+    }
+    return this.props.children as any;
+  }
 }

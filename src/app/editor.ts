@@ -103,8 +103,15 @@ export class Editor {
       store.emit('tick');
     }
     const r = this.renderer;
-    if (r.dirty || r.lastTime !== store.time) r.render(store.time);
-    for (const h of this.hooks) h(now, store.time, store.playing);
+    // isolate failures: one broken frame or hook must never stop the loop or the other hooks
+    try { if (r.dirty || r.lastTime !== store.time) r.render(store.time); } catch (e) { this.report('render', e); r.dirty = false; }
+    for (const h of this.hooks) { try { h(now, store.time, store.playing); } catch (e) { this.report('frame hook', e); } }
+  }
+
+  private lastReport = 0;
+  private report(where: string, e: unknown) {
+    const now = performance.now();
+    if (now - this.lastReport > 2000) { console.error(`[${where}]`, e); this.lastReport = now; }
   }
 
   /** frames per second measured over the ring buffer */

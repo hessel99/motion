@@ -183,3 +183,4 @@ kbd { font: 11px ui-monospace, Menlo, monospace; background: #2a2a30; border: 1p
 .expr-chips button { font: 10px ui-monospace, Menlo, monospace; padding: 1px 5px; color: var(--muted); }
 .model-select { width: 78px; flex: none !important; }
 .tl-search { position: absolute; left: 6px; top: 4px; width: 150px; height: 20px; font-size: 11px; padding: 1px 6px; z-index: 2; background: #121214; }
+.panel-error { padding: 14px; display: flex; flex-direction: column; gap: 8px; color: #ffb3ad; }

@@ -461,7 +461,7 @@ export function buildShapeLayer(ctx: BuildCtx, name: string, items: ShapeNode[],
   }
   const prims = cur.filter(isPrim);
   const paints = cur.filter(isPaint);
-  if (prims.length === 1 && cur.every(n => isPrim(n) || isPaint(n)) && paints.length && cur.indexOf(prims[0]) < cur.indexOf(paints[0])) {
+  if (prims.length === 1 && cur.every(n => isPrim(n) || isMod(n)) && paints.length && cur.indexOf(prims[0]) < cur.indexOf(paints[0])) {
     const tmp = new BuildCtx(ctx.compW, ctx.compH);
     const kids = groupItems(tmp, cur, []);
     if (kids.length === 1) {
@@ -605,6 +605,161 @@ export function assemble(ctx: BuildCtx, src: SrcLayer[]): Layer[] {
   for (const r of roots) { const l = node(r); if (l) out.push({ idx: r.index, l }); }
   out.sort((a, b) => b.idx - a.idx);
   return out.map(o => o.l);
+}
+
+// ---------------- stacking-correct assembly with track mattes (lottie) ----------------
+
+export interface SrcLayerX extends SrcLayer {
+  /** track matte mode of this layer (lottie tt): 1 alpha, 2 alpha inverted, 3 luma, 4 luma inverted */
+  matte?: number;
+  /** this layer is a matte source (lottie td): never rendered on its own */
+  matteSource?: boolean;
+  /** explicit matte source key (lottie tp, newer exports); else the layer directly above */
+  matteParent?: string | number;
+  /** layer-space box used to invert a matte shape ([x, y, w, h]) */
+  box?: [number, number, number, number];
+}
+
+export interface AssembleStats { mattes: number; invertedMattes: number; invertedApprox: number; lumaMattes: number }
+
+function cloneProp(p: Prop): Prop { return JSON.parse(JSON.stringify(p)); }
+
+/** invert a path layer's coverage inside `box` (layer space of the path's parent): box + path, even-odd */
+function invertPathLayer(l: Layer, box: [number, number, number, number]): boolean {
+  if (l.type !== 'path' || !l.geometry || l.children.length) return false;
+  if (isAnimated(l.props.position) || isAnimated(l.props.size)) return false;
+  const pos = l.props.position!.v, anc = l.props.anchor?.v ?? [0, 0];
+  const sc = l.props.scale?.v ?? [100, 100], rot = l.props.rotation?.v[0] ?? 0;
+  if (isAnimated(l.props.scale) || isAnimated(l.props.rotation) || isAnimated(l.props.anchor) || Math.abs(rot) > 1e-9) return false;
+  const gs = l.geomSize ?? [1, 1], sz = l.props.size!.v;
+  const sx = sc[0] / 100, sy = sc[1] / 100, gx = gs[0] ? sz[0] / gs[0] : 1, gy = gs[1] ? sz[1] / gs[1] : 1;
+  if (!sx || !sy || !gx || !gy) return false;
+  // parent space -> layer box -> geometry space (local = T(pos) S T(-anc), geometry scaled by size/geomSize)
+  const toG = (x: number, y: number): [number, number] => [((x - pos[0]) / sx + anc[0]) / gx, ((y - pos[1]) / sy + anc[1]) / gy];
+  const [x0, y0] = toG(box[0], box[1]), [x1, y1] = toG(box[0] + box[2], box[1] + box[3]);
+  const rect: PathGeometry = { cmds: rectCmds(Math.min(x0, x1), Math.min(y0, y1), Math.abs(x1 - x0), Math.abs(y1 - y0)), fillRule: 'evenodd' };
+  // geometry outside [0, geomSize] is fine for the rasterizer (bounds come from the geometry)
+  l.geometry = [rect, ...l.geometry.map(g => ({ ...g, fillRule: 'evenodd' as const }))];
+  if (l.pathKf) l.pathKf = l.pathKf.map(k => ({ ...k, geometry: [rect, ...k.geometry.map(g => ({ ...g, fillRule: 'evenodd' as const }))] }));
+  return true;
+}
+
+/**
+ * map ae parenting + stacking onto our tree, keeping the exact ae stacking order: every
+ * visual layer is placed in stacking order inside copies of its parent chain (transform-only
+ * groups, opacity 100, unbounded in/out). consecutive layers sharing a parent chain share the
+ * wrapper groups, so the common "null with children directly above it" case stays one group.
+ * track mattes: content + matte source go into a unit group whose bottom child is a mask
+ * wrapper (mask: true, always visible) holding the matte layer, so a matte outside its in/out
+ * hides the content like in after effects.
+ */
+export function assembleStacked(ctx: BuildCtx, src: SrcLayerX[], stats?: AssembleStats): Layer[] {
+  const byKey = new Map<string | number, SrcLayerX>();
+  for (const s of src) byKey.set(s.key, s);
+  // valid parent chains (cycles / missing parents -> root)
+  const chainOf = new Map<string | number, SrcLayerX[]>();
+  const chain = (s: SrcLayerX): SrcLayerX[] => {
+    const hit = chainOf.get(s.key);
+    if (hit) return hit;
+    const seen = new Set<string | number>([s.key]);
+    const out: SrcLayerX[] = [];
+    let cur = s.parent != null ? byKey.get(s.parent) : undefined;
+    while (cur && !seen.has(cur.key)) { seen.add(cur.key); out.unshift(cur); cur = cur.parent != null ? byKey.get(cur.parent) : undefined; }
+    const res = cur ? [] : out; // cycle: treat as root
+    chainOf.set(s.key, res);
+    return res;
+  };
+  const hasKids = new Set<string | number>();
+  for (const s of src) for (const p of chain(s)) hasKids.add(p.key);
+
+  const roots: Layer[] = [];
+  const open: { key: string | number; g: Layer }[] = [];
+  const container = () => (open.length ? open[open.length - 1].g : null);
+  const put = (l: Layer) => { const c = container(); if (c) ctx.adopt(c, [l]); else roots.push(l); };
+  const wrapper = (p: SrcLayerX) => {
+    const g = ctx.make('group', p.name, { anchor: cloneProp(p.tr.anchor), position: cloneProp(p.tr.position), scale: cloneProp(p.tr.scale), rotation: cloneProp(p.tr.rotation), opacity: sprop([100]) }, { inPoint: WIDE_IN, outPoint: WIDE_OUT });
+    g.props.size = sprop([0, 0]);
+    g.props.fill = sprop([1, 1, 1, 0]);
+    return g;
+  };
+  const enter = (ch: SrcLayerX[]) => {
+    let k = 0;
+    while (k < open.length && k < ch.length && open[k].key === ch[k].key) k++;
+    open.length = k;
+    for (; k < ch.length; k++) { const g = wrapper(ch[k]); put(g); open.push({ key: ch[k].key, g }); }
+  };
+  /** wrap a built layer in fresh copies of (part of) its parent chain */
+  const wrapChain = (l: Layer, ch: SrcLayerX[]): Layer => {
+    let cur = l;
+    for (let i = ch.length - 1; i >= 0; i--) { const g = wrapper(ch[i]); ctx.adopt(g, [cur]); cur = g; }
+    return cur;
+  };
+  const finish = (s: SrcLayerX, l: Layer) => {
+    l.inPoint = s.inPoint; l.outPoint = s.outPoint;
+    if (!s.visible) l.visible = false;
+    return l;
+  };
+  const sorted = src.slice().sort((a, b) => b.index - a.index); // bottom -> top
+  const byIndex = new Map<number, SrcLayerX>();
+  for (const s of src) byIndex.set(s.index, s);
+  for (const s of sorted) {
+    if (ctx.count > ctx.maxLayers) break;
+    if (s.matteSource) continue;
+    const ch = chain(s);
+    let matteSrc: SrcLayerX | undefined;
+    if (s.matte) {
+      matteSrc = s.matteParent != null ? byKey.get(s.matteParent) : byIndex.get(s.index - 1);
+      if (matteSrc && !matteSrc.matteSource && s.matteParent == null) matteSrc = undefined;
+    }
+    if (matteSrc && !matteSrc.isNull) {
+      const content = s.build(s.tr);
+      if (!content) continue;
+      finish(s, content);
+      const mch = chain(matteSrc);
+      let k = 0;
+      while (k < ch.length && k < mch.length && ch[k].key === mch[k].key) k++;
+      enter(ch.slice(0, k));
+      const unit = ctx.make('group', s.name + ' (matte)', identityTR(), { inPoint: WIDE_IN, outPoint: WIDE_OUT });
+      unit.props.size = sprop([0, 0]);
+      unit.props.fill = sprop([1, 1, 1, 0]);
+      const mw = ctx.make('group', matteSrc.name, identityTR(), { inPoint: WIDE_IN, outPoint: WIDE_OUT, mask: true });
+      mw.props.size = sprop([0, 0]);
+      mw.props.fill = sprop([1, 1, 1, 0]);
+      const ml = matteSrc.build(matteSrc.tr);
+      if (ml) {
+        ml.inPoint = matteSrc.inPoint; ml.outPoint = matteSrc.outPoint;
+        const inv = s.matte === 2 || s.matte === 4;
+        if (s.matte >= 3 && stats) stats.lumaMattes++;
+        if (inv) {
+          if (stats) stats.invertedMattes++;
+          if (!invertPathLayer(ml, matteSrc.box ?? [-ctx.compW, -ctx.compH, ctx.compW * 3, ctx.compH * 3])) {
+            // cannot invert this matte: show the content unmasked (approximation)
+            if (stats) stats.invertedApprox++;
+            delete ctx.layers[ml.id];
+            put(wrapChain(content, ch.slice(k)));
+            continue;
+          }
+        }
+        ctx.adopt(mw, [wrapChain(ml, mch.slice(k))]);
+      }
+      if (stats) stats.mattes++;
+      ctx.adopt(unit, [mw, wrapChain(content, ch.slice(k))]);
+      put(unit);
+      continue;
+    }
+    if (s.isNull) {
+      if (hasKids.has(s.key)) continue; // represented by its children's wrapper groups
+      const l = s.build(s.tr);
+      if (!l) continue;
+      enter(ch);
+      put(finish(s, l));
+      continue;
+    }
+    enter(ch);
+    const l = s.build(s.tr);
+    if (l) put(finish(s, l));
+  }
+  return roots;
 }
 
 /** clamp absurd in/out values and convert wide markers */
