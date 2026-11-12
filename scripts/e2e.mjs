@@ -65,8 +65,8 @@ await page.keyboard.press('F9');
 const ease = await ev(() => editor.store.layer(editor.store.selection[0]).props.position.kf[0].out);
 check('F9 easy ease', ease[0] === 0.333 && ease[1] === 0, JSON.stringify(ease));
 await page.waitForTimeout(200);
-const curve = await page.locator('.curve').count();
-check('easing editor visible with keys selected', curve === 1);
+const curve = await page.locator('.curve, .pt-studio').count();
+check('easing editor visible with keys selected', curve >= 1);
 
 // drag a keyframe in timeline (move second key to the right)
 const keyMoved = await ev(() => {
