@@ -15,7 +15,7 @@ import { prefs } from '../app/prefs';
 type Drag =
   | { kind: 'pan'; sx: number; sy: number; px: number; py: number }
   | { kind: 'move'; sx: number; sy: number; start: Map<string, { pos: number[]; inv: number[] }>; moved: boolean; box: number[]; xs: Float64Array; ys: Float64Array; dup?: boolean }
-  | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: string[] }
+  | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: string[]; scope?: string }
   | { kind: 'create'; type: 'rect' | 'ellipse' | 'star' | 'polygon'; cx: number; cy: number; id: string | null }
   | { kind: 'resize'; id: string; handle: number; inv: number[]; size: number[]; anchor: number[]; local: number[]; shift: boolean }
   | { kind: 'rotate'; id: string; cx: number; cy: number; a0: number; r0: number }
@@ -260,6 +260,22 @@ export class ViewportController {
     return !!b && b[0] <= 0.5 && b[1] <= 0.5 && b[2] >= c.width - 0.5 && b[3] >= c.height - 0.5;
   }
 
+  /** MD-05: a press on the empty area of a top-level frame / group (its own fill, or a background
+   *  child that covers it) that isn't selected: the frame to marquee inside (figma) */
+  private marqueeScope(deep: string): string | null {
+    const st = this.ed.store;
+    let top = deep;
+    while (st.layer(top)?.parent) top = st.layer(top)!.parent!;
+    const frame = st.layer(top);
+    if (!frame || frame.type !== 'group' || !frame.children.length || st.selection.includes(top)) return null;
+    if (deep === top) return top;
+    // a background child directly in the frame that covers the frame's box
+    const l = st.layer(deep);
+    if (l?.parent !== top || l.children.length) return null;
+    const fb = this.boundsOf([top]), b = this.boundsOf([deep]);
+    return fb && b && b[0] <= fb[0] + 0.5 && b[1] <= fb[1] + 0.5 && b[2] >= fb[2] - 0.5 && b[3] >= fb[3] - 0.5 ? top : null;
+  }
+
   /** motion path: keyframes + spatial tangent handles of selected layers (screen space) */
   private pathPoints() {
     const st = this.ed.store, r = this.ed.renderer;
@@ -372,7 +388,12 @@ export class ViewportController {
       return;
     }
     const hit = this.ed.renderer.hitTest(cx, cy);
-    if (hit) {
+    // drag on a top-level frame's background: marquee its children (cmd-drag / a selected frame moves)
+    const scope = hit && !(e.metaKey || e.ctrlKey) && !e.altKey ? this.marqueeScope(hit) : null;
+    if (scope) {
+      this.drag = { kind: 'marquee', sx: x, sy: y, x, y, base: e.shiftKey ? st.selection.slice() : [], scope };
+      if (!e.shiftKey) st.select([]);
+    } else if (hit) {
       const id = this.pick(hit, e.metaKey || e.ctrlKey);
       if (e.shiftKey) st.select([id], 'toggle');
       else if (!st.selection.includes(id)) st.select([id]);
@@ -525,7 +546,19 @@ export class ViewportController {
       d.x = x; d.y = y;
       const [ax, ay] = this.toComp(Math.min(d.sx, x), Math.min(d.sy, y));
       const [bx, by] = this.toComp(Math.max(d.sx, x), Math.max(d.sy, y));
-      const hits = this.ed.renderer.hitRect(ax, ay, bx, by).map(id => topAncestor(st, id));
+      const raw = this.ed.renderer.hitRect(ax, ay, bx, by);
+      let hits: string[];
+      if (d.scope) {
+        // inside a frame: its direct children (not the frame, not a background that covers it)
+        const scope = d.scope, fb = this.boundsOf([scope]);
+        const covers = (id: string) => { const b = this.boundsOf([id]); return !!(fb && b && b[0] <= fb[0] + 0.5 && b[1] <= fb[1] + 0.5 && b[2] >= fb[2] - 0.5 && b[3] >= fb[3] - 0.5); };
+        hits = [];
+        for (const id of raw) {
+          let cur: string | null = id;
+          while (cur && st.layer(cur)?.parent !== scope) cur = st.layer(cur)?.parent ?? null;
+          if (cur && !covers(cur)) hits.push(cur);
+        }
+      } else hits = raw.map(id => topAncestor(st, id));
       st.select([...new Set([...d.base, ...hits])]);
       this.overlayDirty = true;
     } else if (d.kind === 'create') {
@@ -633,6 +666,8 @@ export class ViewportController {
       }
       this.ed.setTool('select');
     }
+    // a click (no drag) on a frame's background selects the frame
+    if (d?.kind === 'marquee' && d.scope && Math.hypot(d.x - d.sx, d.y - d.sy) < 3) st.select(e.shiftKey ? [...d.base, d.scope] : [d.scope]);
     if (d?.kind === 'move' && d.dup && !d.moved) { st.undo(); return; } // alt-click without a drag: drop the copy
     if (d?.kind === 'move' && !d.moved && !e.shiftKey) {
       // click (no drag) on a selected item inside a multi-selection: select just it

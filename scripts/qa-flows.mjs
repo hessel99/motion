@@ -114,6 +114,27 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   const scr = async (x, y) => { const [sx, sy] = await ev(([x, y]) => viewport.toScreen(x, y), [x, y]); return [vpb.x + sx, vpb.y + sy]; };
   const sel = () => ev(() => editor.store.selection.slice());
   const pos = id => ev(id => editor.store.layer(id).props.position?.v.slice(), id);
+  // MD-05: drag on the frame background marquees its children; the frame stays put
+  const fpos = await pos(scene.frame);
+  let a = await scr(scene.W / 2 - 400, scene.H / 2 - 380), b = await scr(scene.W / 2 + 500, scene.H / 2 + 100);
+  await page.mouse.move(a[0], a[1]); await page.mouse.down(); await page.mouse.move(b[0], b[1], { steps: 8 }); await page.mouse.up();
+  const msel = await sel();
+  check('MD-05: drag on a frame background marquee-selects its children', msel.length === 3 && [scene.ring, scene.star, scene.word].every(id => msel.includes(id)), JSON.stringify(msel));
+  check('MD-05: ... and does not move the frame', JSON.stringify(await pos(scene.frame)) === JSON.stringify(fpos), JSON.stringify([fpos, await pos(scene.frame)]));
+  // a click on the background selects the frame; dragging the selected frame moves it
+  await page.mouse.click(a[0], a[1]);
+  check('MD-05: click on a frame background selects the frame', JSON.stringify(await sel()) === JSON.stringify([scene.frame]), JSON.stringify(await sel()));
+  await page.mouse.move(a[0], a[1]); await page.mouse.down(); await page.mouse.move(a[0] + 40, a[1] + 20, { steps: 4 }); await page.mouse.up();
+  check('MD-05: dragging the selected frame moves it', JSON.stringify(await pos(scene.frame)) !== JSON.stringify(fpos));
+  await ev(() => editor.store.undo());
+  // cmd-drag on the background moves the (unselected) frame
+  await ev(() => editor.store.select([]));
+  await page.keyboard.down('Control');
+  await page.mouse.move(a[0], a[1]); await page.mouse.down(); await page.mouse.move(a[0] + 40, a[1] + 20, { steps: 4 }); await page.mouse.up();
+  await page.keyboard.up('Control');
+  check('MD-05: cmd-drag on the background moves the frame', JSON.stringify(await pos(scene.frame)) !== JSON.stringify(fpos), JSON.stringify(await sel()));
+  await ev(() => editor.store.undo());
+
   // MD-04: with the star selected, a press on the ring just outside the star's corner selects the
   // ring (no rotation); outside every other layer the corner zone still rotates
   await ev(id => editor.store.select([id]), scene.star);
