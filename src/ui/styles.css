@@ -170,3 +170,6 @@ code { background: #111; padding: 1px 4px; border-radius: 3px; }
 .help-title { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; margin-bottom: 12px; }
 .help-grid { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; align-items: center; }
 kbd { font: 11px ui-monospace, Menlo, monospace; background: #2a2a30; border: 1px solid #3a3a42; border-radius: 4px; padding: 2px 6px; color: #e4e4e8; white-space: nowrap; }
+.bench { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.bench th, .bench td { text-align: right; padding: 4px 8px; border-bottom: 1px solid var(--line); }
+.bench th:first-child, .bench td:first-child { text-align: left; }

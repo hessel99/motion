@@ -55,6 +55,40 @@ export function loadStress(count: number, kinds?: any[], nested = false) {
   toast(`${count} animated layers generated in ${Math.round(performance.now() - t0)}ms`);
 }
 
+/** in-app benchmark: plays stress scenes and reports real fps / frame times on this machine */
+export async function runBenchmark(onRow?: (row: Record<string, string | number>) => void) {
+  const saved = serialize();
+  const counts = [1000, 5000, 10000, 25000];
+  const rows: Record<string, string | number>[] = [];
+  const gl = editor.renderer.gl;
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  const gpu = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+  for (const n of counts) {
+    editor.load(stressProject({ count: n }));
+    editor.play();
+    await new Promise(r => setTimeout(r, 700)); // warm up
+    const frames: number[] = [], cpu: number[] = [];
+    let last = performance.now();
+    await new Promise<void>(res => {
+      const end = last + 2500;
+      const loop = (now: number) => {
+        frames.push(now - last); last = now;
+        cpu.push(editor.renderer.stats.frameMs);
+        if (now < end) requestAnimationFrame(loop); else res();
+      };
+      requestAnimationFrame(loop);
+    });
+    editor.pause();
+    const med = (a: number[]) => { const b = [...a].sort((x, y) => x - y); return b[b.length >> 1]; };
+    const p95 = (a: number[]) => { const b = [...a].sort((x, y) => x - y); return b[Math.floor(b.length * 0.95)]; };
+    const row = { layers: n, fps: +(1000 / med(frames)).toFixed(0), 'p95 frame ms': +p95(frames).toFixed(1), 'cpu ms/frame': +med(cpu).toFixed(2), gpu };
+    rows.push(row);
+    onRow?.(row);
+  }
+  editor.load(JSON.parse(saved));
+  return rows;
+}
+
 export function serialize(): string {
   return JSON.stringify(st().project);
 }

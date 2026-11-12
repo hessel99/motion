@@ -7,7 +7,7 @@ import { AgentPanel } from './AgentPanel';
 import { useChannels } from './hooks';
 import { showContextMenu, type MenuItem } from './menu';
 import {
-  exportLottie, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, toast,
+  exportLottie, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, toast, runBenchmark,
 } from '../app/actions';
 import { setProjectName, editMode, newComposition, addPrecompLayer, renameComp } from '../core/commands';
 
@@ -33,6 +33,7 @@ export function App() {
       <aside class="right"><Inspector /></aside>
       <section class="bottom"><TimelineHost /></section>
       <ShortcutHelp />
+      <Benchmark />
     </div>
   );
 }
@@ -69,6 +70,7 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
           { label: '2,000 mixed (text, stars, shapes, groups)', action: () => loadStress(2000, ['rect', 'ellipse', 'text', 'path'], true) },
         ],
       },
+      { label: 'Run performance benchmark', action: () => editor.emit('benchmark') },
       { separator: true },
       { label: editor.showHud ? 'Hide performance HUD' : 'Show performance HUD', action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
       { label: editor.snapPlaybackToFrames ? 'Play smooth (display refresh)' : 'Play at composition fps', action: () => { editor.snapPlaybackToFrames = !editor.snapPlaybackToFrames; toast(editor.snapPlaybackToFrames ? 'Playback snaps to composition frames' : 'Playback is smooth (every display frame)'); } },
@@ -239,6 +241,28 @@ function ShortcutHelp() {
       <div class="help" onClick={e => e.stopPropagation()}>
         <div class="help-title">Keyboard shortcuts <button class="ghost" onClick={() => setOpen(false)}>✕</button></div>
         <div class="help-grid">{SHORTCUTS.map(([k, d]) => <><kbd>{k}</kbd><span>{d}</span></>)}</div>
+      </div>
+    </div>
+  );
+}
+
+function Benchmark() {
+  const [rows, setRows] = useState<Record<string, string | number>[] | null>(null);
+  const [running, setRunning] = useState(false);
+  useEffect(() => editor.on('benchmark', async () => {
+    setRows([]); setRunning(true);
+    try { await runBenchmark(r => setRows(x => [...(x ?? []), r])); } finally { setRunning(false); }
+  }), []);
+  if (!rows) return null;
+  return (
+    <div class="help-backdrop" onClick={() => !running && setRows(null)}>
+      <div class="help" onClick={e => e.stopPropagation()}>
+        <div class="help-title">Performance benchmark {running ? <span class="muted small">running… (every layer animates position, rotation, scale, opacity, color). your project is restored afterwards; undo history is reset.</span> : <button class="ghost" onClick={() => setRows(null)}>✕</button>}</div>
+        <table class="bench">
+          <thead><tr><th>layers</th><th>fps</th><th>p95 frame</th><th>cpu / frame</th></tr></thead>
+          <tbody>{rows.map(r => <tr><td>{(r.layers as number).toLocaleString()}</td><td>{r.fps}</td><td>{r['p95 frame ms']} ms</td><td>{r['cpu ms/frame']} ms</td></tr>)}</tbody>
+        </table>
+        {rows[0] && <div class="muted small" style={{ marginTop: '10px' }}>GPU: {rows[0].gpu}. fps is capped by your display refresh rate; cpu/frame is the editor's own work per frame.</div>}
       </div>
     </div>
   );
