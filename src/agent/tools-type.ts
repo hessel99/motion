@@ -27,14 +27,14 @@ function measure(content: string, font: string, size: number, weight: number, lh
 }
 
 /** move a layer out of its container (parent children or comp root) */
-function detach(tx: Tx, l: Layer) {
+export function detach(tx: Tx, l: Layer) {
   const s = st();
   if (l.parent) { const p = s.layer(l.parent)!; tx.set(p, 'children', p.children.filter(c => c !== l.id)); }
   else for (const c of Object.values(s.project.comps)) if (c.root.includes(l.id)) tx.set(c, 'root', c.root.filter(x => x !== l.id));
 }
 
 /** split text layer `l` into one text layer per unit inside a new group (same place on screen) */
-function splitTx(tx: Tx, l: Layer, by: 'char' | 'word' | 'line', keep: boolean, units?: { text: string; x: number; y: number; w: number; h: number }[]) {
+export function splitTx(tx: Tx, l: Layer, by: 'char' | 'word' | 'line', keep: boolean, units?: { text: string; x: number; y: number; w: number; h: number }[]) {
   const s = st();
   const [w, h] = layerSize(s, l, s.time);
   const sz = l.props.size?.v ?? [0, 0];

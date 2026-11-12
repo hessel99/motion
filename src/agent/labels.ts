@@ -69,6 +69,10 @@ export function toolLabel(rawName: string, input: any, layerName: (id: string) =
     case 'timeline_summary': return 'Read the timeline';
     case 'preview_strip': return `Preview strip${a.layout ? ' (' + a.layout + ')' : ''}`;
     case 'preview_video': return 'Render GIF preview';
+    case 'inspect_artwork': return `Look at the parts of ${a.id ? ln(a.id) : a.ids?.length ? lns(a.ids) : 'the selection'}`;
+    case 'split_shape': return `Split ${ln(a.id)} into ${a.mode === 'subpaths' ? 'contours' : 'parts'}`;
+    case 'set_pivot': return `Move pivot of ${a.id ? ln(a.id) : lns(a.ids)}${typeof a.at === 'string' ? ' to ' + a.at : ''}`;
+    case 'rig': return `Rig ${a.kind ?? ''} on ${lns(a.ids)}`;
     default: return name.replace(/_/g, ' ');
   }
 }
