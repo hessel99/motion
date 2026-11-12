@@ -1,0 +1,32 @@
+/* audio: action cards, inspector rows, sound-effect picker. tokens only (see tokens.css) */
+.toast.au-card { pointer-events: auto; display: flex; flex-direction: column; gap: var(--space-3); min-width: 280px; max-width: 420px; padding: var(--space-5) var(--space-6); }
+.au-card-title { font-weight: 600; }
+.au-card-detail { color: var(--text-muted); font-size: var(--font-sm, 12px); }
+.au-card-actions { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; }
+.au-card-btn { background: var(--btn-bg); color: var(--text); border: 0; border-radius: var(--radius-md, 6px); padding: 4px 10px; cursor: pointer; font: inherit; }
+.au-card-btn:hover { background: var(--btn-bg-hover); }
+.au-card-btn.primary { background: var(--accent-solid); color: var(--text-on-accent); }
+.au-card-btn.primary:hover { background: var(--accent-solid-hover); }
+.au-card-x { margin-left: auto; background: none; border: 0; color: var(--text-muted); cursor: pointer; font: inherit; padding: 2px 4px; }
+.au-card-x:hover { color: var(--text); }
+
+.au-rows { display: flex; flex-direction: column; gap: var(--space-3); }
+.au-row { display: flex; align-items: center; gap: var(--space-3); min-height: 26px; }
+.au-row > .au-label { width: 72px; flex: none; color: var(--text-muted); font-size: var(--font-sm, 12px); }
+.au-row > .au-grow { flex: 1; min-width: 0; display: flex; gap: var(--space-2); align-items: center; }
+.au-stat { color: var(--text-secondary); font-variant-numeric: tabular-nums; font-size: var(--font-sm, 12px); }
+.au-chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px; border-radius: 999px; background: var(--surface-2); color: var(--text-secondary); font-size: 11px; }
+.au-sections { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--surface-0); }
+.au-sections > span { display: block; height: 100%; }
+.au-btn { background: var(--btn-bg); color: var(--text); border: 0; border-radius: var(--radius-md, 6px); padding: 3px 8px; cursor: pointer; font: inherit; font-size: 12px; white-space: nowrap; }
+.au-btn:hover { background: var(--btn-bg-hover); }
+.au-btn.primary { background: var(--accent-solid); color: var(--text-on-accent); }
+.au-btn:disabled { opacity: 0.5; cursor: default; }
+.au-tap { min-width: 64px; }
+.au-tap.flash { background: var(--accent-soft); }
+.au-sfx { display: grid; grid-template-columns: 1fr; gap: var(--space-2); }
+.au-sfx-fam { display: flex; align-items: center; gap: var(--space-3); padding: 4px 6px; border-radius: var(--radius-md, 6px); background: var(--surface-0); }
+.au-sfx-fam.on { outline: 1px solid var(--accent-soft-border); background: var(--accent-soft); }
+.au-sfx-fam .au-sfx-name { flex: 1; min-width: 0; }
+.au-sfx-fam .au-sfx-hint { color: var(--text-muted); font-size: 11px; }
+.au-play { width: 22px; height: 22px; padding: 0; display: grid; place-items: center; border-radius: 50%; }

@@ -5,6 +5,7 @@ import type { Store } from '../core/store';
 import type { Layer } from '../core/model';
 import { PROP_KEYS } from '../core/model';
 import { fmtTime } from './describe';
+import { music, musicLayer, sections } from '../audio/timing';
 
 const MAX_LIST = 24;
 
@@ -46,6 +47,12 @@ export function editorContext(store: Store, mentioned: Layer[] = []): string {
   lines.push(`comp ${JSON.stringify(c.name)} ${c.width}x${c.height} ${c.fps}fps ${fmtTime(c.duration)}, ${Object.keys(store.project.layers).length} layers; playhead ${fmtTime(store.time)}${store.workArea ? `; work area ${fmtTime(store.workArea[0])}–${fmtTime(store.workArea[1])}` : ''}`);
   const mk = c.markers ?? [];
   if (mk.length) lines.push(`markers: ${mk.slice(0, MAX_LIST).map(m => `${fmtTime(m.t)}${m.label ? ' ' + JSON.stringify(m.label) : ''}`).join(', ')}${mk.length > MAX_LIST ? ` (+${mk.length - MAX_LIST})` : ''}`);
+  const ml = musicLayer(store);
+  if (ml) {
+    const m = music(store);
+    lines.push(m ? `music: ${JSON.stringify(ml.name)} id=${ml.id} ${Math.round(m.a.bpm)} BPM ${m.a.meter}/4, ${fmtTime(m.from)}–${fmtTime(m.to)}, sections ${sections(m).map(x => `${x.label}@${fmtTime(x.t0)}`).join(' ')} (get_audio_analysis for beats/accents; design to it)`
+      : `music: ${JSON.stringify(ml.name)} id=${ml.id} (analysing; get_audio_analysis waits for it)`);
+  }
   const sel = store.selection.map(id => store.layer(id)).filter(Boolean) as Layer[];
   if (sel.length) {
     lines.push(`selected (${sel.length}, in selection order):`);

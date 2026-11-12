@@ -14,6 +14,7 @@ import { invert } from './viewport-controller';
 import { toast } from '../app/actions';
 import { EaseStudio, showClassicEase, studioEnabled, StudioSwitch } from './patterns/EaseStudio';
 import { RhythmPanel } from './patterns/RhythmPanel';
+import { AudioInspector } from './audio/AudioInspector';
 import { Checkbox, ColorSwatch, NumField, Section, Segmented, Slider } from './ui';
 import { ComponentBox, LinkButton, LinkedChip, sharedLink } from './LinkControls';
 import { exportAeScript, exportFramePng, exportGifFile, exportLottie } from '../app/actions';
@@ -99,42 +100,8 @@ function PropRow(props: { layers: Layer[]; prop: PropKey; label: string; childre
 
 // ---------------- layer panel ----------------
 function LayerPanel({ layers }: { layers: Layer[] }) {
-  if (layers.every(x => x.type === 'audio')) return <AudioPanel layers={layers} />;
+  if (layers.every(x => x.type === 'audio')) return <AudioInspector layers={layers} />;
   return <VisualLayerPanel layers={layers} />;
-}
-
-/** onset detection on the clip, one marker per beat inside the clip's visible range (one undo step) */
-async function markBeats(l: Layer) {
-  const store = st();
-  const asset = l.imageRef ? store.project.assets[l.imageRef] : undefined;
-  if (!asset) return;
-  const [{ loadAudioBuffer }, { detectOnsets }] = await Promise.all([import('../audio/engine'), import('../audio/beats')]);
-  const buf = await loadAudioBuffer(asset);
-  if (!buf) { toast('Audio could not be decoded', 'error'); return; }
-  const off = l.startTime ?? 0, c = store.comp;
-  const times = detectOnsets(buf).map(t => t + off).filter(t => t >= Math.max(0, l.inPoint) && t < Math.min(l.outPoint, c.duration));
-  if (!times.length) { toast('No beats found in this clip'); return; }
-  const before = c.markers?.length ?? 0;
-  store.batch('beats', () => { for (const t of times) addMarker(store, t); }, 'Markers on beats');
-  toast(`${(c.markers?.length ?? 0) - before} markers added`);
-}
-
-function AudioPanel({ layers }: { layers: Layer[] }) {
-  const store = st();
-  const l = layers[0];
-  const ids = layers.map(x => x.id);
-  return (
-    <Section title={layers.length > 1 ? `${layers.length} audio layers` : l.name} right={<span class="insp-type">audio</span>}>
-      <div class="row">
-        <span class="field-label">Volume</span>
-        <Slider label="Volume" min={0} max={1} step={0.01} value={l.volume ?? 1} style={{ flex: 1 }} onChange={v => setLayerField(store, ids, 'volume', v, 'Volume')} />
-        <span class="small">{Math.round((l.volume ?? 1) * 100)}%</span>
-      </div>
-      <div class="row"><NumField label="Start" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={(n, mk) => store.transact('Audio start', tx => { for (const id of ids) { const x = store.layer(id); if (x) { tx.set(x, 'startTime', n); tx.touch(id); } } }, mk)} /></div>
-      <div class="row"><button type="button" class="btn" title="Detect beats/onsets in this clip and add a timeline marker on each" onClick={() => markBeats(l)}>Add markers on beats</button></div>
-      <div class="muted small">Drag the waveform in the timeline to move it. Exported videos include audio.</div>
-    </Section>
-  );
 }
 
 function VisualLayerPanel({ layers }: { layers: Layer[] }) {

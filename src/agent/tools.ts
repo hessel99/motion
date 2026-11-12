@@ -31,6 +31,7 @@ import { ANALYSIS_TOOLS } from './tools-analysis';
 import { PREVIEW_TOOLS } from './tools-preview';
 import { SHAPE_TOOLS } from './tools-shapes';
 import { MOTION_TOOLS } from './tools-motion';
+import { AUDIO_TOOLS } from './tools-audio';
 
 function summarize(l: Layer, deep: boolean): any {
   const t = st().time;
@@ -651,6 +652,7 @@ export const TOOLS: ToolDef[] = [
   ...ANALYSIS_TOOLS,
   ...PREVIEW_TOOLS,
   ...GUIDE_TOOLS,
+  ...AUDIO_TOOLS,
 ];
 
 export { AGENT_SYSTEM_PROMPT, ASK_MODE_PROMPT } from './prompt';

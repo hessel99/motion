@@ -72,6 +72,14 @@ export function toolLabel(rawName: string, input: any, layerName: (id: string) =
     case 'get_guide': return a.name ? `Read guide ${q(a.name + (a.section ? ' › ' + a.section : ''))}` : 'List guides';
     case 'propose_storyboard': return `Storyboard ${q(a.title ?? '')}${Array.isArray(a.beats) ? ` · ${plural(a.beats.length, 'beat')}` : ''}`;
     case 'update_progress': return `Beat ${a.beat} ${a.status === 'active' ? 'started' : a.status ?? ''}`;
+    case 'get_audio_analysis': return a.from !== undefined || a.to !== undefined ? `Listen to ${a.from ?? 0}–${a.to ?? 'end'}s` : 'Listen to the music';
+    case 'sync_to_audio': return `Sync ${a.ids?.length ? lns(a.ids) : 'animation'} to the ${a.mode ?? 'beats'}`;
+    case 'audio_reactive': return `${a.prop ?? ''} of ${lns(a.ids)} follows the ${a.band ?? 'music'}`;
+    case 'place_on_beats': return a.what === 'markers' ? `Markers on ${a.pattern ?? 'beats'}` : `Entrances on ${a.pattern ?? 'beats'}`;
+    case 'list_sfx_families': return 'Sound families';
+    case 'preview_sfx': return `Preview ${q(a.family ?? '')} sounds`;
+    case 'add_sound_effects': return `Sound effects · ${a.family ?? ''}`;
+    case 'set_sfx_family': return `Sound family → ${q(a.family ?? '')}`;
     default: return name.replace(/_/g, ' ');
   }
 }

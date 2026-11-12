@@ -157,13 +157,19 @@ export function download(name: string, data: string | Blob, mime: string) {
 export async function openFileDialog() {
   const n = native();
   if (n) {
-    const f = await n.openFile({});
+    // filters from here (the shell's defaults predate audio import)
+    const f = await n.openFile({ filters: [
+      { name: 'All supported', extensions: ['motion', 'aep', 'json', 'svg', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac'] },
+      { name: 'Motion project', extensions: ['motion'] }, { name: 'After Effects project', extensions: ['aep'] }, { name: 'Lottie', extensions: ['json'] },
+      { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'] }, { name: 'SVG', extensions: ['svg'] },
+      { name: 'Audio', extensions: ['mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac'] }, { name: 'All files', extensions: ['*'] },
+    ] });
     if (f) await openData(f.name, f.data, f.path);
     return;
   }
   const inp = document.createElement('input');
   inp.type = 'file';
-  inp.accept = '.motion,.json,.aep,.svg,image/*,audio/*';
+  inp.accept = '.motion,.json,.aep,.svg,image/*,audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac';
   inp.onchange = async () => { for (const f of inp.files ?? []) await openBrowserFile(f); };
   inp.click();
 }
@@ -216,6 +222,10 @@ export async function openData(name: string, data: string, path?: string) {
     if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
       const blob = new Blob([b64ToBuf(data)], { type: 'image/' + (ext === 'jpg' ? 'jpeg' : ext) });
       return importImage(new File([blob], name, { type: blob.type }));
+    }
+    if (['mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac'].includes(ext)) {
+      const type = { mp3: 'audio/mpeg', wav: 'audio/wav', m4a: 'audio/mp4', aac: 'audio/aac', ogg: 'audio/ogg', flac: 'audio/flac' }[ext]!;
+      return importAudio(new File([b64ToBuf(data)], name, { type }));
     }
     throw new Error(`unsupported file type .${ext}`);
   } catch (e: any) {
@@ -367,15 +377,8 @@ async function importSvgText(text: string) {
 }
 
 async function importAudio(f: File) {
-  const data = await new Promise<string>((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result as string); r.onerror = rej; r.readAsDataURL(f); });
-  const asset: Asset = { id: uid('a'), kind: 'audio', mime: f.type || 'audio/mpeg', data, width: 0, height: 0 };
-  const { createLayer } = await import('../core/model');
-  const l = createLayer('audio', { x: 0, y: 0, w: 0, h: 0, name: f.name.replace(/\.[^.]+$/, '') });
-  l.imageRef = asset.id;
-  l.startTime = st().time;
-  l.volume = 1;
-  insertLayers({ layers: [l], roots: [l.id], assets: [asset] }, { label: 'Import audio' });
-  toast(`Audio added at ${st().time.toFixed(2)}s`);
+  const { importAudioFile } = await import('../audio/import');
+  return importAudioFile(f);
 }
 
 async function importImage(f: File) {
@@ -522,7 +525,9 @@ export async function handlePaste(e: ClipboardEvent) {
     if (textData.startsWith(CLIP_PREFIX)) return pasteMotion(textData);
     if (textData.startsWith(KEYS_PREFIX)) return pasteKeys(textData);
     if (/^\s*<svg[\s>]/i.test(textData) || /^\s*<\?xml[\s\S]*<svg/i.test(textData)) return importSvgText(textData);
-    for (const item of cd.files) if (item.type.startsWith('image/') || item.name.endsWith('.svg') || item.name.endsWith('.json')) return openBrowserFile(item);
+    for (const item of cd.files) if (item.type.startsWith('image/') || item.type.startsWith('audio/') || /\.(svg|json|mp3|wav|m4a|aac|ogg|flac)$/i.test(item.name)) return openBrowserFile(item);
+    // some apps put files only in clipboard items (kind 'file')
+    for (const it of cd.items ?? []) { const f = it.kind === 'file' ? it.getAsFile() : null; if (f && (f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name))) return openBrowserFile(f); }
     if (textData.trim().startsWith('{')) {
       const json = JSON.parse(textData);
       if (json.layers && (json.v || json.fr)) return openData('clipboard.json', textData);

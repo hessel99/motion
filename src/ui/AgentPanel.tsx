@@ -58,6 +58,8 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   useEffect(() => editor.store.on('history', () => force(x => x + 1)), []);
   useEffect(() => editor.store.on('selection', () => force(x => x + 1)), []);
   useEffect(() => installVariationThumbs(), []);
+  // a drafted message from elsewhere (e.g. "Ask the agent" on the audio sync card)
+  useEffect(() => editor.on('agent-draft', () => { const t = (editor as any).agentDraft; if (t) { (editor as any).agentDraft = ''; setInput(t); } }), []);
   // keep scrolled to the bottom unless the user scrolled up to read
   useEffect(() => { if (stick.current) list.current?.scrollTo({ top: 1e9 }); }, [msgs, turn]);
   // elapsed timer while a turn runs

@@ -56,6 +56,8 @@ export const PROP_DEFS = {
   trimStart: { label: 'Trim Start', dim: 1, default: [0], unit: '%', min: 0, max: 100 },
   trimEnd: { label: 'Trim End', dim: 1, default: [100], unit: '%', min: 0, max: 100 },
   trimOffset: { label: 'Trim Offset', dim: 1, default: [0], unit: '°' },
+  /** audio layers: gain in percent (keyframable) */
+  volume: { label: 'Volume', dim: 1, default: [100], unit: '%', min: 0, max: 200 },
 } as const;
 
 export type PropKey = keyof typeof PROP_DEFS;
@@ -70,7 +72,7 @@ export const TYPE_PROPS: Record<LayerType, PropKey[]> = {
   path: ['size', 'fill', 'stroke', 'strokeWidth', 'trimStart', 'trimEnd', 'trimOffset'],
   text: ['size', 'fill'],
   image: ['size'],
-  audio: [],
+  audio: ['volume'],
   precomp: ['size'],
 };
 
@@ -171,6 +173,10 @@ export interface Layer {
   imageRef?: string; // asset id
   /** audio: volume 0..1 (startTime = when the clip starts, in comp time) */
   volume?: number;
+  /** audio: fades, mute, tempo overrides (see src/audio/) */
+  audio?: AudioSettings;
+  /** a synthesized sound effect: what it was made from and the motion event it follows */
+  sfx?: SfxLink;
   /** precomp: referenced composition id and when it starts (comp time) */
   compRef?: string;
   startTime?: number;
@@ -180,6 +186,32 @@ export interface Layer {
   sceneKey?: string;
   /** ui state */
   collapsed?: boolean;
+}
+
+export interface AudioSettings {
+  /** seconds */
+  fadeIn?: number;
+  fadeOut?: number;
+  mute?: boolean;
+  /** tempo override (bpm): the beat grid is re-fitted at this tempo */
+  bpm?: number;
+  /** shifts the detected beat grid (seconds) */
+  gridOffset?: number;
+  /** shifts which beat starts a bar */
+  barOffset?: number;
+}
+
+export interface SfxLink {
+  /** sound type (whoosh, pop, ...) and family (character) */
+  type: string;
+  family: string;
+  /** recipe variation 0..1 (e.g. scaled with the move's speed) */
+  intensity: number;
+  /** the layer whose motion triggered it and which event: the sound follows retimes */
+  src?: string;
+  event?: string;
+  /** offset of the sound from the event (s): whooshes start before a landing */
+  lead?: number;
 }
 
 /** an instance layer mirrors one layer of a main component. fields listed in `ov` were changed on the
