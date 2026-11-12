@@ -79,6 +79,27 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
     check('reopening a recent file keeps its thumbnail', thumb);
   }
 
+  // QA-5: a precomp copied into another document pointed at a composition that wasn't there
+  if (w === 1440) {
+    await page.click('text=Open the demo animation').catch(() => {});
+    await page.waitForTimeout(500);
+    await ev(() => { const s = editor.store; s.select(s.comp.root.slice(0, 2)); });
+    await page.keyboard.press('Control+Shift+c'); await page.waitForTimeout(200);
+    await page.keyboard.press('Control+a'); await page.keyboard.press('Control+c');
+    await page.click('.tb-add'); await page.waitForTimeout(300);
+    await page.click('.preset-card >> nth=0').catch(() => {}); await page.waitForTimeout(300);
+    await page.keyboard.press('Control+v'); await page.waitForTimeout(500);
+    const pc = await ev(() => {
+      const s = editor.store, P = s.project;
+      const pre = s.comp.root.map(id => s.layer(id)).filter(l => l.type === 'precomp');
+      return { pre: pre.length, ok: pre.every(l => P.comps[l.compRef]?.root.every(id => P.layers[id])), inner: pre.map(l => P.comps[l.compRef]?.root.length), label: s.undoLabel };
+    });
+    check('precomp pasted into another document brings its composition', pc.pre === 1 && pc.ok && pc.inner[0] === 2 && pc.label === 'Paste', JSON.stringify(pc));
+    await page.keyboard.press('Control+z'); await page.waitForTimeout(200);
+    const undone = await ev(() => ({ n: editor.store.comp.root.length, comps: Object.keys(editor.store.project.comps).length }));
+    check('undoing that paste removes the composition too', undone.n === 0 && undone.comps === 1, JSON.stringify(undone));
+  }
+
   // no horizontal page overflow
   const overflow = await ev(() => document.documentElement.scrollWidth - innerWidth);
   check(`${w}: no horizontal page overflow`, overflow <= 0, `${overflow}px`);

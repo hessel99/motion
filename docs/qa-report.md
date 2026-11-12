@@ -13,6 +13,7 @@ The existing `scripts/e2e.mjs`, `scripts/ui-check.mjs`, `scripts/audio-smoke.mjs
 | QA-2 | A Lottie pasted as text opened in a new tab called "clipboard". It is now named after the animation (`nm`), or "Pasted Lottie". | fixed, `qa-flows` check | see `git log --grep QA-2` |
 | QA-3 | Inspector number fields with a long label shrank the label so it ran into the value: "Spread0", "Density50%", "Background Blur" and the Timing "Out" clipped. The label no longer shrinks (`.num-label`, `src/ui/styles.css`). | fixed, `qa-flows` check | see `git log --grep QA-3` |
 | QA-4 | Reopening a recent file (or closing a background tab) stored "no thumbnail" over the one saved before, so its Home card went blank. The stored thumbnail is now kept unless a new one is given (`src/app/recent.ts`). | fixed, `qa-flows` check | see `git log --grep QA-4` |
+| QA-5 | Copying a precomp layer into another document tab pasted a layer pointing at a composition that only existed in the first document (it rendered nothing; opening it failed). The copy now carries the compositions it shows (nested ones too, with their image assets); the paste adds the missing ones in the same undo step (`copyPayload` / `pasteMotion`, `src/app/actions.ts`). | fixed, `qa-flows` check | see `git log --grep QA-5` |
 
 ## Handed off (layout / chrome: shell agent)
 
