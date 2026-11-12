@@ -359,7 +359,8 @@ export function pathLayer(ctx: BuildCtx, name: string, srcs: PathSrc[], fill?: P
   const l = ctx.make('path', name, tr);
   delete l.props.radius;
   const rule = ruleOverride ?? (fill && (fill.kind === 'fill' || fill.kind === 'gfill') ? fill.rule : 'nonzero');
-  const geo = (paths: PathCmd[][]) => paths.map(cmds => ({ cmds: translateCmds(cmds, -bx, -by), fillRule: rule } as PathGeometry));
+  // one compound path (like ae): even-odd and opposite-winding holes work across sub-paths
+  const geo = (paths: PathCmd[][]): PathGeometry[] => [{ cmds: translateCmds(paths.flat(), -bx, -by), fillRule: rule }];
   l.geometry = geo(first);
   if (keyed) l.pathKf = keyed.map(k => ({ t: k.t, geometry: geo(k.paths), interp: k.interp, out: [k.out[0], k.out[1]], in: [k.in[0], k.in[1]] }));
   l.geomSize = [bw, bh];
@@ -623,7 +624,12 @@ export interface SrcLayerX extends SrcLayer {
 
 export interface AssembleStats { mattes: number; invertedMattes: number; invertedApprox: number; lumaMattes: number }
 
-function cloneProp(p: Prop): Prop { return JSON.parse(JSON.stringify(p)); }
+function cloneProp(p: Prop): Prop {
+  const o: Prop = { v: p.v.slice() };
+  if (p.kf) o.kf = p.kf.map(k => { const n: Keyframe = { ...k, v: k.v.slice(), out: [k.out[0], k.out[1]], in: [k.in[0], k.in[1]] }; if (k.sOut) n.sOut = k.sOut.slice(); if (k.sIn) n.sIn = k.sIn.slice(); return n; });
+  if (p.expr) o.expr = p.expr;
+  return o;
+}
 
 /** invert a path layer's coverage inside `box` (layer space of the path's parent): box + path, even-odd */
 function invertPathLayer(l: Layer, box: [number, number, number, number]): boolean {
@@ -899,10 +905,11 @@ function withExpr(p: Prop, lp: any): Prop {
 }
 
 /** keyframed lottie shape (sh ks / mask pt) -> path source with keys */
-function lpathSrc(lp: any, c: LCtx): PathSrc {
+function lpathSrc(lp: any, c: LCtx, closed?: boolean): PathSrc {
   const k = lp?.k;
   const animated = Array.isArray(k) && k.length > 0 && typeof k[0] === 'object' && k[0] !== null && 't' in k[0];
-  const shape = (s: any) => (Array.isArray(s) ? s[0] : s);
+  // old exports put `closed` on the shape item instead of `c` on each shape
+  const shape = (s: any) => { const v = Array.isArray(s) ? s[0] : s; return closed !== undefined && v && typeof v === 'object' && v.c === undefined ? { ...v, c: closed } : v; };
   if (!animated) return { cmds: lpathCmds(shape(k)) };
   const keys: PathAnimKey[] = [];
   let prevEnd: any = null;
@@ -923,16 +930,33 @@ function lpathSrc(lp: any, c: LCtx): PathSrc {
     if (a.interp === 'bezier' && Math.abs(a.out[0] - a.out[1]) < 1e-9 && Math.abs(b.in[0] - b.in[1]) < 1e-9) a.interp = 'linear';
   }
   if (!keys.length) return { cmds: [] };
-  if (keys.length === 1 || keys.every(kk => JSON.stringify(kk.cmds) === JSON.stringify(keys[0].cmds))) return { cmds: keys[0].cmds };
+  if (keys.length === 1 || keys.every(kk => cmdsEqual(kk.cmds, keys[0].cmds))) return { cmds: keys[0].cmds };
   return { cmds: keys[0].cmds, keys };
 }
 
 function lpathCmds(sh: any): PathCmd[] {
-  if (!sh || typeof sh !== 'object') return [];
-  const v = Array.isArray(sh.v) ? sh.v.map(arr) : [];
-  const ti = Array.isArray(sh.i) ? sh.i.map(arr) : [];
-  const to = Array.isArray(sh.o) ? sh.o.map(arr) : [];
-  return bezierCmds(v, ti, to, !!sh.c);
+  if (!sh || typeof sh !== 'object' || !Array.isArray(sh.v) || !sh.v.length) return [];
+  const v = sh.v, ti = Array.isArray(sh.i) ? sh.i : [], to = Array.isArray(sh.o) ? sh.o : [];
+  const n = v.length;
+  const X = (p: any, d: number) => (Array.isArray(p) ? num(p[d]) : 0);
+  const cmds: PathCmd[] = [['M', X(v[0], 0), X(v[0], 1)]];
+  const seg = (a: number, b: number) => {
+    const ax = X(v[a], 0), ay = X(v[a], 1), bx = X(v[b], 0), by = X(v[b], 1);
+    cmds.push(['C', ax + X(to[a], 0), ay + X(to[a], 1), bx + X(ti[b], 0), by + X(ti[b], 1), bx, by]);
+  };
+  for (let k = 0; k < n - 1; k++) seg(k, k + 1);
+  if (sh.c) { if (n > 1) seg(n - 1, 0); cmds.push(['Z']); }
+  return cmds;
+}
+
+function cmdsEqual(a: PathCmd[], b: PathCmd[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const x = a[i], y = b[i];
+    if (x.length !== y.length || x[0] !== y[0]) return false;
+    for (let k = 1; k < x.length; k++) if (x[k] !== y[k]) return false;
+  }
+  return true;
 }
 
 function starCmds(sr: any): PathCmd[] {
@@ -1005,7 +1029,7 @@ function lshapes(items: any[], c: LCtx): ShapeNode[] {
           out.push({ kind: 'ellipse', name: name || 'Ellipse', size: lprop(it.s, v2, [100, 100], c), position: lprop(it.p, v2, [0, 0], c) });
           break;
         case 'sh': {
-          const src = lpathSrc(it.ks, c);
+          const src = lpathSrc(it.ks, c, typeof it.closed === 'boolean' ? it.closed : undefined);
           out.push({ kind: 'path', name: name || 'Path', cmds: src.cmds, keys: src.keys });
           break;
         }
@@ -1136,6 +1160,20 @@ function withMasks(ctx: BuildCtx, name: string, regions: MaskRegion[], t: TR, so
   return outer;
 }
 
+/**
+ * shape / text layers have no bounds of their own: the area a subtract / inverted mask keeps is
+ * the comp (mapped into layer space with the layer's first transform values) plus margin.
+ */
+function compBoxInLayer(tr: TR, cw: number, ch: number): [number, number, number, number] {
+  const p = firstValue(tr.position), a = firstValue(tr.anchor), sc = firstValue(tr.scale);
+  const sx = Math.abs(sc[0]) / 100 || 1, sy = Math.abs(sc[1]) / 100 || 1;
+  const r = Math.abs(firstValue(tr.rotation)[0] ?? 0) % 180 > 1e-6;
+  let x0 = (0 - p[0]) / sx + a[0], y0 = (0 - p[1]) / sy + a[1], x1 = (cw - p[0]) / sx + a[0], y1 = (ch - p[1]) / sy + a[1];
+  if (r) { const m = Math.max(x1 - x0, y1 - y0); const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2; x0 = cx - m; x1 = cx + m; y0 = cy - m; y1 = cy + m; }
+  const px = (x1 - x0) * 0.1, py = (y1 - y0) * 0.1;
+  return [x0 - px, y0 - py, x1 - x0 + 2 * px, y1 - y0 + 2 * py];
+}
+
 // ---------------- precomp time ----------------
 
 /**
@@ -1224,7 +1262,7 @@ export function lottieToProject(json: any, name?: string, stats?: LottieImportSt
         ty === 1 ? [0, 0, num(L.sw, 100), num(L.sh, 100)]
         : ty === 0 ? [0, 0, num(L.w, num(a?.w, cw)), num(L.h, num(a?.h, ch))]
         : ty === 2 ? [0, 0, num(a?.w, 100), num(a?.h, 100)]
-        : [0, 0, cw, ch];
+        : compBoxInLayer(tr, cw, ch);
       const content = (t: TR): Layer | null => {
         switch (ty) {
           case 4: countShapes(L.shapes); return buildShapeLayer(ctx, lname, lshapes(L.shapes, c), t);
@@ -1293,7 +1331,7 @@ export function lottieToProject(json: any, name?: string, stats?: LottieImportSt
         matte: num(L.tt, 0) || undefined,
         matteSource: L.td === 1 || L.td === true,
         matteParent: L.tp ?? undefined,
-        box,
+        box: [0, 0, cw, ch],
         build: (t: TR) => {
           try {
             const regions = ty === 3 ? [] : maskRegions(masks, c, box);

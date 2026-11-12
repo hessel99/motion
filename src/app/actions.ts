@@ -31,6 +31,22 @@ const native = () => (globalThis as any).motionNative as undefined | {
 
 let currentPath: string | null = null;
 
+// ---------------- dirty state + window title ----------------
+let savedAt = 0; // undo stack length at the last save/open
+export function markSaved() { savedAt = st().historyLength; updateTitle(); }
+export function isDirty() { return st().historyLength !== savedAt; }
+function updateTitle() {
+  const name = st().project.name || 'Untitled';
+  document.title = `${isDirty() ? '● ' : ''}${name} — Motion`;
+}
+export function setupTitle() {
+  st().on('history', updateTitle);
+  st().on('doc', updateTitle);
+  editor.on('loaded', () => { savedAt = st().historyLength; updateTitle(); });
+  window.addEventListener('beforeunload', e => { if (isDirty() && !(window as any).__noUnloadGuard) { e.preventDefault(); e.returnValue = ''; } });
+  updateTitle();
+}
+
 export function toast(msg: string, kind: 'info' | 'error' = 'info') {
   const el = document.createElement('div');
   el.className = 'toast ' + kind;
@@ -99,10 +115,11 @@ export async function saveProject(saveAs = false) {
   const n = native();
   if (n) {
     const p = await n.saveFile({ defaultPath: saveAs || !currentPath ? name : currentPath, path: saveAs ? undefined : currentPath, data, filters: [{ name: 'Motion project', extensions: ['motion'] }] });
-    if (p) { currentPath = p; toast('Saved'); }
+    if (p) { currentPath = p; markSaved(); toast('Saved'); }
     return;
   }
   download(name, data, 'application/json');
+  markSaved();
 }
 
 export function download(name: string, data: string | Blob, mime: string) {

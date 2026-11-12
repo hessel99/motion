@@ -188,6 +188,15 @@ function createWindow() {
     },
   });
   win.once('ready-to-show', () => win && win.show());
+  // the renderer blocks unload while there are unsaved changes: ask natively
+  win.webContents.on('will-prevent-unload', (e) => {
+    if (process.env.MOTION_TEST) { e.preventDefault(); return; } // automated tests: never block on a dialog
+    const choice = dialog.showMessageBoxSync(win, {
+      type: 'question', buttons: ['Close without saving', 'Cancel'], defaultId: 1, cancelId: 1,
+      message: 'You have unsaved changes', detail: 'An autosave copy is kept and restored next time, but the project file itself is not saved.',
+    });
+    if (choice === 0) e.preventDefault(); // ignore beforeunload and close
+  });
   win.on('closed', () => { win = null; });
 
   // External links open in the system browser, never in-app.
