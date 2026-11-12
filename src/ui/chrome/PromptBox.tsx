@@ -3,7 +3,8 @@
 // chips or from the brief itself); files dropped on it (a logo, an SVG, an image, audio) come in
 // as layers; a Figma frame is pasted with ⌘V anywhere.
 
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
+import { agentClient } from '../../agent/client';
 import { editor } from '../../app/editor';
 import { openBrowserFile } from '../../app/actions';
 import { setCompSettings } from '../../core/commands';
@@ -36,6 +37,9 @@ export function PromptBox(props: { fresh: boolean }) {
   const [text, setText] = useState('');
   const [format, setFormat] = useState<Format | null>(null);
   const [over, setOver] = useState(false);
+  const [, force] = useState(0);
+  useEffect(() => agentClient.on(() => force(x => x + 1)), []);
+  const status = agentClient.status;
   const target = (): void => {
     const f = format ?? formatFromBrief(text) ?? '16:9';
     const [w, h] = SIZES[f];
@@ -77,6 +81,13 @@ export function PromptBox(props: { fresh: boolean }) {
           <button type="button" class="send-btn primary" aria-label="Start" title="Start (Enter)" disabled={!text.trim()} onClick={submit}><ArrowUp /></button>
         </div>
       </div>
+      {status !== 'connected' && (
+        <div class="prompt-offline" role="status" data-testid="prompt-offline">
+          <span class={'dot ' + status} aria-hidden="true" />
+          {status === 'connecting' ? 'Connecting to the agent…' : 'The agent is offline: your brief will wait and start once it connects.'}
+          {status === 'offline' && <button type="button" class="link" onClick={() => agentClient.reconnect()}>Reconnect</button>}
+        </div>
+      )}
       <div class="prompt-chips">
         {STARTERS.map(s => (
           <button type="button" class="prompt-chip" onClick={() => { setText(s.brief); if (s.format) setFormat(s.format); }}>{s.label}</button>
