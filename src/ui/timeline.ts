@@ -279,15 +279,16 @@ export class Timeline {
     g.fillStyle = '#8a8a93';
     g.font = '11px system-ui, sans-serif';
     // (layer count lives in the search box placeholder area)
-    // keys / graph toggle
-    const tx0 = this.leftW - 112;
-    for (const [i, label] of ['Keys', 'Graph'].entries()) {
-      const on = (i === 1) === this.graphMode;
-      const bx = tx0 + i * 52;
+    // keys / graph / speed toggle
+    const tx0 = this.leftW - 150;
+    for (const [i, label] of ['Keys', 'Graph', 'Speed'].entries()) {
+      const mode = !this.graphMode ? 0 : this.graph.speed ? 2 : 1;
+      const on = i === mode;
+      const bx = tx0 + i * 48;
       g.fillStyle = on ? 'rgba(76,141,255,0.25)' : 'rgba(255,255,255,0.04)';
-      g.beginPath(); g.roundRect(bx, 5, 48, HEADER_H - 10, 4); g.fill();
+      g.beginPath(); g.roundRect(bx, 5, 44, HEADER_H - 10, 4); g.fill();
       g.fillStyle = on ? '#cfe0ff' : '#8a8a93';
-      g.fillText(label, bx + 24 - g.measureText(label).width / 2, HEADER_H / 2);
+      g.fillText(label, bx + 22 - g.measureText(label).width / 2, HEADER_H / 2);
     }
 
     // scrollbars
@@ -559,8 +560,10 @@ export class Timeline {
     const hs = this.hScroll();
     if (hs && y > this.h - 10 && x > this.leftW) { this.drag = { kind: 'hscroll', sx: x, s0: this.scrollT }; return; }
     if (y < HEADER_H && Math.abs(x - this.tToX(st.comp.duration)) < 5) { this.drag = { kind: 'compEnd' }; st.beginGesture('duration'); return; }
-    if (y < HEADER_H && x < this.leftW && x >= this.leftW - 112 && x < this.leftW - 8) {
-      this.graphMode = x >= this.leftW - 60;
+    if (y < HEADER_H && x < this.leftW && x >= this.leftW - 150 && x < this.leftW - 6) {
+      const i = Math.floor((x - (this.leftW - 150)) / 48);
+      this.graphMode = i >= 1;
+      this.graph.speed = i === 2;
       this.baseDirty = true;
       return;
     }

@@ -17,7 +17,9 @@ const ref = await browser.newPage({ viewport: { width: 640, height: 640 } });
 await ref.setContent('<div id="c" style="width:600px;height:600px;background:#121214"></div>');
 await ref.addScriptTag({ content: readFileSync(playerPath, 'utf8') });
 const refShots = [];
-await ref.evaluate(a => { window.anim = lottie.loadAnimation({ container: document.getElementById('c'), renderer: 'canvas', loop: false, autoplay: false, animationData: a }); }, anim);
+// REF_RENDERER=svg uses lottie-web's svg renderer (implements mask modes and inverted mattes the
+// after effects way; the canvas renderer unions all masks regardless of mode)
+await ref.evaluate(([a, r]) => { window.anim = lottie.loadAnimation({ container: document.getElementById('c'), renderer: r, loop: false, autoplay: false, animationData: a }); }, [anim, process.env.REF_RENDERER || 'canvas']);
 await ref.waitForTimeout(500);
 for (const f of times) {
   await ref.evaluate(f => window.anim.goToAndStop(f * window.anim.totalFrames, true), f);
