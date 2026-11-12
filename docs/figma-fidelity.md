@@ -175,3 +175,34 @@ renders, so they never change the look.
 5. Figma-exact noise / texture / glass: compare against the ground-truth screenshots of the stress
    harness and tune.
 6. Shader paints / effects: the shader runtime plugs into the hooks above.
+
+## Measured (fidelity harness, `npm run fidelity`, 1x, Nov 12 2026)
+
+Second round, fixed against Figma's own renders (`docs/figma-fidelity-report.md` explains the harness):
+
+| group | cases | before | after |
+|---|---|---|---|
+| blend | 20 | 71.2 | 99.6 |
+| effect | 18 | 80.8 | 87.0 (noise is random grain: statistics match Figma, pixels can't) |
+| text | 23 | 89.9 | 94.2 |
+| paint | 24 | 97.9 | 99.0 |
+| mask | 5 | 97.6 | 98.8 |
+| shape | 16 | 99.3 | 99.7 |
+| stroke | 15 | 98.4 | 98.5 |
+| instance | 6 | 98.4 | 99.3 |
+| combo | 3 | 62.3 | 68.8 (2 of 3 need the shader runtime) |
+| svg (vs chromium) | 29 | 87.6 | 98.9 |
+| **all figma frames** | 146 | **89.6** | **95.4** |
+
+What changed: backdrop copies by blit (the canvas framebuffer has no alpha, so the old copy came out
+black: every backdrop blend mode, background blur and glass showed nothing), darken and blends inside
+isolated groups through the shader, NORMAL groups isolate their children's blend modes, soft light on
+Figma's curve; noise grain fitted to Figma (cell = noise size / 2, coverage density², graded strength,
+duo = two grain colors); image filter curves fitted to Figma's render; nearest-neighbour image
+upsampling; text line metrics from the font (auto line height = ascender + descender, half leading),
+run-aware wrapping, list indents, justify, text strokes; mitered outside strokes; nested clips; four
+more OFL families loaded on first use; SVG clip-path / mask / patterns / css selectors / spreadMethod /
+nested svg / symbols / images / dashes / filters / tspans.
+
+Still open: Roboto Flex named instances (width / optical size axes), noise is not Figma's exact random
+pattern, glass rim / refraction tuning, SVG markers and radial focal points.

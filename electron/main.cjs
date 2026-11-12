@@ -39,6 +39,12 @@ if (process.platform === 'linux') app.commandLine.appendSwitch('enable-unsafe-we
 /** @type {BrowserWindow | null} */
 let win = null;
 let bridge = null;
+/** figma shader sources: app-level cache in userData, sign-in tokens encrypted with the os keychain */
+function bridgeOpts() {
+  const { safeStorage } = require('electron');
+  const box = safeStorage.isEncryptionAvailable() ? { encrypt: (t) => safeStorage.encryptString(t), decrypt: (b) => safeStorage.decryptString(b) } : null;
+  return { dataDir: app.getPath('userData'), secretBox: box };
+}
 let bridgeReady = null;
 // per-launch secret: the packaged app loads file:// (Origin "null"), which websites can fake, so
 // the bridge additionally requires this token from such origins
@@ -50,9 +56,9 @@ function startBridge() {
     const mod = await import(pathToFileURL(path.join(__dirname, '..', 'bridge', 'server.mjs')).href);
     const preferred = Number(process.env.MOTION_BRIDGE_PORT || 7823);
     try {
-      bridge = await mod.startBridge({ port: preferred, token: BRIDGE_TOKEN });
+      bridge = await mod.startBridge({ port: preferred, token: BRIDGE_TOKEN, ...bridgeOpts() });
     } catch (e) {
-      if (e && e.code === 'EADDRINUSE') bridge = await mod.startBridge({ port: 0, token: BRIDGE_TOKEN }); // another instance owns 7823
+      if (e && e.code === 'EADDRINUSE') bridge = await mod.startBridge({ port: 0, token: BRIDGE_TOKEN, ...bridgeOpts() }); // another instance owns 7823
       else throw e;
     }
     return bridge.port;
@@ -102,6 +108,7 @@ async function saveDialog(opts) {
 }
 
 ipcMain.handle('bridge:port', () => startBridge());
+ipcMain.handle('window:isFullScreen', (e) => { const w = BrowserWindow.fromWebContents(e.sender); return !!(w && w.isFullScreen()); });
 ipcMain.handle('bridge:token', () => BRIDGE_TOKEN);
 
 // opts: {filters?, multi?} -> {path, name, encoding:'utf8'|'base64', data} | array when multi | null if cancelled
@@ -251,10 +258,14 @@ function createWindow() {
     backgroundColor: '#1e1e1e',
     show: false,
     title: 'Motion',
-    // the renderer draws its own tab strip; the macOS traffic lights sit inside it
-    // (src/ui/chrome/TabStrip.tsx reserves room for them and marks the drag regions)
+    // below this the panels would have to overlap (scripts/layout-lock.mjs checks this size)
+    minWidth: 1100,
+    minHeight: 700,
+    // mac: no title bar; the traffic lights float at the left end of the renderer's 40px title
+    // row (--titlebar-h), vertically centred, and the row reserves --traffic-w (80px) for them
+    // (src/ui/chrome/platform.ts, chrome.css). windows / linux keep the native frame.
     ...(process.platform === 'darwin'
-      ? { titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 14, y: 13 } }
+      ? { titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 20, y: 14 } }
       : {}),
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
@@ -276,6 +287,9 @@ function createWindow() {
     else if (updates) updates.cancelLoad(); // "Restart to update" was cancelled: keep the running UI
   });
   win.on('closed', () => { win = null; });
+  // full screen hides the traffic lights: the title row stops reserving room for them
+  win.on('enter-full-screen', () => win && win.webContents.send('window:fullscreen', true));
+  win.on('leave-full-screen', () => win && win.webContents.send('window:fullscreen', false));
 
   // External links open in the system browser, never in-app.
   win.webContents.setWindowOpenHandler(({ url }) => {

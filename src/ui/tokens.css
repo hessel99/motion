@@ -493,15 +493,28 @@
   --icon-btn: 28px;
   --icon-size: 16px;  /* lucide icons, 1.5px stroke (see chrome/icons.tsx) */
 
-  /* app shell */
-  --gap: 6px;              /* window color around the stage's cards */
-  --rail-w: 52px;
-  --tabstrip-h: 44px;
+  /* app shell: the window grid (chrome.css ".app"). LOCKED: every size of the window's structure
+     lives here and nowhere else; scripts/layout-lock.mjs (npm run layout:check) checks that no
+     two regions overlap at 1100×700 … 2560×1440, with and without the mac traffic lights.
+       ┌──────────────────────── title bar (--titlebar-h) ────────────────────────┐
+       │ traffic │ file tabs  +                 drag            ↶ ↷ …  Share      │
+       ├────┬──────────┬───────────────────────────────────────┬──────────────────┤
+       │rail│ left     │ canvas (full bleed, >= --stage-min)    │ inspector        │
+       │    │ sidebar  ├────────────────────────────────────────┤ (--right-w)      │
+       │    │(--left-w)│ timeline (--tl-h, header --tl-head-h)  │                  │
+       └────┴──────────┴────────────────────────────────────────┴──────────────────┘ */
+  --titlebar-h: 40px;      /* the full-width title row; the mac traffic lights are centred in it */
+  --traffic-w: 80px;       /* its left end on mac (electron trafficLightPosition x 20 y 14: 3 × 12px, 20px apart) */
+  --rail-w: 48px;
   --left-w: 300px;
-  --right-w: 312px;
-  --timeline-h: clamp(220px, 36vh, 520px);
-  --stage-min: 180px;
+  --right-w: 300px;
+  --panel-head-h: 40px;    /* the sidebars' header rows */
+  --stage-min: 200px;      /* the canvas never gets shorter than this */
+  --timeline-h: clamp(220px, 34vh, 520px);
+  --tl-min: 160px;
   --tl-head-h: 40px;       /* timeline header: comp tabs + transport */
+  --app-min-w: 1100px;     /* = BrowserWindow minWidth / minHeight (electron/main.cjs) */
+  --app-min-h: 700px;
 
   /* motion (UI transitions only: never on surfaces that repaint during playback) */
   --dur-instant: 0ms;
@@ -524,6 +537,11 @@
   /* focus ring */
   --focus-ring-width: 2px;
   --focus-ring-offset: 1px;
+}
+
+/* narrow windows (down to the 1100px minimum): the sidebars give the stage room */
+@media (max-width: 1279px) {
+  :root { --left-w: 264px; --right-w: 280px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

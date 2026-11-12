@@ -143,6 +143,7 @@ export function shaderRefFromFigma(raw: unknown, kind: ShaderKind, ctx: { layer:
   }
   for (const [k, prop] of Object.entries(initialProps(asset, slot, vals))) (ctx.layer.props as Record<string, Prop>)[k] = prop;
   const ref: ShaderRef & { asset?: ShaderAsset } = { slot, shader: shaderAssetKey(asset), asset };
+  if (!asset.files['main.ts'] && f.values) ref.init = f.values;
   return ref;
 }
 

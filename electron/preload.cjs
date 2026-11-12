@@ -3,6 +3,13 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('motionNative', {
   platform: process.platform,
+  /** full screen (mac: the traffic lights hide, src/ui/chrome/platform.ts stops reserving room) */
+  isFullScreen: () => ipcRenderer.invoke('window:isFullScreen'),
+  onFullScreen: (cb) => {
+    const listener = (_e, on) => cb(!!on);
+    ipcRenderer.on('window:fullscreen', listener);
+    return () => ipcRenderer.removeListener('window:fullscreen', listener);
+  },
   /** Port of the in-process agent bridge (ws://127.0.0.1:PORT/ws). 0 if it failed to start. */
   bridgePort: () => ipcRenderer.invoke('bridge:port'),
   /** secret the bridge requires from the app's file:// origin */
