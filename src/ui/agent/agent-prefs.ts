@@ -21,6 +21,8 @@ export const agentPrefs = {
   autoQuick: pref('autoQuick', 'sonnet'),
   /** storyboards: 'ask' = wait for the user's approval, 'auto' = build right away (read by src/agent/storyboard.ts) */
   storyboard: (pref('storyboard', 'ask') === 'auto' ? 'auto' : 'ask') as 'ask' | 'auto',
+  /** taste layer: the motion critic polishes builds automatically ('on' | 'off'; read by src/agent/taste.ts) */
+  taste: (pref('taste', 'on') === 'off' ? 'off' : 'on') as 'on' | 'off',
   /** max agentic turns per message ('' = the bridge default) */
   turns: pref('turns', ''),
 };

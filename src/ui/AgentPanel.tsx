@@ -7,6 +7,7 @@ import { loadChat, projectKey, saveChat, type Msg, type ReviewInfo } from '../ag
 import { toolLabel } from '../agent/labels';
 import { briefScope } from '../agent/quick';
 import { approvalMessage, storyboards, type Storyboard } from '../agent/storyboard';
+import { polishPlan, tasteOn } from '../agent/taste';
 import { TOOLS } from '../agent/tools';
 import { animRange } from '../agent/describe';
 import { variations } from '../agent/variations';
@@ -26,6 +27,9 @@ import { lastImport, openBrowserFile } from '../app/actions';
 import type { ComponentChildren } from 'preact';
 import './agent/agent.css';
 import { setAgentProgress, setChatStarted, takeAsk } from './agent-bridge';
+
+/** an automatic polishing follow-up (taste layer): its round and the turn it continues */
+interface Polish { round: number; snap: DocSnapshot; startId: number; marker: number; model?: string }
 
 interface Turn { chatId: string; startedAt: number; activity: string; stopping: boolean; live: number; snap: DocSnapshot; startId: number }
 
@@ -130,7 +134,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
 
   const layerName = (id: string) => editor.store.layer(id)?.name;
 
-  const send = (text: string, opts: { mode?: ChatMode; chip?: string; style?: string } = {}) => {
+  const send = (text: string, opts: { mode?: ChatMode; chip?: string; style?: string; polish?: Polish } = {}) => {
     text = text.trim();
     if (!text || turnRef.current || agentClient.status !== 'connected') return;
     const s = editor.store;
@@ -141,14 +145,19 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
     // the style line goes in the message (never the system prompt: that is the cached prefix)
     const message = composeMessage(s, pre ? `${pre}\n${text}` : text, mentions);
     const scope = briefScope(text, { chip: opts.chip, selCount: s.selection.length, style: !!st });
-    setInput('');
-    setMentions([]);
+    const pol = opts.polish;
+    if (!pol) { setInput(''); setMentions([]); }
     if (st) setStyle('');
     stick.current = true;
-    setMsgs(x => [...x, { role: 'user', text, mode: m, chip: opts.chip, ...(st ? { style: st } : {}) }]);
-    const snap = snapshotDoc(s.project);
-    const marker = s.historyLength; // only for the step count shown on the card
-    const startId = s.topEntryId; // identifies the exact pre-turn state (revert / compare)
+    // a polishing follow-up shows as its quiet row (added when it was planned) and takes over the
+    // previous turn's review: one card for the build + its polish
+    if (pol) setMsgs(x => x.filter(y => !(y.role === 'review' && y.review?.startId === pol.startId && y.review.state === 'pending')));
+    else setMsgs(x => [...x, { role: 'user', text, mode: m, chip: opts.chip, ...(st ? { style: st } : {}) }]);
+    const snap = pol?.snap ?? snapshotDoc(s.project);
+    const marker = pol?.marker ?? s.historyLength; // only for the step count shown on the card
+    const startId = pol?.startId ?? s.topEntryId; // identifies the exact pre-turn state (revert / compare)
+    const usedModel = pol ? pol.model : provider === 'claude' ? resolveModel(scope, model) : undefined;
+    let failed = false;
     const startKey = key.current;
     let assistantIdx = -1;
     let finished = false;
@@ -161,6 +170,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
       agentClient.forget(chatId); // lifts the Ask-mode lock even when the bridge never sends 'done'
       finishers.current.delete(chatId);
       setTurn(t => (t && t.chatId === chatId ? null : t));
+      if (turnRef.current?.chatId === chatId) turnRef.current = null; // a polishing follow-up may start right away
       if (drop || key.current !== startKey) return;
       const steps = Math.max(1, s.historyLength - marker);
       const diff = diffDocs(snap, snapshotDoc(s.project));
@@ -173,12 +183,21 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
         // inline preview of the result: one contact sheet over what the turn animated
         resultPreview(review.range).then(src => append(x => x.map(y => (y.review?.endId === review.endId && y.role === 'review' ? { ...y, preview: src } : y))));
       }
+      // taste layer: the critic checks the result and feeds the worst fixes back (max 2 rounds)
+      if (!failed && m === 'edit' && s.topEntryId !== startId && storyboards.current?.state !== 'proposed') {
+        const plan = tasteOn() ? polishPlan(s, (pol?.round ?? 0) + 1) : null;
+        if (plan) {
+          append(x => [...x, { role: 'info', text: `Polishing: ${plan.count} fix${plan.count > 1 ? 'es' : ''}` }]);
+          const next: Polish = { round: (pol?.round ?? 0) + 1, snap, startId, marker, model: usedModel };
+          setTimeout(() => sendRef.current(plan.message, { polish: next }), 0);
+        }
+      }
       const bits = [e.durationMs ? `${(e.durationMs / 1000).toFixed(1)}s` : '', e.costUsd ? `$${e.costUsd.toFixed(3)}` : '', e.usage ? `${fmtTok(e.usage.input)} in · ${fmtTok(e.usage.output)} out` : ''].filter(Boolean);
       // run stats (time, cost, tokens) are developer detail: the console, not the thread
       if (bits.length) console.info('[agent turn]', bits.join(' · '));
     };
 
-    const chatId = agentClient.chat({ provider, message, sessionId: session.current[provider], model: provider === 'claude' ? resolveModel(scope, model) : undefined, mode: m, maxTurns: turnBudget() }, (e: ChatEvent) => {
+    const chatId = agentClient.chat({ provider, message: pol ? text : message, sessionId: session.current[provider], model: usedModel, mode: m, maxTurns: turnBudget() }, (e: ChatEvent) => {
       switch (e.kind) {
         case 'session': session.current[provider] = e.sessionId; break;
         case 'text_delta':
@@ -210,6 +229,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
           append(m => m.map(x => (x.tool?.id === e.id ? { ...x, tool: { ...x.tool!, result: e.summary, isError: e.isError, ms: x.tool!.startedAt ? Date.now() - x.tool!.startedAt : undefined } } : x)));
           break;
         case 'error':
+          failed = true;
           if (e.errorKind === 'cancelled') append(m => [...m, { role: 'info', text: 'Stopped.' }]);
           else append(m => [...m, { role: 'error', text: e.message, errorKind: e.errorKind, hint: e.hint, retry: text, mode: m0 }]);
           break;

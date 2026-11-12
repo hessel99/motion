@@ -27,6 +27,7 @@ export type { ToolDef, ToolContent } from './tool-kit';
 import { enableTrim, st, text, colorSchema, propValueSchema, easeSchema, keyframeSchema, idsSchema, parseColor, toValue, checkProp, need, round, buildKeys, writeTrack, shiftLayerKeys, contactSheet, resolveEase, boundsOf } from './tool-kit';
 export { parseColor, boundsOf } from './tool-kit';
 import { SCENE_TOOLS, textAnimFrom } from './tools-scene';
+import { tasteDefaults } from './taste-defaults';
 import { TYPE_TOOLS } from './tools-type';
 import { ANALYSIS_TOOLS } from './tools-analysis';
 import { PREVIEW_TOOLS } from './tools-preview';
@@ -414,9 +415,10 @@ export const TOOLS: ToolDef[] = [
   {
     name: 'apply_preset',
     description: 'Apply a ready-made animation to layers at a time (default: playhead). "in" presets start at t, "out" presets end at t. stagger offsets each next layer (seconds) — great for lists/logos. Presets: ' + ANIM_PRESETS.map(p => `${p.name} (${p.kind})`).join(', '),
-    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, preset: { type: 'string' }, t: { type: 'number' }, duration: { type: 'number', default: 0.6 }, stagger: { type: 'number', default: 0 } }, required: ['ids', 'preset'] },
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, preset: { type: 'string' }, t: { type: 'number' }, duration: { type: 'number', description: 'default: from the element size (handbook timing table)' }, stagger: { type: 'number', description: 'default: the style\'s list step for several layers' } }, required: ['ids', 'preset'] },
     run: ({ ids, preset, t, duration, stagger }) => {
       if (t !== undefined) st().setTime(t);
+      ({ duration, stagger } = tasteDefaults(ids, duration, stagger));
       applyPreset(st(), ids, preset, { duration, stagger });
       return text('ok');
     },
@@ -564,21 +566,21 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: 'retime',
-    description: 'Speed up / slow down / shift animation: key times become pivot + (t - pivot) * scale + offset, for every animated property, path shape keys and text animators of the layers. scale 1.25 = 25% slower, 0.8 = faster. ids default to the selection, else all layers. pivot defaults to the earliest key.',
-    inputSchema: { type: 'object', properties: { ids: idsSchema, scale: { type: 'number', default: 1 }, offset: { type: 'number', default: 0, description: 'seconds' }, pivot: { type: 'number' } } },
-    run: ({ ids, scale = 1, offset = 0, pivot }) => {
+    description: 'Speed up / slow down / shift animation: key times become pivot + (t - pivot) * scale + offset (only keys at/after `from` when given), for every animated property, path shape keys and text animators of the layers. scale 1.25 = 25% slower, 0.8 = faster. ids default to the selection, else all layers. pivot defaults to the earliest key.',
+    inputSchema: { type: 'object', properties: { ids: idsSchema, scale: { type: 'number', default: 1 }, offset: { type: 'number', default: 0, description: 'seconds' }, pivot: { type: 'number' }, from: { type: 'number', description: 'only keys at or after this time move (e.g. delay an exit: from = exit start, offset 0.5); default all' } } },
+    run: ({ ids, scale = 1, offset = 0, pivot, from }) => {
       const s = st();
       if (!(scale > 0) || !isFinite(scale)) throw new Error('scale must be a positive number');
       if (!isFinite(offset) || (pivot != null && !isFinite(pivot))) throw new Error('offset and pivot must be numbers');
       const list: Layer[] = ids?.length ? ids.map(need) : s.selection.length ? s.selection.map(need) : Object.values(s.project.layers);
       const ranges = list.map(animRange).filter(Boolean) as [number, number][];
       if (!ranges.length) throw new Error('none of these layers is animated');
-      const p0 = pivot ?? Math.min(...ranges.map(r => r[0]));
+      const p0 = pivot ?? from ?? Math.min(...ranges.map(r => r[0]));
       // the whole mapping must keep keys at t >= 0: clamping each key would stack them on 0
-      const earliest = Math.min(...ranges.map(r => r[0]));
+      const earliest = from != null ? Math.max(from, Math.min(...ranges.map(r => r[0]))) : Math.min(...ranges.map(r => r[0]));
       const mapped0 = p0 + (earliest - p0) * scale + offset;
       if (mapped0 < -1e-9) throw new Error(`this would move the first key to ${fmtTime(mapped0)} (before 0). The smallest allowed offset here is ${fmtTime(offset - mapped0)}.`);
-      const f = (t: number) => Math.max(0, p0 + (t - p0) * scale + offset);
+      const f = (t: number) => (from != null && t < from - 1e-6 ? t : Math.max(0, p0 + (t - p0) * scale + offset));
       let end = 0;
       s.transact('Agent: retime', tx => {
         for (const l of list) {

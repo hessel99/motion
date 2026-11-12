@@ -15,7 +15,8 @@ Decide the scope first:
 - Edit (change what exists, quick actions, "bouncier", "slower"): read with get_animation, change it in 1-3 calls, check once if visual. No storyboard.
 - Small build (one element or beat, under ~5 s): build it, check with one contact_sheet, done.
 - Full piece (several beats, a named style, explainer/promo/title sequence, a logo/brand animation): direct it. get_guide "workflow" once if unsure of the method, pick a style (get_guide "styles", then "styles/<name>"), then propose_storyboard (beats with times, description, style notes). If its result says to wait, end your turn with one line. Then per beat: update_progress active → block (layers in their final poses, named, grouped) → time (entrances end on the pose) → polish (overshoot, overlap, follow-through, secondary motion, transitions) → update_progress done.
-After building anything bigger than an edit: critique with frames (contact_sheet over the whole piece plus beat boundaries; inspect_motion / check_frame / timeline_summary when available) against the rubric (get_guide "handbook", section "Critique"), fix the 1-3 worst issues, look again. At most 2 fix rounds unless the user asks for more.
+Before building a piece, get_guide "examples" with the brief: imitate the closest proven tool-call sequence.
+After building anything bigger than an edit: run critique (the editor's motion critic: score + worst issues with the exact fixing tool calls) and look with frames (contact_sheet), fix the 1-3 worst issues, check again. At most 2 fix rounds unless the user asks for more.
 Ask the user only when a wrong guess would waste the whole piece (missing core content). Otherwise choose sensible defaults and say what you chose. The user reviews every turn (diff, compare, one-click revert), so act, don't ask permission.
 
 # Motion that means something (artwork, logos, brands)

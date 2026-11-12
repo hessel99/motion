@@ -6,6 +6,7 @@ import { valueAt } from '../core/commands';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { PROP_DEFS, PROP_KEYS, type Keyframe, type Layer, type PropKey } from '../core/model';
 import type { Tx } from '../core/store';
+import { defaultEaseFor } from './taste';
 
 export interface ToolDef {
   name: string;
@@ -87,7 +88,13 @@ export function round(v: number[]) { return v.map(x => Math.round(x * 1000) / 10
 export function buildKeys(key: PropKey, raw: any[]): Keyframe[] {
   if (!Array.isArray(raw)) throw new Error('keyframes must be an array');
   const sorted = raw.slice().sort((x, y) => +x.t - +y.t);
-  const eases = sorted.map(k => resolveEase(k.ease));
+  // taste layer: an unspecified ease follows the move (entrances decelerate, exits accelerate)
+  const eases = sorted.map((k, i) => {
+    if (k.ease === undefined && k.interp === undefined && sorted[i + 1]) {
+      try { const d = defaultEaseFor(key, toValue(key, k.v), toValue(key, sorted[i + 1].v)); if (d) return resolveEase(d); } catch { /* invalid values throw below */ }
+    }
+    return resolveEase(k.ease);
+  });
   const out = sorted.map((k, i) => {
     if (!isFinite(+k.t)) throw new Error(`keyframe time must be a number (got ${JSON.stringify(k.t)})`);
     const ease = eases[i];

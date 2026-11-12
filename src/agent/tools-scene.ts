@@ -9,6 +9,7 @@ import { TEXT_ANIM_PRESETS } from '../core/presets';
 import { starGeometry } from '../core/shapes';
 import type { Tx } from '../core/store';
 import { valueAt } from '../core/commands';
+import { tasteOn, feel, easeArg, moveDuration, unit } from './taste';
 import { st, text, need, parseColor, toValue, checkProp, buildKeys, colorSchema, easeSchema, keyframeSchema, resolveEase, type ToolDef } from './tool-kit';
 import { resolveShape, parseD, polylineCmds, cmdsBounds, transformCmds, PRIMITIVE_NAMES, type ShapeOut } from './shape-lib';
 import { layerSize, rng } from './motion-math';
@@ -309,12 +310,19 @@ function buildLayer(ctx: Ctx, s: any, parent: string | null, compId: string, inh
     }
   }
   const moveSpec = (spec: any, dir: 'enter' | 'exit') => {
-    const dur = spec.duration ?? 0.6;
+    const vals = spec[dir === 'enter' ? 'from' : 'to'] ?? { opacity: 0 };
+    // taste layer: unspecified duration / ease come from the timing table (distance, size, role) and the style's feel
+    const taste = tasteOn(), f = feel();
+    const dist = Math.hypot(+(vals.dx ?? 0) || 0, +(vals.dy ?? 0) || 0) || (vals.x !== undefined || vals.y !== undefined ? Math.hypot(vals.x !== undefined ? +vals.x + an[0] - rest('position')[0] : 0, vals.y !== undefined ? +vals.y + an[1] - rest('position')[1] : 0) : 0);
+    const sc = vals.scale !== undefined ? Math.min(...toValue('scale', vals.scale)) : 100;
+    const role = L.type === 'text' ? 'text' : bw * bh < comp.width * comp.height * 0.004 ? 'decoration' : undefined;
+    const dur = spec.duration ?? (taste ? moveDuration(store, { distance: dist, size: Math.max(bw, bh), role, exit: dir === 'exit' }) : 0.6);
+    const big = dist >= 300 * unit(store) || sc <= 30;
+    const ease = spec.ease ?? (taste ? (dir === 'enter' ? easeArg(big && f.settle ? f.settle : f.enter) : f.exit) : (dir === 'enter' ? 'Expo Out' : 'Expo In'));
+    const defaulted = spec.ease === undefined && taste;
     const t0 = (spec.t ?? (dir === 'enter' ? 0 : comp.duration)) + delay;
     const a = dir === 'enter' ? t0 : t0 - dur, b = dir === 'enter' ? t0 + dur : t0;
-    const ease = spec.ease ?? (dir === 'enter' ? 'Expo Out' : 'Expo In');
     resolveEase(ease);
-    const vals = spec[dir === 'enter' ? 'from' : 'to'] ?? { opacity: 0 };
     for (const [k, v] of Object.entries(vals)) {
       let key: PropKey, off: number[];
       if (k === 'dx' || k === 'dy' || k === 'x' || k === 'y') {
@@ -328,7 +336,7 @@ function buildLayer(ctx: Ctx, s: any, parent: string | null, compId: string, inh
       } else { key = checkProp(k); off = toValue(key, v); }
       // opacity fades faster than the move: it reads as "arrived" sooner
       const d2 = key === 'opacity' ? Math.min(dur, Math.max(0.15, dur * 0.5)) : dur;
-      const e2 = key === 'opacity' && /^spring/i.test(String(ease)) ? 'Ease Out' : ease;
+      const e2 = key === 'opacity' && (defaulted || /^spring/i.test(String(ease)) || Array.isArray(ease)) ? (dir === 'enter' ? 'Ease Out' : 'Ease In') : ease;
       if (dir === 'enter') add(key, [{ t: a, v: off, ease: e2 }, { t: a + d2, v: rest(key) }]);
       else add(key, [{ t: b - d2, v: rest(key), ease: e2 }, { t: b, v: off }]);
     }
@@ -419,6 +427,24 @@ export async function buildScene(a: any) {
     const d = orderDelays(b.keys.length, b.order ?? 'sequential', num(b.step ?? 0.08, 'step'), b.seed ?? 1);
     b.keys.forEach((k: string, j: number) => delays.set(k, (delays.get(k) ?? 0) + d[j] + (b.start ?? 0)));
   }
+  // taste layer: siblings that all enter at an unspecified time overlap in reading order (the hero first)
+  let autoStaggered = 0;
+  if (tasteOn()) {
+    const f = feel();
+    const visit = (list: any[], parentStaggers: boolean) => {
+      const cand = parentStaggers ? [] : list.filter(x => x && x.key && x.enter && x.enter.t === undefined && !delays.has(x.key) && x.animate === undefined);
+      if (cand.length >= 3) {
+        const weight = (x: any) => x.type === 'text' || x.text ? (+(x.fontSize ?? x.text?.fontSize ?? 48)) ** 2 * String(x.text?.content ?? x.text ?? '').length * 0.6 : (+(x.w ?? 0) || 100) * (+(x.h ?? 0) || 100);
+        const hero = cand.reduce((m, x) => (weight(x) > weight(m) ? x : m), cand[0]);
+        const ordered = [hero, ...cand.filter(x => x !== hero)];
+        const step = Math.min(f.step, 0.6 / (ordered.length - 1));
+        ordered.forEach((x, i) => delays.set(x.key, Math.round(i * step * 1000) / 1000));
+        autoStaggered += ordered.length;
+      }
+      for (const x of list) if (x && Array.isArray(x.children)) visit(x.children, !!x.staggerChildren);
+    };
+    visit(a.layers, false);
+  }
   const ctx: Ctx = { tx: null as any, byKey, out: [], delays, shapes, tracks: 0, seen: new Set() };
   let pruned = 0;
   s.transact('Agent: build scene', tx => {
@@ -449,6 +475,7 @@ export async function buildScene(a: any) {
   const notes = ctx.out.filter(o => o.notes.length).map(o => `${o.key}: ${o.notes.join('; ')}`);
   const end = Math.max(0, ...ctx.out.map(o => { const l = P.layers[o.id]; let m = 0; for (const k of PROP_KEYS) for (const f of l?.props[k]?.kf ?? []) m = Math.max(m, f.t); return m; }));
   const summary = `${created} created, ${ctx.out.length - created} updated${pruned ? `, ${pruned} pruned` : ''}, ${ctx.tracks} keyframe tracks; animation ends ${Math.round(end * 100) / 100}s${end > s.comp.duration + 1e-6 ? ` (past comp end ${s.comp.duration}s!)` : ''}`;
+  if (autoStaggered) notes.push(`taste layer: ${autoStaggered} entrances without a time were overlapped (hero first, ${feel().step}s apart); pass enter.t or a stagger block to control it`);
   return { summary, ids, ...(notes.length ? { notes } : {}) };
 }
 
