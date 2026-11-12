@@ -9,6 +9,7 @@
 
 import { Track } from '../core/evaluate';
 import { TrackPool } from '../core/trackpool';
+import { compileExpr, runExpr, type ExprContext } from '../core/expr';
 import { PROP_DEFS, type Layer, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
 import { Atlas, type AtlasEntry } from './atlas';
@@ -189,6 +190,9 @@ interface Item {
   owner: number;
   /** per-unit text animation state */
   units: UnitState[] | null;
+  /** properties driven by expressions (bit = TR_* index) + their compiled programs */
+  exprMask: number;
+  exprs: ({ node: any; track: Track; keyTimes: number[] } | null)[] | null;
   hidden: boolean; // visible=false (self or ancestor)
   rasterBase: string | null;
   rasterKey: string | null; // last resolved atlas key
@@ -393,7 +397,7 @@ export class Renderer {
         id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10), isoGroup: layer.children.length > 0 || layer.type === 'precomp',
         hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden),
         rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
-        tOff, owner, units: null,
+        tOff, owner, units: null, exprMask: 0, exprs: null,
       };
       if (parent >= 0) {
         const p = this.items[parent];
@@ -429,6 +433,20 @@ export class Renderer {
       it.tracks[k] = tr;
       if (tr.animated) { mask |= 1 << k; it.h[k] = this.pool.add(p!, PROP_DEFS[key].dim, key === 'position'); }
     }
+    // expressions: evaluated every frame on top of the keyframed/static value
+    let emask = 0;
+    it.exprs = null;
+    for (let k = 0; k < TR_KEYS.length; k++) {
+      const p = l.props[TR_KEYS[k]];
+      if (!p?.expr?.trim()) continue;
+      const c = compileExpr(p.expr);
+      if (!c.node) continue;
+      if (!it.exprs) it.exprs = new Array(TR_KEYS.length).fill(null);
+      it.exprs[k] = { node: c.node, track: it.tracks[k], keyTimes: (p.kf ?? []).map(f => f.t) };
+      emask |= 1 << k;
+    }
+    it.exprMask = emask;
+    mask |= emask;
     it.animMask = mask;
     const sp = l.props.scale;
     it.maxScale = sp?.kf?.length ? Math.max(...sp.kf.map(k => Math.max(Math.abs(k.v[0]), Math.abs(k.v[1])))) / 100 : 1;
@@ -518,8 +536,9 @@ export class Renderer {
       this.composeLocal(i);
       return;
     }
-    const m = it.animMask;
-    if (!m) return;
+    const m = it.animMask & ~it.exprMask;
+    if (it.exprMask) this.evalExprs(i, t);
+    if (!m) { if (it.exprMask & 0x0f) this.composeLocal(i); return; }
     const h = it.h, P = this.pool;
     if (m & 0x0f) {
       if (m & (1 << TR_ANCHOR)) P.eval(h[TR_ANCHOR], t, X, o8);
@@ -534,6 +553,44 @@ export class Renderer {
     if (m & (1 << TR_FILL)) P.eval(h[TR_FILL], t, S, os + 6);
     if (m & (1 << TR_STROKE)) P.eval(h[TR_STROKE], t, S, os + 10);
     if (m & (1 << TR_SW)) P.eval(h[TR_SW], t, S, os + 14);
+  }
+
+  private exprCtx: ExprContext = { time: 0, value: 0, index: 0, fps: 30, duration: 1, inPoint: 0, valueAt: () => 0, keyTimes: [], seed: 0 };
+  private exprTmp = new Float64Array(4);
+
+  /** run the expressions of item i at time t and write results where the tracks would */
+  private evalExprs(i: number, t: number) {
+    const it = this.items[i], ex = it.exprs!, X = this.xf, S = this.style, o8 = i * 8, os = i * ST;
+    const comp = this.store.comp;
+    for (let k = 0; k < TR_KEYS.length; k++) {
+      const e = ex[k];
+      if (!e) continue;
+      const dim = PROP_DEFS[TR_KEYS[k]].dim;
+      const tmp = this.exprTmp;
+      e.track.eval(t, tmp, 0);
+      const c = this.exprCtx;
+      c.time = t;
+      c.value = dim === 1 ? tmp[0] : Array.from(tmp.subarray(0, dim));
+      c.index = i;
+      c.fps = comp.fps;
+      c.duration = comp.duration;
+      c.inPoint = it.layer.inPoint;
+      c.keyTimes = e.keyTimes;
+      c.seed = (hashStr(it.id) + k * 31) % 9973;
+      c.valueAt = (tt: number) => { const o = new Float64Array(4); e.track.eval(tt, o, 0); return dim === 1 ? o[0] : Array.from(o.subarray(0, dim)); };
+      switch (k) {
+        case TR_ANCHOR: runExpr(e.node, c, 2, X, o8); break;
+        case TR_POS: runExpr(e.node, c, 2, X, o8 + 2); break;
+        case TR_SCALE: runExpr(e.node, c, 2, X, o8 + 4); break;
+        case TR_ROT: runExpr(e.node, c, 1, X, o8 + 6); X[o8 + 6] *= Math.PI / 180; break;
+        case TR_OPA: runExpr(e.node, c, 1, tmp, 0); this.lopa[i] = Math.min(1, Math.max(0, tmp[0] / 100)); break;
+        case TR_SIZE: runExpr(e.node, c, 2, S, os); break;
+        case TR_RAD: runExpr(e.node, c, 4, S, os + 2); break;
+        case TR_FILL: runExpr(e.node, c, 4, S, os + 6); break;
+        case TR_STROKE: runExpr(e.node, c, 4, S, os + 10); break;
+        case TR_SW: runExpr(e.node, c, 1, S, os + 14); break;
+      }
+    }
   }
 
   /** local matrix = T(pos) R S T(-anchor) from cached components */
@@ -1223,3 +1280,5 @@ export function easeFn(name: string): (p: number) => number {
   const pr = EASE_PRESETS.find(p => p.name.toLowerCase() === name.toLowerCase()) ?? EASE_PRESETS[1];
   return cubicBezier(pr.v[0], pr.v[1], pr.v[2], pr.v[3]);
 }
+
+function hashStr(s: string) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }

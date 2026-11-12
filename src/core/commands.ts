@@ -583,3 +583,17 @@ export function renameComp(store: Store, id: string, name: string) {
   store.transact('Rename composition', tx => { tx.set(c, 'name', name); tx.comp(); });
   store.emit('comps');
 }
+
+/** set or clear (undefined / '') a property expression */
+export function setExpr(store: Store, ids: string[], key: PropKey, src: string | undefined) {
+  store.transact(src ? 'Set expression' : 'Remove expression', tx => {
+    for (const id of ids) {
+      const l = store.layer(id);
+      if (!l) continue;
+      let p = l.props[key];
+      if (!p) { p = { v: (PROP_DEFS[key].default as unknown as number[]).slice() }; tx.set(l.props, key, p); }
+      tx.set(p, 'expr', src?.trim() ? src : undefined);
+      tx.touch(id);
+    }
+  });
+}

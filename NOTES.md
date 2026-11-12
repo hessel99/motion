@@ -28,6 +28,7 @@
   - SVG (by paste or drop), Lottie JSON, After Effects `.aep` (best effort, see below), images
 - **Export**: Lottie JSON and **video** (MP4 H.264 / WebM VP9 through WebCodecs + mediabunny; verified with ffprobe in Chromium and Electron)
 - **Graph editor**: value curves in the timeline. Drag keys (time/value) and bezier handles on the real curve, which Figma Motion doesn't have.
+- **Expressions** (`wiggle(2, 20)`, `loopOut('pingpong')`, `time * 90`, `linear(...)`, vectors…): a *safe* mini language with its own parser and interpreter (`src/core/expr.ts`). It never calls `eval`, so opening someone else's project can't run code.
 - **Text animation** (per letter / word / line, like AE text animators): presets (Fade up, Typewriter, Pop letters, Spin letters, …), order (forward, backward, center, random), springs. Every unit is its own instance in the same single draw call.
 - **Precomps** (⇧⌘C to pre-compose, a comp switcher, start offset), **masks** (Figma-style), **group opacity** done right (offscreen isolation)
 - **Pen tool** + path point editing; **animation presets** (fade/slide/pop/…) with stagger; **align/distribute**

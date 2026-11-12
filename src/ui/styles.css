@@ -173,3 +173,10 @@ kbd { font: 11px ui-monospace, Menlo, monospace; background: #2a2a30; border: 1p
 .bench { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .bench th, .bench td { text-align: right; padding: 4px 8px; border-bottom: 1px solid var(--line); }
 .bench th:first-child, .bench td:first-child { text-align: left; }
+.expr-add { font-size: 11px; padding: 1px 4px; }
+.expr-row { margin-bottom: 10px; }
+.expr-edit { width: 100%; font: 11px ui-monospace, Menlo, monospace; resize: vertical; user-select: text; }
+.expr-edit.bad { border-color: var(--danger); }
+.expr-err { color: #ffb3ad; font-size: 11px; margin-top: 2px; }
+.expr-chips { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 4px; }
+.expr-chips button { font: 10px ui-monospace, Menlo, monospace; padding: 1px 5px; color: var(--muted); }

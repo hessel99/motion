@@ -26,6 +26,8 @@ export interface Prop {
   /** static value (used when there are no keyframes) */
   v: number[];
   kf?: Keyframe[];
+  /** expression (safe mini language, see core/expr.ts); `value` = keyframed/static value */
+  expr?: string;
 }
 
 export type LayerType = 'group' | 'rect' | 'ellipse' | 'path' | 'text' | 'image' | 'precomp';

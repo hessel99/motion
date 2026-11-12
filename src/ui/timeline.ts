@@ -138,7 +138,7 @@ export class Timeline {
         rows.push({ kind: 'layer', id: l.id, layer: l, depth, hasChildren: l.children.length > 0 });
         if (this.expanded.has(l.id)) {
           const keys = [...TRANSFORM_KEYS, ...TYPE_PROPS[l.type]];
-          for (const k of keys) if (isAnimated(l, k)) rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: k });
+          for (const k of keys) if (isAnimated(l, k) || l.props[k]?.expr) rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: k });
           walk(l.children, depth + 1);
         }
       }
@@ -335,7 +335,7 @@ export class Timeline {
     const st = this.ed.store;
     const cy = y + ROW_H / 2;
     const ix = 8 + r.depth * INDENT;
-    const animated = Object.values(l.props).some(p => p?.kf?.length);
+    const animated = Object.values(l.props).some(p => p?.kf?.length || p?.expr);
     // twirl
     if (r.hasChildren || animated) {
       g.fillStyle = '#9a9aa3';
@@ -416,7 +416,7 @@ export class Timeline {
     atKey ? g.fill() : (g.strokeStyle = '#7a7a82', g.stroke());
     g.fillStyle = '#b9b9c2';
     g.font = '12px system-ui, sans-serif';
-    g.fillText(PROP_DEFS[key].label, ix + 30, cy);
+    g.fillText(PROP_DEFS[key].label + (l.props[key]?.expr ? '  =' : ''), ix + 30, cy);
     // current value
     const v = valueAt(l, key, st.time);
     g.fillStyle = '#6aa3ff';

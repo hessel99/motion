@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
 import {
   addKeyframe, deleteKeyframes, isAnimated, keyId, parseKeyId, setCompSettings, setEase, setLayerField, setProp,
-  setSegmentHandles, toggleAnimated, valueAt, setSpring,
+  setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr,
 } from '../core/commands';
+import { compileExpr } from '../core/expr';
 import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
 import { PROP_DEFS, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
 import { useChannels } from './hooks';
@@ -219,6 +220,7 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
         </Section>
       )}
       <AnimatePanel ids={ids} />
+      <ExprPanel layers={layers} />
       <Section title="Timing">
         <div class="row">
           <NumField label="In" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
@@ -545,3 +547,52 @@ function TextAnimPanel({ layers }: { layers: Layer[] }) {
     </Section>
   );
 }
+
+const EXPR_SUGGEST: Partial<Record<PropKey, string[]>> = {
+  position: ['wiggle(2, 20)', "loopOut('cycle')", 'value + [Math.sin(time * 3) * 50, 0]'],
+  rotation: ['time * 90', 'wiggle(1, 10)', "loopOut('pingpong')"],
+  scale: ['value * (1 + Math.sin(time * 4) * 0.05)', 'wiggle(3, 5)'],
+  opacity: ['50 + Math.sin(time * 6) * 50', "loopOut('cycle')"],
+};
+
+function ExprPanel({ layers }: { layers: Layer[] }) {
+  const store = st();
+  const l = layers[0];
+  const ids = layers.map(x => x.id);
+  const keys = [...TRANSFORM_KEYS_LOCAL, ...TYPE_PROPS[l.type]].filter((k, i, a) => a.indexOf(k) === i);
+  const withExpr = keys.filter(k => l.props[k]?.expr !== undefined);
+  const add = (e: Event) => {
+    const k = (e.target as HTMLSelectElement).value as PropKey;
+    (e.target as HTMLSelectElement).value = '';
+    if (k) setExpr(store, ids, k, EXPR_SUGGEST[k]?.[0] ?? 'value');
+  };
+  return (
+    <Section title="Expressions" right={
+      <select class="expr-add" value="" onChange={add}>
+        <option value="">+ add</option>
+        {keys.filter(k => !withExpr.includes(k)).map(k => <option value={k}>{PROP_DEFS[k].label}</option>)}
+      </select>
+    }>
+      {withExpr.length === 0 && <div class="muted small">e.g. wiggle(2, 20), time * 90, loopOut('cycle')</div>}
+      {withExpr.map(k => <ExprRow key={k} ids={ids} k={k} src={l.props[k]!.expr!} />)}
+    </Section>
+  );
+}
+
+function ExprRow({ ids, k, src }: { ids: string[]; k: PropKey; src: string }) {
+  const store = st();
+  const [text, setText] = useState(src);
+  useEffect(() => setText(src), [src]);
+  const err = compileExpr(text).error;
+  return (
+    <div class="expr-row">
+      <div class="row small"><span>{PROP_DEFS[k].label}</span><span style={{ flex: 1 }} /><button class="ghost" title="Remove expression" onClick={() => setExpr(store, ids, k, undefined)}>✕</button></div>
+      <textarea class={'expr-edit' + (err ? ' bad' : '')} rows={2} value={text} spellcheck={false}
+        onInput={e => { const v = (e.target as HTMLTextAreaElement).value; setText(v); if (!compileExpr(v).error) setExpr(store, ids, k, v); }}
+        onKeyDown={e => e.stopPropagation()} />
+      {err && <div class="expr-err">{err}</div>}
+      <div class="expr-chips">{(EXPR_SUGGEST[k] ?? []).map(sug => <button class="ghost small" onClick={() => setExpr(store, ids, k, sug)}>{sug}</button>)}</div>
+    </div>
+  );
+}
+const TRANSFORM_KEYS_LOCAL: PropKey[] = ['anchor', 'position', 'scale', 'rotation', 'opacity'];
