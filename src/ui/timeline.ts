@@ -592,9 +592,9 @@ export class Timeline {
     }
     const hs = this.hScroll();
     if (hs && y > this.h - 10 && x > this.leftW) { this.drag = { kind: 'hscroll', sx: x, s0: this.scrollT }; return; }
+    if (y < HEADER_H && Math.abs(x - this.tToX(st.comp.duration)) < 5) { this.drag = { kind: 'compEnd' }; st.beginGesture('duration'); return; }
     const mk = this.markerAt(x, y);
     if (mk) { this.drag = { kind: 'marker', id: mk.id, sx: x, moved: false }; st.beginGesture('marker'); return; }
-    if (y < HEADER_H && Math.abs(x - this.tToX(st.comp.duration)) < 5) { this.drag = { kind: 'compEnd' }; st.beginGesture('duration'); return; }
     if (y < HEADER_H && x < this.leftW && x >= this.leftW - 150 && x < this.leftW - 6) {
       const i = Math.floor((x - (this.leftW - 150)) / 48);
       this.graphMode = i >= 1;
@@ -754,6 +754,7 @@ export class Timeline {
     if (d.kind === 'compEnd') {
       const dur = Math.max(1 / st.comp.fps, st.snapTime(this.xToT(x)));
       if (dur !== st.comp.duration) st.transact('Composition duration', tx => { tx.set(st.comp, 'duration', dur); tx.comp(); });
+      if (st.time > dur) st.setTime(dur);
       return;
     }
     if (d.kind === 'scrub') this.scrubTo(x, e.shiftKey);
@@ -898,7 +899,8 @@ export class Timeline {
 
   /** marker flag under the pointer (ruler only) */
   private markerAt(x: number, y: number) {
-    if (y >= HEADER_H || x < this.leftW) return null;
+    // only the flag strip at the bottom of the ruler: the playhead knob above it stays draggable
+    if (y >= HEADER_H || y < HEADER_H - 14 || x < this.leftW) return null;
     let best: { id: string; t: number } | null = null, bd = 6;
     for (const m of this.ed.store.comp.markers ?? []) {
       const d = Math.abs(this.tToX(m.t) - x);

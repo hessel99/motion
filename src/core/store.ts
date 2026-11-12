@@ -141,10 +141,23 @@ export class Store {
   }
 
   /** run several commands as ONE undo step */
-  batch<T>(key: string, fn: () => T): T {
+  batch<T>(key: string, fn: () => T, label?: string): T {
     const prev = this.gesture;
-    if (!prev) this.gesture = key + ':' + Math.random();
-    try { return fn(); } finally { if (!prev) this.gesture = null; }
+    if (prev) return fn();
+    const g = key + ':' + Math.random();
+    this.gesture = g;
+    const mine = () => { const top = this.undoStack[this.undoStack.length - 1]; return top && top.mergeKey === g ? top : null; };
+    try {
+      const r = fn();
+      const top = mine();
+      if (top && label) { top.label = label; this.emit('history'); }
+      return r;
+    } catch (e) {
+      // all or nothing: undo what the batch already did
+      this.gesture = null;
+      if (mine()) { this.undo(); this.redoStack.pop(); this.emit('history'); }
+      throw e;
+    } finally { this.gesture = null; }
   }
 
   /** while a gesture is active, all transactions merge into one undo step */

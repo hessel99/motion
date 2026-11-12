@@ -312,7 +312,7 @@ export const TOOLS: ToolDef[] = [
       st().batch('Agent markers', () => {
         for (const id of remove ?? []) deleteMarker(st(), id);
         for (const m of add ?? []) { const mk = addMarker(st(), +m.t, m.label ?? ''); if (m.label && mk.label !== m.label) updateMarker(st(), mk.id, { label: m.label }); }
-      });
+      }, 'Agent: markers');
       return text(JSON.stringify(st().comp.markers ?? []));
     },
   },

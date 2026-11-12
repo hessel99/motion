@@ -20,18 +20,24 @@ export function detectOnsets(buf: AudioBuffer, opts: { minGap?: number; sensitiv
   }
   const flux = new Float32Array(frames);
   for (let f = 1; f < frames; f++) flux[f] = Math.max(0, energy[f] - energy[f - 1]);
+  // a sound that starts on the first sample is an onset too: rise from the clip's quietest level,
+  // capped at the largest real rise so it can't distort the adaptive threshold
+  let minE = Infinity, maxF = 0;
+  for (let f = 0; f < frames; f++) { if (energy[f] < minE) minE = energy[f]; if (flux[f] > maxF) maxF = flux[f]; }
+  flux[0] = Math.min(maxF, Math.max(0, energy[0] - minE));
   // adaptive threshold over ±0.5 s
   const W = 50;
   const out: number[] = [];
   let last = -Infinity;
   let sum = 0, sum2 = 0, cnt = 0, lo = 0, hi = 0;
-  for (let f = 1; f < frames - 1; f++) {
+  for (let f = 0; f < frames - 1; f++) {
     while (hi < Math.min(frames, f + W)) { sum += flux[hi]; sum2 += flux[hi] * flux[hi]; cnt++; hi++; }
     while (lo < f - W) { sum -= flux[lo]; sum2 -= flux[lo] * flux[lo]; cnt--; lo++; }
     const mean = sum / cnt, sd = Math.sqrt(Math.max(0, sum2 / cnt - mean * mean));
     const v = flux[f];
-    if (v > mean + k * sd && v > 0.3 && v >= flux[f - 1] && v >= flux[f + 1]) {
-      const t = (f * hop + win / 2) / sr;
+    if (v > mean + k * sd && v > 0.3 && (f === 0 || v >= flux[f - 1]) && v >= flux[f + 1]) {
+      // window f spans [f*hop, f*hop + 2*hop]: a rise first shows in its second half (clip start: 0)
+      const t = f === 0 ? 0 : ((f + 1) * hop) / sr;
       if (t - last >= minGap) { out.push(t); last = t; }
     }
   }

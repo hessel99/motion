@@ -218,7 +218,7 @@ export function groupLayers(store: Store, ids: string[], bounds: { x: number; y:
   const first = store.layer(ids[0])!;
   const parent = first.parent;
   if (ids.some(id => store.layer(id)?.parent !== parent)) throw new Error('select layers with the same parent to group them');
-  return store.batch('group', () => groupLayersInner(store, ids, bounds, first, parent));
+  return store.batch('group', () => groupLayersInner(store, ids, bounds, first, parent), 'Group');
 }
 
 function groupLayersInner(store: Store, ids: string[], bounds: { x: number; y: number; w: number; h: number }, first: Layer, parent: string | null) {
@@ -240,7 +240,7 @@ function groupLayersInner(store: Store, ids: string[], bounds: { x: number; y: n
 }
 
 export function ungroup(store: Store, groupId: string) {
-  store.batch('ungroup', () => ungroupInner(store, groupId));
+  store.batch('ungroup', () => ungroupInner(store, groupId), 'Ungroup');
 }
 
 function ungroupInner(store: Store, groupId: string) {

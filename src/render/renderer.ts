@@ -1322,7 +1322,7 @@ export class Renderer {
   /** comp-space corners of item's box [x0,y0,x1,y1,x2,y2,x3,y3] */
   corners(id: string): number[] | null {
     const i = this.index.get(id);
-    if (i === undefined) return null;
+    if (i === undefined || this.items[i].layer.type === 'audio') return null; // audio has no box
     const o = i * 6, W = this.world, S = this.style, os = i * ST;
     const w = S[os], h = S[os + 1];
     const a = W[o], b = W[o + 1], c = W[o + 2], d = W[o + 3], e = W[o + 4], f = W[o + 5];

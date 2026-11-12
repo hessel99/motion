@@ -97,7 +97,7 @@ export function NumField(props: { label: string; value: number; step?: number; m
 
 /** allows simple math in fields: "100+20", "*2", "/2" */
 function evalExpr(s: string, cur: number): number | null {
-  s = s.trim().replace(/[^0-9+\-*/(). e]/gi, '');
+  s = s.trim().replace(/(\d),(\d)/g, '$1.$2').replace(/[^0-9+\-*/(). e]/gi, ''); // 12,5 = 12.5 (decimal comma)
   if (!s) return null;
   if (/^[*/+]/.test(s)) s = cur + s;
   try { return Function(`"use strict";return (${s})`)() as number; } catch { return null; }
@@ -143,7 +143,7 @@ async function markBeats(l: Layer) {
   const times = detectOnsets(buf).map(t => t + off).filter(t => t >= Math.max(0, l.inPoint) && t < Math.min(l.outPoint, c.duration));
   if (!times.length) { toast('No beats found in this clip'); return; }
   const before = c.markers?.length ?? 0;
-  store.batch('Markers on beats', () => { for (const t of times) addMarker(store, t); });
+  store.batch('beats', () => { for (const t of times) addMarker(store, t); }, 'Markers on beats');
   toast(`${(c.markers?.length ?? 0) - before} markers added`);
 }
 
@@ -442,7 +442,12 @@ function ColorField({ value, onChange }: { value: number[]; onChange: (c: number
         const h = (e.target as HTMLInputElement).value;
         onChange([parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255, value[3]], mk.current);
       }} onChange={() => (mk.current = 'color' + Math.random())} />
-      <input class="hex" value={hex.slice(1).toUpperCase()} onKeyDown={e => e.stopPropagation()} onChange={e => {
+      <input class="hex" value={hex.slice(1).toUpperCase()} onKeyDown={e => {
+        e.stopPropagation();
+        const inp = e.target as HTMLInputElement;
+        if (e.key === 'Escape') { inp.value = hex.slice(1).toUpperCase(); inp.blur(); } // revert, no change event
+        if (e.key === 'Enter') inp.blur(); // commits through onChange, frees the shortcuts
+      }} onChange={e => {
         const inp = e.target as HTMLInputElement;
         let h = inp.value.trim().replace('#', '');
         if (/^[0-9a-f]{3}$/i.test(h)) h = h.replace(/./g, c => c + c); // css shorthand f00 -> ff0000
@@ -671,7 +676,7 @@ function AnimatePanel({ ids }: { ids: string[] }) {
         <NumField label="Dur" step={0.05} min={0.05} value={dur} suffix="s" onChange={setDur} />
         {ids.length > 1 && <NumField label="Stagger" step={0.01} min={0} value={stagger} suffix="s" onChange={setStagger} />}
       </div>
-      {ids.length === 2 && <SmartRow ids={ids} dur={dur} />}
+      {ids.length === 2 && <SmartRow key={ids.join(',')} ids={ids} dur={dur} />}
     </Section>
   );
 }

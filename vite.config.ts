@@ -5,5 +5,5 @@ export default defineConfig({
   base: './',
   build: { target: 'es2022', sourcemap: true },
   server: { port: 5173 },
-  test: { environment: 'node' },
+  test: { environment: 'node', exclude: ['**/node_modules/**', '.claude/**', 'release/**', 'dist/**'] },
 } as any);

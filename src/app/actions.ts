@@ -53,6 +53,7 @@ let spaceTap: { panned: boolean } | null = null;
 export function markSpacePanned() { if (spaceTap) spaceTap.panned = true; }
 function isTypingTarget(t: EventTarget | null) {
   const el = t as HTMLElement | null;
+  if (el?.tagName === 'INPUT' && ['range', 'checkbox', 'radio', 'color', 'button'].includes((el as HTMLInputElement).type)) return false;
   return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
 }
 
@@ -282,7 +283,8 @@ export async function exportAeScript() {
   const m = await mod('../export/aejsx.ts');
   if (!m) { toast('After Effects export not available', 'error'); return; }
   download((st().project.name || 'animation') + '.jsx', m.projectToAeScript(st().project), 'text/javascript');
-  toast('In After Effects: File › Scripts › Run Script File…');
+  const hasAudio = Object.values(st().project.layers).some(l => l.type === 'audio');
+  toast('In After Effects: File › Scripts › Run Script File…' + (hasAudio ? ' (audio layers are not included)' : ''));
 }
 
 // ---------------- inserting layers (paste / import) ----------------
@@ -632,11 +634,15 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
       // jump to previous / next keyframe of selection (after effects)
       return run(() => {
         const times = new Set<number>();
-        for (const id of s.selection.length ? s.selection : Object.keys(s.project.layers)) {
+        // selection, else every layer of the active comp (not other comps)
+        const all: string[] = [];
+        const walk = (ids: string[]) => { for (const id of ids) { all.push(id); walk(s.layer(id)?.children ?? []); } };
+        if (!s.selection.length) walk(s.comp.root);
+        for (const id of s.selection.length ? s.selection : all) {
           const l = s.layer(id);
           if (l) for (const p of Object.values(l.props)) p?.kf?.forEach(f => times.add(f.t));
         }
-        for (const m of s.comp.markers ?? []) times.add(m.t);
+        for (const m of s.comp.markers ?? []) if (m.t <= s.comp.duration) times.add(m.t);
         const sorted = [...times].sort((a, b) => a - b);
         const t = k === 'j' ? [...sorted].reverse().find(x => x < s.time - 1e-6) : sorted.find(x => x > s.time + 1e-6);
         if (t !== undefined) s.setTime(t);
@@ -676,5 +682,7 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
 
 function isTyping(e: Event) {
   const t = e.target as HTMLElement;
+  // sliders, checkboxes and color swatches keep focus after a click but take no text: shortcuts work
+  if (t?.tagName === 'INPUT' && ['range', 'checkbox', 'radio', 'color', 'button'].includes((t as HTMLInputElement).type)) return false;
   return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
 }

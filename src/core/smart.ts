@@ -65,7 +65,7 @@ export function smartAnimate(store: Store, startId: string, endId: string, opts:
   const res: SmartAnimateResult = { matched: 0, fadedIn: 0, fadedOut: 0, props: 0 };
   const ia = index(store, A), ib = index(store, B);
 
-  store.batch('Smart animate', () => {
+  store.batch('smart-animate', () => {
     // layers that only exist at the end: move them into the matching parent of the start tree
     // (their local values are relative to that parent), hidden until they fade in
     const incoming: Layer[] = [];
@@ -128,6 +128,6 @@ export function smartAnimate(store: Store, startId: string, endId: string, opts:
       }
     });
     if (opts.removeEnd ?? true) deleteLayers(store, [B.id]);
-  });
+  }, 'Smart animate');
   return res;
 }
