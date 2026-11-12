@@ -155,9 +155,6 @@
 /* selection bar: the inline ask anchored to the layer (CanvasBars.tsx) */
 .sel-ask-pop { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); width: 280px; padding: 6px; border-radius: var(--radius-lg); background: var(--surface-2); border: 1px solid var(--border); box-shadow: var(--shadow-2); display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
 .sel-ask-pop input { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; padding: 5px 8px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--input-bg); color: var(--text); }
-.sel-ask-sugg { display: flex; gap: 4px; flex-wrap: wrap; }
-.sel-ask-sugg button { font: inherit; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer; }
-.sel-ask-sugg button:hover { color: var(--text); border-color: var(--accent); }
 
 /* the brief box (Home / empty canvas) says when the agent is not connected */
 .prompt-offline { display: inline-flex; align-items: center; gap: 6px; }
