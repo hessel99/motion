@@ -272,6 +272,35 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   await ev(() => editor.store.undo());
   check('MD-10: remove is one undo step', (await fx()).color);
 
+  // MD-55: a collapsed group row shows its children's keys as summary ticks (and drags them)
+  const grp = await ev(async () => {
+    const c = await import('/src/core/commands.ts');
+    const s = editor.store;
+    for (const id of s.comp.root.slice()) c.deleteLayers(s, [id]);
+    const a = c.addLayer(s, 'rect', { x: 100, y: 100, w: 100, h: 100, name: 'A' });
+    const b = c.addLayer(s, 'rect', { x: 300, y: 100, w: 100, h: 100, name: 'B' });
+    s.setTime(0); c.setProp(s, a.id, 'opacity', [0], { forceKey: true });
+    s.setTime(1); c.setProp(s, a.id, 'opacity', [100]);
+    s.setTime(0.5); c.setProp(s, b.id, 'rotation', [0], { forceKey: true });
+    s.setTime(1.5); c.setProp(s, b.id, 'rotation', [90]);
+    const gr = c.groupLayers(s, [a.id, b.id], { x: 100, y: 100, w: 300, h: 100 });
+    const g = gr?.id ?? gr;
+    s.select([]); s.setTime(0);
+    timeline.expand(g, false);
+    return { a: a.id, b: b.id, g };
+  });
+  await page.waitForTimeout(200);
+  const tick = await ev(g => {
+    const i = timeline.rows.findIndex(r => r.kind === 'layer' && r.id === g);
+    const y = (timeline.rowY(i) + timeline.rowY(i + 1)) / 2, x = timeline.tToX(1);
+    const r = document.querySelector('.tl-canvas').getBoundingClientRect();
+    return { keys: timeline.summaryKeysAt(x, y), times: timeline.summaryTimes(editor.store.layer(g)), x: r.x + x, y: r.y + y, dx: timeline.tToX(1.25) - x };
+  }, grp.g);
+  check('MD-55: a collapsed group summarizes its children\'s keys', JSON.stringify(tick.times) === '[0,0.5,1,1.5]' && tick.keys.length === 1 && tick.keys[0].startsWith(grp.a), JSON.stringify(tick));
+  await page.mouse.move(tick.x, tick.y); await page.mouse.down(); await page.mouse.move(tick.x + tick.dx, tick.y, { steps: 6 }); await page.mouse.up();
+  const moved = await ev(id => editor.store.layer(id).props.opacity.kf.map(k => +k.t.toFixed(2)), grp.a);
+  check('MD-55: dragging a summary tick retimes the child keys', moved[1] > 1.1, JSON.stringify(moved));
+
   check('MD: no page errors', errors.length === 0, JSON.stringify(errors.slice(0, 5)));
   await ctx.close();
 }
