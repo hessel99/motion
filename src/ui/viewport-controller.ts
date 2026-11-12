@@ -611,6 +611,9 @@ export class ViewportController {
       if (c) { g.strokeStyle = accent; g.lineWidth = 1; poly(c); g.stroke(); }
     }
     // motion path of selected layers with animated position
+    // tangent handles of every selected layer, computed once (per layer lookup was O(selection^2):
+    // selecting 5k animated layers froze the editor for ~36s per frame)
+    let handles: Map<string, ReturnType<ViewportController['pathPoints']>> | null = null;
     for (const id of st.selection) {
       const l = st.layer(id);
       const p = l?.props.position;
@@ -633,8 +636,16 @@ export class ViewportController {
       g.stroke();
       g.setLineDash([]);
       // spatial tangent handles
-      for (const pt of this.pathPoints()) {
-        if (pt.part === 'key' || pt.id !== id) continue;
+      if (!handles) {
+        handles = new Map();
+        for (const pt of this.pathPoints()) {
+          if (pt.part === 'key') continue;
+          let a = handles.get(pt.id);
+          if (!a) handles.set(pt.id, (a = []));
+          a.push(pt);
+        }
+      }
+      for (const pt of handles.get(id) ?? []) {
         const k = p.kf[pt.idx];
         const kx = pw[0] * k.v[0] + pw[2] * k.v[1] + pw[4], ky = pw[1] * k.v[0] + pw[3] * k.v[1] + pw[5];
         const [ax, ay] = this.toScreen(kx, ky);

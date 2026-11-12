@@ -28,4 +28,6 @@ function startEditor() {
     preloadImporters();
   });
   if (!q.has('nobridge')) agentClient.connect();
+  // stress lab (scripts/stress-lab.mjs): scene builders + measurement loops, never loaded otherwise
+  if (q.has('lab')) import('./lab/index');
 }

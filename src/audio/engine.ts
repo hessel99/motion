@@ -146,7 +146,9 @@ export class AudioEngine {
         // the audio clock (scrub, loop wrap, frame step, long frames where the editor clock is capped)
         const sig = this.signature();
         const expected = this.tStart + (this.ctxStart ? audioCtx().currentTime - this.ctxStart : 0);
-        if (sig !== this.sig || Math.abs(expected - t) > 0.06) this.restart();
+        // no audible clips (ctxStart 0): nothing to resync. checking drift there restarted (and walked
+        // the whole layer tree, precomps included) every few frames of playback.
+        if (sig !== this.sig || (this.ctxStart !== 0 && Math.abs(expected - t) > 0.06)) this.restart();
       }
       this.wasPlaying = playing;
     });

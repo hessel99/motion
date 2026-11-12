@@ -147,6 +147,10 @@ export function noise1(x: number, seed = 0): number {
 
 function lerpV(a: Val, b: Val, p: number): Val { return map2(a, b, (x, y) => x + (y - x) * p); }
 
+// one-argument math functions (built once: building this table inside every call() was ~40% of
+// expression time in the stress lab's expr-3k scene)
+const M1: Record<string, (x: number) => number> = Object.assign(Object.create(null), { sin: Math.sin, cos: Math.cos, tan: Math.tan, asin: Math.asin, acos: Math.acos, atan: Math.atan, abs: Math.abs, floor: Math.floor, ceil: Math.ceil, round: Math.round, sqrt: Math.sqrt, exp: Math.exp, log: Math.log, degreesToRadians: (x: number) => x * Math.PI / 180, radiansToDegrees: (x: number) => x * 180 / Math.PI });
+
 export function evalExpr(node: Node, ctx: ExprContext): Val {
   ctx.calls = 0;
   const ev = (n: Node): Val => {
@@ -199,7 +203,6 @@ export function evalExpr(node: Node, ctx: ExprContext): Val {
   };
   const call = (name: string, args: Node[]): Val => {
     const A = () => args.map(ev);
-    const M1: Record<string, (x: number) => number> = Object.assign(Object.create(null), { sin: Math.sin, cos: Math.cos, tan: Math.tan, asin: Math.asin, acos: Math.acos, atan: Math.atan, abs: Math.abs, floor: Math.floor, ceil: Math.ceil, round: Math.round, sqrt: Math.sqrt, exp: Math.exp, log: Math.log, degreesToRadians: (x: number) => x * Math.PI / 180, radiansToDegrees: (x: number) => x * 180 / Math.PI });
     if (M1[name]) return map1(ev(args[0]), M1[name]);
     switch (name) {
       case 'min': { const a = A(); return a.reduce((p, c) => map2(p, c, Math.min)); }
