@@ -222,7 +222,9 @@ export async function openData(name: string, data: string, path?: string) {
   const ext = name.split('.').pop()!.toLowerCase();
   try {
     if (ext === 'motion') {
-      const p = JSON.parse(data) as Project;
+      // older desktop shells hand .motion files over as base64: decode them as utf-8 json
+      const text = /^\s*[{[]/.test(data) ? data : new TextDecoder().decode(b64ToBuf(data.trim()));
+      const p = JSON.parse(text) as Project;
       if (!p.comps || !p.layers) throw new Error('not a motion project');
       p.name ||= name.replace(/\.motion$/i, '');
       openProject(p, path ?? null);
