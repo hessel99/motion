@@ -16,6 +16,8 @@ npm run dev           # browser, plus `npm run bridge` for the agent sidebar
 npm run dist          # build an installable app (on a Mac: .dmg + .zip in ./release)
 ```
 
+The built app is not code-signed, so macOS warns on first launch: right-click the app → **Open** once (or use `npm run electron` during development).
+
 For the agent sidebar, install and log in to the [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) once (`npm i -g @anthropic-ai/claude-code`, then `claude`). Motion uses your own subscription through it. Codex CLI and Gemini CLI also work if they are installed.
 
 Try **File → Run performance benchmark** to see real numbers on your machine.
