@@ -8,7 +8,7 @@ import { AgentPanel } from './AgentPanel';
 import { useChannels } from './hooks';
 import { showContextMenu, type MenuItem } from './menu';
 import {
-  exportLottie, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, toast, runBenchmark, exportGifFile,
+  exportLottie, exportAeScript, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, toast, runBenchmark, exportGifFile,
 } from '../app/actions';
 import { setProjectName, editMode, newComposition, addPrecompLayer, renameComp } from '../core/commands';
 
@@ -60,6 +60,7 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
       { label: 'Save As…', shortcut: '⇧⌘S', action: () => saveProject(true) },
       { separator: true },
       { label: 'Export Lottie JSON', action: exportLottie },
+      { label: 'Export for After Effects (.jsx)', action: exportAeScript },
       { label: 'Export GIF', action: () => { exportGifFile().catch(() => {}); } },
       { label: 'Export video…', action: () => { import('./ExportDialog').then(m => m.openExportDialog()); } },
       { separator: true },

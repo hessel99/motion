@@ -168,6 +168,7 @@ function buildMenu() {
         { type: 'separator' },
         { label: 'Import…', click: () => sendMenu('import') }, // ⌘I is the agent sidebar toggle in the app; ⌘O opens + imports
         { label: 'Export Lottie…', accelerator: 'CmdOrCtrl+E', click: () => sendMenu('export-lottie') },
+        { label: 'Export for After Effects (.jsx)…', click: () => sendMenu('export-ae') },
         { type: 'separator' },
         isMac ? { role: 'close' } : { role: 'quit' },
       ],
