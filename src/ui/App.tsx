@@ -5,6 +5,7 @@ import { ViewportController } from './viewport-controller';
 import { Timeline, fmtTime } from './timeline';
 import { Inspector } from './Inspector';
 import { AgentPanel } from './AgentPanel';
+import { LibraryPanel, SyncReview, STYLE_MIME, applyStyle } from './LibraryPanel';
 import { useChannels } from './hooks';
 import { showContextMenu, type MenuItem } from './menu';
 import {
@@ -59,7 +60,7 @@ export function App() {
       <Guard name="Top bar"><TopBar agentOpen={agentOpen} toggleAgent={() => setAgentOpen(o => !o)} /></Guard>
       {agentOpen && <aside class="left" aria-label="AI agent"><Guard name="Agent"><AgentPanel /></Guard></aside>}
       <main class="center"><Viewport /></main>
-      <aside class="right" ref={right} aria-label="Inspector"><Guard name="Inspector"><Inspector /></Guard></aside>
+      <aside class="right" ref={right} aria-label="Inspector"><RightPanel /></aside>
       <section class="bottom" aria-label="Timeline"><TimelineHost /></section>
       {L === 'stage' && <StageChrome key="stage" agentOpen={agentOpen} openAgent={() => setAgentOpen(true)} />}
       {L === 'score' && <Transport key="score" />}
@@ -70,11 +71,28 @@ export function App() {
       {L === 'studio' && <StudioTransport key="studio-transport" />}
       {L === 'studio' && <StudioFps key="studio-fps" />}
       {L === 'studio' && <StudioEffects key="studio-fx" />}
+      <Guard name="Sync"><SyncReview /></Guard>
       <CommandPalette toggleAgent={() => setAgentOpen(o => !o)} fit={() => vp?.fit()} />
       <ShortcutHelp />
       <Welcome />
       <Benchmark />
     </div>
+  );
+}
+
+// ---------------- right panel: inspector | library ----------------
+function RightPanel() {
+  useChannels([], ['library-tab']);
+  const tab = editor.rightTab;
+  const set = (t: 'design' | 'library') => { editor.rightTab = t; try { localStorage.setItem('motion.rightTab', t); } catch { /* */ } editor.emit('library-tab'); };
+  return (
+    <>
+      <div class="right-tabs" role="tablist" aria-label="Right panel">
+        <button type="button" role="tab" aria-selected={tab === 'design'} class={tab === 'design' ? 'on' : ''} onClick={() => set('design')}>Design</button>
+        <button type="button" role="tab" aria-selected={tab === 'library'} class={tab === 'library' ? 'on' : ''} onClick={() => set('library')} title="Colors, numbers and components of this project">Library</button>
+      </div>
+      {tab === 'design' ? <Guard name="Inspector"><Inspector /></Guard> : <Guard name="Library"><LibraryPanel /></Guard>}
+    </>
   );
 }
 
@@ -194,9 +212,21 @@ function Viewport() {
   }, []);
   return (
     <div class={'viewport' + (drag ? ' dropping' : '')} ref={host}
-      onDragOver={e => { e.preventDefault(); setDrag(true); }}
-      onDragLeave={() => setDrag(false)}
-      onDrop={async e => { e.preventDefault(); setDrag(false); for (const f of e.dataTransfer?.files ?? []) await openBrowserFile(f); }}>
+      onDragOver={e => { e.preventDefault(); if (e.dataTransfer?.types.includes(STYLE_MIME)) { e.dataTransfer.dropEffect = 'link'; vp?.hoverAt(e); return; } setDrag(true); }}
+      onDragLeave={() => { setDrag(false); vp?.hoverAt(null); }}
+      onDrop={async e => {
+        e.preventDefault(); setDrag(false);
+        const style = e.dataTransfer?.getData(STYLE_MIME);
+        if (style) {
+          // a style swatch dropped on a layer links it (alt: as the stroke). on empty canvas: the selection
+          vp?.hoverAt(null);
+          const hit = vp?.layerAt(e);
+          applyStyle(style, hit ? [hit] : editor.store.selection, e.altKey);
+          if (hit) editor.store.select([hit]);
+          return;
+        }
+        for (const f of e.dataTransfer?.files ?? []) await openBrowserFile(f);
+      }}>
       <Toolbar />
       <Hud />
     </div>

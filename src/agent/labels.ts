@@ -10,6 +10,12 @@ export function toolLabel(rawName: string, input: any, layerName: (id: string) =
   const lns = (ids: any) => (Array.isArray(ids) ? (ids.length <= 3 ? ids.map(ln).join(', ') : plural(ids.length, 'layer')) : 'selection');
   switch (name) {
     case 'get_document': return 'Read the document';
+    case 'list_styles': return 'Read colors & components';
+    case 'link_style': return a.style ? `Link ${a.prop ?? ''} of ${lns(a.ids)} to ${q(a.style)}` : `Detach ${a.prop ?? ''} of ${lns(a.ids)}`;
+    case 'set_style': return `Set style ${q(a.name)}`;
+    case 'set_style_mode': return `Switch to ${q(a.mode)} mode`;
+    case 'create_component': return `Make ${ln(a.id)} a component`;
+    case 'add_instance': return `Add ${q(a.component)} instance`;
     case 'get_layer': return `Inspect ${ln(a.id)}`;
     case 'get_animation': return `Read animation${a.ids?.length ? ' of ' + lns(a.ids) : ''}`;
     case 'get_editor_context': return 'Check selection & playhead';

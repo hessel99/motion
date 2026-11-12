@@ -38,6 +38,7 @@ const COLOR_TOKENS = {
   tlControlOff: '--tl-control-off',
   tlControlOn: '--tl-control-on',
   tlSolo: '--tl-solo',
+  tlComponent: '--tl-component',
   tlBar: '--tl-bar',
   tlBarSelected: '--tl-bar-selected',
   tlKey: '--tl-key',

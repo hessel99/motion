@@ -31,6 +31,7 @@
 - **Agent review**: every agent turn ends in a review card (changed layers/props, hold to compare, replay, revert by undo-entry id, keep); editor context + @-mentions; quick actions (bouncier, snappier, stagger, 3 variations, critique); Ask mode (read-only); compact tools (`animate`, `retime`, `stagger`, `get_animation`, `contact_sheet`). See `docs/MCP.md`.
 - **Design system**: tokens in `src/ui/tokens.css` (dark default, light via File menu or `?theme=light`), canvas parity via `src/ui/theme.ts`, primitives in `src/ui/ui.tsx`, living style guide at `?styleguide`.
 - **Smart animate** (Figma style, `src/core/smart.ts`): select two versions of a design (e.g. two pasted Figma frames) → Animate panel → *Smart animate A → B*. Layers are matched by name path; every differing property (transform, size, fill, radius, stroke, path shape with the same structure) gets an eased key pair, unmatched layers fade in/out, the end frame is removed. One undo step; also an agent tool (`smart_animate`).
+- **Components and linked styles** (see `docs/components-and-tokens.md`): main components + instances (real linked layers: own place, delay, overrides; main edits and animation propagate inside the same undo step), named colors/numbers that fill, stroke, radius, stroke width and opacity link to (resolved values stay in the props, so zero render cost; light/dark modes; hand edits unlink). Library tab: palette with usage counts, click to select users, drag a swatch onto a layer. Sync from Figma paste (variables, color styles, components), W3C / Tokens Studio files (watched in the desktop app), URLs or the Figma variables API, always through a before → after review, one undo step.
 - **Gradient fills**: Fill → Solid / Linear / Radial, angle, color stops (add/remove, position, color+alpha). Static (not keyframed). Exported to Lottie as gradient fills (`gf`, checked against lottie-web: mean pixel error 1.7; gradients on non-square boxes stretch slightly differently); the AE script uses the first stop color.
 - **Markers**: M adds one at the playhead; drag, name (double-click), delete (right-click). J/K and keyframe drags snap to them. Exported to Lottie and AE; the agent can set them (`set_markers`).
 - **Audio layers**: drop or open a wav/mp3/m4a/ogg. Waveform in the timeline, drag to shift in time, volume in the inspector, **Add markers on beats** (onset detection, `src/audio/beats.ts`). Playback through WebAudio is (re)scheduled on play, on loop wrap and on playhead jumps, so the editor clock stays frame-accurate.
@@ -207,6 +208,31 @@ Current numbers from `scripts/cpu-bench.mjs` (the table above is older and came 
 - Isolation/mask offscreen passes are scissored to the region's screen bounds; each draw range binds one cached vertex array.
 - Stress lab, CPU mode: mixed-10k 105 → 25 ms, camera-mixed-10k 106 → 27 ms, rasters-500 79 → 0.4 ms per frame.
 
+### Deep zoom: viewport tiles (`scripts/zoom-check.mjs`)
+
+- A raster layer whose raster at screen resolution would be big (a side > 2040 px, or > 1 Mpx while less than half of it is on screen) is drawn as **tiles of its raster at screen resolution, only where it is visible** (+ a 1 tile prefetch ring). Texture memory follows the screen size, not the zoom; text, paths, gradient rasters and images (up to their native resolution) stay crisp at any zoom (limit 1%..25600%).
+  - Tile levels are quarter octaves (settled view: 1..1.19x screen resolution). Tiles of a level share one pixel grid and carry a 1 px apron of real content, so linear filtering across seams is exact.
+  - A missing tile is drawn from the small whole-layer raster (a sub-rectangle of it, same quad), so a layer never disappears. A new level replaces the shown one only once all its visible tiles are resident (no blurry flash).
+  - Tile jobs go to the raster workers nearest-to-visible first, at most 6 in flight (no stale queues during fast pans); images tile on the main thread within the frame budget; exports (`syncRaster`) raster tiles synchronously.
+- **Zoom gestures**: two zoom changes within 180 ms count as a gesture. During it rasters and tile levels are kept and drawn scaled (no thrash); only rasters that got more than 2x too soft upgrade, progressively. When the gesture settles, sharp versions are rasterized. A single zoom jump (zoom to fit, keyboard) re-rasters at once as before.
+- **Atlas budget**: optional allocations (upgrades with an old raster to show, tiles) stay within 8 pages (128 MB), never evict entries drawn in the last 30 frames and never compact. Compactions are rate limited to one per 60 frames.
+- **Viewport UI**: ctrl/cmd+wheel and trackpad pinch zoom at the cursor (Safari gesture events too); mouse-wheel notches glide over a few frames; overlay lines and handles snap to device pixels at any zoom / dpr.
+- `scripts/zoom-check.mjs` (scenes from `scripts/zoom-dump.mjs`, lab scenes `zoomMix` / `crisp`): zoom sweep 0.05x -> 64x -> 0.05x while playing, holds at 4x / 32x, and crispness against a direct canvas2d render of the same view. Before -> after (1600x1000, dpr 1, software GPU):
+
+| | before | after |
+|---|---|---|
+| sweep: evictions / compactions / uploads per s | 200 / 1.5 / 247 MB | 0 / 0 / 6 MB |
+| sweep: frame ms mean / p95 | 29.9 / 128 | 4.8 / 27 |
+| hold 4x playing: evictions / compactions / uploads per s | 27 / 3.1 / 318 MB | 24 / 0 / 2.8 MB |
+| hold 4x: frame ms mean / p95 | 116 / 332 | 4.0 / 10.6 |
+| hold 32x playing: evictions / compactions / uploads per s | 4.6 / 1.4 / 140 MB | 78 / 0.33 / 43 MB |
+| hold 32x: frame ms mean / p95 | 239 / 407 | 16.7 / 62.7 |
+| crisp, mean abs error (0-255) text 8x / 32x / 128x | 4.6 / 4.9 / 8.7 | 1.1 / 0.17 / 0.13 |
+| crisp, mean abs error star path 8x / 32x / 128x | 5.0 / 17.9 / 36.3 | 0.33 / 0.71 / 0.81 |
+
+  (hold 32x after: ~50 big scale-animating stars overlap the view and re-tile as they grow; those evictions are LRU replacement of off-screen tiles, not thrash. Before, the headline text at 32x was not drawn at all.)
+- 1x is pixel identical (`pixel-compare.mjs`: max diff 1/255 on text, the known noise floor).
+
 ### Timeline at scale (`scripts/timeline-bench.mjs`, `scripts/timeline-profile.mjs`)
 
 - The bench drives the canvas timeline with synthetic wheel / pointer / input events in `?stress=N[&nested]` scenes and times each step (event handlers incl. every store listener + the timeline frame hook). `TALL=700` makes the timeline 700px high (28 visible rows) instead of the default 300px.
@@ -335,8 +361,9 @@ The look is token driven, so a visual pass should only need to edit `tokens.css`
 
 - **Effects: none yet, on purpose.** The renderer is prepared (effect-pipeline design + motion blur / gaussian blur prototypes, see "Architecture decisions"); effects get added one by one after v0.5, in the order of `docs/research-2026-11.md` (drop shadow, blur, motion blur, glow, …).
 - **Design pass** still to do: the design system (`src/ui/tokens.css`, `?styleguide`) is ready to be re-themed by changing tokens only, once the visual direction is set.
-- Big text / path rasters are capped at 1/8 of an atlas page, so very deep zoom (≈15×+) on large text stays soft. GPU text/path rendering (see decisions) is the real fix.
-- Zoomed-in playback of many big rasters still churns the atlas (evictions/compactions); hysteresis for optional upgrades is the next step.
+- Layers that animate their path shape (morph, trim) are not tiled: at deep zoom they are capped at one 2040 px raster per frame. Per-glyph text animation units are not tiled either.
+- Zoomed-in playback of many big layers that animate their *scale* still re-tiles them as they grow (bounded: 6 tile jobs in flight, LRU within the byte budget). GPU text/path rendering (see decisions) would make that free.
+- The anticipatory max-scale boost can still fill the atlas to 12 pages at fit zoom in raster-heavy scenes (required rasters may exceed the 8 page budget; optional ones may not).
 - Only the nearest clip ancestor clips (no nested clip intersection).
 - Lottie text glyphs only for the bundled Inter; other fonts export by name.
 - AE: effects, expressions beyond the safe subset, 3D, cameras, luma mattes (as alpha), mask feather; the .jsx export uses the first stop of gradients and skips audio.

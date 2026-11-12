@@ -15,6 +15,7 @@ import { toast } from '../app/actions';
 import { EaseStudio, showClassicEase, studioEnabled, StudioSwitch } from './patterns/EaseStudio';
 import { RhythmPanel } from './patterns/RhythmPanel';
 import { Checkbox, ColorSwatch, NumField, Section, Segmented, Slider } from './ui';
+import { ComponentBox, LinkButton, LinkedChip, sharedLink } from './LinkControls';
 
 const st = () => editor.store;
 
@@ -116,6 +117,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
   return (
     <>
       <AlignBar ids={ids} />
+      {layers.length === 1 && <ComponentBox layer={l} />}
       <Section title={layers.length > 1 ? `${layers.length} layers` : l.name} right={<span class="insp-type">{layers.length > 1 ? 'mixed' : l.type}</span>}>
         <div class="row">
           <KeyButton layers={layers} prop="position" />
@@ -140,6 +142,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
           <KeyButton layers={layers} prop="opacity" />
           <NumField label="◐" title="Opacity" value={opa} min={0} max={100} suffix="%" onChange={(n, mk) => set('opacity', [n], mk)} />
         </div>
+        {sharedLink(layers, 'opacity') && <div class="row"><LinkedChip layers={layers} prop="opacity" /></div>}
         <div class="row">
           <KeyButton layers={layers} prop="anchor" />
           <NumField label="AX" title="Anchor X" value={anchor[0]} onChange={(n, mk) => vec('anchor', 0, n, anchor, mk)} />
@@ -150,8 +153,11 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
         <Section title="Corner radius">
           <div class="row">
             <KeyButton layers={layers} prop="radius" />
-            <NumField label="R" min={0} value={v('radius')[0]} onChange={(n, mk) => set('radius', [n, n, n, n], mk)} />
-            <span class="muted small">{v('radius').every(x => x === v('radius')[0]) ? '' : v('radius').map(x => Math.round(x)).join(' ')}</span>
+            {sharedLink(layers, 'radius') ? <LinkedChip layers={layers} prop="radius" /> : <>
+              <NumField label="R" min={0} value={v('radius')[0]} onChange={(n, mk) => set('radius', [n, n, n, n], mk)} />
+              <span class="muted small">{v('radius').every(x => x === v('radius')[0]) ? '' : v('radius').map(x => Math.round(x)).join(' ')}</span>
+              <LinkButton layers={layers} prop="radius" />
+            </>}
           </div>
         </Section>
       )}
@@ -160,7 +166,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
         <Section title="Fill">
           {!(layers.length === 1 && l.paints?.some(p => p.type === 'linear' || p.type === 'radial')) && <div class="row">
             <KeyButton layers={layers} prop="fill" />
-            <ColorField value={v('fill')} onChange={(c, mk) => set('fill', c, mk)} />
+            {sharedLink(layers, 'fill') ? <LinkedChip layers={layers} prop="fill" /> : <><ColorField value={v('fill')} onChange={(c, mk) => set('fill', c, mk)} /><LinkButton layers={layers} prop="fill" /></>}
           </div>}
           {layers.length === 1 && l.type !== 'text' && <GradientEditor layer={l} />}
         </Section>
@@ -169,7 +175,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
         <Section title="Stroke">
           <div class="row">
             <KeyButton layers={layers} prop="stroke" />
-            <ColorField value={v('stroke')} onChange={(c, mk) => set('stroke', c, mk)} />
+            {sharedLink(layers, 'stroke') ? <LinkedChip layers={layers} prop="stroke" /> : <><ColorField value={v('stroke')} onChange={(c, mk) => set('stroke', c, mk)} /><LinkButton layers={layers} prop="stroke" /></>}
           </div>
           <div class="row">
             <KeyButton layers={layers} prop="strokeWidth" />
@@ -178,6 +184,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
               <option value="inside">Inside</option><option value="center">Center</option><option value="outside">Outside</option>
             </select>
           </div>
+          {sharedLink(layers, 'strokeWidth') && <div class="row"><LinkedChip layers={layers} prop="strokeWidth" /></div>}
         </Section>
       )}
       {layers.length === 1 && l.type === 'text' && <TextPanel layer={l} />}

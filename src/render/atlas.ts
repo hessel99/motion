@@ -30,6 +30,12 @@ interface Dirty { x0: number; y0: number; x1: number; y1: number; rects: number[
 
 export const PAGE = 2048;
 const MAX_PAGES = 12;
+/** byte budget for optional rasters (resolution upgrades, viewport tiles): they may grow the atlas
+ *  only up to this many pages and only evict entries nobody drew for KEEP_FRAMES frames */
+const BUDGET_PAGES = 8;
+const KEEP_FRAMES = 30;
+/** frames between two compactions (a compaction re-uploads everything that moved) */
+const COMPACT_GAP = 60;
 
 export class Atlas {
   tex: WebGLTexture;
@@ -44,6 +50,9 @@ export class Atlas {
   compactions = 0;
   evictions = 0;
   uploadsLastFlush = 0;
+  /** bytes uploaded to the gpu so far (hud / zoom-check) */
+  uploadedBytes = 0;
+  private lastCompact = -1e9;
   /** called with the key of every evicted entry (holders drop their metadata) */
   onEvict: ((key: string) => void) | null = null;
   private scratch = new Uint8Array(0);
@@ -94,14 +103,26 @@ export class Atlas {
   get size() { return this.entries.size; }
 
   /** reserve space; returns null if it can't fit without evicting entries drawn this frame
-   *  (the caller then tries a lower resolution or keeps what it has) */
-  alloc(key: string, w: number, h: number): AtlasEntry | null {
+   *  (the caller then tries a lower resolution or keeps what it has).
+   *  optional (upgrades, tiles: the caller has something to show meanwhile): stays within the byte
+   *  budget, never evicts entries drawn in the last KEEP_FRAMES frames and never compacts, so zoomed-in
+   *  playback can't turn into an evict / re-raster / compact cycle. */
+  alloc(key: string, w: number, h: number, optional = false): AtlasEntry | null {
     w = Math.ceil(w) + 2; // 1px gutter each side
     h = Math.ceil(h) + 2;
     if (w > PAGE || h > PAGE) return null;
     const old = this.entries.get(key);
     if (old) this.evict(old);
     let slot = this.findSlot(w, h);
+    if (!slot && optional) {
+      slot = this.evictUntilFits(w, h, 120);
+      if (!slot && this.pages < BUDGET_PAGES) {
+        this.allocate(Math.min(BUDGET_PAGES, this.pages * 2));
+        slot = this.findSlot(w, h);
+      }
+      if (!slot) slot = this.evictUntilFits(w, h, KEEP_FRAMES);
+      if (!slot) return null;
+    }
     if (!slot) {
       // 1. evict entries nobody drew for a while (oldest first), 2. grow, 3. evict anything not drawn
       // this frame, 4. defragment what is left. entries drawn this frame always stay.
@@ -111,7 +132,10 @@ export class Atlas {
         slot = this.findSlot(w, h);
       }
       if (!slot) slot = this.evictUntilFits(w, h, 0);
-      if (!slot && this.freeArea() >= w * h * 2 && this.compact(0)) slot = this.findSlot(w, h);
+      if (!slot && this.frame - this.lastCompact >= COMPACT_GAP && this.freeArea() >= w * h * 2) {
+        this.lastCompact = this.frame;
+        if (this.compact(0)) slot = this.findSlot(w, h);
+      }
       if (!slot) return null;
     }
     const e: AtlasEntry = { key, page: slot.page, x: slot.x + 1, y: slot.y + 1, w: w - 2, h: h - 2, lastUsed: this.frame, shelf: slot.shelf };
@@ -274,6 +298,7 @@ export class Atlas {
         gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, x0);
         gl.pixelStorei(gl.UNPACK_SKIP_ROWS, y0);
         gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, x0, y0, p, w, h, 1, gl.RGBA, gl.UNSIGNED_BYTE, s);
+        this.uploadedBytes += w * h * 4;
         n++;
       }
     }

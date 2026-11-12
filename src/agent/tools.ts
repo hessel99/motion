@@ -15,6 +15,9 @@ import type { Tx } from '../core/store';
 import { animRange, describeLayerAnimation, fmtTime } from './describe';
 import { editorContext } from './context';
 import { variations } from './variations';
+import { addToken, BINDABLE, findToken, linkProp, prettyName, setTokenMode, setTokenValue, tokenUsage, tokenValue, linkOf } from '../core/tokens';
+import { toHex } from '../core/token-sync';
+import { createComponent, createInstance, instanceRootOf, instancesOf } from '../core/components';
 
 export interface ToolDef {
   name: string;
@@ -106,9 +109,107 @@ function summarize(l: Layer, deep: boolean): any {
   else { o.position = vals.position; o.size = vals.size; }
   if (Object.keys(anim).length) o.animated = anim;
   if (l.text) o.text = l.text.content.slice(0, 80);
+  const P = st().project;
+  if (P.tokens) {
+    const linked: any = {};
+    for (const k of BINDABLE) { const id = linkOf(l, k); const tk = id ? P.tokens.items[id] : undefined; if (tk) linked[k] = tk.name; }
+    if (Object.keys(linked).length) o.linkedStyles = linked;
+  }
+  if (P.components?.[l.id]) o.component = P.components[l.id].name;
+  else if (l.link && P.components?.[l.link.main]) o.instanceOf = P.components[l.link.main].name;
+  if (l.link?.ov?.length) o.overrides = l.link.ov;
   if (l.children.length) o.children = deep ? l.children.map(c => summarize(st().layer(c)!, deep)) : l.children.length;
   return o;
 }
+
+function needComponent(ref: string): string {
+  const P = st().project;
+  if (P.components?.[ref] && P.layers[ref]) return ref;
+  const hit = Object.entries(P.components ?? {}).find(([id, c]) => P.layers[id] && c.name.toLowerCase() === String(ref).toLowerCase());
+  if (!hit) throw new Error(`no component "${ref}". components: ${Object.values(P.components ?? {}).map(c => c.name).join(', ') || 'none (create_component first)'}`);
+  return hit[0];
+}
+
+const STYLE_TOOLS: ToolDef[] = [
+  {
+    name: 'list_styles',
+    readOnly: true,
+    description: 'List the project library: named color/number styles (design tokens, e.g. "Brand/Primary", synced from Figma or a tokens file) with values in the active mode and how many layers use them, the modes (e.g. Light/Dark), and the components with their instance counts. Prefer linking layers to these styles over hard-coded colors.',
+    inputSchema: { type: 'object', properties: {} },
+    run: () => {
+      const P = st().project;
+      const lib = P.tokens;
+      const usage = tokenUsage(P);
+      const styles = Object.values(lib?.items ?? {}).map(t => {
+        const v = tokenValue(lib!, t);
+        return { id: t.id, name: t.name, type: t.type, value: t.type === 'color' ? toHex(v) : v[0], usedBy: usage.get(t.id)?.layers.size ?? 0, ...(t.missing ? { removedFromLibrary: true } : {}) };
+      });
+      const components = Object.entries(P.components ?? {}).filter(([id]) => P.layers[id]).map(([id, c]) => ({ id, name: c.name, instances: instancesOf(P, id).length }));
+      return text({ mode: lib?.mode, modes: lib?.modes, styles, components });
+    },
+  },
+  {
+    name: 'link_style',
+    description: `Link a layer property to a named style so it follows library changes (colors: fill, stroke; numbers: opacity, radius, strokeWidth). On an animated property the keyframe at "time" (default: playhead) is linked. style null (or "") detaches and keeps the current value.`,
+    inputSchema: { type: 'object', properties: { ids: idsSchema, prop: { enum: BINDABLE }, style: { description: 'style name ("Brand/Primary") or id; null to detach', anyOf: [{ type: 'string' }, { type: 'null' }] }, time: { type: 'number' } }, required: ['ids', 'prop'] },
+    run: ({ ids, prop, style, time }) => {
+      const key = checkProp(prop);
+      ids.forEach(need);
+      if (!style) { linkProp(st(), ids, key, null, time); return text('detached'); }
+      const t = findToken(st().project, style);
+      if (!t) throw new Error(`no style "${style}". use list_styles, or set_style to create one`);
+      linkProp(st(), ids, key, t.id, time ?? st().time);
+      return text(`linked ${ids.length} layer(s) ${key} to ${t.name}`);
+    },
+  },
+  {
+    name: 'set_style',
+    description: 'Create a named color or number style, or change its value (every linked layer and keyframe updates, one undo step). Use "/" to group: "Brand/Primary". mode: which mode to change (default: the active one).',
+    inputSchema: { type: 'object', properties: { name: { type: 'string' }, value: { description: 'color ("#rrggbb", [r,g,b,a]) or a number', anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'array', items: { type: 'number' } }] }, mode: { type: 'string' } }, required: ['name', 'value'] },
+    run: ({ name, value, mode }) => {
+      const s = st();
+      const isNum = typeof value === 'number';
+      const v = isNum ? [value] : parseColor(value);
+      const t = findToken(s.project, name);
+      if (t) {
+        if ((t.type === 'number') !== isNum) throw new Error(`${t.name} is a ${t.type} style`);
+        setTokenValue(s, t.id, v, { mode });
+        return text({ id: t.id, updated: t.name });
+      }
+      const n = addToken(s, { name, type: isNum ? 'number' : 'color', value: v });
+      return text({ id: n.id, created: n.name });
+    },
+  },
+  {
+    name: 'set_style_mode',
+    description: 'Switch the library mode (e.g. "Light" / "Dark"): every linked value changes to that mode\'s value.',
+    inputSchema: { type: 'object', properties: { mode: { type: 'string' } }, required: ['mode'] },
+    run: ({ mode }) => {
+      const lib = st().project.tokens;
+      const m = lib?.modes.find(x => x.toLowerCase() === String(mode).toLowerCase());
+      if (!m) throw new Error(`no mode "${mode}". modes: ${lib?.modes.join(', ') ?? 'none'}`);
+      setTokenMode(st(), m);
+      return text(`mode ${m}`);
+    },
+  },
+  {
+    name: 'create_component',
+    description: 'Make a layer (usually a group, e.g. a logo, button or card, with its animation) a reusable main component. Instances follow every later change of the main (properties, keyframes, added/removed layers) except properties changed on the instance (overrides).',
+    inputSchema: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' } }, required: ['id'] },
+    run: ({ id, name }) => { need(id); const c = createComponent(st(), id, name); return text({ component: id, name: c.name }); },
+  },
+  {
+    name: 'add_instance',
+    description: 'Add an instance of a component to the active composition (or inside a parent group). x/y = where its position goes (default: next to the main). delay = seconds its animation starts after the main\'s. Edit instance layers with update_layer etc. to override.',
+    inputSchema: { type: 'object', properties: { component: { type: 'string', description: 'component id or name' }, x: { type: 'number' }, y: { type: 'number' }, delay: { type: 'number' }, parent: { type: 'string' } }, required: ['component'] },
+    run: ({ component, x, y, delay, parent }) => {
+      const mainId = needComponent(component);
+      if (parent) need(parent);
+      const l = createInstance(st(), mainId, { x, y, delay, parent: parent ?? null });
+      return text({ id: l.id, name: l.name, instanceOf: prettyName(st().project.components![mainId].name), children: l.children.length, root: instanceRootOf(st().project, l.id) === l.id });
+    },
+  },
+];
 
 export const TOOLS: ToolDef[] = [
   {
@@ -147,6 +248,12 @@ export const TOOLS: ToolDef[] = [
       if (l.strokeGeometry && cmds(l.strokeGeometry) > 40) o.strokeGeometry = '(omitted)';
       if (l.pathKf?.length) o.pathKf = l.pathKf.map(k => ({ t: k.t, interp: k.interp, commands: cmds(k.geometry) }));
       delete o.collapsed;
+      // style ids mean nothing to the model: name them
+      const P = st().project;
+      const linked: any = {};
+      for (const k of BINDABLE) { const tid = linkOf(l, k); const tk = tid ? P.tokens?.items[tid] : undefined; if (tk) linked[k] = tk.name; }
+      if (Object.keys(linked).length) o.linkedStyles = linked;
+      if (l.link && P.components?.[l.link.main]) o.instanceOf = P.components[l.link.main].name;
       return text(o);
     },
   },
@@ -596,6 +703,7 @@ export const TOOLS: ToolDef[] = [
     inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
     run: ({ id }) => { const v = variations.apply(st(), id); return text(`applied ${JSON.stringify(v.label)}`); },
   },
+  ...STYLE_TOOLS,
 ];
 
 /** keyframes from the tool format ({t, v, ease, interp, sOut, sIn}) to the model format */
@@ -727,6 +835,8 @@ Tools by job (prefer the high level ones, and batch: fewer calls = faster for th
 - Two versions of a design (e.g. two pasted Figma frames, start and end state): smart_animate matches layers by name and animates every difference.
 - Timing to music or story beats: markers are in the context; set_markers adds/removes them. Put keys on marker times.
 - Organize: group_layers, precompose (animate a group as one unit), open_composition.
+- Reuse: create_component turns a layer (logo, button, card + its animation) into a main component; add_instance places linked copies (own position and delay; edits on an instance become overrides).
+- Brand colors: list_styles shows the project's named colors/numbers (often synced from Figma); use link_style instead of raw hex so they follow library updates and light/dark mode (set_style_mode).
 - Options for the user to choose from: build each version, then save_variation (A, B, C...). The user previews and picks in the sidebar.
 - Check your work: contact_sheet (one image, many frames: best for motion), screenshot for a single detailed frame. export_video renders a file only when asked.
 Motion craft: entrances ease out, exits ease in; overlap and stagger (60-120ms) instead of moving everything at once;

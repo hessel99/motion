@@ -70,6 +70,31 @@ export function geometryBounds(geoms: PathGeometry[]): [number, number, number, 
 
 const MAX_PX = 2040;
 
+/** viewport tile: a pixel window of the layer's raster at scale `s`. x/y are absolute raster pixels
+ *  (raster space * scale), so tiles of one level share one pixel grid and line up seamlessly. */
+export interface RasterClip { x: number; y: number; pw: number; ph: number }
+
+/** the unscaled box a raster of this layer covers (raster space: geometry space for paths, local box
+ *  otherwise), without the 2/scale anti-aliasing pad. same math as the raster functions. */
+export function rasterBox(l: Layer, size: number[], strokeWidth: number): [number, number, number, number] {
+  if (l.type === 'path') {
+    const geoms = l.geometry ?? [];
+    const strokeGeoms = l.strokeGeometry;
+    const [bx, by, bw, bh] = geometryBounds(strokeGeoms ? [...geoms, ...strokeGeoms] : geoms);
+    const pad = strokeGeoms ? 0 : strokeWidth;
+    return [bx - pad, by - pad, bw + pad * 2, bh + pad * 2];
+  }
+  if (l.type === 'text') {
+    const t = l.text!;
+    const lines = layoutText(l, size[0] > 0 ? size[0] : null);
+    const maxW = Math.max(size[0], ...lines.map(x => x.width));
+    const pad = t.fontSize * 0.5;
+    return [-pad, -pad, maxW + pad * 2, Math.max(size[1], lines.length * t.fontSize * t.lineHeight) + pad * 2];
+  }
+  if (l.type === 'image') return [0, 0, size[0], size[1]];
+  return [-strokeWidth, -strokeWidth, size[0] + strokeWidth * 2, size[1] + strokeWidth * 2];
+}
+
 function fitScale(w: number, h: number, scale: number) {
   const s = Math.min(scale, MAX_PX / Math.max(1, w), MAX_PX / Math.max(1, h));
   return Math.max(s, 0.01);
@@ -167,15 +192,16 @@ function strokeTrimmed(c: OffscreenCanvasRenderingContext2D | CanvasRenderingCon
 }
 
 /** vector path: fill + stroke coverage masks in geometry space */
-export function rasterPath(l: Layer, scale: number, strokeWidth: number, trimArg?: TrimValues): RasterResult | null {
+export function rasterPath(l: Layer, scale: number, strokeWidth: number, trimArg?: TrimValues, clip?: RasterClip): RasterResult | null {
   const geoms = l.geometry ?? [];
   const strokeGeoms = trimArg ? undefined : l.strokeGeometry;
   trim = trimArg;
   const [bx, by, bw, bh] = geometryBounds(strokeGeoms ? [...geoms, ...strokeGeoms] : geoms);
   const pad = (strokeGeoms ? 0 : strokeWidth) + 2 / scale;
-  const x = bx - pad, y = by - pad, w = bw + pad * 2, h = bh + pad * 2;
-  const s = fitScale(w, h, scale);
-  const pw = Math.max(1, Math.ceil(w * s)), ph = Math.max(1, Math.ceil(h * s));
+  let x = bx - pad, y = by - pad, w = bw + pad * 2, h = bh + pad * 2;
+  let s = fitScale(w, h, scale);
+  if (clip) { s = scale; x = clip.x / s; y = clip.y / s; w = clip.pw / s; h = clip.ph / s; }
+  const pw = clip ? clip.pw : Math.max(1, Math.ceil(w * s)), ph = clip ? clip.ph : Math.max(1, Math.ceil(h * s));
   const c = getCtx(pw, ph);
   c.setTransform(s, 0, 0, s, -x * s, -y * s);
   if (hasComplexPaint(l)) {
@@ -314,13 +340,14 @@ function invert(m: number[]) {
 }
 
 /** rect/ellipse with a gradient paint: rendered as an rgba raster in the local box */
-export function rasterShapePaint(l: Layer, scale: number, size: number[], radius: number[], strokeWidth: number): RasterResult {
+export function rasterShapePaint(l: Layer, scale: number, size: number[], radius: number[], strokeWidth: number, clip?: RasterClip): RasterResult {
   const [w, h] = size;
   const pad = strokeWidth + 2 / scale;
-  const s = fitScale(w + pad * 2, h + pad * 2, scale);
-  const pw = Math.max(1, Math.ceil((w + pad * 2) * s)), ph = Math.max(1, Math.ceil((h + pad * 2) * s));
+  const s = clip ? scale : fitScale(w + pad * 2, h + pad * 2, scale);
+  const pw = clip ? clip.pw : Math.max(1, Math.ceil((w + pad * 2) * s)), ph = clip ? clip.ph : Math.max(1, Math.ceil((h + pad * 2) * s));
   const c = getCtx(pw, ph);
-  c.setTransform(s, 0, 0, s, pad * s, pad * s);
+  if (clip) c.setTransform(s, 0, 0, s, -clip.x, -clip.y);
+  else c.setTransform(s, 0, 0, s, pad * s, pad * s);
   const p = new Path2D();
   if (l.type === 'ellipse') p.ellipse(w / 2, h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
   else p.roundRect(0, 0, w, h, [radius[0] || 0, radius[1] || 0, radius[2] || 0, radius[3] || 0]);
@@ -335,6 +362,7 @@ export function rasterShapePaint(l: Layer, scale: number, size: number[], radius
     c.lineWidth = strokeWidth;
     c.stroke(p);
   }
+  if (clip) return { kind: 'rgba', pw, ph, x: clip.x / s, y: clip.y / s, w: pw / s, h: ph / s, data: rgbaData(c, pw, ph) };
   return { kind: 'rgba', pw, ph, x: -pad, y: -pad, w: pw / s, h: ph / s, data: rgbaData(c, pw, ph) };
 }
 
@@ -379,7 +407,7 @@ export function layoutText(l: Layer, boxWidth: number | null): TextLine[] {
   return lines;
 }
 
-export function rasterText(l: Layer, scale: number, size: number[]): RasterResult {
+export function rasterText(l: Layer, scale: number, size: number[], clip?: RasterClip): RasterResult {
   const t = l.text!;
   const lines = layoutText(l, size[0] > 0 ? size[0] : null);
   const lh = t.fontSize * t.lineHeight;
@@ -387,10 +415,11 @@ export function rasterText(l: Layer, scale: number, size: number[]): RasterResul
   const maxW = Math.max(size[0], ...lines.map(x => x.width));
   const pad = t.fontSize * 0.5 + 2 / scale;
   const w = maxW + pad * 2, h = Math.max(size[1], textH) + pad * 2;
-  const s = fitScale(w, h, scale);
-  const pw = Math.max(1, Math.ceil(w * s)), ph = Math.max(1, Math.ceil(h * s));
+  const s = clip ? scale : fitScale(w, h, scale);
+  const pw = clip ? clip.pw : Math.max(1, Math.ceil(w * s)), ph = clip ? clip.ph : Math.max(1, Math.ceil(h * s));
   const c = getCtx(pw, ph);
-  c.setTransform(s, 0, 0, s, pad * s, pad * s);
+  if (clip) c.setTransform(s, 0, 0, s, -clip.x, -clip.y);
+  else c.setTransform(s, 0, 0, s, pad * s, pad * s);
   c.font = fontString(l);
   (c as any).letterSpacing = `${t.letterSpacing || 0}px`;
   c.textBaseline = 'alphabetic';
@@ -404,6 +433,7 @@ export function rasterText(l: Layer, scale: number, size: number[]): RasterResul
   const out = new Uint8Array(pw * ph * 4);
   alphaInto(c, pw, ph, out, 0);
   finishMask(out);
+  if (clip) return { kind: 'mask', pw, ph, x: clip.x / s, y: clip.y / s, w: pw / s, h: ph / s, data: out };
   return { kind: 'mask', pw, ph, x: -pad, y: -pad, w: pw / s, h: ph / s, data: out };
 }
 
@@ -412,6 +442,13 @@ export function rasterText(l: Layer, scale: number, size: number[]): RasterResul
 const bitmaps = new Map<string, ImageBitmap | 'loading' | 'error'>();
 export let onImageLoaded: (() => void) | null = null;
 export function setImageLoadedHandler(fn: () => void) { onImageLoaded = fn; }
+
+/** largest useful raster scale of an image layer (its native resolution), or 0 while it loads */
+export function imageMaxScale(asset: Asset, size: number[]): number {
+  const b = bitmaps.get(asset.id);
+  if (!b || typeof b === 'string') return 0;
+  return Math.min(b.width / Math.max(1, size[0]), b.height / Math.max(1, size[1]));
+}
 
 export function getBitmap(asset: Asset): ImageBitmap | null {
   const b = bitmaps.get(asset.id);
@@ -426,10 +463,16 @@ export function getBitmap(asset: Asset): ImageBitmap | null {
   return null;
 }
 
-export function rasterImage(asset: Asset, scale: number, size: number[]): RasterResult | null {
+export function rasterImage(asset: Asset, scale: number, size: number[], clip?: RasterClip): RasterResult | null {
   const bmp = getBitmap(asset);
   if (!bmp) return null;
   const [w, h] = size;
+  if (clip) {
+    const c = getCtx(clip.pw, clip.ph);
+    c.imageSmoothingQuality = 'high';
+    c.drawImage(bmp, -clip.x, -clip.y, w * scale, h * scale);
+    return { kind: 'rgba', pw: clip.pw, ph: clip.ph, x: clip.x / scale, y: clip.y / scale, w: clip.pw / scale, h: clip.ph / scale, data: rgbaData(c, clip.pw, clip.ph) };
+  }
   const s = Math.min(fitScale(w, h, scale), bmp.width / Math.max(1, w), bmp.height / Math.max(1, h)) || 1;
   const pw = Math.max(1, Math.round(w * s)), ph = Math.max(1, Math.round(h * s));
   const c = getCtx(pw, ph);

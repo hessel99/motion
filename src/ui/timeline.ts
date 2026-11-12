@@ -12,6 +12,7 @@ import {
 } from '../core/commands';
 import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
 import { showContextMenu, type MenuItem } from './menu';
+import { createComponent, createInstance, detachInstance, instanceRootOf, overridesOf, resetOverrides } from '../core/components';
 import { GraphView } from './graph';
 import { T, onThemeChange } from './theme';
 import { audioDuration, audioFailed, audioPeaks } from '../audio/engine';
@@ -539,6 +540,15 @@ export class Timeline {
     g.fillStyle = g.strokeStyle;
     g.lineWidth = 1.2;
     drawTypeIcon(g, l.type, tx, cy);
+    // component badge: filled diamond = main component, hollow = instance
+    const comps = st.project.components;
+    if (comps && (comps[l.id] || (l.link && comps[l.link.main]))) {
+      const bx = tx + 8, by = cy + 4;
+      g.beginPath(); g.moveTo(bx, by - 3.5); g.lineTo(bx + 3.5, by); g.lineTo(bx, by + 3.5); g.lineTo(bx - 3.5, by); g.closePath();
+      g.fillStyle = T.tlBg; g.fill();
+      g.strokeStyle = T.tlComponent; g.lineWidth = 1.2;
+      if (comps[l.id]) { g.fillStyle = T.tlComponent; g.fill(); } else g.stroke();
+    }
     // name
     g.fillStyle = !l.visible ? T.tlLayerNameHidden : isSel ? T.tlLayerNameSelected : T.tlLayerName;
     g.font = T.font.ui;
@@ -1232,6 +1242,18 @@ export class Timeline {
         items.push({ label: 'Delete', shortcut: '⌫', action: () => deleteLayers(st, st.selection) });
         items.push({ label: 'Pre-compose', shortcut: '⇧⌘C', action: () => { try { precompose(st, st.selection); } catch (err: any) { alert(err.message); } } });
         if (r.layer.type === 'precomp' && r.layer.compRef) items.push({ label: 'Open composition', action: () => st.openComp(r.layer.compRef!) });
+        const P = st.project;
+        const inst = instanceRootOf(P, r.id);
+        if (inst) {
+          items.push({ separator: true });
+          if (overridesOf(r.layer).length || P.layers[inst].link?.ov?.length) items.push({ label: 'Reset instance changes', action: () => resetOverrides(st, inst) });
+          items.push({ label: 'Detach instance', action: () => detachInstance(st, inst) });
+        } else if (P.components?.[r.id]) {
+          items.push({ separator: true });
+          items.push({ label: 'Add instance', action: () => createInstance(st, r.id) });
+        } else if (st.selection.length === 1) {
+          items.push({ label: 'Create component', shortcut: '⌥⌘K', action: () => { try { createComponent(st, r.id); } catch (err: any) { alert(err.message); } } });
+        }
       }
     }
     if (items.length) showContextMenu(e.clientX, e.clientY, items);
