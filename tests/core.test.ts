@@ -154,3 +154,28 @@ describe('precomps', () => {
     expect(() => addPrecompLayer(s, main)).toThrow();
   });
 });
+
+import { applyPreset, alignLayers } from '../src/core/presets';
+describe('presets + align', () => {
+  it('slide up with stagger ends at the original position, offset per layer', () => {
+    const s = new Store();
+    const ls = [0, 1, 2].map(i => addLayer(s, 'rect', { x: i * 100, y: 100, w: 50, h: 50 }));
+    s.setTime(1);
+    applyPreset(s, ls.map(l => l.id), 'Slide up', { duration: 0.5, stagger: 0.1 });
+    ls.forEach((l, i) => {
+      const kf = s.layer(l.id)!.props.position!.kf!;
+      expect(kf[0].t).toBeCloseTo(1 + i * 0.1, 9);
+      expect(kf[1].t).toBeCloseTo(1.5 + i * 0.1, 9);
+      expect(kf[1].v).toEqual([i * 100 + 25, 125]);
+      expect(kf[0].v[1]).toBe(205);
+    });
+    s.undo();
+    expect(s.layer(ls[0].id)!.props.position!.kf).toBeUndefined();
+  });
+  it('align left to the composition', () => {
+    const s = new Store();
+    const l = addLayer(s, 'rect', { x: 300, y: 100, w: 50, h: 50 });
+    alignLayers(s, [l.id], 'left', () => [300, 100, 350, 150], () => [1, 0, 0, 1, 0, 0]);
+    expect(valueAt(s.layer(l.id)!, 'position', 0)).toEqual([25, 125]);
+  });
+});

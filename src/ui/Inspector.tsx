@@ -7,6 +7,9 @@ import {
 import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
 import { PROP_DEFS, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
 import { useChannels } from './hooks';
+import { ANIM_PRESETS, alignLayers, applyPreset, distributeLayers, type Align } from '../core/presets';
+import { invert } from './viewport-controller';
+import { toast } from '../app/actions';
 
 const st = () => editor.store;
 
@@ -131,6 +134,7 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
   };
   return (
     <>
+      <AlignBar ids={ids} />
       <Section title={layers.length > 1 ? `${layers.length} layers` : l.name} right={<span class="insp-type">{layers.length > 1 ? 'mixed' : l.type}</span>}>
         <div class="row">
           <KeyButton layers={layers} prop="position" />
@@ -213,6 +217,7 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
           <label class="check"><input type="checkbox" checked={!!l.mask} onChange={e => setLayerField(store, ids, 'mask', (e.target as HTMLInputElement).checked, 'Use as mask')} /> Use as mask (masks the layers above it in the same group)</label>
         </Section>
       )}
+      <AnimatePanel ids={ids} />
       <Section title="Timing">
         <div class="row">
           <NumField label="In" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
@@ -443,3 +448,47 @@ function CurveEditor({ value, onChange }: { value: [number, number, number, numb
 
 import { cubicBezier } from '../core/easing';
 function bez(v: number[]) { return cubicBezier(v[0], v[1], v[2], v[3]); }
+
+// ---------------- align / animate ----------------
+const vpBounds = (id: string) => (globalThis as any).viewport?.boundsOf([id]) ?? null;
+const parentInv = (id: string) => {
+  const l = st().layer(id);
+  const w = l?.parent ? editor.renderer.worldMatrix(l.parent) : null;
+  return invert(w ?? [1, 0, 0, 1, 0, 0]);
+};
+
+function AlignBar({ ids }: { ids: string[] }) {
+  const store = st();
+  const btn = (how: Align, title: string, icon: string) => (
+    <button class="ghost icon" title={title + (ids.length === 1 ? ' (to composition)' : '')} onClick={() => alignLayers(store, ids, how, vpBounds, parentInv)}>{icon}</button>
+  );
+  return (
+    <div class="align-bar">
+      {btn('left', 'Align left', '⇤')}{btn('hcenter', 'Align horizontal centers', '↔')}{btn('right', 'Align right', '⇥')}
+      {btn('top', 'Align top', '⤒')}{btn('vcenter', 'Align vertical centers', '↕')}{btn('bottom', 'Align bottom', '⤓')}
+      <button class="ghost icon" disabled={ids.length < 3} title="Distribute horizontally" onClick={() => distributeLayers(store, ids, 'x', vpBounds, parentInv)}>⋯</button>
+      <button class="ghost icon" disabled={ids.length < 3} title="Distribute vertically" onClick={() => distributeLayers(store, ids, 'y', vpBounds, parentInv)}>⋮</button>
+    </div>
+  );
+}
+
+function AnimatePanel({ ids }: { ids: string[] }) {
+  const store = st();
+  const [dur, setDur] = useState(0.6);
+  const [stagger, setStagger] = useState(0.08);
+  const apply = (name: string) => {
+    try { applyPreset(store, ids, name, { duration: dur, stagger: ids.length > 1 ? stagger : 0 }); (globalThis as any).timeline?.expand(ids[0], true); }
+    catch (e: any) { toast(e.message, 'error'); }
+  };
+  return (
+    <Section title="Animate" right={<span class="insp-type">at playhead</span>}>
+      <div class="preset-grid">
+        {ANIM_PRESETS.map(p => <button class={'preset ' + p.kind} title={p.kind === 'out' ? 'ends at the playhead' : 'starts at the playhead'} onClick={() => apply(p.name)}>{p.name}</button>)}
+      </div>
+      <div class="row">
+        <NumField label="Dur" step={0.05} min={0.05} value={dur} suffix="s" onChange={setDur} />
+        {ids.length > 1 && <NumField label="Stagger" step={0.01} min={0} value={stagger} suffix="s" onChange={setStagger} />}
+      </div>
+    </Section>
+  );
+}

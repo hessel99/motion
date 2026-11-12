@@ -158,3 +158,10 @@ code { background: #111; padding: 1px 4px; border-radius: 3px; }
 .xv-stat { display: flex; justify-content: space-between; font-size: 11px; margin-top: 4px; font-variant-numeric: tabular-nums; }
 .xv-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .msg.revert { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #17171a; border: 1px solid var(--line); border-radius: 6px; padding: 4px 4px 4px 8px; }
+.align-bar { display: flex; gap: 2px; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.align-bar .icon { flex: 1; padding: 3px 0; font-size: 13px; }
+.preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 8px; }
+.preset { font-size: 11px; text-align: left; padding: 4px 8px; }
+.preset.in { border-left: 2px solid #3ecf6e; }
+.preset.out { border-left: 2px solid #ff5a4f; }
+.preset.loop { border-left: 2px solid #c792ea; }

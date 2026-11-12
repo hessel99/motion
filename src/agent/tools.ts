@@ -7,6 +7,7 @@ import {
   setPropTx, valueAt, setSpring, precompose,
 } from '../core/commands';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
+import { ANIM_PRESETS, applyPreset } from '../core/presets';
 import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
 
 export interface ToolDef {
@@ -309,6 +310,16 @@ export const TOOLS: ToolDef[] = [
     run: ({ t, times, maxSize = 768 }) => {
       const list: number[] = times?.length ? times.slice(0, 4) : [t ?? st().time];
       return list.map(tt => ({ type: 'image' as const, data: editor.renderer.snapshot(tt, maxSize).split(',')[1], mimeType: 'image/png' }));
+    },
+  },
+  {
+    name: 'apply_preset',
+    description: 'Apply a ready-made animation to layers at a time (default: playhead). "in" presets start at t, "out" presets end at t. stagger offsets each next layer (seconds) — great for lists/logos. Presets: ' + ANIM_PRESETS.map(p => `${p.name} (${p.kind})`).join(', '),
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, preset: { type: 'string' }, t: { type: 'number' }, duration: { type: 'number', default: 0.6 }, stagger: { type: 'number', default: 0 } }, required: ['ids', 'preset'] },
+    run: ({ ids, preset, t, duration, stagger }) => {
+      if (t !== undefined) st().setTime(t);
+      applyPreset(st(), ids, preset, { duration, stagger });
+      return text('ok');
     },
   },
   {
