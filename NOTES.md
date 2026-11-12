@@ -26,7 +26,8 @@
 - **Import**:
   - **Figma copy and paste** (just ⌘C in Figma, ⌘V here)
   - SVG (by paste or drop), Lottie JSON, After Effects `.aep` (best effort, see below), images
-- **Export**: Lottie JSON, **GIF**, and **video** (MP4 H.264 / WebM VP9 through WebCodecs + mediabunny; verified with ffprobe in Chromium and Electron)
+- **Audio layers**: drop or open a wav/mp3/m4a/ogg. Waveform in the timeline, drag to shift in time, volume in the inspector. Playback through WebAudio is (re)scheduled on play, on loop wrap and on playhead jumps, so the editor clock stays frame-accurate.
+- **Export**: Lottie JSON, **GIF**, and **video** (MP4 H.264 / WebM VP9 through WebCodecs + mediabunny; verified with ffprobe in Chromium and Electron). Audio layers are mixed offline (`OfflineAudioContext`) into one stereo track (AAC when the platform has it, else Opus). `scripts/audio-check.mjs` checks the streams with ffprobe.
 - **Graph editor**: value curves in the timeline. Drag keys (time/value) and bezier handles on the real curve, which Figma Motion doesn't have.
 - **Expressions** (`wiggle(2, 20)`, `loopOut('pingpong')`, `time * 90`, `linear(...)`, vectors…): a *safe* mini language with its own parser and interpreter (`src/core/expr.ts`). It never calls `eval`, so opening someone else's project can't run code.
 - **Text animation** (per letter / word / line, like AE text animators): presets (Fade up, Typewriter, Pop letters, Spin letters, …), order (forward, backward, center, random), springs. Every unit is its own instance in the same single draw call.
@@ -161,8 +162,8 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
 
 ## Known limitations / next
 
-- Only the nearest clip ancestor clips (no nested clip intersection). No AE track mattes yet. No effects yet (on purpose).
+- Only the nearest clip ancestor clips (no nested clip intersection). No effects yet (on purpose).
 - **Design pass** (visual polish of all panels) is still to do. The current UI is functional on purpose.
 - Lottie export of text for lottie-web's *canvas* renderer (it needs glyph outlines).
 - AE: effects, expressions beyond the safe subset, 3D, cameras, luma/inverted mattes.
-- Precomps/multiple compositions are not built yet.
+- Audio: no scrubbing sound, no fades/volume keyframes yet, no audio in Lottie/GIF.
