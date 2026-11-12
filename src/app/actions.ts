@@ -16,6 +16,12 @@ async function mod(path: string): Promise<any | null> {
   return m ? m() : null;
 }
 
+/** warm up the importers in idle time so the first paste/drop is instant */
+export function preloadImporters() {
+  const idle = (cb: () => void) => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(cb, { timeout: 4000 }) : setTimeout(cb, 1500));
+  idle(() => { mod('../import/figma/index.ts'); mod('../import/svg.ts'); });
+}
+
 const st = () => editor.store;
 const native = () => (globalThis as any).motionNative as undefined | {
   openFile(o?: any): Promise<{ path: string; name: string; data: string } | null>;

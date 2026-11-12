@@ -3,7 +3,7 @@ import { App } from './ui/App';
 import './ui/styles.css';
 import { editor } from './app/editor';
 import { agentClient } from './agent/client';
-import { loadDemo, loadStress, restoreAutosave, setupAutosave } from './app/actions';
+import { loadDemo, loadStress, preloadImporters, restoreAutosave, setupAutosave } from './app/actions';
 
 render(<App />, document.getElementById('app')!);
 
@@ -15,5 +15,6 @@ requestAnimationFrame(() => {
   if (q.has('hud')) { editor.showHud = true; editor.emit('hud'); }
   if (q.has('play')) editor.play();
   setupAutosave();
+  preloadImporters();
 });
 if (!q.has('nobridge')) agentClient.connect();
