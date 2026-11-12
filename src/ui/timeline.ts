@@ -106,8 +106,8 @@ export class Timeline {
   private playheadDrawn: number | null = null;
   /** incremental rows: direct search matches of the last build */
   private matched = new Set<string>();
-  /** the filter `matched` was computed for (null: stale) */
-  private matchedFor: string | null = null;
+  /** search results per filter string, dropped on any document change */
+  private matchCache = new Map<string, Set<string>>();
   /** layer id -> index of its layer row (built lazily, for reveal) */
   private rowIndex: Map<string, number> | null = null;
   /** collapsed-row key summary per layer (dropped when the layer changes) */
@@ -135,7 +135,7 @@ export class Timeline {
     const st = ed.store;
     let lastDur = st.comp.duration;
     st.onChange(c => {
-      if (c.structure || c.comp || c.layers.size) this.matchedFor = null;
+      if ((c.structure || c.comp || c.layers.size) && this.matchCache.size) this.matchCache.clear();
       if (c.structure || c.comp) { this.rowsDirty = true; this.keyTimesCache.clear(); return; }
       for (const id of c.layers) this.keyTimesCache.delete(id);
       if (!this.rowsDirty) this.rowsDirty = this.rowsChanged(c.layers);
@@ -212,23 +212,25 @@ export class Timeline {
     let keep: Set<string> | null = null;
     if (f) {
       const k = (keep = new Set<string>());
-      // typing more characters only narrows the previous matches: rescan just those
-      // (valid while the document hasn't changed since they were computed)
-      const narrow = this.matchedFor !== null && f.includes(this.matchedFor);
-      const prev = this.matched;
-      const matched = new Set<string>();
-      const test = (id: string) => {
-        const l = L[id];
-        if (!l || !matchesFilter(l, f)) return;
-        matched.add(id);
+      // match sets per filter string, valid while the document doesn't change: backspace reuses an
+      // earlier result, and typing more characters only rescans the matches of a shorter filter
+      const cache = this.matchCache;
+      let matched = cache.get(f);
+      if (!matched) {
+        let base: Set<string> | undefined, baseLen = -1;
+        for (const [q, set] of cache) if (q.length > baseLen && f.includes(q)) { base = set; baseLen = q.length; }
+        matched = new Set<string>();
+        if (base) { for (const id of base) { const l = L[id]; if (l && matchesFilter(l, f)) matched.add(id); } }
+        else for (const id in L) if (matchesFilter(L[id], f)) matched.add(id);
+        if (cache.size >= 64) cache.delete(cache.keys().next().value!);
+        cache.set(f, matched);
+      }
+      for (const id of matched) {
         let cur: string | null = id;
         while (cur && !k.has(cur)) { k.add(cur); cur = L[cur]?.parent ?? null; }
-      };
-      if (narrow) for (const id of prev) test(id);
-      else for (const id in L) test(id);
+      }
       this.matched = matched;
-      this.matchedFor = f;
-    } else this.matchedFor = null;
+    }
     const expanded = this.expanded;
     // all rows share one object shape (monomorphic access in the draw / hit-test loops)
     const walk = (ids: string[], depth: number) => {
@@ -1176,7 +1178,20 @@ function drawTypeIcon(g: CanvasRenderingContext2D, type: Layer['type'], x: numbe
     case 'audio': for (let k = -4; k <= 4; k += 2) { const hh = [2, 4, 5, 3, 2][(k + 4) / 2]; g.fillRect(x + k - 0.5, y - hh, 1.2, hh * 2); } break;
   }
 }
+/** ellipsized labels by font + width + text: the visible names are re-measured on every redraw otherwise */
+const fitCache = new Map<string, string>();
+// a web font finishing to load changes the widths
+if (typeof document !== 'undefined') document.fonts?.addEventListener?.('loadingdone', () => fitCache.clear());
 function ellipsize(g: CanvasRenderingContext2D, s: string, max: number) {
+  const key = g.font + '\n' + max + '\n' + s;
+  let r = fitCache.get(key);
+  if (r === undefined) {
+    if (fitCache.size > 4000) fitCache.clear();
+    fitCache.set(key, (r = ellipsizeUncached(g, s, max)));
+  }
+  return r;
+}
+function ellipsizeUncached(g: CanvasRenderingContext2D, s: string, max: number) {
   if (g.measureText(s).width <= max) return s;
   let lo = 0, hi = s.length;
   while (lo < hi) { const m = (lo + hi + 1) >> 1; if (g.measureText(s.slice(0, m) + '…').width <= max) lo = m; else hi = m - 1; }
