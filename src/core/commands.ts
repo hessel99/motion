@@ -4,7 +4,7 @@ import { evalProp } from './evaluate';
 import { EASE_PRESETS } from './easing';
 import {
   createComp, createLayer, defaultEase, PROP_DEFS, propDef, uid,
-  type Keyframe, type Layer, type LayerType, type Prop, type PropKey, type Interp,
+  type Keyframe, type Layer, type LayerType, type Prop, type PropKey, type Interp, type EffectType, type Effect,
 } from './model';
 import type { Store, Tx } from './store';
 
@@ -756,4 +756,60 @@ export function setExpr(store: Store, ids: string[], key: PropKey, src: string |
       tx.touch(id);
     }
   }, mergeKey);
+}
+
+// ---------------- effects (MD-10) ----------------
+/** the animatable props that feed the live (first) effect of each type (see model.ts Effect) */
+export const EFFECT_PROPS: Partial<Record<EffectType, PropKey[]>> = {
+  dropShadow: ['shadowColor', 'shadowOffset', 'shadowBlur', 'shadowSpread'],
+  innerShadow: ['innerShadowColor', 'innerShadowOffset', 'innerShadowBlur', 'innerShadowSpread'],
+  layerBlur: ['blur'],
+  backgroundBlur: ['backgroundBlur'],
+  noise: ['noiseColor', 'noiseSize', 'noiseDensity'],
+};
+
+/** is the live effect of this type on (an implicit effect from props counts as on) */
+export function effectVisible(l: Layer, type: EffectType) {
+  return l.effects?.find(e => e.type === type)?.visible !== false;
+}
+
+/** show / hide the live effect of a type (the eye toggle). an effect that only exists through its
+ *  props gets an explicit entry to carry the flag; values and keyframes are kept */
+export function setEffectVisible(store: Store, ids: string[], type: EffectType, visible: boolean) {
+  store.transact(visible ? 'Show effect' : 'Hide effect', tx => {
+    for (const id of ids) {
+      const l = store.layer(id);
+      if (!l) continue;
+      const list = l.effects ? l.effects.slice() : [];
+      const i = list.findIndex(e => e.type === type);
+      if (i >= 0) list[i] = { ...list[i], visible };
+      else if ((EFFECT_PROPS[type] ?? []).some(k => l.props[k])) list.push(defaultEffect(type, visible));
+      else continue;
+      tx.set(l, 'effects', list);
+      tx.touch(id);
+    }
+    tx.structure();
+  });
+}
+
+/** remove the live effect of a type: its entry and its animatable props (keyframes included) */
+export function removeEffect(store: Store, ids: string[], type: EffectType) {
+  store.transact('Remove effect', tx => {
+    for (const id of ids) {
+      const l = store.layer(id);
+      if (!l) continue;
+      for (const k of EFFECT_PROPS[type] ?? []) if (l.props[k]) tx.set(l.props, k, undefined);
+      const i = l.effects?.findIndex(e => e.type === type) ?? -1;
+      if (i >= 0) {
+        const list = l.effects!.filter((_, j) => j !== i);
+        tx.set(l, 'effects', list.length ? list : undefined);
+      }
+      tx.touch(id);
+    }
+    tx.structure();
+  });
+}
+
+function defaultEffect(type: EffectType, visible: boolean): Effect {
+  return type === 'noise' ? { type, visible, noise: { mode: 'mono', size: 1, density: 0.5 } } : { type, visible };
 }

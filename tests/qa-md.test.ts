@@ -6,7 +6,8 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { GIFEncoder } from 'gifenc';
 import { Store } from '../src/core/store';
-import { addLayer, setProp, toggleAnimated, toggleKeyAtTime } from '../src/core/commands';
+import { addLayer, setProp, toggleAnimated, toggleKeyAtTime, removeEffect, setEffectVisible, effectVisible } from '../src/core/commands';
+import { EffectEval } from '../src/render/effects';
 import { gifDelaysCs } from '../src/export/gif';
 
 // the exporters read the live editor; these tests only need their pure helpers
@@ -73,5 +74,35 @@ describe('MD-43: GIF frame delays add up to the comp duration', () => {
     writeFileSync(f, bytes);
     const dur = +execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString().trim();
     expect(dur).toBeCloseTo(2, 2);
+  });
+});
+
+describe('MD-10: effects can be hidden and removed', () => {
+  const live = (l: any) => new EffectEval(l, k => l.props[k]).list.map(e => e.type);
+  it('hide keeps the values, the renderer skips it; show brings it back', () => {
+    const s = new Store();
+    const l = addLayer(s, 'rect');
+    setProp(s, l.id, 'shadowColor', [0, 0, 0, 0.5]);
+    setProp(s, l.id, 'blur', [6]);
+    expect(live(s.layer(l.id))).toEqual(['dropShadow', 'layerBlur']);
+    setEffectVisible(s, [l.id], 'dropShadow', false);
+    expect(effectVisible(s.layer(l.id)!, 'dropShadow')).toBe(false);
+    expect(s.layer(l.id)!.props.shadowColor).toBeTruthy();
+    expect(live(s.layer(l.id))).toEqual(['layerBlur']);
+    setEffectVisible(s, [l.id], 'dropShadow', true);
+    expect(live(s.layer(l.id))).toEqual(['dropShadow', 'layerBlur']);
+  });
+  it('remove drops the effect, its props and keyframes in one undo step', () => {
+    const s = new Store();
+    const l = addLayer(s, 'rect');
+    s.setTime(0); setProp(s, l.id, 'blur', [0], { forceKey: true });
+    s.setTime(1); setProp(s, l.id, 'blur', [10]);
+    s.layer(l.id)!.effects = [{ type: 'layerBlur', radius: 10 }, { type: 'dropShadow', radius: 4 }];
+    removeEffect(s, [l.id], 'layerBlur');
+    expect(s.layer(l.id)!.props.blur).toBeUndefined();
+    expect(s.layer(l.id)!.effects!.map(e => e.type)).toEqual(['dropShadow']);
+    s.undo();
+    expect(s.layer(l.id)!.props.blur!.kf!.length).toBe(2);
+    expect(s.layer(l.id)!.effects!.length).toBe(2);
   });
 });

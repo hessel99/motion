@@ -4,13 +4,13 @@
 import { editor } from '../app/editor';
 import {
   addLayer, cloneLayers, deleteLayers, groupLayers, isAnimated, keyId, setCompSettings, setEase, setLayerField, setProp,
-  setPropTx, valueAt, setSpring, precompose, setExpr,
+  setPropTx, valueAt, setSpring, precompose, setExpr, EFFECT_PROPS, removeEffect, setEffectVisible,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { ANIM_PRESETS, applyPreset, setTextAnim, TEXT_ANIM_PRESETS } from '../core/presets';
 import { parsePathD } from '../import/svg';
-import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
+import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type EffectType, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
 import type { Tx } from '../core/store';
 import { animRange, describeLayerAnimation, fmtTime } from './describe';
 import { editorContext } from './context';
@@ -443,6 +443,19 @@ export const TOOLS: ToolDef[] = [
     description: 'Switch the editor (and all other tools) to another composition by id.',
     inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
     run: ({ id }) => { if (!st().project.comps[id]) throw new Error('no such composition'); st().openComp(id); return text('ok'); },
+  },
+  {
+    name: 'set_effect_state',
+    description: 'Turn a layer effect off/on (values and keyframes kept) or remove it (its effect props and keyframes go too). Effects are added by setting their props (shadowColor/shadowOffset/shadowBlur/shadowSpread, innerShadow*, blur, backgroundBlur, noiseColor/noiseSize/noiseDensity). One undo step.',
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, effect: { enum: ['dropShadow', 'innerShadow', 'layerBlur', 'backgroundBlur', 'noise'] }, action: { enum: ['hide', 'show', 'remove'] } }, required: ['ids', 'effect', 'action'] },
+    run: ({ ids, effect, action }) => {
+      if (!EFFECT_PROPS[effect as EffectType]) throw new Error('unknown effect ' + effect);
+      const known = (ids as string[]).filter(id => st().layer(id));
+      if (!known.length) throw new Error('no such layers');
+      if (action === 'remove') removeEffect(st(), known, effect);
+      else setEffectVisible(st(), known, effect, action === 'show');
+      return text('ok');
+    },
   },
   {
     name: 'set_expression',

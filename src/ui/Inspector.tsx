@@ -3,6 +3,7 @@ import { editor } from '../app/editor';
 import {
   addKeyframe, deleteKeyframes, isAnimated, keyId, parseKeyId, setCompSettings, setEase, setLayerField, setProp,
   setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, renameComp,
+  effectVisible, removeEffect, setEffectVisible,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { starGeometry } from '../core/shapes';
@@ -21,7 +22,7 @@ import { instanceComp } from '../core/motion-components';
 import {
   AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignHorizontalDistributeCenter, AlignStartHorizontal,
   AlignStartVertical, AlignVerticalDistributeCenter, ArrowUpRight, Blend, ChevronLeft, ChevronRight, Minus,
-  RotateCw, X, Clock, Gauge, SquareRoundCorner, ALargeSmall,
+  RotateCw, X, Clock, Gauge, SquareRoundCorner, ALargeSmall, Eye, EyeOff,
 } from './chrome/icons';
 
 const st = () => editor.store;
@@ -275,9 +276,17 @@ function EffectsPanel({ layers }: { layers: Layer[] }) {
       <option value="">Add…</option>
       {EFFECT_GROUPS.filter(g => !has(g)).map(g => <option value={g.title}>{g.title}</option>)}
     </select>}>
-      {shown.map(g => (
+      {shown.map(g => {
+        const type = effectTypeOf(g.title) as import('../core/model').EffectType;
+        const ids = layers.map(x => x.id);
+        const on = effectVisible(l, type);
+        return (
         <>
-          <div class="muted small">{g.title}</div>
+          <div class="fx-head">
+            <span class={'muted small' + (on ? '' : ' fx-off')}>{g.title}</span>
+            <button type="button" class="ghost icon" title={on ? 'Hide effect' : 'Show effect'} aria-label={(on ? 'Hide ' : 'Show ') + g.title} aria-pressed={!on} onClick={() => setEffectVisible(store, ids, type, !on)}>{on ? <Eye /> : <EyeOff />}</button>
+            <button type="button" class="ghost icon" title="Remove effect" aria-label={'Remove ' + g.title} onClick={() => removeEffect(store, ids, type)}><Minus /></button>
+          </div>
           {g.keys.filter(k => l.props[k]).map(k => {
             const def = PROP_DEFS[k], v = valueAt(l, k, t);
             return (
@@ -290,7 +299,8 @@ function EffectsPanel({ layers }: { layers: Layer[] }) {
             );
           })}
         </>
-      ))}
+        );
+      })}
       {extra > 0 && <div class="muted small">{extra} more effect{extra > 1 ? 's' : ''} from Figma (not animatable)</div>}
     </Section>
   );

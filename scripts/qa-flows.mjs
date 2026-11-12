@@ -245,6 +245,33 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   }, svg);
   check('MD-38: a brand-new untouched document adopts the SVG size and fits the view', fresh.w === 400 && fresh.h === 200 && fresh.fits && fresh.centered, JSON.stringify(fresh));
 
+  // MD-10: effects can be hidden (eye) and removed in the inspector
+  await ev(async () => {
+    const c = await import('/src/core/commands.ts');
+    const s = editor.store;
+    const l = c.addLayer(s, 'rect', { x: 50, y: 50, w: 100, h: 100, name: 'Fx' });
+    s.select([l.id]);
+    window.__fx = l.id;
+  });
+  await page.waitForTimeout(200);
+  await page.locator('select[aria-label="Add effect"]').selectOption('Drop shadow');
+  await page.waitForTimeout(150);
+  const fx = () => ev(() => { const l = editor.store.layer(window.__fx); return { color: !!l.props.shadowColor, effects: l.effects ?? null }; });
+  check('MD-10: Add effect adds a drop shadow', (await fx()).color, JSON.stringify(await fx()));
+  await page.locator('button[aria-label="Hide Drop shadow"]').click();
+  await page.waitForTimeout(100);
+  const hidden = await fx();
+  check('MD-10: the eye hides the effect and keeps its values', hidden.color && hidden.effects?.[0]?.visible === false && (await page.locator('button[aria-label="Show Drop shadow"]').count()) === 1, JSON.stringify(hidden));
+  await page.locator('button[aria-label="Show Drop shadow"]').click();
+  await page.waitForTimeout(100);
+  check('MD-10: ... and shows it again', (await fx()).effects?.[0]?.visible === true);
+  await page.locator('button[aria-label="Remove Drop shadow"]').click();
+  await page.waitForTimeout(100);
+  const gone = await fx();
+  check('MD-10: remove deletes the effect', !gone.color && !gone.effects && (await page.locator('button[aria-label="Remove Drop shadow"]').count()) === 0, JSON.stringify(gone));
+  await ev(() => editor.store.undo());
+  check('MD-10: remove is one undo step', (await fx()).color);
+
   check('MD: no page errors', errors.length === 0, JSON.stringify(errors.slice(0, 5)));
   await ctx.close();
 }
