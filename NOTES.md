@@ -142,7 +142,7 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
   - 9 of 11 have a mean pixel error under 2.2 of 255. Supported: masks (add, subtract, intersect), track mattes, animated paths, trim paths, compound paths, AE stacking order with parenting, precomp time stretch/remap, simple expressions, blend modes.
   - Remaining gaps, most frequent first: merge paths (path booleans), expressions referencing other layers or effects, gradient strokes, round corners, per-character text animators.
 - **Lottie export is verified against the official lottie-web player** (`scripts/export-compare.mjs`): frame-identical for transforms, easing, springs and opacity with its default SVG renderer.
-  - Known gap: lottie-web's *canvas* renderer only draws text that is embedded as glyph shapes ("chars"), which we don't export yet; its SVG renderer and the mobile players use system fonts.
+  - Text in the bundled Inter is exported as **glyph outlines** (`chars`, `src/export/lottie-glyphs.ts`, opentype.js loaded only on export), so every player draws it without the font installed. Measured against lottie-web (SVG): mean pixel error 0.003–0.38 on the demo. Other fonts stay font-name based.
 
 ## Agent integration
 

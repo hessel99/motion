@@ -17,6 +17,7 @@ import { springAt } from '../core/easing';
 import type { Composition, Keyframe, Layer, PathCmd, Project, Prop } from '../core/model';
 
 const R = (x: number) => Math.round(x * 1e6) / 1e6;
+const WEIGHT_STYLE: Record<number, string> = { 100: 'Thin', 200: 'ExtraLight', 300: 'Light', 400: 'Regular', 500: 'Medium', 600: 'SemiBold', 700: 'Bold', 800: 'ExtraBold', 900: 'Black' };
 
 function firstV(p: Prop | undefined, def: number[]): number[] {
   if (!p) return def;
@@ -240,8 +241,10 @@ export function projectToLottie(project: Project): any {
         case 'text': {
           const t = l.text!;
           const fill = firstV(l.props.fill, [1, 1, 1, 1]);
-          const fName = (t.fontFamily || 'Inter').replace(/\s+/g, '') + (t.fontWeight >= 700 ? '-Bold' : '-Regular');
-          fonts.set(fName, { fName, fFamily: t.fontFamily, fStyle: `${t.fontWeight >= 700 ? 'Bold' : 'Regular'}${t.fontStyle === 'italic' ? ' Italic' : ''}`, ascent: 75, origin: 0, fPath: '', fWeight: '' });
+          const wStyle = WEIGHT_STYLE[Math.min(900, Math.max(100, Math.round((t.fontWeight || 400) / 100) * 100))];
+          const fStyle = `${wStyle}${t.fontStyle === 'italic' ? ' Italic' : ''}`;
+          const fName = (t.fontFamily || 'Inter').replace(/\s+/g, '') + '-' + fStyle.replace(/\s+/g, '');
+          fonts.set(fName, { fName, fFamily: t.fontFamily || 'Inter', fStyle, ascent: 75, origin: 0, fPath: '', fWeight: '' });
           const doc = {
             s: t.fontSize, f: fName, t: t.content.replace(/\n/g, '\r'), j: t.align === 'right' ? 1 : t.align === 'center' ? 2 : 0,
             tr: t.fontSize ? R((t.letterSpacing / t.fontSize) * 1000) : 0, lh: R(t.fontSize * t.lineHeight), ls: 0,

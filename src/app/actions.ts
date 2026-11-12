@@ -262,7 +262,10 @@ export async function exportGifFile() {
 export async function exportLottie() {
   const m = await mod('../export/lottie.ts');
   if (!m) { toast('Lottie export not available yet', 'error'); return; }
-  download((st().project.name || 'animation') + '.json', JSON.stringify(m.projectToLottie(st().project)), 'application/json');
+  const lot = m.projectToLottie(st().project);
+  // text as glyph outlines so every lottie player draws it without the font (bundled Inter only)
+  try { const g = await import('../export/lottie-glyphs'); await g.addGlyphs(lot); } catch (e) { console.warn('glyphs skipped', e); }
+  download((st().project.name || 'animation') + '.json', JSON.stringify(lot), 'application/json');
 }
 
 /** the current frame at full composition size */
