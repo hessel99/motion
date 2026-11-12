@@ -21,6 +21,7 @@
     "fidelity": "node scripts/figma-fidelity.mjs",
     "parity": "node scripts/export-parity.mjs",
     "parity:full": "node scripts/export-parity.mjs --full",
+    "layout:check": "node scripts/layout-lock.mjs",
     "qa": "node scripts/qa-flows.mjs",
     "qa:electron": "xvfb-run -a node scripts/qa-electron.mjs",
     "release:local": "npm run build && node scripts/release.mjs --out release/updates",
