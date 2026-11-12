@@ -4,7 +4,7 @@
 import { editor } from '../app/editor';
 import {
   addLayer, cloneLayers, deleteLayers, groupLayers, isAnimated, keyId, setCompSettings, setEase, setLayerField, setProp,
-  setPropTx, valueAt, setSpring, precompose, setExpr,
+  setPropTx, valueAt, setSpring, precompose, setExpr, addMarker, updateMarker, deleteMarker,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
@@ -102,7 +102,7 @@ export const TOOLS: ToolDef[] = [
       const big = total > limit;
       return text({
         file: s.project.name,
-        composition: { id: c.id, name: c.name, width: c.width, height: c.height, fps: c.fps, duration: c.duration, background: round(c.background) },
+        composition: { id: c.id, name: c.name, width: c.width, height: c.height, fps: c.fps, duration: c.duration, background: round(c.background), markers: (c.markers ?? []).map(m => ({ id: m.id, t: m.t, label: m.label })) },
         compositions: Object.values(s.project.comps).map(x => ({ id: x.id, name: x.name, active: x.id === c.id })),
         currentTime: s.time,
         selection: s.selection,
@@ -293,6 +293,18 @@ export const TOOLS: ToolDef[] = [
     description: 'Change composition settings.',
     inputSchema: { type: 'object', properties: { width: { type: 'number' }, height: { type: 'number' }, fps: { type: 'number' }, duration: { type: 'number', description: 'seconds' }, background: colorSchema, name: { type: 'string' } } },
     run: (a) => { setCompSettings(st(), { ...a, background: a.background !== undefined ? parseColor(a.background) as any : undefined }); return text('ok'); },
+  },
+  {
+    name: 'set_markers',
+    description: 'Timeline markers (e.g. beats or story moments the user cares about). add: [{t, label}], remove: marker ids. Returns the markers. Markers are listed in get_document.',
+    inputSchema: { type: 'object', properties: { add: { type: 'array', items: { type: 'object', properties: { t: { type: 'number' }, label: { type: 'string' } }, required: ['t'] } }, remove: { type: 'array', items: { type: 'string' } } } },
+    run: ({ add, remove }) => {
+      st().batch('Agent markers', () => {
+        for (const id of remove ?? []) deleteMarker(st(), id);
+        for (const m of add ?? []) { const mk = addMarker(st(), +m.t, m.label ?? ''); if (m.label && mk.label !== m.label) updateMarker(st(), mk.id, { label: m.label }); }
+      });
+      return text(JSON.stringify(st().comp.markers ?? []));
+    },
   },
   {
     name: 'set_time',
