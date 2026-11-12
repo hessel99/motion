@@ -11,21 +11,41 @@ import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { ANIM_PRESETS, applyPreset, setTextAnim, TEXT_ANIM_PRESETS } from '../core/presets';
 import { parsePathD } from '../import/svg';
 import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
+import type { Tx } from '../core/store';
+import { animRange, describeLayerAnimation, fmtTime } from './describe';
+import { editorContext } from './context';
+import { variations } from './variations';
 
 export interface ToolDef {
   name: string;
   description: string;
   inputSchema: any;
   run: (args: any) => Promise<ToolContent[]> | ToolContent[];
+  /** does not change the document (allowed in Ask mode; advertised as readOnlyHint over MCP) */
+  readOnly?: boolean;
 }
 export type ToolContent = { type: 'text'; text: string } | { type: 'image'; data: string; mimeType: string };
 
 const st = () => editor.store;
-const text = (v: unknown): ToolContent[] => [{ type: 'text', text: typeof v === 'string' ? v : JSON.stringify(v, null, 1) }];
+// compact json: tool results go straight into the model context, whitespace is wasted tokens
+const text = (v: unknown): ToolContent[] => [{ type: 'text', text: typeof v === 'string' ? v : JSON.stringify(v) }];
 
 const colorSchema = { description: 'color as "#rrggbb", "#rrggbbaa" or [r,g,b,a] with 0..1 floats', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'number' } }] };
 const propValueSchema = { description: 'number, number array, or color (for fill/stroke)', anyOf: [{ type: 'number' }, { type: 'array', items: { type: 'number' } }, { type: 'string' }] };
+const vec2Schema = { type: 'array', items: { type: 'number' }, minItems: 2, maxItems: 2 };
 const easeSchema = { description: `ease preset name (${EASE_PRESETS.map(p => p.name).join(', ')}), spring preset (${SPRING_PRESETS.map(p => 'spring ' + p.name).join(', ')}), "spring:<bounce 0..0.9>", or cubic-bezier [x1,y1,x2,y2]`, anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'number' } }] };
+
+const keyframeSchema = {
+  type: 'object',
+  properties: {
+    t: { type: 'number', description: 'seconds' }, v: propValueSchema, ease: easeSchema,
+    interp: { enum: ['bezier', 'linear', 'hold'] },
+    sOut: { ...vec2Schema, description: 'position only: outgoing spatial tangent [dx,dy]' },
+    sIn: { ...vec2Schema, description: 'position only: incoming spatial tangent [dx,dy]' },
+  },
+  required: ['t', 'v'],
+};
+const idsSchema = { type: 'array', items: { type: 'string' } };
 
 export function parseColor(c: any): number[] {
   if (Array.isArray(c)) {
@@ -93,6 +113,7 @@ function summarize(l: Layer, deep: boolean): any {
 export const TOOLS: ToolDef[] = [
   {
     name: 'get_document',
+    readOnly: true,
     description: 'Get the composition settings and the layer tree (top-level first in draw order bottom→top). Call this first. Set deep=false for big documents.',
     inputSchema: { type: 'object', properties: { deep: { type: 'boolean', default: true }, limit: { type: 'number', default: 300 } } },
     run: ({ deep = true, limit = 300 }) => {
@@ -114,9 +135,20 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: 'get_layer',
-    description: 'Get the full JSON of one layer including all keyframes (times in seconds).',
-    inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
-    run: ({ id }) => text(need(id)),
+    description: 'Get the JSON of one layer including all keyframes (times in seconds). Large path geometry is summarized unless full=true. For reading animation, get_animation is much more compact.',
+    inputSchema: { type: 'object', properties: { id: { type: 'string' }, full: { type: 'boolean', description: 'include full path geometry' } }, required: ['id'] },
+    readOnly: true,
+    run: ({ id, full }) => {
+      const l = need(id);
+      if (full) return text(l);
+      const o: any = { ...l };
+      const cmds = (g?: { cmds: unknown[] }[]) => (g ?? []).reduce((n, x) => n + x.cmds.length, 0);
+      if (l.geometry && cmds(l.geometry) > 40) o.geometry = `${l.geometry.length} paths, ${cmds(l.geometry)} commands (pass full:true)`;
+      if (l.strokeGeometry && cmds(l.strokeGeometry) > 40) o.strokeGeometry = '(omitted)';
+      if (l.pathKf?.length) o.pathKf = l.pathKf.map(k => ({ t: k.t, interp: k.interp, commands: cmds(k.geometry) }));
+      delete o.collapsed;
+      return text(o);
+    },
   },
   {
     name: 'add_layer',
@@ -216,7 +248,7 @@ export const TOOLS: ToolDef[] = [
         prop: { enum: PROP_KEYS },
         keyframes: {
           type: 'array',
-          items: { type: 'object', properties: { t: { type: 'number' }, v: propValueSchema, ease: easeSchema, interp: { enum: ['bezier', 'linear', 'hold'] }, sOut: { type: 'array' }, sIn: { type: 'array' } }, required: ['t', 'v'] },
+          items: keyframeSchema,
         },
         merge: { type: 'boolean' },
       },
@@ -226,25 +258,8 @@ export const TOOLS: ToolDef[] = [
       const s = st();
       const l = need(a.id);
       const key = checkProp(a.prop);
-      const incoming: Keyframe[] = (a.keyframes as any[]).map(k => {
-        const ease = resolveEase(k.ease);
-        return { t: +k.t, v: toValue(key, k.v), interp: k.interp ?? (ease.bounce !== undefined ? 'spring' : ease.linear ? 'linear' : 'bezier'), bounce: ease.bounce, out: [ease.v[0], ease.v[1]], in: [0.667, 1], sOut: k.sOut, sIn: k.sIn } as Keyframe;
-      });
-      incoming.sort((x, y) => x.t - y.t);
-      // the "in" handle of key i+1 comes from the ease of key i
-      const eases = (a.keyframes as any[]).slice().sort((x, y) => x.t - y.t).map(k => resolveEase(k.ease));
-      for (let i = 1; i < incoming.length; i++) incoming[i].in = [eases[i - 1].v[2], eases[i - 1].v[3]];
-      s.transact('Agent: keyframes', tx => {
-        const p = l.props[key] ?? { v: valueAt(l, key, s.time) };
-        if (!l.props[key]) tx.set(l.props, key, p);
-        let kf = incoming;
-        if (a.merge && p.kf) {
-          const rest = p.kf.filter(k => !incoming.some(n => Math.abs(n.t - k.t) < 1e-6));
-          kf = [...rest, ...incoming].sort((x, y) => x.t - y.t);
-        }
-        tx.set(p, 'kf', kf);
-        tx.touch(l.id);
-      });
+      const incoming = buildKeys(key, a.keyframes);
+      s.transact('Agent: keyframes', tx => writeTrack(tx, l, key, incoming, !!a.merge));
       (globalThis as any).timeline?.expand(l.id, true);
       return text(`set ${incoming.length} keyframes on ${l.name}.${key}`);
     },
@@ -318,24 +333,28 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: 'set_time',
+    readOnly: true,
     description: 'Move the playhead (seconds). Values set with update_layer on animated properties go to this time.',
     inputSchema: { type: 'object', properties: { t: { type: 'number' } }, required: ['t'] },
     run: ({ t }) => { editor.pause(); st().setTime(t); return text('ok'); },
   },
   {
     name: 'playback',
+    readOnly: true,
     description: 'Play or pause the preview.',
     inputSchema: { type: 'object', properties: { play: { type: 'boolean' } }, required: ['play'] },
     run: ({ play }) => { play ? editor.play() : editor.pause(); return text('ok'); },
   },
   {
     name: 'select_layers',
+    readOnly: true,
     description: 'Select layers in the editor (shows them to the user).',
     inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } } }, required: ['ids'] },
     run: ({ ids }) => { st().select(ids.filter((id: string) => st().layer(id))); return text('ok'); },
   },
   {
     name: 'screenshot',
+    readOnly: true,
     description: 'Render the composition at a time (seconds, default current) and return a PNG. Use it to check your work. times: render several frames side by side info as separate images (max 4).',
     inputSchema: { type: 'object', properties: { t: { type: 'number' }, times: { type: 'array', items: { type: 'number' } }, maxSize: { type: 'number', default: 768 } } },
     run: ({ t, times, maxSize = 768 }) => {
@@ -431,7 +450,213 @@ export const TOOLS: ToolDef[] = [
     inputSchema: { type: 'object', properties: {} },
     run: () => { st().undo(); return text('ok'); },
   },
+  {
+    name: 'get_editor_context',
+    description: 'What the user is looking at right now: composition, playhead, work area, markers, selected layers (with what is animated) and selected keyframes. "this"/"these" in the user\'s message usually mean the selection.',
+    inputSchema: { type: 'object', properties: {} },
+    readOnly: true,
+    run: () => text(editorContext(st())),
+  },
+  {
+    name: 'get_animation',
+    description: 'Read the animation of layers compactly, one line per animated property: "scale: 0.2s 0 ─Back Out→ 0.8s 100". Shows keyframe times, values, eases/springs, expressions and text animators. Much cheaper than get_layer. ids default to the selection, else every animated layer.',
+    inputSchema: { type: 'object', properties: { ids: { ...idsSchema, description: 'layer ids (children are not included automatically)' }, includeStatic: { type: 'boolean', description: 'also list layers without animation' } } },
+    readOnly: true,
+    run: ({ ids, includeStatic }) => {
+      const s = st();
+      const list: Layer[] = (ids?.length ? ids.map(need) : s.selection.length ? s.selection.map(need) : s.drawOrder().map(id => s.layer(id)!));
+      const out: string[] = [`comp ${fmtTime(s.comp.duration)} @${s.comp.fps}fps`];
+      let n = 0;
+      for (const l of list) {
+        const d = describeLayerAnimation(l, { always: !!includeStatic || !!ids?.length });
+        if (!d) continue;
+        if (++n > 80) { out.push(`… more layers omitted; pass ids`); break; }
+        out.push(d);
+      }
+      if (n === 0) out.push('no animated layers' + (ids?.length || s.selection.length ? ' in the given set' : ''));
+      return text(out.join('\n'));
+    },
+  },
+  {
+    name: 'animate',
+    description: 'Set keyframes on many layers/properties in ONE call and ONE undo step (preferred over many set_keyframes calls). Each track replaces that property\'s keys unless merge=true. stagger (seconds) delays each next distinct layer in track order — handy for lists.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        tracks: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: { id: { type: 'string' }, prop: { enum: PROP_KEYS }, keyframes: { type: 'array', items: keyframeSchema }, merge: { type: 'boolean' } },
+            required: ['id', 'prop', 'keyframes'],
+          },
+        },
+        stagger: { type: 'number', description: 'seconds added per distinct layer (0 for the first)' },
+      },
+      required: ['tracks'],
+    },
+    run: ({ tracks, stagger = 0 }) => {
+      const s = st();
+      if (!Array.isArray(tracks) || !tracks.length) throw new Error('tracks must be a non-empty array');
+      const order: string[] = [];
+      const prepared = tracks.map((tr: any, i: number) => {
+        const l = need(tr.id);
+        const key = checkProp(tr.prop);
+        if (!Array.isArray(tr.keyframes) || !tr.keyframes.length) throw new Error(`tracks[${i}].keyframes must be a non-empty array`);
+        if (!order.includes(l.id)) order.push(l.id);
+        const delay = order.indexOf(l.id) * stagger;
+        return { l, key, kf: buildKeys(key, tr.keyframes.map((k: any) => ({ ...k, t: +k.t + delay }))), merge: !!tr.merge };
+      });
+      s.transact('Agent: animate', tx => { for (const p of prepared) writeTrack(tx, p.l, p.key, p.kf, p.merge); });
+      for (const id of order) (globalThis as any).timeline?.expand(id, true);
+      return text(`ok: ${prepared.length} tracks on ${order.length} layers`);
+    },
+  },
+  {
+    name: 'retime',
+    description: 'Speed up / slow down / shift animation: key times become pivot + (t - pivot) * scale + offset, for every animated property, path shape keys and text animators of the layers. scale 1.25 = 25% slower, 0.8 = faster. ids default to the selection, else all layers. pivot defaults to the earliest key.',
+    inputSchema: { type: 'object', properties: { ids: idsSchema, scale: { type: 'number', default: 1 }, offset: { type: 'number', default: 0, description: 'seconds' }, pivot: { type: 'number' } } },
+    run: ({ ids, scale = 1, offset = 0, pivot }) => {
+      const s = st();
+      if (!(scale > 0)) throw new Error('scale must be > 0');
+      const list: Layer[] = ids?.length ? ids.map(need) : s.selection.length ? s.selection.map(need) : Object.values(s.project.layers);
+      const ranges = list.map(animRange).filter(Boolean) as [number, number][];
+      if (!ranges.length) throw new Error('none of these layers is animated');
+      const p0 = pivot ?? Math.min(...ranges.map(r => r[0]));
+      const f = (t: number) => Math.max(0, p0 + (t - p0) * scale + offset);
+      let end = 0;
+      s.transact('Agent: retime', tx => {
+        for (const l of list) {
+          if (shiftLayerKeys(tx, l, f, scale)) { end = Math.max(end, animRange(l)?.[1] ?? 0); tx.touch(l.id); }
+        }
+      });
+      return text(`retimed ${ranges.length} layers; animation now ends at ${fmtTime(end)}${end > s.comp.duration ? ` — past the comp end (${fmtTime(s.comp.duration)}); consider set_composition duration` : ''}`);
+    },
+  },
+  {
+    name: 'stagger',
+    description: 'Offset whole layer animations so each next layer (in the given order) starts `step` seconds after the previous one. Keeps each layer\'s own timing. start = when the first layer starts (default: its current start).',
+    inputSchema: { type: 'object', properties: { ids: { ...idsSchema, description: 'in order; default: selection order' }, step: { type: 'number', description: 'seconds, e.g. 0.08' }, start: { type: 'number' } }, required: ['step'] },
+    run: ({ ids, step, start }) => {
+      const s = st();
+      const list: Layer[] = (ids?.length ? ids : s.selection).map(need);
+      if (list.length < 2) throw new Error('stagger needs at least two layers (pass ids or select them)');
+      const animated = list.filter(l => animRange(l));
+      if (!animated.length) throw new Error('none of these layers is animated yet; animate them first (e.g. apply_preset with stagger)');
+      const base = start ?? animRange(animated[0])![0];
+      s.transact('Agent: stagger', tx => {
+        animated.forEach((l, i) => {
+          const d = base + i * step - animRange(l)![0];
+          if (Math.abs(d) > 1e-9) { shiftLayerKeys(tx, l, t => Math.max(0, t + d), 1); tx.touch(l.id); }
+        });
+      });
+      const skipped = list.length - animated.length;
+      return text(`staggered ${animated.length} layers by ${step}s${skipped ? `; skipped ${skipped} without animation` : ''}`);
+    },
+  },
+  {
+    name: 'contact_sheet',
+    description: 'One image with a grid of frames over time (like a film contact sheet), each labeled with its time. The cheapest way to SEE motion: use it to check timing, spacing and overlaps, or to critique an animation. Defaults: 6 frames across the work area or the whole composition.',
+    inputSchema: { type: 'object', properties: { frames: { type: 'number', default: 6, description: '2..12' }, start: { type: 'number' }, end: { type: 'number' }, times: { type: 'array', items: { type: 'number' }, description: 'explicit times instead of frames/start/end' }, cell: { type: 'number', default: 320, description: 'max cell size in px' } } },
+    readOnly: true,
+    run: async ({ frames = 6, start, end, times, cell = 320 }) => {
+      const s = st();
+      const wa = s.workArea;
+      const a = start ?? wa?.[0] ?? 0, b = end ?? wa?.[1] ?? s.comp.duration;
+      const n = Math.max(2, Math.min(12, Math.round(frames)));
+      const list: number[] = times?.length ? times.slice(0, 12).map(Number) : Array.from({ length: n }, (_, i) => a + ((b - a) * i) / (n - 1));
+      const ts = list.map(t => Math.min(s.comp.duration, Math.max(0, Math.round(t * s.comp.fps) / s.comp.fps)));
+      const img = await contactSheet(ts, Math.max(96, Math.min(512, cell)));
+      return [{ type: 'text', text: `${ts.length} frames left→right, top→bottom at ${ts.map(fmtTime).join(', ')}` }, { type: 'image', data: img, mimeType: 'image/jpeg' }];
+    },
+  },
+  {
+    name: 'save_variation',
+    description: 'Save the current animation of some layers as a named variation the user can preview and pick in the sidebar (A/B/C). Workflow: build version A, save_variation; change it into version B, save_variation; ... The last saved one stays applied. Use distinct ideas (e.g. snappy / bouncy / elegant), not tiny tweaks.',
+    inputSchema: { type: 'object', properties: { ids: { ...idsSchema, description: 'every layer whose animation differs between the variations' }, label: { type: 'string', description: 'short, e.g. "B · Bouncy"' }, note: { type: 'string', description: 'one line: what is different' } }, required: ['ids', 'label'] },
+    run: ({ ids, label, note }) => {
+      const v = variations.capture(st(), ids, label, note);
+      return text(`saved variation ${JSON.stringify(v.label)} (${Object.keys(v.layers).length} layers, id ${v.id}); ${variations.list.length} variations so far.`);
+    },
+  },
+  {
+    name: 'apply_variation',
+    description: 'Apply a saved variation (by id) to the document, e.g. to go back to a base before building the next one.',
+    inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
+    run: ({ id }) => { const v = variations.apply(st(), id); return text(`applied ${JSON.stringify(v.label)}`); },
+  },
 ];
+
+/** keyframes from the tool format ({t, v, ease, interp, sOut, sIn}) to the model format */
+function buildKeys(key: PropKey, raw: any[]): Keyframe[] {
+  if (!Array.isArray(raw)) throw new Error('keyframes must be an array');
+  const sorted = raw.slice().sort((x, y) => +x.t - +y.t);
+  const eases = sorted.map(k => resolveEase(k.ease));
+  const out = sorted.map((k, i) => {
+    if (!isFinite(+k.t)) throw new Error(`keyframe time must be a number (got ${JSON.stringify(k.t)})`);
+    const ease = eases[i];
+    return { t: +k.t, v: toValue(key, k.v), interp: k.interp ?? (ease.bounce !== undefined ? 'spring' : ease.linear ? 'linear' : 'bezier'), bounce: ease.bounce, out: [ease.v[0], ease.v[1]], in: [0.667, 1], sOut: k.sOut, sIn: k.sIn } as Keyframe;
+  });
+  // the "in" handle of key i+1 comes from the ease of key i
+  for (let i = 1; i < out.length; i++) out[i].in = [eases[i - 1].v[2], eases[i - 1].v[3]];
+  for (const k of out) { if (k.bounce === undefined) delete k.bounce; if (k.sOut === undefined) delete k.sOut; if (k.sIn === undefined) delete k.sIn; }
+  return out;
+}
+
+function writeTrack(tx: Tx, l: Layer, key: PropKey, incoming: Keyframe[], merge: boolean) {
+  const s = st();
+  const p = l.props[key] ?? { v: valueAt(l, key, s.time) };
+  if (!l.props[key]) tx.set(l.props, key, p);
+  let kf = incoming;
+  if (merge && p.kf) {
+    const rest = p.kf.filter(k => !incoming.some(n => Math.abs(n.t - k.t) < 1e-6));
+    kf = [...rest, ...incoming].sort((x, y) => x.t - y.t);
+  }
+  tx.set(p, 'kf', kf);
+  tx.touch(l.id);
+}
+
+/** remap every key time of a layer (props, path shape, text animator). returns whether anything moved */
+function shiftLayerKeys(tx: Tx, l: Layer, f: (t: number) => number, scale: number): boolean {
+  let moved = false;
+  for (const k of PROP_KEYS) {
+    const p = l.props[k];
+    if (!p?.kf?.length) continue;
+    tx.set(p, 'kf', p.kf.map(x => ({ ...x, t: f(x.t) })));
+    moved = true;
+  }
+  if (l.pathKf?.length) { tx.set(l, 'pathKf', l.pathKf.map(x => ({ ...x, t: f(x.t) }))); moved = true; }
+  if (l.textAnim) { const a = l.textAnim; tx.set(l, 'textAnim', { ...a, start: f(a.start), duration: a.duration * scale, stagger: a.stagger * scale }); moved = true; }
+  return moved;
+}
+
+/** render frames and lay them out in one labeled jpeg (base64, no data: prefix) */
+async function contactSheet(times: number[], cell: number): Promise<string> {
+  const c = st().comp;
+  const sc = Math.min(1, cell / Math.max(c.width, c.height));
+  const w = Math.round(c.width * sc), h = Math.round(c.height * sc);
+  const cols = times.length <= 4 ? times.length : times.length <= 6 ? 3 : 4;
+  const rows = Math.ceil(times.length / cols);
+  const pad = 4, label = 16;
+  const canvas = document.createElement('canvas');
+  canvas.width = cols * (w + pad) + pad;
+  canvas.height = rows * (h + pad + label) + pad;
+  const g = canvas.getContext('2d')!;
+  g.fillStyle = '#111';
+  g.fillRect(0, 0, canvas.width, canvas.height);
+  g.font = '11px ui-monospace, Menlo, monospace';
+  g.textBaseline = 'middle';
+  for (let i = 0; i < times.length; i++) {
+    const url = editor.renderer.snapshot(times[i], Math.max(w, h));
+    const im = new Image();
+    await new Promise<void>((res, rej) => { im.onload = () => res(); im.onerror = () => rej(new Error('snapshot decode failed')); im.src = url; });
+    const x = pad + (i % cols) * (w + pad), y = pad + Math.floor(i / cols) * (h + pad + label);
+    g.fillStyle = '#ddd';
+    g.fillText(`${(Math.round(times[i] * 100) / 100).toFixed(2)}s  f${Math.round(times[i] * c.fps)}`, x + 2, y + label / 2);
+    g.drawImage(im, x, y + label, w, h);
+  }
+  return canvas.toDataURL('image/jpeg', 0.82).split(',')[1];
+}
 
 function resolveEase(e: any): { v: [number, number, number, number]; linear: boolean; bounce?: number } {
   if (e === undefined || e === null) return { v: [0.333, 0, 0.667, 1], linear: false };
@@ -476,15 +701,30 @@ Opacity and scale are percent (100 = normal). Colors are "#rrggbb" or [r,g,b,a] 
 Each layer has an anchor point (default: center of its box) and position = where the anchor sits in the parent.
 Layers inside a group use coordinates relative to the group's box.
 
-Tools by job (prefer the high level ones):
+Every user message ends with an <editor_context> block: composition, playhead, markers, the SELECTED layers
+(ids, what is animated) and layers the user @-mentioned. "this", "these", "it" mean the selection unless said otherwise.
+If the selection already tells you enough, you don't need get_document.
+
+Tools by job (prefer the high level ones, and batch: fewer calls = faster for the user):
+- Read animation: get_animation (compact keys/eases per layer). get_layer only for raw details.
 - Entrances/exits/loops for one or many layers: apply_preset (Fade in, Slide up, Pop, Zoom in, Spin in, Fade out, Pulse, ...) with stagger for lists.
 - Text reveals per letter/word/line: set_text_animation (presets: Fade up, Typewriter, Pop letters, Slide words, Drop lines, Spin letters, Center burst).
-- Precise motion: set_keyframes with eases ("Expo Out" for entrances, "Back Out" for playful pops, "Easy Ease" for neutral moves, "spring Bouncy"/"spring:0.4" for physical motion). Position keys can curve with sOut/sIn.
+- Precise motion: animate (many layers/properties in one call, one undo step) or set_keyframes, with eases ("Expo Out" for entrances, "Back Out" for playful pops, "Easy Ease" for neutral moves, "spring Bouncy"/"spring:0.4" for physical motion). Position keys can curve with sOut/sIn.
+- Timing edits: retime (faster/slower/shift), stagger (offset layers one after another), set_easing (change feel without moving keys).
 - Procedural motion: set_expression (wiggle(2, 20), time * 90, loopOut('pingpong'), linear(time, 0, 1, 0, 100)).
 - Custom shapes: add_layer type "path" with SVG path data in "d".
 - Two versions of a design (e.g. two pasted Figma frames, start and end state): smart_animate matches layers by name and animates every difference.
-- Timing to music or story beats: get_document lists markers (the user can drop them on audio beats); set_markers adds/removes them. Put keys on marker times.
+- Timing to music or story beats: markers are in the context; set_markers adds/removes them. Put keys on marker times.
 - Organize: group_layers, precompose (animate a group as one unit), open_composition.
-- Check your work with screenshot (several times, e.g. times: [0.5, 1, 2]); export_video renders an MP4 when the user asks for a file.
-Always call get_document first. Keep the user's existing work intact unless asked; every change is undoable (the user also gets a one-click "undo agent changes").
-Keep replies short: say what you made and offer one or two tweaks.`;
+- Options for the user to choose from: build each version, then save_variation (A, B, C...). The user previews and picks in the sidebar.
+- Check your work: contact_sheet (one image, many frames: best for motion), screenshot for a single detailed frame. export_video renders a file only when asked.
+Motion craft: entrances ease out, exits ease in; overlap and stagger (60-120ms) instead of moving everything at once;
+anticipation = small opposite move before the main move; follow-through/overshoot via Back Out or springs; keep 0.2-0.6s for UI moves.
+Keep the user's existing work intact unless asked. The user reviews every turn's changes (with a diff and one-click revert), so act, don't ask for permission.
+Keep replies short: say what you changed (layer names) and offer one or two tweaks.`;
+
+/** extra instruction for read-only "Ask" turns (critique / explain): the editor also blocks editing tools */
+export const ASK_MODE_PROMPT = 'This turn is READ-ONLY (Ask mode): do not try to change the document; editing tools are disabled. Inspect with get_animation, contact_sheet and screenshot, then answer.';
+
+/** tool names the agent may use in Ask mode */
+export const READ_ONLY_TOOLS = () => TOOLS.filter(t => t.readOnly).map(t => t.name);

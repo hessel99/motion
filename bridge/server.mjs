@@ -99,6 +99,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
             name: t.name,
             description: t.description ?? '',
             inputSchema: t.inputSchema && typeof t.inputSchema === 'object' ? t.inputSchema : { type: 'object', properties: {} },
+            ...(t.annotations && typeof t.annotations === 'object' ? { annotations: t.annotations } : {}),
           })),
         });
       case 'tools/call': {
@@ -241,6 +242,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
               sessionId: typeof msg.sessionId === 'string' && msg.sessionId ? msg.sessionId : undefined,
               model: typeof msg.model === 'string' && msg.model ? msg.model : undefined,
               systemPrompt: typeof msg.systemPrompt === 'string' && msg.systemPrompt ? msg.systemPrompt : undefined,
+              readOnlyTools: Array.isArray(msg.readOnlyTools) ? msg.readOnlyTools.filter((t) => typeof t === 'string' && /^[\w-]+$/.test(t)) : undefined,
               mcpUrl: `http://127.0.0.1:${actualPort}/mcp`,
               workDir,
             },

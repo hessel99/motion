@@ -95,6 +95,12 @@ export function parseClaudeLine(obj, state = {}) {
         result: typeof obj.result === 'string' ? obj.result : undefined,
         costUsd: typeof obj.total_cost_usd === 'number' ? obj.total_cost_usd : undefined,
         durationMs: typeof obj.duration_ms === 'number' ? obj.duration_ms : undefined,
+        numTurns: typeof obj.num_turns === 'number' ? obj.num_turns : undefined,
+        usage: obj.usage && typeof obj.usage === 'object' ? {
+          input: (obj.usage.input_tokens ?? 0) + (obj.usage.cache_creation_input_tokens ?? 0) + (obj.usage.cache_read_input_tokens ?? 0),
+          cached: obj.usage.cache_read_input_tokens ?? 0,
+          output: obj.usage.output_tokens ?? 0,
+        } : undefined,
       });
       state.finished = true;
       break;
