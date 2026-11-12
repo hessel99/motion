@@ -12,6 +12,7 @@
 import { chromium } from './pw.mjs';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SourceMapConsumer } from 'source-map-js';
@@ -188,6 +189,7 @@ async function gcHeap(cdp) {
 const results = {};
 for (const sc of todo) {
   const t0 = Date.now();
+  const load0 = os.loadavg()[0];
   process.stdout.write(`▶ ${sc.name.padEnd(22)} `);
   const { page, cdp, errors } = await openPage();
   const row = { kind: sc.kind };
@@ -280,6 +282,8 @@ for (const sc of todo) {
     row.error = String(e.message ?? e).split('\n')[0];
   }
   row.errors = errors.slice(0, 5);
+  // other processes on the machine skew cpu numbers: keep the 1-minute load next to every row
+  row.load = r2(Math.max(load0, os.loadavg()[0]));
   row.seconds = row.seconds ?? Math.round((Date.now() - t0) / 1000);
   results[sc.name] = row;
   console.log(row.error ? `ERROR ${row.error}` : `${row.tickP50 ?? row.totalMs ?? ''}ms tick p50  (${Math.round((Date.now() - t0) / 1000)}s)`);
@@ -290,7 +294,7 @@ stopServer();
 
 // ---------------------------------------------------------------- report
 const commit = await new Promise(res => { let o = ''; const p = spawn('git', ['rev-parse', '--short', 'HEAD'], { cwd: root }); p.stdout.on('data', d => (o += d)); p.on('exit', () => res(o.trim())); });
-const out = { date: new Date().toISOString(), commit, gl, quick: QUICK, measureMs: MEASURE, soakSec: SOAK_SEC, results };
+const out = { date: new Date().toISOString(), commit, gl, cpus: os.cpus().length, quick: QUICK, measureMs: MEASURE, soakSec: SOAK_SEC, results };
 fs.mkdirSync(RESULTS_DIR, { recursive: true });
 const stamp = out.date.replace(/[:]/g, '-').replace(/\..*/, '');
 const file = path.join(RESULTS_DIR, `${stamp}${only.length ? '-partial' : ''}${QUICK ? '-quick' : ''}.json`);
@@ -324,7 +328,7 @@ function report(out, file) {
   console.table(Object.fromEntries(playRows.map(([k, r]) => [k, {
     items: r.setup?.items ?? '', drawn: r.after?.drawn ?? '', 'load+1st': r2((r.setup?.buildMs ?? 0) + (r.setup?.loadMs ?? 0) + (r.setup?.firstFrameMs ?? 0)),
     tick50: r.tickP50, tick95: r.tickP95, tick99: r.tickP99, cpu50: r.cpuP50, eval: r.evalP50, write: r.writeP50, raster: r.rasterP50, gpu: r.gpuP50,
-    fps: r.fps, fr95: r.frameP95, swFps: r.swFps, long: r.longTasks, longMax: r.longMax, 'gc%': r.gcPct, 'heapΔMB': r.heapDeltaMB, err: r.error ? 'ERR' : r.errors?.length || '',
+    fps: r.fps, fr95: r.frameP95, swFps: r.swFps, long: r.longTasks, longMax: r.longMax, 'gc%': r.gcPct, 'heapΔMB': r.heapDeltaMB, load: r.load, err: r.error ? 'ERR' : r.errors?.length || '',
   }])));
   const mb = Object.entries(results).filter(([, r]) => r.kind === 'mblur');
   if (mb.length) { console.log('motion blur (temporal supersampling, cpu mode)'); console.table(Object.fromEntries(mb.map(([k, r]) => [k, { frameMs50: r.tickP50, frameMs95: r.tickP95, perSubframe: r.perSubframeMs, fps: r.fps, long: r.longTasks, 'gc%': r.gcPct }]))); }
@@ -357,7 +361,8 @@ function report(out, file) {
       if (typeof a !== 'number' || typeof v !== 'number') continue;
       if (Math.abs(v - a) < (ABS_FLOOR[k] ?? 0.3)) continue;
       const worse = HIGHER.has(k) ? (a - v) / Math.max(1e-9, a) : (v - a) / Math.max(1e-9, Math.abs(a));
-      const e = { scenario: name, metric: k, before: a, after: v, change: `${Math.abs(worse * 100).toFixed(0)}% ${worse > 0 ? 'worse' : 'better'}`, baseline: b.commit };
+      const busy = Math.max(r.load ?? 0, p.load ?? 0) > (out.cpus ?? 4) * 0.75;
+      const e = { scenario: name, metric: k, before: a, after: v, change: `${Math.abs(worse * 100).toFixed(0)}% ${worse > 0 ? 'worse' : 'better'}`, baseline: b.commit, noisy: busy ? `load ${p.load ?? '?'}->${r.load}` : '' };
       if (worse > THRESH) regressions.push(e); else if (worse < -THRESH) improvements.push(e);
     }
   }
@@ -367,6 +372,7 @@ function report(out, file) {
     console.log(`\ncompared ${nb} scenarios with their newest earlier results (threshold ${THRESH * 100}%)`);
     if (improvements.length) { console.log(`improvements (${improvements.length}):`); console.table(improvements); }
     if (regressions.length) { console.log(`REGRESSIONS (${regressions.length}):`); console.table(regressions); } else console.log('no regressions');
+    if (regressions.some(x => x.noisy)) console.log('rows marked noisy ran while the machine was busy (1-min load > 75% of cores): re-run before trusting them');
   }
   return { regressions, improvements, baselines: Object.fromEntries(Object.entries(base).map(([k, v]) => [k, v.file])) };
 }
