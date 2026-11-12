@@ -614,21 +614,21 @@ export class ViewportController {
     // tangent handles of every selected layer, computed once (per layer lookup was O(selection^2):
     // selecting 5k animated layers froze the editor for ~36s per frame)
     let handles: Map<string, ReturnType<ViewportController['pathPoints']>> | null = null;
+    // big selections: paths of the first MAX_PATHS only (hundreds of dashed curves are unreadable anyway)
+    let drawn = 0;
     for (const id of st.selection) {
       const l = st.layer(id);
       const p = l?.props.position;
       if (!l || !p?.kf || p.kf.length < 2) continue;
+      if (drawn++ >= MAX_PATHS) break;
       const pw = l.parent ? r.worldMatrix(l.parent) : [1, 0, 0, 1, 0, 0];
       if (!pw) continue;
-      const tr = new Track(p, 2, true);
-      const t0 = p.kf[0].t, t1 = p.kf[p.kf.length - 1].t;
-      const steps = Math.min(400, Math.max(20, Math.round((t1 - t0) * comp.fps)));
-      const o = [0, 0];
+      const pts = motionPolyline(p, comp.fps);
       g.beginPath();
-      for (let s = 0; s <= steps; s++) {
-        tr.eval(t0 + (t1 - t0) * s / steps, o, 0);
-        const wx = pw[0] * o[0] + pw[2] * o[1] + pw[4], wy = pw[1] * o[0] + pw[3] * o[1] + pw[5];
-        const [sx, sy] = this.toScreen(wx, wy);
+      for (let s = 0; s < pts.length; s += 2) {
+        const ox = pts[s], oy = pts[s + 1];
+        const wx = pw[0] * ox + pw[2] * oy + pw[4], wy = pw[1] * ox + pw[3] * oy + pw[5];
+        const sx = wx * this.zoom + this.panX, sy = wy * this.zoom + this.panY;
         s ? g.lineTo(sx, sy) : g.moveTo(sx, sy);
       }
       g.strokeStyle = T.vpMotionPath;
@@ -759,6 +759,24 @@ export function localMatrix(l: Layer, t: number) {
   const cs = Math.cos(r), sn = Math.sin(r);
   const A = cs * s[0] / 100, B = sn * s[0] / 100, C = -sn * s[1] / 100, D = cs * s[1] / 100;
   return [A, B, C, D, p[0] - (A * a[0] + C * a[1]), p[1] - (B * a[0] + D * a[1])];
+}
+
+const MAX_PATHS = 300;
+/** sampled motion path (parent space) per position prop, cached until its keyframes change */
+const pathCache = new WeakMap<object, { sig: string; pts: Float64Array }>();
+function motionPolyline(p: NonNullable<Layer['props']['position']>, fps: number): Float64Array {
+  const kf = p.kf!;
+  let sig = `${fps}|${kf.length}`;
+  for (const k of kf) sig += `|${k.t},${k.v[0]},${k.v[1]},${k.interp},${k.out},${k.in},${k.sOut ?? ''},${k.sIn ?? ''},${k.bounce ?? ''}`;
+  const hit = pathCache.get(p);
+  if (hit && hit.sig === sig) return hit.pts;
+  const tr = new Track(p, 2, true);
+  const t0 = kf[0].t, t1 = kf[kf.length - 1].t;
+  const steps = Math.min(400, Math.max(20, Math.round((t1 - t0) * fps)));
+  const pts = new Float64Array((steps + 1) * 2), o = [0, 0];
+  for (let s = 0; s <= steps; s++) { tr.eval(t0 + (t1 - t0) * s / steps, o, 0); pts[s * 2] = o[0]; pts[s * 2 + 1] = o[1]; }
+  pathCache.set(p, { sig, pts });
+  return pts;
 }
 
 /** "Rectangle 2", "Rectangle 3"… so new rows can be told apart in the timeline */
