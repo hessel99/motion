@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 4,
+  "style_match": 5,
+  "timing_easing": 3,
+  "composition": 2,
+  "richness": 3,
+  "polish": 2
+ },
+ "overall": 3.17,
+ "critique": [
+  "PULSE 2 has no opacity key before 2.5s, so it sits on screen from frame 0 at 150% scale, overflowing the frame and colliding with every feature word; this destroys the feature-flash beats and steals the slam's reveal. The rest of the timing is also off: 'Spatial audio' gets ~0.4s, 'Pure silence' lingers 1.36s, the ring hard-cuts off on a hold instead of fading, and all motion ends at 4s, leaving a dead 6s hold.",
+  "Key PULSE 2 (and the CTA) to opacity 0 until 2.5s, then re-space the whole sequence across the 10s on the 0.5s grid. Give each word an equal 1-beat flash with an orange wipe between every pair, land the slam around 4–5s with an Expo Out ring that fades out, bring the pill in on the next downbeat, and add a subtle pulse or glow loop on the end card so the final hold stays alive."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0599038,
+ "ms": 11884,
+ "raw": "```json\n{\"brief_fit\": 4, \"style_match\": 5, \"timing_easing\": 3, \"composition\": 2, \"richness\": 3, \"polish\": 2,\n \"critique\": [\"PULSE 2 has no opacity key before 2.5s, so it sits on screen from frame 0 at 150% scale, overflowing the frame and colliding with every feature word; this destroys the feature-flash beats and steals the slam's reveal. The rest of the timing is also off: 'Spatial audio' gets ~0.4s, 'Pure silence' lingers 1.36s, the ring hard-cuts off on a hold instead of fading, and all motion ends at 4s, leaving a dead 6s hold.\", \"Key PULSE 2 (and the CTA) to opacity 0 until 2.5s, then re-space the whole sequence across the 10s on the 0.5s grid. Give each word an equal 1-beat flash with an orange wipe between every pair, land the slam around 4–5s with an Expo Out ring that fades out, bring the pill in on the next downbeat, and add a subtle pulse or glow loop on the end card so the final hold stays alive.\"]}\n```"
+}

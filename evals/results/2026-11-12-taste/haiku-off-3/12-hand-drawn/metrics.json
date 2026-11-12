@@ -1,0 +1,199 @@
+{
+ "run": {
+  "id": "12-hand-drawn",
+  "name": "12-hand-drawn",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 82,
+    "sub": {
+     "timing": 87.39999999999999,
+     "easing": 84,
+     "choreography": 95.8,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 12.600000000000001,
+     "easing": 16,
+     "choreography": 4.2,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:entrance-ease",
+     "low:lead-late",
+     "low:timing-range",
+     "low:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 8.3
+   },
+   "after": {
+    "score": 82,
+    "sub": {
+     "timing": 87.39999999999999,
+     "easing": 84,
+     "choreography": 95.8,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 12.600000000000001,
+     "easing": 16,
+     "choreography": 4.2,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:entrance-ease",
+     "low:lead-late",
+     "low:timing-range",
+     "low:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 8.3
+   }
+  },
+  "wallMs": 64632,
+  "timedOut": false,
+  "turns": 8,
+  "costUsd": 0.013061330000000001,
+  "durationMs": 63445,
+  "usage": {
+   "input": 425541,
+   "cached": 409233,
+   "output": 11418
+  },
+  "errors": [],
+  "toolCalls": 7,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the Crumb & Co sting as a 6 s, 1920×1080 comp on a warm paper background (`#F6EFE3`), using the hand-drawn organic style.\n\n- **Blobs:** three irregular blobs (**Blob sage**, **Blob terracotta**, **Blob mustard**) fade up from 0 to 1.3 s and then breathe slowly with a ±2% scale expression.\n- **Wheat:** **Wheat stalk** draws itself from the base up at 0.4 s over 1.4 s, with four pairs of grains and a tip.\n- **Loaf:** **Loaf outline** draws on at 1.4 s over 1.2 s, and **Loaf score** follows at 2.4 s with three slashes.\n- **Name:** **Name Crumb & Co** (serif, 150 px, ink) springs in at 3.0 s with a small rise and tilt.\n- **Underline:** **Mustard underline** scribbles under the name from 4.2 s.\n- **Boil:** the three line-art layers have a `wiggle(8, 0.5)` rotation expression, so the lines wobble slightly throughout.\n\nI checked eight frames across the piece. The sequence reads correctly and the final frame holds as a clean lockup. I didn't check the motion itself in playback, so the wobble and breathing speed are worth a look.\n\nPossible next tweaks: a bolder or more hand-lettered name, a sage leaf on the wheat, a different underline colour, or a looser, more jittery boil."
+ },
+ "metrics": {
+  "layers": 8,
+  "drawableLayers": 8,
+  "layerTypes": {
+   "path": 7,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 8,
+  "keys": 30,
+  "segments": 13,
+  "easesUsed": {
+   "Sine In Out": 10,
+   "Spring 0.1": 2,
+   "Ease Out": 1
+  },
+  "distinctEases": 3,
+  "easeFamilies": 3,
+  "overshootSegments": 2,
+  "keyedOvershoots": 0,
+  "springSegments": 2,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 6,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 7,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#7a9e7e",
+   "#d97757",
+   "#e9b44c",
+   "#2e2a24",
+   "#f6efe3"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.715,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0.201,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 5.963,
+  "exits": 0,
+  "beats": 5,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.058,
+  "midLuma": 0.893,
+  "toolErrors": 0,
+  "toolCalls": 7
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "stroke draw-on (trim paths animated)",
+    "type": "trimAnimated",
+    "pass": true
+   },
+   {
+    "text": "custom paths (≥2)",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "boil/wobble (wiggle expression, hold keys or path keys)",
+    "type": "jitter",
+    "pass": true
+   },
+   {
+    "text": "breathing blobs (scale animated)",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "warm palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "no linear eases",
+    "type": "noLinear",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

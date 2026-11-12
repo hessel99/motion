@@ -1,0 +1,68 @@
+{
+  "id": "10-corporate-smooth",
+  "title": "Corporate smooth lower third",
+  "complexity": "simple",
+  "style": [
+    "corporate",
+    "smooth"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration": 6
+  },
+  "prompt": "Corporate smooth lower third for an interview video: \"Dr. Amelia Hart\" / \"Head of Research, Larkspur Labs\". A thin accent line extends, a translucent panel slides in behind it, name and title reveal with a soft mask/slide. Holds, then animates out cleanly by 6s. Calm and premium: long ease-in-outs, nothing bouncy, blue-grey palette.",
+  "checklist": [
+    {
+      "text": "name present",
+      "check": {
+        "type": "textContains",
+        "text": "Amelia Hart"
+      }
+    },
+    {
+      "text": "title present",
+      "check": {
+        "type": "textContains",
+        "text": "Larkspur"
+      }
+    },
+    {
+      "text": "placed in the lower third",
+      "check": {
+        "type": "lowerThird"
+      }
+    },
+    {
+      "text": "no overshoot",
+      "check": {
+        "type": "noOvershoot"
+      }
+    },
+    {
+      "text": "animates out by the end",
+      "check": {
+        "type": "exitsMin",
+        "min": 2
+      }
+    },
+    {
+      "text": "hold in the middle (≥1.5s without key motion)",
+      "check": {
+        "type": "holdMin",
+        "seconds": 1.5
+      }
+    },
+    {
+      "text": "translucent panel (opacity < 100 or alpha)",
+      "check": {
+        "type": "translucent"
+      }
+    },
+    {
+      "text": "accent line extends",
+      "check": null
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "15-minimal-luxury",
+  "title": "Minimal luxury",
+  "complexity": "simple",
+  "style": [
+    "minimal",
+    "luxury",
+    "elegant"
+  ],
+  "comp": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "duration": 7
+  },
+  "prompt": "Minimal luxury reveal for a perfume, \"ÉCLAT — Eau de Parfum\", vertical story format. Near-black background, champagne gold accents, a single thin gold line that slowly draws, the name in a wide-tracked serif fading in letter by letter with tracking tightening slightly, generous negative space. Slow, restrained, expensive. Nothing should move fast.",
+  "checklist": [
+    {
+      "text": "name present",
+      "check": {
+        "type": "textContains",
+        "text": "CLAT"
+      }
+    },
+    {
+      "text": "subtitle present",
+      "check": {
+        "type": "textContains",
+        "text": "Parfum"
+      }
+    },
+    {
+      "text": "letter-by-letter reveal",
+      "check": {
+        "type": "perLetter"
+      }
+    },
+    {
+      "text": "thin line draws (trim or size/scale animated on a thin layer)",
+      "check": {
+        "type": "thinLineDraw"
+      }
+    },
+    {
+      "text": "serif font",
+      "check": {
+        "type": "serifFont"
+      }
+    },
+    {
+      "text": "slow: shortest keyed move ≥0.8s",
+      "check": {
+        "type": "minSegmentDuration",
+        "seconds": 0.8
+      }
+    },
+    {
+      "text": "no overshoot",
+      "check": {
+        "type": "noOvershoot"
+      }
+    },
+    {
+      "text": "negative space: ≤8 layers",
+      "check": {
+        "type": "layersMax",
+        "max": 8
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 6,
+  "style_match": 6,
+  "timing_easing": 6,
+  "composition": 7,
+  "richness": 4,
+  "polish": 5
+ },
+ "overall": 5.67,
+ "critique": [
+  "The wordmark does not slide out from behind the mark as the brief asks: it is drawn above the mark with no mask and simply fades in while nudging 80px right, so at 1.45s the half-opaque 'NOVA' sits on top of the ring instead of emerging from it.",
+  "Put the wordmark under a clip or mask whose left edge sits at the ring's right edge, start the text fully hidden behind the mark at opacity 100, and slide it out about 250px with the Quart Out ease, which delivers the key reveal beat and gives the piece the craft moment it lacks."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.050767799999999995,
+ "ms": 10711,
+ "raw": "```json\n{\"brief_fit\": 6, \"style_match\": 6, \"timing_easing\": 6, \"composition\": 7, \"richness\": 4, \"polish\": 5,\n \"critique\": [\"The wordmark does not slide out from behind the mark as the brief asks: it is drawn above the mark with no mask and simply fades in while nudging 80px right, so at 1.45s the half-opaque 'NOVA' sits on top of the ring instead of emerging from it.\", \"Put the wordmark under a clip or mask whose left edge sits at the ring's right edge, start the text fully hidden behind the mark at opacity 100, and slide it out about 250px with the Quart Out ease, which delivers the key reveal beat and gives the piece the craft moment it lacks.\"]}\n```"
+}

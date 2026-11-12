@@ -1,0 +1,54 @@
+- title [text] box 120,80,900,80 #1b2333 "Revenue by quarter" Inter 64px w700
+- sub [text] box 120,160,600,40 #6b7488 "$M, 2025" Inter 30px w400
+- axis [rect] box 200,900,1520,4 #1b2333
+- b1 [rect] box 300,660,240,240 #b8c2d6
+- b2 [rect] box 660,540,240,360 #b8c2d6
+- b3 [rect] box 1020,600,240,300 #b8c2d6
+- b4 [rect] box 1380,360,240,540 #ff5a36
+- c1 [text] box 300,925,240,44 #6b7488 "Q1" Inter 34px w600
+- c2 [text] box 660,925,240,44 #6b7488 "Q2" Inter 34px w600
+- c3 [text] box 1020,925,240,44 #6b7488 "Q3" Inter 34px w600
+- c4 [text] box 1380,925,240,44 #ff5a36 "Q4" Inter 34px w700
+- v1 [text] box 300,590,240,64 #1b2333 "12" Inter 52px w700
+- v2 [text] box 660,470,240,64 #1b2333 "18" Inter 52px w700
+- v3 [text] box 1020,530,240,64 #1b2333 "15" Inter 52px w700
+- v4 [text] box 1375,274,249,83 #ff5a36 "27" Inter 68px w800
+
+comp 1920x1080 6s @30fps, background #f7f8fa
+"title" (text l_03jm2)
+  position: 0s [570,140] ─Expo Out→ 0.6s [570,120]
+  opacity: 0s 0 ─Expo Out→ 0.3s 100
+"sub" (text l_03jm3)
+  position: 0.15s [420,200] ─Expo Out→ 0.75s [420,180]
+  opacity: 0.15s 0 ─Expo Out→ 0.45s 100
+"axis" (rect l_03jm4)
+  scale: 0.3s [0,100] ─Expo Out→ 1s 100
+"b1" (rect l_03jm5)
+  scale: 1.1s [100,0] ─Expo Out→ 1.8s 100
+"b2" (rect l_03jm6)
+  scale: 1.45s [100,0] ─Expo Out→ 2.15s 100
+"b3" (rect l_03jm7)
+  scale: 1.8s [100,0] ─Expo Out→ 2.5s 100
+"b4" (rect l_03jm8)
+  scale: 2.15s [100,0] ─Back Out→ 3s 100
+  fill: 2.5s #b8c2d6 ─Cubic Out→ 2.9s #ff5a36
+"c1" (text l_03jm9)
+  opacity: 0.8s 0 ─Expo Out→ 1.05s 100
+"c2" (text l_03jma)
+  opacity: 0.9s 0 ─Expo Out→ 1.15s 100
+"c3" (text l_03jmb)
+  opacity: 1s 0 ─Expo Out→ 1.25s 100
+"c4" (text l_03jmc)
+  opacity: 1.1s 0 ─Expo Out→ 1.35s 100
+"v1" (text l_03jmd)
+  position: 1.6s [420,652] ─Expo Out→ 2.1s [420,622]
+  opacity: 1.6s 0 ─Expo Out→ 1.85s 100
+"v2" (text l_03jme)
+  position: 1.95s [780,532] ─Expo Out→ 2.45s [780,502]
+  opacity: 1.95s 0 ─Expo Out→ 2.2s 100
+"v3" (text l_03jmf)
+  position: 2.3s [1140,592] ─Expo Out→ 2.8s [1140,562]
+  opacity: 2.3s 0 ─Expo Out→ 2.55s 100
+"v4" (text l_03jmg)
+  scale: 2.7s 60 ─Back Out→ 3.2s 100
+  opacity: 2.7s 0 ─Easy Ease→ 3s 100

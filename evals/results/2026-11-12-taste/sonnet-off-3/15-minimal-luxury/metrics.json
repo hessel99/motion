@@ -1,0 +1,202 @@
+{
+ "run": {
+  "id": "15-minimal-luxury",
+  "name": "15-minimal-luxury",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 54,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 94.4,
+     "composition": 100,
+     "readability": 100,
+     "polish": 70,
+     "richness": 70,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 5.6000000000000005,
+     "composition": 0,
+     "readability": 0,
+     "polish": 30,
+     "richness": 30,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "high:no-secondary",
+     "high:thin",
+     "low:slow-stagger"
+    ],
+    "ms": 6.3
+   },
+   "after": {
+    "score": 54,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 94.4,
+     "composition": 100,
+     "readability": 100,
+     "polish": 70,
+     "richness": 70,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 5.6000000000000005,
+     "composition": 0,
+     "readability": 0,
+     "polish": 30,
+     "richness": 30,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "high:no-secondary",
+     "high:thin",
+     "low:slow-stagger"
+    ],
+    "ms": 6.3
+   }
+  },
+  "wallMs": 16209,
+  "timedOut": false,
+  "turns": 3,
+  "costUsd": 0.0371301,
+  "durationMs": 15220,
+  "usage": {
+   "input": 91549,
+   "cached": 88261,
+   "output": 1516
+  },
+  "errors": [],
+  "toolCalls": 2,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the 7-second reveal in the \"Main\" comp (1080×1920, 30 fps). I checked it on a contact sheet at five points, but I haven't played it back in real time.\n\n- **Background:** near-black (#0b0a09).\n- **Gold line (`line`):** a single hairline in champagne gold (#d9c08e), 1.5 px wide. It draws downward over 4.5 seconds, starting at 0.4 s, with a Sine In Out ease. It sits centred above the name.\n- **Name (`name`):** \"ÉCLAT\" in light Cormorant Garamond with wide tracking. Each letter fades in on a 0.35 s stagger from 2.2 s, and the last letter lands around 4.2 s. The whole word scales from 104% to 100% over the same stretch, so the spacing tightens slightly as it settles. Tracking can't be animated directly in this editor, so the scale stands in for the tightening.\n- **Subtitle (`sub`):** \"EAU DE PARFUM\" in small, muted gold, tracked wide. It fades in slowly from 4.6 s to 6.2 s, and the last half second is a still hold.\n\nThe line, name and subtitle make up the whole composition, with generous empty space around them. Everything uses Sine eases and nothing moves fast.\n\nI can make it even slower, move the line to sit beside or below the name, or swap the subtitle font if you want."
+ },
+ "metrics": {
+  "layers": 3,
+  "drawableLayers": 3,
+  "layerTypes": {
+   "path": 1,
+   "text": 2
+  },
+  "groups": 0,
+  "animatedLayers": 3,
+  "keys": 7,
+  "segments": 3,
+  "easesUsed": {
+   "Sine In Out": 1,
+   "Sine Out": 1,
+   "Easy Ease": 1
+  },
+  "distinctEases": 3,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 1,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#d9c08e",
+   "#b8a27a",
+   "#0b0a09"
+  ],
+  "keyCoverage": 0.829,
+  "visualActivity": 0.22,
+  "firstMotion": 2.133,
+  "lastMotion": 6.133,
+  "endHold": 0.867,
+  "longestHold": 2.479,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [
+   "Cormorant Garamond"
+  ],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.004,
+  "midLuma": 0.042,
+  "toolErrors": 0,
+  "toolCalls": 2
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "subtitle present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "letter-by-letter reveal",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "thin line draws (trim or size/scale animated on a thin layer)",
+    "type": "thinLineDraw",
+    "pass": true
+   },
+   {
+    "text": "serif font",
+    "type": "serifFont",
+    "pass": false
+   },
+   {
+    "text": "slow: shortest keyed move ≥0.8s",
+    "type": "minSegmentDuration",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "negative space: ≤8 layers",
+    "type": "layersMax",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

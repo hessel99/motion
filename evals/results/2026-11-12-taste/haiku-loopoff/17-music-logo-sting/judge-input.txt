@@ -1,0 +1,73 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (17-music-logo-sting, 1920x1080, 8s @30fps):
+Make a logo sting for the brand "Pulse" (a round mark — a circle with a smaller dot inside — plus the wordmark "Pulse") synced to the music already in the timeline. Build anticipation during the build, land the logo exactly on the drop, punctuate the next beats with secondary hits, and settle on a clean lockup before the end.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- wordmark present [yes]
+- the music is kept [yes]
+- a hero landing on the drop (4.0 s, ±1 frame) [yes]
+- moves land on beats (≥60% of landings within ±1 frame of the 120 BPM grid) [yes]
+- restraint: not every beat carries a landing [yes]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- Sting 120 BPM [audio] #6b8cff
+- Echo ring 1 (4.5) [ellipse] box 525,400,280,280 #000000 a0 stroke #ff4d5e 6px
+- Echo ring 2 (5.0) [ellipse] box 525,400,280,280 #000000 a0 stroke #ff4d5e 6px
+- Echo ring 3 (5.5) [ellipse] box 525,400,280,280 #000000 a0 stroke #ff4d5e 6px
+- Pulse mark ring [path] box 514,389,302,302 #000000 a0 stroke #f5f5f7 16px
+- Pulse mark dot [ellipse] box 609,506,113,67 #ff4d5e
+- Pulse wordmark [text] box 845,410,700,260 #f5f5f7 "Pulse" Inter 200px w800
+
+TIMELINE:
+comp 1920x1080 8s @30fps, background #0b0b0f
+"Echo ring 1 (4.5)" (ellipse l_03jm8)
+  scale: 0s 100 ─hold→ 4.5s 100 ─Expo Out→ 5.2s 240
+  opacity: 0s 0 ─hold→ 4.5s 80 ─Cubic Out→ 5.2s 0
+"Echo ring 2 (5.0)" (ellipse l_03jm9)
+  scale: 0s 100 ─hold→ 5s 100 ─Expo Out→ 5.7s 240
+  opacity: 0s 0 ─hold→ 5s 80 ─Cubic Out→ 5.7s 0
+"Echo ring 3 (5.5)" (ellipse l_03jma)
+  scale: 0s 100 ─hold→ 5.5s 100 ─Expo Out→ 6.2s 240
+  opacity: 0s 0 ─hold→ 5.5s 80 ─Cubic Out→ 6.2s 0
+"Pulse mark ring" (path l_03jmb)
+  scale: 0s 60 ─Expo Out→ 1.5s 72 ─Ease In→ 3.9s 78 ─Quad In→ 4s 108 ─Expo Out→ 4.35s 98 ─Cubic Out→ 4.5s 103 ─Expo Out→ 4.75s 100 ─Cubic Out→ 5s 103 ─Expo Out→ 5.25s 100 ─Cubic Out→ 5.5s 103 ─Expo Out→ 5.75s 100
+  trimStart: 0s 0
+  trimEnd: 0s 0 ─Expo Out→ 1.2s 100
+"Pulse mark dot" (ellipse l_03jmc)
+  scale: 0s 100 ─Cubic Out→ 0.35s 100 ─Quad In→ 0.5s 108 ─Expo Out→ 0.75s 100 ─Cubic Out→ 0.85s 100 ─Quad In→ 1s 110 ─Expo Out→ 1.25s 100 ─Cubic Out→ 1.35s 100 ─Quad In→ 1.5s 111 ─Expo Out→ 1.75s 100 ─Cubic Out→ 1.85s 100 ─Quad In→ 2s 112 ─Expo Out→ 2.25s 100 ─Cubic Out→ 2.35s 100 ─Quad In→ 2.5s 114 ─Expo Out→ 2.75s 100 ─Cubic Out→ 2.85s 100 ─Quad In→ 3s 116 ─Expo Out→ 3.25s 100 ─Cubic Out→ 3.35s 100 ─Quad In→ 3.5s 118 ─Expo Out→ 3.75s 100 ─Cubic Out→ 3.9s 84 ─Quad In→ 4s [125,75] ─Expo Out→ 4.18s [94,106] ─Cubic Out→ 4.4s 100
+"Pulse wordmark" (text l_03jmd)
+  text animator: in by char, start 4.2s, 0.5s each, stagger 0.04s, ease spring:0.5
+
+AUTOMATIC METRICS:
+layers 6 drawable (audio 1, ellipse 4, path 1, text 1), 58 keys, 38 moving segments
+eases: Expo Out×17, Hold×3, Cubic Out×8, Ease In×1, Quad In×9; springs 0, overshooting 0, hold 3
+expressions 0, text animators 1, precomps 0, paths 1, gradients 0, markers 0
+palette (3): #ff4d5e #f5f5f7 #0b0b0f
+motion from 0s to 6.067s (end hold 1.933s, longest still 0.268s), visual activity 55% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 0s; text-on-text overlap 0s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

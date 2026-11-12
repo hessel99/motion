@@ -1,0 +1,188 @@
+{
+ "run": {
+  "id": "01-logo-reveal",
+  "name": "01-logo-reveal",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 2.1
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 2.1
+   }
+  },
+  "wallMs": 55762,
+  "timedOut": false,
+  "turns": 14,
+  "costUsd": 0.013220420000000002,
+  "durationMs": 54970,
+  "usage": {
+   "input": 500299,
+   "cached": 483882,
+   "output": 10200
+  },
+  "errors": [],
+  "toolCalls": 13,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The mark is too wide for the gap: the ring's right edge (about x=860) runs into the N. I'm shifting the lockup so it's centered with clear space, then adding a small settle on the wordmark.\nThe wordmark is visible before its slide starts, because its start position is still inside the clip. I'm holding it fully hidden behind the mark until 0.95 s, then sliding it out.\nThe NOVA logo reveal is built on the 4-second Main comp, navy background with one teal accent. The critic scores it 100/100 and the frame checks pass.\n\n**What happens:**\n- **Mark (0.1–1.15 s):** **Mark ring** draws on as a white circle, then **Mark slash** cuts through it in teal (Expo Out) as the ring closes.\n- **Wordmark (0.95–1.85 s):** **Wordmark NOVA** slides out from behind the mark inside the clipping group **Wordmark reveal**, using Quart Out with a small settle at the end.\n- **Tagline (1.9–2.5 s):** **Tagline** \"Money, made simple\" fades in and rises 12 px beneath the wordmark.\n- **Hold (2.5–4 s):** the full lockup sits still for about 1.5 s.\n\n**Choices I made:**\n- Colors: navy `#0B1F3A`, off-white `#F4F6FB` for the mark and wordmark, teal `#5EEAD4` for the slash only, and muted blue-grey `#8FA3BF` for the tagline.\n- Type: 150 px bold for NOVA, 40 px regular for the tagline. The lockup is centered horizontally.\n- The wordmark is held fully hidden until its slide starts, so it doesn't show early.\n\n**Possible tweaks:** the wordmark could travel a shorter distance, or the tagline could be larger for more presence. Say if you want either."
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "path": 2,
+   "group": 1,
+   "text": 2
+  },
+  "groups": 1,
+  "animatedLayers": 4,
+  "keys": 15,
+  "segments": 7,
+  "easesUsed": {
+   "Cubic In Out": 1,
+   "Expo Out": 1,
+   "Quart Out": 3,
+   "Sine In Out": 2
+  },
+  "distinctEases": 4,
+  "easeFamilies": 4,
+  "overshootSegments": 0,
+  "keyedOvershoots": 1,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#f4f6fb",
+   "#5eead4",
+   "#8fa3bf",
+   "#0b1f3a"
+  ],
+  "keyCoverage": 0.6,
+  "visualActivity": 0.285,
+  "firstMotion": 0.933,
+  "lastMotion": 2.2,
+  "endHold": 1.8,
+  "longestHold": 0.134,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 1.273,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.015,
+  "midLuma": 0.128,
+  "toolErrors": 0,
+  "toolCalls": 13
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"NOVA\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "tagline present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "sequenced: mark → wordmark → tagline (≥3 entrance waves)",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "holds the final lockup ≥1s",
+    "type": "endHoldMin",
+    "pass": true
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "wordmark revealed from behind the mark (mask/clip or layer order)",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

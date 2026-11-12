@@ -1,0 +1,410 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 331,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Logo reveal for NOVA, a small fintech. Geometric mark (circle and diagonal slash) next to wordmark. Mark draws/assembles first, wordmark slides out from behind the mark, tagline \"Money, made simple\" fades in underneath. Navy background, one accent color. Clean hold of full lockup at least 1 second."
+  },
+  "result": "# Example: Elegant logo reveal, the line draws the mark and the wordmark slides out from behind it\n> tags: logo, reveal, elegant, minimal, luxury, corporate, line, stroke, draw, draw-on, trim, wordmark, mask, behind, monogram, calm\n\n## Brief\n\"Logo reveal for NOVA (a circle monogram with a slash). Calm and premium, dark background, 4 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 14,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "deep": false
+  },
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":60,\"duration\":4,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":0,\"layers\":[]}"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1081,
+  "ok": true,
+  "ms": 99,
+  "editorMs": 9,
+  "input": {
+   "comp": {
+    "duration": 4,
+    "background": "#0B1F3A"
+   },
+   "layers": [
+    {
+     "key": "mark-ring",
+     "name": "Mark ring",
+     "type": "path",
+     "shape": "circle",
+     "x": 660,
+     "y": 440,
+     "w": 200,
+     "h": 200,
+     "stroke": "#F4F6FB",
+     "strokeWidth": 14,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 0.1,
+      "duration": 0.8,
+      "ease": "Cubic In Out"
+     }
+    },
+    {
+     "key": "mark-slash",
+     "name": "Mark slash",
+     "type": "path",
+     "d": "M690 610 L830 470",
+     "stroke": "#5EEAD4",
+     "strokeWidth": 22,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 0.75,
+      "duration": 0.4,
+      "ease": "Expo Out"
+     }
+    },
+    {
+     "key": "reveal",
+     "name": "Wordmark reveal",
+     "type": "group",
+     "clip": true,
+     "x": 800,
+     "y": 400,
+     "w": 660,
+     "h": 260,
+     "children": [
+      {
+       "key": "wordmark",
+       "name": "Wordmark NOVA",
+       "text": {
+        "content": "NOVA",
+        "fontSize": 150,
+        "fontWeight": 700,
+        "tracking": 6,
+        "align": "left"
+       },
+       "x": 30,
+       "y": 40,
+       "w": 460,
+       "h": 180,
+       "fill": "#F4F6FB",
+       "enter": {
+        "t": 0.95,
+        "duration": 0.9,
+        "from": {
+         "dx": -200
+        },
+        "ease": "Quart Out"
+       }
+      }
+     ]
+    },
+    {
+     "key": "tagline",
+     "name": "Tagline",
+     "text": {
+      "content": "Money, made simple",
+      "fontSize": 40,
+      "fontWeight": 400,
+      "tracking": 1,
+      "align": "left"
+     },
+     "x": 832,
+     "y": 636,
+     "w": 560,
+     "h": 56,
+     "fill": "#8FA3BF",
+     "enter": {
+      "t": 1.9,
+      "duration": 0.6,
+      "from": {
+       "opacity": 0,
+       "dy": 12
+      },
+      "ease": "Quart Out"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 7 keyframe tracks; animation ends 2.5s\",\"ids\":{\"mark-ring\":\"l_03jm2\",\"mark-slash\":\"l_03jm3\",\"wordmark\":\"l_03jm5\",\"reveal\":\"l_03jm4\",\"tagline\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 31,
+  "ok": true,
+  "ms": 109,
+  "editorMs": 95,
+  "input": {
+   "times": [
+    0.3,
+    0.7,
+    1,
+    1.4,
+    2,
+    3.2
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.3s, 0.7s, 1s, 1.4s, 2s, 3.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b25cfdab-96bf-4ef0-94e6-9057a3221870/tool-results/mcp-motion-blob-1794511816278-dcaqis.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 34,
+  "editorMs": 8,
+  "input": {},
+  "result": "score 82/100 (polish 84, richness 84)\n1. [medium] no follow-through, overshoot, settle or idle motion anywhere in 4s: everything stops dead\n   → secondary_motion {\"ids\":[\"l_03jm5\",\"l_03jm6\"],\"overshoot\":0.08,\"segments\":\"first\"}\n2. [medium] 4 elements and 4 moves for 4s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch\n   → seconda…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1081,
+  "ok": true,
+  "ms": 22,
+  "editorMs": 2,
+  "input": {
+   "comp": {
+    "duration": 4,
+    "background": "#0B1F3A"
+   },
+   "layers": [
+    {
+     "key": "mark-ring",
+     "name": "Mark ring",
+     "type": "path",
+     "shape": "circle",
+     "x": 602,
+     "y": 440,
+     "w": 200,
+     "h": 200,
+     "stroke": "#F4F6FB",
+     "strokeWidth": 14,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 0.1,
+      "duration": 0.8,
+      "ease": "Cubic In Out"
+     }
+    },
+    {
+     "key": "mark-slash",
+     "name": "Mark slash",
+     "type": "path",
+     "d": "M632 610 L772 470",
+     "stroke": "#5EEAD4",
+     "strokeWidth": 22,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 0.75,
+      "duration": 0.4,
+      "ease": "Expo Out"
+     }
+    },
+    {
+     "key": "reveal",
+     "name": "Wordmark reveal",
+     "type": "group",
+     "clip": true,
+     "x": 830,
+     "y": 400,
+     "w": 660,
+     "h": 260,
+     "children": [
+      {
+       "key": "wordmark",
+       "name": "Wordmark NOVA",
+       "text": {
+        "content": "NOVA",
+        "fontSize": 150,
+        "fontWeight": 700,
+        "tracking": 6,
+        "align": "left"
+       },
+       "x": 40,
+       "y": 40,
+       "w": 460,
+       "h": 180,
+       "fill": "#F4F6FB",
+       "enter": {
+        "t": 0.95,
+        "duration": 0.9,
+        "from": {
+         "dx": -200
+        },
+        "ease": "Quart Out"
+       }
+      }
+     ]
+    },
+    {
+     "key": "tagline",
+     "name": "Tagline",
+     "text": {
+      "content": "Money, made simple",
+      "fontSize": 40,
+      "fontWeight": 400,
+      "tracking": 1,
+      "align": "left"
+     },
+     "x": 872,
+     "y": 636,
+     "w": 560,
+     "h": 56,
+     "fill": "#8FA3BF",
+     "enter": {
+      "t": 1.9,
+      "duration": 0.6,
+      "from": {
+       "opacity": 0,
+       "dy": 12
+      },
+      "ease": "Quart Out"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 5 updated, 7 keyframe tracks; animation ends 2.5s\",\"ids\":{\"mark-ring\":\"l_03jm2\",\"mark-slash\":\"l_03jm3\",\"wordmark\":\"l_03jm5\",\"reveal\":\"l_03jm4\",\"tagline\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "secondary_motion",
+  "argsBytes": 59,
+  "ok": true,
+  "ms": 26,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm5"
+   ],
+   "overshoot": 0.06,
+   "segments": "\"first\""
+  },
+  "result": "added overshoot 6% to Wordmark NOVA (1 moves)"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 87,
+  "editorMs": 72,
+  "input": {
+   "times": [
+    0.4,
+    0.8,
+    1.2,
+    1.6,
+    2.2,
+    3.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.4s, 0.8s, 1.2s, 1.6s, 2.2s, 3.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b25cfdab-96bf-4ef0-94e6-9057a3221870/tool-results/mcp-motion-blob-1794511827853-0cjsvv.jpg]"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 15,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 2,
+  "input": {
+   "times": [
+    3.5
+   ]
+  },
+  "result": "3.5s:\n  Mark ring ↔ Mark slash: overlap 100%"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 29,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm5",
+    "l_03jm4"
+   ]
+  },
+  "result": "comp 4s @60fps\n\"Wordmark NOVA\" (text l_03jm5)\n  position: 0.95s [70,130] ─Quart Out→ 1.85s [282,130] ─Sine In Out→ 2.03s [264.6,130] ─Sine In Out→ 2.21s [270,130]\n\"Wordmark reveal\" (group l_03jm4)\n  (static)"
+ },
+ {
+  "name": "set_keyframes",
+  "argsBytes": 251,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "prop": "position",
+   "keyframes": [
+    {
+     "t": 0,
+     "v": [
+      -250,
+      130
+     ],
+     "interp": "hold"
+    },
+    {
+     "t": 0.95,
+     "v": [
+      -250,
+      130
+     ],
+     "ease": "Quart Out"
+    },
+    {
+     "t": 1.85,
+     "v": [
+      282,
+      130
+     ],
+     "ease": "Sine In Out"
+    },
+    {
+     "t": 2.03,
+     "v": [
+      264.6,
+      130
+     ],
+     "ease": "Sine In Out"
+    },
+    {
+     "t": 2.21,
+     "v": [
+      270,
+      130
+     ]
+    }
+   ]
+  },
+  "result": "set 5 keyframes on Wordmark NOVA.position"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 77,
+  "editorMs": 64,
+  "input": {
+   "times": [
+    0.5,
+    0.9,
+    1.1,
+    1.4,
+    1.9,
+    3.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 0.9s, 1.1s, 1.4s, 1.9s, 3.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b25cfdab-96bf-4ef0-94e6-9057a3221870/tool-results/mcp-motion-blob-1794511842440-uiini6.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 3,
+  "input": {},
+  "result": "score 100/100 (no issues found)"
+ }
+]

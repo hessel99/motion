@@ -1,0 +1,204 @@
+{
+ "run": {
+  "id": "10-corporate-smooth",
+  "name": "10-corporate-smooth",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 58,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 64.8,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 80.8,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 35.2,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 19.2,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:monotone-ease",
+     "medium:text-collision",
+     "medium:entrance-ease",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 2.2
+   },
+   "after": {
+    "score": 58,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 64.8,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 80.8,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 35.2,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 19.2,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:monotone-ease",
+     "medium:text-collision",
+     "medium:entrance-ease",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 2.2
+   }
+  },
+  "wallMs": 87379,
+  "timedOut": false,
+  "turns": 37,
+  "costUsd": 0.028075980000000004,
+  "durationMs": 86685,
+  "usage": {
+   "input": 1335016,
+   "cached": 1302208,
+   "output": 16993
+  },
+  "errors": [],
+  "toolCalls": 36,
+  "toolErrors": 1,
+  "toolsAvailable": 76,
+  "finalText": "The lower third is built in the **Main** comp (6 s, 30 fps), in blue-grey tones over a placeholder background.\n\n- **Accent line**: a thin light blue-grey bar grows from its top edge (0–0.9 s), then retracts at the end.\n- **Panel**: a translucent dark blue-grey rectangle (about 72% opacity) slides in from the left with a fade (0.25–1.35 s).\n- **Name** \"Dr. Amelia Hart\" (56 px, semibold) rises 24 px and fades in (0.8–1.8 s).\n- **Title** \"Head of Research, Larkspur Labs\" (30 px, muted blue-grey) follows 0.25 s later.\n- **Hold**: about 2.5 s fully readable (roughly 2.0–4.4 s).\n- **Out**: the name and title fade and sink back (4.4–5.0 s), then the panel fades (4.7–5.5 s) and the accent retracts (5.2–5.9 s), so the frame is clean before 6 s.\n\nChoices to check:\n- **Reveal is a slide plus fade, not a true mask.** Text inside clipped groups didn't render in this editor, so I moved the text out of the groups. If you want a hard mask edge, tell me and I'll try another way.\n- **Easing is Sine In Out throughout**, as you asked for calm. The critic wanted faster, decelerating entrances (about 0.27 s), but that would fight the calm brief, so I kept the long curves.\n- **Background is a placeholder** (#2B3440). Swap in your interview footage; the panel's translucency will show it through.\n\nI can also add a version with a short horizontal accent rule under the name, or adjust the panel opacity and colours."
+ },
+ "metrics": {
+  "layers": 4,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "rect": 2,
+   "text": 2
+  },
+  "groups": 0,
+  "animatedLayers": 4,
+  "keys": 28,
+  "segments": 14,
+  "easesUsed": {
+   "Sine In Out": 14
+  },
+  "distinctEases": 1,
+  "easeFamilies": 1,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#8faec7",
+   "#1b2633",
+   "#f2f5f8"
+  ],
+  "keyCoverage": 0.592,
+  "visualActivity": 0.592,
+  "firstMotion": 0,
+  "lastMotion": 5.933,
+  "endHold": 0.067,
+  "longestHold": 2.412,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.201,
+  "exits": 3,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.201,
+  "toolErrors": 1,
+  "toolCalls": 36
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "placed in the lower third",
+    "type": "lowerThird",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "animates out by the end",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "hold in the middle (≥1.5s without key motion)",
+    "type": "holdMin",
+    "pass": true
+   },
+   {
+    "text": "translucent panel (opacity < 100 or alpha)",
+    "type": "translucent",
+    "pass": true
+   },
+   {
+    "text": "accent line extends",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 8
+ },
+ "video": null
+}

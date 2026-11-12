@@ -1,0 +1,68 @@
+{
+  "id": "04-explainer-3beat",
+  "title": "3-beat explainer scene",
+  "complexity": "complex",
+  "style": [
+    "explainer",
+    "flat"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration": 12
+  },
+  "prompt": "A 12-second explainer scene for a password manager, in three beats of ~4s each: (1) a messy pile of sticky notes with passwords appears and jitters anxiously, (2) they get sucked into a shield/vault icon, (3) the shield glows and a single \"One key. Every login.\" headline lands with a check mark. Flat illustration style, friendly colors. Each beat should hand over to the next — no hard cuts.",
+  "checklist": [
+    {
+      "text": "3 beats",
+      "check": {
+        "type": "beatsMin",
+        "min": 3
+      }
+    },
+    {
+      "text": "headline present",
+      "check": {
+        "type": "textContains",
+        "text": "One key"
+      }
+    },
+    {
+      "text": "≥5 sticky notes (rects) in beat 1",
+      "check": {
+        "type": "layersOfTypeMin",
+        "layerType": "rect",
+        "min": 5
+      }
+    },
+    {
+      "text": "jitter/anxious motion (wiggle expression or many small keys)",
+      "check": {
+        "type": "jitter"
+      }
+    },
+    {
+      "text": "shield/vault as a custom path",
+      "check": {
+        "type": "pathLayersMin",
+        "min": 1
+      }
+    },
+    {
+      "text": "uses most of the 12s (animated coverage ≥70%)",
+      "check": {
+        "type": "coverageMin",
+        "min": 0.7
+      }
+    },
+    {
+      "text": "notes converge (moving toward one point)",
+      "check": null
+    },
+    {
+      "text": "transitions between beats are continuous",
+      "check": null
+    }
+  ]
+}

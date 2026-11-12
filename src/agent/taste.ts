@@ -18,6 +18,9 @@ export function tasteOn(): boolean {
   if (typeof g === 'boolean') return g;
   try { return localStorage.getItem(PREF) !== 'off'; } catch { return true; }
 }
+/** tools only advertised with the taste layer on, and the get_guide sentence about the gold examples */
+export const TASTE_TOOLS = ['critique'];
+export const TASTE_GUIDE_HINT = ' "examples" + brief: the 1-2 most similar proven pieces (brief, exact tool-call sequence, why it works) — imitate them.';
 export function setTaste(on: boolean) { try { localStorage.setItem(PREF, on ? 'on' : 'off'); } catch { /* */ } }
 
 // ---------------------------------------------------------------- feel (style → easing family, tempo)

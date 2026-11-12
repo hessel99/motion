@@ -1,0 +1,201 @@
+{
+ "run": {
+  "id": "05-bar-chart",
+  "name": "05-bar-chart",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 83,
+    "fixes": 2,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 83,
+    "sub": {
+     "timing": 64,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 36,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:end-hold",
+     "medium:one-move"
+    ],
+    "ms": 11.5
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 44.6
+   }
+  },
+  "wallMs": 72673,
+  "timedOut": false,
+  "turns": 18,
+  "costUsd": 0.024881020000000004,
+  "durationMs": 70892,
+  "usage": {
+   "input": 334957,
+   "cached": 318632,
+   "output": 8189
+  },
+  "errors": [],
+  "toolCalls": 16,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The \"Revenue by quarter\" chart is built on the Main comp (6 s, 1920×1080). The axis draws in from the left first, the four bars grow up from the baseline in sequence, and each value label fades and rises in above its bar. Q4 is the blue accent bar with a slight overshoot, and its \"27\" label springs in last.\n\nLayers are named `title`, `subtitle`, `axis`, `bar-q1` to `bar-q4`, `val-q1` to `val-q4`, and `x-q1` to `x-q4`. Title and subtitle sit inside the title-safe area, and the frame check is clean.\n\nChoices I made:\n- **Scale:** bar heights are 20 px per $M, so the 27 bar is 540 px tall.\n- **Colours:** the neutral bars are slate `#CBD5E1` and the accent is `#2563EB`.\n- **Subtitle:** I added \"Quarterly revenue, $M\" under the title to carry the unit. Remove it if you want the title alone.\n- **Hold:** the motion ends at about 2.7 s, so the last 3 s are static. That's a clean read, but I can add a slow drift or a gentle settle if you want the piece to keep moving.\n\nI can also add a \"+80% vs Q3\" callout or change the accent colour.\nPolishing round 1 is done: the critic now scores the piece 100/100 with no issues. The fix was a slow scale push on the \"27\" label after the build, and the title, subtitle and \"27\" label got a light overshoot settle."
+ },
+ "metrics": {
+  "layers": 15,
+  "drawableLayers": 15,
+  "layerTypes": {
+   "text": 10,
+   "rect": 5
+  },
+  "groups": 0,
+  "animatedLayers": 15,
+  "keys": 67,
+  "segments": 39,
+  "easesUsed": {
+   "Expo Out": 5,
+   "Sine In Out": 11,
+   "Quart Out": 20,
+   "Cubic Out": 1,
+   "Cubic In Out": 2
+  },
+  "distinctEases": 5,
+  "easeFamilies": 4,
+  "overshootSegments": 0,
+  "keyedOvershoots": 4,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 7,
+  "palette": [
+   "#0f172a",
+   "#64748b",
+   "#94a3b8",
+   "#cbd5e1",
+   "#2563eb",
+   "#334155",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.968,
+  "visualActivity": 0.436,
+  "firstMotion": 0,
+  "lastMotion": 2.6,
+  "endHold": 3.4,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.402,
+  "exits": 0,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.051,
+  "midLuma": 0.942,
+  "toolErrors": 0,
+  "toolCalls": 16
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "4 bars (rects)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "bars grow from the baseline (size/scale animated, bottom edge fixed)",
+    "type": "barsGrow",
+    "pass": true
+   },
+   {
+    "text": "staggered bar entrances",
+    "type": "staggered",
+    "pass": true
+   },
+   {
+    "text": "value labels present (≥4 numeric text layers)",
+    "type": "numericTextMin",
+    "pass": true
+   },
+   {
+    "text": "accent highlight on Q4 (≥2 bar colors)",
+    "type": "paletteMin",
+    "pass": true
+   },
+   {
+    "text": "bar heights proportional to data",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

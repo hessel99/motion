@@ -1,0 +1,32 @@
+- Background [rect] box 0,0,1080,1920 #0b0a09
+- Gold line [path] box 390,860,300,2 #000000 a0 stroke #c8a96a 1.5px
+- Name ÉCLAT [group] #ffffff a0
+  - É [text] box 364,900,69,135 #ede6d6 "É" serif 112px w400
+  - C [text] box 431,900,75,135 #ede6d6 "C" serif 112px w400
+  - L [text] box 513,900,69,135 #ede6d6 "L" serif 112px w400
+  - A [text] box 576,900,81,135 #ede6d6 "A" serif 112px w400
+  - T [text] box 655,900,69,135 #ede6d6 "T" serif 112px w400
+- Subline [text] box 0,1027,1080,50 #c8a96a "Eau de Parfum" serif 34px w400
+
+comp 1080x1920 7s @30fps, background #0b0a09
+"Gold line" (path l_03jm3)
+  trimStart: 0.3s 50 ─Sine In Out→ 2.7s 0
+  trimEnd: 0.3s 50 ─Sine In Out→ 2.7s 100
+"É" (text l_03jm7)
+  position: 0s [376.8,67.2] ─Cubic In Out→ 1.6s [376.8,67.2] ─Quart Out→ 3.4s [397.4,67.2]
+  opacity: 0s 0 ─Ease In→ 1.6s 0 ─Sine Out→ 2.8s 100
+"C" (text l_03jm8)
+  position: 0s [461.8,67.2] ─Cubic In Out→ 1.85s [461.8,67.2] ─Quart Out→ 3.65s [472,67.2]
+  opacity: 0s 0 ─Ease In→ 1.85s 0 ─Sine Out→ 3.05s 100
+"L" (text l_03jm9)
+  position: 0s [544.5,67.2] ─Cubic In Out→ 2.1s [544.5,67.2] ─Quart Out→ 3.9s [544.5,67.2]
+  opacity: 0s 0 ─Ease In→ 2.1s 0 ─Sine Out→ 3.3s 100
+"A" (text l_03jma)
+  position: 0s [624.6,67.2] ─Cubic In Out→ 2.35s [624.6,67.2] ─Quart Out→ 4.15s [614.8,67.2]
+  opacity: 0s 0 ─Ease In→ 2.35s 0 ─Sine Out→ 3.55s 100
+"T" (text l_03jmb)
+  position: 0s [709.9,67.2] ─Cubic In Out→ 2.6s [709.9,67.2] ─Quart Out→ 4.4s [689.6,67.2]
+  opacity: 0s 0 ─Ease In→ 2.6s 0 ─Sine Out→ 3.8s 100
+"Subline" (text l_03jm5)
+  position: 0s [540,1052] ─Cubic In Out→ 4.6s [540,1052] ─Sine Out→ 5.8s [540,1044.44] ─Sine In Out→ 6.04s [540,1045.25] ─Sine In Out→ 6.28s [540,1045]
+  opacity: 0s 0 ─Ease In→ 4.6s 0 ─Sine Out→ 5.8s 100

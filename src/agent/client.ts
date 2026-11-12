@@ -3,7 +3,7 @@
 
 import { TOOLS, READ_ONLY_TOOLS } from './tools';
 import { AGENT_SYSTEM_PROMPT, AGENT_SYSTEM_PROMPT_PLAIN, ASK_MODE_PROMPT } from './prompt';
-import { tasteOn } from './taste';
+import { tasteOn, TASTE_TOOLS, TASTE_GUIDE_HINT } from './taste';
 import { GUIDES } from './guides';
 
 export interface Provider { id: string; name: string; available: boolean; version?: string }
@@ -14,9 +14,11 @@ type Status = 'connecting' | 'connected' | 'offline';
 
 /** the tool list as sent to the bridge (and served over MCP) */
 export function toolManifest() {
-  return TOOLS.map(t => ({
+  // taste layer off: no critic tool and no gold examples (the plain agent; Settings → Polish automatically)
+  const taste = tasteOn();
+  return TOOLS.filter(t => taste || !TASTE_TOOLS.includes(t.name)).map(t => ({
     name: t.name,
-    description: t.description,
+    description: taste ? t.description : t.description.replace(TASTE_GUIDE_HINT, ''),
     inputSchema: t.inputSchema,
     annotations: { readOnlyHint: !!t.readOnly, destructiveHint: t.name === 'delete_layers' || t.name === 'undo', openWorldHint: false },
   }));

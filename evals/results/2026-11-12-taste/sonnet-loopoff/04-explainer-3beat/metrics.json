@@ -1,0 +1,232 @@
+{
+ "run": {
+  "id": "04-explainer-3beat",
+  "name": "04-explainer-3beat",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 58,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 100,
+     "choreography": 97.2,
+     "composition": 100,
+     "readability": 55.2,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 90.4,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 0,
+     "choreography": 2.8000000000000003,
+     "composition": 0,
+     "readability": 44.8,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 9.6,
+     "music": 0
+    },
+    "issues": [
+     "medium:text-collision",
+     "medium:covers-text",
+     "medium:covers-text",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:palette-drift",
+     "low:timing-range",
+     "low:uniform-stagger"
+    ],
+    "ms": 34.5
+   },
+   "after": {
+    "score": 58,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 100,
+     "choreography": 97.2,
+     "composition": 100,
+     "readability": 55.2,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 90.4,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 0,
+     "choreography": 2.8000000000000003,
+     "composition": 0,
+     "readability": 44.8,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 9.6,
+     "music": 0
+    },
+    "issues": [
+     "medium:text-collision",
+     "medium:covers-text",
+     "medium:covers-text",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:palette-drift",
+     "low:timing-range",
+     "low:uniform-stagger"
+    ],
+    "ms": 34.5
+   }
+  },
+  "wallMs": 54323,
+  "timedOut": false,
+  "turns": 4,
+  "costUsd": 0.1196131,
+  "durationMs": 53510,
+  "usage": {
+   "input": 145205,
+   "cached": 135991,
+   "output": 6917
+  },
+  "errors": [],
+  "toolCalls": 3,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the 12-second scene as a single flat-illustration piece on a cream background. I checked it with one contact sheet, but I didn't run the critic and haven't watched it play in real time.\n\n- **Beat 1, 0–4s:** nine sticky notes (yellow, pink, mint, blue, orange) pop in one after another with a Back Out ease. Each carries a weak password such as \"hunter2\" or \"P@ssw0rd\". They sit in a messy pile and keep jittering anxiously, using a rotation wiggle.\n- **Beat 2, 3.6–7.5s:** the teal **shield** with a keyhole springs up over the pile while the notes are still jittering, so there is no cut. The notes then get sucked into it one by one, shrinking as they go. The shield pulses slightly with each gulp.\n- **Beat 3, 7.6–12s:** a mint **glow** fades in behind the shield and pulses. The keyhole fades out and a white **check** draws on inside the shield. The headline \"One key. Every login.\" rises in with an Expo Out ease and holds to the end.\n\nThe contact sheet shows the pile, the shield over it, the check, and the headline with no leftover notes at the end.\n\nI can make the suck-in more dramatic with curved paths, add sound effects, or save an alternate version with a bouncier, more playful feel."
+ },
+ "metrics": {
+  "layers": 36,
+  "drawableLayers": 25,
+  "layerTypes": {
+   "ellipse": 2,
+   "group": 11,
+   "rect": 10,
+   "text": 10,
+   "path": 3
+  },
+  "groups": 11,
+  "animatedLayers": 14,
+  "keys": 74,
+  "segments": 40,
+  "easesUsed": {
+   "Cubic Out": 1,
+   "Sine In Out": 3,
+   "Cubic In": 18,
+   "Back Out": 9,
+   "Spring 0.5": 1,
+   "Quad Out": 1,
+   "Quad In Out": 3,
+   "Quad In": 1,
+   "Expo Out": 3
+  },
+  "distinctEases": 9,
+  "easeFamilies": 6,
+  "overshootSegments": 10,
+  "keyedOvershoots": 0,
+  "springSegments": 1,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 9,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 3,
+  "gradientLayers": 1,
+  "paletteSize": 14,
+  "palette": [
+   "#7fe8d8",
+   "#ffd95a",
+   "#5a4300",
+   "#ff9db5",
+   "#6b1230",
+   "#9be8c4",
+   "#0f4a33",
+   "#9fd2ff",
+   "#103a66",
+   "#ffb566",
+   "#2bb5a0",
+   "#3ccdb7",
+   "#ffffff",
+   "#fff4e0"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.793,
+  "firstMotion": 0.267,
+  "lastMotion": 11.467,
+  "endHold": 0.533,
+  "longestHold": 1.139,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0.134,
+  "textOverlapPairs": {
+   "n1t × n2t": 0.134
+  },
+  "partialOverlapTime": 10.921,
+  "exits": 2,
+  "beats": 7,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.031,
+  "midLuma": 0.949,
+  "toolErrors": 0,
+  "toolCalls": 3
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "3 beats",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "headline present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 sticky notes (rects) in beat 1",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "jitter/anxious motion (wiggle expression or many small keys)",
+    "type": "jitter",
+    "pass": true
+   },
+   {
+    "text": "shield/vault as a custom path",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "uses most of the 12s (animated coverage ≥70%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "notes converge (moving toward one point)",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "transitions between beats are continuous",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 8
+ },
+ "video": null
+}

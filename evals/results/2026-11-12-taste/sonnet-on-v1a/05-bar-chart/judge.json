@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 8,
+  "style_match": 7,
+  "timing_easing": 6,
+  "composition": 7,
+  "richness": 5,
+  "polish": 6
+ },
+ "overall": 6.5,
+ "critique": [
+  "All motion ends by 3.3s, leaving a 2.7s dead hold (44% of the comp). The Q4 'pop' is undercut by a 0.5s grey-to-orange fill crossfade that passes through a muddy mauve (visible at 2.73s), so the highlight lands as a smear instead of a hit.",
+  "Re-pace and sharpen the payoff. Spread the bar stagger across roughly 1.2–3.8s. Grow Q4 directly in the accent color, or snap it to accent on the frame it lands, and pair that with the 104% overshoot plus a count-up on the value labels. Leave a ~1.2s end hold."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0648678,
+ "ms": 16163,
+ "raw": "```json\n{\"brief_fit\": 8, \"style_match\": 7, \"timing_easing\": 6, \"composition\": 7, \"richness\": 5, \"polish\": 6,\n \"critique\": [\"All motion ends by 3.3s, leaving a 2.7s dead hold (44% of the comp). The Q4 'pop' is undercut by a 0.5s grey-to-orange fill crossfade that passes through a muddy mauve (visible at 2.73s), so the highlight lands as a smear instead of a hit.\", \"Re-pace and sharpen the payoff. Spread the bar stagger across roughly 1.2–3.8s. Grow Q4 directly in the accent color, or snap it to accent on the frame it lands, and pair that with the 104% overshoot plus a count-up on the value labels. Leave a ~1.2s end hold.\"]}\n```"
+}

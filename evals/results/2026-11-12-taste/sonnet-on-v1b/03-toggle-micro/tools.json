@@ -1,0 +1,204 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 980,
+  "ok": true,
+  "ms": 277,
+  "editorMs": 6,
+  "input": {
+   "comp": {
+    "background": "#f2f2f7",
+    "duration": 2,
+    "fps": 60
+   },
+   "layers": [
+    {
+     "key": "track",
+     "name": "Track",
+     "type": "rect",
+     "x": 240,
+     "y": 220,
+     "w": 320,
+     "h": 160,
+     "radius": 80,
+     "fill": "#c7c7cc",
+     "animate": {
+      "fill": [
+       {
+        "t": 0.4,
+        "v": "#c7c7cc",
+        "ease": "Easy Ease"
+       },
+       {
+        "t": 0.8,
+        "v": "#34c759"
+       }
+      ]
+     }
+    },
+    {
+     "key": "knob",
+     "name": "Knob",
+     "type": "group",
+     "x": 255,
+     "y": 235,
+     "w": 130,
+     "h": 130,
+     "animate": {
+      "position": [
+       {
+        "t": 0.4,
+        "v": [
+         320,
+         300
+        ],
+        "ease": "Quart Out"
+       },
+       {
+        "t": 0.8,
+        "v": [
+         490,
+         300
+        ],
+        "ease": "Easy Ease"
+       },
+       {
+        "t": 1.2,
+        "v": [
+         480,
+         300
+        ]
+       }
+      ],
+      "scale": [
+       {
+        "t": 0.4,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Quad Out"
+       },
+       {
+        "t": 0.55,
+        "v": [
+         124,
+         88
+        ],
+        "ease": "Easy Ease"
+       },
+       {
+        "t": 0.8,
+        "v": [
+         92,
+         108
+        ],
+        "ease": "Easy Ease"
+       },
+       {
+        "t": 1,
+        "v": [
+         102,
+         98
+        ],
+        "ease": "Easy Ease"
+       },
+       {
+        "t": 1.2,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ]
+     },
+     "children": [
+      {
+       "key": "knob-disc",
+       "name": "Knob Disc",
+       "type": "ellipse",
+       "x": 0,
+       "y": 0,
+       "w": 130,
+       "h": 130,
+       "fill": "#ffffff"
+      },
+      {
+       "key": "check",
+       "name": "Checkmark",
+       "type": "path",
+       "d": "M38 68 L57 86 L93 46",
+       "x": 0,
+       "y": 0,
+       "w": 130,
+       "h": 130,
+       "stroke": "#34c759",
+       "strokeWidth": 10,
+       "drawOn": {
+        "t": 0.75,
+        "duration": 0.3,
+        "ease": "Cubic Out"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 5 keyframe tracks; animation ends 1.2s\",\"ids\":{\"track\":\"l_03jm2\",\"knob-disc\":\"l_03jm4\",\"check\":\"l_03jm5\",\"knob\":\"l_03jm3\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 254,
+  "editorMs": 117,
+  "input": {
+   "times": [
+    0,
+    0.4,
+    0.55,
+    0.7,
+    0.85,
+    1.2
+   ],
+   "cell": 260
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 0.4s, 0.55s, 0.7s, 0.85s, 1.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/cda26e6a-836e-4a1a-8877-1e67f0abef0d/tool-results/mcp-motion-blob-1794512516677-f3v87q.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 110,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "props": {
+    "fill": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 38,
+  "ok": true,
+  "ms": 219,
+  "editorMs": 56,
+  "input": {
+   "times": [
+    0,
+    0.55,
+    0.85,
+    1.2
+   ],
+   "cell": 260
+  },
+  "result": "4 frames left→right, top→bottom at 0s, 0.55s, 0.85s, 1.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/cda26e6a-836e-4a1a-8877-1e67f0abef0d/tool-results/mcp-motion-blob-1794512518811-yoyzid.jpg]"
+ }
+]

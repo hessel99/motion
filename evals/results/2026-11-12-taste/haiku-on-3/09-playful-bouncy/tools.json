@@ -1,0 +1,111 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 263,
+  "ok": true,
+  "ms": 34,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Playful bouncy kids app intro \"Boop!\": colorful candy shapes (circles, stars, rounded squares) drop in with squash and stretch, jostle, then letters B-o-o-p-! hop in one by one like a trampoline, elastic joyful, idle wiggle at end."
+  },
+  "result": "# Example: Playful logo sting, the dot drops in and lands (make my logo move)\n> tags: logo, sting, playful, bouncy, fun, kids, app, mark, wordmark, drop, land, squash, bounce, simple, make my logo move\n\n## Brief\n\"Make my logo move: a round orange mark and the word 'pip'. Fun and friendly, about 3 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"duration\": 3, \"backgrou…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 10441,
+  "ok": true,
+  "ms": 32,
+  "editorMs": 8,
+  "input": "{\"comp\":{\"width\":1080,\"height\":1080,\"duration\":5,\"fps\":60,\"background\":\"#FFF4E0\",\"name\":\"Boop! intro\"},\"layers\":[{\"key\":\"candy-pink-circle\",\"type\":\"ellipse\",\"x\":60,\"y\":140,\"w\":180,\"h\":180,\"fill\":\"#FF4D8D\",\"animate\":{\"position\":[{\"t\":0,\"v\":[150,-120],\"ease\":\"Quad In\"},{\"t\":0.42,\"v\":[150,230],\"ease\":\"Quad Out\"},{\"t\":0.6,\"v\":[136,190],\"ease\":\"Quad In\"},{\"t\":0.8,\"v\":[144,230],\"ease\":\"Quad Out\"},{\"t\":1,\"v\":[150,230],\"ease\":\"Quad In Out\"}],\"scale\":[{\"t\":0,\"v\":[80,125],\"ease\":\"Quad In\"},{\"t\":0.42,\"v\":[130,74],\"ease\":\"spring Bouncy\"},{\"t\":0.6,\"v\":[92,110],\"ease\":\"spring Bouncy\"},{\"t\":0.8,\"v\":[104,96],\"ease\":\"spring Bouncy\"},{\"t\":1,\"v\":[100,100]}],\"rotation\":[{\"t\":0,\"v\":-40,\"ease\":\"Quad Out\"},{\"t\":0.42,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.6,\"v\":14,\"ease\":\"Quad Out\"},{\"t\":0.9,\"v\":-6,\"ease\":\"Quad In Out\"},{\"t\":1.15,\"v\":0}]},\"expr\":{\"rotation\":\"value + 4*Math.sin((time-3)*2*Math.PI/1.4+0)*clamp((time-3)/0.3,0,1)\"}},{\"key\":\"candy-yellow-star\",\"type\":\"star\",\"points\":5,\"inner\":0.5,\"x\":845,\"y\":115,\"w\":170,\"h\":170,\"fill\":\"#FFC93C\",\"animate\":{\"position\":[{\"t\":0.08,\"v\":[930,-120],\"ease\":\"Quad In\"},{\"t\":0.5,\"v\":[930,200],\"ease\":\"Quad Out\"},{\"t\":0.68,\"v\":[942,160],\"ease\":\"Quad In\"},{\"t\":0.88,\"v\":[918,200],\"ease\":\"Quad Out\"},{\"t\":1.08,\"v\":[930,200],\"ease\":\"Quad In Out\"}],\"scale\":[{\"t\":0.08,\"v\":[80,125],\"ease\":\"Quad In\"},{\"t\":0.5,\"v\":[130,74],\"ease\":\"spring Bouncy\"},{\"t\":0.68,\"v\":[92,110],\"ease\":\"spring Bouncy\"},{\"t\":0.88,\"v\":[104,96],\"ease\":\"spring Bouncy\"},{\"t\":1.08,\"v\":[100,100]}],\"rotation\":[{\"t\":0.08,\"v\":40,\"ease\":\"Quad Out\"},{\"t\":0.5,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.68,\"v\":-12,\"ease\":\"Quad Out\"},{\"t\":0.95,\"v\":6,\"ease\":\"Quad In Out\"},{\"t\":1.2,\"v\":0}]},\"expr\":{\"rotation\":\"value + 4*Math.sin((time-3)*2*Math.PI/1.4+0.5)*clamp((time-3)/0.3,0,1)\"}},{\"key\":\"candy-teal-squircle\",\"type\":\"rect\",\"radius\":36,\"x\":825,\"y\":785,\"w\":150,\"h\":150,\"fill\":\"#2EC4B6\",\"animate\":{\"position\":[{\"t\":0.16,\"v\":[900,-120],\"ease\":\"Quad In\"},{\"t\":0.58,\"v\":[900,860],\"ease\":\"Quad Out\"},{\"t\":0.76,\"v\":[890,820],\"ease\":\"Quad In\"},{\"t\":0.96,\"v\":[908,860],\"ease\":\"Quad Out\"},{\"t\":1.16,\"v\":[900,860],\"ease\":\"Quad In Out\"}],\"scale\":[{\"t\":0.16,\"v\":[80,125],\"ease\":\"Quad In\"},{\"t\":0.58,\"v\":[130,74],\"ease\":\"spring Bouncy\"},{\"t\":0.76,\"v\":[92,110],\"ease\":\"spring Bouncy\"},{\"t\":0.96,\"v\":[104,96],\"ease\":\"spring Bouncy\"},{\"t\":1.16,\"v\":[100,100]}],\"rotation\":[{\"t\":0.16,\"v\":-30,\"ease\":\"Quad Out\"},{\"t\":0.58,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.76,\"v\":10,\"ease\":\"Quad Out\"},{\"t\":1.05,\"v\":-4,\"ease\":\"Quad In Out\"},{\"t\":1.3,\"v\":0}]},\"expr\":{\"rotation\":\"value + 4*Math.sin((time-3)*2*Math.PI/1.4+1)*clamp((time-3)/0.3,0,1)\"}},{\"key\":\"candy-violet-circle\",\"type\":\"ellipse\",\"x\":200,\"y\":800,\"w\":120,\"h\":120,\"fill\":\"#7B5CFF\",\"animate\":{\"position\":[{\"t\":0.22,\"v\":[260,-120],\"ease\":\"Quad In\"},{\"t\":0.64,\"v\":[260,860],\"ease\":\"Quad Out\"},{\"t\":0.82,\"v\":[272,820],\"ease\":\"Quad In\"},{\"t\":1.02,\"v\":[252,860],\"ease\":\"Quad Out\"},{\"t\":1.22,\"v\":[260,860],\"ease\":\"Quad In Out\"}],\"scale\":[{\"t\":0.22,\"v\":[80,125],\"ease\":\"Quad In\"},{\"t\":0.64,\"v\":[130,74],\"ease\":\"sp…",
+  "result": "{\"summary\":\"13 created, 0 updated, 40 keyframe tracks; animation ends 2.6s\",\"ids\":{\"candy-pink-circle\":\"l_03jm2\",\"candy-yellow-star\":\"l_03jm3\",\"candy-teal-squircle\":\"l_03jm4\",\"candy-violet-circle\":\"l_03jm5\",\"candy-orange-star\":\"l_03jm6\",\"candy-green-squircle\":\"l_03jm7\",\"candy-pale-pink-circle\":\"l_03jm8\",\"candy-sky-star\":\"l_03jm9\",\"letter-B\":\"l_03jma\",\"letter-o1\":\"l_03jmb\",\"letter-o2\":\"l_03jmc\",\"le…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 278,
+  "editorMs": 240,
+  "input": {
+   "times": [
+    0.3,
+    0.8,
+    1.3,
+    1.9,
+    2.4,
+    3.5,
+    4.5
+   ]
+  },
+  "result": "7 frames left→right, top→bottom at 0.3s, 0.8s, 1.3s, 1.9s, 2.4s, 3.5s, 4.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/5eba6c18-611e-4b4c-96f1-d17e9b558251/tool-results/mcp-motion-blob-1794514716653-9z3ely.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 107,
+  "editorMs": 41,
+  "input": {},
+  "result": "score 88/100 (readability 79, brand 90)\n1. [medium] 10 different accent colors (#ff4d8d #ffc93c #2ec4b6 #7b5cff #ff8a3d #5bd66b…): keep 1 accent + 1-2 support colors\n2. [low] \"letter-o1\" has 1.88:1 contrast against #fff4e0 behind it (needs 3:1)\n   → update_layer {\"id\":\"l_03jmb\",\"props\":{\"fill\":\"#111111\"}}\n3. [low] \"letter-o2\" has 2.9:1 contrast against #fff4e0 behind it (needs 3:1)\n   → update_lay…"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmb",
+   "props": {
+    "fill": "#E8590C"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmc",
+   "props": {
+    "fill": "#0E8C7A"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jme",
+   "props": {
+    "fill": "#E03A12"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 160,
+  "editorMs": 135,
+  "input": {
+   "times": [
+    1,
+    1.9,
+    2.8,
+    3.3,
+    3.8,
+    4.4
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 1s, 1.9s, 2.8s, 3.3s, 3.8s, 4.4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/5eba6c18-611e-4b4c-96f1-d17e9b558251/tool-results/mcp-motion-blob-1794514719515-oatl1w.jpg]"
+ }
+]

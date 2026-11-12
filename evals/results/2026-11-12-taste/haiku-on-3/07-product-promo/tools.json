@@ -1,0 +1,95 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 390,
+  "ok": true,
+  "ms": 57,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Title sequence for product launch \"Pulse 2\" wireless earbuds. Quick flashes of three feature words (\"40h battery\", \"Spatial audio\", \"Pure silence\") on beats with energetic transitions, then \"PULSE 2\" slams in big with a shockwave ring, then \"Available now\" with a button-like pill. Dark background, electric orange accent. Fast, confident, 120 BPM."
+  },
+  "result": "# Example: Kinetic type cut to music (120 BPM): words on downbeats, not on every beat\n> tags: music, song, beat, bpm, rhythm, audio, kinetic, type, words, lyric, drop, sync, energetic, promo, cut to the beat\n\n## Brief\n\"Kinetic type for our launch track (120 BPM, 4/4): MOVE / FAST / BREAK / THINGS, then the drop with the logo word NOW. 8 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"get_audio_analysis\",…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 14,
+  "ok": true,
+  "ms": 44,
+  "editorMs": 1,
+  "input": {
+   "deep": false
+  },
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":10,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":0,\"layers\":[]}"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3314,
+  "ok": true,
+  "ms": 163,
+  "editorMs": 5,
+  "input": "{\"comp\":{\"background\":\"#0B0B0D\",\"duration\":10},\"markers\":[{\"t\":0,\"label\":\"Word 1\"},{\"t\":1,\"label\":\"Word 2\"},{\"t\":2,\"label\":\"Word 3\"},{\"t\":3.5,\"label\":\"Slam PULSE 2\"},{\"t\":6,\"label\":\"Available now\"}],\"layers\":[{\"key\":\"w1\",\"name\":\"Word 1 - 40h battery\",\"type\":\"text\",\"text\":{\"content\":\"40h battery\",\"fontSize\":180,\"fontWeight\":900,\"align\":\"center\",\"tracking\":-6},\"center\":[960,540],\"fill\":\"#F4F4F5\",\"animate\":{\"scale\":[{\"t\":0,\"v\":125,\"ease\":\"Expo Out\"},{\"t\":0.25,\"v\":100}],\"opacity\":[{\"t\":0,\"v\":0,\"interp\":\"hold\"},{\"t\":0.02,\"v\":100,\"ease\":\"Linear\"},{\"t\":0.9,\"v\":100,\"ease\":\"Ease In\"},{\"t\":1,\"v\":0}]}},{\"key\":\"w2\",\"name\":\"Word 2 - Spatial audio\",\"type\":\"text\",\"text\":{\"content\":\"Spatial audio\",\"fontSize\":180,\"fontWeight\":900,\"align\":\"center\",\"tracking\":-6},\"center\":[960,540],\"fill\":\"#F4F4F5\",\"animate\":{\"position\":[{\"t\":1,\"v\":[1360,540],\"ease\":\"Expo Out\"},{\"t\":1.25,\"v\":[960,540]}],\"opacity\":[{\"t\":1,\"v\":0,\"interp\":\"hold\"},{\"t\":1.02,\"v\":100,\"ease\":\"Linear\"},{\"t\":1.9,\"v\":100,\"ease\":\"Ease In\"},{\"t\":2,\"v\":0}]}},{\"key\":\"w3\",\"name\":\"Word 3 - Pure silence\",\"type\":\"text\",\"text\":{\"content\":\"Pure silence\",\"fontSize\":180,\"fontWeight\":900,\"align\":\"center\",\"tracking\":-6},\"center\":[960,540],\"fill\":\"#F4F4F5\",\"animate\":{\"rotation\":[{\"t\":2,\"v\":-8,\"ease\":\"spring:0.4\"},{\"t\":2.4,\"v\":0}],\"scale\":[{\"t\":2,\"v\":115,\"ease\":\"Expo Out\"},{\"t\":2.3,\"v\":100}],\"opacity\":[{\"t\":2,\"v\":0,\"interp\":\"hold\"},{\"t\":2.02,\"v\":100,\"ease\":\"Linear\"},{\"t\":3.3,\"v\":100,\"ease\":\"Ease In\"},{\"t\":3.5,\"v\":0}]}},{\"key\":\"flash\",\"name\":\"Orange flash\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":1920,\"h\":1080,\"fill\":\"#FF5A1F\",\"animate\":{\"opacity\":[{\"t\":3.5,\"v\":0,\"interp\":\"hold\"},{\"t\":3.52,\"v\":85,\"ease\":\"Expo Out\"},{\"t\":3.95,\"v\":0}]}},{\"key\":\"ring1\",\"name\":\"Shockwave ring\",\"type\":\"ellipse\",\"x\":760,\"y\":340,\"w\":400,\"h\":400,\"fill\":[0,0,0,0],\"stroke\":\"#FF5A1F\",\"strokeWidth\":14,\"center\":[960,540],\"animate\":{\"scale\":[{\"t\":3.5,\"v\":5,\"ease\":\"Expo Out\"},{\"t\":4.3,\"v\":260}],\"opacity\":[{\"t\":3.5,\"v\":100,\"ease\":\"Ease Out\"},{\"t\":4.3,\"v\":0}]}},{\"key\":\"ring2\",\"name\":\"Shockwave ring 2\",\"type\":\"ellipse\",\"x\":760,\"y\":340,\"w\":400,\"h\":400,\"fill\":[0,0,0,0],\"stroke\":\"#FF5A1F\",\"strokeWidth\":5,\"center\":[960,540],\"animate\":{\"scale\":[{\"t\":3.62,\"v\":5,\"ease\":\"Expo Out\"},{\"t\":4.6,\"v\":330}],\"opacity\":[{\"t\":3.62,\"v\":70,\"ease\":\"Ease Out\"},{\"t\":4.6,\"v\":0}]}},{\"key\":\"pulse\",\"name\":\"PULSE 2 title\",\"type\":\"text\",\"text\":{\"content\":\"PULSE 2\",\"fontSize\":300,\"fontWeight\":900,\"align\":\"center\",\"tracking\":-12},\"center\":[960,540],\"fill\":\"#F4F4F5\",\"animate\":{\"scale\":[{\"t\":3.5,\"v\":170,\"ease\":\"Expo Out\"},{\"t\":3.9,\"v\":100}],\"opacity\":[{\"t\":3.5,\"v\":0,\"interp\":\"hold\"},{\"t\":3.52,\"v\":100}],\"position\":[{\"t\":6,\"v\":[960,540],\"ease\":\"Expo In Out\"},{\"t\":6.6,\"v\":[960,380]}]}},{\"key\":\"pill\",\"name\":\"Available now pill\",\"type\":\"rect\",\"x\":700,\"y\":700,\"w\":520,\"h\":130,\"radius\":65,\"fill\":\"#FF5A1F\",\"animate\":{\"scale\":[{\"t\":6,\"v\":0,\"ease\":\"spring:0.45\"},{\"t\":6.6,\"v\":100,\"ease\":\"Cubic In Out\"},{\"t\":8.2,\"v\":100,\"ease\":\"Cubic In Out\"},{\"t\":8.35,\"v\":96,\"ease\":\"Cubic Out\"},{\"t\":8.6,\"v\":100}],\"opacity\":[{\"t\":6…",
+  "result": "{\"summary\":\"9 created, 0 updated, 18 keyframe tracks; animation ends 8.6s\",\"ids\":{\"w1\":\"l_03jm2\",\"w2\":\"l_03jm3\",\"w3\":\"l_03jm4\",\"flash\":\"l_03jm5\",\"ring1\":\"l_03jm6\",\"ring2\":\"l_03jm7\",\"pulse\":\"l_03jm8\",\"pill\":\"l_03jm9\",\"pillText\":\"l_03jma\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 34,
+  "editorMs": 15,
+  "input": {},
+  "result": "score 85/100 (timing 96, easing 97, choreography 94, richness 84)\n1. [medium] 8 elements and 11 moves for 10s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch\n   → secondary_motion {\"ids\":[\"l_03jm8\"],\"overshoot\":0.1,\"segments\":\"all\"}\n2. [low] 3 text layers cascade 1 s apart (2 s in total): items overlap, 0.05-0.12 s apart, the wh…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 221,
+  "editorMs": 190,
+  "input": {
+   "times": [
+    0.3,
+    1.4,
+    2.4,
+    3.6,
+    4.2,
+    5.5,
+    7,
+    9
+   ]
+  },
+  "result": "8 frames left→right, top→bottom at 0.3s, 1.4s, 2.4s, 3.6s, 4.2s, 5.5s, 7s, 9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/0c67c508-60ae-437c-9da9-c75032e743fc/tool-results/mcp-motion-blob-1794514679030-1jq6zd.jpg]"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 48,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm7"
+   ],
+   "pivot": 3.62,
+   "scale": 0.5
+  },
+  "result": "retimed 1 layers; animation now ends at 4.11s"
+ },
+ {
+  "name": "secondary_motion",
+  "argsBytes": 54,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm8"
+   ],
+   "overshoot": 0.08,
+   "props": [
+    "scale"
+   ]
+  },
+  "result": "added overshoot 8% to PULSE 2 title (1 moves)"
+ }
+]

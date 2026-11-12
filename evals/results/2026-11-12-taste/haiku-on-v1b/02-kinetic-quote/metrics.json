@@ -1,0 +1,209 @@
+{
+ "run": {
+  "id": "02-kinetic-quote",
+  "name": "02-kinetic-quote",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 62,
+    "fixes": 3,
+    "timedOut": false
+   },
+   {
+    "round": 2,
+    "scoreBefore": 63,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 62,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 23.199999999999992,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 76.8,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:read-hold",
+     "medium:read-hold",
+     "medium:read-hold",
+     "medium:read-hold"
+    ],
+    "ms": 3.9
+   },
+   "after": {
+    "score": 71,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 44.8,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 55.2,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:read-hold",
+     "medium:read-hold"
+    ],
+    "ms": 3
+   }
+  },
+  "wallMs": 109844,
+  "timedOut": false,
+  "turns": 34,
+  "costUsd": 0.08334546000000001,
+  "durationMs": 104616,
+  "usage": {
+   "input": 797738,
+   "cached": 771973,
+   "output": 15404
+  },
+  "errors": [],
+  "toolCalls": 31,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The kinetic quote is built in the **Main** comp (1080×1080, 8 s, dark #0E0E0E background). It runs in four phrases with a small attribution at the end:\n\n- **Phrase 1, \"Design is not just\"** (0–2 s): off-white, words slide up one by one, then the whole line lifts out.\n- **Phrase 2, \"what it looks like.\"** (1.95–3.75 s): grey, slides in as phrase 1 leaves, then drops out downward.\n- **Phrase 3, \"Design is\"** (3.7–4.75 s): drops in word by word from above, then fades up and out.\n- **Phrase 4, \"how it works.\"** (4.7–6.9 s): the payoff. It's the largest line (124 px against 104 px for the others), heavy weight, red #FF3D2E, each word springs in, and a red underline wipes under it.\n- **Attribution, \"— Steve Jobs\"** (6.85–7.35 s): 28 px grey, fades and rises into place as the last element.\n\nEasing is Expo Out for entrances and Expo In for exits, with a spring on the payoff. The phrases hand over one to the next rather than stacking.\n\nTwo things to know:\n- The critic scores this 62/100. Its main complaint is readability: at 8 s, the holds on phrases 1–3 and the attribution are a bit short of its reading-time targets. Extending the comp to 10 s would fix that, and I can do it if you'd like.\n- I animate per word for the entrances, but the exits are whole-line, not per word. Per-word exits would need each word split into its own layer.\n\nWant me to lengthen the piece, or try a per-letter version of the payoff?\nScore rose only from 62 to 63: the phrase holds are still short of the critic's reading-time targets, and the suggested offsets would make phrases overlap the next one, so I stopped here. Extending the comp to 10 s would fix it.\nScore is now 71/100; I applied the attribution fix and skipped the two phrase retimes because they would make \"Design is\" and \"what it looks like\" overlap the next phrase, so those two readability flags remain."
+ },
+ "metrics": {
+  "layers": 6,
+  "drawableLayers": 6,
+  "layerTypes": {
+   "text": 5,
+   "rect": 1
+  },
+  "groups": 0,
+  "animatedLayers": 6,
+  "keys": 28,
+  "segments": 12,
+  "easesUsed": {
+   "Expo In": 6,
+   "Cubic In": 2,
+   "Expo Out": 1,
+   "Cubic In Out": 1,
+   "Ease Out": 2
+  },
+  "distinctEases": 5,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 4,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#f5f5f0",
+   "#8a8a8a",
+   "#ff3d2e",
+   "#0e0e0e"
+  ],
+  "keyCoverage": 0.603,
+  "visualActivity": 0.318,
+  "firstMotion": 1.867,
+  "lastMotion": 7.467,
+  "endHold": 0.533,
+  "longestHold": 1.34,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 4,
+  "beats": 6,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.001,
+  "midLuma": 0.055,
+  "toolErrors": 0,
+  "toolCalls": 31
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "quote text present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "attribution present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "per-letter or per-word text animation",
+    "type": "textAnimatorMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 text layers (phrases)",
+    "type": "textLayersMin",
+    "pass": true
+   },
+   {
+    "text": "phrases exit/transition (some text animates out)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "emphasis: one phrase larger or bolder than the rest",
+    "type": "textEmphasis",
+    "pass": true
+   },
+   {
+    "text": "3–4 beats over the 8s",
+    "type": "beatsMin",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

@@ -1,0 +1,187 @@
+{
+ "run": {
+  "id": "03-toggle-micro",
+  "name": "03-toggle-micro",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 3.9
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 3.9
+   }
+  },
+  "wallMs": 38208,
+  "timedOut": false,
+  "turns": 5,
+  "costUsd": 0.014909570000000002,
+  "durationMs": 37330,
+  "usage": {
+   "input": 151196,
+   "cached": 97887,
+   "output": 6539
+  },
+  "errors": [],
+  "toolCalls": 4,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The checkmark shows in the off state, which it shouldn't. Its trim has no key before 0.55s, so it sits fully drawn from the start. I'll add a hold at 0 and re-check.\nI built the toggle micro-interaction in the **Toggle** group (track, knob, checkmark) on a light `#f2f2f7` background, and it's checked across the timeline.\n\n- **Off state:** grey track `#c7c7cc`, knob on the left, no checkmark.\n- **0.4s:** the knob starts sliding and the track starts fading from grey to green `#34c759`.\n- **Knob motion:** a Back Out slide with a small overshoot past the end, a horizontal stretch (116%) mid-travel and a squash on arrival, back to 100% by about 0.74s.\n- **Checkmark:** draws on inside the knob from 0.55s to 0.8s.\n- **Settled:** green track, checkmark drawn, knob at rest by 0.8s, held to the 2s end.\n\nThe comp is 2s, so the end holds for about 0.8s. A first pass showed the checkmark in the off state; I fixed it by holding its draw at 0 until 0.55s.\n\nI can make the squash stronger, speed up the crossfade, or add a reverse (on to off) toggle."
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 3,
+  "layerTypes": {
+   "group": 2,
+   "rect": 1,
+   "ellipse": 1,
+   "path": 1
+  },
+  "groups": 2,
+  "animatedLayers": 3,
+  "keys": 11,
+  "segments": 6,
+  "easesUsed": {
+   "Ease In Out": 4,
+   "Back Out": 1,
+   "Ease Out": 1
+  },
+  "distinctEases": 3,
+  "easeFamilies": 2,
+  "overshootSegments": 1,
+  "keyedOvershoots": 1,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#34c759",
+   "#c7c7cc",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.2,
+  "visualActivity": 0.168,
+  "firstMotion": 0.4,
+  "lastMotion": 0.733,
+  "endHold": 1.267,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.005,
+  "midLuma": 0.947,
+  "toolErrors": 0,
+  "toolCalls": 4
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "track + knob layers",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "knob position animated",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "track color changes grey → green (fill keys or crossfade)",
+    "type": "colorChange",
+    "pass": true
+   },
+   {
+    "text": "overshoot on the knob (Back/spring)",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch (non-uniform scale or size)",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "checkmark (path) appears",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "settled by ~1.2s (motion ends ≤1.5s)",
+    "type": "motionEndsBy",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

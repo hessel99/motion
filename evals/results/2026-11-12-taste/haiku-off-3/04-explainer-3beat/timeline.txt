@@ -1,0 +1,100 @@
+- Note 1 (coral) [group] #ffffff a0
+  - Body [rect] box 960,430,0,0 #ff7f50
+  - Pin [ellipse] box 960,430,0,0 #ffffff
+  - Line 1 [rect] box 960,430,0,0 #22313f
+  - Line 2 [rect] box 960,430,0,0 #22313f
+  - Line 3 [rect] box 960,430,0,0 #22313f
+- Note 2 (amber) [group] #ffffff a0
+  - Body [rect] box 960,430,0,0 #ffbf69
+  - Pin [ellipse] box 960,430,0,0 #ffffff
+  - Line 1 [rect] box 960,430,0,0 #22313f
+  - Line 2 [rect] box 960,430,0,0 #22313f
+  - Line 3 [rect] box 960,430,0,0 #22313f
+- Note 3 (coral) [group] #ffffff a0
+  - Body [rect] box 943,383,34,24 #ff7f50
+  - Pin [ellipse] box 947,387,4,4 #ffffff
+  - Line 1 [rect] box 947,392,26,4 #22313f
+  - Line 2 [rect] box 947,397,19,3 #22313f
+  - Line 3 [rect] box 948,401,14,3 #22313f
+- Note 4 (amber) [group] #ffffff a0
+  - Body [rect] box 825,417,65,50 #ffbf69
+  - Pin [ellipse] box 836,424,7,7 #ffffff
+  - Line 1 [rect] box 835,435,46,12 #22313f
+  - Line 2 [rect] box 833,442,34,9 #22313f
+  - Line 3 [rect] box 832,449,25,8 #22313f
+- Note 5 (coral) [group] #ffffff a0
+  - Body [rect] box 1047,459,88,67 #ff7f50
+  - Pin [ellipse] box 1057,478,9,9 #ffffff
+  - Line 1 [rect] box 1060,483,62,16 #22313f
+  - Line 2 [rect] box 1062,495,45,13 #22313f
+  - Line 3 [rect] box 1063,507,33,11 #22313f
+- Note 6 (amber) [group] #ffffff a0
+  - Body [rect] box 856,273,99,71 #ffbf69
+  - Pin [ellipse] box 869,284,10,10 #ffffff
+  - Line 1 [rect] box 868,302,74,11 #22313f
+  - Line 2 [rect] box 868,313,54,10 #22313f
+  - Line 3 [rect] box 867,324,39,9 #22313f
+- Note 7 (coral) [group] #ffffff a0
+  - Body [rect] box 992,516,111,81 #ff7f50
+  - Pin [ellipse] box 1004,534,11,12 #ffffff
+  - Line 1 [rect] box 1006,548,83,14 #22313f
+  - Line 2 [rect] box 1007,562,60,12 #22313f
+  - Line 3 [rect] box 1008,576,44,10 #22313f
+- Shield vault [group] #ffffff a0
+  - Glow [ellipse] box 770,240,380,380 gradient(#ffbf69 a0.85→#ffbf69 a0)
+  - Shield body [path] box 840,290,240,280 #2ec4b6
+  - Shield inner [path] box 840,290,240,280 #5fd9ce
+  - Keyhole head [ellipse] box 938,394,44,44 #3d5a80
+  - Keyhole stem [rect] box 949,428,22,52 #3d5a80
+- Headline [text] box 260,740,1400,130 #22313f "One key. Every login." Inter 96px w700
+- Check badge [group] #ffffff a0
+  - Badge disc [ellipse] box 960,640,0,0 #2ec4b6
+  - Check mark [path] box 960,640,0,0 #6b8cff stroke #ffffff 9px
+
+comp 1920x1080 12s @30fps, background #eaf4f4
+"Note 1 (coral)" (group l_03jm2)
+  position: 4s [900,400] ─Sine In Out→ 4.9s [810,475] ─Cubic In→ 5.9s [960,430]
+  position: expr "value + [6*sin(time*31+0)*clamp((4-time)/0.6,0,1), 5*cos(time*27+0)*clamp((4-time)/0.6,0,1)]"
+  scale: 0s 0 ─Back Out→ 0.45s 100 ─Sine In Out→ 4s 100 ─Sine In Out→ 4.9s 55 ─Cubic In→ 5.9s 0
+  rotation: expr "value + 7*sin(time*29+0)*clamp((4-time)/0.6,0,1)"
+"Note 2 (amber)" (group l_03jm8)
+  position: 4.1s [1040,410] ─Sine In Out→ 5s [1140,380] ─Cubic In→ 6s [960,430]
+  position: expr "value + [6*sin(time*31+1)*clamp((4-time)/0.6,0,1), 5*cos(time*27+1)*clamp((4-time)/0.6,0,1)]"
+  scale: 0.15s 0 ─Back Out→ 0.6s 100 ─Sine In Out→ 4.1s 100 ─Sine In Out→ 5s 55 ─Cubic In→ 6s 0
+  rotation: expr "value + 7*sin(time*29+1)*clamp((4-time)/0.6,0,1)"
+"Note 3 (coral)" (group l_03jme)
+  position: 4.2s [960,470] ─Sine In Out→ 5.1s [960,300] ─Cubic In→ 6.1s [960,430]
+  position: expr "value + [6*sin(time*31+2)*clamp((4-time)/0.6,0,1), 5*cos(time*27+2)*clamp((4-time)/0.6,0,1)]"
+  scale: 0.3s 0 ─Back Out→ 0.75s 100 ─Sine In Out→ 4.2s 100 ─Sine In Out→ 5.1s 55 ─Cubic In→ 6.1s 0
+  rotation: expr "value + 7*sin(time*29+2)*clamp((4-time)/0.6,0,1)"
+"Note 4 (amber)" (group l_03jmk)
+  position: 4.3s [860,480] ─Sine In Out→ 5.2s [750,455] ─Cubic In→ 6.2s [960,430]
+  position: expr "value + [6*sin(time*31+3)*clamp((4-time)/0.6,0,1), 5*cos(time*27+3)*clamp((4-time)/0.6,0,1)]"
+  scale: 0.45s 0 ─Back Out→ 0.9s 100 ─Sine In Out→ 4.3s 100 ─Sine In Out→ 5.2s 55 ─Cubic In→ 6.2s 0
+  rotation: expr "value + 7*sin(time*29+3)*clamp((4-time)/0.6,0,1)"
+"Note 5 (coral)" (group l_03jmq)
+  position: 4.4s [1060,500] ─Sine In Out→ 5.3s [1160,525] ─Cubic In→ 6.3s [960,430]
+  position: expr "value + [6*sin(time*31+4)*clamp((4-time)/0.6,0,1), 5*cos(time*27+4)*clamp((4-time)/0.6,0,1)]"
+  scale: 0.6s 0 ─Back Out→ 1.05s 100 ─Sine In Out→ 4.4s 100 ─Sine In Out→ 5.3s 55 ─Cubic In→ 6.3s 0
+  rotation: expr "value + 7*sin(time*29+4)*clamp((4-time)/0.6,0,1)"
+"Note 6 (amber)" (group l_03jmw)
+  position: 4.5s [940,360] ─Sine In Out→ 5.4s [890,275] ─Cubic In→ 6.4s [960,430]
+  position: expr "value + [6*sin(time*31+5)*clamp((4-time)/0.6,0,1), 5*cos(time*27+5)*clamp((4-time)/0.6,0,1)]"
+  scale: 0.75s 0 ─Back Out→ 1.2s 100 ─Sine In Out→ 4.5s 100 ─Sine In Out→ 5.4s 55 ─Cubic In→ 6.4s 0
+  rotation: expr "value + 7*sin(time*29+5)*clamp((4-time)/0.6,0,1)"
+"Note 7 (coral)" (group l_03jm12)
+  position: 4.6s [1000,520] ─Sine In Out→ 5.5s [1060,575] ─Cubic In→ 6.5s [960,430]
+  position: expr "value + [6*sin(time*31+6)*clamp((4-time)/0.6,0,1), 5*cos(time*27+6)*clamp((4-time)/0.6,0,1)]"
+  scale: 0.9s 0 ─Back Out→ 1.35s 100 ─Sine In Out→ 4.6s 100 ─Sine In Out→ 5.5s 55 ─Cubic In→ 6.5s 0
+  rotation: expr "value + 7*sin(time*29+6)*clamp((4-time)/0.6,0,1)"
+"Shield vault" (group l_03jm18)
+  scale: 5.5s 0 ─Back Out→ 6s 100 ─Cubic Out→ 6.6s 100 ─Cubic Out→ 6.75s 106 ─Cubic Out→ 7s 100
+"Glow" (ellipse l_03jm19)
+  opacity: 0s 0 ─Sine In Out→ 6.6s 0 ─Sine In Out→ 7.2s 45 ─Sine In Out→ 7.9s 18 ─Sine In Out→ 8s 18 ─Sine In Out→ 9.2s 55
+"Headline" (text l_03jm1e)
+  text animator: in by word, start 8.2s, 0.6s each, stagger 0.1s, ease Quart Out
+"Check badge" (group l_03jm1f)
+  scale: 8.8s 0 ─Back Out→ 9.2s 100
+"Check mark" (path l_03jm1h)
+  trimStart: 9.1s 0
+  trimEnd: 9.1s 0 ─Cubic In Out→ 9.6s 100

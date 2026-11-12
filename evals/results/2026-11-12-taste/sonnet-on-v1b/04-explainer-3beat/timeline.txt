@@ -1,0 +1,87 @@
+- glow [ellipse] box 610,30,700,700 gradient(#ffd803 a0.8→#ffd803 a0)
+- ring [ellipse] box 790,210,340,340 #000000 a0 stroke #ffd803 8px
+- shield [path] box 810,260,300,340 #8bd3dd stroke #172c66 10px
+- check [path] box 895,330,130,100 #000000 a0 stroke #ffffff 20px
+- n1 [group] #ffffff a0
+  - n1r [rect] box 960,430,0,0 #f582ae
+  - n1t [text] box 960,430,0,0 #172c66 "hunter2" Inter 28px w700
+- n2 [group] #ffffff a0
+  - n2r [rect] box 960,430,0,0 #ffd803
+  - n2t [text] box 960,430,0,0 #172c66 "Pa$$w0rd!" Inter 28px w700
+- n3 [group] #ffffff a0
+  - n3r [rect] box 960,430,0,0 #8bd3dd
+  - n3t [text] box 960,430,0,0 #172c66 "qwerty123" Inter 28px w700
+- n4 [group] #ffffff a0
+  - n4r [rect] box 960,430,0,0 #f582ae
+  - n4t [text] box 960,430,0,0 #172c66 "bank_2019" Inter 28px w700
+- n5 [group] #ffffff a0
+  - n5r [rect] box 960,430,0,0 #ffd803
+  - n5t [text] box 960,430,0,0 #172c66 "mom'sBday" Inter 28px w700
+- n6 [group] #ffffff a0
+  - n6r [rect] box 960,430,0,0 #8bd3dd
+  - n6t [text] box 960,430,0,0 #172c66 "letmein" Inter 28px w700
+- n7 [group] #ffffff a0
+  - n7r [rect] box 960,430,0,0 #ffd803
+  - n7t [text] box 960,430,0,0 #172c66 "Winter#4" Inter 28px w700
+- n8 [group] #ffffff a0
+  - n8r [rect] box 960,430,0,0 #f582ae
+  - n8t [text] box 960,430,0,0 #172c66 "admin1234" Inter 28px w700
+- headline [text] box 260,770,1400,150 #172c66 "One key. Every login." Inter 120px w800
+
+comp 1920x1080 12s @30fps, background #fef6e4
+"glow" (ellipse l_03jm2)
+  position: 6s [960,380]
+  opacity: 6.2s 0 ─Cubic Out→ 7.2s 90
+"ring" (ellipse l_03jm3)
+  scale: 6.8s 100 ─Expo Out→ 7.6s 220
+  opacity: 6.8s 0 ─Ease Out→ 6.85s 80 ─Ease In→ 7.6s 0
+"shield" (path l_03jm4)
+  position: 6s [960,430] ─Cubic In Out→ 6.7s [960,380]
+  scale: 4.4s 100 ─Quad Out→ 4.5s 106 ─Quad In Out→ 4.7s 100 ─Cubic In Out→ 4.9s 108 ─Quad In Out→ 5.2s 100 ─spring Bouncy→ 5.4s 100
+  opacity: 3s 0 ─Quad Out→ 3.7s 35 ─Ease In→ 4.4s 35 ─Quad Out→ 5s 100
+"check" (path l_03jm5)
+  trimStart: 6.9s 0
+  trimEnd: 6.9s 0 ─Cubic Out→ 7.4s 100
+"n1" (group l_03jm6)
+  position: 3.8s [700,360] ─Expo In→ 4.4s [960,430]
+  scale: 0.2s 0 ─Back Out→ 0.8s 100 ─Cubic In Out→ 3.6s 100 ─Quad Out→ 3.8s 112 ─Expo In→ 4.4s 0
+  rotation: 3.8s -12 ─Expo In→ 4.4s -282
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/0.5)"
+"n2" (group l_03jm9)
+  position: 3.86s [880,300] ─Expo In→ 4.46s [960,430]
+  scale: 0.3s 0 ─Back Out→ 0.9s 100 ─Cubic In Out→ 3.66s 100 ─Quad Out→ 3.86s 112 ─Expo In→ 4.46s 0
+  rotation: 3.86s 8 ─Expo In→ 4.46s 278
+  rotation: expr "value - 4*Math.sin(time*2*Math.PI/0.4)"
+"n3" (group l_03jmc)
+  position: 3.92s [1060,330] ─Expo In→ 4.52s [960,430]
+  scale: 0.4s 0 ─Back Out→ 1s 100 ─Cubic In Out→ 3.72s 100 ─Quad Out→ 3.92s 112 ─Expo In→ 4.52s 0
+  rotation: 3.92s -6 ─Expo In→ 4.52s -276
+  rotation: expr "value + 5*Math.sin(time*2*Math.PI/0.6)"
+"n4" (group l_03jmf)
+  position: 3.98s [1230,420] ─Expo In→ 4.58s [960,430]
+  scale: 0.5s 0 ─Back Out→ 1.1s 100 ─Cubic In Out→ 3.78s 100 ─Quad Out→ 3.98s 112 ─Expo In→ 4.58s 0
+  rotation: 3.98s 12 ─Expo In→ 4.58s 282
+  rotation: expr "value - 4*Math.sin(time*2*Math.PI/0.45)"
+"n5" (group l_03jmi)
+  position: 4.04s [1150,560] ─Expo In→ 4.64s [960,430]
+  scale: 0.6s 0 ─Back Out→ 1.2s 100 ─Cubic In Out→ 3.84s 100 ─Quad Out→ 4.04s 112 ─Expo In→ 4.64s 0
+  rotation: 4.04s -10 ─Expo In→ 4.64s -280
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/0.55)"
+"n6" (group l_03jml)
+  position: 4.1s [960,580] ─Expo In→ 4.7s [960,430]
+  scale: 0.7s 0 ─Back Out→ 1.3s 100 ─Cubic In Out→ 3.9s 100 ─Quad Out→ 4.1s 112 ─Expo In→ 4.7s 0
+  rotation: 4.1s 6 ─Expo In→ 4.7s 276
+  rotation: expr "value - 5*Math.sin(time*2*Math.PI/0.5)"
+"n7" (group l_03jmo)
+  position: 4.16s [770,540] ─Expo In→ 4.76s [960,430]
+  scale: 0.8s 0 ─Back Out→ 1.4s 100 ─Cubic In Out→ 3.96s 100 ─Quad Out→ 4.16s 112 ─Expo In→ 4.76s 0
+  rotation: 4.16s -14 ─Expo In→ 4.76s -284
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/0.42)"
+"n8" (group l_03jmr)
+  position: 4.22s [620,470] ─Expo In→ 4.82s [960,430]
+  scale: 0.9s 0 ─Back Out→ 1.5s 100 ─Cubic In Out→ 4.02s 100 ─Quad Out→ 4.22s 112 ─Expo In→ 4.82s 0
+  rotation: 4.22s 9 ─Expo In→ 4.82s 279
+  rotation: expr "value - 4*Math.sin(time*2*Math.PI/0.58)"
+"headline" (text l_03jmu)
+  position: 8s [960,845] ─Cubic Out→ 8.7s [960,795]
+  opacity: 8s 0 ─Cubic Out→ 8.35s 100

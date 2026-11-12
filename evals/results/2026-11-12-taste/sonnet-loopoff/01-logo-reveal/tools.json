@@ -1,0 +1,168 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1183,
+  "ok": true,
+  "ms": 117,
+  "editorMs": 7,
+  "input": {
+   "comp": {
+    "background": "#0B1630",
+    "duration": 4,
+    "fps": 60,
+    "width": 1920,
+    "height": 1080,
+    "name": "NOVA Logo Reveal"
+   },
+   "layers": [
+    {
+     "key": "wordmark",
+     "name": "Wordmark",
+     "type": "text",
+     "x": 810,
+     "y": 395,
+     "w": 560,
+     "h": 170,
+     "text": {
+      "content": "NOVA",
+      "fontSize": 150,
+      "fontWeight": 800,
+      "align": "left",
+      "letterSpacing": 8
+     },
+     "fill": "#FFFFFF",
+     "enter": {
+      "t": 1.3,
+      "duration": 0.9,
+      "ease": "Expo Out",
+      "from": {
+       "dx": -230,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "tagline",
+     "name": "Tagline",
+     "type": "text",
+     "x": 814,
+     "y": 575,
+     "w": 560,
+     "h": 50,
+     "text": {
+      "content": "Money, made simple",
+      "fontSize": 38,
+      "fontWeight": 400,
+      "align": "left",
+      "letterSpacing": 2
+     },
+     "fill": "#9FB0D0",
+     "enter": {
+      "t": 2.4,
+      "duration": 0.8,
+      "ease": "Cubic Out",
+      "from": {
+       "dy": 14,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "backing",
+     "name": "Mark Backing",
+     "type": "ellipse",
+     "x": 590,
+     "y": 390,
+     "w": 180,
+     "h": 180,
+     "fill": "#0B1630",
+     "enter": {
+      "t": 0,
+      "duration": 0.2,
+      "from": {
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "ring",
+     "name": "Mark Ring",
+     "type": "path",
+     "shape": "circle",
+     "x": 598,
+     "y": 398,
+     "w": 164,
+     "h": 164,
+     "stroke": "#2EE6A6",
+     "strokeWidth": 16,
+     "drawOn": {
+      "t": 0.2,
+      "duration": 0.9,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "slash",
+     "name": "Mark Slash",
+     "type": "path",
+     "points": "632,534 728,426",
+     "stroke": "#2EE6A6",
+     "strokeWidth": 18,
+     "drawOn": {
+      "t": 0.8,
+      "duration": 0.5,
+      "ease": "Expo Out"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 9 keyframe tracks; animation ends 3.2s\",\"ids\":{\"wordmark\":\"l_03jm2\",\"tagline\":\"l_03jm3\",\"backing\":\"l_03jm4\",\"ring\":\"l_03jm5\",\"slash\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 142,
+  "editorMs": 123,
+  "input": {
+   "times": [
+    0.4,
+    0.9,
+    1.5,
+    1.9,
+    2.8,
+    3.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.4s, 0.9s, 1.5s, 1.9s, 2.8s, 3.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/05f4f34f-e8c2-4fd8-8c19-dc547c8101db/tool-results/mcp-motion-blob-1794512206869-86htgx.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 25,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "props": {
+    "fill": "#0B1630"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 57,
+  "editorMs": 36,
+  "input": {
+   "times": [
+    0.6,
+    3.6
+   ],
+   "maxSize": 640
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/05f4f34f-e8c2-4fd8-8c19-dc547c8101db/tool-results/mcp-motion-blob-1794512209479-wlixai.png]\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/05f4f34f-e8c2-4fd8-8c19-dc547c8101db/tool-results/mcp-motion-blob-1794512209480-j9h3dg.png]"
+ }
+]

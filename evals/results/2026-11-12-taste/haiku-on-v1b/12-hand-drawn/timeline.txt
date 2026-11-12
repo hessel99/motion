@@ -1,0 +1,100 @@
+- Blob mustard [path] box 240,220,180,157 #e9b44c a0.85
+- Blob terracotta [path] box 1507,688,184,166 #d97757 a0.85
+- Blob sage [path] box 1476,216,135,117 #7a9e7e a0.85
+- Blob sage low [path] box 187,762,114,93 #7a9e7e a0.85
+- Wheat stalk [path] box 636,166,5,664 #000000 a0 stroke #2e2a24 6px
+- Grain 610 R [path] box 640,566,38,44 #000000 a0 stroke #2e2a24 5px
+- Grain 610 L [path] box 603,567,38,44 #000000 a0 stroke #2e2a24 5px
+- Grain 540 R [path] box 640,496,38,44 #000000 a0 stroke #2e2a24 5px
+- Grain 540 L [path] box 602,495,38,44 #000000 a0 stroke #2e2a24 5px
+- Grain 470 R [path] box 640,426,38,44 #000000 a0 stroke #2e2a24 5px
+- Grain 470 L [path] box 603,425,38,44 #000000 a0 stroke #2e2a24 5px
+- Grain 400 R [path] box 640,355,38,44 #000000 a0 stroke #2e2a24 5px
+- Grain 400 L [path] box 602,357,38,44 #000000 a0 stroke #2e2a24 5px
+- Grain 330 R [path] box 640,287,38,44 #000000 a0 stroke #2e2a24 5px
+- Grain 330 L [path] box 602,286,38,44 #000000 a0 stroke #2e2a24 5px
+- Loaf outline [path] box 1151,448,260,192 #000000 a0 stroke #2e2a24 6px
+- Loaf score 1 [path] box 1197,507,62,33 #000000 a0 stroke #d97757 6px
+- Loaf score 2 [path] box 1264,471,62,20 #000000 a0 stroke #d97757 6px
+- Loaf score 3 [path] box 1333,478,48,21 #000000 a0 stroke #d97757 6px
+- Wordmark [text] box 460,860,1000,160 #2e2a24 "Crumb & Co" serif 128px w600
+- Name underline [path] box 720,1008,480,12 #000000 a0 stroke #e9b44c 8px
+
+comp 1920x1080 6s @24fps, background #f6efe3
+"Blob mustard" (path l_03jm2)
+  scale: 0.1s 0 ─Quad Out→ 0.9s 100
+  scale: expr "value + [3*Math.sin(time*2*Math.PI/3)*clamp((time-1.2)/0.6,0,1), 3*Math.sin(time*2*Math.PI/3)*clamp((time-1.2)/0.6,0,1)]"
+"Blob terracotta" (path l_03jm3)
+  scale: 0.25s 0 ─Quad Out→ 1.05s 100
+  scale: expr "value + [3*Math.sin(time*2*Math.PI/3+1.3)*clamp((time-1.2)/0.6,0,1), 3*Math.sin(time*2*Math.PI/3+1.3)*clamp((time-1.2)/0.6,0,1)]"
+"Blob sage" (path l_03jm4)
+  scale: 0.4s 0 ─Quad Out→ 1.2s 100
+  scale: expr "value + [3*Math.sin(time*2*Math.PI/3+2.6)*clamp((time-1.2)/0.6,0,1), 3*Math.sin(time*2*Math.PI/3+2.6)*clamp((time-1.2)/0.6,0,1)]"
+"Blob sage low" (path l_03jm5)
+  scale: 0.55s 0 ─Quad Out→ 1.35s 100
+  scale: expr "value + [3*Math.sin(time*2*Math.PI/3+4)*clamp((time-1.2)/0.6,0,1), 3*Math.sin(time*2*Math.PI/3+4)*clamp((time-1.2)/0.6,0,1)]"
+"Wheat stalk" (path l_03jm6)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 0.3s 0
+  trimEnd: 0.3s 0 ─Sine In Out→ 1.3s 100
+"Grain 610 R" (path l_03jm7)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1s 0
+  trimEnd: 1s 0 ─Sine In Out→ 1.35s 100
+"Grain 610 L" (path l_03jm8)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1s 0
+  trimEnd: 1s 0 ─Sine In Out→ 1.35s 100
+"Grain 540 R" (path l_03jm9)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1.12s 0
+  trimEnd: 1.12s 0 ─Sine In Out→ 1.47s 100
+"Grain 540 L" (path l_03jma)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1.12s 0
+  trimEnd: 1.12s 0 ─Sine In Out→ 1.47s 100
+"Grain 470 R" (path l_03jmb)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1.24s 0
+  trimEnd: 1.24s 0 ─Sine In Out→ 1.59s 100
+"Grain 470 L" (path l_03jmc)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1.24s 0
+  trimEnd: 1.24s 0 ─Sine In Out→ 1.59s 100
+"Grain 400 R" (path l_03jmd)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1.36s 0
+  trimEnd: 1.36s 0 ─Sine In Out→ 1.71s 100
+"Grain 400 L" (path l_03jme)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1.36s 0
+  trimEnd: 1.36s 0 ─Sine In Out→ 1.71s 100
+"Grain 330 R" (path l_03jmf)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1.48s 0
+  trimEnd: 1.48s 0 ─Sine In Out→ 1.83s 100
+"Grain 330 L" (path l_03jmg)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1.48s 0
+  trimEnd: 1.48s 0 ─Sine In Out→ 1.83s 100
+"Loaf outline" (path l_03jmh)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 0.6s 0
+  trimEnd: 0.6s 0 ─Sine In Out→ 1.6s 100
+"Loaf score 1" (path l_03jmi)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1.6s 0
+  trimEnd: 1.6s 0 ─Sine In Out→ 1.95s 100
+"Loaf score 2" (path l_03jmj)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1.72s 0
+  trimEnd: 1.72s 0 ─Sine In Out→ 2.07s 100
+"Loaf score 3" (path l_03jmk)
+  position: expr "wiggle(10, 0.9)"
+  trimStart: 1.84s 0
+  trimEnd: 1.84s 0 ─Sine In Out→ 2.19s 100
+"Wordmark" (text l_03jml)
+  text animator: in by char, start 2.4s, 0.6s each, stagger 0.04s, ease Expo Out
+"Name underline" (path l_03jmm)
+  trimStart: 3s 0
+  trimEnd: 3s 0 ─Sine In Out→ 3.7s 100

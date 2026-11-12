@@ -1,0 +1,211 @@
+{
+ "run": {
+  "id": "02-kinetic-quote",
+  "name": "02-kinetic-quote",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 53,
+    "fixes": 3,
+    "timedOut": false
+   },
+   {
+    "round": 2,
+    "scoreBefore": 71,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 53,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 44.8,
+     "polish": 70,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 55.2,
+     "polish": 30,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:read-hold",
+     "high:no-secondary",
+     "medium:read-hold",
+     "medium:thin"
+    ],
+    "ms": 13.8
+   },
+   "after": {
+    "score": 79,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 80.8,
+     "readability": 80.8,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 19.2,
+     "readability": 19.2,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:read-hold",
+     "medium:grow-middle"
+    ],
+    "ms": 3.3
+   }
+  },
+  "wallMs": 58533,
+  "timedOut": false,
+  "turns": 22,
+  "costUsd": 0.47770579999999996,
+  "durationMs": 54385,
+  "usage": {
+   "input": 294734,
+   "cached": 286559,
+   "output": 3877
+  },
+  "errors": [],
+  "toolCalls": 19,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The quote animation is built and the contact-sheet frames look right. I haven't run `critique`, and I only checked six frames, not the full 8 s.\n\nIt plays as four phrases on a dark background, each in its own moment:\n\n1. **\"Design is not\"** slides in word by word in white, then lifts up and out.\n2. **\"just what it looks like.\"** rises in as the first phrase leaves, in a softer grey and a lighter weight. It also lifts away at the end.\n3. **\"Design is\"** pops in letter by letter, then glides up to make room.\n4. **\"how it works.\"** is the emphasis. It's larger, black weight, in orange (#FF5A1F), and its words scale in with overshoot.\n\n\"— STEVE JOBS\" fades in last at 6 s, small and grey, and stays until the end.\n\nI fixed one problem on the way: phrases 2–4 were invisible on the first build because the timing was applied twice. They now show at the right times.\n\nI can add a subtle camera push on the final phrase or tighten the timing if you'd like.\nI retimed the phrases so each stays on screen longer, and the critic now scores the piece 71/100, up from 53. It still flags three medium issues that I left open: \"just what it looks like.\" is still short of its reading time, the attribution appears about 0.17 s too late, and it wants more supporting elements.\nCritic score is now 79/100, up from 71. I started \"just what it looks like.\" earlier and moved the attribution 0.17 s sooner. I also added an orange rule that draws in under the last phrase. Two medium notes remain: that phrase is readable for 1.5 s against the ~1.73 s the critic wants, and the rule grows from its middle instead of its left edge. I left both, since a later exit would collide with \"Design is\"."
+ },
+ "metrics": {
+  "layers": 6,
+  "drawableLayers": 6,
+  "layerTypes": {
+   "text": 5,
+   "rect": 1
+  },
+  "groups": 0,
+  "animatedLayers": 6,
+  "keys": 22,
+  "segments": 13,
+  "easesUsed": {
+   "Expo In": 4,
+   "Expo Out": 3,
+   "Sine In Out": 4,
+   "Cubic Out": 2
+  },
+  "distinctEases": 4,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 2,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 4,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#ffffff",
+   "#c9cad3",
+   "#ff5a1f",
+   "#8a8b96",
+   "#0e0e12"
+  ],
+  "keyCoverage": 0.672,
+  "visualActivity": 0.293,
+  "firstMotion": 0.067,
+  "lastMotion": 7.333,
+  "endHold": 0.667,
+  "longestHold": 2.077,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0.067,
+  "textOverlapPairs": {
+   "p2 × p3": 0.067
+  },
+  "partialOverlapTime": 0.067,
+  "exits": 2,
+  "beats": 5,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.023,
+  "midLuma": 0.073,
+  "toolErrors": 0,
+  "toolCalls": 19
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "quote text present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "attribution present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "per-letter or per-word text animation",
+    "type": "textAnimatorMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 text layers (phrases)",
+    "type": "textLayersMin",
+    "pass": true
+   },
+   {
+    "text": "phrases exit/transition (some text animates out)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "emphasis: one phrase larger or bolder than the rest",
+    "type": "textEmphasis",
+    "pass": true
+   },
+   {
+    "text": "3–4 beats over the 8s",
+    "type": "beatsMin",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

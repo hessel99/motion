@@ -1,0 +1,209 @@
+{
+ "run": {
+  "id": "15-minimal-luxury",
+  "name": "15-minimal-luxury",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 54,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 70,
+     "richness": 84,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 30,
+     "richness": 16,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "high:no-secondary",
+     "medium:thin",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 15.6
+   },
+   "after": {
+    "score": 54,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 70,
+     "richness": 84,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 30,
+     "richness": 16,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "high:no-secondary",
+     "medium:thin",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 15.6
+   }
+  },
+  "wallMs": 45393,
+  "timedOut": false,
+  "turns": 17,
+  "costUsd": 0.009919960000000002,
+  "durationMs": 44464,
+  "usage": {
+   "input": 412565,
+   "cached": 401076,
+   "output": 7226
+  },
+  "errors": [],
+  "toolCalls": 16,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the 7-second reveal, but the name is not rendering in a serif. The preview shows a sans-serif fallback, so the \"Cormorant Garamond\" and \"Georgia\" settings aren't available in this renderer. Please check the serif on your machine, or tell me which serif font you have and I'll switch to it.\n\nWhat's in the comp (1080×1920, 30 fps, near-black `#0b0a08` background):\n\n- **Gold line**: a single 1.25 px champagne line (`#c9a96e`) under the name, drawing outward from its centre from 0.4 s to 2.8 s with Sine In Out.\n- **Name \"ÉCLAT\"**: split into five letters. From 1.6 s each letter fades in with Cubic Out, staggered 0.16 s apart. Each letter also starts 18 px wider out and eases into its final spacing, so the tracking tightens slightly. It finishes around 4 s.\n- **Subline \"EAU DE PARFUM\"**: 28 px Inter in champagne, fading in from 3.9 s to 4.9 s.\n- The piece then holds until 7 s with no exit.\n\nThe layers are **Gold line**, **Name ÉCLAT** (now five letter layers in a group), and **Subline**. I checked it with a contact sheet and a single frame. The subline is small at phone size and could go up to about 32 px if you want more presence."
+ },
+ "metrics": {
+  "layers": 8,
+  "drawableLayers": 7,
+  "layerTypes": {
+   "path": 1,
+   "text": 6,
+   "group": 1
+  },
+  "groups": 1,
+  "animatedLayers": 7,
+  "keys": 26,
+  "segments": 12,
+  "easesUsed": {
+   "Sine In Out": 2,
+   "Sine Out": 1,
+   "Cubic Out": 9
+  },
+  "distinctEases": 3,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#c9a96e",
+   "#e8d9b5",
+   "#0b0a08"
+  ],
+  "keyCoverage": 0.643,
+  "visualActivity": 0.392,
+  "firstMotion": 1.6,
+  "lastMotion": 4.8,
+  "endHold": 2.2,
+  "longestHold": 0.469,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [
+   "Georgia"
+  ],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.004,
+  "midLuma": 0.044,
+  "toolErrors": 0,
+  "toolCalls": 16
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "subtitle present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "letter-by-letter reveal",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "thin line draws (trim or size/scale animated on a thin layer)",
+    "type": "thinLineDraw",
+    "pass": true
+   },
+   {
+    "text": "serif font",
+    "type": "serifFont",
+    "pass": false
+   },
+   {
+    "text": "slow: shortest keyed move ≥0.8s",
+    "type": "minSegmentDuration",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "negative space: ≤8 layers",
+    "type": "layersMax",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

@@ -1,0 +1,195 @@
+{
+ "run": {
+  "id": "17-music-logo-sting",
+  "name": "17-music-logo-sting",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 80,
+    "sub": {
+     "timing": 95.8,
+     "easing": 85.3,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 14.7,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin",
+     "low:entrance-ease",
+     "low:hard-stop",
+     "low:timing-range",
+     "low:exit-ease"
+    ],
+    "ms": 40.2
+   },
+   "after": {
+    "score": 80,
+    "sub": {
+     "timing": 95.8,
+     "easing": 85.3,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 14.7,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin",
+     "low:entrance-ease",
+     "low:hard-stop",
+     "low:timing-range",
+     "low:exit-ease"
+    ],
+    "ms": 40.2
+   }
+  },
+  "wallMs": 32466,
+  "timedOut": false,
+  "turns": 9,
+  "costUsd": 0.0835129,
+  "durationMs": 30564,
+  "usage": {
+   "input": 241197,
+   "cached": 234709,
+   "output": 3411
+  },
+  "errors": [],
+  "toolCalls": 8,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the 8 s sting around the 120 BPM grid. I checked it on a contact sheet at eight key times, but I didn't run the critic or play it back in real time.\n\n- **Build (0–4 s):** The coral **Dot** pulses on every beat (0.5 s) and grows each time. A faint **Ring** contracts in from 2.0 s on an Expo In ease. At 3.5 s the dot swells, then squeezes down just before the drop.\n- **Drop (4.0 s):** The ring lands and the dot slams to 150% on the 4.00 s accent, the strongest hit in the track. A **Shock** ring blasts outward at the same moment. The **Wordmark** \"Pulse\" slides out of the mark and fades in from 4.15 s.\n- **Secondary hits:** At 5.5 s the dot pulses. At 6.0 s the ring pops, a second shockwave fires and the wordmark gives a small bump. These sit on the 5.50 and 6.00 s accents.\n- **Settle:** From about 6.6 s the clean lockup holds, with the ring and dot centred in the circle, until 8 s.\n\nI chose the palette myself: near-white mark and wordmark on the dark background, with coral for the dot and shockwaves.\n\nI can add a second wordmark accent, or shift the lockup to sit centred on the frame."
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "audio": 1,
+   "ellipse": 3,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 4,
+  "keys": 47,
+  "segments": 36,
+  "easesUsed": {
+   "Expo Out": 4,
+   "Cubic In Out": 2,
+   "Hold": 1,
+   "Ease Out": 3,
+   "Ease In": 2,
+   "Quad Out": 13,
+   "Expo In": 2,
+   "Quad In": 1,
+   "Back Out": 7,
+   "Cubic Out": 1
+  },
+  "distinctEases": 10,
+  "easeFamilies": 6,
+  "overshootSegments": 7,
+  "keyedOvershoots": 2,
+  "springSegments": 0,
+  "holdKeys": 1,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#ff4d6d",
+   "#f5f5f7",
+   "#121214"
+  ],
+  "keyCoverage": 0.85,
+  "visualActivity": 0.854,
+  "firstMotion": 0,
+  "lastMotion": 6.8,
+  "endHold": 1.2,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 1.139,
+  "exits": 1,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.013,
+  "midLuma": 0.076,
+  "toolErrors": 0,
+  "toolCalls": 8
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "the music is kept",
+    "type": "audioKept",
+    "pass": true
+   },
+   {
+    "text": "a hero landing on the drop (4.0 s, ±1 frame)",
+    "type": "hitAt",
+    "pass": true
+   },
+   {
+    "text": "moves land on beats (≥60% of landings within ±1 frame of the 120 BPM grid)",
+    "type": "onBeats",
+    "pass": false
+   },
+   {
+    "text": "restraint: not every beat carries a landing",
+    "type": "notEveryBeat",
+    "pass": true
+   }
+  ],
+  "hits": 4,
+  "checkable": 5,
+  "total": 5
+ },
+ "video": null
+}

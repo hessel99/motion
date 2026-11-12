@@ -1,0 +1,34 @@
+- Sting 120 BPM [audio] #6b8cff
+- flash [rect] box 0,0,1920,1080 #ffffff
+- wave1 [ellipse] box 840,420,240,240 #000000 a0 stroke #ff4d6d 6px
+- wave2 [ellipse] box 618,468,144,144 #000000 a0 stroke #ff4d6d 4px
+- wave3 [ellipse] box 570,420,240,240 #000000 a0 stroke #f5f2ec 3px
+- reveal [group] #ffffff a0
+  - wordmark [text] box 254,426,493,228 #f5f2ec "Pulse" Inter 190px w700
+- mark [group] #ffffff a0
+  - ring [path] box 890,470,139,139 #000000 a0 stroke #f5f2ec 14px
+  - dot [ellipse] box 949,529,22,22 #ff4d6d
+
+comp 1920x1080 8s @30fps, background #0e0e12
+"flash" (rect l_03jmb)
+  opacity: 3.98s 0 ─Ease Out→ 4s 22 ─Expo Out→ 4.35s 0
+"wave1" (ellipse l_03jmc)
+  scale: 4s 100 ─Expo Out→ 4.9s 320
+  opacity: 3.99s 0 ─Ease Out→ 4s 80 ─Ease In→ 4.9s 0
+"wave2" (ellipse l_03jmd)
+  scale: 5.5s 60 ─Expo Out→ 6.2s 200
+  opacity: 5.49s 0 ─Ease Out→ 5.5s 60 ─Ease In→ 6.2s 0
+"wave3" (ellipse l_03jme)
+  scale: 6s 100 ─Expo Out→ 6.9s 260
+  opacity: 5.99s 0 ─Ease Out→ 6s 45 ─Ease In→ 6.9s 0
+"wordmark" (text l_03jmg)
+  position: 4.85s [-300,160] ─Expo Out→ 5.6s [310,160]
+"mark" (group l_03jmh)
+  position: 0s [960,540] ─Cubic In Out→ 4.5s [960,540] ─Expo In Out→ 5.3s [690,540]
+"ring" (path l_03jmi)
+  scale: 0s 70 ─Cubic In Out→ 3.5s 76 ─Sine In Out→ 3.95s 58 ─Cubic In Out→ 4s 58 ─spring:0.35→ 4.7s 100 ─Cubic In Out→ 5.95s 100 ─Quad Out→ 6.05s 107 ─Quad Out→ 6.5s 100
+  opacity: 0s 45 ─Ease Out→ 3.5s 60 ─Ease Out→ 4s 100
+  trimStart: 0.2s 0
+  trimEnd: 0.2s 0 ─Sine In Out→ 3.5s 100
+"dot" (ellipse l_03jmj)
+  scale: 0s 50 ─Cubic In Out→ 0.5s 50 ─Expo Out→ 0.6s 58 ─Quad Out→ 0.95s 50 ─Cubic In Out→ 1s 50 ─Expo Out→ 1.1s 60 ─Quad Out→ 1.45s 50 ─Cubic In Out→ 1.5s 50 ─Expo Out→ 1.6s 62 ─Quad Out→ 1.95s 50 ─Cubic In Out→ 2s 50 ─Expo Out→ 2.1s 66 ─Quad Out→ 2.45s 50 ─Cubic In Out→ 2.5s 50 ─Expo Out→ 2.6s 70 ─Quad Out→ 2.95s 50 ─Cubic In Out→ 3s 50 ─Expo Out→ 3.1s 76 ─Quad Out→ 3.45s 50 ─Cubic In Out→ 3.5s 50 ─Expo Out→ 3.58s 84 ─Cubic In Out→ 3.95s 28 ─Cubic In Out→ 4s 28 ─spring Bouncy→ 4.7s 100 ─Cubic In Out→ 5.5s 100 ─Expo Out→ 5.6s 135 ─Quad Out→ 6s 100

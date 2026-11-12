@@ -1,0 +1,196 @@
+{
+ "run": {
+  "id": "01-logo-reveal",
+  "name": "01-logo-reveal",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 80,
+    "sub": {
+     "timing": 95.8,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 84,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 16,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:no-secondary",
+     "medium:thin",
+     "low:timing-range"
+    ],
+    "ms": 2.8
+   },
+   "after": {
+    "score": 80,
+    "sub": {
+     "timing": 95.8,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 84,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 16,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:no-secondary",
+     "medium:thin",
+     "low:timing-range"
+    ],
+    "ms": 2.8
+   }
+  },
+  "wallMs": 40300,
+  "timedOut": false,
+  "turns": 9,
+  "costUsd": 0.017586360000000002,
+  "durationMs": 38364,
+  "usage": {
+   "input": 318347,
+   "cached": 260986,
+   "output": 7011
+  },
+  "errors": [],
+  "toolCalls": 8,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The NOVA logo reveal is built: a 4-second, 1920×1080 comp on a navy background (`#0B1D3A`) with off-white type and one mint accent (`#3DDC97`) used only on the slash.\n\n- **Mark (group \"Mark\"):** the off-white ring draws on from 0.2 to 1.1 s, then the mint diagonal slash draws across it from 0.9 to 1.4 s.\n- **Wordmark (\"Wordmark NOVA\"):** starts behind the mark's right edge, clipped by \"Wordmark reveal\", and slides out 80 px from 1.3 to 2.2 s.\n- **Tagline (\"Tagline\"):** \"Money, made simple\" fades in and rises 14 px from 2.1 to 2.8 s, in a muted blue-grey so the accent stays unique.\n- **Hold:** the full lockup sits still from 2.8 s to the end, so the last 1.2 s are clean.\n\nMy first build placed the mark's children with absolute coordinates inside its group, so the mark landed at the bottom of the frame. I fixed that and checked the frames again. The only remaining check flag is the ring and slash overlap, which is intentional.\n\nI left out secondary motion (overshoot or settle) to keep the reveal clean, as you asked. If you want it, I can add a small overshoot on the wordmark or a slow breathing scale on the mark during the hold."
+ },
+ "metrics": {
+  "layers": 6,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "group": 2,
+   "path": 2,
+   "text": 2
+  },
+  "groups": 2,
+  "animatedLayers": 4,
+  "keys": 14,
+  "segments": 6,
+  "easesUsed": {
+   "Sine In Out": 1,
+   "Expo Out": 1,
+   "Quart Out": 2,
+   "Sine Out": 2
+  },
+  "distinctEases": 4,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#f4f7fb",
+   "#3ddc97",
+   "#8fa3c4",
+   "#0b1d3a"
+  ],
+  "keyCoverage": 0.65,
+  "visualActivity": 0.335,
+  "firstMotion": 1.267,
+  "lastMotion": 2.667,
+  "endHold": 1.333,
+  "longestHold": 0.067,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.013,
+  "midLuma": 0.12,
+  "toolErrors": 0,
+  "toolCalls": 8
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"NOVA\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "tagline present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "sequenced: mark → wordmark → tagline (≥3 entrance waves)",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "holds the final lockup ≥1s",
+    "type": "endHoldMin",
+    "pass": true
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "wordmark revealed from behind the mark (mask/clip or layer order)",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

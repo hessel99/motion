@@ -1,0 +1,66 @@
+{
+  "id": "02-kinetic-quote",
+  "title": "Kinetic typography quote",
+  "complexity": "medium",
+  "style": [
+    "typographic",
+    "editorial"
+  ],
+  "comp": {
+    "width": 1080,
+    "height": 1080,
+    "fps": 30,
+    "duration": 8
+  },
+  "prompt": "Kinetic typography for the quote \"Design is not just what it looks like. Design is how it works.\" — Steve Jobs. Split it into 3–4 phrases that each get their own moment; animate per letter or per word, emphasise \"how it works\" (bigger/bolder, different color). Phrases should transition into each other, not just stack up. Attribution appears last, small.",
+  "checklist": [
+    {
+      "text": "quote text present",
+      "check": {
+        "type": "textContains",
+        "text": "how it works"
+      }
+    },
+    {
+      "text": "attribution present",
+      "check": {
+        "type": "textContains",
+        "text": "Jobs"
+      }
+    },
+    {
+      "text": "per-letter or per-word text animation",
+      "check": {
+        "type": "textAnimatorMin",
+        "min": 1
+      }
+    },
+    {
+      "text": "≥3 text layers (phrases)",
+      "check": {
+        "type": "textLayersMin",
+        "min": 3
+      }
+    },
+    {
+      "text": "phrases exit/transition (some text animates out)",
+      "check": {
+        "type": "exitsMin",
+        "min": 1
+      }
+    },
+    {
+      "text": "emphasis: one phrase larger or bolder than the rest",
+      "check": {
+        "type": "textEmphasis"
+      }
+    },
+    {
+      "text": "3–4 beats over the 8s",
+      "check": {
+        "type": "beatsMin",
+        "min": 3
+      }
+    }
+  ]
+}

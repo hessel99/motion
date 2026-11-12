@@ -1,0 +1,203 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1528,
+  "ok": true,
+  "ms": 99,
+  "editorMs": 7,
+  "input": {
+   "comp": {
+    "background": "#1b2430",
+    "duration": 6
+   },
+   "layers": [
+    {
+     "key": "panel",
+     "name": "Panel",
+     "type": "rect",
+     "x": 120,
+     "y": 800,
+     "w": 800,
+     "h": 150,
+     "radius": 6,
+     "fill": "#4a5d75",
+     "opacity": 72,
+     "enter": {
+      "t": 0.5,
+      "duration": 1.1,
+      "ease": "Cubic In Out",
+      "from": {
+       "opacity": 0,
+       "dx": -80
+      }
+     },
+     "exit": {
+      "t": 5.8,
+      "duration": 0.8,
+      "ease": "Cubic In Out",
+      "to": {
+       "opacity": 0,
+       "dx": -40
+      }
+     }
+    },
+    {
+     "key": "line",
+     "name": "Accent Line",
+     "type": "rect",
+     "x": 120,
+     "y": 794,
+     "w": 800,
+     "h": 4,
+     "fill": "#9bbce0",
+     "anchor": "left",
+     "animate": {
+      "scale": [
+       {
+        "t": 0.2,
+        "v": [
+         0,
+         100
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 1.4,
+        "v": [
+         100,
+         100
+        ]
+       },
+       {
+        "t": 5,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 5.8,
+        "v": [
+         0,
+         100
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "nameMask",
+     "name": "Name Mask",
+     "type": "group",
+     "clip": true,
+     "x": 156,
+     "y": 820,
+     "w": 740,
+     "h": 62,
+     "children": [
+      {
+       "key": "name",
+       "name": "Name",
+       "type": "text",
+       "text": {
+        "content": "Dr. Amelia Hart",
+        "fontSize": 46,
+        "fontWeight": 600,
+        "fontFamily": "Inter"
+       },
+       "x": 0,
+       "y": 0,
+       "w": 740,
+       "h": 62,
+       "fill": "#f2f6fa",
+       "enter": {
+        "t": 1,
+        "duration": 1,
+        "ease": "Cubic In Out",
+        "from": {
+         "dy": 64,
+         "opacity": 0
+        }
+       },
+       "exit": {
+        "t": 5.4,
+        "duration": 0.7,
+        "ease": "Cubic In Out",
+        "to": {
+         "dy": -64,
+         "opacity": 0
+        }
+       }
+      }
+     ]
+    },
+    {
+     "key": "titleMask",
+     "name": "Title Mask",
+     "type": "group",
+     "clip": true,
+     "x": 156,
+     "y": 890,
+     "w": 740,
+     "h": 42,
+     "children": [
+      {
+       "key": "title",
+       "name": "Title",
+       "type": "text",
+       "text": {
+        "content": "Head of Research, Larkspur Labs",
+        "fontSize": 26,
+        "fontWeight": 400,
+        "fontFamily": "Inter"
+       },
+       "x": 0,
+       "y": 0,
+       "w": 740,
+       "h": 42,
+       "fill": "#c3d1e2",
+       "enter": {
+        "t": 1.25,
+        "duration": 1,
+        "ease": "Cubic In Out",
+        "from": {
+         "dy": 48,
+         "opacity": 0
+        }
+       },
+       "exit": {
+        "t": 5.5,
+        "duration": 0.7,
+        "ease": "Cubic In Out",
+        "to": {
+         "dy": -48,
+         "opacity": 0
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"6 created, 0 updated, 7 keyframe tracks; animation ends 5.8s\",\"ids\":{\"panel\":\"l_03jm2\",\"line\":\"l_03jm3\",\"name\":\"l_03jm5\",\"nameMask\":\"l_03jm4\",\"title\":\"l_03jm7\",\"titleMask\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 106,
+  "editorMs": 81,
+  "input": {
+   "times": [
+    0.6,
+    1.2,
+    2.2,
+    4,
+    5.2,
+    5.9
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.6s, 1.2s, 2.2s, 4s, 5.2s, 5.9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/501bb316-d1b2-4350-b700-7269f023948d/tool-results/mcp-motion-blob-1794514003538-bwml2x.jpg]"
+ }
+]

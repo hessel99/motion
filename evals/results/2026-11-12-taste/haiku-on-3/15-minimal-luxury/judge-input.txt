@@ -1,0 +1,83 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (15-minimal-luxury, 1080x1920, 7s @30fps):
+Minimal luxury reveal for a perfume, "ÉCLAT — Eau de Parfum", vertical story format. Near-black background, champagne gold accents, a single thin gold line that slowly draws, the name in a wide-tracked serif fading in letter by letter with tracking tightening slightly, generous negative space. Slow, restrained, expensive. Nothing should move fast.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- name present [yes]
+- subtitle present [yes]
+- letter-by-letter reveal [yes]
+- thin line draws (trim or size/scale animated on a thin layer) [yes]
+- serif font [yes]
+- slow: shortest keyed move ≥0.8s [NO]
+- no overshoot [yes]
+- negative space: ≤8 layers [yes]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- line [path] box 370,1010,340,2 #000000 a0 stroke #c9a96e 2px
+- name [group] #ffffff a0
+  - É [text] box 304,820,92,180 #efe9dc "É" serif 150px w400
+  - C [text] box 394,820,101,180 #efe9dc "C" serif 150px w400
+  - L [text] box 504,820,92,180 #efe9dc "L" serif 150px w400
+  - A [text] box 589,820,109,180 #efe9dc "A" serif 150px w400
+  - T [text] box 692,820,92,180 #efe9dc "T" serif 150px w400
+- descriptor [text] box 0,1045,1080,40 #a38f66 "EAU DE PARFUM" Inter 26px w400
+
+TIMELINE:
+comp 1080x1920 7s @30fps, background #0b0a09
+"line" (path l_03jm2)
+  trimStart: 0.4s 50 ─Sine In Out→ 2.8s 0
+  trimEnd: 0.4s 50 ─Sine In Out→ 2.8s 100
+"name" (group l_03jm5)
+  scale: 4.4s 100 ─Sine In Out→ 7s 103
+"É" (text l_03jm6)
+  position: 0s [317,90] ─Cubic In Out→ 1s [317,90] ─Quart Out→ 2.8s [349.02,90]
+  opacity: 0s 0 ─Ease In→ 1s 0 ─Sine Out→ 2.2s 100
+"C" (text l_03jm7)
+  position: 0s [433,90] ─Cubic In Out→ 1.22s [433,90] ─Quart Out→ 3.02s [448.89,90]
+  opacity: 0s 0 ─Ease In→ 1.22s 0 ─Sine Out→ 2.42s 100
+"L" (text l_03jm8)
+  position: 0s [546.08,90] ─Cubic In Out→ 1.44s [546.08,90] ─Quart Out→ 3.24s [546.08,90]
+  opacity: 0s 0 ─Ease In→ 1.44s 0 ─Sine Out→ 2.64s 100
+"A" (text l_03jm9)
+  position: 0s [656,90] ─Cubic In Out→ 1.66s [656,90] ─Quart Out→ 3.46s [640.23,90]
+  opacity: 0s 0 ─Ease In→ 1.66s 0 ─Sine Out→ 2.86s 100
+"T" (text l_03jma)
+  position: 0s [772,90] ─Cubic In Out→ 1.88s [772,90] ─Quart Out→ 3.68s [740.39,90]
+  opacity: 0s 0 ─Ease In→ 1.88s 0 ─Sine Out→ 3.08s 100
+"descriptor" (text l_03jm4)
+  position: 3.2s [540,1068] ─Sine Out→ 4.4s [540,1060]
+  opacity: 3.2s 0 ─Sine Out→ 3.8s 100
+
+AUTOMATIC METRICS:
+layers 7 drawable (path 1, text 6, group 1), 40 keys, 14 moving segments
+eases: Sine In Out×3, Sine Out×7, Quart Out×4; springs 0, overshooting 0, hold 0
+expressions 0, text animators 0, precomps 0, paths 1, gradients 0, markers 0
+palette (4): #c9a96e #a38f66 #efe9dc #0b0a09
+motion from 1s to 3.8s (end hold 3.2s, longest still 0.201s), visual activity 37% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 0s; text-on-text overlap 0s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

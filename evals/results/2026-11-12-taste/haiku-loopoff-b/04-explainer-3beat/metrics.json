@@ -1,0 +1,202 @@
+{
+ "run": {
+  "id": "04-explainer-3beat",
+  "name": "04-explainer-3beat",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 97,
+    "sub": {
+     "timing": 95.8,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "low:timing-range"
+    ],
+    "ms": 14.3
+   },
+   "after": {
+    "score": 97,
+    "sub": {
+     "timing": 95.8,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "low:timing-range"
+    ],
+    "ms": 14.3
+   }
+  },
+  "wallMs": 85056,
+  "timedOut": false,
+  "turns": 17,
+  "costUsd": 0.01900922,
+  "durationMs": 83757,
+  "usage": {
+   "input": 616575,
+   "cached": 591812,
+   "output": 16281
+  },
+  "errors": [],
+  "toolCalls": 16,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The 12-second explainer is built in the **Main** composition (1920×1080, 30 fps), in three ~4 s beats that hand over without cuts. The critique scores it 97/100. Its one flag, a 0.7 s suction move on the last note, is intentional, so I left it.\n\n- **Messy notes (0–4 s):** Five flat sticky notes (pink, teal, yellow) pop in with a slight Back Out overshoot. They wobble anxiously on different rhythms while they sit in a pile.\n- **Suck into vault (3.5–4.7 s):** The notes accelerate into the centre, each one shrinking as it arrives (staggered by about 0.06 s). The navy shield pops in as the last note lands, then holds.\n- **Glow and headline (7.8–12 s):** A teal halo blooms behind the shield and pulses. A white check mark draws on inside the shield at 8.7 s, and \"One key. Every login.\" rises in at 8.3 s. The shield then breathes gently to the end.\n\nChoices I made:\n- The palette is cream background, navy ink, pink, teal and yellow.\n- The check mark sits inside the shield rather than beside the headline. If you want a second check next to the text, I can add one.\n- The shield is held still for about 3 s in beat 2, which gives the headline room to land.\n\nLayers are named (Sticky note 1–5, Vault shield, Shield glow, Headline). Next tweaks could be a bigger headline, a different accent colour for the glow, or a loop-friendly ending."
+ },
+ "metrics": {
+  "layers": 30,
+  "drawableLayers": 24,
+  "layerTypes": {
+   "group": 6,
+   "rect": 20,
+   "ellipse": 1,
+   "path": 2,
+   "text": 1
+  },
+  "groups": 6,
+  "animatedLayers": 9,
+  "keys": 50,
+  "segments": 27,
+  "easesUsed": {
+   "Expo In": 5,
+   "Back Out": 9,
+   "Quad In": 5,
+   "Ease In Out": 6,
+   "Ease Out": 1,
+   "Cubic Out": 1
+  },
+  "distinctEases": 6,
+  "easeFamilies": 5,
+  "overshootSegments": 9,
+  "keyedOvershoots": 1,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 5,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#f582ae",
+   "#172c66",
+   "#8bd3dd",
+   "#ffd803",
+   "#ffffff"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.664,
+  "firstMotion": 0.2,
+  "lastMotion": 11.867,
+  "endHold": 0.133,
+  "longestHold": 3.082,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 3.953,
+  "exits": 0,
+  "beats": 6,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.047,
+  "midLuma": 0.93,
+  "toolErrors": 0,
+  "toolCalls": 16
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "3 beats",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "headline present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 sticky notes (rects) in beat 1",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "jitter/anxious motion (wiggle expression or many small keys)",
+    "type": "jitter",
+    "pass": false
+   },
+   {
+    "text": "shield/vault as a custom path",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "uses most of the 12s (animated coverage ≥70%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "notes converge (moving toward one point)",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "transitions between beats are continuous",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 5,
+  "checkable": 6,
+  "total": 8
+ },
+ "video": null
+}

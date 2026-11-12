@@ -1,0 +1,38 @@
+- Beat flash [rect] box 0,0,1920,1080 #ff5a1f
+- Shockwave ring 1 [ellipse] box 570,80,780,780 #000000 a0 stroke #ff5a1f 16px
+- Shockwave ring 2 [ellipse] box 480,-10,960,960 #000000 a0 stroke #ff5a1f 8px
+- Word 1 - 40h battery [text] box 256,408,1408,264 #f4f4f5 "40h battery" Inter 200px w800
+- Word 2 - Spatial audio [text] box -140,390,1600,300 #f4f4f5 "Spatial audio" Inter 200px w800
+- Word 3 - Pure silence [text] box 160,390,1600,300 #f4f4f5 "Pure silence" Inter 200px w800
+- Title - PULSE 2 [text] box 160,320,1600,300 #f4f4f5 "PULSE 2" Inter 300px w900
+- CTA pill [rect] box 960,700,0,0 #ff5a1f
+- CTA text - Available now [text] box 710,635,500,130 #0a0a0b "Available now" Inter 60px w800
+
+comp 1920x1080 6s @30fps, background #0a0a0b
+"Beat flash" (rect l_03jm2)
+  opacity: 0s 0 ─hold→ 0.5s 70 ─Expo Out→ 0.62s 0 ─Ease Out→ 1s 70 ─Expo Out→ 1.12s 0 ─Ease Out→ 2s 100 ─Expo Out→ 2.25s 0
+"Shockwave ring 1" (ellipse l_03jm3)
+  scale: 2s 20 ─Expo Out→ 2.7s 130
+  opacity: 0s 0 ─hold→ 1.99s 0 ─hold→ 2s 100 ─Ease In→ 2.7s 0
+  strokeWidth: 2s 16 ─Expo Out→ 2.7s 2
+"Shockwave ring 2" (ellipse l_03jm4)
+  scale: 2.1s 20 ─Expo Out→ 2.9s 160
+  opacity: 0s 0 ─hold→ 2.09s 0 ─hold→ 2.1s 80 ─Ease In→ 2.9s 0
+  strokeWidth: 2.1s 8 ─Expo Out→ 2.9s 1
+"Word 1 - 40h battery" (text l_03jm5)
+  scale: 0s 125 ─Expo Out→ 0.22s 100 ─Ease In→ 0.42s 100 ─Ease In→ 0.5s 88
+  opacity: 0s 0 ─hold→ 0.01s 100 ─Easy Ease→ 0.44s 100 ─Ease In→ 0.5s 0
+"Word 2 - Spatial audio" (text l_03jm6)
+  position: 0.5s [1260,540] ─Expo Out→ 0.72s [960,540] ─Ease In→ 0.92s [960,540] ─Ease In→ 1s [660,540]
+  opacity: 0.5s 0 ─hold→ 0.51s 100 ─Easy Ease→ 0.94s 100 ─Ease In→ 1s 0
+"Word 3 - Pure silence" (text l_03jm7)
+  scale: 1s 115 ─Expo Out→ 1.25s 100
+  rotation: 1s -8 ─spring:0.4→ 1.4s 0
+  opacity: 1s 0 ─hold→ 1.01s 100 ─Easy Ease→ 1.9s 100 ─Ease In→ 2s 0
+"Title - PULSE 2" (text l_03jm8)
+  scale: 2s 190 ─Expo Out→ 2.3s 100
+  opacity: 2s 0 ─hold→ 2.02s 100
+"CTA pill" (rect l_03jm9)
+  scale: 3.2s 0 ─spring:0.4→ 3.6s 100 ─Ease In Out→ 4.4s 100 ─Ease In→ 4.5s 94 ─Expo Out→ 4.7s 100
+"CTA text - Available now" (text l_03jma)
+  opacity: 3.45s 0 ─hold→ 3.5s 100

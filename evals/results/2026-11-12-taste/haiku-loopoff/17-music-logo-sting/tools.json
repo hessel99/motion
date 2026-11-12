@@ -1,0 +1,200 @@
+[
+ {
+  "name": "get_document",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 0,
+  "input": {},
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":8,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":1,\"layers\":[{\"id\":\"l_03jm3\",\"name\":\"Sting 120 BPM\",\"type\":\"audio\",\"props\":{\"anchor\":[0,0],\"position\":[0,0],\"scale\":[100,100],\"rotation\":…"
+ },
+ {
+  "name": "get_audio_analysis",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 1,
+  "input": {},
+  "result": "music \"Sting 120 BPM\" (layer l_03jm3): 120 BPM, 4/4, steady grid; audible 0.00–9.50s in comp (comp is 8.00s)\nbeat 0.50s, bar 2.00s; 16 beats from 0.00s; 4 bars, downbeats: 0.00 2.00 4.00 6.00\nsections: build 0.00–4.00 (energy 0.59) | drop 4.00–8.00 (energy 1)\naccents (strongest hits, time:strength): 0.50:0.38 1.00:0.34 3.50:0.33 4.00:1.00 5.50:0.31 6.00:0.32\nenergy per bar (▁ quiet .. █ loud): ▄▅█…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 219,
+  "ok": true,
+  "ms": 30,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "logo sting for brand Pulse: round mark (circle with smaller dot inside) plus wordmark, synced to music, build anticipation, land logo on drop, secondary hits on next beats, clean lockup end"
+  },
+  "result": "# Example: Playful logo sting, the dot drops in and lands (make my logo move)\n> tags: logo, sting, playful, bouncy, fun, kids, app, mark, wordmark, drop, land, squash, bounce, simple, make my logo move\n\n## Brief\n\"Make my logo move: a round orange mark and the word 'pip'. Fun and friendly, about 3 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"duration\": 3, \"backgrou…"
+ },
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1808,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 0,
+  "input": {
+   "title": "Pulse logo sting",
+   "duration": 8,
+   "style": "Kinetic brand sting: springs and squash on the hit, expo-out entrances, one ease family",
+   "styleReason": "A pulse brand wants rhythm: the mark breathes on the beat and lands on the drop.",
+   "concepts": [
+    {
+     "name": "Heartbeat build",
+     "idea": "The inner dot pulses on every beat, faster and tighter through the build (0-4 s), then the ring snaps open on the drop at 4.0 s and the wordmark follows.",
+     "why": "The name is Pulse: the mark is literally a beat, so the sting is the heartbeat."
+    },
+    {
+     "name": "Ripple drop",
+     "idea": "The ring draws on during the build, then on the drop it bursts outward and ripples out as echo rings on the next beats.",
+     "why": "Radiating rings read as a signal or pulse wave and carry the secondary hits."
+    }
+   ],
+   "recommended": 0,
+   "beats": [
+    {
+     "name": "Build",
+     "start": 0,
+     "end": 4,
+     "description": "Ring draws on in a tight arc; inner dot pulses on every beat (0.5 s) with growing amplitude and speed. Wordmark hidden. Tension builds into the drop.",
+     "style": "Dot pulses: Quad In/Out tight, amplitude grows. Ring drawn with trim."
+    },
+    {
+     "name": "Drop landing",
+     "start": 4,
+     "end": 4.6,
+     "description": "At 4.0 s (the drop) the ring snaps to full scale with a spring overshoot and the dot lands with squash. Wordmark 'Pulse' letters pop in from 4.2 s.",
+     "style": "spring Bouncy on the ring, letters 0.04 s stagger, Expo Out."
+    },
+    {
+     "name": "Secondary hits",
+     "start": 4.5,
+     "end": 6,
+     "description": "Beats 4.5, 5.0, 5.5 punctuate with ripple echo rings expanding and fading out from the mark; a smaller hit at the 5.5 accent.",
+     "style": "Echo rings Expo Out, fade out; mark scale nudges 102%."
+    },
+    {
+     "name": "Lockup",
+     "start": 6,
+     "end": 8,
+     "description": "Echoes stop. Mark and wordmark settle to the exact clean lockup at scale 100 and hold to the end.",
+     "style": "Gentle settle, no motion in the final 1.5 s."
+    }
+   ]
+  },
+  "result": "storyboard \"Pulse logo sting\" shown to the user (4 beats, 8s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 0,
+  "input": {
+   "beat": 1,
+   "status": "active"
+  },
+  "result": "beat 1 \"Build\" active; 0/4 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3193,
+  "ok": false,
+  "ms": 13,
+  "editorMs": 3,
+  "error": "layer \"ring\": drawOn needs a path layer (type path / shape / star)",
+  "input": "{\"comp\":{\"duration\":8,\"background\":\"#0B0B0F\"},\"layers\":[{\"key\":\"echo-1\",\"type\":\"ellipse\",\"name\":\"Echo ring 1 (4.5)\",\"x\":525,\"y\":400,\"w\":280,\"h\":280,\"fill\":\"#00000000\",\"stroke\":\"#FF4D5E\",\"strokeWidth\":6,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":0,\"v\":100,\"interp\":\"hold\"},{\"t\":4.5,\"v\":100,\"ease\":\"Expo Out\"},{\"t\":5.2,\"v\":240}],\"opacity\":[{\"t\":0,\"v\":0,\"interp\":\"hold\"},{\"t\":4.5,\"v\":80,\"ease\":\"Cubic Out\"},{\"t\":5.2,\"v\":0}]}},{\"key\":\"echo-2\",\"type\":\"ellipse\",\"name\":\"Echo ring 2 (5.0)\",\"x\":525,\"y\":400,\"w\":280,\"h\":280,\"fill\":\"#00000000\",\"stroke\":\"#FF4D5E\",\"strokeWidth\":6,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":0,\"v\":100,\"interp\":\"hold\"},{\"t\":5,\"v\":100,\"ease\":\"Expo Out\"},{\"t\":5.7,\"v\":240}],\"opacity\":[{\"t\":0,\"v\":0,\"interp\":\"hold\"},{\"t\":5,\"v\":80,\"ease\":\"Cubic Out\"},{\"t\":5.7,\"v\":0}]}},{\"key\":\"echo-3\",\"type\":\"ellipse\",\"name\":\"Echo ring 3 (5.5)\",\"x\":525,\"y\":400,\"w\":280,\"h\":280,\"fill\":\"#00000000\",\"stroke\":\"#FF4D5E\",\"strokeWidth\":6,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":0,\"v\":100,\"interp\":\"hold\"},{\"t\":5.5,\"v\":100,\"ease\":\"Expo Out\"},{\"t\":6.2,\"v\":240}],\"opacity\":[{\"t\":0,\"v\":0,\"interp\":\"hold\"},{\"t\":5.5,\"v\":80,\"ease\":\"Cubic Out\"},{\"t\":6.2,\"v\":0}]}},{\"key\":\"ring\",\"type\":\"ellipse\",\"name\":\"Pulse mark ring\",\"x\":525,\"y\":400,\"w\":280,\"h\":280,\"fill\":\"#00000000\",\"stroke\":\"#F5F5F7\",\"strokeWidth\":16,\"drawOn\":{\"t\":0,\"duration\":1.2,\"ease\":\"Expo Out\"},\"animate\":{\"scale\":[{\"t\":0,\"v\":60,\"ease\":\"Expo Out\"},{\"t\":1.5,\"v\":72,\"ease\":\"Ease In\"},{\"t\":3.9,\"v\":78,\"ease\":\"Quad In\"},{\"t\":4,\"v\":108,\"ease\":\"Expo Out\"},{\"t\":4.35,\"v\":98,\"ease\":\"Cubic Out\"},{\"t\":4.5,\"v\":103,\"ease\":\"Expo Out\"},{\"t\":4.75,\"v\":100,\"ease\":\"Cubic Out\"},{\"t\":5,\"v\":103,\"ease\":\"Expo Out\"},{\"t\":5.25,\"v\":100,\"ease\":\"Cubic Out\"},{\"t\":5.5,\"v\":103,\"ease\":\"Expo Out\"},{\"t\":5.75,\"v\":100,\"ease\":\"Cubic Out\"}]}},{\"key\":\"dot\",\"type\":\"ellipse\",\"name\":\"Pulse mark dot\",\"x\":620,\"y\":495,\"w\":90,\"h\":90,\"fill\":\"#FF4D5E\",\"animate\":{\"scale\":[{\"t\":0,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":0.35,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":0.5,\"v\":[108,108],\"ease\":\"Expo Out\"},{\"t\":0.75,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":0.85,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":1,\"v\":[110,110],\"ease\":\"Expo Out\"},{\"t\":1.25,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":1.35,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":1.5,\"v\":[111,111],\"ease\":\"Expo Out\"},{\"t\":1.75,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":1.85,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":2,\"v\":[112,112],\"ease\":\"Expo Out\"},{\"t\":2.25,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":2.35,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":2.5,\"v\":[114,114],\"ease\":\"Expo Out\"},{\"t\":2.75,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":2.85,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":3,\"v\":[116,116],\"ease\":\"Expo Out\"},{\"t\":3.25,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":3.35,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":3.5,\"v\":[118,118],\"ease\":\"Expo Out\"},{\"t\":3.75,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":3.9,\"v\":[84,84],\"ease\":\"Quad In\"},{\"t\":4,\"v\":[125,75],\"ease\":\"Expo Out\"},{\"t\":4.18,\"v\":[94,106],\"ease\":\"Cubic Out\"},{\"t\":4.4,\"v\":[100,100],\"ease\":\"Cubic Out\"}]}},{\"key\":\"wordmark\",\"type\":\"text\",\"name\"…",
+  "result": "layer \"ring\": drawOn needs a path layer (type path / shape / star)"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3207,
+  "ok": true,
+  "ms": 109,
+  "editorMs": 2,
+  "input": "{\"comp\":{\"duration\":8,\"background\":\"#0B0B0F\"},\"layers\":[{\"key\":\"echo-1\",\"type\":\"ellipse\",\"name\":\"Echo ring 1 (4.5)\",\"x\":525,\"y\":400,\"w\":280,\"h\":280,\"fill\":\"#00000000\",\"stroke\":\"#FF4D5E\",\"strokeWidth\":6,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":0,\"v\":100,\"interp\":\"hold\"},{\"t\":4.5,\"v\":100,\"ease\":\"Expo Out\"},{\"t\":5.2,\"v\":240}],\"opacity\":[{\"t\":0,\"v\":0,\"interp\":\"hold\"},{\"t\":4.5,\"v\":80,\"ease\":\"Cubic Out\"},{\"t\":5.2,\"v\":0}]}},{\"key\":\"echo-2\",\"type\":\"ellipse\",\"name\":\"Echo ring 2 (5.0)\",\"x\":525,\"y\":400,\"w\":280,\"h\":280,\"fill\":\"#00000000\",\"stroke\":\"#FF4D5E\",\"strokeWidth\":6,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":0,\"v\":100,\"interp\":\"hold\"},{\"t\":5,\"v\":100,\"ease\":\"Expo Out\"},{\"t\":5.7,\"v\":240}],\"opacity\":[{\"t\":0,\"v\":0,\"interp\":\"hold\"},{\"t\":5,\"v\":80,\"ease\":\"Cubic Out\"},{\"t\":5.7,\"v\":0}]}},{\"key\":\"echo-3\",\"type\":\"ellipse\",\"name\":\"Echo ring 3 (5.5)\",\"x\":525,\"y\":400,\"w\":280,\"h\":280,\"fill\":\"#00000000\",\"stroke\":\"#FF4D5E\",\"strokeWidth\":6,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":0,\"v\":100,\"interp\":\"hold\"},{\"t\":5.5,\"v\":100,\"ease\":\"Expo Out\"},{\"t\":6.2,\"v\":240}],\"opacity\":[{\"t\":0,\"v\":0,\"interp\":\"hold\"},{\"t\":5.5,\"v\":80,\"ease\":\"Cubic Out\"},{\"t\":6.2,\"v\":0}]}},{\"key\":\"ring\",\"type\":\"path\",\"shape\":\"circle\",\"name\":\"Pulse mark ring\",\"x\":525,\"y\":400,\"w\":280,\"h\":280,\"fill\":\"#00000000\",\"stroke\":\"#F5F5F7\",\"strokeWidth\":16,\"drawOn\":{\"t\":0,\"duration\":1.2,\"ease\":\"Expo Out\"},\"animate\":{\"scale\":[{\"t\":0,\"v\":60,\"ease\":\"Expo Out\"},{\"t\":1.5,\"v\":72,\"ease\":\"Ease In\"},{\"t\":3.9,\"v\":78,\"ease\":\"Quad In\"},{\"t\":4,\"v\":108,\"ease\":\"Expo Out\"},{\"t\":4.35,\"v\":98,\"ease\":\"Cubic Out\"},{\"t\":4.5,\"v\":103,\"ease\":\"Expo Out\"},{\"t\":4.75,\"v\":100,\"ease\":\"Cubic Out\"},{\"t\":5,\"v\":103,\"ease\":\"Expo Out\"},{\"t\":5.25,\"v\":100,\"ease\":\"Cubic Out\"},{\"t\":5.5,\"v\":103,\"ease\":\"Expo Out\"},{\"t\":5.75,\"v\":100,\"ease\":\"Cubic Out\"}]}},{\"key\":\"dot\",\"type\":\"ellipse\",\"name\":\"Pulse mark dot\",\"x\":620,\"y\":495,\"w\":90,\"h\":90,\"fill\":\"#FF4D5E\",\"animate\":{\"scale\":[{\"t\":0,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":0.35,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":0.5,\"v\":[108,108],\"ease\":\"Expo Out\"},{\"t\":0.75,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":0.85,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":1,\"v\":[110,110],\"ease\":\"Expo Out\"},{\"t\":1.25,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":1.35,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":1.5,\"v\":[111,111],\"ease\":\"Expo Out\"},{\"t\":1.75,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":1.85,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":2,\"v\":[112,112],\"ease\":\"Expo Out\"},{\"t\":2.25,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":2.35,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":2.5,\"v\":[114,114],\"ease\":\"Expo Out\"},{\"t\":2.75,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":2.85,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":3,\"v\":[116,116],\"ease\":\"Expo Out\"},{\"t\":3.25,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":3.35,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":3.5,\"v\":[118,118],\"ease\":\"Expo Out\"},{\"t\":3.75,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":3.9,\"v\":[84,84],\"ease\":\"Quad In\"},{\"t\":4,\"v\":[125,75],\"ease\":\"Expo Out\"},{\"t\":4.18,\"v\":[94,106],\"ease\":\"Cubic Out\"},{\"t\":4.4,\"v\":[100,100],\"ease\":\"Cubic Out\"}]}},{\"key\":\"wordmark\",\"type\"…",
+  "result": "{\"summary\":\"6 created, 0 updated, 10 keyframe tracks; animation ends 6.2s\",\"ids\":{\"echo-1\":\"l_03jm8\",\"echo-2\":\"l_03jm9\",\"echo-3\":\"l_03jma\",\"ring\":\"l_03jmb\",\"dot\":\"l_03jmc\",\"wordmark\":\"l_03jmd\"}}"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 2,
+  "input": {
+   "beat": 1,
+   "status": "done"
+  },
+  "result": "beat 1 \"Build\" done; 1/4 beats finished"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 41,
+  "ok": true,
+  "ms": 137,
+  "editorMs": 120,
+  "input": {
+   "times": [
+    0.5,
+    2,
+    3.9,
+    4.1,
+    4.6,
+    5.2,
+    6.4,
+    7.5
+   ]
+  },
+  "result": "8 frames left→right, top→bottom at 0.5s, 2s, 3.9s, 4.1s, 4.6s, 5.2s, 6.4s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/ea293c7a-aee3-4d3b-bff2-766d17d1c69c/tool-results/mcp-motion-blob-1794511758805-vi0tn2.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 30,
+  "editorMs": 8,
+  "input": {},
+  "result": "score 84/100 (easing 75, music 96)\n1. [low] \"Pulse mark ring\".scale arrives at full speed at 4s (Quad In): ease the landing (Cubic In Out) or add a settle\n   → set_easing {\"id\":\"l_03jmb\",\"prop\":\"scale\",\"indices\":[2],\"ease\":\"Cubic In Out\"}\n2. [low] \"Pulse mark dot\".scale arrives at full speed at 3.5s (Quad In): ease the landing (Cubic In Out) or add a settle\n   → set_easing {\"id\":\"l_03jmc\",\"prop\":\"…"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 106,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 0,
+  "input": {
+   "beat": 2,
+   "status": "done",
+   "note": "Ring snaps on the 4.0 s drop, dot squash, Pulse letters pop from 4.2 s"
+  },
+  "result": "beat 2 \"Drop landing\" done; 2/4 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 92,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "beat": 3,
+   "status": "done",
+   "note": "Echo rings on 4.5, 5.0, 5.5 plus 103% nudges on the ring"
+  },
+  "result": "beat 3 \"Secondary hits\" done; 3/4 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 84,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "beat": 4,
+   "status": "done",
+   "note": "Echoes gone by 6.2 s; static clean lockup to 8 s"
+  },
+  "result": "beat 4 \"Lockup\" done; 4/4 beats finished — now critique (the critique tool, then contact_sheet; rubric: get_guide handbook, section \"Critique\")"
+ }
+]

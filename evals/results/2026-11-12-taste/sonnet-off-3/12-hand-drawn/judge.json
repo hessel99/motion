@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 7,
+  "style_match": 6,
+  "timing_easing": 7,
+  "composition": 7,
+  "richness": 6,
+  "polish": 5
+ },
+ "overall": 6.33,
+ "critique": [
+  "The hand-drawn feel is only skin-deep: the lines are clean, uniform-weight vectors and the only 'boil' is a 3px whole-group jitter at 12fps, so nothing actually wobbles per-line. The Fredoka fallback renders as a stiff geometric sans, and leftover default #6b8cff blue fills flash on the stem (~1.08s) and underline (~4.38s).",
+  "Add real per-path boil by cycling 2-3 slightly offset path keyframes (or a stepped per-vertex wiggle) on every stroke at 12fps with varied stroke width. Also set the stem, scores and underline fills to none, and make sure the rounded friendly font actually loads so the name lands warm instead of corporate."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0636438,
+ "ms": 11876,
+ "raw": "```json\n{\"brief_fit\": 7, \"style_match\": 6, \"timing_easing\": 7, \"composition\": 7, \"richness\": 6, \"polish\": 5,\n \"critique\": [\"The hand-drawn feel is only skin-deep: the lines are clean, uniform-weight vectors and the only 'boil' is a 3px whole-group jitter at 12fps, so nothing actually wobbles per-line. The Fredoka fallback renders as a stiff geometric sans, and leftover default #6b8cff blue fills flash on the stem (~1.08s) and underline (~4.38s).\", \"Add real per-path boil by cycling 2-3 slightly offset path keyframes (or a stepped per-vertex wiggle) on every stroke at 12fps with varied stroke width. Also set the stem, scores and underline fills to none, and make sure the rounded friendly font actually loads so the name lands warm instead of corporate.\"]}\n```"
+}

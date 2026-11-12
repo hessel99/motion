@@ -1,0 +1,1096 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 220,
+  "ok": true,
+  "ms": 26,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Kinetic typography quote, 3-4 phrases, per-word or per-letter reveals, emphasis on \"how it works\" in bigger bold different color, phrases transition into each other, small attribution last"
+  },
+  "result": "# Example: Kinetic type quote with clean phrase handovers\n> tags: kinetic, type, typography, quote, text, words, phrases, sentence, statement, title, bold, editorial, manifesto\n\n## Brief\n\"Kinetic typography for the quote: Design is not just what it looks like. Design is how it works. — Steve Jobs. Bold, dark, 8 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"duration…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 14,
+  "ok": true,
+  "ms": 33,
+  "editorMs": 0,
+  "input": {
+   "deep": false
+  },
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1080,\"height\":1080,\"fps\":30,\"duration\":8,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":0,\"layers\":[]}"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2266,
+  "ok": true,
+  "ms": 116,
+  "editorMs": 7,
+  "input": {
+   "comp": {
+    "duration": 8,
+    "background": "#0E0E0E",
+    "width": 1080,
+    "height": 1080,
+    "fps": 30
+   },
+   "layers": [
+    {
+     "key": "p1-design-not-just",
+     "name": "Phrase 1 · Design is not just",
+     "text": {
+      "content": "Design is not just",
+      "fontSize": 88,
+      "fontWeight": 800,
+      "tracking": -3,
+      "align": "center"
+     },
+     "center": [
+      540,
+      540
+     ],
+     "w": 1000,
+     "h": 120,
+     "fill": "#F5F5F0",
+     "textAnim": {
+      "by": "word",
+      "start": 0.2,
+      "duration": 0.6,
+      "stagger": 0.1,
+      "ease": "Expo Out",
+      "mode": "in",
+      "from": {
+       "dy": 40,
+       "opacity": 0
+      }
+     },
+     "exit": {
+      "t": 2,
+      "duration": 0.35,
+      "to": {
+       "opacity": 0,
+       "dy": -50
+      },
+      "ease": "Expo In"
+     }
+    },
+    {
+     "key": "p2-what-it-looks-like",
+     "name": "Phrase 2 · what it looks like",
+     "text": {
+      "content": "what it looks like.",
+      "fontSize": 88,
+      "fontWeight": 800,
+      "tracking": -3,
+      "align": "center"
+     },
+     "center": [
+      540,
+      540
+     ],
+     "w": 1000,
+     "h": 120,
+     "fill": "#8A8A8A",
+     "textAnim": {
+      "by": "word",
+      "start": 2.2,
+      "duration": 0.6,
+      "stagger": 0.08,
+      "ease": "Expo Out",
+      "mode": "in",
+      "from": {
+       "dy": 40,
+       "opacity": 0
+      }
+     },
+     "exit": {
+      "t": 3.55,
+      "duration": 0.35,
+      "to": {
+       "opacity": 0,
+       "dy": -50
+      },
+      "ease": "Expo In"
+     }
+    },
+    {
+     "key": "p3-design-is",
+     "name": "Phrase 3 · Design is",
+     "text": {
+      "content": "Design is",
+      "fontSize": 88,
+      "fontWeight": 800,
+      "tracking": -3,
+      "align": "center"
+     },
+     "center": [
+      540,
+      540
+     ],
+     "w": 1000,
+     "h": 120,
+     "fill": "#F5F5F0",
+     "textAnim": {
+      "by": "word",
+      "start": 3.6,
+      "duration": 0.6,
+      "stagger": 0.1,
+      "ease": "Expo Out",
+      "mode": "in",
+      "from": {
+       "dy": 40,
+       "opacity": 0
+      }
+     },
+     "exit": {
+      "t": 4.6,
+      "duration": 0.3,
+      "to": {
+       "opacity": 0,
+       "dy": -50
+      },
+      "ease": "Expo In"
+     }
+    },
+    {
+     "key": "hero-how-it",
+     "name": "Hero · how it",
+     "text": {
+      "content": "how it",
+      "fontSize": 210,
+      "fontWeight": 900,
+      "tracking": -8,
+      "align": "center"
+     },
+     "center": [
+      540,
+      420
+     ],
+     "w": 1000,
+     "h": 230,
+     "fill": "#FF3D2E",
+     "textAnim": {
+      "by": "char",
+      "start": 4.75,
+      "duration": 0.5,
+      "stagger": 0.035,
+      "ease": "Expo Out",
+      "mode": "in",
+      "from": {
+       "dy": 70,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "hero-works",
+     "name": "Hero · works.",
+     "text": {
+      "content": "works.",
+      "fontSize": 210,
+      "fontWeight": 900,
+      "tracking": -8,
+      "align": "center"
+     },
+     "center": [
+      540,
+      630
+     ],
+     "w": 1000,
+     "h": 230,
+     "fill": "#FF3D2E",
+     "textAnim": {
+      "by": "char",
+      "start": 4.95,
+      "duration": 0.5,
+      "stagger": 0.035,
+      "ease": "Expo Out",
+      "mode": "in",
+      "from": {
+       "dy": 70,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "attribution",
+     "name": "Attribution · Steve Jobs",
+     "text": {
+      "content": "— Steve Jobs",
+      "fontSize": 28,
+      "fontWeight": 500,
+      "tracking": 1,
+      "align": "center"
+     },
+     "center": [
+      540,
+      840
+     ],
+     "w": 600,
+     "h": 50,
+     "fill": "#8A8A8A",
+     "enter": {
+      "t": 7.3,
+      "duration": 0.6,
+      "from": {
+       "opacity": 0,
+       "dy": 16
+      },
+      "ease": "Quart Out"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"6 created, 0 updated, 8 keyframe tracks; animation ends 7.9s\",\"ids\":{\"p1-design-not-just\":\"l_03jm2\",\"p2-what-it-looks-like\":\"l_03jm3\",\"p3-design-is\":\"l_03jm4\",\"hero-how-it\":\"l_03jm5\",\"hero-works\":\"l_03jm6\",\"attribution\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 57,
+  "editorMs": 23,
+  "input": {},
+  "result": "score 41/100 (readability 0, polish 70)\n1. [high] \"Phrase 2 · what it looks like\" (4 words) is readable for 0.5 s, needs ~1.44 s: exit later\n   → retime {\"ids\":[\"l_03jm3\"],\"from\":3.5,\"offset\":1.04}\n2. [high] \"Phrase 3 · Design is\" (2 words) is readable for 0.25 s, needs ~0.87 s: exit later\n   → retime {\"ids\":[\"l_03jm4\"],\"from\":4.5,\"offset\":0.72}\n3. [high] no follow-through, overshoot, settle or id…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 52,
+  "ok": true,
+  "ms": 1486,
+  "editorMs": 1440,
+  "input": {
+   "times": [
+    0.6,
+    1.6,
+    2.5,
+    3.9,
+    4.9,
+    5.6,
+    7,
+    7.8
+   ],
+   "cell": 260
+  },
+  "result": "8 frames left→right, top→bottom at 0.6s, 1.6s, 2.5s, 3.9s, 4.9s, 5.6s, 7s, 7.8s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/40ee344d-09cd-4f42-8339-f7c0a0a9dcd3/tool-results/mcp-motion-blob-1794513412698-ifrom7.jpg]"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2210,
+  "ok": true,
+  "ms": 36,
+  "editorMs": 4,
+  "input": {
+   "comp": {
+    "duration": 9.5
+   },
+   "layers": [
+    {
+     "key": "p1-design-not-just",
+     "name": "Phrase 1 · Design is not just",
+     "text": {
+      "content": "Design is not just",
+      "fontSize": 88,
+      "fontWeight": 800,
+      "tracking": -3,
+      "align": "center"
+     },
+     "center": [
+      540,
+      540
+     ],
+     "w": 1000,
+     "h": 120,
+     "fill": "#F5F5F0",
+     "textAnim": {
+      "by": "word",
+      "start": 0.2,
+      "duration": 0.6,
+      "stagger": 0.1,
+      "ease": "Expo Out",
+      "mode": "in",
+      "from": {
+       "dy": 40,
+       "opacity": 0
+      }
+     },
+     "exit": {
+      "t": 2.65,
+      "duration": 0.35,
+      "to": {
+       "opacity": 0,
+       "dy": -50
+      },
+      "ease": "Expo In"
+     }
+    },
+    {
+     "key": "p2-what-it-looks-like",
+     "name": "Phrase 2 · what it looks like",
+     "text": {
+      "content": "what it looks like.",
+      "fontSize": 88,
+      "fontWeight": 800,
+      "tracking": -3,
+      "align": "center"
+     },
+     "center": [
+      540,
+      540
+     ],
+     "w": 1000,
+     "h": 120,
+     "fill": "#8A8A8A",
+     "textAnim": {
+      "by": "word",
+      "start": 2.55,
+      "duration": 0.6,
+      "stagger": 0.08,
+      "ease": "Expo Out",
+      "mode": "in",
+      "from": {
+       "dy": 40,
+       "opacity": 0
+      }
+     },
+     "exit": {
+      "t": 4.7,
+      "duration": 0.35,
+      "to": {
+       "opacity": 0,
+       "dy": -50
+      },
+      "ease": "Expo In"
+     }
+    },
+    {
+     "key": "p3-design-is",
+     "name": "Phrase 3 · Design is",
+     "text": {
+      "content": "Design is",
+      "fontSize": 88,
+      "fontWeight": 800,
+      "tracking": -3,
+      "align": "center"
+     },
+     "center": [
+      540,
+      540
+     ],
+     "w": 1000,
+     "h": 120,
+     "fill": "#F5F5F0",
+     "textAnim": {
+      "by": "word",
+      "start": 4.6,
+      "duration": 0.6,
+      "stagger": 0.1,
+      "ease": "Expo Out",
+      "mode": "in",
+      "from": {
+       "dy": 40,
+       "opacity": 0
+      }
+     },
+     "exit": {
+      "t": 6,
+      "duration": 0.3,
+      "to": {
+       "opacity": 0,
+       "dy": -50
+      },
+      "ease": "Expo In"
+     }
+    },
+    {
+     "key": "hero-how-it",
+     "name": "Hero · how it",
+     "text": {
+      "content": "how it",
+      "fontSize": 210,
+      "fontWeight": 900,
+      "tracking": -8,
+      "align": "center"
+     },
+     "center": [
+      540,
+      420
+     ],
+     "w": 1000,
+     "h": 230,
+     "fill": "#FF3D2E",
+     "textAnim": {
+      "by": "char",
+      "start": 6.05,
+      "duration": 0.5,
+      "stagger": 0.035,
+      "ease": "Expo Out",
+      "mode": "in",
+      "from": {
+       "dy": 70,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "hero-works",
+     "name": "Hero · works.",
+     "text": {
+      "content": "works.",
+      "fontSize": 210,
+      "fontWeight": 900,
+      "tracking": -8,
+      "align": "center"
+     },
+     "center": [
+      540,
+      630
+     ],
+     "w": 1000,
+     "h": 230,
+     "fill": "#FF3D2E",
+     "textAnim": {
+      "by": "char",
+      "start": 6.25,
+      "duration": 0.5,
+      "stagger": 0.035,
+      "ease": "Expo Out",
+      "mode": "in",
+      "from": {
+       "dy": 70,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "attribution",
+     "name": "Attribution · Steve Jobs",
+     "text": {
+      "content": "— Steve Jobs",
+      "fontSize": 28,
+      "fontWeight": 500,
+      "tracking": 1,
+      "align": "center"
+     },
+     "center": [
+      540,
+      840
+     ],
+     "w": 600,
+     "h": 50,
+     "fill": "#8A8A8A",
+     "enter": {
+      "t": 8.3,
+      "duration": 0.6,
+      "from": {
+       "opacity": 0,
+       "dy": 16
+      },
+      "ease": "Quart Out"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 6 updated, 8 keyframe tracks; animation ends 8.9s\",\"ids\":{\"p1-design-not-just\":\"l_03jm2\",\"p2-what-it-looks-like\":\"l_03jm3\",\"p3-design-is\":\"l_03jm4\",\"hero-how-it\":\"l_03jm5\",\"hero-works\":\"l_03jm6\",\"attribution\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "secondary_motion",
+  "argsBytes": 67,
+  "ok": false,
+  "ms": 30,
+  "editorMs": 2,
+  "error": "no moves found on position of these layers (they need 2+ keys with different values; spring/hold segments are left alone)",
+  "input": {
+   "ids": [
+    "l_03jm5",
+    "l_03jm6"
+   ],
+   "props": [
+    "position"
+   ],
+   "overshoot": 0.05
+  },
+  "result": "no moves found on position of these layers (they need 2+ keys with different values; spring/hold segments are left alone)"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 30,
+  "editorMs": 11,
+  "input": {},
+  "result": "score 51/100 (easing 71, polish 70, technical 52)\n1. [high] no follow-through, overshoot, settle or idle motion anywhere in 9.5s: everything stops dead\n2. [medium] \"Phrase 1 · Design is not just\" is never visible (opacity/scale 0 or off-frame the whole time)\n   → delete_layers {\"ids\":[\"l_03jm2\"]}\n3. [medium] \"Phrase 2 · what it looks like\" is never visible (opacity/scale 0 or off-frame the whole t…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 52,
+  "ok": true,
+  "ms": 167,
+  "editorMs": 146,
+  "input": {
+   "times": [
+    0.9,
+    2,
+    3.2,
+    4.2,
+    5.3,
+    6.4,
+    7.6,
+    9.2
+   ],
+   "cell": 240
+  },
+  "result": "8 frames left→right, top→bottom at 0.9s, 2s, 3.2s, 4.2s, 5.3s, 6.4s, 7.6s, 9.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/40ee344d-09cd-4f42-8339-f7c0a0a9dcd3/tool-results/mcp-motion-blob-1794513423937-y4iwbt.jpg]"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 29,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 4,
+  "input": {
+   "ids": [
+    "l_03jm2",
+    "l_03jm5"
+   ]
+  },
+  "result": "comp 9.5s @30fps\n\"Phrase 1 · Design is not just\" (text l_03jm2)\n  position: 2.3s 540 ─Expo In→ 2.65s [540,490]\n  opacity: 2.48s 0 ─Expo In→ 2.65s 0\n  text animator: in by word, start 0.2s, 0.6s each, stagger 0.1s, ease Expo Out\n\"Hero · how it\" (text l_03jm5)\n  text animator: in by char, start 6.05s, 0.5s each, stagger 0.04s, ease Expo Out"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 357,
+  "ok": true,
+  "ms": 7,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm2",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 100
+      },
+      {
+       "t": 2.3,
+       "v": 100,
+       "ease": "Ease In"
+      },
+      {
+       "t": 2.65,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 100
+      },
+      {
+       "t": 4.35,
+       "v": 100,
+       "ease": "Ease In"
+      },
+      {
+       "t": 4.7,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 100
+      },
+      {
+       "t": 5.7,
+       "v": 100,
+       "ease": "Ease In"
+      },
+      {
+       "t": 6,
+       "v": 0
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 3 tracks on 3 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 52,
+  "ok": true,
+  "ms": 124,
+  "editorMs": 112,
+  "input": {
+   "times": [
+    0.9,
+    2,
+    3.2,
+    4.2,
+    5.3,
+    6.4,
+    7.6,
+    9.2
+   ],
+   "cell": 240
+  },
+  "result": "8 frames left→right, top→bottom at 0.9s, 2s, 3.2s, 4.2s, 5.3s, 6.4s, 7.6s, 9.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/40ee344d-09cd-4f42-8339-f7c0a0a9dcd3/tool-results/mcp-motion-blob-1794513430307-04tqjx.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 113,
+  "ok": true,
+  "ms": 52,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm7",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 8.3,
+       "v": 0,
+       "ease": "Quart Out"
+      },
+      {
+       "t": 8.9,
+       "v": 100
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 33,
+  "editorMs": 6,
+  "input": {},
+  "result": "score 51/100 (readability 23, polish 70)\n1. [high] no follow-through, overshoot, settle or idle motion anywhere in 9.5s: everything stops dead\n   → secondary_motion {\"ids\":[\"l_03jm7\"],\"overshoot\":0.08,\"segments\":\"first\"}\n2. [medium] \"Phrase 1 · Design is not just\" (4 words) is readable for 1.33 s, needs ~1.44 s: exit later\n   → retime {\"ids\":[\"l_03jm2\"],\"from\":2.42,\"offset\":0.21}\n3. [medium] \"Phra…"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm2"
+   ],
+   "from": 2.42,
+   "offset": 0.3
+  },
+  "result": "retimed 1 layers; animation now ends at 2.95s"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm3"
+   ],
+   "from": 4.42,
+   "offset": 0.5
+  },
+  "result": "retimed 1 layers; animation now ends at 5.2s"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 39,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm4"
+   ],
+   "from": 5.75,
+   "offset": 0.6
+  },
+  "result": "retimed 1 layers; animation now ends at 6.6s"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 42,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm5",
+    "l_03jm6"
+   ],
+   "offset": 0.4
+  },
+  "result": "retimed 2 layers; animation now ends at 7.15s"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 109,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm7"
+   ],
+   "from": 8.3,
+   "offset": 0.5
+  },
+  "result": "retimed 1 layers; animation now ends at 9.4s"
+ },
+ {
+  "name": "set_composition",
+  "argsBytes": 15,
+  "ok": true,
+  "ms": 61,
+  "editorMs": 1,
+  "input": {
+   "duration": 10
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 112,
+  "editorMs": 6,
+  "input": {},
+  "result": "score 38/100 (timing 87, readability 0, polish 70)\n1. [high] \"Phrase 2 · what it looks like\" and \"Phrase 3 · Design is\" overlap for 0.42 s (4.75s–5.08s): let the outgoing text clear (or move apart) before the next arrives\n   → retime {\"ids\":[\"l_03jm4\"],\"offset\":0.47}\n2. [high] no follow-through, overshoot, settle or idle motion anywhere in 10s: everything stops dead\n   → secondary_motion {\"ids\":[\"…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 402,
+  "editorMs": 293,
+  "input": {
+   "times": [
+    0.9,
+    2,
+    2.8,
+    3.8,
+    5,
+    6,
+    7.5,
+    9.5
+   ],
+   "cell": 240
+  },
+  "result": "8 frames left→right, top→bottom at 0.9s, 2s, 2.8s, 3.8s, 5s, 6s, 7.5s, 9.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/40ee344d-09cd-4f42-8339-f7c0a0a9dcd3/tool-results/mcp-motion-blob-1794513440185-iyujg6.jpg]"
+ },
+ {
+  "name": "set_text_animation",
+  "argsBytes": 132,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm3"
+   ],
+   "by": "word",
+   "start": 2.7,
+   "duration": 0.6,
+   "stagger": 0.08,
+   "ease": "Expo Out",
+   "mode": "in",
+   "from": {
+    "dy": 40,
+    "opacity": 0
+   }
+  },
+  "result": "in by word from 2.7s: 0.6s each, stagger 0.08s, Expo Out"
+ },
+ {
+  "name": "set_text_animation",
+  "argsBytes": 131,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm4"
+   ],
+   "by": "word",
+   "start": 4.9,
+   "duration": 0.6,
+   "stagger": 0.1,
+   "ease": "Expo Out",
+   "mode": "in",
+   "from": {
+    "dy": 40,
+    "opacity": 0
+   }
+  },
+  "result": "in by word from 4.9s: 0.6s each, stagger 0.1s, Expo Out"
+ },
+ {
+  "name": "set_text_animation",
+  "argsBytes": 133,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm5"
+   ],
+   "by": "char",
+   "start": 6.7,
+   "duration": 0.5,
+   "stagger": 0.035,
+   "ease": "Expo Out",
+   "mode": "in",
+   "from": {
+    "dy": 70,
+    "opacity": 0
+   }
+  },
+  "result": "in by char from 6.7s: 0.5s each, stagger 0.04s, Expo Out"
+ },
+ {
+  "name": "set_text_animation",
+  "argsBytes": 133,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm6"
+   ],
+   "by": "char",
+   "start": 6.9,
+   "duration": 0.5,
+   "stagger": 0.035,
+   "ease": "Expo Out",
+   "mode": "in",
+   "from": {
+    "dy": 70,
+    "opacity": 0
+   }
+  },
+  "result": "in by char from 6.9s: 0.5s each, stagger 0.04s, Expo Out"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 880,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm2",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 100
+      },
+      {
+       "t": 2.3,
+       "v": 100,
+       "ease": "Ease In"
+      },
+      {
+       "t": 2.6,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        540,
+        540
+       ]
+      },
+      {
+       "t": 2.3,
+       "v": [
+        540,
+        540
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 2.6,
+       "v": [
+        540,
+        490
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 100
+      },
+      {
+       "t": 4.5,
+       "v": 100,
+       "ease": "Ease In"
+      },
+      {
+       "t": 4.8,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        540,
+        540
+       ]
+      },
+      {
+       "t": 4.5,
+       "v": [
+        540,
+        540
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 4.8,
+       "v": [
+        540,
+        490
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 100
+      },
+      {
+       "t": 6.3,
+       "v": 100,
+       "ease": "Ease In"
+      },
+      {
+       "t": 6.6,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        540,
+        540
+       ]
+      },
+      {
+       "t": 6.3,
+       "v": [
+        540,
+        540
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 6.6,
+       "v": [
+        540,
+        490
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 8.5,
+       "v": 0,
+       "ease": "Quart Out"
+      },
+      {
+       "t": 9.1,
+       "v": 100
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 7 tracks on 4 layers"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 4,
+  "input": {},
+  "result": "score 58/100 (readability 42, polish 70)\n1. [high] no follow-through, overshoot, settle or idle motion anywhere in 10s: everything stops dead\n   → secondary_motion {\"ids\":[\"l_03jm7\"],\"overshoot\":0.08,\"segments\":\"first\"}\n2. [medium] \"Phrase 1 · Design is not just\" (4 words) is readable for 1.25 s, needs ~1.44 s: exit later\n   → retime {\"ids\":[\"l_03jm2\"],\"from\":2.33,\"offset\":0.29}\n3. [medium] \"Phras…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 54,
+  "ok": true,
+  "ms": 138,
+  "editorMs": 116,
+  "input": {
+   "times": [
+    0.9,
+    2.5,
+    3.2,
+    4.6,
+    5.3,
+    6.5,
+    7.6,
+    9.6
+   ],
+   "cell": 240
+  },
+  "result": "8 frames left→right, top→bottom at 0.9s, 2.5s, 3.2s, 4.6s, 5.3s, 6.5s, 7.6s, 9.6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/40ee344d-09cd-4f42-8339-f7c0a0a9dcd3/tool-results/mcp-motion-blob-1794513450602-28ey2h.jpg]"
+ }
+]

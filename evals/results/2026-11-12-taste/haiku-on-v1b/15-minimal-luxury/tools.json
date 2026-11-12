@@ -1,0 +1,716 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 240,
+  "ok": true,
+  "ms": 38,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "minimal luxury perfume reveal, near-black background, champagne gold thin line draws slowly, wide-tracked serif name fades in letter by letter with tracking tightening, vertical story 1080x1920, slow restrained"
+  },
+  "result": "# Example: Elegant logo reveal, the line draws the mark and the wordmark slides out from behind it\n> tags: logo, reveal, elegant, minimal, luxury, corporate, line, stroke, draw, draw-on, trim, wordmark, mask, behind, monogram, calm\n\n## Brief\n\"Logo reveal for NOVA (a circle monogram with a slash). Calm and premium, dark background, 4 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 826,
+  "ok": true,
+  "ms": 379,
+  "editorMs": 3,
+  "input": {
+   "comp": {
+    "width": 1080,
+    "height": 1920,
+    "duration": 7,
+    "background": "#0B0A09",
+    "fps": 30
+   },
+   "layers": [
+    {
+     "key": "bg",
+     "type": "rect",
+     "x": 0,
+     "y": 0,
+     "w": 1080,
+     "h": 1920,
+     "fill": "#0B0A09",
+     "name": "Background"
+    },
+    {
+     "key": "rule",
+     "type": "path",
+     "d": "M0 0 L300 0",
+     "x": 390,
+     "y": 860,
+     "w": 300,
+     "h": 2,
+     "stroke": "#C8A96A",
+     "strokeWidth": 1.5,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 0.3,
+      "duration": 2.4,
+      "ease": "Sine In Out",
+      "from": "center"
+     },
+     "name": "Gold line"
+    },
+    {
+     "key": "name",
+     "text": {
+      "content": "ÉCLAT",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 112,
+      "fontWeight": 400,
+      "tracking": 40,
+      "align": "center"
+     },
+     "x": 0,
+     "y": 900,
+     "w": 1080,
+     "h": 140,
+     "fill": "#EDE6D6",
+     "name": "Name ÉCLAT"
+    },
+    {
+     "key": "sub",
+     "text": {
+      "content": "Eau de Parfum",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 34,
+      "fontWeight": 400,
+      "tracking": 4,
+      "align": "center"
+     },
+     "x": 0,
+     "y": 1020,
+     "w": 1080,
+     "h": 50,
+     "fill": "#C8A96A",
+     "name": "Subline"
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 2 keyframe tracks; animation ends 2.7s\",\"ids\":{\"bg\":\"l_03jm2\",\"rule\":\"l_03jm3\",\"name\":\"l_03jm4\",\"sub\":\"l_03jm5\"}}"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 14,
+  "ok": true,
+  "ms": 41,
+  "editorMs": 1,
+  "input": {
+   "deep": false
+  },
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1080,\"height\":1920,\"fps\":30,\"duration\":7,\"background\":[0.043,0.039,0.035,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":4,\"layers\":[{\"id\":\"l_03jm2\",\"name\":\"Background\",\"type\":\"rect\",\"position\":[540,960],\"size\":[1080,1920]},{\"id\":\"l_03jm3\",\"name\":\"Gold l…"
+ },
+ {
+  "name": "split_text",
+  "argsBytes": 42,
+  "ok": true,
+  "ms": 44,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jm4",
+   "by": "char",
+   "stagger": 0.2
+  },
+  "result": "{\"group\":\"l_03jm6\",\"pieces\":5,\"ids\":[\"l_03jm7\",\"l_03jm8\",\"l_03jm9\",\"l_03jma\",\"l_03jmb\"],\"note\":\"pieces are char text layers in group coordinates\"}"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm7"
+  },
+  "result": "{\"id\":\"l_03jm7\",\"name\":\"É\",\"type\":\"text\",\"parent\":\"l_03jm6\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[33.66015625,67.2]},\"position\":{\"v\":[397.40234375,67.2]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9294117647058824,0.9019607843137255,0.8392156862745098,1]}},\"text\":{\"content\":\"É\"…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jmb"
+  },
+  "result": "{\"id\":\"l_03jmb\",\"name\":\"T\",\"type\":\"text\",\"parent\":\"l_03jm6\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[36.1484375,67.2]},\"position\":{\"v\":[689.625,67.2]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9294117647058824,0.9019607843137255,0.8392156862745098,1]}},\"text\":{\"content\":\"T\",\"font…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm8"
+  },
+  "result": "{\"id\":\"l_03jm8\",\"name\":\"C\",\"type\":\"text\",\"parent\":\"l_03jm6\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[40.90625,67.2]},\"position\":{\"v\":[471.96875,67.2]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9294117647058824,0.9019607843137255,0.8392156862745098,1]}},\"text\":{\"content\":\"C\",\"font…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 36,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm9"
+  },
+  "result": "{\"id\":\"l_03jm9\",\"name\":\"L\",\"type\":\"text\",\"parent\":\"l_03jm6\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[31.6640625,67.2]},\"position\":{\"v\":[544.5390625,67.2]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9294117647058824,0.9019607843137255,0.8392156862745098,1]}},\"text\":{\"content\":\"L\",\"…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 68,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jma"
+  },
+  "result": "{\"id\":\"l_03jma\",\"name\":\"A\",\"type\":\"text\",\"parent\":\"l_03jm6\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[38.63671875,67.2]},\"position\":{\"v\":[614.83984375,67.2]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9294117647058824,0.9019607843137255,0.8392156862745098,1]}},\"text\":{\"content\":\"A\"…"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 1587,
+  "ok": true,
+  "ms": 213,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm7",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        376.8,
+        67.2
+       ]
+      },
+      {
+       "t": 1.6,
+       "v": [
+        376.8,
+        67.2
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.4,
+       "v": [
+        397.4,
+        67.2
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 1.6,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 2.8,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        461.8,
+        67.2
+       ]
+      },
+      {
+       "t": 1.85,
+       "v": [
+        461.8,
+        67.2
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.65,
+       "v": [
+        472,
+        67.2
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 1.85,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.05,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm9",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        544.5,
+        67.2
+       ]
+      },
+      {
+       "t": 2.1,
+       "v": [
+        544.5,
+        67.2
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.9,
+       "v": [
+        544.5,
+        67.2
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm9",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 2.1,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.3,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jma",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        624.6,
+        67.2
+       ]
+      },
+      {
+       "t": 2.35,
+       "v": [
+        624.6,
+        67.2
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.15,
+       "v": [
+        614.8,
+        67.2
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jma",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 2.35,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.55,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jmb",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        709.9,
+        67.2
+       ]
+      },
+      {
+       "t": 2.6,
+       "v": [
+        709.9,
+        67.2
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.4,
+       "v": [
+        689.6,
+        67.2
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jmb",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 2.6,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.8,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm5",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 4.6,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 5.8,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm5",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        540,
+        1052
+       ]
+      },
+      {
+       "t": 4.6,
+       "v": [
+        540,
+        1052
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 5.8,
+       "v": [
+        540,
+        1045
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 12 tracks on 6 layers"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 32,
+  "editorMs": 26,
+  "input": {},
+  "result": "score 51/100 (timing 92, easing 84, polish 70, richness 84, technical 64)\n1. [high] font \"Cormorant Garamond\" is not available: 6 text layer(s) render in a fallback\n   → update_layer {\"id\":\"l_03jm7\",\"text\":{\"fontFamily\":\"serif\"}}\n   → update_layer {\"id\":\"l_03jm8\",\"text\":{\"fontFamily\":\"serif\"}}\n   → update_layer {\"id\":\"l_03jm9\",\"text\":{\"fontFamily\":\"serif\"}}\n   → update_layer {\"id\":\"l_03jma\",\"text\"…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 286,
+  "editorMs": 272,
+  "input": {
+   "times": [
+    0.3,
+    1.2,
+    2.2,
+    3,
+    4.2,
+    6.5
+   ],
+   "cell": 260
+  },
+  "result": "6 frames left→right, top→bottom at 0.3s, 1.2s, 2.2s, 3s, 4.2s, 6.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b5e94e11-b9f6-4ef0-96db-ff74709df2d5/tool-results/mcp-motion-blob-1794513155473-uvuwzu.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 57,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 33,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm8",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm9",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 37,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jma",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 96,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmb",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 45,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 34,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "prop": "position",
+   "indices": [
+    1
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 48,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm8",
+   "prop": "position",
+   "indices": [
+    1
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 83,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jma",
+   "prop": "position",
+   "indices": [
+    1
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 39,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmb",
+   "prop": "position",
+   "indices": [
+    1
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm9",
+   "prop": "position",
+   "indices": [
+    1
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 37,
+  "editorMs": 31,
+  "input": {},
+  "result": "score 71/100 (timing 92, polish 70, richness 84)\n1. [high] no follow-through, overshoot, settle or idle motion anywhere in 7s: everything stops dead\n   → secondary_motion {\"ids\":[\"l_03jm5\"],\"overshoot\":0.08,\"segments\":\"first\"}\n2. [medium] 4 elements and 7 moves for 7s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch\n   → secondar…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 187,
+  "editorMs": 163,
+  "input": {
+   "times": [
+    1,
+    2.2,
+    3.2,
+    4.2,
+    5.8,
+    6.8
+   ],
+   "cell": 260
+  },
+  "result": "6 frames left→right, top→bottom at 1s, 2.2s, 3.2s, 4.2s, 5.8s, 6.8s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b5e94e11-b9f6-4ef0-96db-ff74709df2d5/tool-results/mcp-motion-blob-1794513161984-g5xkh0.jpg]"
+ },
+ {
+  "name": "secondary_motion",
+  "argsBytes": 74,
+  "ok": true,
+  "ms": 46,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm5"
+   ],
+   "overshoot": 0.08,
+   "segments": "all",
+   "props": [
+    "position"
+   ]
+  },
+  "result": "added overshoot 8% to Subline (1 moves)"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 164,
+  "editorMs": 6,
+  "input": {},
+  "result": "score 86/100 (timing 92, richness 84)\n1. [medium] 4 elements and 9 moves for 7s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch\n   → secondary_motion {\"ids\":[\"l_03jm5\"],\"overshoot\":0.1,\"segments\":\"all\"}\n2. [low] \"T\".position enter takes 1.8 s for 20 px: sluggish, ~0.26 s fits (handbook timing table)\n   → retime {\"ids\":[\"l_03jmb\"…"
+ }
+]

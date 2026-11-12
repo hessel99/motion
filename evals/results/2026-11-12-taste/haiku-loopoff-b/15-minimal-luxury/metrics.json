@@ -1,0 +1,208 @@
+{
+ "run": {
+  "id": "15-minimal-luxury",
+  "name": "15-minimal-luxury",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 54,
+    "sub": {
+     "timing": 87.39999999999999,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 80.8,
+     "readability": 80.8,
+     "polish": 70,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 12.600000000000001,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 19.2,
+     "readability": 19.2,
+     "polish": 30,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:no-secondary",
+     "medium:read-hold",
+     "medium:grow-middle",
+     "medium:thin",
+     "low:timing-range",
+     "low:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 9.1
+   },
+   "after": {
+    "score": 54,
+    "sub": {
+     "timing": 87.39999999999999,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 80.8,
+     "readability": 80.8,
+     "polish": 70,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 12.600000000000001,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 19.2,
+     "readability": 19.2,
+     "polish": 30,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:no-secondary",
+     "medium:read-hold",
+     "medium:grow-middle",
+     "medium:thin",
+     "low:timing-range",
+     "low:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 9.1
+   }
+  },
+  "wallMs": 51332,
+  "timedOut": false,
+  "turns": 18,
+  "costUsd": 0.0112385,
+  "durationMs": 50351,
+  "usage": {
+   "input": 469507,
+   "cached": 456740,
+   "output": 8239
+  },
+  "errors": [],
+  "toolCalls": 17,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the 7-second vertical reveal for ÉCLAT, a 1080×1920 comp on a near-black background (#0b0b0c).\n\n- **Gold line:** a 360 px champagne rule (**Gold line**) draws outward from its centre between 0.4 s and 3.0 s, with a slow Sine In Out ease. It fades in during the first second.\n- **Name:** **ÉCLAT** is split into five letter layers. Each letter fades in on a 0.2 s stagger from 2.6 s, with a Cubic Out ease. Each letter starts about 12% wider than its final spacing and tightens into place, so the tracking closes slightly as it appears.\n- **Tagline:** **Tagline** (\"EAU DE PARFUM\", Inter, letter-spaced, champagne) fades in from 5.0 s to 6.4 s.\n- **Hold:** the piece settles on the full lockup from about 5 s to the end.\n\nThe name is set in the system serif, because Cormorant Garamond isn't installed in this editor. If you add that font, I can switch the letters back to it.\n\nI left out the follow-through and overshoot the critic suggested, since the brief asks for restraint. The critic also flagged the slow letter moves as sluggish, but that pace is intentional for this brief.\n\nI can lengthen the hold, switch to a different serif, or add a thin rule under the tagline if you want more structure."
+ },
+ "metrics": {
+  "layers": 8,
+  "drawableLayers": 7,
+  "layerTypes": {
+   "rect": 1,
+   "text": 6,
+   "group": 1
+  },
+  "groups": 1,
+  "animatedLayers": 7,
+  "keys": 26,
+  "segments": 13,
+  "easesUsed": {
+   "Sine In Out": 1,
+   "Easy Ease": 2,
+   "Cubic Out": 5,
+   "Sine Out": 5
+  },
+  "distinctEases": 4,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#d2b98a",
+   "#efe4cc",
+   "#0b0b0c"
+  ],
+  "keyCoverage": 0.857,
+  "visualActivity": 0.756,
+  "firstMotion": 0.4,
+  "lastMotion": 6.333,
+  "endHold": 0.667,
+  "longestHold": 0.67,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.004,
+  "midLuma": 0.046,
+  "toolErrors": 0,
+  "toolCalls": 17
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "subtitle present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "letter-by-letter reveal",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "thin line draws (trim or size/scale animated on a thin layer)",
+    "type": "thinLineDraw",
+    "pass": true
+   },
+   {
+    "text": "serif font",
+    "type": "serifFont",
+    "pass": true
+   },
+   {
+    "text": "slow: shortest keyed move ≥0.8s",
+    "type": "minSegmentDuration",
+    "pass": false
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "negative space: ≤8 layers",
+    "type": "layersMax",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

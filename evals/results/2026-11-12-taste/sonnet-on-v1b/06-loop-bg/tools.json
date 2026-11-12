@@ -1,0 +1,106 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 7372,
+  "ok": true,
+  "ms": 436,
+  "editorMs": 19,
+  "input": "{\"comp\":{\"duration\":6,\"fps\":30,\"width\":1920,\"height\":1080,\"background\":\"#0a0620\"},\"layers\":[{\"key\":\"bg\",\"name\":\"BG Gradient\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":1920,\"h\":1080,\"fill\":{\"type\":\"linear\",\"angle\":45,\"stops\":[\"#0d0726\",\"#120a33\",\"#06232b\"]}},{\"key\":\"b1\",\"name\":\"Blob Purple\",\"type\":\"ellipse\",\"x\":-100,\"y\":-150,\"w\":1000,\"h\":1000,\"fill\":{\"type\":\"radial\",\"stops\":[\"#8b45f0cc\",\"#6d28d900\"]},\"expr\":{\"position\":\"value+[90*Math.sin(time*Math.PI*2/6),70*Math.cos(time*Math.PI*2/6)]\"}},{\"key\":\"b2\",\"name\":\"Blob Teal\",\"type\":\"ellipse\",\"x\":1050,\"y\":380,\"w\":1100,\"h\":1100,\"fill\":{\"type\":\"radial\",\"stops\":[\"#14c4b0b3\",\"#0d948800\"]},\"expr\":{\"position\":\"value+[-100*Math.cos(time*Math.PI*2/6),80*Math.sin(time*Math.PI*2/6)]\"}},{\"key\":\"b3\",\"name\":\"Blob Indigo\",\"type\":\"ellipse\",\"x\":600,\"y\":-250,\"w\":900,\"h\":900,\"fill\":{\"type\":\"radial\",\"stops\":[\"#5b5ff0b3\",\"#4338ca00\"]},\"expr\":{\"position\":\"value+[70*Math.sin(time*Math.PI*2/6+2),60*Math.sin(time*Math.PI*4/6)]\",\"scale\":\"[100+6*Math.sin(time*Math.PI*2/6),100+6*Math.sin(time*Math.PI*2/6)]\"}},{\"key\":\"b4\",\"name\":\"Blob Magenta\",\"type\":\"ellipse\",\"x\":1250,\"y\":-200,\"w\":800,\"h\":800,\"fill\":{\"type\":\"radial\",\"stops\":[\"#c04ff0a0\",\"#a855f700\"]},\"expr\":{\"position\":\"value+[-60*Math.sin(time*Math.PI*2/6+1),90*Math.cos(time*Math.PI*2/6+1)]\"}},{\"key\":\"b5\",\"name\":\"Blob Cyan\",\"type\":\"ellipse\",\"x\":-200,\"y\":500,\"w\":900,\"h\":900,\"fill\":{\"type\":\"radial\",\"stops\":[\"#22d3e699\",\"#06b6d400\"]},\"expr\":{\"position\":\"value+[80*Math.cos(time*Math.PI*2/6+0.5),-70*Math.sin(time*Math.PI*2/6+0.5)]\",\"scale\":\"[100+5*Math.cos(time*Math.PI*2/6),100+5*Math.cos(time*Math.PI*2/6)]\"}},{\"key\":\"dotsA\",\"name\":\"Dots A\",\"type\":\"path\",\"fill\":\"#ffffff\",\"d\":\"M57 60a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM297 60a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM537 60a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM777 60a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1017 60a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1257 60a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1497 60a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1737 60a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM177 180a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM417 180a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM657 180a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM897 180a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1137 180a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1377 180a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1617 180a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1857 180a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM57 300a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM297 300a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM537 300a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM777 300a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1017 300a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1257 300a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1497 300a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1737 300a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM177 420a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM417 420a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM657 420a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM897 420a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1137 420a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1377 420a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1617 420a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM1857 420a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM57 540a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM297 540a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM537 540a3 3 0 1 0 6 0a3 3 0 1 0 -6 0zM777 540a3…",
+  "result": "{\"summary\":\"8 created, 0 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"bg\":\"l_03jm2\",\"b1\":\"l_03jm3\",\"b2\":\"l_03jm4\",\"b3\":\"l_03jm5\",\"b4\":\"l_03jm6\",\"b5\":\"l_03jm7\",\"dotsA\":\"l_03jm8\",\"dotsB\":\"l_03jm9\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 1342,
+  "editorMs": 1234,
+  "input": {
+   "times": [
+    0,
+    1.5,
+    3,
+    4.5,
+    5.97
+   ],
+   "cell": 320
+  },
+  "result": "5 frames left→right, top→bottom at 0s, 1.5s, 3s, 4.5s, 5.97s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/c6c4b216-df13-4e4b-b557-89beaf4d1d2a/tool-results/mcp-motion-blob-1794512625374-q2dj94.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 49,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm3",
+   "props": {
+    "position": [
+     577,
+     470
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 173,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "props": {
+    "position": [
+     1050,
+     493
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 159,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm6",
+   "props": {
+    "position": [
+     1494,
+     395
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 112,
+  "editorMs": 3,
+  "input": {},
+  "result": "score 80/100 (composition 64)\n1. [high] \"Blob Cyan\" sits 44% outside the frame at the end\n   → update_layer {\"id\":\"l_03jm7\",\"props\":{\"position\":[479,598]}}"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 286,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "props": {
+    "position": [
+     479,
+     598
+    ]
+   }
+  },
+  "result": "ok"
+ }
+]

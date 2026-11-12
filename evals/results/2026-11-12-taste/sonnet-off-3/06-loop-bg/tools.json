@@ -1,0 +1,29 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 7818,
+  "ok": true,
+  "ms": 911,
+  "editorMs": 9,
+  "input": "{\"comp\":{\"background\":\"#0b0820\",\"duration\":6,\"fps\":30},\"layers\":[{\"key\":\"o1\",\"type\":\"ellipse\",\"x\":100,\"y\":80,\"w\":760,\"h\":760,\"fill\":\"#7b3fe4\",\"opacity\":55,\"props\":{\"blur\":140},\"expr\":{\"position\":\"value + [90*Math.sin(time*2*Math.PI/6), 60*Math.cos(time*2*Math.PI/6)]\",\"scale\":\"100 + 6*Math.sin(time*2*Math.PI/6)\"}},{\"key\":\"o2\",\"type\":\"ellipse\",\"x\":1050,\"y\":380,\"w\":820,\"h\":820,\"fill\":\"#14b8a6\",\"opacity\":45,\"props\":{\"blur\":150},\"expr\":{\"position\":\"value + [-80*Math.cos(time*2*Math.PI/6), 70*Math.sin(time*2*Math.PI/6)]\",\"scale\":\"100 + 5*Math.cos(time*2*Math.PI/6)\"}},{\"key\":\"o3\",\"type\":\"ellipse\",\"x\":600,\"y\":520,\"w\":600,\"h\":600,\"fill\":\"#4f46e5\",\"opacity\":40,\"props\":{\"blur\":130},\"expr\":{\"position\":\"value + [70*Math.sin(time*4*Math.PI/6+1), 50*Math.cos(time*2*Math.PI/6+2)]\"}},{\"key\":\"o4\",\"type\":\"ellipse\",\"x\":1350,\"y\":-120,\"w\":560,\"h\":560,\"fill\":\"#a855f7\",\"opacity\":40,\"props\":{\"blur\":120},\"expr\":{\"position\":\"value + [-60*Math.sin(time*2*Math.PI/6+0.5), 70*Math.cos(time*4*Math.PI/6)]\"}},{\"key\":\"o5\",\"type\":\"ellipse\",\"x\":-100,\"y\":640,\"w\":620,\"h\":620,\"fill\":\"#2dd4bf\",\"opacity\":35,\"props\":{\"blur\":130},\"expr\":{\"position\":\"value + [80*Math.cos(time*2*Math.PI/6+1), -60*Math.sin(time*2*Math.PI/6+3)]\"}},{\"key\":\"dotsA\",\"type\":\"group\",\"expr\":{\"opacity\":\"55 + 30*Math.sin(time*2*Math.PI/6)\"},\"children\":[{\"key\":\"a00\",\"type\":\"ellipse\",\"x\":132,\"y\":87,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a01\",\"type\":\"ellipse\",\"x\":432,\"y\":87,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a02\",\"type\":\"ellipse\",\"x\":732,\"y\":87,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a03\",\"type\":\"ellipse\",\"x\":1032,\"y\":87,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a04\",\"type\":\"ellipse\",\"x\":1332,\"y\":87,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a05\",\"type\":\"ellipse\",\"x\":1632,\"y\":87,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a10\",\"type\":\"ellipse\",\"x\":282,\"y\":237,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a11\",\"type\":\"ellipse\",\"x\":582,\"y\":237,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a12\",\"type\":\"ellipse\",\"x\":882,\"y\":237,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a13\",\"type\":\"ellipse\",\"x\":1182,\"y\":237,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a14\",\"type\":\"ellipse\",\"x\":1482,\"y\":237,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a15\",\"type\":\"ellipse\",\"x\":1782,\"y\":237,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a20\",\"type\":\"ellipse\",\"x\":132,\"y\":387,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a21\",\"type\":\"ellipse\",\"x\":432,\"y\":387,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a22\",\"type\":\"ellipse\",\"x\":732,\"y\":387,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a23\",\"type\":\"ellipse\",\"x\":1032,\"y\":387,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a24\",\"type\":\"ellipse\",\"x\":1332,\"y\":387,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a25\",\"type\":\"ellipse\",\"x\":1632,\"y\":387,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a30\",\"type\":\"ellipse\",\"x\":282,\"y\":537,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a31\",\"type\":\"ellipse\",\"x\":582,\"y\":537,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a32\",\"type\":\"ellipse\",\"x\":882,\"y\":537,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a33\",\"type\":\"ellipse\",\"x\":1182,\"y\":537,\"w\":6,\"h\":6,\"fill\":\"#ffffff\"},{\"key\":\"a34\",\"type\":\"el…",
+  "result": "{\"summary\":\"91 created, 0 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"o1\":\"l_03jm2\",\"o2\":\"l_03jm3\",\"o3\":\"l_03jm4\",\"o4\":\"l_03jm5\",\"o5\":\"l_03jm6\",\"a00\":\"l_03jm8\",\"a01\":\"l_03jm9\",\"a02\":\"l_03jma\",\"a03\":\"l_03jmb\",\"a04\":\"l_03jmc\",\"a05\":\"l_03jmd\",\"a10\":\"l_03jme\",\"a11\":\"l_03jmf\",\"a12\":\"l_03jmg\",\"a13\":\"l_03jmh\",\"a14\":\"l_03jmi\",\"a15\":\"l_03jmj\",\"a20\":\"l_03jmk\",\"a21\":\"l_03jml\",\"a22\":\"l_03jmm\",\"a23\"…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 2077,
+  "editorMs": 2026,
+  "input": {
+   "times": [
+    0,
+    1.5,
+    3,
+    4.5,
+    5.97
+   ],
+   "cell": 320
+  },
+  "result": "5 frames left→right, top→bottom at 0s, 1.5s, 3s, 4.5s, 5.97s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/616d4d85-6181-46cb-8dd5-6c04bc5601c0/tool-results/mcp-motion-blob-1794513928824-a9cgds.jpg]"
+ }
+]

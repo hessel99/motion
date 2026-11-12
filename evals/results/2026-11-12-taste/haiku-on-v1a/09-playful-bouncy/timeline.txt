@@ -1,0 +1,62 @@
+- candy-coral-circle [ellipse] box 175,255,150,150 #ff6b6b
+- candy-sun-star [path] box 355,185,130,130 #ffd93d star
+- candy-green-square [rect] box 535,255,130,130 #6bcb77
+- candy-blue-circle [ellipse] box 710,200,120,120 #4d96ff
+- candy-lilac-star [path] box 825,325,110,110 #c77dff star
+- candy-sun-circle [ellipse] box 520,130,80,80 #ffd93d
+- letter-B [text] box 218,344,147,311 #2b2d42 "B" Inter 240px w800
+- letter-o-1 [text] box 355,474,180,229 #2b2d42 "o" Inter 240px w800
+- letter-o-2 [text] box 517,252,146,287 #2b2d42 "o" Inter 240px w800
+- letter-p [text] box 663,133,150,288 #2b2d42 "p" Inter 240px w800
+- letter-excl [text] box 808,116,83,288 #d9364a "!" Inter 240px w800
+
+comp 1080x1080 6s @60fps, background #fff4e6
+"candy-coral-circle" (ellipse l_03jm2)
+  position: 0s [250,-160] ─Quad In→ 0.5s [250,330] ─Quad Out→ 0.72s [250,292] ─Quad In→ 0.95s [250,330] ─Quad Out→ 1.6s [250,330] ─Cubic In Out→ 1.78s [278,330] ─Quad Out→ 2.02s [250,330]
+  scale: 0s [85,120] ─Cubic In Out→ 0.5s [125,75] ─Sine Out→ 0.62s [92,110] ─Sine In Out→ 0.72s 100 ─Sine Out→ 0.95s [115,88] ─Sine Out→ 1.1s 100 ─Cubic In Out→ 1.6s 100 ─Cubic In Out→ 1.78s [88,112] ─Sine Out→ 1.9s [112,90] ─Sine In Out→ 2.02s 100
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/1.5)*clamp((time-4.6)/0.4,0,1)"
+"candy-sun-star" (path l_03jm3)
+  position: 0.12s [420,-160] ─Quad In→ 0.62s [420,250] ─Quad Out→ 0.84s [420,212] ─Quad In→ 1.07s [420,250] ─Quad Out→ 1.68s [420,250] ─Cubic In Out→ 1.86s [396,250] ─Quad Out→ 2.1s [420,250]
+  scale: 0.12s [85,120] ─Cubic In Out→ 0.62s [125,75] ─Sine Out→ 0.74s [92,110] ─Sine In Out→ 0.84s 100 ─Sine Out→ 1.07s [115,88] ─Sine Out→ 1.22s 100 ─Cubic In Out→ 1.68s 100 ─Cubic In Out→ 1.86s [88,112] ─Sine Out→ 1.98s [112,90] ─Sine In Out→ 2.1s 100
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/1.5)*clamp((time-4.6)/0.4,0,1)"
+"candy-green-square" (rect l_03jm4)
+  position: 0.24s [600,-160] ─Quad In→ 0.74s [600,320] ─Quad Out→ 0.96s [600,282] ─Quad In→ 1.19s [600,320] ─Quad Out→ 1.76s [600,320] ─Cubic In Out→ 1.94s [622,320] ─Quad Out→ 2.18s [600,320]
+  scale: 0.24s [85,120] ─Cubic In Out→ 0.74s [125,75] ─Sine Out→ 0.86s [92,110] ─Sine In Out→ 0.96s 100 ─Sine Out→ 1.19s [115,88] ─Sine Out→ 1.34s 100 ─Cubic In Out→ 1.76s 100 ─Cubic In Out→ 1.94s [88,112] ─Sine Out→ 2.06s [112,90] ─Sine In Out→ 2.18s 100
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/1.5)*clamp((time-4.6)/0.4,0,1)"
+"candy-blue-circle" (ellipse l_03jm5)
+  position: 0.36s [770,-160] ─Quad In→ 0.86s [770,260] ─Quad Out→ 1.08s [770,222] ─Quad In→ 1.31s [770,260] ─Quad Out→ 1.84s [770,260] ─Cubic In Out→ 2.02s [744,260] ─Quad Out→ 2.26s [770,260]
+  scale: 0.36s [85,120] ─Cubic In Out→ 0.86s [125,75] ─Sine Out→ 0.98s [92,110] ─Sine In Out→ 1.08s 100 ─Sine Out→ 1.31s [115,88] ─Sine Out→ 1.46s 100 ─Cubic In Out→ 1.84s 100 ─Cubic In Out→ 2.02s [88,112] ─Sine Out→ 2.14s [112,90] ─Sine In Out→ 2.26s 100
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/1.5)*clamp((time-4.6)/0.4,0,1)"
+"candy-lilac-star" (path l_03jm6)
+  position: 0.48s [880,-160] ─Quad In→ 0.98s [880,380] ─Quad Out→ 1.2s [880,342] ─Quad In→ 1.43s [880,380] ─Quad Out→ 1.92s [880,380] ─Cubic In Out→ 2.1s [900,380] ─Quad Out→ 2.34s [880,380]
+  scale: 0.48s [85,120] ─Cubic In Out→ 0.98s [125,75] ─Sine Out→ 1.1s [92,110] ─Sine In Out→ 1.2s 100 ─Sine Out→ 1.43s [115,88] ─Sine Out→ 1.58s 100 ─Cubic In Out→ 1.92s 100 ─Cubic In Out→ 2.1s [88,112] ─Sine Out→ 2.22s [112,90] ─Sine In Out→ 2.34s 100
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/1.5)*clamp((time-4.6)/0.4,0,1)"
+"candy-sun-circle" (ellipse l_03jm7)
+  position: 0.6s [560,-160] ─Quad In→ 1.1s [560,170] ─Quad Out→ 1.32s [560,132] ─Quad In→ 1.55s [560,170] ─Quad Out→ 2s [560,170] ─Cubic In Out→ 2.18s [542,170] ─Quad Out→ 2.42s [560,170]
+  scale: 0.6s [85,120] ─Cubic In Out→ 1.1s [125,75] ─Sine Out→ 1.22s [92,110] ─Sine In Out→ 1.32s 100 ─Sine Out→ 1.55s [115,88] ─Sine Out→ 1.7s 100 ─Cubic In Out→ 2s 100 ─Cubic In Out→ 2.18s [88,112] ─Sine Out→ 2.3s [112,90] ─Sine In Out→ 2.42s 100
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/1.5)*clamp((time-4.6)/0.4,0,1)"
+"letter-B" (text l_03jm8)
+  position: 2.5s [291,260] ─Quad In→ 2.85s [291,600] ─Cubic Out→ 3.12s [291,490] ─Quad In→ 3.4s [291,600]
+  scale: 2.5s 100 ─Cubic In Out→ 2.7s 100 ─Cubic In Out→ 2.85s [128,76] ─Sine Out→ 3s [94,108] ─Sine In Out→ 3.12s 100 ─Sine Out→ 3.26s 100 ─Cubic In Out→ 3.4s [128,76] ─Sine Out→ 3.54s [96,104] ─Sine In Out→ 3.64s 100
+  rotation: expr "value + 3*Math.sin(time*2*Math.PI/1.5 + 1.2)*clamp((time-4.6)/0.4,0,1)"
+  opacity: 2.5s 0 ─Ease Out→ 2.62s 100
+"letter-o-1" (text l_03jm9)
+  position: 2.64s [445,260] ─Quad In→ 2.99s [445,600] ─Cubic Out→ 3.26s [445,490] ─Quad In→ 3.54s [445,600]
+  scale: 2.64s 100 ─Cubic In Out→ 2.84s 100 ─Cubic In Out→ 2.99s [128,76] ─Sine Out→ 3.14s [94,108] ─Sine In Out→ 3.26s 100 ─Sine Out→ 3.4s 100 ─Cubic In Out→ 3.54s [128,76] ─Sine Out→ 3.68s [96,104] ─Sine In Out→ 3.78s 100
+  rotation: expr "value + 3*Math.sin(time*2*Math.PI/1.5 + 1.2)*clamp((time-4.6)/0.4,0,1)"
+  opacity: 2.64s 0 ─Ease Out→ 2.76s 100
+"letter-o-2" (text l_03jma)
+  position: 2.78s [590,260] ─Quad In→ 3.13s [590,600] ─Cubic Out→ 3.4s [590,490] ─Quad In→ 3.68s [590,600]
+  scale: 2.78s 100 ─Cubic In Out→ 2.98s 100 ─Cubic In Out→ 3.13s [128,76] ─Sine Out→ 3.28s [94,108] ─Sine In Out→ 3.4s 100 ─Sine Out→ 3.54s 100 ─Cubic In Out→ 3.68s [128,76] ─Sine Out→ 3.82s [96,104] ─Sine In Out→ 3.92s 100
+  rotation: expr "value + 3*Math.sin(time*2*Math.PI/1.5 + 1.2)*clamp((time-4.6)/0.4,0,1)"
+  opacity: 2.78s 0 ─Ease Out→ 2.9s 100
+"letter-p" (text l_03jmb)
+  position: 2.92s [738,260] ─Quad In→ 3.27s [738,600] ─Cubic Out→ 3.54s [738,490] ─Quad In→ 3.82s [738,600]
+  scale: 2.92s 100 ─Cubic In Out→ 3.12s 100 ─Cubic In Out→ 3.27s [128,76] ─Sine Out→ 3.42s [94,108] ─Sine In Out→ 3.54s 100 ─Sine Out→ 3.68s 100 ─Cubic In Out→ 3.82s [128,76] ─Sine Out→ 3.96s [96,104] ─Sine In Out→ 4.06s 100
+  rotation: expr "value + 3*Math.sin(time*2*Math.PI/1.5 + 1.2)*clamp((time-4.6)/0.4,0,1)"
+  opacity: 2.92s 0 ─Ease Out→ 3.04s 100
+"letter-excl" (text l_03jmc)
+  position: 3.1s [849,260] ─Quad In→ 3.45s [849,600] ─Cubic Out→ 3.72s [849,430] ─Quad In→ 4s [849,600]
+  scale: 3.1s 100 ─Cubic In Out→ 3.3s 100 ─Cubic In Out→ 3.45s [128,76] ─Sine Out→ 3.6s [94,108] ─Sine In Out→ 3.72s 100 ─Sine Out→ 3.86s 100 ─Cubic In Out→ 4s [128,76] ─Sine Out→ 4.14s [96,104] ─Sine In Out→ 4.24s 100
+  rotation: expr "value + 3*Math.sin(time*2*Math.PI/1.5 + 1.2)*clamp((time-4.6)/0.4,0,1)"
+  opacity: 3.1s 0 ─Ease Out→ 3.22s 100

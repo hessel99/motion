@@ -1,0 +1,209 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 3263,
+  "ok": true,
+  "ms": 246,
+  "editorMs": 6,
+  "input": "{\"comp\":{\"background\":\"#f6ecd9\",\"duration\":6,\"fps\":24},\"layers\":[{\"key\":\"blob1\",\"shape\":\"blob\",\"x\":260,\"y\":120,\"w\":520,\"h\":480,\"fill\":\"#e8b86b\",\"opacity\":75,\"shapeOptions\":{\"seed\":2},\"enter\":{\"from\":{\"opacity\":0,\"scale\":60},\"duration\":1.4,\"ease\":\"Cubic Out\"},\"expr\":{\"scale\":\"[100+4*Math.sin(time*1.3),100+4*Math.cos(time*1.0)]\",\"rotation\":\"4*Math.sin(time*0.5)\"}},{\"key\":\"blob2\",\"shape\":\"blob\",\"x\":1050,\"y\":260,\"w\":560,\"h\":420,\"fill\":\"#d98a5f\",\"opacity\":60,\"shapeOptions\":{\"seed\":5},\"enter\":{\"from\":{\"opacity\":0,\"scale\":60},\"duration\":1.4,\"t\":0.3,\"ease\":\"Cubic Out\"},\"expr\":{\"scale\":\"[100+4*Math.cos(time*1.1),100+4*Math.sin(time*1.4)]\",\"rotation\":\"-5*Math.sin(time*0.45)\"}},{\"key\":\"blob3\",\"shape\":\"blob\",\"x\":1450,\"y\":60,\"w\":340,\"h\":320,\"fill\":\"#a9b27a\",\"opacity\":65,\"shapeOptions\":{\"seed\":8},\"enter\":{\"from\":{\"opacity\":0,\"scale\":60},\"duration\":1.4,\"t\":0.5,\"ease\":\"Cubic Out\"},\"expr\":{\"scale\":\"[100+5*Math.sin(time*1.7),100+5*Math.cos(time*1.2)]\"}},{\"key\":\"blob4\",\"shape\":\"blob\",\"x\":120,\"y\":620,\"w\":300,\"h\":280,\"fill\":\"#c9a27a\",\"opacity\":55,\"shapeOptions\":{\"seed\":11},\"enter\":{\"from\":{\"opacity\":0,\"scale\":60},\"duration\":1.4,\"t\":0.6,\"ease\":\"Cubic Out\"},\"expr\":{\"scale\":\"[100+5*Math.cos(time*1.5),100+5*Math.sin(time*1.0)]\"}},{\"key\":\"stem\",\"d\":\"M560 720 C578 620 544 520 566 400 C576 340 558 300 562 250\",\"stroke\":\"#5a3a22\",\"strokeWidth\":8,\"drawOn\":{\"t\":0.4,\"duration\":1.2,\"ease\":\"Sine In Out\"}},{\"key\":\"g0\",\"d\":\"M562 250 C545 220 548 185 562 150 C576 185 579 220 562 250\",\"stroke\":\"#5a3a22\",\"strokeWidth\":7,\"fill\":\"#e8b86b\",\"drawOn\":{\"t\":1.4,\"duration\":0.5,\"ease\":\"Sine Out\"}},{\"key\":\"gl1\",\"d\":\"M562 310 C522 312 508 275 514 245 C548 250 566 278 562 310\",\"stroke\":\"#5a3a22\",\"strokeWidth\":7,\"fill\":\"#e8b86b\",\"drawOn\":{\"t\":1.6,\"duration\":0.5,\"ease\":\"Sine Out\"}},{\"key\":\"gr1\",\"d\":\"M564 300 C604 302 618 265 612 235 C578 240 560 268 564 300\",\"stroke\":\"#5a3a22\",\"strokeWidth\":7,\"fill\":\"#e8b86b\",\"drawOn\":{\"t\":1.7,\"duration\":0.5,\"ease\":\"Sine Out\"}},{\"key\":\"gl2\",\"d\":\"M566 385 C526 387 512 350 518 320 C552 325 570 353 566 385\",\"stroke\":\"#5a3a22\",\"strokeWidth\":7,\"fill\":\"#e8b86b\",\"drawOn\":{\"t\":1.9,\"duration\":0.5,\"ease\":\"Sine Out\"}},{\"key\":\"gr2\",\"d\":\"M568 375 C608 377 622 340 616 310 C582 315 564 343 568 375\",\"stroke\":\"#5a3a22\",\"strokeWidth\":7,\"fill\":\"#e8b86b\",\"drawOn\":{\"t\":2,\"duration\":0.5,\"ease\":\"Sine Out\"}},{\"key\":\"loaf\",\"d\":\"M820 660 C790 580 840 490 950 462 C1070 436 1230 450 1290 530 C1335 590 1310 650 1262 662 C1120 676 960 674 820 660 Z\",\"stroke\":\"#5a3a22\",\"strokeWidth\":9,\"fill\":\"#e8b86b\",\"drawOn\":{\"t\":1.2,\"duration\":1.6,\"ease\":\"Sine In Out\"}},{\"key\":\"s1\",\"d\":\"M930 520 C950 545 962 570 966 592\",\"stroke\":\"#5a3a22\",\"strokeWidth\":7,\"drawOn\":{\"t\":2.9,\"duration\":0.4,\"ease\":\"Sine Out\"}},{\"key\":\"s2\",\"d\":\"M1042 505 C1062 530 1074 556 1078 580\",\"stroke\":\"#5a3a22\",\"strokeWidth\":7,\"drawOn\":{\"t\":3.1,\"duration\":0.4,\"ease\":\"Sine Out\"}},{\"key\":\"s3\",\"d\":\"M1156 510 C1176 535 1188 560 1192 582\",\"stroke\":\"#5a3a22\",\"strokeWidth\":7,\"drawOn\":{\"t\":3.3,\"duration\":0.4,\"ease\":\"Sine Out\"}},{\"key\":\"title\",\"typ…",
+  "result": "{\"summary\":\"15 created, 0 updated, 28 keyframe tracks; animation ends 3.7s\",\"ids\":{\"blob1\":\"l_03jm2\",\"blob2\":\"l_03jm3\",\"blob3\":\"l_03jm4\",\"blob4\":\"l_03jm5\",\"stem\":\"l_03jm6\",\"g0\":\"l_03jm7\",\"gl1\":\"l_03jm8\",\"gr1\":\"l_03jm9\",\"gl2\":\"l_03jma\",\"gr2\":\"l_03jmb\",\"loaf\":\"l_03jmc\",\"s1\":\"l_03jmd\",\"s2\":\"l_03jme\",\"s3\":\"l_03jmf\",\"title\":\"l_03jmg\"}}"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 237,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm6",
+    "l_03jm7",
+    "l_03jm8",
+    "l_03jm9",
+    "l_03jma",
+    "l_03jmb",
+    "l_03jmc",
+    "l_03jmd",
+    "l_03jme",
+    "l_03jmf"
+   ],
+   "prop": "position",
+   "expr": "value + [2.5*Math.sin(Math.floor(time*12)*2.3+index), 2.5*Math.cos(Math.floor(time*12)*1.7+index*2)]"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 150,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm6",
+    "l_03jm7",
+    "l_03jm8",
+    "l_03jm9",
+    "l_03jma",
+    "l_03jmb",
+    "l_03jmc"
+   ],
+   "prop": "rotation",
+   "expr": "0.6*Math.sin(Math.floor(time*12)*3.1+index)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 12,
+  "ok": true,
+  "ms": 214,
+  "editorMs": 174,
+  "input": {
+   "frames": 6
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 1.21s, 2.42s, 3.58s, 4.79s, 6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/cfb97376-cb06-4e31-9700-c77155f0f1f4/tool-results/mcp-motion-blob-1794511389917-c1m8sb.jpg]"
+ },
+ {
+  "name": "draw_on",
+  "argsBytes": 77,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jmc"
+   ],
+   "t": 1.2,
+   "duration": 1.6,
+   "ease": "Sine In Out",
+   "fill": "fade"
+  },
+  "result": "draw on: 1 path(s) 1.2s–2.8s"
+ },
+ {
+  "name": "draw_on",
+  "argsBytes": 129,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm7",
+    "l_03jm8",
+    "l_03jm9",
+    "l_03jma",
+    "l_03jmb"
+   ],
+   "t": 1.4,
+   "duration": 0.5,
+   "ease": "Sine Out",
+   "fill": "fade",
+   "stagger": 0.15
+  },
+  "result": "draw on: 5 path(s) 1.4s–2.5s"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 25,
+  "ok": true,
+  "ms": 233,
+  "editorMs": 133,
+  "input": {
+   "times": [
+    0,
+    0.8,
+    1.8,
+    2.6
+   ]
+  },
+  "result": "4 frames left→right, top→bottom at 0s, 0.79s, 1.79s, 2.58s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/cfb97376-cb06-4e31-9700-c77155f0f1f4/tool-results/mcp-motion-blob-1794511393865-25md65.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm6",
+   "inPoint": 0.4
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmd",
+   "inPoint": 2.9
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 30,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jme",
+   "inPoint": 3.1
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmf",
+   "inPoint": 3.3
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 94,
+  "editorMs": 68,
+  "input": {
+   "times": [
+    0.2,
+    0.9,
+    3,
+    5
+   ]
+  },
+  "result": "4 frames left→right, top→bottom at 0.21s, 0.92s, 3s, 5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/cfb97376-cb06-4e31-9700-c77155f0f1f4/tool-results/mcp-motion-blob-1794511397485-2kvn6w.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 70,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jmg",
+   "text": {
+    "fontFamily": "Inter"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 76,
+  "editorMs": 16,
+  "input": {},
+  "result": "score 100/100 (no issues found)"
+ }
+]

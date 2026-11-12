@@ -94,7 +94,7 @@ export const RULES: Record<string, { cat: Category; w: number; title: string }> 
 };
 const SEV: Record<Severity, number> = { high: 30, medium: 16, low: 7 };
 /** category weights of the overall score (calibrated) */
-export const CAT_WEIGHTS: Record<Category, number> = { timing: 0.5, easing: 1.2, choreography: 1.5, composition: 0.7, readability: 0.8, polish: 0.5, richness: 0.7, technical: 1.5, brand: 0.4, music: 0.8 };
+export const CAT_WEIGHTS: Record<Category, number> = { timing: 0.3, easing: 0.9, choreography: 1.8, composition: 0.4, readability: 0.8, polish: 0.4, richness: 0.6, technical: 1.4, brand: 0.2, music: 0.8 };
 /** penalty points (after category weights) that halve the score's distance to 0: score = 100·0.5^(P/HALF) */
 export const HALF = 110;
 

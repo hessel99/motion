@@ -1,0 +1,26 @@
+- BG Gradient [rect] box 0,0,1920,1080 gradient(#0d0726→#120a33→#06232b)
+- Blob Purple [ellipse] box 77,-100,1000,1000 gradient(#8b45f0 a0.8→#6d28d9 a0)
+- Blob Teal [ellipse] box 1150,380,1100,1100 gradient(#14c4b0 a0.7→#0d9488 a0)
+- Blob Indigo [ellipse] box 536,43,900,900 gradient(#5b5ff0 a0.7→#4338ca a0)
+- Blob Magenta [ellipse] box 1145,-54,800,800 gradient(#c04ff0 a0.63→#a855f7 a0)
+- Blob Cyan [ellipse] box -19,204,855,855 gradient(#22d3e6 a0.6→#06b6d4 a0)
+- Dots A [path] box 57,57,1806,966 #ffffff
+- Dots B [path] box 57,57,1806,966 #ffffff
+
+comp 1920x1080 6s @30fps, background #0a0620
+"Blob Purple" (ellipse l_03jm3)
+  position: expr "value+[90*Math.sin(time*Math.PI*2/6),70*Math.cos(time*Math.PI*2/6)]"
+"Blob Teal" (ellipse l_03jm4)
+  position: expr "value+[-100*Math.cos(time*Math.PI*2/6),80*Math.sin(time*Math.PI*2/6)]"
+"Blob Indigo" (ellipse l_03jm5)
+  position: expr "value+[70*Math.sin(time*Math.PI*2/6+2),60*Math.sin(time*Math.PI*4/6)]"
+  scale: expr "[100+6*Math.sin(time*Math.PI*2/6),100+6*Math.sin(time*Math.PI*2/6)]"
+"Blob Magenta" (ellipse l_03jm6)
+  position: expr "value+[-60*Math.sin(time*Math.PI*2/6+1),90*Math.cos(time*Math.PI*2/6+1)]"
+"Blob Cyan" (ellipse l_03jm7)
+  position: expr "value+[80*Math.cos(time*Math.PI*2/6+0.5),-70*Math.sin(time*Math.PI*2/6+0.5)]"
+  scale: expr "[100+5*Math.cos(time*Math.PI*2/6),100+5*Math.cos(time*Math.PI*2/6)]"
+"Dots A" (path l_03jm8)
+  opacity: expr "28+16*Math.sin(time*Math.PI*2/6)"
+"Dots B" (path l_03jm9)
+  opacity: expr "28-16*Math.sin(time*Math.PI*2/6)"

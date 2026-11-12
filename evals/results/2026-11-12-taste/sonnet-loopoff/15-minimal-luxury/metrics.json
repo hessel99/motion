@@ -1,0 +1,202 @@
+{
+ "run": {
+  "id": "15-minimal-luxury",
+  "name": "15-minimal-luxury",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 53,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 94.4,
+     "composition": 100,
+     "readability": 100,
+     "polish": 70,
+     "richness": 70,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 5.6000000000000005,
+     "composition": 0,
+     "readability": 0,
+     "polish": 30,
+     "richness": 30,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "high:no-secondary",
+     "high:thin",
+     "low:slow-stagger"
+    ],
+    "ms": 5.8
+   },
+   "after": {
+    "score": 53,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 94.4,
+     "composition": 100,
+     "readability": 100,
+     "polish": 70,
+     "richness": 70,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 5.6000000000000005,
+     "composition": 0,
+     "readability": 0,
+     "polish": 30,
+     "richness": 30,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "high:no-secondary",
+     "high:thin",
+     "low:slow-stagger"
+    ],
+    "ms": 5.8
+   }
+  },
+  "wallMs": 18364,
+  "timedOut": false,
+  "turns": 6,
+  "costUsd": 0.0480512,
+  "durationMs": 17505,
+  "usage": {
+   "input": 140214,
+   "cached": 136252,
+   "output": 1859
+  },
+  "errors": [],
+  "toolCalls": 5,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The ÉCLAT reveal is built, but the type still renders in a sans-serif, not the serif you asked for. I set \"Cormorant Garamond\" first, then \"Playfair Display\". Neither shows in the preview, so both look like they fell back to the default font. I haven't tried a third font. If you have a serif installed, tell me its name and I'll switch it.\n\nIt runs 7 seconds at 1080×1920 on a near-black background (#0a0908). I haven't run the critic, and I checked it only in contact-sheet and still frames, not played back in real time.\n\n- **Gold line:** a thin vertical champagne line (**Gold Line**) draws itself from 0.6 s to 3.8 s with a Sine In Out ease, so it starts and stops softly.\n- **Name:** **ECLAT Name** fades in one letter at a time from 2 s. Each letter takes 1.6 s and they step 0.4 s apart. It is set wide-tracked in gold.\n- **Tracking tightening:** letter spacing can't be animated here, so the name eases from 106% down to 100% scale over four seconds. That reads as a slight settling inward, not a true tracking change.\n- **Subtitle:** **Eau de Parfum** is a small, muted gold line that fades in slowly from 4.4 s to 6 s.\n- **Ending:** the last second is a held end card, with plenty of empty space around the lockup.\n\nI can make it slower or add a slow glow on the line's tip."
+ },
+ "metrics": {
+  "layers": 3,
+  "drawableLayers": 3,
+  "layerTypes": {
+   "path": 1,
+   "text": 2
+  },
+  "groups": 0,
+  "animatedLayers": 3,
+  "keys": 7,
+  "segments": 3,
+  "easesUsed": {
+   "Sine In Out": 1,
+   "Sine Out": 1,
+   "Easy Ease": 1
+  },
+  "distinctEases": 3,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 1,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#d6b98a",
+   "#a8926c",
+   "#0a0908"
+  ],
+  "keyCoverage": 0.771,
+  "visualActivity": 0.459,
+  "firstMotion": 1.933,
+  "lastMotion": 5.933,
+  "endHold": 1.067,
+  "longestHold": 0.67,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [
+   "Playfair Display"
+  ],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.004,
+  "midLuma": 0.038,
+  "toolErrors": 0,
+  "toolCalls": 5
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "subtitle present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "letter-by-letter reveal",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "thin line draws (trim or size/scale animated on a thin layer)",
+    "type": "thinLineDraw",
+    "pass": true
+   },
+   {
+    "text": "serif font",
+    "type": "serifFont",
+    "pass": false
+   },
+   {
+    "text": "slow: shortest keyed move ≥0.8s",
+    "type": "minSegmentDuration",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "negative space: ≤8 layers",
+    "type": "layersMax",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

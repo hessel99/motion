@@ -1,0 +1,950 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 17,
+  "ok": true,
+  "ms": 44,
+  "editorMs": 0,
+  "input": {
+   "name": "styles"
+  },
+  "result": "Style recipes (get_guide {name: \"styles/<name>\"}):\n- styles/corporate-smooth: Clean, trustworthy and calm: brand blue, soft cards, gentle fades and long decelerating eases, no surprises.\n- styles/cyber-neon: Night-city neon: glowing strokes on near-black, magenta/cyan, grids receding to the horizon, flicker-on lights and smooth synth motion.\n- styles/data-viz: Precise, honest charts that build in …"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 14,
+  "ok": true,
+  "ms": 139,
+  "editorMs": 0,
+  "input": {
+   "deep": false
+  },
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":12,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":0,\"layers\":[]}"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 32,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 0,
+  "input": {
+   "name": "styles/flat-explainer"
+  },
+  "result": "# Flat illustration explainer\n> Friendly flat illustrations from simple shapes, clear icons and step-by-step reveals that explain one idea per beat.\n\n**Use for**: product explainers, onboarding, how-it-works, education, app store videos.\n\n## Palette\n- Background `#EAF4F4` or `#FFF8F0`; ink `#22313F`.\n- Illustration set: `#FF7F50` coral, `#2EC4B6` teal, `#FFBF69` amber, `#3D5A80` navy, `#FFFFFF` hi…"
+ },
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1548,
+  "ok": true,
+  "ms": 55,
+  "editorMs": 0,
+  "input": {
+   "title": "Password manager: one key",
+   "duration": 12,
+   "style": "Flat explainer (flat illustration, friendly colors)",
+   "styleReason": "Simple shapes and one idea per beat suit a password manager explainer; the brief asks for flat, friendly illustration.",
+   "notes": "Background #EAF4F4, ink #22313F, coral #FF7F50 for anxious sticky notes, teal #2EC4B6 for the shield, amber #FFBF69 for glow accents, navy #3D5A80 for vault detail. Inter 700 headline. Each beat hands over: notes are pulled into the shield; shield glow carries into the headline.",
+   "beats": [
+    {
+     "name": "Chaos",
+     "start": 0,
+     "end": 4,
+     "description": "A messy pile of 6-8 coral and amber sticky notes, each with a short password-like line (dots/scribble), pops in with Back Out and then jitters anxiously (small rotation and position wobble).",
+     "style": "Icon pop Back Out 0.4s, stagger 0.08s; jitter by small expression wiggle, low amplitude."
+    },
+    {
+     "name": "Absorb",
+     "start": 4,
+     "end": 8,
+     "description": "The notes curve on arcs into a teal shield with a navy keyhole at center; the jitter settles as they are pulled in, the shield scales up with a small squash on arrival.",
+     "style": "Position keys on arcs with Cubic In Out / Quart Out, stagger 0.1s; shield Back Out."
+    },
+    {
+     "name": "Resolve",
+     "start": 8,
+     "end": 12,
+     "description": "The shield glows (amber soft ring behind it pulses once), a check mark draws on beside it, and the headline 'One key. Every login.' lands below with a line-by-line rise. Final frame holds.",
+     "style": "Check trimEnd draw Cubic In Out 0.5s; headline Inter 700 ~76px, lines rise with Quart Out."
+    }
+   ]
+  },
+  "result": "storyboard \"Password manager: one key\" shown to the user (3 beats, 12s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 5,
+  "editorMs": 0,
+  "input": {
+   "beat": 1,
+   "status": "active"
+  },
+  "result": "beat 1 \"Chaos\" active; 0/3 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 6435,
+  "ok": true,
+  "ms": 119,
+  "editorMs": 8,
+  "input": "{\"comp\":{\"background\":\"#EAF4F4\"},\"layers\":[{\"key\":\"note-0\",\"name\":\"Note 1 (coral)\",\"type\":\"group\",\"center\":[900,400],\"w\":220,\"h\":150,\"rotation\":-8,\"animate\":{\"scale\":[{\"t\":0,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.45,\"v\":100}]},\"expr\":{\"position\":\"value + [6*sin(time*31+0)*clamp((4-time)/0.6,0,1), 5*cos(time*27+0)*clamp((4-time)/0.6,0,1)]\",\"rotation\":\"value + 7*sin(time*29+0)*clamp((4-time)/0.6,0,1)\"},\"children\":[{\"key\":\"n0-body\",\"name\":\"Body\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":220,\"h\":150,\"radius\":18,\"fill\":\"#FF7F50\"},{\"key\":\"n0-pin\",\"name\":\"Pin\",\"type\":\"ellipse\",\"x\":24,\"y\":22,\"w\":22,\"h\":22,\"fill\":\"#FFFFFF\"},{\"key\":\"n0-l1\",\"name\":\"Line 1\",\"type\":\"rect\",\"x\":24,\"y\":64,\"w\":172,\"h\":14,\"radius\":7,\"fill\":\"#22313F\",\"opacity\":30},{\"key\":\"n0-l2\",\"name\":\"Line 2\",\"type\":\"rect\",\"x\":24,\"y\":90,\"w\":124,\"h\":14,\"radius\":7,\"fill\":\"#22313F\",\"opacity\":30},{\"key\":\"n0-l3\",\"name\":\"Line 3\",\"type\":\"rect\",\"x\":24,\"y\":116,\"w\":90,\"h\":14,\"radius\":7,\"fill\":\"#22313F\",\"opacity\":30}]},{\"key\":\"note-1\",\"name\":\"Note 2 (amber)\",\"type\":\"group\",\"center\":[1040,410],\"w\":220,\"h\":150,\"rotation\":6,\"animate\":{\"scale\":[{\"t\":0.15,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.6,\"v\":100}]},\"expr\":{\"position\":\"value + [6*sin(time*31+1)*clamp((4-time)/0.6,0,1), 5*cos(time*27+1)*clamp((4-time)/0.6,0,1)]\",\"rotation\":\"value + 7*sin(time*29+1)*clamp((4-time)/0.6,0,1)\"},\"children\":[{\"key\":\"n1-body\",\"name\":\"Body\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":220,\"h\":150,\"radius\":18,\"fill\":\"#FFBF69\"},{\"key\":\"n1-pin\",\"name\":\"Pin\",\"type\":\"ellipse\",\"x\":24,\"y\":22,\"w\":22,\"h\":22,\"fill\":\"#FFFFFF\"},{\"key\":\"n1-l1\",\"name\":\"Line 1\",\"type\":\"rect\",\"x\":24,\"y\":64,\"w\":172,\"h\":14,\"radius\":7,\"fill\":\"#22313F\",\"opacity\":30},{\"key\":\"n1-l2\",\"name\":\"Line 2\",\"type\":\"rect\",\"x\":24,\"y\":90,\"w\":124,\"h\":14,\"radius\":7,\"fill\":\"#22313F\",\"opacity\":30},{\"key\":\"n1-l3\",\"name\":\"Line 3\",\"type\":\"rect\",\"x\":24,\"y\":116,\"w\":90,\"h\":14,\"radius\":7,\"fill\":\"#22313F\",\"opacity\":30}]},{\"key\":\"note-2\",\"name\":\"Note 3 (coral)\",\"type\":\"group\",\"center\":[960,470],\"w\":220,\"h\":150,\"rotation\":-3,\"animate\":{\"scale\":[{\"t\":0.3,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.75,\"v\":100}]},\"expr\":{\"position\":\"value + [6*sin(time*31+2)*clamp((4-time)/0.6,0,1), 5*cos(time*27+2)*clamp((4-time)/0.6,0,1)]\",\"rotation\":\"value + 7*sin(time*29+2)*clamp((4-time)/0.6,0,1)\"},\"children\":[{\"key\":\"n2-body\",\"name\":\"Body\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":220,\"h\":150,\"radius\":18,\"fill\":\"#FF7F50\"},{\"key\":\"n2-pin\",\"name\":\"Pin\",\"type\":\"ellipse\",\"x\":24,\"y\":22,\"w\":22,\"h\":22,\"fill\":\"#FFFFFF\"},{\"key\":\"n2-l1\",\"name\":\"Line 1\",\"type\":\"rect\",\"x\":24,\"y\":64,\"w\":172,\"h\":14,\"radius\":7,\"fill\":\"#22313F\",\"opacity\":30},{\"key\":\"n2-l2\",\"name\":\"Line 2\",\"type\":\"rect\",\"x\":24,\"y\":90,\"w\":124,\"h\":14,\"radius\":7,\"fill\":\"#22313F\",\"opacity\":30},{\"key\":\"n2-l3\",\"name\":\"Line 3\",\"type\":\"rect\",\"x\":24,\"y\":116,\"w\":90,\"h\":14,\"radius\":7,\"fill\":\"#22313F\",\"opacity\":30}]},{\"key\":\"note-3\",\"name\":\"Note 4 (amber)\",\"type\":\"group\",\"center\":[860,480],\"w\":220,\"h\":150,\"rotation\":10,\"animate\":{\"scale\":[{\"t\":0.45,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.9,\"v\":100}]},\"expr\":{\"position\":\"value + [6*sin(time*3…",
+  "result": "{\"summary\":\"42 created, 0 updated, 7 keyframe tracks; animation ends 1.35s\",\"ids\":{\"n0-body\":\"l_03jm3\",\"n0-pin\":\"l_03jm4\",\"n0-l1\":\"l_03jm5\",\"n0-l2\":\"l_03jm6\",\"n0-l3\":\"l_03jm7\",\"note-0\":\"l_03jm2\",\"n1-body\":\"l_03jm9\",\"n1-pin\":\"l_03jma\",\"n1-l1\":\"l_03jmb\",\"n1-l2\":\"l_03jmc\",\"n1-l3\":\"l_03jmd\",\"note-1\":\"l_03jm8\",\"n2-body\":\"l_03jmf\",\"n2-pin\":\"l_03jmg\",\"n2-l1\":\"l_03jmh\",\"n2-l2\":\"l_03jmi\",\"n2-l3\":\"l_03jmj\",…"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 2596,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm2",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 4,
+       "v": [
+        900,
+        400
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.9,
+       "v": [
+        810,
+        475
+       ],
+       "ease": "Cubic In"
+      },
+      {
+       "t": 5.9,
+       "v": [
+        960,
+        430
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "ease": "Back Out"
+      },
+      {
+       "t": 0.45,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.9,
+       "v": 55,
+       "ease": "Cubic In"
+      },
+      {
+       "t": 5.9,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 4.1,
+       "v": [
+        1040,
+        410
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5,
+       "v": [
+        1140,
+        380
+       ],
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6,
+       "v": [
+        960,
+        430
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.15,
+       "v": 0,
+       "ease": "Back Out"
+      },
+      {
+       "t": 0.6,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.1,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5,
+       "v": 55,
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jme",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 4.2,
+       "v": [
+        960,
+        470
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.1,
+       "v": [
+        960,
+        300
+       ],
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6.1,
+       "v": [
+        960,
+        430
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jme",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.3,
+       "v": 0,
+       "ease": "Back Out"
+      },
+      {
+       "t": 0.75,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.2,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.1,
+       "v": 55,
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6.1,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jmk",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 4.3,
+       "v": [
+        860,
+        480
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.2,
+       "v": [
+        750,
+        455
+       ],
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6.2,
+       "v": [
+        960,
+        430
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jmk",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.45,
+       "v": 0,
+       "ease": "Back Out"
+      },
+      {
+       "t": 0.9,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.3,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.2,
+       "v": 55,
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6.2,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jmq",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 4.4,
+       "v": [
+        1060,
+        500
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.3,
+       "v": [
+        1160,
+        525
+       ],
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6.3,
+       "v": [
+        960,
+        430
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jmq",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.6,
+       "v": 0,
+       "ease": "Back Out"
+      },
+      {
+       "t": 1.05,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.4,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.3,
+       "v": 55,
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6.3,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jmw",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 4.5,
+       "v": [
+        940,
+        360
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.4,
+       "v": [
+        890,
+        275
+       ],
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6.4,
+       "v": [
+        960,
+        430
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jmw",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.75,
+       "v": 0,
+       "ease": "Back Out"
+      },
+      {
+       "t": 1.2,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.5,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.4,
+       "v": 55,
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6.4,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm12",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 4.6,
+       "v": [
+        1000,
+        520
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.5,
+       "v": [
+        1060,
+        575
+       ],
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6.5,
+       "v": [
+        960,
+        430
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm12",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.9,
+       "v": 0,
+       "ease": "Back Out"
+      },
+      {
+       "t": 1.35,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.6,
+       "v": 100,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.5,
+       "v": 55,
+       "ease": "Cubic In"
+      },
+      {
+       "t": 6.5,
+       "v": 0
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 14 tracks on 7 layers"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1290,
+  "ok": true,
+  "ms": 22,
+  "editorMs": 3,
+  "input": {
+   "layers": [
+    {
+     "key": "shield",
+     "name": "Shield vault",
+     "type": "group",
+     "center": [
+      960,
+      430
+     ],
+     "w": 240,
+     "h": 280,
+     "animate": {
+      "scale": [
+       {
+        "t": 5.5,
+        "v": 0,
+        "ease": "Back Out"
+       },
+       {
+        "t": 6,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 6.6,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 6.75,
+        "v": 106,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 7,
+        "v": 100
+       }
+      ]
+     },
+     "children": [
+      {
+       "key": "shield-glow",
+       "name": "Glow",
+       "type": "ellipse",
+       "x": -70,
+       "y": -50,
+       "w": 380,
+       "h": 380,
+       "fill": {
+        "type": "radial",
+        "stops": [
+         {
+          "pos": 0,
+          "color": [
+           1,
+           0.75,
+           0.41,
+           0.85
+          ]
+         },
+         {
+          "pos": 1,
+          "color": [
+           1,
+           0.75,
+           0.41,
+           0
+          ]
+         }
+        ]
+       },
+       "animate": {
+        "opacity": [
+         {
+          "t": 0,
+          "v": 0,
+          "ease": "Sine In Out"
+         },
+         {
+          "t": 6.6,
+          "v": 0,
+          "ease": "Sine In Out"
+         },
+         {
+          "t": 7.2,
+          "v": 45,
+          "ease": "Sine In Out"
+         },
+         {
+          "t": 7.9,
+          "v": 18,
+          "ease": "Sine In Out"
+         },
+         {
+          "t": 8,
+          "v": 18,
+          "ease": "Sine In Out"
+         },
+         {
+          "t": 9.2,
+          "v": 55
+         }
+        ]
+       }
+      },
+      {
+       "key": "shield-body",
+       "name": "Shield body",
+       "type": "path",
+       "w": 240,
+       "h": 280,
+       "d": "M120 0 L240 40 L240 150 C240 220 190 260 120 280 C50 260 0 220 0 150 L0 40 Z",
+       "fill": "#2EC4B6"
+      },
+      {
+       "key": "shield-inner",
+       "name": "Shield inner",
+       "type": "path",
+       "w": 240,
+       "h": 280,
+       "d": "M120 30 L210 62 L210 150 C210 205 170 236 120 252 C70 236 30 205 30 150 L30 62 Z",
+       "fill": "#5FD9CE"
+      },
+      {
+       "key": "shield-keyhole",
+       "name": "Keyhole head",
+       "type": "ellipse",
+       "x": 98,
+       "y": 104,
+       "w": 44,
+       "h": 44,
+       "fill": "#3D5A80"
+      },
+      {
+       "key": "shield-stem",
+       "name": "Keyhole stem",
+       "type": "rect",
+       "x": 109,
+       "y": 138,
+       "w": 22,
+       "h": 52,
+       "radius": 8,
+       "fill": "#3D5A80"
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"6 created, 0 updated, 2 keyframe tracks; animation ends 9.2s\",\"ids\":{\"shield-glow\":\"l_03jm19\",\"shield-body\":\"l_03jm1a\",\"shield-inner\":\"l_03jm1b\",\"shield-keyhole\":\"l_03jm1c\",\"shield-stem\":\"l_03jm1d\",\"shield\":\"l_03jm18\"}}"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 6,
+  "editorMs": 2,
+  "input": {
+   "beat": 1,
+   "status": "done"
+  },
+  "result": "beat 1 \"Chaos\" done; 1/3 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 77,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "beat": 2,
+   "status": "done",
+   "note": "notes arc into shield, shield pulse, glow"
+  },
+  "result": "beat 2 \"Absorb\" done; 2/3 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 0,
+  "input": {
+   "beat": 3,
+   "status": "active"
+  },
+  "result": "beat 3 \"Resolve\" active; 2/3 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 800,
+  "ok": true,
+  "ms": 328,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "key": "headline",
+     "name": "Headline",
+     "type": "text",
+     "x": 160,
+     "y": 740,
+     "w": 1600,
+     "h": 110,
+     "text": {
+      "content": "One key. Every login.",
+      "fontFamily": "Inter",
+      "fontSize": 80,
+      "fontWeight": 700,
+      "align": "center"
+     },
+     "fill": "#22313F",
+     "delay": 8,
+     "textAnim": {
+      "by": "word",
+      "preset": "Fade up",
+      "stagger": 0.1,
+      "duration": 0.6,
+      "ease": "Quart Out",
+      "start": 0.2
+     }
+    },
+    {
+     "key": "check",
+     "name": "Check badge",
+     "type": "group",
+     "center": [
+      1450,
+      795
+     ],
+     "w": 84,
+     "h": 84,
+     "animate": {
+      "scale": [
+       {
+        "t": 8.8,
+        "v": 0,
+        "ease": "Back Out"
+       },
+       {
+        "t": 9.2,
+        "v": 100
+       }
+      ]
+     },
+     "children": [
+      {
+       "key": "check-disc",
+       "name": "Badge disc",
+       "type": "ellipse",
+       "x": 0,
+       "y": 0,
+       "w": 84,
+       "h": 84,
+       "fill": "#2EC4B6"
+      },
+      {
+       "key": "check-mark",
+       "name": "Check mark",
+       "type": "path",
+       "w": 84,
+       "h": 84,
+       "d": "M24 44 L36 56 L60 30",
+       "stroke": "#FFFFFF",
+       "strokeWidth": 9,
+       "drawOn": {
+        "t": 9.1,
+        "duration": 0.5,
+        "ease": "Cubic In Out"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 3 keyframe tracks; animation ends 9.6s\",\"ids\":{\"headline\":\"l_03jm1e\",\"check-disc\":\"l_03jm1g\",\"check-mark\":\"l_03jm1h\",\"check\":\"l_03jm1f\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 4227,
+  "editorMs": 4115,
+  "input": {
+   "frames": 8,
+   "start": 0,
+   "end": 11.5,
+   "cell": 300
+  },
+  "result": "8 frames left→right, top→bottom at 0s, 1.63s, 3.3s, 4.93s, 6.57s, 8.2s, 9.87s, 11.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b26b83f0-61a6-4559-9074-8abd1711110f/tool-results/mcp-motion-blob-1794514285270-ehpesp.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 40,
+  "ok": true,
+  "ms": 36,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm1e",
+   "text": {
+    "fontSize": 96
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 22,
+  "ok": true,
+  "ms": 148,
+  "editorMs": 18,
+  "input": {
+   "times": [
+    2,
+    5,
+    9.5,
+    11
+   ]
+  },
+  "result": "2s:\n  Shield body, Shield inner, Keyhole head +3: tiny (0×0px)\n  Headline: outside title-safe area (10% margin)\n  Body ↔ Pin, Body ↔ Line 1, Body ↔ Line 2 +5: overlap 100%\n  Body ↔ Line 3: overlap 66%\n  Body ↔ Pin: overlap 86%\n  Body ↔ Body: overlap 67%\n  Body ↔ Line 1: overlap 92%\n5s:\n  Shield body, Shield inner, Keyhole head +3: tiny (0×0px)\n  Headline: outside title-safe area (10% margin)\n  Bod…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 339,
+  "ok": true,
+  "ms": 7,
+  "editorMs": 1,
+  "input": {
+   "layers": [
+    {
+     "key": "headline",
+     "name": "Headline",
+     "type": "text",
+     "x": 260,
+     "y": 740,
+     "w": 1400,
+     "h": 130,
+     "text": {
+      "content": "One key. Every login.",
+      "fontFamily": "Inter",
+      "fontSize": 96,
+      "fontWeight": 700,
+      "align": "center"
+     },
+     "fill": "#22313F",
+     "delay": 8,
+     "textAnim": {
+      "by": "word",
+      "preset": "Fade up",
+      "stagger": 0.1,
+      "duration": 0.6,
+      "ease": "Quart Out",
+      "start": 0.2
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 1 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"headline\":\"l_03jm1e\"}}"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 196,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm1f",
+   "props": {
+    "position": [
+     960,
+     640
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 227,
+  "editorMs": 113,
+  "input": {
+   "times": [
+    1.5,
+    4.5,
+    6.8,
+    8.4,
+    9,
+    11.5
+   ],
+   "cell": 300
+  },
+  "result": "6 frames left→right, top→bottom at 1.5s, 4.5s, 6.8s, 8.4s, 9s, 11.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b26b83f0-61a6-4559-9074-8abd1711110f/tool-results/mcp-motion-blob-1794514296145-frievz.jpg]"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 2,
+  "input": {
+   "times": [
+    9.5,
+    11
+   ],
+   "ids": [
+    "l_03jm1e",
+    "l_03jm1f"
+   ]
+  },
+  "result": "9.5s:\n  Badge disc ↔ Check mark: overlap 100%\n11s:\n  Badge disc ↔ Check mark: overlap 100%"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 1,
+  "input": {
+   "beat": 3,
+   "status": "done"
+  },
+  "result": "beat 3 \"Resolve\" done; 3/3 beats finished — now critique (the critique tool, then contact_sheet; rubric: get_guide handbook, section \"Critique\")"
+ }
+]

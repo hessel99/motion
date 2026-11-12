@@ -1,0 +1,717 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 796,
+  "ok": true,
+  "ms": 135,
+  "editorMs": 0,
+  "input": {
+   "title": "ÉCLAT — Eau de Parfum",
+   "duration": 7,
+   "style": "Minimal luxury",
+   "styleReason": "Restraint, negative space, slow sine/quart easing, single gold accent",
+   "beats": [
+    {
+     "name": "Line",
+     "start": 0,
+     "end": 2.8,
+     "description": "A single thin champagne-gold vertical line slowly draws down from above centre in the black.",
+     "style": "Sine In Out, 2.6 s"
+    },
+    {
+     "name": "Name",
+     "start": 1.6,
+     "end": 4.8,
+     "description": "ÉCLAT fades in letter by letter in a wide-tracked serif; tracking tightens slightly as it settles.",
+     "style": "Quart Out, stagger 0.22 s"
+    },
+    {
+     "name": "Subline",
+     "start": 4,
+     "end": 5.6,
+     "description": "A small hairline rule and 'EAU DE PARFUM' fade in softly beneath the name.",
+     "style": "Sine Out"
+    },
+    {
+     "name": "Rest",
+     "start": 5.6,
+     "end": 7,
+     "description": "Hold on the final lockup with a very slow drift.",
+     "style": "Still"
+    }
+   ]
+  },
+  "result": "storyboard \"ÉCLAT — Eau de Parfum\" shown to the user (4 beats, 7s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2366,
+  "ok": true,
+  "ms": 159,
+  "editorMs": 3,
+  "input": {
+   "comp": {
+    "background": "#0a0908",
+    "duration": 7,
+    "fps": 30
+   },
+   "layers": [
+    {
+     "key": "line",
+     "name": "Gold Line",
+     "d": "M540 380 L540 820",
+     "stroke": "#d9bf8f",
+     "strokeWidth": 1.5,
+     "drawOn": {
+      "t": 0.4,
+      "duration": 2.8,
+      "ease": "Sine In Out"
+     }
+    },
+    {
+     "key": "l1",
+     "name": "Letter É",
+     "text": {
+      "content": "É",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 130,
+      "fontWeight": 400,
+      "align": "center"
+     },
+     "fill": "#d9bf8f",
+     "x": 210,
+     "y": 890,
+     "w": 120,
+     "h": 170,
+     "animate": {
+      "opacity": [
+       {
+        "t": 1.8,
+        "v": 0
+       },
+       {
+        "t": 3.6,
+        "v": 100,
+        "ease": "Quart Out"
+       }
+      ],
+      "position": [
+       {
+        "t": 1.8,
+        "v": [
+         246,
+         975
+        ]
+       },
+       {
+        "t": 4.6,
+        "v": [
+         270,
+         975
+        ],
+        "ease": "Quart Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "l2",
+     "name": "Letter C",
+     "text": {
+      "content": "C",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 130,
+      "fontWeight": 400,
+      "align": "center"
+     },
+     "fill": "#d9bf8f",
+     "x": 345,
+     "y": 890,
+     "w": 120,
+     "h": 170,
+     "animate": {
+      "opacity": [
+       {
+        "t": 2.1,
+        "v": 0
+       },
+       {
+        "t": 3.9,
+        "v": 100,
+        "ease": "Quart Out"
+       }
+      ],
+      "position": [
+       {
+        "t": 2.1,
+        "v": [
+         423,
+         975
+        ]
+       },
+       {
+        "t": 4.9,
+        "v": [
+         405,
+         975
+        ],
+        "ease": "Quart Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "l3",
+     "name": "Letter L",
+     "text": {
+      "content": "L",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 130,
+      "fontWeight": 400,
+      "align": "center"
+     },
+     "fill": "#d9bf8f",
+     "x": 480,
+     "y": 890,
+     "w": 120,
+     "h": 170,
+     "animate": {
+      "opacity": [
+       {
+        "t": 2.4,
+        "v": 0
+       },
+       {
+        "t": 4.2,
+        "v": 100,
+        "ease": "Quart Out"
+       }
+      ],
+      "position": [
+       {
+        "t": 2.4,
+        "v": [
+         540,
+         975
+        ]
+       },
+       {
+        "t": 5.2,
+        "v": [
+         540,
+         975
+        ],
+        "ease": "Quart Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "l4",
+     "name": "Letter A",
+     "text": {
+      "content": "A",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 130,
+      "fontWeight": 400,
+      "align": "center"
+     },
+     "fill": "#d9bf8f",
+     "x": 615,
+     "y": 890,
+     "w": 120,
+     "h": 170,
+     "animate": {
+      "opacity": [
+       {
+        "t": 2.7,
+        "v": 0
+       },
+       {
+        "t": 4.5,
+        "v": 100,
+        "ease": "Quart Out"
+       }
+      ],
+      "position": [
+       {
+        "t": 2.7,
+        "v": [
+         657,
+         975
+        ]
+       },
+       {
+        "t": 5.5,
+        "v": [
+         675,
+         975
+        ],
+        "ease": "Quart Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "l5",
+     "name": "Letter T",
+     "text": {
+      "content": "T",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 130,
+      "fontWeight": 400,
+      "align": "center"
+     },
+     "fill": "#d9bf8f",
+     "x": 750,
+     "y": 890,
+     "w": 120,
+     "h": 170,
+     "animate": {
+      "opacity": [
+       {
+        "t": 3,
+        "v": 0
+       },
+       {
+        "t": 4.8,
+        "v": 100,
+        "ease": "Quart Out"
+       }
+      ],
+      "position": [
+       {
+        "t": 3,
+        "v": [
+         834,
+         975
+        ]
+       },
+       {
+        "t": 5.8,
+        "v": [
+         810,
+         975
+        ],
+        "ease": "Quart Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "rule",
+     "name": "Hairline",
+     "d": "M490 1110 L590 1110",
+     "stroke": "#d9bf8f",
+     "strokeWidth": 1,
+     "drawOn": {
+      "t": 4.2,
+      "duration": 1.6,
+      "ease": "Sine In Out"
+     }
+    },
+    {
+     "key": "sub",
+     "name": "Subline",
+     "text": {
+      "content": "EAU DE PARFUM",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 28,
+      "fontWeight": 500,
+      "align": "center",
+      "letterSpacing": 10
+     },
+     "fill": "#bfa97f",
+     "x": 240,
+     "y": 1150,
+     "w": 600,
+     "h": 50,
+     "animate": {
+      "opacity": [
+       {
+        "t": 4.6,
+        "v": 0
+       },
+       {
+        "t": 6,
+        "v": 100,
+        "ease": "Sine Out"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"8 created, 0 updated, 15 keyframe tracks; animation ends 6s\",\"ids\":{\"line\":\"l_03jm2\",\"l1\":\"l_03jm3\",\"l2\":\"l_03jm4\",\"l3\":\"l_03jm5\",\"l4\":\"l_03jm6\",\"l5\":\"l_03jm7\",\"rule\":\"l_03jm8\",\"sub\":\"l_03jm9\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 38,
+  "ok": true,
+  "ms": 173,
+  "editorMs": 106,
+  "input": {
+   "times": [
+    1,
+    2.5,
+    3.5,
+    5,
+    6.5
+   ],
+   "cell": 240
+  },
+  "result": "5 frames left→right, top→bottom at 1s, 2.5s, 3.5s, 5s, 6.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b7b789e4-d8df-4989-88a9-6266930de56b/tool-results/mcp-motion-blob-1794511387706-me0tyu.jpg]"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 643,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "layers": [
+    {
+     "key": "l1",
+     "text": {
+      "content": "É",
+      "fontFamily": "Playfair Display",
+      "fontSize": 130,
+      "align": "center"
+     }
+    },
+    {
+     "key": "l2",
+     "text": {
+      "content": "C",
+      "fontFamily": "Playfair Display",
+      "fontSize": 130,
+      "align": "center"
+     }
+    },
+    {
+     "key": "l3",
+     "text": {
+      "content": "L",
+      "fontFamily": "Playfair Display",
+      "fontSize": 130,
+      "align": "center"
+     }
+    },
+    {
+     "key": "l4",
+     "text": {
+      "content": "A",
+      "fontFamily": "Playfair Display",
+      "fontSize": 130,
+      "align": "center"
+     }
+    },
+    {
+     "key": "l5",
+     "text": {
+      "content": "T",
+      "fontFamily": "Playfair Display",
+      "fontSize": 130,
+      "align": "center"
+     }
+    },
+    {
+     "key": "sub",
+     "text": {
+      "content": "EAU DE PARFUM",
+      "fontFamily": "Playfair Display",
+      "fontSize": 26,
+      "align": "center",
+      "letterSpacing": 10
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 6 updated, 0 keyframe tracks; animation ends 6s\",\"ids\":{\"l1\":\"l_03jm3\",\"l2\":\"l_03jm4\",\"l3\":\"l_03jm5\",\"l4\":\"l_03jm6\",\"l5\":\"l_03jm7\",\"sub\":\"l_03jm9\"}}"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 55,
+  "editorMs": 25,
+  "input": {
+   "t": 6.5,
+   "maxSize": 500
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b7b789e4-d8df-4989-88a9-6266930de56b/tool-results/mcp-motion-blob-1794511390779-u0ls45.png]"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 589,
+  "ok": true,
+  "ms": 45,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "key": "l1",
+     "text": {
+      "content": "É",
+      "fontFamily": "Georgia",
+      "fontSize": 130,
+      "align": "center"
+     }
+    },
+    {
+     "key": "l2",
+     "text": {
+      "content": "C",
+      "fontFamily": "Georgia",
+      "fontSize": 130,
+      "align": "center"
+     }
+    },
+    {
+     "key": "l3",
+     "text": {
+      "content": "L",
+      "fontFamily": "Georgia",
+      "fontSize": 130,
+      "align": "center"
+     }
+    },
+    {
+     "key": "l4",
+     "text": {
+      "content": "A",
+      "fontFamily": "Georgia",
+      "fontSize": 130,
+      "align": "center"
+     }
+    },
+    {
+     "key": "l5",
+     "text": {
+      "content": "T",
+      "fontFamily": "Georgia",
+      "fontSize": 130,
+      "align": "center"
+     }
+    },
+    {
+     "key": "sub",
+     "text": {
+      "content": "EAU DE PARFUM",
+      "fontFamily": "Georgia",
+      "fontSize": 26,
+      "align": "center",
+      "letterSpacing": 10
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 6 updated, 0 keyframe tracks; animation ends 6s\",\"ids\":{\"l1\":\"l_03jm3\",\"l2\":\"l_03jm4\",\"l3\":\"l_03jm5\",\"l4\":\"l_03jm6\",\"l5\":\"l_03jm7\",\"sub\":\"l_03jm9\"}}"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 72,
+  "editorMs": 28,
+  "input": {
+   "t": 6.5,
+   "maxSize": 500
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b7b789e4-d8df-4989-88a9-6266930de56b/tool-results/mcp-motion-blob-1794511393640-70b8na.png]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 61,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jm3",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 74,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 52,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm6",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 45,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 67,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm9",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 52,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jm2",
+   "prop": "trimEnd",
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 90,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 3,
+  "input": {
+   "ids": [
+    "l_03jm2"
+   ],
+   "prop": "opacity",
+   "expr": "value * (0.85 + 0.15 * Math.sin(time * 1.2))"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 36,
+  "editorMs": 9,
+  "input": {},
+  "result": "score 66/100 (timing 67, easing 84, richness 84)\n1. [medium] 4 of 4 entrances don't decelerate (Sine In Out): entrances ease out (Expo/Quart/Cubic Out) or spring\n   → set_easing {\"id\":\"l_03jm3\",\"prop\":\"position\",\"indices\":[0],\"ease\":\"Quart Out\"}\n   → set_easing {\"id\":\"l_03jm4\",\"prop\":\"position\",\"indices\":[0],\"ease\":\"Quart Out\"}\n   → set_easing {\"id\":\"l_03jm6\",\"prop\":\"position\",\"indices\":[0],\"ease\"…"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 123,
+  "editorMs": 6,
+  "input": {
+   "id": "l_03jm3",
+   "prop": "position",
+   "indices": [
+    0
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 134,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "prop": "position",
+   "indices": [
+    0
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm6",
+   "prop": "position",
+   "indices": [
+    0
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 70,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "prop": "position",
+   "indices": [
+    0
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 76,
+  "editorMs": 7,
+  "input": {},
+  "result": "score 73/100 (timing 67, richness 84)\n1. [medium] 5 elements and 8 moves for 7s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch\n2. [medium] \"Letter C\".position enter takes 2.8 s for 18 px: sluggish, ~0.26 s fits (handbook timing table)\n   → retime {\"ids\":[\"l_03jm4\"],\"pivot\":2.1,\"scale\":0.2}\n3. [medium] \"Letter A\".position enter …"
+ }
+]

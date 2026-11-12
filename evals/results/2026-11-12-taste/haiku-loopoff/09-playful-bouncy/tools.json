@@ -1,0 +1,273 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 295,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Playful bouncy kids app intro \"Boop!\": colorful candy shapes (circles, stars, rounded squares) drop in and bounce with squash and stretch, jostle each other, then letters B-o-o-p-! hop in one by one like on a trampoline, elastic and joyful, ends with idle wiggle."
+  },
+  "result": "# Example: Playful logo sting, the dot drops in and lands (make my logo move)\n> tags: logo, sting, playful, bouncy, fun, kids, app, mark, wordmark, drop, land, squash, bounce, simple, make my logo move\n\n## Brief\n\"Make my logo move: a round orange mark and the word 'pip'. Fun and friendly, about 3 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"duration\": 3, \"backgrou…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 0,
+  "input": {},
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1080,\"height\":1080,\"fps\":60,\"duration\":5,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":0,\"layers\":[]}"
+ },
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1687,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 1,
+  "input": {
+   "title": "Boop! kids app intro",
+   "style": "Playful elastic: springs and squash & stretch, candy palette on cream",
+   "styleReason": "Kids app brief: joy and elasticity come from springs, squash on contact and trampoline-like hops.",
+   "duration": 6,
+   "beats": [
+    {
+     "name": "Candy drop",
+     "start": 0,
+     "end": 1.6,
+     "description": "Circles, stars and rounded squares fall in from above at staggered times, squash on landing and bounce back with springs.",
+     "style": "spring Bouncy, squash 130/70 on contact, drops from top edge"
+    },
+    {
+     "name": "Jostle",
+     "start": 1.4,
+     "end": 2.6,
+     "description": "The candies nudge each other: small rotational knocks and position bumps, then settle into a loose cluster at the centre.",
+     "style": "spring Quick overlaps, elastic rotation wobble"
+    },
+    {
+     "name": "Letters hop",
+     "start": 2.5,
+     "end": 4.4,
+     "description": "B, o, o, p, ! hop in one by one from the baseline like a trampoline, each landing with squash and a small overshoot.",
+     "style": "Stagger 0.12 s, arc hops with spring landings"
+    },
+    {
+     "name": "Idle wiggle",
+     "start": 4.4,
+     "end": 6,
+     "description": "Wordmark and candies keep a gentle wiggle and breathing pulse so the final frame feels alive.",
+     "style": "Looping sine expressions, small amplitude"
+    }
+   ],
+   "concepts": [
+    {
+     "name": "Candy bounce",
+     "idea": "Shapes drop like sweets onto a trampoline floor, squash on contact, then the letters hop on the same bouncy floor.",
+     "why": "The trampoline metaphor carries the brief literally: elastic, joyful, kid-level physics."
+    }
+   ],
+   "notes": "Palette: cream #FFF6E9 background, candy pink #FF4F8B, yellow #FFC93C, teal #2EC4B6, violet #7B5CFF, orange #FF8A3D, ink #2B2D42 for the wordmark. Comp 6 s at 60 fps, 1080x1080. Final lockup is the upright \"Boop!\" word with candies around it."
+  },
+  "result": "storyboard \"Boop! kids app intro\" shown to the user (4 beats, 6s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "beat": 1,
+   "status": "active"
+  },
+  "result": "beat 1 \"Candy drop\" active; 0/4 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 7600,
+  "ok": true,
+  "ms": 131,
+  "editorMs": 3,
+  "input": "{\"comp\":{\"duration\":6,\"background\":\"#FFF6E9\"},\"layers\":[{\"key\":\"candy-pink\",\"name\":\"Candy pink circle\",\"type\":\"ellipse\",\"w\":150,\"h\":150,\"x\":225,\"y\":305,\"fill\":\"#FF4F8B\",\"animate\":{\"position\":[{\"t\":0.1,\"v\":[300,-150],\"ease\":\"Quad In\"},{\"t\":0.6,\"v\":[300,380],\"ease\":\"Quad Out\"},{\"t\":0.8,\"v\":[300,310],\"ease\":\"Quad In\"},{\"t\":0.98,\"v\":[300,380],\"ease\":\"Quad Out\"},{\"t\":1.12,\"v\":[300,362],\"ease\":\"Quad In\"},{\"t\":1.24,\"v\":[300,380],\"ease\":\"Quad In Out\"},{\"t\":1.9,\"v\":[300,380]},{\"t\":2.04,\"v\":[314,380],\"ease\":\"Quad Out\"},{\"t\":2.2,\"v\":[292,380],\"ease\":\"Quad In Out\"},{\"t\":2.35,\"v\":[300,380]}],\"scale\":[{\"t\":0.1,\"v\":[88,118],\"ease\":\"Quad In\"},{\"t\":0.6,\"v\":[130,72],\"ease\":\"Cubic Out\"},{\"t\":0.8,\"v\":[88,116],\"ease\":\"Quad Out\"},{\"t\":0.98,\"v\":[126,76],\"ease\":\"Quad In\"},{\"t\":1.12,\"v\":[92,110],\"ease\":\"Quad Out\"},{\"t\":1.24,\"v\":[100,100],\"ease\":\"spring Bouncy\"},{\"t\":1.9,\"v\":[100,100],\"ease\":\"Quad Out\"},{\"t\":2.04,\"v\":[112,90],\"ease\":\"Quad Out\"},{\"t\":2.2,\"v\":[96,104],\"ease\":\"Quad In Out\"},{\"t\":2.35,\"v\":[100,100]}],\"rotation\":[{\"t\":0,\"v\":0},{\"t\":1.9,\"v\":0},{\"t\":2.04,\"v\":-10,\"ease\":\"Quad Out\"},{\"t\":2.2,\"v\":8,\"ease\":\"Quad In Out\"},{\"t\":2.35,\"v\":-4,\"ease\":\"Quad In Out\"},{\"t\":2.5,\"v\":0,\"ease\":\"spring Quick\"}]},\"expr\":{\"rotation\":\"value + clamp((time-4.4)*3,0,1)*4*Math.sin(time*2*Math.PI/2.2 + 1.3*index)\"}},{\"key\":\"candy-yellow\",\"name\":\"Candy yellow star\",\"type\":\"star\",\"points\":5,\"inner\":0.5,\"w\":190,\"h\":190,\"x\":425,\"y\":235,\"fill\":\"#FFC93C\",\"animate\":{\"position\":[{\"t\":0.22,\"v\":[520,-150],\"ease\":\"Quad In\"},{\"t\":0.72,\"v\":[520,330],\"ease\":\"Quad Out\"},{\"t\":0.92,\"v\":[520,260],\"ease\":\"Quad In\"},{\"t\":1.1,\"v\":[520,330],\"ease\":\"Quad Out\"},{\"t\":1.24,\"v\":[520,312],\"ease\":\"Quad In\"},{\"t\":1.36,\"v\":[520,330],\"ease\":\"Quad In Out\"},{\"t\":1.98,\"v\":[520,330]},{\"t\":2.12,\"v\":[506,330],\"ease\":\"Quad Out\"},{\"t\":2.28,\"v\":[528,330],\"ease\":\"Quad In Out\"},{\"t\":2.43,\"v\":[520,330]}],\"scale\":[{\"t\":0.22,\"v\":[88,118],\"ease\":\"Quad In\"},{\"t\":0.72,\"v\":[130,72],\"ease\":\"Cubic Out\"},{\"t\":0.92,\"v\":[88,116],\"ease\":\"Quad Out\"},{\"t\":1.1,\"v\":[126,76],\"ease\":\"Quad In\"},{\"t\":1.24,\"v\":[92,110],\"ease\":\"Quad Out\"},{\"t\":1.36,\"v\":[100,100],\"ease\":\"spring Bouncy\"},{\"t\":1.98,\"v\":[100,100],\"ease\":\"Quad Out\"},{\"t\":2.12,\"v\":[112,90],\"ease\":\"Quad Out\"},{\"t\":2.28,\"v\":[96,104],\"ease\":\"Quad In Out\"},{\"t\":2.43,\"v\":[100,100]}],\"rotation\":[{\"t\":0,\"v\":0},{\"t\":1.98,\"v\":0},{\"t\":2.12,\"v\":10,\"ease\":\"Quad Out\"},{\"t\":2.28,\"v\":-8,\"ease\":\"Quad In Out\"},{\"t\":2.43,\"v\":4,\"ease\":\"Quad In Out\"},{\"t\":2.58,\"v\":0,\"ease\":\"spring Quick\"}]},\"expr\":{\"rotation\":\"value + clamp((time-4.4)*3,0,1)*4*Math.sin(time*2*Math.PI/2.2 + 1.3*index)\"}},{\"key\":\"candy-teal\",\"name\":\"Candy teal rounded square\",\"type\":\"rect\",\"w\":140,\"h\":140,\"radius\":30,\"x\":690,\"y\":310,\"fill\":\"#2EC4B6\",\"animate\":{\"position\":[{\"t\":0.34,\"v\":[760,-150],\"ease\":\"Quad In\"},{\"t\":0.84,\"v\":[760,380],\"ease\":\"Quad Out\"},{\"t\":1.04,\"v\":[760,310],\"ease\":\"Quad In\"},{\"t\":1.22,\"v\":[760,380],\"ease\":\"Quad Out\"},{\"t\":1.36,\"v\":[760,362],\"ease\":\"Quad In\"},{\"t\":1.48,\"v\":[760,380],\"ease\":\"Quad In Out\"},{\"t\":2.06,\"v\":[760,3…",
+  "result": "{\"summary\":\"6 created, 0 updated, 18 keyframe tracks; animation ends 2.9s\",\"ids\":{\"candy-pink\":\"l_03jm2\",\"candy-yellow\":\"l_03jm3\",\"candy-teal\":\"l_03jm4\",\"candy-violet\":\"l_03jm5\",\"candy-orange\":\"l_03jm6\",\"candy-mint\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 4068,
+  "ok": true,
+  "ms": 48,
+  "editorMs": 3,
+  "input": "{\"layers\":[{\"key\":\"letter-B\",\"name\":\"Letter B\",\"text\":\"B\",\"fontSize\":230,\"fontWeight\":900,\"align\":\"center\",\"center\":[230,730],\"fill\":\"#FF4F8B\",\"animate\":{\"position\":[{\"t\":2.7,\"v\":[230,900],\"ease\":\"Quad Out\"},{\"t\":3.02,\"v\":[230,600],\"ease\":\"Quad In\"},{\"t\":3.25,\"v\":[230,730],\"ease\":\"Quad Out\"},{\"t\":3.42,\"v\":[230,690],\"ease\":\"Quad In\"},{\"t\":3.56,\"v\":[230,730]}],\"scale\":[{\"t\":2.7,\"v\":[88,116],\"ease\":\"Quad Out\"},{\"t\":3.02,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":3.25,\"v\":[132,70],\"ease\":\"Cubic Out\"},{\"t\":3.42,\"v\":[92,112],\"ease\":\"Quad Out\"},{\"t\":3.56,\"v\":[126,76],\"ease\":\"Quad In\"},{\"t\":3.7,\"v\":[100,100],\"ease\":\"spring Bouncy\"}],\"opacity\":[{\"t\":0,\"v\":0,\"ease\":\"Linear\"},{\"t\":2.7,\"v\":0,\"ease\":\"Linear\"},{\"t\":2.76,\"v\":100}]},\"expr\":{\"rotation\":\"value + clamp((time-4.4)*3,0,1)*3*Math.sin(time*2*Math.PI/1.6 + 0.6*index)\"}},{\"key\":\"letter-o1\",\"name\":\"Letter o 1\",\"text\":\"o\",\"fontSize\":230,\"fontWeight\":900,\"align\":\"center\",\"center\":[390,730],\"fill\":\"#F5A300\",\"animate\":{\"position\":[{\"t\":2.82,\"v\":[390,900],\"ease\":\"Quad Out\"},{\"t\":3.14,\"v\":[390,600],\"ease\":\"Quad In\"},{\"t\":3.37,\"v\":[390,730],\"ease\":\"Quad Out\"},{\"t\":3.54,\"v\":[390,690],\"ease\":\"Quad In\"},{\"t\":3.68,\"v\":[390,730]}],\"scale\":[{\"t\":2.82,\"v\":[88,116],\"ease\":\"Quad Out\"},{\"t\":3.14,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":3.37,\"v\":[132,70],\"ease\":\"Cubic Out\"},{\"t\":3.54,\"v\":[92,112],\"ease\":\"Quad Out\"},{\"t\":3.68,\"v\":[126,76],\"ease\":\"Quad In\"},{\"t\":3.82,\"v\":[100,100],\"ease\":\"spring Bouncy\"}],\"opacity\":[{\"t\":0,\"v\":0,\"ease\":\"Linear\"},{\"t\":2.82,\"v\":0,\"ease\":\"Linear\"},{\"t\":2.88,\"v\":100}]},\"expr\":{\"rotation\":\"value + clamp((time-4.4)*3,0,1)*3*Math.sin(time*2*Math.PI/1.6 + 0.6*index)\"}},{\"key\":\"letter-o2\",\"name\":\"Letter o 2\",\"text\":\"o\",\"fontSize\":230,\"fontWeight\":900,\"align\":\"center\",\"center\":[540,730],\"fill\":\"#1FA89B\",\"animate\":{\"position\":[{\"t\":2.94,\"v\":[540,900],\"ease\":\"Quad Out\"},{\"t\":3.26,\"v\":[540,600],\"ease\":\"Quad In\"},{\"t\":3.49,\"v\":[540,730],\"ease\":\"Quad Out\"},{\"t\":3.66,\"v\":[540,690],\"ease\":\"Quad In\"},{\"t\":3.8,\"v\":[540,730]}],\"scale\":[{\"t\":2.94,\"v\":[88,116],\"ease\":\"Quad Out\"},{\"t\":3.26,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":3.49,\"v\":[132,70],\"ease\":\"Cubic Out\"},{\"t\":3.66,\"v\":[92,112],\"ease\":\"Quad Out\"},{\"t\":3.8,\"v\":[126,76],\"ease\":\"Quad In\"},{\"t\":3.94,\"v\":[100,100],\"ease\":\"spring Bouncy\"}],\"opacity\":[{\"t\":0,\"v\":0,\"ease\":\"Linear\"},{\"t\":2.94,\"v\":0,\"ease\":\"Linear\"},{\"t\":3,\"v\":100}]},\"expr\":{\"rotation\":\"value + clamp((time-4.4)*3,0,1)*3*Math.sin(time*2*Math.PI/1.6 + 0.6*index)\"}},{\"key\":\"letter-p\",\"name\":\"Letter p\",\"text\":\"p\",\"fontSize\":230,\"fontWeight\":900,\"align\":\"center\",\"center\":[690,730],\"fill\":\"#6A4CFF\",\"animate\":{\"position\":[{\"t\":3.06,\"v\":[690,900],\"ease\":\"Quad Out\"},{\"t\":3.38,\"v\":[690,600],\"ease\":\"Quad In\"},{\"t\":3.61,\"v\":[690,730],\"ease\":\"Quad Out\"},{\"t\":3.78,\"v\":[690,690],\"ease\":\"Quad In\"},{\"t\":3.92,\"v\":[690,730]}],\"scale\":[{\"t\":3.06,\"v\":[88,116],\"ease\":\"Quad Out\"},{\"t\":3.38,\"v\":[100,100],\"ease\":\"Quad In\"},{\"t\":3.61,\"v\":[132,70],\"ease\":\"Cubic Out\"},{\"t\":3.78,\"v\":[92,112],\"ease\":\"Quad Out\"},{\"t\":3.92,\"v\":[126,76],\"eas…",
+  "result": "{\"summary\":\"5 created, 0 updated, 15 keyframe tracks; animation ends 4.18s\",\"ids\":{\"letter-B\":\"l_03jm8\",\"letter-o1\":\"l_03jm9\",\"letter-o2\":\"l_03jma\",\"letter-p\":\"l_03jmb\",\"letter-bang\":\"l_03jmc\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 303,
+  "editorMs": 265,
+  "input": {
+   "frames": 8,
+   "start": 0,
+   "end": 6
+  },
+  "result": "8 frames left→right, top→bottom at 0s, 0.85s, 1.72s, 2.57s, 3.43s, 4.28s, 5.15s, 6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/82e7b1d7-1dac-4183-bab2-305ee3da1f69/tool-results/mcp-motion-blob-1794511700765-zce9en.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 79,
+  "editorMs": 34,
+  "input": {},
+  "result": "score 86/100 (readability 79, brand 96)\n1. [low] \"Letter B\" has 2.91:1 contrast against #fff6e9 behind it (needs 3:1)\n   → update_layer {\"id\":\"l_03jm8\",\"props\":{\"fill\":\"#111111\"}}\n2. [low] \"Letter o 1\" has 1.94:1 contrast against #fff6e9 behind it (needs 3:1)\n   → update_layer {\"id\":\"l_03jm9\",\"props\":{\"fill\":\"#111111\"}}\n3. [low] \"Letter o 2\" has 2.75:1 contrast against #fff6e9 behind it (needs 3:1…"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jm8",
+   "props": {
+    "fill": "#D92D6E"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm9",
+   "props": {
+    "fill": "#C27C00"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jma",
+   "props": {
+    "fill": "#137F76"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 33,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmb",
+   "props": {
+    "fill": "#5638E0"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jmc",
+   "props": {
+    "fill": "#E0561A"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 17,
+  "input": {},
+  "result": "score 97/100 (brand 90)\n1. [medium] 10 different accent colors (#ff4f8b #ffc93c #2ec4b6 #7b5cff #ff8a3d #d92d6e…): keep 1 accent + 1-2 support colors"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 26,
+  "editorMs": 3,
+  "input": {
+   "times": [
+    1.2,
+    3.6,
+    5.5
+   ]
+  },
+  "result": "1.2s: ok\n3.6s: ok\n5.5s: ok"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 69,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "beat": 1,
+   "status": "done",
+   "note": "6 candies drop, squash and bounce"
+  },
+  "result": "beat 1 \"Candy drop\" done; 1/4 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 69,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "beat": 2,
+   "status": "done",
+   "note": "rotation and nudge jostle, settle"
+  },
+  "result": "beat 2 \"Jostle\" done; 2/4 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 66,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 0,
+  "input": {
+   "beat": 3,
+   "status": "done",
+   "note": "B-o-o-p-! hop in, 0.12 s apart"
+  },
+  "result": "beat 3 \"Letters hop\" done; 3/4 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 73,
+  "ok": true,
+  "ms": 8,
+  "editorMs": 0,
+  "input": {
+   "beat": 4,
+   "status": "done",
+   "note": "sine idle wiggle ramps in after 4.4 s"
+  },
+  "result": "beat 4 \"Idle wiggle\" done; 4/4 beats finished — now critique (the critique tool, then contact_sheet; rubric: get_guide handbook, section \"Critique\")"
+ }
+]

@@ -1,0 +1,216 @@
+{
+ "run": {
+  "id": "10-corporate-smooth",
+  "name": "10-corporate-smooth",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 68,
+    "fixes": 3,
+    "timedOut": false
+   },
+   {
+    "round": 2,
+    "scoreBefore": 76,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 68,
+    "sub": {
+     "timing": 91.6,
+     "easing": 84,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 64,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 8.4,
+     "easing": 16,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 36,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:text-collision",
+     "medium:entrance-ease",
+     "low:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 17.9
+   },
+   "after": {
+    "score": 77,
+    "sub": {
+     "timing": 94.4,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 64,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 5.6000000000000005,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 36,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:text-collision",
+     "low:dead-time"
+    ],
+    "ms": 2.8
+   }
+  },
+  "wallMs": 46485,
+  "timedOut": false,
+  "turns": 11,
+  "costUsd": 0.2754647,
+  "durationMs": 41276,
+  "usage": {
+   "input": 142464,
+   "cached": 137839,
+   "output": 2631
+  },
+  "errors": [],
+  "toolCalls": 8,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the lower third as a 6 s composition on a dark blue-grey background. I checked it in contact-sheet frames at 0.5 s, 1.4 s, 3 s and 5.1 s. I didn't run the critique pass or look at it in motion.\n\n- **Accent line** (blue): extends from the left edge from 0.2 s to 1.4 s with a long ease-in-out.\n- **Panel** (translucent steel-blue): slides in from the left and fades up behind the line from 0.6 s to 1.8 s.\n- **Name and title**: \"Dr. Amelia Hart\" and \"Head of Research, Larkspur Labs\" slide up through a clipped mask. The name starts at 1.1 s and the title follows at 1.3 s, both landing by about 2 s.\n- **Hold**: everything sits still from about 2.2 s to 4.7 s.\n- **Exit**: the text slides up and out of the mask first, then the panel fades and drifts left while the line retracts. It is all clear by 5.8 s.\n\nAll the moves use Cubic or Sine in-out easing, with no overshoot or bounce.\n\nThe first pass showed the name peeking through the mask before it should. I moved the text's start position lower, and the later frames look clean. I saw no frame where the name or title was visible before its entrance.\n\nI can change the position or size, add a subtle blur on the text reveal, or slow the timing further.\nI made the line and panel entrances decelerate (Quart Out) and shortened the panel slide to 0.7 s, which lifted the score from 68 to 76. I left the Name/Title overlap flag alone: the two text boxes don't overlap on screen, and the suggested 2.38 s delay would push the title's exit past the 6 s end.\nScore is now 77/100: I sped up the title entrance and the panel exit slightly. I left the Name/Title overlap flag alone again, since the two lines don't overlap on screen, and I kept the 2.7 s hold because the brief asks for a calm hold."
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "rect": 2,
+   "group": 1,
+   "text": 2
+  },
+  "groups": 1,
+  "animatedLayers": 4,
+  "keys": 20,
+  "segments": 10,
+  "easesUsed": {
+   "Quart Out": 3,
+   "Cubic In Out": 5,
+   "Sine In Out": 2
+  },
+  "distinctEases": 3,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#8fa3b8",
+   "#6fa8dc",
+   "#f2f6fa",
+   "#b8c7d6",
+   "#1b2430"
+  ],
+  "keyCoverage": 0.483,
+  "visualActivity": 0.48,
+  "firstMotion": 0.2,
+  "lastMotion": 5.8,
+  "endHold": 0.2,
+  "longestHold": 2.747,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 1.742,
+  "textOverlapPairs": {
+   "Name × Title": 1.742
+  },
+  "partialOverlapTime": 2.345,
+  "exits": 1,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.147,
+  "toolErrors": 0,
+  "toolCalls": 8
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "placed in the lower third",
+    "type": "lowerThird",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "animates out by the end",
+    "type": "exitsMin",
+    "pass": false
+   },
+   {
+    "text": "hold in the middle (≥1.5s without key motion)",
+    "type": "holdMin",
+    "pass": true
+   },
+   {
+    "text": "translucent panel (opacity < 100 or alpha)",
+    "type": "translucent",
+    "pass": true
+   },
+   {
+    "text": "accent line extends",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 7,
+  "total": 8
+ },
+ "video": null
+}

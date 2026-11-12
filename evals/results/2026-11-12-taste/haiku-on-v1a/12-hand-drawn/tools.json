@@ -1,0 +1,390 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 264,
+  "ok": true,
+  "ms": 26,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Hand-drawn organic logo sting for a bakery called Crumb & Co: wobbly line-drawn wheat stalk and loaf draw on with stroke reveal, irregular warm earthy blobs breathe slowly, name appears friendly. Imperfect boil on lines at 12fps feel."
+  },
+  "result": "# Example: Elegant logo reveal, the line draws the mark and the wordmark slides out from behind it\n> tags: logo, reveal, elegant, minimal, luxury, corporate, line, stroke, draw, draw-on, trim, wordmark, mask, behind, monogram, calm\n\n## Brief\n\"Logo reveal for NOVA (a circle monogram with a slash). Calm and premium, dark background, 4 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 28,
+  "ok": false,
+  "ms": 17,
+  "editorMs": 1,
+  "error": "no guide \"styles/hand-drawn\". guides: workflow, handbook, cookbook, concepts, music, styles/corporate-smooth, styles/cyber-neon, styles/data-viz, styles/editorial, styles/flat-explainer, styles/glitch-retro, styles/hand-drawn-organic, styles/kinetic-type, styles/liquid-blob, styles/minimal-luxury, styles/neo-brutalist, styles/paper-cutout, styles/parallax-3d, styles/playful-bouncy, styles/swiss, s",
+  "input": {
+   "name": "styles/hand-drawn"
+  },
+  "result": "no guide \"styles/hand-drawn\". guides: workflow, handbook, cookbook, concepts, music, styles/corporate-smooth, styles/cyber-neon, styles/data-viz, styles/editorial, styles/flat-explainer, styles/glitch-retro, styles/hand-drawn-organic, styles/kinetic-type, styles/liquid-blob, styles/minimal-luxury, styles/neo-brutalist, styles/paper-cutout, styles/parallax-3d, styles/playful-bouncy, styles/swiss, s…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 36,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 0,
+  "input": {
+   "name": "styles/hand-drawn-organic"
+  },
+  "result": "# Hand-drawn organic\n> Imperfect, warm and human: wobbly strokes drawing on, earthy palette, boiling lines and gentle arcs.\n\n**Use for**: wellness, food, education, nonprofits, storytelling, craft brands.\n\n## Palette\n- Background `#F6EFE3` (paper); ink `#2E2A24`.\n- Accents: `#D97757` terracotta, `#7A9E7E` sage, `#E9B44C` mustard, `#5B7DB1` dusty blue.\n\n## Shapes\nPath layers with irregular curves (…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2967,
+  "ok": true,
+  "ms": 171,
+  "editorMs": 6,
+  "input": {
+   "comp": {
+    "duration": 6,
+    "fps": 24,
+    "background": "#F6EFE3",
+    "name": "Crumb & Co"
+   },
+   "layers": [
+    {
+     "key": "blob-terracotta",
+     "name": "Blob terracotta",
+     "type": "path",
+     "d": "M210 20 C330 0 420 90 400 210 C390 320 300 380 190 360 C80 340 10 290 20 180 C30 70 110 40 210 20 Z",
+     "w": 420,
+     "h": 380,
+     "x": 140,
+     "y": 160,
+     "fill": "#D97757",
+     "enter": {
+      "t": 0.1,
+      "duration": 1,
+      "from": {
+       "scale": 0
+      },
+      "ease": "Quad Out"
+     },
+     "expr": {
+      "scale": "value + [1.2*Math.sin(time*2*Math.PI/3.2), 1.2*Math.sin(time*2*Math.PI/3.2)]"
+     }
+    },
+    {
+     "key": "blob-mustard",
+     "name": "Blob mustard",
+     "type": "path",
+     "d": "M160 10 C250 0 315 70 300 160 C285 250 200 285 110 265 C20 245 5 170 15 100 C25 40 80 15 160 10 Z",
+     "w": 320,
+     "h": 280,
+     "x": 1520,
+     "y": 660,
+     "fill": "#E9B44C",
+     "enter": {
+      "t": 0.22,
+      "duration": 1,
+      "from": {
+       "scale": 0
+      },
+      "ease": "Quad Out"
+     },
+     "expr": {
+      "scale": "value + [1.2*Math.sin(time*2*Math.PI/2.6+1), 1.2*Math.sin(time*2*Math.PI/2.6+1)]"
+     }
+    },
+    {
+     "key": "blob-sage",
+     "name": "Blob sage",
+     "type": "path",
+     "d": "M120 8 C190 0 235 60 225 130 C215 200 150 220 80 205 C15 190 2 130 12 70 C22 25 60 12 120 8 Z",
+     "w": 240,
+     "h": 220,
+     "x": 1480,
+     "y": 150,
+     "fill": "#7A9E7E",
+     "enter": {
+      "t": 0.34,
+      "duration": 1,
+      "from": {
+       "scale": 0
+      },
+      "ease": "Quad Out"
+     },
+     "expr": {
+      "scale": "value + [1.2*Math.sin(time*2*Math.PI/3.8+2), 1.2*Math.sin(time*2*Math.PI/3.8+2)]"
+     }
+    },
+    {
+     "key": "wheat",
+     "name": "Wheat stalk",
+     "type": "path",
+     "d": "M90 460 C89 320 92 180 90 20 M90 62 C84 42 84 22 90 4 C96 22 96 42 90 62 Z M90 120 C72 112 64 92 70 70 C86 82 92 102 90 120 Z M90 120 C108 112 116 92 110 70 C94 82 88 102 90 120 Z M90 185 C72 177 64 157 70 135 C86 147 92 167 90 185 Z M90 185 C108 177 116 157 110 135 C94 147 88 167 90 185 Z M90 250 C72 242 64 222 70 200 C86 212 92 232 90 250 Z M90 250 C108 242 116 222 110 200 C94 212 88 232 90 250 Z M90 315 C72 307 64 287 70 265 C86 277 92 297 90 315 Z M90 315 C108 307 116 287 110 265 C94 277 88 297 90 315 Z M90 380 C72 372 64 352 70 330 C86 342 92 362 90 380 Z M90 380 C108 372 116 352 110 330 C94 342 88 362 90 380 Z",
+     "w": 180,
+     "h": 460,
+     "x": 710,
+     "y": 200,
+     "fill": "#00000000",
+     "stroke": "#2E2A24",
+     "strokeWidth": 6,
+     "drawOn": {
+      "t": 0.3,
+      "duration": 1.3,
+      "ease": "Sine In Out"
+     },
+     "expr": {
+      "rotation": "wiggle(12, 0.5)"
+     }
+    },
+    {
+     "key": "loaf",
+     "name": "Loaf",
+     "type": "path",
+     "d": "M20 180 C0 120 10 40 80 25 C130 10 180 0 230 20 C290 45 300 120 282 180 C200 192 100 192 20 180 Z",
+     "w": 300,
+     "h": 200,
+     "x": 910,
+     "y": 440,
+     "fill": "#00000000",
+     "stroke": "#2E2A24",
+     "strokeWidth": 6,
+     "drawOn": {
+      "t": 0.9,
+      "duration": 1.2,
+      "ease": "Sine In Out"
+     },
+     "expr": {
+      "rotation": "wiggle(12, 0.5)"
+     }
+    },
+    {
+     "key": "score",
+     "name": "Loaf score",
+     "type": "path",
+     "d": "M92 70 C120 40 160 40 186 62",
+     "w": 300,
+     "h": 200,
+     "x": 910,
+     "y": 440,
+     "fill": "#00000000",
+     "stroke": "#D97757",
+     "strokeWidth": 6,
+     "drawOn": {
+      "t": 1.9,
+      "duration": 0.45,
+      "ease": "Quad Out"
+     },
+     "expr": {
+      "rotation": "wiggle(12, 0.5)"
+     }
+    },
+    {
+     "key": "wordmark",
+     "name": "Wordmark",
+     "text": {
+      "content": "Crumb & Co",
+      "fontFamily": "serif",
+      "fontSize": 128,
+      "fontWeight": 600,
+      "align": "center"
+     },
+     "x": 460,
+     "y": 730,
+     "w": 1000,
+     "h": 170,
+     "fill": "#2E2A24",
+     "textAnim": {
+      "preset": "Fade up",
+      "by": "char",
+      "start": 2.3,
+      "stagger": 0.045,
+      "duration": 0.6,
+      "ease": "Quart Out"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"7 created, 0 updated, 9 keyframe tracks; animation ends 2.35s\",\"ids\":{\"blob-terracotta\":\"l_03jm2\",\"blob-mustard\":\"l_03jm3\",\"blob-sage\":\"l_03jm4\",\"wheat\":\"l_03jm5\",\"loaf\":\"l_03jm6\",\"score\":\"l_03jm7\",\"wordmark\":\"l_03jm8\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 39,
+  "editorMs": 12,
+  "input": {},
+  "result": "score 100/100 (no issues found)"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 31,
+  "ok": true,
+  "ms": 187,
+  "editorMs": 127,
+  "input": {
+   "times": [
+    0.4,
+    1.2,
+    2,
+    2.8,
+    4,
+    5.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.42s, 1.21s, 2s, 2.79s, 4s, 5.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/7a57e83d-5341-4eb9-870f-4df41b1e1113/tool-results/mcp-motion-blob-1794512021747-e3cooq.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 63,
+  "ok": false,
+  "ms": 10,
+  "editorMs": 0,
+  "error": "no layer with id \"wheat\"",
+  "input": {
+   "id": "wheat",
+   "props": {
+    "position": [
+     760,
+     361
+    ],
+    "scale": [
+     130,
+     130
+    ]
+   }
+  },
+  "result": "no layer with id \"wheat\""
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 63,
+  "ok": false,
+  "ms": 89,
+  "editorMs": 0,
+  "error": "no layer with id \"loaf\"",
+  "input": {
+   "id": "loaf",
+   "props": {
+    "position": [
+     1080,
+     575
+    ],
+    "scale": [
+     130,
+     130
+    ]
+   }
+  },
+  "result": "no layer with id \"loaf\""
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 64,
+  "ok": false,
+  "ms": 20,
+  "editorMs": 0,
+  "error": "no layer with id \"score\"",
+  "input": {
+   "id": "score",
+   "props": {
+    "position": [
+     1080,
+     575
+    ],
+    "scale": [
+     130,
+     130
+    ]
+   }
+  },
+  "result": "no layer with id \"score\""
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 65,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "props": {
+    "position": [
+     760,
+     361
+    ],
+    "scale": [
+     130,
+     130
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 66,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm6",
+   "props": {
+    "position": [
+     1080,
+     575
+    ],
+    "scale": [
+     130,
+     130
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 66,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "props": {
+    "position": [
+     1080,
+     575
+    ],
+    "scale": [
+     130,
+     130
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 31,
+  "ok": true,
+  "ms": 159,
+  "editorMs": 138,
+  "input": {
+   "times": [
+    0.8,
+    1.6,
+    2.4,
+    3.5,
+    5.5
+   ]
+  },
+  "result": "5 frames left→right, top→bottom at 0.79s, 1.58s, 2.42s, 3.5s, 5.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/7a57e83d-5341-4eb9-870f-4df41b1e1113/tool-results/mcp-motion-blob-1794512030309-01rwv3.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 66,
+  "editorMs": 8,
+  "input": {},
+  "result": "score 100/100 (no issues found)"
+ }
+]

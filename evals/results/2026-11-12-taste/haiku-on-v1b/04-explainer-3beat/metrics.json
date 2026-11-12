@@ -1,0 +1,210 @@
+{
+ "run": {
+  "id": "04-explainer-3beat",
+  "name": "04-explainer-3beat",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 81,
+    "sub": {
+     "timing": 95.8,
+     "easing": 100,
+     "choreography": 95.8,
+     "composition": 100,
+     "readability": 74.4,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 0,
+     "choreography": 4.2,
+     "composition": 0,
+     "readability": 25.6,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:covers-text",
+     "medium:covers-text",
+     "low:lead-late",
+     "low:timing-range"
+    ],
+    "ms": 16.4
+   },
+   "after": {
+    "score": 81,
+    "sub": {
+     "timing": 95.8,
+     "easing": 100,
+     "choreography": 95.8,
+     "composition": 100,
+     "readability": 74.4,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 0,
+     "choreography": 4.2,
+     "composition": 0,
+     "readability": 25.6,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:covers-text",
+     "medium:covers-text",
+     "low:lead-late",
+     "low:timing-range"
+    ],
+    "ms": 16.4
+   }
+  },
+  "wallMs": 129793,
+  "timedOut": false,
+  "turns": 19,
+  "costUsd": 0.028172000000000006,
+  "durationMs": 127685,
+  "usage": {
+   "input": 834245,
+   "cached": 797440,
+   "output": 25678
+  },
+  "errors": [],
+  "toolCalls": 18,
+  "toolErrors": 1,
+  "toolsAvailable": 76,
+  "finalText": "The 12-second password manager scene is built in the Main comp across the three beats, on a cream background with a flat navy, coral, teal and amber palette.\n\n- **Beat 1, problem (0–3.6 s):** six sticky notes with passwords pop in with Back Out and jitter anxiously until about 3.6 s.\n- **Beat 2, gather (3.3–4.7 s):** the vault shield pops in at 3.3 s. The notes are pulled into its center on Expo In arcs, spinning and shrinking as they go, and the shield gives a small bump as the last one lands.\n- **Beat 3, resolve (4.2–12 s):** a soft amber glow breathes behind the shield. A teal check mark draws on (7.0–7.5 s), then \"One key. Every login.\" rises in below it and holds to the end.\n\nThe critique scored it 75/100. I fixed the shield bump's abruptness. The remaining flags are deliberate: the notes passing behind the shield is the suction itself, and the even note cadence is a sequential pull.\n\nTwo changes from the storyboard timing: the notes finish their suction at about 4.7 s rather than 7.5 s, so beat 2 is shorter than planned, and the headline lands at 7.4 s instead of 7.5 s. I can stretch the suction or add a hold if you want the gather to breathe more.\n\nNext options: a word-by-word headline reveal, or a slightly brighter glow pulse."
+ },
+ "metrics": {
+  "layers": 22,
+  "drawableLayers": 16,
+  "layerTypes": {
+   "group": 6,
+   "rect": 6,
+   "text": 7,
+   "ellipse": 1,
+   "path": 2
+  },
+  "groups": 6,
+  "animatedLayers": 10,
+  "keys": 76,
+  "segments": 38,
+  "easesUsed": {
+   "Expo In": 12,
+   "Back Out": 7,
+   "Quad In": 6,
+   "Quart Out": 4,
+   "Sine In Out": 6,
+   "Quad Out": 2,
+   "Cubic In Out": 1
+  },
+  "distinctEases": 7,
+  "easeFamilies": 6,
+  "overshootSegments": 7,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 12,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 6,
+  "palette": [
+   "#ff7f50",
+   "#22313f",
+   "#2ec4b6",
+   "#ffbf69",
+   "#3d5a80",
+   "#fff8f0"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.771,
+  "firstMotion": 0,
+  "lastMotion": 10.733,
+  "endHold": 1.267,
+  "longestHold": 0.737,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 4.221,
+  "exits": 0,
+  "beats": 6,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.031,
+  "midLuma": 0.951,
+  "toolErrors": 1,
+  "toolCalls": 18
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "3 beats",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "headline present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 sticky notes (rects) in beat 1",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "jitter/anxious motion (wiggle expression or many small keys)",
+    "type": "jitter",
+    "pass": false
+   },
+   {
+    "text": "shield/vault as a custom path",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "uses most of the 12s (animated coverage ≥70%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "notes converge (moving toward one point)",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "transitions between beats are continuous",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 5,
+  "checkable": 6,
+  "total": 8
+ },
+ "video": null
+}

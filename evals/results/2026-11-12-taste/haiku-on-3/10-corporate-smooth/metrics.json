@@ -1,0 +1,194 @@
+{
+ "run": {
+  "id": "10-corporate-smooth",
+  "name": "10-corporate-smooth",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 89,
+    "sub": {
+     "timing": 100,
+     "easing": 84,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 16,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:entrance-ease"
+    ],
+    "ms": 4
+   },
+   "after": {
+    "score": 89,
+    "sub": {
+     "timing": 100,
+     "easing": 84,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 16,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:entrance-ease"
+    ],
+    "ms": 4
+   }
+  },
+  "wallMs": 40072,
+  "timedOut": false,
+  "turns": 5,
+  "costUsd": 0.007727320000000001,
+  "durationMs": 39088,
+  "usage": {
+   "input": 206826,
+   "cached": 195632,
+   "output": 7066
+  },
+  "errors": [],
+  "toolCalls": 4,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the lower third as a 6 s piece on a blue-grey backdrop. The panel is translucent, the name and title reveal inside their own soft masks, and everything is clear by 5.8 s.\n\n- **Accent line** (`Accent line`): extends left to right along the top edge of the panel, 0.2–1.1 s.\n- **Panel** (`Panel`): slides in 40 px from the left and fades up, 0.6–1.5 s. It's a dark blue-grey at 72% opacity with 6 px corners.\n- **Name** (`Name`, \"Dr. Amelia Hart\"): rises 50 px out of a clip mask, 1.0–1.9 s.\n- **Title** (`Title`, \"Head of Research, Larkspur Labs\"): rises 30 px out of its own mask, 1.25–2.15 s, so it trails the name.\n- **Hold:** about 2.2 s of full readability before the out.\n- **Out:** the text fades up and away (4.6–5.0 s), the panel slides left and fades (5.0–5.5 s), and the accent line retracts (5.3–5.8 s).\n\nAll entrances and exits use Quart In Out or Quart In, as you asked for long, calm curves with no bounce. The critic flagged that entrances would read softer with a pure ease-out, but I kept the in-out you specified. If you want a snappier arrival, switching the entrances to Quart Out is a one-step change.\n\nThe comp background (`#2B3947`) is a stand-in for the interview footage, so the panel will sit over your video once you place it there. The title text is 28 px, which is small at 1080p; bump it if the footage is busy behind the panel.\n\nWant me to adjust the palette, move the panel to another corner, or add a second lower third for a different speaker?"
+ },
+ "metrics": {
+  "layers": 6,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "rect": 2,
+   "group": 2,
+   "text": 2
+  },
+  "groups": 2,
+  "animatedLayers": 4,
+  "keys": 28,
+  "segments": 14,
+  "easesUsed": {
+   "Quart In Out": 7,
+   "Quart In": 7
+  },
+  "distinctEases": 2,
+  "easeFamilies": 1,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#1e2b3a",
+   "#8fb3cc",
+   "#f4f7fa"
+  ],
+  "keyCoverage": 0.525,
+  "visualActivity": 0.447,
+  "firstMotion": 0.2,
+  "lastMotion": 5.8,
+  "endHold": 0.2,
+  "longestHold": 2.814,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 3,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.217,
+  "toolErrors": 0,
+  "toolCalls": 4
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "placed in the lower third",
+    "type": "lowerThird",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "animates out by the end",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "hold in the middle (≥1.5s without key motion)",
+    "type": "holdMin",
+    "pass": true
+   },
+   {
+    "text": "translucent panel (opacity < 100 or alpha)",
+    "type": "translucent",
+    "pass": true
+   },
+   {
+    "text": "accent line extends",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 8
+ },
+ "video": null
+}

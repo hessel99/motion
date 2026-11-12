@@ -1,0 +1,186 @@
+{
+ "run": {
+  "id": "12-hand-drawn",
+  "name": "12-hand-drawn",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 7.8
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 7.8
+   }
+  },
+  "wallMs": 62862,
+  "timedOut": false,
+  "turns": 8,
+  "costUsd": 0.013659089999999999,
+  "durationMs": 61690,
+  "usage": {
+   "input": 393000,
+   "cached": 374929,
+   "output": 12594
+  },
+  "errors": [],
+  "toolCalls": 7,
+  "toolErrors": 1,
+  "toolsAvailable": 76,
+  "finalText": "I built the **Crumb & Co** sting as a 6-second, 1920×1080 piece on the warm paper background (`#F6EFE3`) with ink `#2E2A24`. The critique scores it 100/100, and I checked six frames.\n\n- **Blobs (0–1.4 s):** four irregular blobs in mustard, terracotta and sage grow in on staggered starts, then breathe slowly through the hold.\n- **Wheat (0.3–2.5 s):** the wobbly stalk draws on from the base, then five pairs of grains draw out upward, each 0.12 s apart.\n- **Loaf (0.6–2.3 s):** the dome outline draws on, then three terracotta score marks cut across it.\n- **Name (2.4–3.7 s):** \"Crumb & Co\" in a serif at 128 px fades up letter by letter, with a mustard swoosh underline drawing under it.\n- **Boil:** all line art has a 0.9 px position wiggle at 10 Hz for the hand-animated jitter. The comp stays at 24 fps, so the boil is not a true 12 fps step.\n\nI drew the wheat and loaf myself as paths since no artwork was provided. The stalk and strokes are fairly thin at full frame, so if you want a bolder mark I can thicken the strokes or scale the illustration up. I can also swap the serif for a specific brand font."
+ },
+ "metrics": {
+  "layers": 21,
+  "drawableLayers": 21,
+  "layerTypes": {
+   "path": 20,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 21,
+  "keys": 56,
+  "segments": 20,
+  "easesUsed": {
+   "Quad Out": 4,
+   "Sine In Out": 16
+  },
+  "distinctEases": 2,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 19,
+  "textAnimators": 1,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 20,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#e9b44c",
+   "#d97757",
+   "#7a9e7e",
+   "#2e2a24",
+   "#f6efe3"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.748,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0.067,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.023,
+  "midLuma": 0.918,
+  "toolErrors": 1,
+  "toolCalls": 7
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "stroke draw-on (trim paths animated)",
+    "type": "trimAnimated",
+    "pass": true
+   },
+   {
+    "text": "custom paths (≥2)",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "boil/wobble (wiggle expression, hold keys or path keys)",
+    "type": "jitter",
+    "pass": true
+   },
+   {
+    "text": "breathing blobs (scale animated)",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "warm palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "no linear eases",
+    "type": "noLinear",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

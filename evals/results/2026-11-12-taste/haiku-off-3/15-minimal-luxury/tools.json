@@ -1,0 +1,454 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 668,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 2,
+  "input": {
+   "comp": {
+    "background": "#0b0a08",
+    "duration": 7,
+    "fps": 30,
+    "width": 1080,
+    "height": 1920
+   },
+   "layers": [
+    {
+     "key": "line",
+     "name": "Gold line",
+     "type": "path",
+     "d": "M300 1000 L780 1000",
+     "stroke": "#c9a96e",
+     "strokeWidth": 1.25,
+     "fill": "#00000000"
+    },
+    {
+     "key": "name",
+     "name": "Name ÉCLAT",
+     "type": "text",
+     "x": 0,
+     "y": 820,
+     "w": 1080,
+     "h": 160,
+     "text": {
+      "content": "ÉCLAT",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 132,
+      "fontWeight": 300,
+      "align": "center"
+     },
+     "tracking": 44,
+     "fill": "#e8d9b5"
+    },
+    {
+     "key": "sub",
+     "name": "Subline",
+     "type": "text",
+     "x": 0,
+     "y": 1060,
+     "w": 1080,
+     "h": 50,
+     "text": {
+      "content": "EAU DE PARFUM",
+      "fontFamily": "Inter",
+      "fontSize": 28,
+      "fontWeight": 400,
+      "align": "center"
+     },
+     "tracking": 14,
+     "fill": "#c9a96e",
+     "opacity": 0
+    }
+   ]
+  },
+  "result": "{\"summary\":\"3 created, 0 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"line\":\"l_03jm2\",\"name\":\"l_03jm3\",\"sub\":\"l_03jm4\"}}"
+ },
+ {
+  "name": "draw_on",
+  "argsBytes": 93,
+  "ok": true,
+  "ms": 49,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm2"
+   ],
+   "t": 0.4,
+   "duration": 2.4,
+   "from": "center",
+   "ease": "Sine In Out",
+   "fill": "keep"
+  },
+  "result": "draw on: 1 path(s) 0.4s–2.8s"
+ },
+ {
+  "name": "split_text",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 42,
+  "editorMs": 3,
+  "input": {
+   "id": "l_03jm3",
+   "by": "char"
+  },
+  "result": "{\"group\":\"l_03jm5\",\"pieces\":5,\"ids\":[\"l_03jm6\",\"l_03jm7\",\"l_03jm8\",\"l_03jm9\",\"l_03jma\"],\"note\":\"pieces are char text layers in group coordinates\"}"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm6"
+  },
+  "result": "{\"id\":\"l_03jm6\",\"name\":\"É\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[61.2841796875,79.2]},\"position\":{\"v\":[285.904296875,79.2]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9098039215686274,0.8509803921568627,0.7098039215686275,1]}},\"text\":{\"content\":…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm7"
+  },
+  "result": "{\"id\":\"l_03jm7\",\"name\":\"C\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[70.0498046875,79.2]},\"position\":{\"v\":[417.23828125,79.2]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9098039215686274,0.8509803921568627,0.7098039215686275,1]}},\"text\":{\"content\":\"…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm8"
+  },
+  "result": "{\"id\":\"l_03jm8\",\"name\":\"L\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[59.25390625,79.2]},\"position\":{\"v\":[546.5419921875,79.2]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9098039215686274,0.8509803921568627,0.7098039215686275,1]}},\"text\":{\"content\":\"…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm9"
+  },
+  "result": "{\"id\":\"l_03jm9\",\"name\":\"A\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[66.4404296875,79.2]},\"position\":{\"v\":[672.236328125,79.2]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9098039215686274,0.8509803921568627,0.7098039215686275,1]}},\"text\":{\"content\":…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 25,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jma"
+  },
+  "result": "{\"id\":\"l_03jma\",\"name\":\"T\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[63.958984375,79.2]},\"position\":{\"v\":[802.6357421875,79.2]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9098039215686274,0.8509803921568627,0.7098039215686275,1]}},\"text\":{\"content\":…"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 1243,
+  "ok": true,
+  "ms": 48,
+  "editorMs": 8,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm6",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 1.6,
+       "v": [
+        249.9,
+        79.2
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 3.4,
+       "v": [
+        285.9,
+        79.2
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm6",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 1.6,
+       "v": 0,
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 2.6,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 1.76,
+       "v": [
+        399.2,
+        79.2
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 3.56,
+       "v": [
+        417.2,
+        79.2
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 1.76,
+       "v": 0,
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 2.76,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 1.92,
+       "v": [
+        546.5,
+        79.2
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 3.72,
+       "v": [
+        546.5,
+        79.2
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 1.92,
+       "v": 0,
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 2.92,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm9",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 2.08,
+       "v": [
+        690.2,
+        79.2
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 3.88,
+       "v": [
+        672.2,
+        79.2
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm9",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 2.08,
+       "v": 0,
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 3.08,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jma",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 2.24,
+       "v": [
+        838.6,
+        79.2
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 4.04,
+       "v": [
+        802.6,
+        79.2
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jma",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 2.24,
+       "v": 0,
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 3.24,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 3.9,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 4.9,
+       "v": 100
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 11 tracks on 6 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 96,
+  "editorMs": 74,
+  "input": {
+   "frames": 6,
+   "start": 0,
+   "end": 7
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 1.4s, 2.8s, 4.2s, 5.6s, 7s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/7d1d5897-8f4b-4b42-a502-f52460b6a52e/tool-results/mcp-motion-blob-1794514391213-03vgpv.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 6,
+  "input": {
+   "id": "l_03jm6",
+   "text": {
+    "fontFamily": "Georgia"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "text": {
+    "fontFamily": "Georgia"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm8",
+   "text": {
+    "fontFamily": "Georgia"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm9",
+   "text": {
+    "fontFamily": "Georgia"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jma",
+   "text": {
+    "fontFamily": "Georgia"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 21,
+  "ok": true,
+  "ms": 49,
+  "editorMs": 22,
+  "input": {
+   "t": 6,
+   "maxSize": 540
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/7d1d5897-8f4b-4b42-a502-f52460b6a52e/tool-results/mcp-motion-blob-1794514395892-k9c851.png]"
+ }
+]

@@ -1,0 +1,50 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 6236,
+  "ok": true,
+  "ms": 1465,
+  "editorMs": 10,
+  "input": "{\"comp\":{\"background\":\"#0b0820\",\"duration\":6,\"fps\":30,\"name\":\"Stage Loop\"},\"layers\":[{\"key\":\"b1\",\"name\":\"Orb Purple\",\"type\":\"ellipse\",\"w\":820,\"h\":820,\"center\":[460,330],\"fill\":\"#7c3aed\",\"opacity\":60,\"props\":{\"blur\":150},\"animate\":{\"position\":[{\"t\":0,\"v\":[460,330],\"ease\":\"Sine In Out\"},{\"t\":3,\"v\":[620,470],\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":[460,330]}],\"scale\":[{\"t\":0,\"v\":100,\"ease\":\"Sine In Out\"},{\"t\":3,\"v\":110,\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":100}]}},{\"key\":\"b2\",\"name\":\"Orb Teal\",\"type\":\"ellipse\",\"w\":760,\"h\":760,\"center\":[1480,760],\"fill\":\"#14b8a6\",\"opacity\":55,\"props\":{\"blur\":150},\"animate\":{\"position\":[{\"t\":0,\"v\":[1480,760],\"ease\":\"Sine In Out\"},{\"t\":3,\"v\":[1320,620],\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":[1480,760]}],\"scale\":[{\"t\":0,\"v\":105,\"ease\":\"Sine In Out\"},{\"t\":3,\"v\":95,\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":105}]}},{\"key\":\"b3\",\"name\":\"Orb Indigo\",\"type\":\"ellipse\",\"w\":640,\"h\":640,\"center\":[1400,250],\"fill\":\"#4f46e5\",\"opacity\":50,\"props\":{\"blur\":130},\"animate\":{\"position\":[{\"t\":0,\"v\":[1400,250],\"ease\":\"Sine In Out\"},{\"t\":3,\"v\":[1230,330],\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":[1400,250]}]}},{\"key\":\"b4\",\"name\":\"Orb Cyan\",\"type\":\"ellipse\",\"w\":560,\"h\":560,\"center\":[620,860],\"fill\":\"#22d3ee\",\"opacity\":38,\"props\":{\"blur\":130},\"animate\":{\"position\":[{\"t\":0,\"v\":[620,860],\"ease\":\"Sine In Out\"},{\"t\":3,\"v\":[780,760],\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":[620,860]}],\"scale\":[{\"t\":0,\"v\":95,\"ease\":\"Sine In Out\"},{\"t\":3,\"v\":108,\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":95}]}},{\"key\":\"b5\",\"name\":\"Orb Magenta\",\"type\":\"ellipse\",\"w\":480,\"h\":480,\"center\":[1000,540],\"fill\":\"#c026d3\",\"opacity\":32,\"props\":{\"blur\":120},\"animate\":{\"position\":[{\"t\":0,\"v\":[1000,540],\"ease\":\"Sine In Out\"},{\"t\":3,\"v\":[920,600],\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":[1000,540]}]}},{\"key\":\"dotsA\",\"name\":\"Dots A\",\"type\":\"path\",\"fill\":\"#ffffff\",\"opacity\":15,\"d\":\"M117 120a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M237 240a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M117 360a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M237 480a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M117 600a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m240 0a3 3 0 1 0 6 …",
+  "result": "{\"summary\":\"7 created, 0 updated, 10 keyframe tracks; animation ends 6s\",\"ids\":{\"b1\":\"l_03jm2\",\"b2\":\"l_03jm3\",\"b3\":\"l_03jm4\",\"b4\":\"l_03jm5\",\"b5\":\"l_03jm6\",\"dotsA\":\"l_03jm7\",\"dotsB\":\"l_03jm8\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 25,
+  "ok": true,
+  "ms": 3788,
+  "editorMs": 3535,
+  "input": {
+   "times": [
+    0,
+    1.5,
+    3,
+    4.5,
+    6
+   ]
+  },
+  "result": "5 frames left→right, top→bottom at 0s, 1.5s, 3s, 4.5s, 6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/cc56ee49-915c-433a-a143-9999f54bcfdc/tool-results/mcp-motion-blob-1794511255786-28pq7a.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 13,
+  "ok": true,
+  "ms": 85,
+  "editorMs": 3,
+  "input": {
+   "loop": true
+  },
+  "result": "score 73/100 (easing 81, polish 70)\n1. [high] no follow-through, overshoot, settle or idle motion anywhere in 6s: everything stops dead\n   → secondary_motion {\"ids\":[\"l_03jm2\"],\"overshoot\":0.08,\"segments\":\"first\"}\n2. [medium] 100% of 20 moves use Sine In Out: give entrances a decelerating ease, exits an accelerating one, accents a spring/overshoot"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 13,
+  "ok": true,
+  "ms": 120,
+  "editorMs": 3,
+  "input": {
+   "loop": true
+  },
+  "result": "score 73/100 (easing 81, polish 70)\n1. [high] no follow-through, overshoot, settle or idle motion anywhere in 6s: everything stops dead\n   → secondary_motion {\"ids\":[\"l_03jm2\"],\"overshoot\":0.08,\"segments\":\"first\"}\n2. [medium] 100% of 20 moves use Sine In Out: give entrances a decelerating ease, exits an accelerating one, accents a spring/overshoot"
+ }
+]

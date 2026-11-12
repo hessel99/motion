@@ -1,0 +1,6 @@
+Playful bouncy intro for a kids' app called "Boop!". Colorful candy shapes (circles, stars, rounded squares) drop in and bounce with squash & stretch, jostle each other, then the letters B-o-o-p-! hop in one by one like they're on a trampoline. Everything should feel elastic and joyful. End with a little idle wiggle.
+
+<editor_context>
+comp "Main" 1080x1080 60fps 5s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

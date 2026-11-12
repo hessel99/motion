@@ -1,0 +1,21 @@
+- Sting 120 BPM [audio] #6b8cff
+- shock [ellipse] box 860,440,200,200 #000000 a0 stroke #4de1c1 6px
+- ring [ellipse] box 860,440,200,200 #000000 a0 stroke #f2f4f5 14px
+- dot [ellipse] box 948,528,24,24 #4de1c1
+- word [text] box 900,455,560,170 #f2f4f5 "Pulse" Inter 150px w700
+
+comp 1920x1080 8s @30fps, background #121214
+"shock" (ellipse l_03jm4)
+  position: 0s [960,540] ─Easy Ease→ 4.5s [960,540] ─Expo In Out→ 5.1s [760,540] ─Easy Ease→ 5.5s [760,540]
+  scale: 0s 50 ─Easy Ease→ 4s 50 ─Expo Out→ 4.7s 160 ─Easy Ease→ 5.5s 60 ─Expo Out→ 6.2s 150
+  opacity: 0s 0 ─Easy Ease→ 4s 90 ─Easy Ease→ 4.7s 0 ─Easy Ease→ 5.5s 80 ─Easy Ease→ 6.2s 0
+"ring" (ellipse l_03jm5)
+  position: 0s [960,540] ─Easy Ease→ 4.5s [960,540] ─Expo In Out→ 5.1s [760,540]
+  scale: 0s 0 ─Easy Ease→ 2s 0 ─Easy Ease→ 3.5s 40 ─Quad In→ 4s 100 ─Expo Out→ 5.5s 100 ─Easy Ease→ 5.65s 108 ─Quad Out→ 6s 100
+  opacity: 0s 0 ─Easy Ease→ 2s 0 ─Easy Ease→ 2.01s 30 ─Easy Ease→ 3.5s 60 ─Easy Ease→ 4s 100
+"dot" (ellipse l_03jm6)
+  position: 0s [960,540] ─Easy Ease→ 4.5s [960,540] ─Expo In Out→ 5.1s [760,540]
+  scale: 0s 0 ─Easy Ease→ 0.4s 100 ─Back Out→ 0.5s 100 ─Easy Ease→ 0.65s 120 ─Quad Out→ 1s 100 ─Easy Ease→ 1.15s 125 ─Quad Out→ 1.5s 100 ─Easy Ease→ 1.65s 130 ─Easy Ease→ 2s 100 ─Easy Ease→ 2.15s 140 ─Easy Ease→ 2.5s 100 ─Easy Ease→ 2.65s 150 ─Easy Ease→ 3s 100 ─Easy Ease→ 3.15s 165 ─Easy Ease→ 3.5s 110 ─Easy Ease→ 3.99s 30 ─Quad In→ 4s 30 ─Easy Ease→ 4.3s 100 ─Back Out→ 5.5s 100 ─Easy Ease→ 5.65s 150 ─Quad Out→ 6s 100
+"word" (text l_03jm7)
+  position: 0s [1180,540]
+  opacity: 0s 0 ─Easy Ease→ 4.7s 0 ─Easy Ease→ 5.2s 100

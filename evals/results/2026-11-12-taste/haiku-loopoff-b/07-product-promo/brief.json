@@ -1,0 +1,76 @@
+{
+  "id": "07-product-promo",
+  "title": "Product promo title sequence",
+  "complexity": "complex",
+  "style": [
+    "promo",
+    "bold"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration": 10
+  },
+  "prompt": "Title sequence for the launch of \"Pulse 2\", wireless earbuds. Sequence: quick flashes of three feature words (\"40h battery\", \"Spatial audio\", \"Pure silence\") each on their own beat with energetic transitions, then the product name \"PULSE 2\" slams in big with a shockwave ring, then \"Available now\" with a button-like pill. Dark background, electric orange accent. Fast, confident, cut to an imagined 120 BPM beat.",
+  "checklist": [
+    {
+      "text": "3 feature words present",
+      "check": {
+        "type": "textAllOf",
+        "texts": [
+          "40h",
+          "Spatial",
+          "silence"
+        ]
+      }
+    },
+    {
+      "text": "product name present",
+      "check": {
+        "type": "textContains",
+        "text": "PULSE 2"
+      }
+    },
+    {
+      "text": "\"Available now\" present",
+      "check": {
+        "type": "textContains",
+        "text": "Available now"
+      }
+    },
+    {
+      "text": "≥5 beats",
+      "check": {
+        "type": "beatsMin",
+        "min": 5
+      }
+    },
+    {
+      "text": "shockwave ring (stroked ellipse scaling up)",
+      "check": {
+        "type": "ring"
+      }
+    },
+    {
+      "text": "feature words exit (transitions, not stacking)",
+      "check": {
+        "type": "exitsMin",
+        "min": 3
+      }
+    },
+    {
+      "text": "beat-aligned timing (markers or keys on a 0.5s grid)",
+      "check": {
+        "type": "beatGrid",
+        "bpm": 120
+      }
+    },
+    {
+      "text": "dark background",
+      "check": {
+        "type": "darkBackground"
+      }
+    }
+  ]
+}

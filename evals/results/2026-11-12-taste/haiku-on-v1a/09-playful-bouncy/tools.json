@@ -1,0 +1,665 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 305,
+  "ok": true,
+  "ms": 22,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Playful bouncy kids app intro for \"Boop!\": colorful candy shapes (circles, stars, rounded squares) drop in and bounce with squash and stretch, jostle each other, then letters B-o-o-p-! hop in one by one like on a trampoline. Elastic, joyful, ends with a little idle wiggle."
+  },
+  "result": "# Example: Playful logo sting, the dot drops in and lands (make my logo move)\n> tags: logo, sting, playful, bouncy, fun, kids, app, mark, wordmark, drop, land, squash, bounce, simple, make my logo move\n\n## Brief\n\"Make my logo move: a round orange mark and the word 'pip'. Fun and friendly, about 3 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"duration\": 3, \"backgrou…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 17,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 0,
+  "input": {
+   "name": "styles"
+  },
+  "result": "Style recipes (get_guide {name: \"styles/<name>\"}):\n- styles/corporate-smooth: Clean, trustworthy and calm: brand blue, soft cards, gentle fades and long decelerating eases, no surprises.\n- styles/cyber-neon: Night-city neon: glowing strokes on near-black, magenta/cyan, grids receding to the horizon, flicker-on lights and smooth synth motion.\n- styles/data-viz: Precise, honest charts that build in …"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 32,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 0,
+  "input": {
+   "name": "styles/playful-bouncy"
+  },
+  "result": "# Playful bouncy\n> Rounded shapes, candy colors, springs and squash & stretch: everything has weight, overshoots and wobbles.\n\n**Use for**: kids/consumer apps, onboarding, celebrations, social stickers, mascots.\n\n## Palette\n- Background `#FFF4E6` or `#E8F1FF`; ink `#2B2D42`.\n- Accents: `#FF6B6B` coral, `#FFD93D` sun, `#6BCB77` green, `#4D96FF` blue, `#C77DFF` lilac.\n\n## Shapes\nCircles, pills (radi…"
+ },
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1692,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 1,
+  "input": {
+   "title": "Boop! playful intro",
+   "duration": 6,
+   "style": "playful-bouncy",
+   "styleReason": "Kids app: candy colors, springs and squash & stretch fit the joyful, elastic brief.",
+   "beats": [
+    {
+     "name": "Candy drop",
+     "start": 0,
+     "end": 1.6,
+     "description": "Circles, stars and rounded squares fall in from above, staggered 0.12 s, spring Bouncy with a squash on each landing (stretch on the way down, squash on contact)."
+    },
+    {
+     "name": "Jostle",
+     "start": 1.4,
+     "end": 2.6,
+     "description": "The shapes bump and push each other: overlapping squash-and-stretch knocks, small rotations, settling into a loose cluster around the center."
+    },
+    {
+     "name": "Letters hop",
+     "start": 2.5,
+     "end": 4.6,
+     "description": "B-o-o-p-! hop in one by one on a trampoline: each letter drops onto a bouncy floor line, squashes, springs up and settles, 0.12 s apart. The ! lands last with the biggest bounce."
+    },
+    {
+     "name": "Idle wiggle",
+     "start": 4.6,
+     "end": 6,
+     "description": "Final lockup holds with a gentle rotation wiggle on the letters and candy shapes, out of phase, so the end stays alive. Clean upright lockup at rest."
+    }
+   ],
+   "concepts": [
+    {
+     "name": "Candy bounce",
+     "idea": "Shapes drop like bouncy candy and the wordmark hops across a trampoline line.",
+     "why": "Matches a kids app: literal bounce and squash fits the name Boop!"
+    },
+    {
+     "name": "Boop tap",
+     "idea": "Shapes get poked, each boop pushes the next, and the letters pop up like they were tapped.",
+     "why": "Ties the motion to the app's tap-driven play"
+    }
+   ],
+   "recommended": 0,
+   "notes": "Background #FFF4E6, ink #2B2D42, accents coral #FF6B6B, sun #FFD93D, green #6BCB77, blue #4D96FF, lilac #C77DFF. Font Inter 800. Comp 1080x1080 60fps 6s. Final lockup centered; wordmark \"Boop!\" in ink. Music: none. No sound effects unless asked."
+  },
+  "result": "storyboard \"Boop! playful intro\" shown to the user (4 beats, 6s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 49,
+  "editorMs": 0,
+  "input": {
+   "beat": 1,
+   "status": "active"
+  },
+  "result": "beat 1 \"Candy drop\" active; 0/4 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 4630,
+  "ok": true,
+  "ms": 158,
+  "editorMs": 3,
+  "input": "{\"comp\":{\"width\":1080,\"height\":1080,\"duration\":6,\"fps\":60,\"background\":\"#FFF4E6\"},\"layers\":[{\"key\":\"candy-coral-circle\",\"type\":\"ellipse\",\"center\":[250,330],\"w\":150,\"h\":150,\"fill\":\"#FF6B6B\",\"animate\":{\"position\":[{\"t\":0,\"v\":[250,-160],\"ease\":\"Quad In\"},{\"t\":0.5,\"v\":[250,330],\"ease\":\"Quad Out\"},{\"t\":0.72,\"v\":[250,292],\"ease\":\"Quad In\"},{\"t\":0.95,\"v\":[250,330],\"ease\":\"Quad Out\"},{\"t\":1.6,\"v\":[250,330]},{\"t\":1.78,\"v\":[278,330],\"ease\":\"Quad Out\"},{\"t\":2.02,\"v\":[250,330]}],\"scale\":[{\"t\":0,\"v\":[85,120]},{\"t\":0.5,\"v\":[125,75],\"ease\":\"Sine Out\"},{\"t\":0.62,\"v\":[92,110],\"ease\":\"Sine In Out\"},{\"t\":0.72,\"v\":[100,100],\"ease\":\"Sine Out\"},{\"t\":0.95,\"v\":[115,88],\"ease\":\"Sine Out\"},{\"t\":1.1,\"v\":[100,100]},{\"t\":1.6,\"v\":[100,100]},{\"t\":1.78,\"v\":[88,112],\"ease\":\"Sine Out\"},{\"t\":1.9,\"v\":[112,90],\"ease\":\"Sine In Out\"},{\"t\":2.02,\"v\":[100,100]}]}},{\"key\":\"candy-sun-star\",\"type\":\"star\",\"points\":5,\"inner\":0.5,\"center\":[420,250],\"w\":130,\"h\":130,\"fill\":\"#FFD93D\",\"animate\":{\"position\":[{\"t\":0.12,\"v\":[420,-160],\"ease\":\"Quad In\"},{\"t\":0.62,\"v\":[420,250],\"ease\":\"Quad Out\"},{\"t\":0.84,\"v\":[420,212],\"ease\":\"Quad In\"},{\"t\":1.07,\"v\":[420,250],\"ease\":\"Quad Out\"},{\"t\":1.68,\"v\":[420,250]},{\"t\":1.86,\"v\":[396,250],\"ease\":\"Quad Out\"},{\"t\":2.1,\"v\":[420,250]}],\"scale\":[{\"t\":0.12,\"v\":[85,120]},{\"t\":0.62,\"v\":[125,75],\"ease\":\"Sine Out\"},{\"t\":0.74,\"v\":[92,110],\"ease\":\"Sine In Out\"},{\"t\":0.84,\"v\":[100,100],\"ease\":\"Sine Out\"},{\"t\":1.07,\"v\":[115,88],\"ease\":\"Sine Out\"},{\"t\":1.22,\"v\":[100,100]},{\"t\":1.68,\"v\":[100,100]},{\"t\":1.86,\"v\":[88,112],\"ease\":\"Sine Out\"},{\"t\":1.98,\"v\":[112,90],\"ease\":\"Sine In Out\"},{\"t\":2.1,\"v\":[100,100]}]}},{\"key\":\"candy-green-square\",\"type\":\"rect\",\"center\":[600,320],\"w\":130,\"h\":130,\"radius\":36,\"fill\":\"#6BCB77\",\"animate\":{\"position\":[{\"t\":0.24,\"v\":[600,-160],\"ease\":\"Quad In\"},{\"t\":0.74,\"v\":[600,320],\"ease\":\"Quad Out\"},{\"t\":0.96,\"v\":[600,282],\"ease\":\"Quad In\"},{\"t\":1.19,\"v\":[600,320],\"ease\":\"Quad Out\"},{\"t\":1.76,\"v\":[600,320]},{\"t\":1.94,\"v\":[622,320],\"ease\":\"Quad Out\"},{\"t\":2.18,\"v\":[600,320]}],\"scale\":[{\"t\":0.24,\"v\":[85,120]},{\"t\":0.74,\"v\":[125,75],\"ease\":\"Sine Out\"},{\"t\":0.86,\"v\":[92,110],\"ease\":\"Sine In Out\"},{\"t\":0.96,\"v\":[100,100],\"ease\":\"Sine Out\"},{\"t\":1.19,\"v\":[115,88],\"ease\":\"Sine Out\"},{\"t\":1.34,\"v\":[100,100]},{\"t\":1.76,\"v\":[100,100]},{\"t\":1.94,\"v\":[88,112],\"ease\":\"Sine Out\"},{\"t\":2.06,\"v\":[112,90],\"ease\":\"Sine In Out\"},{\"t\":2.18,\"v\":[100,100]}]}},{\"key\":\"candy-blue-circle\",\"type\":\"ellipse\",\"center\":[770,260],\"w\":120,\"h\":120,\"fill\":\"#4D96FF\",\"animate\":{\"position\":[{\"t\":0.36,\"v\":[770,-160],\"ease\":\"Quad In\"},{\"t\":0.86,\"v\":[770,260],\"ease\":\"Quad Out\"},{\"t\":1.08,\"v\":[770,222],\"ease\":\"Quad In\"},{\"t\":1.31,\"v\":[770,260],\"ease\":\"Quad Out\"},{\"t\":1.84,\"v\":[770,260]},{\"t\":2.02,\"v\":[744,260],\"ease\":\"Quad Out\"},{\"t\":2.26,\"v\":[770,260]}],\"scale\":[{\"t\":0.36,\"v\":[85,120]},{\"t\":0.86,\"v\":[125,75],\"ease\":\"Sine Out\"},{\"t\":0.98,\"v\":[92,110],\"ease\":\"Sine In Out\"},{\"t\":1.08,\"v\":[100,100],\"ease\":\"Sine Out\"},{\"t\":1.31,\"v\":[115,88],\"ease\":\"Sine Out\"},{\"t\":1.46,\"v\":[100,100]},{\"t\":1.84,\"v\":[100…",
+  "result": "{\"summary\":\"6 created, 0 updated, 12 keyframe tracks; animation ends 2.42s\",\"ids\":{\"candy-coral-circle\":\"l_03jm2\",\"candy-sun-star\":\"l_03jm3\",\"candy-green-square\":\"l_03jm4\",\"candy-blue-circle\":\"l_03jm5\",\"candy-lilac-star\":\"l_03jm6\",\"candy-sun-circle\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 48,
+  "editorMs": 15,
+  "input": {
+   "beat": 1,
+   "status": "done"
+  },
+  "result": "beat 1 \"Candy drop\" done; 1/4 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 74,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 7,
+  "input": {
+   "beat": 2,
+   "status": "done",
+   "note": "jostle nudges built with the drop keys"
+  },
+  "result": "beat 2 \"Jostle\" done; 2/4 beats finished\ncritic on this beat (1.4–2.6s): [high] nothing moves for the last 3.58 s (motion ends 2.42s of 6s): keep the brief's length and carry the hold with a slow push / idle motion, or extend the build → animate {\"tracks\":[{\"id\":\"l_03jm2\",\"prop\":\"scale\",\"merge\":true,\"keyframes\":[{\"t\":2.42,\"v\":[100,100],\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":[104,104]}]}]}. Fix before th…"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 0,
+  "input": {
+   "beat": 3,
+   "status": "active"
+  },
+  "result": "beat 3 \"Letters hop\" active; 2/4 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3407,
+  "ok": true,
+  "ms": 65,
+  "editorMs": 5,
+  "input": "{\"layers\":[{\"key\":\"letter-B\",\"text\":\"B\",\"fontSize\":240,\"fontWeight\":800,\"tracking\":-4,\"align\":\"center\",\"center\":[291,600],\"fill\":\"#2B2D42\",\"animate\":{\"position\":[{\"t\":2.5,\"v\":[291,260],\"ease\":\"Quad In\"},{\"t\":2.85,\"v\":[291,600],\"ease\":\"Cubic Out\"},{\"t\":3.12,\"v\":[291,490],\"ease\":\"Quad In\"},{\"t\":3.4,\"v\":[291,600]}],\"scale\":[{\"t\":2.5,\"v\":[100,100]},{\"t\":2.83,\"v\":[100,100]},{\"t\":2.85,\"v\":[128,76],\"ease\":\"Sine Out\"},{\"t\":3,\"v\":[94,108],\"ease\":\"Sine In Out\"},{\"t\":3.12,\"v\":[100,100],\"ease\":\"Sine Out\"},{\"t\":3.38,\"v\":[100,100]},{\"t\":3.4,\"v\":[128,76],\"ease\":\"Sine Out\"},{\"t\":3.54,\"v\":[96,104],\"ease\":\"Sine In Out\"},{\"t\":3.64,\"v\":[100,100]}],\"opacity\":[{\"t\":2.5,\"v\":0},{\"t\":2.62,\"v\":100}]}},{\"key\":\"letter-o-1\",\"text\":\"o\",\"fontSize\":240,\"fontWeight\":800,\"tracking\":-4,\"align\":\"center\",\"center\":[445,600],\"fill\":\"#2B2D42\",\"animate\":{\"position\":[{\"t\":2.64,\"v\":[445,260],\"ease\":\"Quad In\"},{\"t\":2.99,\"v\":[445,600],\"ease\":\"Cubic Out\"},{\"t\":3.26,\"v\":[445,490],\"ease\":\"Quad In\"},{\"t\":3.54,\"v\":[445,600]}],\"scale\":[{\"t\":2.64,\"v\":[100,100]},{\"t\":2.97,\"v\":[100,100]},{\"t\":2.99,\"v\":[128,76],\"ease\":\"Sine Out\"},{\"t\":3.14,\"v\":[94,108],\"ease\":\"Sine In Out\"},{\"t\":3.26,\"v\":[100,100],\"ease\":\"Sine Out\"},{\"t\":3.52,\"v\":[100,100]},{\"t\":3.54,\"v\":[128,76],\"ease\":\"Sine Out\"},{\"t\":3.68,\"v\":[96,104],\"ease\":\"Sine In Out\"},{\"t\":3.78,\"v\":[100,100]}],\"opacity\":[{\"t\":2.64,\"v\":0},{\"t\":2.76,\"v\":100}]}},{\"key\":\"letter-o-2\",\"text\":\"o\",\"fontSize\":240,\"fontWeight\":800,\"tracking\":-4,\"align\":\"center\",\"center\":[590,600],\"fill\":\"#2B2D42\",\"animate\":{\"position\":[{\"t\":2.78,\"v\":[590,260],\"ease\":\"Quad In\"},{\"t\":3.13,\"v\":[590,600],\"ease\":\"Cubic Out\"},{\"t\":3.4,\"v\":[590,490],\"ease\":\"Quad In\"},{\"t\":3.68,\"v\":[590,600]}],\"scale\":[{\"t\":2.78,\"v\":[100,100]},{\"t\":3.11,\"v\":[100,100]},{\"t\":3.13,\"v\":[128,76],\"ease\":\"Sine Out\"},{\"t\":3.28,\"v\":[94,108],\"ease\":\"Sine In Out\"},{\"t\":3.4,\"v\":[100,100],\"ease\":\"Sine Out\"},{\"t\":3.66,\"v\":[100,100]},{\"t\":3.68,\"v\":[128,76],\"ease\":\"Sine Out\"},{\"t\":3.82,\"v\":[96,104],\"ease\":\"Sine In Out\"},{\"t\":3.92,\"v\":[100,100]}],\"opacity\":[{\"t\":2.78,\"v\":0},{\"t\":2.9,\"v\":100}]}},{\"key\":\"letter-p\",\"text\":\"p\",\"fontSize\":240,\"fontWeight\":800,\"tracking\":-4,\"align\":\"center\",\"center\":[738,600],\"fill\":\"#2B2D42\",\"animate\":{\"position\":[{\"t\":2.92,\"v\":[738,260],\"ease\":\"Quad In\"},{\"t\":3.27,\"v\":[738,600],\"ease\":\"Cubic Out\"},{\"t\":3.54,\"v\":[738,490],\"ease\":\"Quad In\"},{\"t\":3.82,\"v\":[738,600]}],\"scale\":[{\"t\":2.92,\"v\":[100,100]},{\"t\":3.25,\"v\":[100,100]},{\"t\":3.27,\"v\":[128,76],\"ease\":\"Sine Out\"},{\"t\":3.42,\"v\":[94,108],\"ease\":\"Sine In Out\"},{\"t\":3.54,\"v\":[100,100],\"ease\":\"Sine Out\"},{\"t\":3.8,\"v\":[100,100]},{\"t\":3.82,\"v\":[128,76],\"ease\":\"Sine Out\"},{\"t\":3.96,\"v\":[96,104],\"ease\":\"Sine In Out\"},{\"t\":4.06,\"v\":[100,100]}],\"opacity\":[{\"t\":2.92,\"v\":0},{\"t\":3.04,\"v\":100}]}},{\"key\":\"letter-excl\",\"text\":\"!\",\"fontSize\":240,\"fontWeight\":800,\"tracking\":-4,\"align\":\"center\",\"center\":[849,600],\"fill\":\"#FF6B6B\",\"animate\":{\"position\":[{\"t\":3.1,\"v\":[849,260],\"ease\":\"Quad In\"},{\"t\":3.45,\"v\":[849,600],\"ease\":\"Cubic Out\"},{\"t\":3.72,\"v\":[849,430],\"ease\"…",
+  "result": "{\"summary\":\"5 created, 0 updated, 15 keyframe tracks; animation ends 4.24s\",\"ids\":{\"letter-B\":\"l_03jm8\",\"letter-o-1\":\"l_03jm9\",\"letter-o-2\":\"l_03jma\",\"letter-p\":\"l_03jmb\",\"letter-excl\":\"l_03jmc\"}}"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 56,
+  "editorMs": 19,
+  "input": {
+   "beat": 3,
+   "status": "done"
+  },
+  "result": "beat 3 \"Letters hop\" done; 3/4 beats finished\ncritic on this beat (2.5–4.6s): [medium] \"letter-B\".scale move takes 0.02 s for scale Δ26%: too abrupt, ~0.15 s fits (handbook timing table) → retime {\"ids\":[\"l_03jm8\"],\"pivot\":2.83,\"scale\":5} | [medium] \"letter-o-1\".scale move takes 0.02 s for scale Δ26%: too abrupt, ~0.15 s fits (handbook timing table) → retime {\"ids\":[\"l_03jm9\"],\"pivot\":2.97,\"scale\"…"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 0,
+  "input": {
+   "beat": 4,
+   "status": "active"
+  },
+  "result": "beat 4 \"Idle wiggle\" active; 3/4 beats finished"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 161,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm2",
+    "l_03jm3",
+    "l_03jm4",
+    "l_03jm5",
+    "l_03jm6",
+    "l_03jm7"
+   ],
+   "prop": "rotation",
+   "expr": "value + 4*Math.sin(time*2*Math.PI/1.5)*clamp((time-4.6)/0.4,0,1)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 157,
+  "ok": true,
+  "ms": 41,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm8",
+    "l_03jm9",
+    "l_03jma",
+    "l_03jmb",
+    "l_03jmc"
+   ],
+   "prop": "rotation",
+   "expr": "value + 3*Math.sin(time*2*Math.PI/1.5 + 1.2)*clamp((time-4.6)/0.4,0,1)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 1813,
+  "ok": true,
+  "ms": 58,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm8",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 2.5,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 2.7,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 2.85,
+       "v": [
+        128,
+        76
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3,
+       "v": [
+        94,
+        108
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.12,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.26,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 3.4,
+       "v": [
+        128,
+        76
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.54,
+       "v": [
+        96,
+        104
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.64,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm9",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 2.64,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 2.84,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 2.99,
+       "v": [
+        128,
+        76
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.14,
+       "v": [
+        94,
+        108
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.26,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.4,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 3.54,
+       "v": [
+        128,
+        76
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.68,
+       "v": [
+        96,
+        104
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.78,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jma",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 2.78,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 2.98,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 3.13,
+       "v": [
+        128,
+        76
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.28,
+       "v": [
+        94,
+        108
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.4,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.54,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 3.68,
+       "v": [
+        128,
+        76
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.82,
+       "v": [
+        96,
+        104
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.92,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jmb",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 2.92,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 3.12,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 3.27,
+       "v": [
+        128,
+        76
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.42,
+       "v": [
+        94,
+        108
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.54,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.68,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 3.82,
+       "v": [
+        128,
+        76
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.96,
+       "v": [
+        96,
+        104
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.06,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jmc",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 3.1,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 3.3,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 3.45,
+       "v": [
+        128,
+        76
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.6,
+       "v": [
+        94,
+        108
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.72,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.86,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 4,
+       "v": [
+        128,
+        76
+       ],
+       "ease": "Sine Out"
+      },
+      {
+       "t": 4.14,
+       "v": [
+        96,
+        104
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.24,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 5 tracks on 5 layers"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 13,
+  "input": {},
+  "result": "score 96/100 (readability 93)\n1. [low] \"letter-excl\" has 2.56:1 contrast against #fff4e6 behind it (needs 3:1)\n   → update_layer {\"id\":\"l_03jmc\",\"props\":{\"fill\":\"#111111\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 124,
+  "editorMs": 106,
+  "input": {
+   "times": [
+    0.6,
+    1.5,
+    2.2,
+    3.2,
+    4,
+    5.2
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.6s, 1.5s, 2.2s, 3.2s, 4s, 5.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/cf115981-ab10-4ef9-8a44-2fe09c2261c7/tool-results/mcp-motion-blob-1794512032589-hrh0r6.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jmc",
+   "props": {
+    "fill": "#D9364A"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 74,
+  "ok": true,
+  "ms": 117,
+  "editorMs": 28,
+  "input": {
+   "beat": 4,
+   "status": "done",
+   "note": "idle rotation wiggle gated after 4.6 s"
+  },
+  "result": "beat 4 \"Idle wiggle\" done; 4/4 beats finished — now critique (the critique tool, then contact_sheet; rubric: get_guide handbook, section \"Critique\")"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 8,
+  "input": {},
+  "result": "score 99/100 (brand 96)\n1. [low] 6 different accent colors (#ff6b6b #ffd93d #6bcb77 #4d96ff #c77dff #d9364a…): keep 1 accent + 1-2 support colors"
+ }
+]

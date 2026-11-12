@@ -1,0 +1,14 @@
+- Track [rect] box 240,220,320,160 #34c759
+- Knob [group] #ffffff a0
+  - Knob Disc [ellipse] box 419,236,133,127 #ffffff
+  - Checkmark [path] box 419,236,133,127 #000000 a0 stroke #34c759 10px
+
+comp 800x600 2s @60fps, background #f2f2f7
+"Track" (rect l_03jm2)
+  fill: 0.4s #c7c7cc ─Easy Ease→ 0.8s #34c759
+"Knob" (group l_03jm3)
+  position: 0.4s [320,300] ─Quart Out→ 0.8s [490,300] ─Easy Ease→ 1.2s [480,300]
+  scale: 0.4s 100 ─Quad Out→ 0.55s [124,88] ─Easy Ease→ 0.8s [92,108] ─Easy Ease→ 1s [102,98] ─Easy Ease→ 1.2s 100
+"Checkmark" (path l_03jm5)
+  trimStart: 0.75s 0
+  trimEnd: 0.75s 0 ─Cubic Out→ 1.05s 100

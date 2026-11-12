@@ -1,0 +1,228 @@
+{
+ "run": {
+  "id": "09-playful-bouncy",
+  "name": "09-playful-bouncy",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 76,
+    "sub": {
+     "timing": 100,
+     "easing": 78.99999999999999,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 79,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 95.8,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 21,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 21,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 4.2,
+     "music": 0
+    },
+    "issues": [
+     "low:contrast",
+     "low:contrast",
+     "low:contrast",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:palette-drift"
+    ],
+    "ms": 18
+   },
+   "after": {
+    "score": 76,
+    "sub": {
+     "timing": 100,
+     "easing": 78.99999999999999,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 79,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 95.8,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 21,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 21,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 4.2,
+     "music": 0
+    },
+    "issues": [
+     "low:contrast",
+     "low:contrast",
+     "low:contrast",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:palette-drift"
+    ],
+    "ms": 18
+   }
+  },
+  "wallMs": 117213,
+  "timedOut": false,
+  "turns": 20,
+  "costUsd": 0.025028960000000003,
+  "durationMs": 115634,
+  "usage": {
+   "input": 528605,
+   "cached": 493726,
+   "output": 26235
+  },
+  "errors": [],
+  "toolCalls": 19,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the **Boop!** intro as a 5-second, 60 fps piece on a cream background (#FFF4E6). I used 8 candy shapes and 5 letters, with timing and easing set so the motion is springy and elastic throughout.\n\n- **Candy drop (0–1.2 s):** Circles, stars and rounded squares fall in from above at staggered times. Each one stretches on the way down, squashes on landing, hops once, then settles. Their staggers and the teal star's delay were set so they don't all land together.\n- **Jostle (1.5–2.1 s):** The shapes nudge sideways in turn, with Back Out overshoot and a small squash, so they bump and settle into a loose cluster.\n- **Boop! hop (2.2–3.6 s):** B, o, o, p and ! launch up from below with a stretch, arc to an apex, and land with a spring squash. Each letter starts 0.13 s after the one before.\n- **Idle wiggle (3.6 s to end):** Every shape and letter gets a ±4° sine rotation, ramped in over 0.4 s and phase-offset so they don't move in lockstep. The final frame is the upright lockup.\n\nLayers are named (e.g. \"Candy pink circle\", \"Letter B\") so you can find them in the timeline. The letters are Inter Black, since no rounded display font was available here.\n\nThe critique score is 76/100. The remaining flags are minor:\n- **Letter contrast:** The yellow and mint letters are only about 1.7–2.9:1 against the cream background. I added a dark ink outline to the letters, but the critic still measures the fill. I kept the candy palette; I can darken the fills or switch the background if you want that gone.\n- **Landing ease:** The letters' landings use Quad In into the spring squash, which reads as a real impact. I left it as is.\n\nPossible next steps: a different background colour, a trampoline pad under the letters, or a loop version for the idle section."
+ },
+ "metrics": {
+  "layers": 13,
+  "drawableLayers": 13,
+  "layerTypes": {
+   "ellipse": 3,
+   "path": 3,
+   "rect": 2,
+   "text": 5
+  },
+  "groups": 0,
+  "animatedLayers": 13,
+  "keys": 157,
+  "segments": 110,
+  "easesUsed": {
+   "Quad In": 26,
+   "Quad Out": 55,
+   "Back Out": 8,
+   "Spring 0.5": 21
+  },
+  "distinctEases": 4,
+  "easeFamilies": 3,
+  "overshootSegments": 29,
+  "keyedOvershoots": 21,
+  "springSegments": 21,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 13,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 3,
+  "gradientLayers": 0,
+  "paletteSize": 10,
+  "palette": [
+   "#ff4f79",
+   "#ffb020",
+   "#3bd0a0",
+   "#4c8dff",
+   "#b26bff",
+   "#ffd43b",
+   "#ff8fb1",
+   "#00c2d1",
+   "#2b1b4d",
+   "#fff4e6"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.965,
+  "firstMotion": 0.067,
+  "lastMotion": 5,
+  "endHold": 0,
+  "longestHold": 0.067,
+  "offCanvasTime": 0.469,
+  "offCanvasLayers": {
+   "Candy pink circle": 0.067,
+   "Candy orange star": 0.067,
+   "Candy mint square": 0.067,
+   "Candy blue circle": 0.067,
+   "Candy purple star": 0.067,
+   "Candy yellow square": 0.067,
+   "Candy soft pink circle": 0.067
+  },
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 1.809,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.045,
+  "midLuma": 0.926,
+  "toolErrors": 0,
+  "toolCalls": 19
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "\"Boop\" present (one layer or letter layers)",
+    "type": "textOrLetters",
+    "pass": true
+   },
+   {
+    "text": "per-letter hop (text animator by char or separate letter layers)",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "springs or Back eases",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "star shapes present",
+    "type": "starShape",
+    "pass": true
+   },
+   {
+    "text": "≥5 candy shapes",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "idle wiggle at the end (motion in the last 0.8s)",
+    "type": "activeAtEnd",
+    "pass": true
+   },
+   {
+    "text": "≥4 colors",
+    "type": "paletteMin",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

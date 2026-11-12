@@ -1,0 +1,28 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 3468,
+  "ok": true,
+  "ms": 165,
+  "editorMs": 8,
+  "input": "{\"comp\":{\"background\":\"#F8FAFC\",\"duration\":6,\"width\":1920,\"height\":1080},\"layers\":[{\"key\":\"title\",\"type\":\"text\",\"x\":192,\"y\":130,\"w\":1000,\"h\":90,\"text\":{\"content\":\"Revenue by quarter\",\"fontSize\":64,\"fontWeight\":700,\"align\":\"left\"},\"fill\":\"#0F172A\",\"enter\":{\"t\":0,\"duration\":0.6,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":12}}},{\"key\":\"subtitle\",\"type\":\"text\",\"x\":192,\"y\":206,\"w\":1000,\"h\":40,\"text\":{\"content\":\"Quarterly revenue, $ millions\",\"fontSize\":28,\"fontWeight\":400,\"align\":\"left\"},\"fill\":\"#64748B\",\"enter\":{\"t\":0.1,\"duration\":0.6,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":12}}},{\"key\":\"axis\",\"type\":\"path\",\"d\":\"M192 900 L1728 900\",\"stroke\":\"#334155\",\"strokeWidth\":3,\"drawOn\":{\"t\":0.3,\"duration\":0.6,\"ease\":\"Ease In Out\",\"from\":\"start\"}},{\"key\":\"bar-q1\",\"type\":\"rect\",\"position\":[420,900],\"anchor\":\"bottom\",\"w\":240,\"h\":249,\"radius\":8,\"fill\":\"#94A3B8\",\"animate\":{\"scale\":[{\"t\":1,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":1.8,\"v\":[100,100]}]}},{\"key\":\"bar-q2\",\"type\":\"rect\",\"position\":[760,900],\"anchor\":\"bottom\",\"w\":240,\"h\":373,\"radius\":8,\"fill\":\"#94A3B8\",\"animate\":{\"scale\":[{\"t\":1.2,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":2,\"v\":[100,100]}]}},{\"key\":\"bar-q3\",\"type\":\"rect\",\"position\":[1100,900],\"anchor\":\"bottom\",\"w\":240,\"h\":311,\"radius\":8,\"fill\":\"#94A3B8\",\"animate\":{\"scale\":[{\"t\":1.4,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":2.2,\"v\":[100,100]}]}},{\"key\":\"bar-q4\",\"type\":\"rect\",\"position\":[1440,900],\"anchor\":\"bottom\",\"w\":240,\"h\":560,\"radius\":8,\"fill\":\"#F97316\",\"animate\":{\"scale\":[{\"t\":1.6,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":2.4,\"v\":[100,100],\"ease\":\"Ease Out\"},{\"t\":2.6,\"v\":[104,102],\"ease\":\"Ease In Out\"},{\"t\":2.9,\"v\":[100,100]}]}},{\"key\":\"val-q1\",\"type\":\"text\",\"x\":270,\"y\":581,\"w\":300,\"h\":60,\"text\":{\"content\":\"$12M\",\"fontSize\":40,\"fontWeight\":700,\"align\":\"center\"},\"fill\":\"#0F172A\",\"enter\":{\"t\":1.4,\"duration\":0.4,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":16}}},{\"key\":\"val-q2\",\"type\":\"text\",\"x\":610,\"y\":457,\"w\":300,\"h\":60,\"text\":{\"content\":\"$18M\",\"fontSize\":40,\"fontWeight\":700,\"align\":\"center\"},\"fill\":\"#0F172A\",\"enter\":{\"t\":1.6,\"duration\":0.4,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":16}}},{\"key\":\"val-q3\",\"type\":\"text\",\"x\":950,\"y\":519,\"w\":300,\"h\":60,\"text\":{\"content\":\"$15M\",\"fontSize\":40,\"fontWeight\":700,\"align\":\"center\"},\"fill\":\"#0F172A\",\"enter\":{\"t\":1.8,\"duration\":0.4,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":16}}},{\"key\":\"val-q4\",\"type\":\"text\",\"x\":1290,\"y\":270,\"w\":300,\"h\":60,\"text\":{\"content\":\"$27M\",\"fontSize\":44,\"fontWeight\":800,\"align\":\"center\"},\"fill\":\"#C2410C\",\"enter\":{\"t\":2.2,\"duration\":0.4,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":16}}},{\"key\":\"q1\",\"type\":\"text\",\"x\":300,\"y\":916,\"w\":240,\"h\":44,\"text\":{\"content\":\"Q1\",\"fontSize\":32,\"fontWeight\":500,\"align\":\"center\"},\"fill\":\"#334155\",\"enter\":{\"t\":0.9,\"duration\":0.4,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":8}}},{\"key\":\"q2\",\"type\":\"text\",\"x\":640,\"y\":916,\"w\":240,\"h\":44,\"text\":{\"content\":\"Q2\",\"fontSize\":32,\"fontWeight\":500,\"align\":\"center\"},\"fill\":\"#334155\",\"enter\":{\"t\":0.9,\"duration\":0.4,\"ease\":\"Expo Out\",\"from\":{\"opacity…",
+  "result": "{\"summary\":\"15 created, 0 updated, 26 keyframe tracks; animation ends 2.9s\",\"ids\":{\"title\":\"l_03jm2\",\"subtitle\":\"l_03jm3\",\"axis\":\"l_03jm4\",\"bar-q1\":\"l_03jm5\",\"bar-q2\":\"l_03jm6\",\"bar-q3\":\"l_03jm7\",\"bar-q4\":\"l_03jm8\",\"val-q1\":\"l_03jm9\",\"val-q2\":\"l_03jma\",\"val-q3\":\"l_03jmb\",\"val-q4\":\"l_03jmc\",\"q1\":\"l_03jmd\",\"q2\":\"l_03jme\",\"q3\":\"l_03jmf\",\"q4\":\"l_03jmg\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 31,
+  "ok": true,
+  "ms": 136,
+  "editorMs": 123,
+  "input": {
+   "times": [
+    0.5,
+    1.2,
+    1.9,
+    2.5,
+    3.5
+   ]
+  },
+  "result": "5 frames left→right, top→bottom at 0.5s, 1.2s, 1.9s, 2.5s, 3.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/261c3837-83b6-4475-af18-4ab12f8d004d/tool-results/mcp-motion-blob-1794514188285-z0jgia.jpg]"
+ }
+]

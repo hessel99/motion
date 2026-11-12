@@ -1,0 +1,59 @@
+- w1 [text] box 160,410,1600,260 #f4f4f5 "40h battery" Inter 210px w900
+- w2 [text] box 160,410,1600,260 #f4f4f5 "Spatial audio" Inter 210px w900
+- w3 [text] box 208,418,1504,244 #f4f4f5 "Pure silence" Inter 210px w900
+- tag1 [text] box 760,300,400,70 #ff5a1f "01" Inter 48px w700
+- tag2 [text] box 760,300,400,70 #ff5a1f "02" Inter 48px w700
+- tag3 [text] box 760,300,400,70 #ff5a1f "03" Inter 48px w700
+- wipe1 [rect] box 1920,0,1920,1080 #ff5a1f
+- wipe2 [rect] box -1920,0,1920,1080 #ff5a1f
+- wipe3 [rect] box 0,-1080,1920,1080 #ff5a1f
+- ring1 [ellipse] box -300,-720,2520,2520 #000000 a0 stroke #ff5a1f 10px
+- ring2 [ellipse] box -60,-480,2040,2040 #000000 a0 stroke #f4f4f5 4px
+- flash [rect] box 0,0,1920,1080 #ff5a1f
+- name [text] box 110,410,1700,340 #f4f4f5 "PULSE 2" Inter 300px w900
+- bar [rect] box 600,770,720,10 #ff5a1f
+- pill [rect] box 960,685,0,0 #ff5a1f
+- pilltext [text] box 660,680,600,70 #0b0b0f "Available now" Inter 56px w800
+
+comp 1920x1080 10s @30fps, background #0b0b0f, markers 0.5 F1, 1.5 F2, 2.5 F3, 4 SLAM, 6.5 CTA
+"w1" (text l_03jmf)
+  scale: 0.6s 135 ─Expo Out→ 0.95s 100
+  opacity: 0.59s 0 ─hold→ 0.6s 100 ─hold→ 1.62s 100 ─hold→ 1.63s 0
+"w2" (text l_03jmg)
+  position: 1.6s [960,340] ─Expo Out→ 1.95s [960,540]
+  opacity: 1.59s 0 ─hold→ 1.6s 100 ─hold→ 2.62s 100 ─hold→ 2.63s 0
+"w3" (text l_03jmh)
+  scale: 2.6s 60 ─Expo Out→ 3s 100 ─linear→ 3.72s 94
+  opacity: 2.59s 0 ─hold→ 2.6s 100 ─hold→ 3.3s 100 ─Ease In→ 3.72s 0
+"tag1" (text l_03jmi)
+  opacity: 0.59s 0 ─hold→ 0.7s 100 ─hold→ 1.4s 100 ─hold→ 1.41s 0
+"tag2" (text l_03jmj)
+  opacity: 1.59s 0 ─hold→ 1.7s 100 ─hold→ 2.4s 100 ─hold→ 2.41s 0
+"tag3" (text l_03jmk)
+  opacity: 2.59s 0 ─hold→ 2.7s 100 ─hold→ 3.45s 100 ─hold→ 3.46s 0
+"wipe1" (rect l_03jml)
+  position: 0.4s [-960,540] ─Expo Out→ 0.6s [960,540] ─Expo In→ 0.8s [2880,540]
+"wipe2" (rect l_03jmm)
+  position: 1.4s [2880,540] ─Expo Out→ 1.6s [960,540] ─Expo In→ 1.8s [-960,540]
+"wipe3" (rect l_03jmn)
+  position: 2.4s [960,1620] ─Expo Out→ 2.6s [960,540] ─Expo In→ 2.8s [960,-540]
+"ring1" (ellipse l_03jmo)
+  scale: 4s 10 ─Expo Out→ 4.9s 420
+  opacity: 3.99s 0 ─hold→ 4s 100 ─Ease Out→ 4.9s 0
+"ring2" (ellipse l_03jmp)
+  scale: 4.12s 10 ─Expo Out→ 5s 340
+  opacity: 4.11s 0 ─hold→ 4.12s 80 ─Ease Out→ 5s 0
+"flash" (rect l_03jmq)
+  opacity: 3.99s 0 ─hold→ 4s 55 ─Expo Out→ 4.25s 0
+"name" (text l_03jmr)
+  position: 4s [960,580] ─Quart In Out→ 4.06s [972,574] ─Quart In Out→ 4.12s [950,586] ─Quart In Out→ 4.18s [966,578] ─Quart In Out→ 4.26s [960,580] ─Quart In Out→ 6.5s [960,580] ─Expo Out→ 7s [960,400]
+  scale: 4s 320 ─Expo Out→ 4.3s 100 ─linear→ 6.5s 100 ─Expo Out→ 7s 78
+  opacity: 3.99s 0 ─hold→ 4s 100
+"bar" (rect l_03jms)
+  scale: 4.4s [0,100] ─Expo Out→ 4.9s 100 ─Expo In→ 6.5s 100 ─Quart In Out→ 6.9s [0,100]
+"pill" (rect l_03jmt)
+  scale: 7s 0 ─spring:0.4→ 7.5s 100
+  opacity: 6.99s 0 ─hold→ 7s 100
+"pilltext" (text l_03jmu)
+  position: 7.2s [960,715] ─Expo Out→ 7.5s [960,685]
+  opacity: 7.2s 0 ─Ease Out→ 7.4s 100

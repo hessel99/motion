@@ -1,0 +1,44 @@
+- Orb Purple [ellipse] box 100,-10,900,900 gradient(#8b4dff a0.8→#8b4dff a0)
+- Orb Teal [ellipse] box 1080,300,950,950 gradient(#19d3c5 a0.7→#19d3c5 a0)
+- Orb Violet [ellipse] box 636,-250,700,700 gradient(#c06bff a0.6→#c06bff a0)
+- Orb Cyan [ellipse] box 118,589,650,650 gradient(#38e8ff a0.5→#38e8ff a0)
+- Orb Indigo [ellipse] box 1305,-132,600,600 gradient(#5a3dff a0.6→#5a3dff a0)
+- Dots Row 1 [path] box 0,57,1920,6 #ffffff
+- Dots Row 1 copy 8 [path] box 0,1017,1920,6 #ffffff
+- Dots Row 1 copy 7 [path] box 0,897,1920,6 #ffffff
+- Dots Row 1 copy 6 [path] box 0,777,1920,6 #ffffff
+- Dots Row 1 copy 5 [path] box 0,657,1920,6 #ffffff
+- Dots Row 1 copy 4 [path] box 0,537,1920,6 #ffffff
+- Dots Row 1 copy 3 [path] box 0,417,1920,6 #ffffff
+- Dots Row 1 copy 2 [path] box 0,297,1920,6 #ffffff
+- Dots Row 1 copy [path] box 0,177,1920,6 #ffffff
+
+comp 1920x1080 6s @30fps, background #0b0820
+"Orb Purple" (ellipse l_03jm2)
+  position: expr "value + [90*Math.sin(2*Math.PI*time/6), 60*Math.cos(2*Math.PI*time/6)]"
+"Orb Teal" (ellipse l_03jm3)
+  position: expr "value + [-80*Math.cos(2*Math.PI*time/6), 70*Math.sin(2*Math.PI*time/6)]"
+"Orb Violet" (ellipse l_03jm4)
+  position: expr "value + [70*Math.sin(2*Math.PI*time/6+2), 50*Math.sin(4*Math.PI*time/6)]"
+"Orb Cyan" (ellipse l_03jm5)
+  position: expr "value + [60*Math.cos(2*Math.PI*time/6+1), 80*Math.sin(2*Math.PI*time/6+3)]"
+"Orb Indigo" (ellipse l_03jm6)
+  position: expr "value + [-60*Math.sin(2*Math.PI*time/6+4), 60*Math.cos(2*Math.PI*time/6+1)]"
+"Dots Row 1" (path l_03jm7)
+  opacity: expr "22+14*Math.sin(2*Math.PI*time/6)"
+"Dots Row 1 copy 8" (path l_03jmf)
+  opacity: expr "22+14*Math.sin(2*Math.PI*time/6-5.6)"
+"Dots Row 1 copy 7" (path l_03jme)
+  opacity: expr "22+14*Math.sin(2*Math.PI*time/6-4.9)"
+"Dots Row 1 copy 6" (path l_03jmd)
+  opacity: expr "22+14*Math.sin(2*Math.PI*time/6-4.2)"
+"Dots Row 1 copy 5" (path l_03jmc)
+  opacity: expr "22+14*Math.sin(2*Math.PI*time/6-3.5)"
+"Dots Row 1 copy 4" (path l_03jmb)
+  opacity: expr "22+14*Math.sin(2*Math.PI*time/6-2.8)"
+"Dots Row 1 copy 3" (path l_03jma)
+  opacity: expr "22+14*Math.sin(2*Math.PI*time/6-2.1)"
+"Dots Row 1 copy 2" (path l_03jm9)
+  opacity: expr "22+14*Math.sin(2*Math.PI*time/6-1.4)"
+"Dots Row 1 copy" (path l_03jm8)
+  opacity: expr "22+14*Math.sin(2*Math.PI*time/6-0.7)"

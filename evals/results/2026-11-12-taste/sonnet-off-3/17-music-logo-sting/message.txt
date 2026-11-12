@@ -1,0 +1,7 @@
+Make a logo sting for the brand "Pulse" (a round mark — a circle with a smaller dot inside — plus the wordmark "Pulse") synced to the music already in the timeline. Build anticipation during the build, land the logo exactly on the drop, punctuate the next beats with secondary hits, and settle on a clean lockup before the end.
+
+<editor_context>
+comp "Main" 1920x1080 30fps 8s, 1 layers; playhead 0s
+music: "Sting 120 BPM" id=l_03jm3 120 BPM 4/4, 0s–9.5s, sections build@0s drop@4s (get_audio_analysis for beats/accents; design to it)
+selected: nothing
+</editor_context>

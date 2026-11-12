@@ -1,0 +1,395 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 243,
+  "ok": true,
+  "ms": 75,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Corporate smooth lower third for an interview video: name and title, thin accent line extends, translucent panel slides in, soft mask reveal, holds, animates out by 6s. Calm, premium, blue-grey, long ease-in-outs."
+  },
+  "result": "# Example: Corporate lower third (name + title), in and out\n> tags: lower third, name, title, caption, interview, corporate, news, broadcast, speaker, smooth, professional, label\n\n## Brief\n\"Lower third for an interview: Maria Lopez, Head of Design at Acme. Clean corporate look, it comes in, holds, and goes out. 6 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"durati…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1362,
+  "ok": true,
+  "ms": 139,
+  "editorMs": 5,
+  "input": {
+   "comp": {
+    "duration": 6,
+    "background": "#1B222B",
+    "name": "Main"
+   },
+   "layers": [
+    {
+     "key": "panel",
+     "name": "Panel (translucent)",
+     "type": "rect",
+     "x": 140,
+     "y": 790,
+     "w": 780,
+     "h": 160,
+     "radius": 4,
+     "fill": "#2B3846CC",
+     "enter": {
+      "t": 0.4,
+      "duration": 1,
+      "ease": "Cubic In Out",
+      "from": {
+       "opacity": 0,
+       "dx": -40
+      }
+     },
+     "exit": {
+      "t": 4.8,
+      "duration": 0.7,
+      "ease": "Cubic In",
+      "to": {
+       "opacity": 0,
+       "dx": -40
+      }
+     }
+    },
+    {
+     "key": "accent",
+     "name": "Accent line",
+     "type": "rect",
+     "x": 140,
+     "y": 790,
+     "w": 780,
+     "h": 2,
+     "fill": "#8FA6BC",
+     "anchor": "left",
+     "animate": {
+      "scale": [
+       {
+        "t": 0.15,
+        "v": [
+         0,
+         100
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 1,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 4.95,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 5.6,
+        "v": [
+         0,
+         100
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "text-mask",
+     "name": "Text mask group",
+     "type": "group",
+     "clip": true,
+     "x": 170,
+     "y": 810,
+     "w": 740,
+     "h": 140,
+     "children": [
+      {
+       "key": "name",
+       "name": "Name",
+       "text": {
+        "content": "Dr. Amelia Hart",
+        "fontSize": 52,
+        "fontWeight": 600
+       },
+       "x": 10,
+       "y": 6,
+       "fill": "#FFFFFF",
+       "enter": {
+        "t": 0.9,
+        "duration": 0.9,
+        "ease": "Cubic In Out",
+        "from": {
+         "opacity": 0,
+         "dy": 34
+        }
+       },
+       "exit": {
+        "t": 4.52,
+        "duration": 0.45,
+        "ease": "Cubic In",
+        "to": {
+         "opacity": 0,
+         "dy": -18
+        }
+       }
+      },
+      {
+       "key": "title",
+       "name": "Title",
+       "text": {
+        "content": "Head of Research, Larkspur Labs",
+        "fontSize": 30,
+        "fontWeight": 400
+       },
+       "x": 12,
+       "y": 76,
+       "fill": "#C9D6E2",
+       "enter": {
+        "t": 1.1,
+        "duration": 0.9,
+        "ease": "Cubic In Out",
+        "from": {
+         "opacity": 0,
+         "dy": 34
+        }
+       },
+       "exit": {
+        "t": 4.4,
+        "duration": 0.45,
+        "ease": "Cubic In",
+        "to": {
+         "opacity": 0,
+         "dy": -18
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 7 keyframe tracks; animation ends 5.6s\",\"ids\":{\"panel\":\"l_03jm2\",\"accent\":\"l_03jm3\",\"name\":\"l_03jm5\",\"title\":\"l_03jm6\",\"text-mask\":\"l_03jm4\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 25,
+  "editorMs": 13,
+  "input": {},
+  "result": "score 73/100 (timing 67, easing 84)\n1. [medium] 4 of 4 entrances don't decelerate (Cubic In Out, Sine In Out): entrances ease out (Expo/Quart/Cubic Out) or spring\n   → set_easing {\"id\":\"l_03jm2\",\"prop\":\"position\",\"indices\":[0],\"ease\":\"Quart Out\"}\n   → set_easing {\"id\":\"l_03jm3\",\"prop\":\"scale\",\"indices\":[0],\"ease\":\"Quart Out\"}\n   → set_easing {\"id\":\"l_03jm5\",\"prop\":\"position\",\"indices\":[0],\"ease\":\"…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 37,
+  "ok": true,
+  "ms": 110,
+  "editorMs": 87,
+  "input": {
+   "times": [
+    0.3,
+    0.8,
+    1.4,
+    2.5,
+    4.5,
+    5,
+    5.5
+   ]
+  },
+  "result": "7 frames left→right, top→bottom at 0.3s, 0.8s, 1.4s, 2.5s, 4.5s, 5s, 5.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/cd8c3ffd-a426-4663-a2d6-a2f05dd5bbfb/tool-results/mcp-motion-blob-1794511955778-0z7hsw.jpg]"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1365,
+  "ok": true,
+  "ms": 34,
+  "editorMs": 9,
+  "input": {
+   "comp": {
+    "duration": 6,
+    "background": "#1B222B",
+    "name": "Main"
+   },
+   "layers": [
+    {
+     "key": "panel",
+     "name": "Panel (translucent)",
+     "type": "rect",
+     "x": 140,
+     "y": 790,
+     "w": 780,
+     "h": 160,
+     "radius": 4,
+     "fill": "#2B3846CC",
+     "enter": {
+      "t": 0.35,
+      "duration": 0.8,
+      "ease": "Cubic In Out",
+      "from": {
+       "opacity": 0,
+       "dx": -40
+      }
+     },
+     "exit": {
+      "t": 4.8,
+      "duration": 0.7,
+      "ease": "Cubic In",
+      "to": {
+       "opacity": 0,
+       "dx": -40
+      }
+     }
+    },
+    {
+     "key": "accent",
+     "name": "Accent line",
+     "type": "rect",
+     "x": 140,
+     "y": 790,
+     "w": 780,
+     "h": 2,
+     "fill": "#8FA6BC",
+     "anchor": "left",
+     "animate": {
+      "scale": [
+       {
+        "t": 0.15,
+        "v": [
+         0,
+         100
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 0.95,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 4.95,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Cubic In"
+       },
+       {
+        "t": 5.6,
+        "v": [
+         0,
+         100
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "text-mask",
+     "name": "Text mask group",
+     "type": "group",
+     "clip": true,
+     "x": 170,
+     "y": 810,
+     "w": 740,
+     "h": 140,
+     "children": [
+      {
+       "key": "name",
+       "name": "Name",
+       "text": {
+        "content": "Dr. Amelia Hart",
+        "fontSize": 52,
+        "fontWeight": 600
+       },
+       "x": 10,
+       "y": 6,
+       "fill": "#FFFFFF",
+       "enter": {
+        "t": 0.8,
+        "duration": 0.7,
+        "ease": "Cubic In Out",
+        "from": {
+         "opacity": 0,
+         "dy": 34
+        }
+       },
+       "exit": {
+        "t": 4.52,
+        "duration": 0.45,
+        "ease": "Cubic In",
+        "to": {
+         "opacity": 0,
+         "dy": -18
+        }
+       }
+      },
+      {
+       "key": "title",
+       "name": "Title",
+       "text": {
+        "content": "Head of Research, Larkspur Labs",
+        "fontSize": 30,
+        "fontWeight": 400
+       },
+       "x": 12,
+       "y": 76,
+       "fill": "#C9D6E2",
+       "enter": {
+        "t": 1,
+        "duration": 0.7,
+        "ease": "Cubic In Out",
+        "from": {
+         "opacity": 0,
+         "dy": 34
+        }
+       },
+       "exit": {
+        "t": 4.4,
+        "duration": 0.45,
+        "ease": "Cubic In",
+        "to": {
+         "opacity": 0,
+         "dy": -18
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 5 updated, 7 keyframe tracks; animation ends 5.6s\",\"ids\":{\"panel\":\"l_03jm2\",\"accent\":\"l_03jm3\",\"name\":\"l_03jm5\",\"title\":\"l_03jm6\",\"text-mask\":\"l_03jm4\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 3,
+  "input": {},
+  "result": "score 86/100 (timing 96, easing 80)\n1. [medium] 4 of 4 entrances don't decelerate (Cubic In Out): entrances ease out (Expo/Quart/Cubic Out) or spring\n   → set_easing {\"id\":\"l_03jm2\",\"prop\":\"position\",\"indices\":[0],\"ease\":\"Quart Out\"}\n   → set_easing {\"id\":\"l_03jm3\",\"prop\":\"scale\",\"indices\":[0],\"ease\":\"Quart Out\"}\n   → set_easing {\"id\":\"l_03jm5\",\"prop\":\"position\",\"indices\":[0],\"ease\":\"Quart Out\"}\n …"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm3",
+   "prop": "scale",
+   "ease": "Cubic In Out",
+   "indices": [
+    2
+   ]
+  },
+  "result": "ok"
+ }
+]

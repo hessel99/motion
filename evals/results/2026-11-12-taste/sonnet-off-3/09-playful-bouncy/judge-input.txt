@@ -1,0 +1,123 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (09-playful-bouncy, 1080x1080, 5s @60fps):
+Playful bouncy intro for a kids' app called "Boop!". Colorful candy shapes (circles, stars, rounded squares) drop in and bounce with squash & stretch, jostle each other, then the letters B-o-o-p-! hop in one by one like they're on a trampoline. Everything should feel elastic and joyful. End with a little idle wiggle.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- "Boop" present (one layer or letter layers) [yes]
+- per-letter hop (text animator by char or separate letter layers) [yes]
+- springs or Back eases [yes]
+- squash & stretch [yes]
+- star shapes present [yes]
+- ≥5 candy shapes [yes]
+- idle wiggle at the end (motion in the last 0.8s) [yes]
+- ≥4 colors [yes]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- Candy Circle Pink [ellipse] box 110,130,200,200 #ff4f8b
+- Candy Star Yellow [path] box 755,105,230,230 #ffd23f star
+- Candy Square Mint [rect] box 95,775,190,190 #2ee6c5
+- Candy Circle Blue [ellipse] box 790,770,180,180 #4da3ff
+- Candy Star Orange [path] box 465,55,150,150 #ff9f1c star
+- Candy Square Purple [rect] box 860,470,140,140 #b388ff
+- Candy Circle Green [ellipse] box 77,448,125,136 #7cff6b
+- Letter B [text] box 176,434,249,235 #ff4f8b "B" Inter 260px w900
+- Letter o1 [text] box 334,322,232,263 #ffd23f "o" Inter 260px w900
+- Letter o2 [text] box 499,360,181,340 #2ee6c5 "o" Inter 260px w900
+- Letter p [text] box 648,919,164,368 #4da3ff "p" Inter 260px w900
+- Letter ! [text] box 782,1063,96,375 #ff9f1c "!" Inter 260px w900
+
+TIMELINE:
+comp 1080x1080 5s @60fps, background #2a1b63
+"Candy Circle Pink" (ellipse l_03jm2)
+  position: 0.2s [210,-200] ─Quad In→ 0.65s [210,230] ─Quad Out→ 0.9s [210,140] ─Quad In→ 1.15s [210,230] ─Quad Out→ 1.3s [210,205] ─Quad In→ 1.45s [210,230] ─Quad Out→ 2.7s [210,230] ─Quad Out→ 2.95s [250,230] ─Quad Out→ 3.3s [210,230]
+  scale: 0.2s [90,112] ─Quad Out→ 0.65s [135,70] ─Quad Out→ 0.9s [88,116] ─Quad Out→ 1.15s [120,82] ─Quad Out→ 1.3s [94,108] ─Quad Out→ 1.45s 100
+  rotation: 2.7s 0 ─Quad Out→ 2.95s 25 ─Quad Out→ 3.3s 0
+  rotation: expr "value + clamp(time-3.4,0,1)*7*sin(time*5+index)"
+"Candy Star Yellow" (path l_03jm3)
+  position: 0.4s [870,-200] ─Quad In→ 0.85s [870,220] ─Quad Out→ 1.1s [870,130] ─Quad In→ 1.35s [870,220] ─Quad Out→ 1.5s [870,195] ─Quad In→ 1.65s [870,220] ─Quad Out→ 2.75s [870,220] ─Quad Out→ 3s [830,220] ─Quad Out→ 3.35s [870,220]
+  scale: 0.4s [90,112] ─Quad Out→ 0.85s [135,70] ─Quad Out→ 1.1s [88,116] ─Quad Out→ 1.35s [120,82] ─Quad Out→ 1.5s [94,108] ─Quad Out→ 1.65s 100
+  rotation: 0.4s -40 ─Quad Out→ 1.65s 0 ─Easy Ease→ 2.75s 0 ─Quad Out→ 3s -30 ─Quad Out→ 3.35s 0
+  rotation: expr "value + clamp(time-3.4,0,1)*7*sin(time*5+index)"
+"Candy Square Mint" (rect l_03jm4)
+  position: 0.6s [190,-200] ─Quad In→ 1.05s [190,870] ─Quad Out→ 1.3s [190,780] ─Quad In→ 1.55s [190,870] ─Quad Out→ 1.7s [190,845] ─Quad In→ 1.85s [190,870] ─Quad Out→ 2.8s [190,870] ─Quad Out→ 3.05s [230,870] ─Quad Out→ 3.4s [190,870]
+  scale: 0.6s [90,112] ─Quad Out→ 1.05s [135,70] ─Quad Out→ 1.3s [88,116] ─Quad Out→ 1.55s [120,82] ─Quad Out→ 1.7s [94,108] ─Quad Out→ 1.85s 100
+  rotation: 0.6s 0 ─Easy Ease→ 2.8s 0 ─Quad Out→ 3.05s 20 ─Quad Out→ 3.4s 0
+  rotation: expr "value + clamp(time-3.4,0,1)*7*sin(time*5+index)"
+"Candy Circle Blue" (ellipse l_03jm5)
+  position: 0.8s [880,-200] ─Quad In→ 1.25s [880,860] ─Quad Out→ 1.5s [880,770] ─Quad In→ 1.75s [880,860] ─Quad Out→ 1.9s [880,835] ─Quad In→ 2.05s [880,860] ─Quad Out→ 2.85s [880,860] ─Quad Out→ 3.1s [840,860] ─Quad Out→ 3.45s [880,860]
+  scale: 0.8s [90,112] ─Quad Out→ 1.25s [135,70] ─Quad Out→ 1.5s [88,116] ─Quad Out→ 1.75s [120,82] ─Quad Out→ 1.9s [94,108] ─Quad Out→ 2.05s 100
+  rotation: 0.8s 0 ─Easy Ease→ 2.85s 0 ─Quad Out→ 3.1s -20 ─Quad Out→ 3.45s 0
+  rotation: expr "value + clamp(time-3.4,0,1)*7*sin(time*5+index)"
+"Candy Star Orange" (path l_03jm6)
+  position: 1s [540,-200] ─Quad In→ 1.45s [540,130] ─Quad Out→ 1.7s [540,40] ─Quad In→ 1.95s [540,130] ─Quad Out→ 2.1s [540,105] ─Quad In→ 2.25s [540,130] ─Quad Out→ 2.9s [540,130] ─Quad Out→ 3.15s [590,130] ─Quad Out→ 3.5s [540,130]
+  scale: 1s [90,112] ─Quad Out→ 1.45s [135,70] ─Quad Out→ 1.7s [88,116] ─Quad Out→ 1.95s [120,82] ─Quad Out→ 2.1s [94,108] ─Quad Out→ 2.25s 100
+  rotation: 1s 30 ─Quad Out→ 2.25s 0 ─Easy Ease→ 2.9s 0 ─Quad Out→ 3.15s 30 ─Quad Out→ 3.5s 0
+  rotation: expr "value + clamp(time-3.4,0,1)*7*sin(time*5+index)"
+"Candy Square Purple" (rect l_03jm7)
+  position: 1.2s [930,-200] ─Quad In→ 1.65s [930,540] ─Quad Out→ 1.9s [930,450] ─Quad In→ 2.15s [930,540] ─Quad Out→ 2.3s [930,515] ─Quad In→ 2.45s [930,540] ─Quad Out→ 2.95s [930,540] ─Quad Out→ 3.2s [900,540] ─Quad Out→ 3.55s [930,540]
+  scale: 1.2s [90,112] ─Quad Out→ 1.65s [135,70] ─Quad Out→ 1.9s [88,116] ─Quad Out→ 2.15s [120,82] ─Quad Out→ 2.3s [94,108] ─Quad Out→ 2.45s 100
+  rotation: 1.2s 0 ─Easy Ease→ 2.95s 0 ─Quad Out→ 3.2s 25 ─Quad Out→ 3.55s 0
+  rotation: expr "value + clamp(time-3.4,0,1)*7*sin(time*5+index)"
+"Candy Circle Green" (ellipse l_03jm8)
+  position: 1.4s [140,-200] ─Quad In→ 1.85s [140,540] ─Quad Out→ 2.1s [140,450] ─Quad In→ 2.35s [140,540] ─Quad Out→ 2.5s [140,515] ─Quad In→ 2.65s [140,540] ─Quad Out→ 2.95s [140,540] ─Quad Out→ 3.2s [175,540] ─Quad Out→ 3.55s [140,540]
+  scale: 1.4s [90,112] ─Quad Out→ 1.85s [135,70] ─Quad Out→ 2.1s [88,116] ─Quad Out→ 2.35s [120,82] ─Quad Out→ 2.5s [94,108] ─Quad Out→ 2.65s 100
+  rotation: expr "value + clamp(time-3.4,0,1)*7*sin(time*5+index)"
+"Letter B" (text l_03jm9)
+  position: 1.9s [300,1250] ─Quad Out→ 2.25s [300,440] ─Quad In→ 2.5s [300,560] ─Quad Out→ 2.75s [300,525] ─Quad In→ 2.95s [300,560]
+  position: expr "value + [0, clamp(time-3.9,0,1)*-9*sin(time*6+index)]"
+  scale: 1.9s [80,125] ─Quad Out→ 2.25s [92,112] ─Quad Out→ 2.5s [135,68] ─Quad Out→ 2.75s [92,110] ─Quad Out→ 2.95s 100
+  opacity: 1.9s 0 ─Easy Ease→ 1.95s 100
+"Letter o1" (text l_03jma)
+  position: 2.1s [450,1250] ─Quad Out→ 2.45s [450,440] ─Quad In→ 2.7s [450,560] ─Quad Out→ 2.95s [450,525] ─Quad In→ 3.15s [450,560]
+  position: expr "value + [0, clamp(time-3.9,0,1)*-9*sin(time*6+index)]"
+  scale: 2.1s [80,125] ─Quad Out→ 2.45s [92,112] ─Quad Out→ 2.7s [135,68] ─Quad Out→ 2.95s [92,110] ─Quad Out→ 3.15s 100
+  opacity: 2.1s 0 ─Easy Ease→ 2.15s 100
+"Letter o2" (text l_03jmb)
+  position: 2.3s [590,1250] ─Quad Out→ 2.65s [590,440] ─Quad In→ 2.9s [590,560] ─Quad Out→ 3.15s [590,525] ─Quad In→ 3.35s [590,560]
+  position: expr "value + [0, clamp(time-3.9,0,1)*-9*sin(time*6+index)]"
+  scale: 2.3s [80,125] ─Quad Out→ 2.65s [92,112] ─Quad Out→ 2.9s [135,68] ─Quad Out→ 3.15s [92,110] ─Quad Out→ 3.35s 100
+  opacity: 2.3s 0 ─Easy Ease→ 2.35s 100
+"Letter p" (text l_03jmc)
+  position: 2.5s [730,1250] ─Quad Out→ 2.85s [730,440] ─Quad In→ 3.1s [730,560] ─Quad Out→ 3.35s [730,525] ─Quad In→ 3.55s [730,560]
+  position: expr "value + [0, clamp(time-3.9,0,1)*-9*sin(time*6+index)]"
+  scale: 2.5s [80,125] ─Quad Out→ 2.85s [92,112] ─Quad Out→ 3.1s [135,68] ─Quad Out→ 3.35s [92,110] ─Quad Out→ 3.55s 100
+  opacity: 2.5s 0 ─Easy Ease→ 2.55s 100
+"Letter !" (text l_03jmd)
+  position: 2.7s [830,1250] ─Quad Out→ 3.05s [830,420] ─Quad In→ 3.3s [830,560] ─Quad Out→ 3.55s [830,520] ─Quad In→ 3.75s [830,560]
+  position: expr "value + [0, clamp(time-3.9,0,1)*-9*sin(time*6+index)]"
+  scale: 2.7s [80,125] ─Quad Out→ 3.05s [92,112] ─Quad Out→ 3.3s [135,68] ─Quad Out→ 3.55s [92,110] ─Quad Out→ 3.75s 100
+  opacity: 2.7s 0 ─Easy Ease→ 2.75s 100
+
+AUTOMATIC METRICS:
+layers 12 drawable (ellipse 3, path 2, rect 2, text 5), 190 keys, 143 moving segments
+eases: Quad In×31, Quad Out×107, Easy Ease×5; springs 0, overshooting 0, hold 0
+expressions 12, text animators 0, precomps 0, paths 2, gradients 0, markers 0
+palette (8): #ff4f8b #ffd23f #2ee6c5 #4da3ff #ff9f1c #b388ff #7cff6b #2a1b63
+motion from 0.2s to 5s (end hold 0s, longest still 0s), visual activity 97% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 1.139s; text-on-text overlap 2.747s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

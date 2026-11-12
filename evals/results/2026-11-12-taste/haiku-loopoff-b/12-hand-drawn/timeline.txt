@@ -1,0 +1,45 @@
+- Blob mustard [path] box 553,492,221,258 #e9b44c a0.85
+- Blob terracotta [path] box 1154,375,142,152 #d97757 a0.85
+- Blob sage [path] box 839,612,249,165 #7a9e7e a0.85
+- Wheat stalk [path] box 699,260,2,560 #000000 a0 stroke #2e2a24 7px
+- Wheat grains [path] box 655,236,88,194 #000000 a0 stroke #2e2a24 6px
+- Loaf outline [path] box 870,475,354,267 #000000 a0 stroke #2e2a24 7px
+- Loaf score [path] box 948,560,184,21 #000000 a0 stroke #2e2a24 6px
+- Name [text] box 360,830,1200,150 #2e2a24 "Crumb & Co" serif 120px w600
+- Name underline [path] box 760,967,400,9 #000000 a0 stroke #d97757 9px
+
+comp 1920x1080 6s @24fps, background #f6efe3
+"Blob mustard" (path l_03jm2)
+  scale: 0.3s 60 ─Quad Out→ 1.2s 100
+  scale: expr "value + [2*Math.sin(time*2*Math.PI/2.4), 2*Math.sin(time*2*Math.PI/2.4)]"
+  opacity: 0.3s 0 ─Quad Out→ 0.75s 100
+"Blob terracotta" (path l_03jm3)
+  scale: 1.8s 60 ─Quad Out→ 2.7s 100
+  scale: expr "value + [2*Math.sin(time*2*Math.PI/3.1), 2*Math.sin(time*2*Math.PI/3.1)]"
+  opacity: 1.8s 0 ─Quad Out→ 2.25s 100
+"Blob sage" (path l_03jm4)
+  scale: 1.5s 60 ─Quad Out→ 2.4s 100
+  scale: expr "value + [2*Math.sin(time*2*Math.PI/2.9), 2*Math.sin(time*2*Math.PI/2.9)]"
+  opacity: 1.5s 0 ─Quad Out→ 1.95s 100
+"Wheat stalk" (path l_03jm5)
+  position: expr "wiggle(8, 0.8)"
+  trimStart: 0.2s 0
+  trimEnd: 0.2s 0 ─Sine In Out→ 1.4s 100
+"Wheat grains" (path l_03jm6)
+  position: expr "wiggle(8, 0.8)"
+  trimStart: 1s 0
+  trimEnd: 1s 0 ─Sine In Out→ 1.8s 100
+"Loaf outline" (path l_03jm7)
+  position: expr "wiggle(8, 0.8)"
+  trimStart: 1.4s 0
+  trimEnd: 1.4s 0 ─Sine In Out→ 2.6s 100
+"Loaf score" (path l_03jm8)
+  position: expr "wiggle(8, 0.8)"
+  trimStart: 2.4s 0
+  trimEnd: 2.4s 0 ─Sine In Out→ 3s 100
+"Name" (text l_03jm9)
+  text animator: in by char, start 2.8s, 0.5s each, stagger 0.04s, ease Expo Out
+"Name underline" (path l_03jma)
+  position: expr "wiggle(8, 0.8)"
+  trimStart: 4s 0
+  trimEnd: 4s 0 ─Sine In Out→ 4.6s 100

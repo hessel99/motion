@@ -1,0 +1,196 @@
+{
+ "run": {
+  "id": "06-loop-bg",
+  "name": "06-loop-bg",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 80,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 64,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 36,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:off-canvas"
+    ],
+    "ms": 3.9
+   },
+   "after": {
+    "score": 80,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 64,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 36,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:off-canvas"
+    ],
+    "ms": 3.9
+   }
+  },
+  "wallMs": 56963,
+  "timedOut": false,
+  "turns": 6,
+  "costUsd": 0.0097786,
+  "durationMs": 55997,
+  "usage": {
+   "input": 161366,
+   "cached": 148600,
+   "output": 11480
+  },
+  "errors": [],
+  "toolCalls": 5,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The loop is built: a 6 s, 1920×1080, 30 fps comp with five blurred orbs and a 12×7 dot grid, all driven by expressions. I checked frame 0 against frame 6 in a contact sheet and they match.\n\n- **Orbs:** five soft ellipses in purple, violet, teal and deep purple (blur 140–160 px, opacity 32–60%) drift in slow Lissajous paths.\n- **Dots:** 84 small white dots in four vertical bands. Each band's opacity pulses between roughly 10% and 38%, offset in phase left to right so a gentle wave crosses the grid.\n- **Seamless loop:** every motion is a sine or cosine with a whole number of cycles in 6 s (one or two per loop), so frame 6 equals frame 0 by construction with no keyframes to seam.\n- **Background:** deep navy `#0b0a1f`.\n\nThe critique scores it 80/100. Its one remaining flag is that the deep-purple orb bleeds off the bottom-right edge. I left that on purpose, since the orbs are blurred and a soft edge bleed suits an ambient stage background. If you want it fully inside the frame, I can pull it up.\n\nI didn't export a video. Say if you want an MP4 or a preview, or if you'd like the motion faster, the orbs larger, or the dots more visible."
+ },
+ "metrics": {
+  "layers": 9,
+  "drawableLayers": 9,
+  "layerTypes": {
+   "ellipse": 5,
+   "path": 4
+  },
+  "groups": 0,
+  "animatedLayers": 9,
+  "keys": 0,
+  "segments": 0,
+  "easesUsed": {},
+  "distinctEases": 0,
+  "easeFamilies": 0,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 9,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 4,
+  "gradientLayers": 0,
+  "paletteSize": 7,
+  "palette": [
+   "#7c3aed",
+   "#2dd4bf",
+   "#a855f7",
+   "#14b8a6",
+   "#4c1d95",
+   "#ffffff",
+   "#0b0a1f"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 6.097,
+  "offCanvasLayers": {
+   "Blob deep": 4.489,
+   "Blob teal": 1.139,
+   "Blob purple": 3.618,
+   "Blob mint": 2.144
+  },
+  "clippedAtEnd": [
+   "Blob deep"
+  ],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 0,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.185,
+  "toolErrors": 0,
+  "toolCalls": 5
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "loops seamlessly (first frame ≈ frame at the loop point)",
+    "type": "loops",
+    "pass": true
+   },
+   {
+    "text": "everything moves (animated coverage ≥90%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 blobs/orbs (ellipses)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "dot grid (≥15 layers)",
+    "type": "layersMin",
+    "pass": false
+   },
+   {
+    "text": "uses loop expressions or matching first/last keys",
+    "type": "loopTechnique",
+    "pass": true
+   },
+   {
+    "text": "purple/teal palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "calm: no fast motion",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 5,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

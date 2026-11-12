@@ -525,6 +525,8 @@ async function main() {
     await ctx.addInitScript(SEED_SCRIPT, O.seed);
     // headless turns: storyboards build right away (nobody is there to approve the card)
     await ctx.addInitScript(() => { try { localStorage.setItem("motion.agent.storyboard", "auto"); } catch { /* */ } });
+    // the taste layer flag must be set before the editor connects (it decides the advertised tools)
+    await ctx.addInitScript((taste) => { globalThis.__motionTaste = taste; }, O.taste);
     const page = await ctx.newPage();
     const w = { i, port: bridge.port, bridge, page, onEvent: null, pageErrors: [] };
     page.on('pageerror', (e) => w.pageErrors.push(e.message));

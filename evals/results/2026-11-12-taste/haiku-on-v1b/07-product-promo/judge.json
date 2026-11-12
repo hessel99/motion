@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 7,
+  "style_match": 6,
+  "timing_easing": 5,
+  "composition": 6,
+  "richness": 4,
+  "polish": 5
+ },
+ "overall": 5.5,
+ "critique": [
+  "After the slam lands at ~3.85s, almost nothing moves for the remaining 6s: the frame sits static from 4.5s to 7s, and again from 7.5s to the end. The feature words also exit by hold-cutting to zero opacity, not with real transitions. Together these drain the 'fast, energetic, 120 BPM' feel. The only connective motion is a full-screen flash and a single 125→100 scale punch repeated three times.",
+  "Give each feature word a directional exit tied to the beat, such as a whip or slide with motion blur, a mask wipe, or a per-character stagger off on the next downbeat. After the slam, keep the beat alive with layered secondary motion: a second delayed ring, a subtle scale throb on PULSE 2 every 0.5s, and the rule extending to the full title width. Bring 'Available now' in around 5–5.5s with a stagger on the pill and its text, so the end hold is about 1.5s rather than 2.5s of dead frame."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0571198,
+ "ms": 12531,
+ "raw": "```json\n{\"brief_fit\": 7, \"style_match\": 6, \"timing_easing\": 5, \"composition\": 6, \"richness\": 4, \"polish\": 5,\n \"critique\": [\"After the slam lands at ~3.85s, almost nothing moves for the remaining 6s: the frame sits static from 4.5s to 7s, and again from 7.5s to the end. The feature words also exit by hold-cutting to zero opacity, not with real transitions. Together these drain the 'fast, energetic, 120 BPM' feel. The only connective motion is a full-screen flash and a single 125→100 scale punch repeated three times.\", \"Give each feature word a directional exit tied to the beat, such as a whip or slide with motion blur, a mask wipe, or a per-character stagger off on the next downbeat. After the slam, keep the beat alive with layered secondary motion: a second delayed ring, a subtle scale throb on PULSE 2 every 0.5s, and the rule extending to the full title width. Bring 'Available now' in around 5–5.5s with a stagger on the pill and its text, so the end hold is about 1.5s rather than 2.5s of dead frame.\"]}\n```"
+}

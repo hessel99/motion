@@ -1,0 +1,196 @@
+{
+ "run": {
+  "id": "15-minimal-luxury",
+  "name": "15-minimal-luxury",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 90,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin"
+    ],
+    "ms": 5.1
+   },
+   "after": {
+    "score": 90,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin"
+    ],
+    "ms": 5.1
+   }
+  },
+  "wallMs": 39361,
+  "timedOut": false,
+  "turns": 21,
+  "costUsd": 0.012223300000000003,
+  "durationMs": 38554,
+  "usage": {
+   "input": 597829,
+   "cached": 583420,
+   "output": 7019
+  },
+  "errors": [],
+  "toolCalls": 20,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the ÉCLAT reveal as a 7-second, 1080×1920 composition on a near-black background (#0A0A0B).\n\n- **Gold line** (`Gold line`): a 1.5 px champagne line (#C9A96E) draws outward from its centre over 2.6 s with Sine In Out, starting at 0.5 s.\n- **Name** (`Name ÉCLAT`): the wordmark is split into five letters, each fading in and rising 18 px with a 0.2 s stagger from 1.6 s. Its tracking starts about 14 px per letter wider and tightens to the resting spacing over 1.6–4.8 s, driven by an expression rather than keyframes.\n- **Subline** (`Subline`): \"EAU DE PARFUM\" in small tracked Inter fades in at 4.2 s in a muted gold.\n- The last motion ends at about 5.4 s, so the lockup holds for the final 1.6 s.\n\nTwo things to know:\n- The serif is a generic `serif` fallback, because Cormorant Garamond isn't installed in the editor. If you can add a licensed display serif, I'll swap it in.\n- The critic's only remaining note asks for more elements. I left it alone, since you asked for a single line and generous negative space.\n\nPossible next steps: slow the whole piece down, add a very slow gold glow behind the line, or export a version with the font you prefer."
+ },
+ "metrics": {
+  "layers": 8,
+  "drawableLayers": 7,
+  "layerTypes": {
+   "path": 1,
+   "text": 6,
+   "group": 1
+  },
+  "groups": 1,
+  "animatedLayers": 7,
+  "keys": 18,
+  "segments": 9,
+  "easesUsed": {
+   "Sine In Out": 2,
+   "Sine Out": 2,
+   "Ease Out": 5
+  },
+  "distinctEases": 3,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 4,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#c9a96e",
+   "#a8966f",
+   "#e9d9b4",
+   "#0a0a0b"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.469,
+  "firstMotion": 1.6,
+  "lastMotion": 4.867,
+  "endHold": 2.133,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.006,
+  "midLuma": 0.045,
+  "toolErrors": 0,
+  "toolCalls": 20
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "subtitle present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "letter-by-letter reveal",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "thin line draws (trim or size/scale animated on a thin layer)",
+    "type": "thinLineDraw",
+    "pass": true
+   },
+   {
+    "text": "serif font",
+    "type": "serifFont",
+    "pass": true
+   },
+   {
+    "text": "slow: shortest keyed move ≥0.8s",
+    "type": "minSegmentDuration",
+    "pass": false
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "negative space: ≤8 layers",
+    "type": "layersMax",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

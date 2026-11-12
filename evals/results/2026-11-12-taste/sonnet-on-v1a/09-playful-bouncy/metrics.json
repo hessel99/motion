@@ -1,0 +1,224 @@
+{
+ "run": {
+  "id": "09-playful-bouncy",
+  "name": "09-playful-bouncy",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 82,
+    "sub": {
+     "timing": 91.6,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 79,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 95.8,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 8.4,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 21,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 4.2,
+     "music": 0
+    },
+    "issues": [
+     "low:contrast",
+     "low:contrast",
+     "low:contrast",
+     "low:timing-range",
+     "low:timing-range",
+     "low:palette-drift"
+    ],
+    "ms": 27.3
+   },
+   "after": {
+    "score": 82,
+    "sub": {
+     "timing": 91.6,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 79,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 95.8,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 8.4,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 21,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 4.2,
+     "music": 0
+    },
+    "issues": [
+     "low:contrast",
+     "low:contrast",
+     "low:contrast",
+     "low:timing-range",
+     "low:timing-range",
+     "low:palette-drift"
+    ],
+    "ms": 27.3
+   }
+  },
+  "wallMs": 104510,
+  "timedOut": false,
+  "turns": 5,
+  "costUsd": 0.1496795,
+  "durationMs": 103683,
+  "usage": {
+   "input": 207155,
+   "cached": 196055,
+   "output": 8569
+  },
+  "errors": [],
+  "toolCalls": 4,
+  "toolErrors": 1,
+  "toolsAvailable": 76,
+  "finalText": "Now the letter hops and idle wiggle.\nI built the \"Boop!\" intro in the Motion editor: 5 seconds at 1080×1080 and 60fps, on a cream background. I checked it with a contact sheet and it plays through as planned. I didn't run the critic or propose a storyboard first, so I haven't reviewed the pacing beyond that.\n\n- **Candy drop (0.1–2.4s):** Six shapes fall in one after another: **Pink circle**, **Yellow star**, **Blue square**, **Teal circle**, **Orange star** and **Purple square**. Each one stretches as it falls, squashes flat on landing, bounces twice and settles with a springy overshoot. They are pinned at the bottom so the squash stays grounded.\n- **Jostle (~1.8–2.6s):** Every shape gets a quick rotation kick, so they look like they bump each other.\n- **Letters (2.0–4.1s):** **B, o, o, p, !** hop in one at a time, 0.18s apart. Each launches up from below, comes down with a squash, takes one more smaller bounce and settles with a spring.\n- **Idle wiggle (to 5s):** The shapes wiggle gently from the start, and each letter starts wiggling once it has settled.\n\nThe letters came out a little smaller than I planned. I can make them bigger, change the colours, speed up the hops, or add a closing pulse on the last frame if you like."
+ },
+ "metrics": {
+  "layers": 11,
+  "drawableLayers": 11,
+  "layerTypes": {
+   "ellipse": 2,
+   "path": 2,
+   "rect": 2,
+   "text": 5
+  },
+  "groups": 0,
+  "animatedLayers": 11,
+  "keys": 183,
+  "segments": 139,
+  "easesUsed": {
+   "Quad In": 28,
+   "Quad Out": 50,
+   "Cubic In Out": 50,
+   "Quad In Out": 6,
+   "Ease Out": 5
+  },
+  "distinctEases": 5,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 23,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 11,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 8,
+  "palette": [
+   "#ff5c8a",
+   "#ffc93c",
+   "#3ca8ff",
+   "#2ed8b6",
+   "#ff8a3c",
+   "#9b5cff",
+   "#ffb000",
+   "#fff4dd"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 5,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 0.268,
+  "offCanvasLayers": {
+   "Pink circle": 0.067,
+   "Yellow star": 0.067,
+   "Blue square": 0.067,
+   "Teal circle": 0.067,
+   "Orange star": 0.067,
+   "Purple square": 0.067
+  },
+  "clippedAtEnd": [],
+  "textOverlapTime": 2.479,
+  "textOverlapPairs": {
+   "Letter B × Letter o1": 2.479,
+   "Letter o2 × Letter p": 2.077,
+   "Letter p × Letter !": 1.943
+  },
+  "partialOverlapTime": 3.618,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.053,
+  "midLuma": 0.915,
+  "toolErrors": 1,
+  "toolCalls": 4
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "\"Boop\" present (one layer or letter layers)",
+    "type": "textOrLetters",
+    "pass": true
+   },
+   {
+    "text": "per-letter hop (text animator by char or separate letter layers)",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "springs or Back eases",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "star shapes present",
+    "type": "starShape",
+    "pass": true
+   },
+   {
+    "text": "≥5 candy shapes",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "idle wiggle at the end (motion in the last 0.8s)",
+    "type": "activeAtEnd",
+    "pass": true
+   },
+   {
+    "text": "≥4 colors",
+    "type": "paletteMin",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

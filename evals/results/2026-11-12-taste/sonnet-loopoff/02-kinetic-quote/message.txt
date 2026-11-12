@@ -1,0 +1,6 @@
+Kinetic typography for the quote "Design is not just what it looks like. Design is how it works." — Steve Jobs. Split it into 3–4 phrases that each get their own moment; animate per letter or per word, emphasise "how it works" (bigger/bolder, different color). Phrases should transition into each other, not just stack up. Attribution appears last, small.
+
+<editor_context>
+comp "Main" 1080x1080 30fps 8s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

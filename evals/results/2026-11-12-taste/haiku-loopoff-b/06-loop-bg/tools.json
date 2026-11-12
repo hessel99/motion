@@ -1,0 +1,90 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 4820,
+  "ok": true,
+  "ms": 1082,
+  "editorMs": 9,
+  "input": "{\"comp\":{\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":6,\"background\":\"#0b0a1f\",\"name\":\"Ambient loop\"},\"layers\":[{\"key\":\"blob-purple\",\"name\":\"Blob purple\",\"type\":\"ellipse\",\"center\":[480,380],\"w\":1000,\"h\":1000,\"fill\":\"#7c3aed\",\"opacity\":55,\"props\":{\"blur\":160},\"expr\":{\"position\":\"[480+180*sin(1.0471976*time), 380+120*cos(1.0471976*time)]\"}},{\"key\":\"blob-teal\",\"name\":\"Blob teal\",\"type\":\"ellipse\",\"center\":[1450,640],\"w\":900,\"h\":900,\"fill\":\"#2dd4bf\",\"opacity\":40,\"props\":{\"blur\":160},\"expr\":{\"position\":\"[1450+150*cos(1.0471976*time+1), 640+160*sin(1.0471976*time+0.5)]\"}},{\"key\":\"blob-violet\",\"name\":\"Blob violet\",\"type\":\"ellipse\",\"center\":[1100,300],\"w\":560,\"h\":560,\"fill\":\"#a855f7\",\"opacity\":40,\"props\":{\"blur\":140},\"expr\":{\"position\":\"[1100+200*sin(2.0943951*time+2), 300+90*cos(2.0943951*time)]\"}},{\"key\":\"blob-mint\",\"name\":\"Blob mint\",\"type\":\"ellipse\",\"center\":[400,800],\"w\":640,\"h\":640,\"fill\":\"#14b8a6\",\"opacity\":35,\"props\":{\"blur\":150},\"expr\":{\"position\":\"[400+140*cos(2.0943951*time), 800-100*sin(1.0471976*time+1)]\"}},{\"key\":\"blob-deep\",\"name\":\"Blob deep\",\"type\":\"ellipse\",\"center\":[1550,920],\"w\":760,\"h\":760,\"fill\":\"#4c1d95\",\"opacity\":60,\"props\":{\"blur\":160},\"expr\":{\"position\":\"[1550-160*sin(1.0471976*time+2.5), 920-110*cos(1.0471976*time+2.5)]\"}},{\"key\":\"dots-b0\",\"name\":\"Dots band 1\",\"type\":\"path\",\"fill\":\"#ffffff\",\"d\":\"M76 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M236 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M396 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M76 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M236 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M396 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M76 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M236 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M396 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M76 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M236 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M396 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M76 690a4 4 0 1 0 8 0a4 4 0 1 0-8 0M236 690a4 4 0 1 0 8 0a4 4 0 1 0-8 0M396 690a4 4 0 1 0 8 0a4 4 0 1 0-8 0M76 840a4 4 0 1 0 8 0a4 4 0 1 0-8 0M236 840a4 4 0 1 0 8 0a4 4 0 1 0-8 0M396 840a4 4 0 1 0 8 0a4 4 0 1 0-8 0M76 990a4 4 0 1 0 8 0a4 4 0 1 0-8 0M236 990a4 4 0 1 0 8 0a4 4 0 1 0-8 0M396 990a4 4 0 1 0 8 0a4 4 0 1 0-8 0\",\"expr\":{\"opacity\":\"24+14*sin(2.0943951*time+0)\"}},{\"key\":\"dots-b1\",\"name\":\"Dots band 2\",\"type\":\"path\",\"fill\":\"#ffffff\",\"d\":\"M556 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M716 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M876 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M556 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M716 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M876 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M556 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M716 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M876 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M556 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M716 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M876 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M556 690a4 4 0 1 0 8 0a4 4 0 1 0-8 0M716 690a4 4 0 1 0 8 0a4 4 0 1 0-8 0M876 690a4 4 0 1 0 8 0a4 4 0 1 0-8 0M556 840a4 4 0 1 0 8 0a4 4 0 1 0-8 0M716 840a4 4 0 1 0 8 0a4 4 0 1 0-8 0M876 840a4 4 0 1 0 8 0a4 4 0 1 0-8 0M556 990a4 4 0 1 0 8 0a4 4 0 1 0-8 0M716 990a4 4 0 1 0 8 0a4 4 0 1 0-8 0M876 990a4 4 0 1 0 8 0a4 4 0 1 0-8 0\",\"expr\":{\"opacity\":\"24+14*sin(2.094395…",
+  "result": "{\"summary\":\"9 created, 0 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"blob-purple\":\"l_03jm2\",\"blob-teal\":\"l_03jm3\",\"blob-violet\":\"l_03jm4\",\"blob-mint\":\"l_03jm5\",\"blob-deep\":\"l_03jm6\",\"dots-b0\":\"l_03jm7\",\"dots-b1\":\"l_03jm8\",\"dots-b2\":\"l_03jm9\",\"dots-b3\":\"l_03jma\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 1676,
+  "editorMs": 7,
+  "input": {},
+  "result": "score 64/100 (composition 28)\n1. [high] \"Blob teal\" sits 16% outside the frame at the end\n   → update_layer {\"id\":\"l_03jm3\",\"props\":{\"position\":[1312,510]}}\n2. [high] \"Blob deep\" sits 41% outside the frame at the end\n   → update_layer {\"id\":\"l_03jm6\",\"props\":{\"position\":[1550,569]}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 12,
+  "ok": true,
+  "ms": 1822,
+  "editorMs": 1784,
+  "input": {
+   "frames": 4
+  },
+  "result": "4 frames left→right, top→bottom at 0s, 2s, 4s, 6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/6eb39cf3-8cf8-47de-bf1f-3daa01e82916/tool-results/mcp-motion-blob-1794513522342-3vu2st.jpg]"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 476,
+  "ok": true,
+  "ms": 356,
+  "editorMs": 1,
+  "input": {
+   "layers": [
+    {
+     "key": "blob-teal",
+     "name": "Blob teal",
+     "type": "ellipse",
+     "center": [
+      1340,
+      640
+     ],
+     "w": 900,
+     "h": 900,
+     "fill": "#2dd4bf",
+     "opacity": 32,
+     "props": {
+      "blur": 160
+     },
+     "expr": {
+      "position": "[1340+130*cos(1.0471976*time+1), 640+150*sin(1.0471976*time+0.5)]"
+     }
+    },
+    {
+     "key": "blob-deep",
+     "name": "Blob deep",
+     "type": "ellipse",
+     "center": [
+      1420,
+      880
+     ],
+     "w": 760,
+     "h": 760,
+     "fill": "#4c1d95",
+     "opacity": 50,
+     "props": {
+      "blur": 160
+     },
+     "expr": {
+      "position": "[1420-130*sin(1.0471976*time+2.5), 880-100*cos(1.0471976*time+2.5)]"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 2 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"blob-teal\":\"l_03jm3\",\"blob-deep\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 46,
+  "editorMs": 6,
+  "input": {},
+  "result": "score 80/100 (composition 64)\n1. [high] \"Blob deep\" sits 34% outside the frame at the end\n   → update_layer {\"id\":\"l_03jm6\",\"props\":{\"position\":[1420,577]}}"
+ }
+]

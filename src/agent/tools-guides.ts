@@ -5,7 +5,7 @@
 import { editor } from '../app/editor';
 import type { ToolContent, ToolDef } from './tools';
 import { findGuide, findExamples, guideIndex, guideSection, guideSections, GUIDES, EXAMPLES } from './guides';
-import { beatNote, noteStyle } from './taste';
+import { beatNote, noteStyle, tasteOn, TASTE_GUIDE_HINT } from './taste';
 import { approvalMode, storyboards } from './storyboard';
 
 const text = (v: unknown): ToolContent[] => [{ type: 'text', text: typeof v === 'string' ? v : JSON.stringify(v) }];
@@ -26,7 +26,7 @@ export const GUIDE_TOOLS: ToolDef[] = [
   {
     name: 'get_guide',
     readOnly: true,
-    description: 'Load motion-design knowledge on demand. No name: the index. "examples" + brief: the 1-2 most similar proven pieces (brief, exact tool-call sequence, why it works) — imitate them. "workflow" (director method, scope rules), "handbook" (principles with numbers, timing tables, easing names, critique rubric), "concepts" (read the artwork + brand; metaphor → motion recipes: door opens, leaf grows, rocket launches; anti-patterns), "cookbook" (worked recipes with exact tool calls), "styles" (index of style recipes), "styles/<name>" (palette, type, easing, timing, signature moves of one style). section: return only one "## " section (e.g. "Timing tables").',
+    description: 'Load motion-design knowledge on demand. No name: the index.' + TASTE_GUIDE_HINT + ' "workflow" (director method, scope rules), "handbook" (principles with numbers, timing tables, easing names, critique rubric), "concepts" (read the artwork + brand; metaphor → motion recipes: door opens, leaf grows, rocket launches; anti-patterns), "cookbook" (worked recipes with exact tool calls), "styles" (index of style recipes), "styles/<name>" (palette, type, easing, timing, signature moves of one style). section: return only one "## " section (e.g. "Timing tables").',
     inputSchema: {
       type: 'object',
       properties: {
@@ -36,11 +36,11 @@ export const GUIDE_TOOLS: ToolDef[] = [
       },
     },
     run: ({ name, section, brief }) => {
-      if (/^examples?\/?$/i.test(String(name ?? '').trim())) {
+      if (/^examples?\/?$/i.test(String(name ?? '').trim()) && tasteOn()) {
         if (!brief) return text(`Gold examples (get_guide {name: "examples", brief: "<the brief>"} returns the closest 1-2 with their exact tool calls):\n${guideIndex('example')}`);
         return text(findExamples(String(brief), 2).map(g => g.text).join('\n\n---\n\n') || 'no examples');
       }
-      if (!name || !String(name).trim()) return text(`Guides (get_guide {name}):\n${guideIndex('guide')}\n- styles: index of the ${GUIDES.filter(g => g.kind === 'style').length} style recipes\n- examples: ${EXAMPLES.length} gold examples (pass brief)`);
+      if (!name || !String(name).trim()) return text(`Guides (get_guide {name}):\n${guideIndex('guide')}\n- styles: index of the ${GUIDES.filter(g => g.kind === 'style').length} style recipes${tasteOn() ? `\n- examples: ${EXAMPLES.length} gold examples (pass brief)` : ''}`);
       if (/^styles?\/?$/i.test(String(name).trim())) return text(`Style recipes (get_guide {name: "styles/<name>"}):\n${guideIndex('style')}`);
       const g = findGuide(name);
       if (g?.kind === 'style') noteStyle(g.name);

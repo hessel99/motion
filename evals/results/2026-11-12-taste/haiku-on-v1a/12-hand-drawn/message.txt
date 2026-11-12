@@ -1,0 +1,6 @@
+Hand-drawn, organic feel for a bakery called "Crumb & Co". A wobbly line-drawn wheat stalk and a loaf draw themselves on (stroke reveal), a few irregular blob shapes in warm earthy colors breathe slowly, the name appears in a friendly way. Imperfect is good: slight boil/wobble on the lines (like hand-animated at 12fps), soft eases, nothing mechanical.
+
+<editor_context>
+comp "Main" 1920x1080 24fps 6s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

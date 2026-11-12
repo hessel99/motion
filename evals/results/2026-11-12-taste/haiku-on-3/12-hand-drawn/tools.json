@@ -1,0 +1,314 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 250,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Hand-drawn organic logo sting for a bakery: wobbly line-drawn wheat stalk and loaf draw on with stroke reveal, warm earthy blob shapes breathe slowly, brand name appears friendly. Imperfect hand-animated wobble at 12fps."
+  },
+  "result": "# Example: Elegant logo reveal, the line draws the mark and the wordmark slides out from behind it\n> tags: logo, reveal, elegant, minimal, luxury, corporate, line, stroke, draw, draw-on, trim, wordmark, mask, behind, monogram, calm\n\n## Brief\n\"Logo reveal for NOVA (a circle monogram with a slash). Calm and premium, dark background, 4 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 25,
+  "ok": false,
+  "ms": 13,
+  "editorMs": 1,
+  "error": "no guide \"styles/organic\". guides: workflow, handbook, cookbook, concepts, music, styles/corporate-smooth, styles/cyber-neon, styles/data-viz, styles/editorial, styles/flat-explainer, styles/glitch-retro, styles/hand-drawn-organic, styles/kinetic-type, styles/liquid-blob, styles/minimal-luxury, styles/neo-brutalist, styles/paper-cutout, styles/parallax-3d, styles/playful-bouncy, styles/swiss, styl",
+  "input": {
+   "name": "styles/organic"
+  },
+  "result": "no guide \"styles/organic\". guides: workflow, handbook, cookbook, concepts, music, styles/corporate-smooth, styles/cyber-neon, styles/data-viz, styles/editorial, styles/flat-explainer, styles/glitch-retro, styles/hand-drawn-organic, styles/kinetic-type, styles/liquid-blob, styles/minimal-luxury, styles/neo-brutalist, styles/paper-cutout, styles/parallax-3d, styles/playful-bouncy, styles/swiss, styl…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 36,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 0,
+  "input": {
+   "name": "styles/hand-drawn-organic"
+  },
+  "result": "# Hand-drawn organic\n> Imperfect, warm and human: wobbly strokes drawing on, earthy palette, boiling lines and gentle arcs.\n\n**Use for**: wellness, food, education, nonprofits, storytelling, craft brands.\n\n## Palette\n- Background `#F6EFE3` (paper); ink `#2E2A24`.\n- Accents: `#D97757` terracotta, `#7A9E7E` sage, `#E9B44C` mustard, `#5B7DB1` dusty blue.\n\n## Shapes\nPath layers with irregular curves (…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2505,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 5,
+  "input": {
+   "comp": {
+    "duration": 6,
+    "fps": 24,
+    "background": "#F6EFE3",
+    "width": 1920,
+    "height": 1080
+   },
+   "layers": [
+    {
+     "key": "blob-mustard",
+     "name": "Blob mustard",
+     "type": "path",
+     "shape": "blob",
+     "shapeOptions": {
+      "seed": 3,
+      "complexity": 6
+     },
+     "x": 470,
+     "y": 270,
+     "w": 470,
+     "h": 420,
+     "fill": "#E9B44C",
+     "opacity": 50,
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": [
+         80,
+         80
+        ],
+        "ease": "Quad Out"
+       },
+       {
+        "t": 1.2,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ]
+     },
+     "expr": {
+      "scale": "value + [2.2*Math.sin(time*2*Math.PI/5), 2.2*Math.sin(time*2*Math.PI/5 + 1.3)]"
+     }
+    },
+    {
+     "key": "blob-terracotta",
+     "name": "Blob terracotta",
+     "type": "path",
+     "shape": "blob",
+     "shapeOptions": {
+      "seed": 7,
+      "complexity": 5
+     },
+     "x": 1000,
+     "y": 370,
+     "w": 460,
+     "h": 380,
+     "fill": "#D97757",
+     "opacity": 38,
+     "animate": {
+      "scale": [
+       {
+        "t": 0.15,
+        "v": [
+         80,
+         80
+        ],
+        "ease": "Quad Out"
+       },
+       {
+        "t": 1.35,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ]
+     },
+     "expr": {
+      "scale": "value + [2.4*Math.sin(time*2*Math.PI/6 + 2), 2.4*Math.sin(time*2*Math.PI/6)]"
+     }
+    },
+    {
+     "key": "blob-sage",
+     "name": "Blob sage",
+     "type": "path",
+     "shape": "blob",
+     "shapeOptions": {
+      "seed": 11,
+      "complexity": 7
+     },
+     "x": 1440,
+     "y": 150,
+     "w": 300,
+     "h": 260,
+     "fill": "#7A9E7E",
+     "opacity": 42,
+     "animate": {
+      "scale": [
+       {
+        "t": 0.3,
+        "v": [
+         80,
+         80
+        ],
+        "ease": "Quad Out"
+       },
+       {
+        "t": 1.5,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ]
+     },
+     "expr": {
+      "scale": "value + [2*Math.sin(time*2*Math.PI/4.5), 2*Math.sin(time*2*Math.PI/4.5 + 0.7)]"
+     }
+    },
+    {
+     "key": "wheat",
+     "name": "Wheat stalk",
+     "type": "path",
+     "d": "M702 700 C696 600 706 470 700 230 M700 630 C686 612 674 600 668 582 M700 630 C714 612 726 600 732 582 M700 560 C686 542 674 530 668 512 M700 560 C714 542 726 530 732 512 M700 490 C686 472 674 460 668 442 M700 490 C714 472 726 460 732 442 M700 420 C686 402 674 390 668 372 M700 420 C714 402 726 390 732 372 M700 350 C686 332 674 320 668 302 M700 350 C714 332 726 320 732 302 M700 300 C690 278 690 250 700 222 C710 250 710 278 700 300 Z",
+     "stroke": "#2E2A24",
+     "strokeWidth": 6,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 0.3,
+      "duration": 1.4,
+      "ease": "Sine In Out"
+     }
+    },
+    {
+     "key": "loaf",
+     "name": "Loaf",
+     "type": "path",
+     "d": "M1062 640 C1050 560 1100 470 1230 462 C1360 470 1412 560 1398 640 C1300 656 1160 656 1062 640 Z",
+     "stroke": "#2E2A24",
+     "strokeWidth": 6,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 1.3,
+      "duration": 1.2,
+      "ease": "Sine In Out"
+     }
+    },
+    {
+     "key": "loaf-scores",
+     "name": "Loaf scores",
+     "type": "path",
+     "d": "M1150 520 C1160 495 1180 488 1196 502 M1222 500 C1232 478 1256 474 1270 490 M1296 512 C1304 494 1322 492 1332 506",
+     "stroke": "#2E2A24",
+     "strokeWidth": 6,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 2.3,
+      "duration": 0.5,
+      "ease": "Sine In Out"
+     }
+    },
+    {
+     "key": "name",
+     "name": "Wordmark",
+     "text": {
+      "content": "Crumb & Co",
+      "fontSize": 150,
+      "fontWeight": 600,
+      "align": "center",
+      "fontFamily": "Georgia"
+     },
+     "x": 360,
+     "y": 800,
+     "w": 1200,
+     "h": 190,
+     "fill": "#2E2A24"
+    }
+   ]
+  },
+  "result": "{\"summary\":\"7 created, 0 updated, 9 keyframe tracks; animation ends 2.8s\",\"ids\":{\"blob-mustard\":\"l_03jm2\",\"blob-terracotta\":\"l_03jm3\",\"blob-sage\":\"l_03jm4\",\"wheat\":\"l_03jm5\",\"loaf\":\"l_03jm6\",\"loaf-scores\":\"l_03jm7\",\"name\":\"l_03jm8\"}}"
+ },
+ {
+  "name": "set_text_animation",
+  "argsBytes": 92,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm8"
+   ],
+   "preset": "Fade up",
+   "by": "char",
+   "start": 2.5,
+   "stagger": 0.05,
+   "duration": 0.7
+  },
+  "result": "in by char from 2.5s: 0.7s each, stagger 0.05s, Expo Out"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 155,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm5",
+    "l_03jm6",
+    "l_03jm7"
+   ],
+   "prop": "position",
+   "expr": "value + [Math.sin(Math.floor(time*12)*7.3)*1.4, Math.sin(Math.floor(time*12)*5.1+1)*1.4]"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 22,
+  "editorMs": 12,
+  "input": {},
+  "result": "score 71/100 (technical 64)\n1. [high] font \"Georgia\" is not available: 1 text layer(s) render in a fallback\n   → update_layer {\"id\":\"l_03jm8\",\"text\":{\"fontFamily\":\"serif\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 142,
+  "editorMs": 125,
+  "input": {
+   "times": [
+    0.2,
+    0.8,
+    1.6,
+    2.4,
+    3.2,
+    5.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.21s, 0.79s, 1.58s, 2.42s, 3.21s, 5.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b2dabc0e-6acb-4c48-adcb-f636c53d568c/tool-results/mcp-motion-blob-1794514747240-8idakp.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 57,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm8",
+   "props": {},
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 5,
+  "input": {},
+  "result": "score 100/100 (no issues found)"
+ }
+]

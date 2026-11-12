@@ -1,0 +1,59 @@
+- title [text] box 192,116,1000,90 #0f172a "Revenue by quarter" Inter 72px w700
+- subtitle [text] box 194,212,900,44 #64748b "Quarterly revenue, $M" Inter 32px w500
+- axis [rect] box 240,858,1440,4 #94a3b8
+- bar-q1 [rect] box 380,620,200,240 #cbd5e1
+- bar-q2 [rect] box 700,500,200,360 #cbd5e1
+- bar-q3 [rect] box 1020,560,200,300 #cbd5e1
+- bar-q4 [rect] box 1340,320,200,540 #2563eb
+- val-q1 [text] box 380,550,200,60 #334155 "12" Inter 48px w700
+- val-q2 [text] box 700,430,200,60 #334155 "18" Inter 48px w700
+- val-q3 [text] box 1020,490,200,60 #334155 "15" Inter 48px w700
+- val-q4 [text] box 1340,240,200,80 #2563eb "27" Inter 64px w800
+- x-q1 [text] box 380,885,200,50 #64748b "Q1" Inter 36px w500
+- x-q2 [text] box 700,885,200,50 #64748b "Q2" Inter 36px w500
+- x-q3 [text] box 1020,885,200,50 #64748b "Q3" Inter 36px w500
+- x-q4 [text] box 1340,885,200,50 #2563eb "Q4" Inter 36px w700
+
+comp 1920x1080 6s @30fps, background #ffffff
+"title" (text l_03jm2)
+  position: 0s [692,181] ─Expo Out→ 0.6s [692,159] ─Sine In Out→ 0.72s [692,161.9] ─Sine In Out→ 0.84s [692,161]
+  opacity: 0s 0 ─Expo Out→ 0.3s 100
+"subtitle" (text l_03jm3)
+  position: 0.15s [644,250] ─Expo Out→ 0.75s [644,232.4] ─Sine In Out→ 0.87s [644,234.72] ─Sine In Out→ 0.99s [644,234]
+  opacity: 0.15s 0 ─Expo Out→ 0.45s 100
+"axis" (rect l_03jm4)
+  scale: 0.2s [0,100] ─Expo Out→ 0.8s 100
+"bar-q1" (rect l_03jm5)
+  scale: 0.9s [100,0] ─Quart Out→ 1.6s 100
+"bar-q2" (rect l_03jm6)
+  scale: 1.05s [100,0] ─Quart Out→ 1.75s 100
+"bar-q3" (rect l_03jm7)
+  scale: 1.2s [100,0] ─Quart Out→ 1.9s 100
+"bar-q4" (rect l_03jm8)
+  scale: 1.35s [100,0] ─Quart Out→ 2.05s 100 ─Cubic Out→ 2.3s [100,104] ─Cubic In Out→ 2.65s 100
+  fill: 2.05s #2563eb
+"val-q1" (text l_03jm9)
+  position: 1.2s [480,596] ─Quart Out→ 1.7s [480,580]
+  opacity: 1.2s 0 ─Quart Out→ 1.45s 100
+"val-q2" (text l_03jma)
+  position: 1.35s [800,476] ─Quart Out→ 1.85s [800,460]
+  opacity: 1.35s 0 ─Quart Out→ 1.6s 100
+"val-q3" (text l_03jmb)
+  position: 1.5s [1120,536] ─Quart Out→ 2s [1120,520]
+  opacity: 1.5s 0 ─Quart Out→ 1.75s 100
+"val-q4" (text l_03jmc)
+  position: 1.65s [1440,296] ─Quart Out→ 2.15s [1440,278.4] ─Sine In Out→ 2.25s [1440,280.72] ─Sine In Out→ 2.35s [1440,280]
+  scale: 1.65s 80 ─Cubic In Out→ 2.05s 102 ─Sine In Out→ 2.13s 99.1 ─Sine In Out→ 2.21s 100 ─spring:0.4→ 2.65s 100 ─Sine In Out→ 5.33s 104.4 ─Sine In Out→ 5.57s 103.82 ─Sine In Out→ 5.81s 104
+  opacity: 1.65s 0 ─Quart Out→ 1.9s 100
+"x-q1" (text l_03jmd)
+  position: 0.8s [480,918] ─Quart Out→ 1.3s [480,910]
+  opacity: 0.8s 0 ─Quart Out→ 1.05s 100
+"x-q2" (text l_03jme)
+  position: 0.8s [800,918] ─Quart Out→ 1.3s [800,910]
+  opacity: 0.8s 0 ─Quart Out→ 1.05s 100
+"x-q3" (text l_03jmf)
+  position: 0.8s [1120,918] ─Quart Out→ 1.3s [1120,910]
+  opacity: 0.8s 0 ─Quart Out→ 1.05s 100
+"x-q4" (text l_03jmg)
+  position: 0.8s [1440,918] ─Quart Out→ 1.3s [1440,910]
+  opacity: 0.8s 0 ─Quart Out→ 1.05s 100

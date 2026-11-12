@@ -1,0 +1,611 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1801,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 2,
+  "input": {
+   "comp": {
+    "width": 1920,
+    "height": 1080,
+    "duration": 6,
+    "fps": 30,
+    "background": "#141b23",
+    "name": "Main"
+   },
+   "layers": [
+    {
+     "key": "panel",
+     "name": "Lower third panel",
+     "type": "rect",
+     "center": [
+      476,
+      870
+     ],
+     "w": 760,
+     "h": 148,
+     "radius": 6,
+     "fill": "#5a6e82b3",
+     "animate": {
+      "position": [
+       {
+        "t": 0.1,
+        "v": [
+         436,
+         870
+        ]
+       },
+       {
+        "t": 1.1,
+        "v": [
+         476,
+         870
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 4.5,
+        "v": [
+         476,
+         870
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 5.5,
+        "v": [
+         436,
+         870
+        ]
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0.1,
+        "v": 0,
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 1,
+        "v": 100
+       },
+       {
+        "t": 4.4,
+        "v": 100,
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 5.3,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "accent",
+     "name": "Accent line",
+     "type": "rect",
+     "anchor": "top",
+     "center": [
+      98.5,
+      870
+     ],
+     "w": 3,
+     "h": 104,
+     "fill": "#9db4c8",
+     "animate": {
+      "position": [
+       {
+        "t": 0,
+        "v": [
+         98.5,
+         820
+        ]
+       }
+      ],
+      "scale": [
+       {
+        "t": 0.25,
+        "v": [
+         100,
+         0
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 1.2,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 4.6,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 5.3,
+        "v": [
+         100,
+         0
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "name",
+     "name": "Name",
+     "type": "text",
+     "center": [
+      464,
+      856
+     ],
+     "w": 680,
+     "h": 64,
+     "text": "Dr. Amelia Hart",
+     "font": "Inter",
+     "fontSize": 52,
+     "fontWeight": 600,
+     "fill": "#f1f4f7",
+     "align": "left",
+     "animate": {
+      "position": [
+       {
+        "t": 0.5,
+        "v": [
+         464,
+         872
+        ],
+        "ease": "Quart In Out"
+       },
+       {
+        "t": 1.5,
+        "v": [
+         464,
+         856
+        ]
+       },
+       {
+        "t": 4.2,
+        "v": [
+         464,
+         856
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 4.8,
+        "v": [
+         464,
+         840
+        ]
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0.5,
+        "v": 0,
+        "ease": "Quart In Out"
+       },
+       {
+        "t": 1.2,
+        "v": 100
+       },
+       {
+        "t": 4.2,
+        "v": 100,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 4.8,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "title",
+     "name": "Title",
+     "type": "text",
+     "center": [
+      464,
+      904
+     ],
+     "w": 680,
+     "h": 40,
+     "text": "Head of Research, Larkspur Labs",
+     "font": "Inter",
+     "fontSize": 28,
+     "fontWeight": 400,
+     "fill": "#b4c1cf",
+     "align": "left",
+     "animate": {
+      "position": [
+       {
+        "t": 0.75,
+        "v": [
+         464,
+         916
+        ],
+        "ease": "Quart In Out"
+       },
+       {
+        "t": 1.7,
+        "v": [
+         464,
+         904
+        ]
+       },
+       {
+        "t": 4.3,
+        "v": [
+         464,
+         904
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 4.9,
+        "v": [
+         464,
+         892
+        ]
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0.75,
+        "v": 0,
+        "ease": "Quart In Out"
+       },
+       {
+        "t": 1.5,
+        "v": 100
+       },
+       {
+        "t": 4.3,
+        "v": 100,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 4.9,
+        "v": 0
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 8 keyframe tracks; animation ends 5.5s\",\"ids\":{\"panel\":\"l_03jm2\",\"accent\":\"l_03jm3\",\"name\":\"l_03jm4\",\"title\":\"l_03jm5\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 104,
+  "editorMs": 77,
+  "input": {
+   "times": [
+    0.3,
+    0.9,
+    1.6,
+    3,
+    4.6,
+    5.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.3s, 0.9s, 1.6s, 3s, 4.6s, 5.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/6cc659ba-af9f-44c4-b86e-d890892f8a75/tool-results/mcp-motion-blob-1794514327858-odnj8e.jpg]"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 15,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 2,
+  "input": {
+   "times": [
+    2.5
+   ]
+  },
+  "result": "2.5s:\n  Accent line: tiny (3×104px)\n  Name, Title: outside title-safe area (10% margin)\n  Lower third panel ↔ Accent line: overlap 100%"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1722,
+  "ok": true,
+  "ms": 151,
+  "editorMs": 3,
+  "input": {
+   "layers": [
+    {
+     "key": "panel",
+     "name": "Lower third panel",
+     "type": "rect",
+     "center": [
+      572,
+      870
+     ],
+     "w": 760,
+     "h": 148,
+     "radius": 6,
+     "fill": "#5a6e82b3",
+     "animate": {
+      "position": [
+       {
+        "t": 0.1,
+        "v": [
+         532,
+         870
+        ]
+       },
+       {
+        "t": 1.1,
+        "v": [
+         572,
+         870
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 4.5,
+        "v": [
+         572,
+         870
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 5.5,
+        "v": [
+         532,
+         870
+        ]
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0.1,
+        "v": 0,
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 1,
+        "v": 100
+       },
+       {
+        "t": 4.4,
+        "v": 100,
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 5.3,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "accent",
+     "name": "Accent line",
+     "type": "rect",
+     "anchor": "top",
+     "center": [
+      194.5,
+      870
+     ],
+     "w": 3,
+     "h": 104,
+     "fill": "#9db4c8",
+     "animate": {
+      "position": [
+       {
+        "t": 0,
+        "v": [
+         194.5,
+         820
+        ]
+       }
+      ],
+      "scale": [
+       {
+        "t": 0.25,
+        "v": [
+         100,
+         0
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 1.2,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 4.6,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 5.3,
+        "v": [
+         100,
+         0
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "name",
+     "name": "Name",
+     "type": "text",
+     "center": [
+      560,
+      856
+     ],
+     "w": 680,
+     "h": 64,
+     "text": "Dr. Amelia Hart",
+     "font": "Inter",
+     "fontSize": 52,
+     "fontWeight": 600,
+     "fill": "#f1f4f7",
+     "align": "left",
+     "animate": {
+      "position": [
+       {
+        "t": 0.5,
+        "v": [
+         560,
+         872
+        ],
+        "ease": "Quart In Out"
+       },
+       {
+        "t": 1.5,
+        "v": [
+         560,
+         856
+        ]
+       },
+       {
+        "t": 4.2,
+        "v": [
+         560,
+         856
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 4.8,
+        "v": [
+         560,
+         840
+        ]
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0.5,
+        "v": 0,
+        "ease": "Quart In Out"
+       },
+       {
+        "t": 1.2,
+        "v": 100
+       },
+       {
+        "t": 4.2,
+        "v": 100,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 4.8,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "title",
+     "name": "Title",
+     "type": "text",
+     "center": [
+      560,
+      904
+     ],
+     "w": 680,
+     "h": 40,
+     "text": "Head of Research, Larkspur Labs",
+     "font": "Inter",
+     "fontSize": 28,
+     "fontWeight": 400,
+     "fill": "#b4c1cf",
+     "align": "left",
+     "animate": {
+      "position": [
+       {
+        "t": 0.75,
+        "v": [
+         560,
+         916
+        ],
+        "ease": "Quart In Out"
+       },
+       {
+        "t": 1.7,
+        "v": [
+         560,
+         904
+        ]
+       },
+       {
+        "t": 4.3,
+        "v": [
+         560,
+         904
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 4.9,
+        "v": [
+         560,
+         892
+        ]
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0.75,
+        "v": 0,
+        "ease": "Quart In Out"
+       },
+       {
+        "t": 1.5,
+        "v": 100
+       },
+       {
+        "t": 4.3,
+        "v": 100,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 4.9,
+        "v": 0
+       }
+      ]
+     }
+    }
+   ],
+   "prune": false
+  },
+  "result": "{\"summary\":\"0 created, 4 updated, 8 keyframe tracks; animation ends 5.5s\",\"ids\":{\"panel\":\"l_03jm2\",\"accent\":\"l_03jm3\",\"name\":\"l_03jm4\",\"title\":\"l_03jm5\"}}"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 15,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 0,
+  "input": {
+   "times": [
+    2.5
+   ]
+  },
+  "result": "2.5s:\n  Accent line: tiny (3×104px)\n  Lower third panel ↔ Accent line: overlap 100%"
+ }
+]
