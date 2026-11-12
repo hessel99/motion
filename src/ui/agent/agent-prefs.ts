@@ -13,7 +13,8 @@ export const agentPrefs = {
   provider: pref('provider', 'claude'),
   /** claude model alias ('' = the CLI's default) */
   model: pref('model', ''),
-  mode: (pref('mode', 'edit') === 'ask' ? 'ask' : 'edit') as ChatMode,
+  /** always 'edit': the read-only Ask mode left the ui (a question is just a message) */
+  mode: 'edit' as ChatMode,
   /** model "auto": the alias used for full pieces (storyboards, styles, multi-beat briefs) */
   autoFull: pref('autoFull', 'opus'),
   /** model "auto": the alias used for edits, quick actions and small builds */

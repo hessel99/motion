@@ -2,25 +2,25 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
 import {
   addKeyframe, deleteKeyframes, isAnimated, keyId, parseKeyId, setCompSettings, setEase, setLayerField, setProp,
-  setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, addMarker, deleteMarker,
+  setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, addMarker, deleteMarker, renameComp,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { starGeometry } from '../core/shapes';
 import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
 import { BLEND_MODES, PROP_DEFS, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
 import { useChannels } from './hooks';
+import { menuFrom, type MenuItem } from './menu';
 import { ANIM_PRESETS, alignLayers, applyPreset, distributeLayers, setTextAnim, TEXT_ANIM_PRESETS, type Align } from '../core/presets';
 import { invert } from './viewport-controller';
 import { toast } from '../app/actions';
 import { EaseStudio, showClassicEase, studioEnabled, StudioSwitch } from './patterns/EaseStudio';
 import { RhythmPanel } from './patterns/RhythmPanel';
-import { Checkbox, ColorSwatch, NumField, Section, Segmented, Slider } from './ui';
+import { Button, Checkbox, ColorSwatch, FieldRow, NumField, Section, Segmented, Slider, Toggle } from './ui';
 import { ComponentBox, LinkButton, LinkedChip, sharedLink } from './LinkControls';
-import { exportAeScript, exportFramePng, exportGifFile, exportLottie } from '../app/actions';
 import {
   AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignHorizontalDistributeCenter, AlignStartHorizontal,
   AlignStartVertical, AlignVerticalDistributeCenter, ArrowRightLeft, ArrowUpRight, Blend, ChevronLeft, ChevronRight, Minus,
-  RotateCw, X,
+  RotateCw, X, Clock, Gauge, SquareRoundCorner, ALargeSmall,
 } from './chrome/icons';
 
 const st = () => editor.store;
@@ -33,7 +33,7 @@ export function Inspector() {
   return (
     <div class="inspector">
       {store.keySelection.size > 0 && <EasePanel />}
-      {sel.length === 0 && <DocPanel />}
+      {sel.length === 0 && <CompPanel />}
       {sel.length > 0 && <LayerPanel layers={sel} />}
     </div>
   );
@@ -85,14 +85,14 @@ function KeyNav(props: { layers: Layer[]; prop: PropKey }) {
   );
 }
 
-/** one animatable property: key navigation, its name, its value fields */
-function PropRow(props: { layers: Layer[]; prop: PropKey; label: string; children: any }) {
+/** one animatable property: its name, its value fields, then key navigation (‹ ◆ ›) */
+export function PropRow(props: { layers: Layer[]; prop: PropKey; label: string; children: any }) {
   const animated = props.layers.some(l => isAnimated(l, props.prop));
   return (
-    <div class={'row prop-row' + (animated ? ' animated' : '')}>
-      <KeyNav layers={props.layers} prop={props.prop} />
-      <span class="prop-label">{props.label}</span>
-      <span class="prop-fields">{props.children}</span>
+    <div class={'field-row prop-row' + (animated ? ' animated' : '')}>
+      <span class="field-row-label">{props.label}</span>
+      <span class="field-row-fields">{props.children}</span>
+      <span class="field-row-trail"><KeyNav layers={props.layers} prop={props.prop} /></span>
     </div>
   );
 }
@@ -153,132 +153,135 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
   const vecMulti = (key: PropKey, idx: number, val: number, mk?: string) => store.batch('insp', () => {
     for (const x of layers) { const n = valueAt(x, key, t); n[idx] = val; setProp(store, x.id, key, n, { mergeKey: mk }); }
   });
+  // a stroke is "there" when it has a width, a key or a linked style; otherwise the section offers "+"
+  const hasStroke = common.includes('stroke') && layers.some(x => valueAt(x, 'strokeWidth', t)[0] > 0 || isAnimated(x, 'strokeWidth') || isAnimated(x, 'stroke') || !!sharedLink([x], 'stroke'));
+  const addStroke = () => store.batch('stroke', () => {
+    for (const x of layers) {
+      const c = valueAt(x, 'stroke', t);
+      setProp(store, x.id, 'stroke', c[3] > 0 ? c : [0, 0, 0, 1]);
+      setProp(store, x.id, 'strokeWidth', [2]);
+    }
+  }, 'Add stroke');
+  const removeStroke = () => store.batch('stroke', () => { for (const x of layers) setProp(store, x.id, 'strokeWidth', [0]); }, 'Remove stroke');
   return (
     <>
-      <Section title="Transform" right={layers.length > 1 ? <span class="insp-type">{layers.length} layers</span> : <span class="insp-type">at {store.time.toFixed(2)}s</span>}>
+      <Section title="Position">
         <PropRow layers={layers} prop="position" label="Position">
           <NumField label="X" value={pos[0]} onChange={(n, mk) => vecMulti('position', 0, n, mk)} />
           <NumField label="Y" value={pos[1]} onChange={(n, mk) => vecMulti('position', 1, n, mk)} />
         </PropRow>
-        <PropRow layers={layers} prop="scale" label="Scale">
-          <NumField label="X" title="Scale X" value={scale[0]} suffix="%" onChange={(n, mk) => vecMulti('scale', 0, n, mk)} />
-          <NumField label="Y" title="Scale Y" value={scale[1]} suffix="%" onChange={(n, mk) => vecMulti('scale', 1, n, mk)} />
-        </PropRow>
         <PropRow layers={layers} prop="rotation" label="Rotation">
-          <NumField label={<RotateCw size={12} />} title="Rotation" value={rot} suffix="°" onChange={(n, mk) => set('rotation', [n], mk)} />
+          <NumField label={<RotateCw size={13} />} title="Rotation" value={rot} suffix="°" onChange={(n, mk) => set('rotation', [n], mk)} />
         </PropRow>
-        <PropRow layers={layers} prop="opacity" label="Opacity">
-          <NumField label={<Blend size={12} />} title="Opacity" value={opa} min={0} max={100} suffix="%" onChange={(n, mk) => set('opacity', [n], mk)} />
+        <PropRow layers={layers} prop="anchor" label="Anchor">
+          <NumField label="X" title="Anchor X" value={anchor[0]} onChange={(n, mk) => vec('anchor', 0, n, anchor, mk)} />
+          <NumField label="Y" title="Anchor Y" value={anchor[1]} onChange={(n, mk) => vec('anchor', 1, n, anchor, mk)} />
         </PropRow>
-        {sharedLink(layers, 'opacity') && <div class="row"><LinkedChip layers={layers} prop="opacity" /></div>}
+      </Section>
+      <Section title="Layout">
         {common.includes('size') && (
           <PropRow layers={layers} prop="size" label="Size">
             <NumField label="W" min={0} value={size[0]} onChange={(n, mk) => sizeChange(layers, 0, n, mk)} />
             <NumField label="H" min={0} value={size[1]} onChange={(n, mk) => sizeChange(layers, 1, n, mk)} />
           </PropRow>
         )}
-        <PropRow layers={layers} prop="anchor" label="Anchor">
-          <NumField label="X" title="Anchor X" value={anchor[0]} onChange={(n, mk) => vec('anchor', 0, n, anchor, mk)} />
-          <NumField label="Y" title="Anchor Y" value={anchor[1]} onChange={(n, mk) => vec('anchor', 1, n, anchor, mk)} />
+        <PropRow layers={layers} prop="scale" label="Scale">
+          <NumField label="X" title="Scale X" value={scale[0]} suffix="%" onChange={(n, mk) => vecMulti('scale', 0, n, mk)} />
+          <NumField label="Y" title="Scale Y" value={scale[1]} suffix="%" onChange={(n, mk) => vecMulti('scale', 1, n, mk)} />
         </PropRow>
+        {layers.length === 1 && l.type === 'group' && (
+          <FieldRow label="Clip"><Checkbox checked={!!l.clip} onChange={on => setLayerField(store, ids, 'clip', on, 'Clip content')}>Clip content</Checkbox></FieldRow>
+        )}
       </Section>
-      <AnimatePanel ids={ids} />
-      <RhythmPanel ids={ids} />
-      <Section title="Timing">
-        <div class="row">
-          <NumField label="In" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
-          <NumField label="Out" step={1 / store.comp.fps} min={0} value={Math.min(l.outPoint, store.comp.duration)} suffix="s" onChange={n => setLayerField(store, ids, 'outPoint', n >= store.comp.duration ? 1e9 : n)} />
-        </div>
-      </Section>
-      <ExprPanel layers={layers} />
-      {layers.length === 1 && <ComponentBox layer={l} />}
-      {common.includes('radius') && (
-        <Section title="Corner radius">
-          <div class="row">
-            <KeyButton layers={layers} prop="radius" />
+      <Section title="Appearance">
+        {sharedLink(layers, 'opacity')
+          ? <FieldRow label="Opacity"><LinkedChip layers={layers} prop="opacity" /></FieldRow>
+          : <PropRow layers={layers} prop="opacity" label="Opacity">
+              <NumField label={<Blend size={13} />} title="Opacity" value={opa} min={0} max={100} suffix="%" onChange={(n, mk) => set('opacity', [n], mk)} />
+            </PropRow>}
+        {common.includes('radius') && (
+          <FieldRow label="Radius" trail={<KeyButton layers={layers} prop="radius" />}>
             {sharedLink(layers, 'radius') ? <LinkedChip layers={layers} prop="radius" /> : <>
-              <NumField label="R" min={0} value={v('radius')[0]} onChange={(n, mk) => set('radius', [n, n, n, n], mk)} />
-              <span class="muted small">{v('radius').every(x => x === v('radius')[0]) ? '' : v('radius').map(x => Math.round(x)).join(' ')}</span>
+              <NumField label={<SquareRoundCorner size={13} />} title="Corner radius" min={0} value={v('radius')[0]} hint={v('radius').every(x => x === v('radius')[0]) ? undefined : v('radius').map(x => Math.round(x)).join(' ')} onChange={(n, mk) => set('radius', [n, n, n, n], mk)} />
               <LinkButton layers={layers} prop="radius" />
             </>}
-          </div>
-        </Section>
-      )}
+          </FieldRow>
+        )}
+        <FieldRow label="Blend">
+          <select class="grow" aria-label="Blend mode" value={l.blend ?? 'normal'} onChange={e => setLayerField(store, ids, 'blend', (e.target as HTMLSelectElement).value as any, 'Blend mode')}>
+            {BLEND_MODES.map(m => <option value={m}>{m[0].toUpperCase() + m.slice(1).replace(/([A-Z])/g, ' $1').toLowerCase()}</option>)}
+          </select>
+        </FieldRow>
+        {layers.length === 1 && (
+          <FieldRow label="Mask" title="Masks the layers above it in the same group">
+            <Checkbox checked={!!l.mask} onChange={on => setLayerField(store, ids, 'mask', on, 'Use as mask')}>Use as mask</Checkbox>
+          </FieldRow>
+        )}
+      </Section>
       {layers.length === 1 && l.shape && <ShapeParams layer={l} />}
       {common.includes('fill') && (
         <Section title="Fill">
-          {!(layers.length === 1 && l.paints?.some(p => p.type === 'linear' || p.type === 'radial')) && <div class="row">
-            <KeyButton layers={layers} prop="fill" />
-            {sharedLink(layers, 'fill') ? <LinkedChip layers={layers} prop="fill" /> : <><ColorField value={v('fill')} onChange={(c, mk) => set('fill', c, mk)} /><LinkButton layers={layers} prop="fill" /></>}
-          </div>}
+          {!(layers.length === 1 && l.paints?.some(p => p.type === 'linear' || p.type === 'radial')) && (
+            sharedLink(layers, 'fill')
+              ? <FieldRow trail={<KeyButton layers={layers} prop="fill" />}><LinkedChip layers={layers} prop="fill" /></FieldRow>
+              : <FieldRow trail={<KeyButton layers={layers} prop="fill" />}><ColorField value={v('fill')} onChange={(c, mk) => set('fill', c, mk)} /><LinkButton layers={layers} prop="fill" /></FieldRow>
+          )}
           {layers.length === 1 && l.type !== 'text' && <GradientEditor layer={l} />}
         </Section>
       )}
       {common.includes('stroke') && (
-        <Section title="Stroke">
-          <div class="row">
-            <KeyButton layers={layers} prop="stroke" />
-            {sharedLink(layers, 'stroke') ? <LinkedChip layers={layers} prop="stroke" /> : <><ColorField value={v('stroke')} onChange={(c, mk) => set('stroke', c, mk)} /><LinkButton layers={layers} prop="stroke" /></>}
-          </div>
-          <div class="row">
-            <KeyButton layers={layers} prop="strokeWidth" />
-            <NumField label="W" min={0} value={v('strokeWidth')[0]} onChange={(n, mk) => set('strokeWidth', [n], mk)} />
-            <select value={l.strokeAlign ?? 'center'} onChange={e => setLayerField(store, ids, 'strokeAlign', (e.target as HTMLSelectElement).value as any)}>
-              <option value="inside">Inside</option><option value="center">Center</option><option value="outside">Outside</option>
-            </select>
-          </div>
-          {sharedLink(layers, 'strokeWidth') && <div class="row"><LinkedChip layers={layers} prop="strokeWidth" /></div>}
+        <Section title="Stroke" onAdd={hasStroke ? undefined : addStroke} addLabel="Add stroke" onRemove={hasStroke ? removeStroke : undefined} removeLabel="Remove stroke">
+          {hasStroke && <>
+            {sharedLink(layers, 'stroke')
+              ? <FieldRow trail={<KeyButton layers={layers} prop="stroke" />}><LinkedChip layers={layers} prop="stroke" /></FieldRow>
+              : <FieldRow trail={<KeyButton layers={layers} prop="stroke" />}><ColorField value={v('stroke')} onChange={(c, mk) => set('stroke', c, mk)} /><LinkButton layers={layers} prop="stroke" /></FieldRow>}
+            <FieldRow trail={<KeyButton layers={layers} prop="strokeWidth" />}>
+              {sharedLink(layers, 'strokeWidth') ? <LinkedChip layers={layers} prop="strokeWidth" /> : <NumField label={<Minus size={13} />} title="Stroke width" min={0} value={v('strokeWidth')[0]} onChange={(n, mk) => set('strokeWidth', [n], mk)} />}
+              <select aria-label="Stroke position" value={l.strokeAlign ?? 'center'} onChange={e => setLayerField(store, ids, 'strokeAlign', (e.target as HTMLSelectElement).value as any)}>
+                <option value="inside">Inside</option><option value="center">Center</option><option value="outside">Outside</option>
+              </select>
+            </FieldRow>
+          </>}
         </Section>
       )}
       {layers.length === 1 && l.type === 'text' && <TextPanel layer={l} />}
       {layers.every(x => x.type === 'path') && (
-        <Section title="Trim paths" right={<Checkbox class="small" checked={!!l.trimOn} onChange={v => setLayerField(store, ids, 'trimOn', v, 'Trim paths')}>on</Checkbox>}>
+        <Section title="Trim paths" right={<Toggle checked={!!l.trimOn} label={<span class="sr-only">Trim paths</span>} onChange={on => setLayerField(store, ids, 'trimOn', on, 'Trim paths')} />}>
           {l.trimOn && (
             <>
-              <div class="row">
+              <FieldRow label="Range">
+                <NumField label="S" title="Start" min={0} max={100} value={v('trimStart')[0]} suffix="%" onChange={(n, mk) => set('trimStart', [n], mk)} />
                 <KeyButton layers={layers} prop="trimStart" />
-                <NumField label="Start" min={0} max={100} value={v('trimStart')[0]} suffix="%" onChange={(n, mk) => set('trimStart', [n], mk)} />
+                <NumField label="E" title="End" min={0} max={100} value={v('trimEnd')[0]} suffix="%" onChange={(n, mk) => set('trimEnd', [n], mk)} />
                 <KeyButton layers={layers} prop="trimEnd" />
-                <NumField label="End" min={0} max={100} value={v('trimEnd')[0]} suffix="%" onChange={(n, mk) => set('trimEnd', [n], mk)} />
-              </div>
-              <div class="row">
-                <KeyButton layers={layers} prop="trimOffset" />
-                <NumField label="Offset" value={v('trimOffset')[0]} suffix="°" onChange={(n, mk) => set('trimOffset', [n], mk)} />
-              </div>
+              </FieldRow>
+              <FieldRow label="Offset" trail={<KeyButton layers={layers} prop="trimOffset" />}>
+                <NumField label={<RotateCw size={13} />} title="Offset" value={v('trimOffset')[0]} suffix="°" onChange={(n, mk) => set('trimOffset', [n], mk)} />
+              </FieldRow>
             </>
           )}
         </Section>
       )}
       {layers.every(x => x.type === 'text') && <TextAnimPanel layers={layers} />}
-      {layers.length === 1 && l.type === 'group' && (
-        <Section title="Frame">
-          <Checkbox checked={!!l.clip} onChange={v => setLayerField(store, ids, 'clip', v, 'Clip content')}>Clip content</Checkbox>
-        </Section>
-      )}
       {layers.length === 1 && l.type === 'precomp' && l.compRef && (
-        <Section title="Composition" right={<button class="ghost" onClick={() => store.openComp(l.compRef!)}>Open <ArrowUpRight size={14} /></button>}>
-          <div class="row">
-            <NumField label="Start" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={(n, mk) => store.transact('Precomp start', tx => { for (const id of ids) { const x = store.layer(id); if (x) { tx.set(x, 'startTime', n); tx.touch(id); } } tx.structure(); }, mk)} />
-          </div>
+        <Section title="Composition" right={<Button variant="ghost" size="sm" onClick={() => store.openComp(l.compRef!)}>Open <ArrowUpRight size={14} /></Button>}>
+          <FieldRow label="Start">
+            <NumField label={<Clock size={13} />} title="Start offset" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={(n, mk) => store.transact('Precomp start', tx => { for (const id of ids) { const x = store.layer(id); if (x) { tx.set(x, 'startTime', n); tx.touch(id); } } tx.structure(); }, mk)} />
+          </FieldRow>
           <div class="muted small">{store.project.comps[l.compRef]?.name}</div>
         </Section>
       )}
-      <Section title="Blending">
-        <div class="row">
-          <select value={l.blend ?? 'normal'} style={{ flex: 1 }} onChange={e => setLayerField(store, ids, 'blend', (e.target as HTMLSelectElement).value as any, 'Blend mode')}>
-            {BLEND_MODES.map(m => <option value={m}>{m[0].toUpperCase() + m.slice(1).replace(/([A-Z])/g, ' $1').toLowerCase()}</option>)}
-          </select>
-        </div>
-      </Section>
       {common.includes('shadowColor') && <EffectsPanel layers={layers} />}
-      {layers.length === 1 && (
-        <Section title="Mask">
-          <Checkbox checked={!!l.mask} onChange={v => setLayerField(store, ids, 'mask', v, 'Use as mask')}>Use as mask (masks the layers above it in the same group)</Checkbox>
-        </Section>
-      )}
-      <Section title="Arrange">
-        <AlignBar ids={ids} />
+      <AnimatePanel ids={ids} />
+      <RhythmPanel ids={ids} />
+      <Section title="Timing">
+        <FieldRow label="Visible">
+          <NumField label="In" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
+          <NumField label="Out" step={1 / store.comp.fps} min={0} value={Math.min(l.outPoint, store.comp.duration)} suffix="s" onChange={n => setLayerField(store, ids, 'outPoint', n >= store.comp.duration ? 1e9 : n)} />
+        </FieldRow>
       </Section>
+      <ExprPanel layers={layers} />
+      {layers.length === 1 && <ComponentBox layer={l} />}
     </>
   );
 }
@@ -360,11 +363,11 @@ function TextPanel({ layer }: { layer: Layer }) {
         </select>
       </div>
       <div class="row">
-        <NumField label="Size" min={1} value={t.fontSize} onChange={n => set({ fontSize: n })} />
-        <NumField label="LH" step={0.01} min={0.5} value={t.lineHeight} onChange={n => set({ lineHeight: n })} />
-        <NumField label="LS" step={0.1} value={t.letterSpacing} onChange={n => set({ letterSpacing: n })} />
+        <NumField label={<ALargeSmall size={14} />} title="Font size" min={1} value={t.fontSize} onChange={n => set({ fontSize: n })} />
+        <NumField label="↕" title="Line height" step={0.01} min={0.5} value={t.lineHeight} onChange={n => set({ lineHeight: n })} />
+        <NumField label="↔" title="Letter spacing" step={0.1} value={t.letterSpacing} onChange={n => set({ letterSpacing: n })} />
       </div>
-      <Segmented class="row" label="Text align" value={t.align} options={(['left', 'center', 'right'] as const).map(a => ({ value: a, label: a }))} onChange={a => set({ align: a })} />
+      <Segmented class="row" label="Text align" value={t.align} options={(['left', 'center', 'right'] as const).map(a => ({ value: a, label: a[0].toUpperCase() + a.slice(1) }))} onChange={a => set({ align: a })} />
     </Section>
   );
 }
@@ -423,13 +426,9 @@ function GradientEditor({ layer }: { layer: Layer }) {
   const setStop = (i: number, patch: Partial<GradPaint['stops'][number]>, mk?: string) => write({ ...g!, stops: g!.stops.map((s3, j) => (j === i ? { ...s3, ...patch } : s3)) }, mk);
   return (
     <>
-      <div class="row">
-        <select value={kind} onChange={e => setKind((e.target as HTMLSelectElement).value)} title="Fill type">
-          <option value="solid">Solid</option>
-          <option value="linear">Linear gradient</option>
-          <option value="radial">Radial gradient</option>
-        </select>
-        {kind === 'linear' && <NumField label="Angle" value={angle} suffix="°" onChange={setAngle} title="Gradient angle" />}
+      <div class="row fill-kind">
+        <Segmented size="sm" label="Fill type" value={kind} options={[{ value: 'solid', label: 'Solid' }, { value: 'linear', label: 'Linear' }, { value: 'radial', label: 'Radial' }]} onChange={setKind} />
+        {kind === 'linear' && <NumField label={<RotateCw size={13} />} value={angle} suffix="°" onChange={setAngle} title="Gradient angle" />}
       </div>
       {g && (
         <>
@@ -480,57 +479,53 @@ function ColorField({ value, onChange }: { value: number[]; onChange: (c: number
 }
 
 // ---------------- composition ----------------
-/** nothing selected: the composition (size, timing, background), its styles and the export */
-function DocPanel() {
+const SIZE_PRESETS: [string, number, number][] = [
+  ['Landscape · 1920×1080', 1920, 1080], ['Square · 1080×1080', 1080, 1080], ['Portrait · 1080×1920', 1080, 1920],
+  ['Feed · 1080×1350', 1080, 1350], ['HD · 1280×720', 1280, 720], ['4K · 3840×2160', 3840, 2160], ['Icon · 512×512', 512, 512],
+];
+
+/** nothing selected: the composition's settings (name, size, frame rate, duration, background)
+ *  and its markers. exporting lives in one place: the Export button (top right, ⌘E) */
+function CompPanel() {
   const store = st();
   const c = store.comp;
-  const [scale, setScale] = useState(() => { try { return localStorage.getItem('motion.export.scale') || '1'; } catch { return '1'; } });
-  const [format, setFormat] = useState(() => { try { return localStorage.getItem('motion.export.format') || 'video'; } catch { return 'video'; } });
-  const remember = (k: string, v: string) => { try { localStorage.setItem('motion.export.' + k, v); } catch { /* */ } };
-  const run = () => {
-    if (format === 'video') import('./ExportDialog').then(m => m.openExportDialog());
-    else if (format === 'gif') exportGifFile().catch(() => {});
-    else if (format === 'png') exportFramePng(+scale).catch(() => {});
-    else if (format === 'lottie') exportLottie();
-    else if (format === 'ae') exportAeScript();
-  };
-  const label: Record<string, string> = { video: 'Export video…', gif: 'Export GIF', png: 'Export frame', lottie: 'Export Lottie', ae: 'Export for After Effects' };
+  const preset = SIZE_PRESETS.find(p => p[1] === c.width && p[2] === c.height);
   return (
     <>
       <Section title="Composition">
-        <div class="row">
+        <FieldRow label="Name">
+          <input class="grow name-input" aria-label="Composition name" value={c.name} spellcheck={false}
+            onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+            onChange={e => { const v = (e.target as HTMLInputElement).value.trim(); if (v && v !== c.name) renameComp(store, c.id, v); }} />
+        </FieldRow>
+        <FieldRow label="Size">
+          <select class="grow" aria-label="Size preset" value={preset ? `${preset[1]}x${preset[2]}` : 'custom'}
+            onChange={e => { const [w, h] = (e.target as HTMLSelectElement).value.split('x').map(Number); if (w && h) setCompSettings(store, { width: w, height: h }); }}>
+            {!preset && <option value="custom">Custom</option>}
+            {SIZE_PRESETS.map(p => <option value={`${p[1]}x${p[2]}`}>{p[0]}</option>)}
+          </select>
+        </FieldRow>
+        <FieldRow label="">
           <NumField label="W" min={1} value={c.width} onChange={n => setCompSettings(store, { width: Math.round(n) })} />
           <NumField label="H" min={1} value={c.height} onChange={n => setCompSettings(store, { height: Math.round(n) })} />
-        </div>
-        <div class="row">
-          <NumField label="FPS" min={1} max={240} value={c.fps} onChange={n => setCompSettings(store, { fps: Math.round(n) })} />
-          <NumField label="Dur" min={0.1} step={0.1} value={c.duration} suffix="s" onChange={n => setCompSettings(store, { duration: n })} />
-        </div>
+        </FieldRow>
+        <FieldRow label="Timing">
+          <NumField label={<Gauge size={13} />} title="Frame rate" min={1} max={240} value={c.fps} hint="fps" onChange={n => setCompSettings(store, { fps: Math.round(n) })} />
+          <NumField label={<Clock size={13} />} title="Duration" min={0.1} step={0.1} value={c.duration} suffix="s" onChange={n => setCompSettings(store, { duration: n })} />
+        </FieldRow>
       </Section>
       <Section title="Background">
-        <div class="row"><ColorField value={c.background} onChange={col => setCompSettings(store, { background: col as any })} /></div>
+        <FieldRow><ColorField value={c.background} onChange={col => setCompSettings(store, { background: col as any })} /></FieldRow>
       </Section>
-      <Section title="Markers" right={<button type="button" class="ghost small" title="Add a marker at the playhead (M)" onClick={() => addMarker(store, store.time)}>Add at playhead</button>}>
-        {(c.markers ?? []).length === 0 && <div class="muted small">Markers mark beats and moments: M at the playhead, or from an audio layer's beats. J / K and key drags snap to them.</div>}
+      <Section title="Markers" onAdd={() => addMarker(store, store.time)} addLabel="Add a marker at the playhead (M)">
+        {(c.markers ?? []).length === 0 && <div class="muted small" title="From an audio layer's beats too. J / K and key drags snap to them.">Press M to mark a moment at the playhead.</div>}
         {[...(c.markers ?? [])].sort((a, b) => a.t - b.t).map(m => (
-          <div class="marker-row">
+          <div class="marker-row list-row">
             <button type="button" class="marker-time" title="Go to this marker" onClick={() => store.setTime(m.t)}>{m.t.toFixed(2)}s</button>
             <span class="marker-label">{m.label || 'Marker'}</span>
             <button type="button" class="ghost icon marker-x" aria-label="Delete marker" title="Delete marker" onClick={() => deleteMarker(store, m.id)}><X size={12} /></button>
           </div>
         ))}
-      </Section>
-      <Section title="Export">
-        <div class="row">
-          <select class="grow" aria-label="Export scale" value={scale} disabled={format !== 'png'} title={format === 'png' ? 'Scale' : 'Scale (set in the video dialog)'} onChange={e => { const v = (e.target as HTMLSelectElement).value; setScale(v); remember('scale', v); }}>
-            {['0.5', '1', '2', '3', '4'].map(v => <option value={v}>{v}x</option>)}
-          </select>
-          <select class="grow" aria-label="Export format" value={format} onChange={e => { const v = (e.target as HTMLSelectElement).value; setFormat(v); remember('format', v); }}>
-            <option value="video">MP4 / WebM</option><option value="gif">GIF</option><option value="png">PNG frame</option><option value="lottie">Lottie</option><option value="ae">After Effects</option>
-          </select>
-        </div>
-        <button type="button" class="btn btn-block" onClick={run}>{label[format] ?? 'Export'}</button>
-        <div class="muted small hint">Paste layers from Figma with ⌘V, or drop Lottie, .aep, .svg or images onto the canvas.</div>
       </Section>
     </>
   );
@@ -704,7 +699,7 @@ const parentInv = (id: string) => {
   return invert(w ?? [1, 0, 0, 1, 0, 0]);
 };
 
-function AlignBar({ ids }: { ids: string[] }) {
+export function AlignBar({ ids }: { ids: string[] }) {
   const store = st();
   const btn = (how: Align, title: string, Icon: typeof AlignStartVertical) => (
     <button class="ghost icon" title={title + (ids.length === 1 ? ' (to composition)' : '')} aria-label={title} onClick={() => alignLayers(store, ids, how, vpBounds, parentInv)}><Icon /></button>
@@ -727,15 +722,21 @@ function AnimatePanel({ ids }: { ids: string[] }) {
     try { applyPreset(store, ids, name, { duration: dur, stagger: ids.length > 1 ? stagger : 0 }); (globalThis as any).timeline?.expand(ids[0], true); }
     catch (e: any) { toast(e.message, 'error'); }
   };
+  // presets live in one compact menu (in / out / loop); the agent does the rest (⌘K, the chat)
+  const menu = (e: MouseEvent) => {
+    const group = (kind: string) => ANIM_PRESETS.filter(p => p.kind === kind).map(p => ({ label: p.name, hint: kind === 'out' ? 'ends at playhead' : undefined, action: () => apply(p.name) }));
+    const items: MenuItem[] = [...group('in'), { separator: true }, ...group('out')];
+    const loops = group('loop');
+    if (loops.length) items.push({ separator: true }, ...loops);
+    menuFrom(e.currentTarget as Element, items);
+  };
   return (
-    <Section title="Animate" right={<span class="insp-type">at playhead</span>}>
-      <div class="preset-grid">
-        {ANIM_PRESETS.map(p => <button class={'preset ' + p.kind} title={p.kind === 'out' ? 'ends at the playhead' : 'starts at the playhead'} onClick={() => apply(p.name)}>{p.name}</button>)}
-      </div>
-      <div class="row">
-        <NumField label="Dur" step={0.05} min={0.05} value={dur} suffix="s" onChange={setDur} />
-        {ids.length > 1 && <NumField label="Delay" title="Stagger: delay between layers" step={0.01} min={0} value={stagger} suffix="s" onChange={setStagger} />}
-      </div>
+    <Section title="Animate">
+      <FieldRow label="Preset" title="Adds keys at the playhead">
+        <button type="button" class="btn preset-pick" aria-haspopup="menu" onClick={menu as any}>Choose…</button>
+        <NumField label={<Clock size={13} />} title="Duration" step={0.05} min={0.05} value={dur} suffix="s" onChange={setDur} />
+      </FieldRow>
+      {ids.length > 1 && <FieldRow label="Stagger"><NumField label={<Clock size={13} />} title="Stagger: delay between layers" step={0.01} min={0} value={stagger} suffix="s" onChange={setStagger} /></FieldRow>}
       {ids.length === 2 && <SmartRow key={ids.join(',')} ids={ids} dur={dur} />}
     </Section>
   );

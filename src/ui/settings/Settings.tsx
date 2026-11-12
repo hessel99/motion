@@ -1,4 +1,4 @@
-// Settings: its own tab in the tab strip. a left nav (Account / Agents / Workspace / App) and
+// Settings: a large modal over the window (⌘, or the app menu in the top bar). a left nav (Account / Agents / Workspace / App) and
 // card sections. Appearance, Connections, Keyboard shortcuts, Models and Agent runs are real;
 // Updates is real too (src/app/updates.ts, electron/updates/). Profile, Notifications and Members are placeholders.
 
@@ -141,7 +141,7 @@ function Appearance() {
   useEffect(() => onThemeChange(() => setT(getThemePref())), []);
   const cards: { id: ThemePref; label: string; sub: string; Icon: LucideIcon; note?: string }[] = [
     { id: 'dark', label: 'Dark', sub: 'Default', Icon: Moon },
-    { id: 'light', label: 'Light', sub: 'Paper white', Icon: Sun },
+    { id: 'light', label: 'Light', sub: 'Light greys', Icon: Sun },
     { id: 'system', label: 'System', sub: 'Follows your OS', Icon: Monitor, note: 'Switches with your computer.' },
   ];
   const gpu = gpuName();

@@ -10,7 +10,9 @@
 //   <Toggle checked onChange label />          switch (role=switch)
 //   <Slider value min max step onChange />     range input
 //   <Segmented value options onChange />       single choice button group
-//   <Section title right>…</Section>           inspector panel section + header
+//   <Section title right onAdd onRemove>…</Section>  inspector section: small title, "+" / "−" on the right, hairline below
+//   <FieldRow label>…fields…</FieldRow>        a labelled row of fields (two NumFields share it)
+//   <SwatchRow color label value>              swatch + type + amount (fill rows)
 //   <Dialog title onClose actions>…</Dialog>   modal with backdrop, focus trap, escape
 //   <ColorSwatch value onInput onChange />     native color input as a swatch
 //   <Kbd>⌘Z</Kbd>
@@ -18,7 +20,7 @@
 
 import type { ComponentChildren, JSX } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { X } from 'lucide-preact';
+import { Minus, Plus, X } from 'lucide-preact';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
 
@@ -70,6 +72,8 @@ export interface NumFieldProps {
   onChange: (v: number, mergeKey?: string) => void;
   suffix?: string;
   title?: string;
+  /** quiet text at the field's right end ("Fixed", "px") */
+  hint?: string;
 }
 
 /** scrubbable number field: drag the label (shift ×10, alt ×0.1), type math like `100+20` or `*2`, arrows ±1 (shift ±10) */
@@ -78,7 +82,8 @@ export function NumField(props: NumFieldProps) {
   // the text being edited, readable synchronously (enter commits and then blurs in the same tick:
   // the state closure would still hold the old text and commit twice)
   const editing = useRef<string | null>(null);
-  const fmt = (v: number) => (Math.round(v * 100) / 100).toString();
+  // sensible precision for the space a field has: 1180, 480.1, 12.25
+  const fmt = (v: number) => { const a = Math.abs(v), k = a >= 1000 ? 1 : a >= 100 ? 10 : 100; return (Math.round(v * k) / k).toString(); };
   const clamp = (v: number) => Math.min(props.max ?? Infinity, Math.max(props.min ?? -Infinity, v));
   const onScrub = (e: PointerEvent) => {
     e.preventDefault();
@@ -107,6 +112,7 @@ export function NumField(props: NumFieldProps) {
   return (
     <div class="num" title={props.title}>
       <span class="num-label" aria-hidden="true" onPointerDown={onScrub as any}>{props.label}</span>
+      {props.hint && <span class="num-hint" aria-hidden="true">{props.hint}</span>}
       <input
         aria-label={props.title ?? (typeof props.label === 'string' ? props.label : undefined)}
         inputMode="decimal"
@@ -211,12 +217,51 @@ export function Segmented<V extends string | number>(props: {
 }
 
 // ---------------- section (panel header + body) ----------------
-export function Section(props: { title: ComponentChildren; children?: ComponentChildren; right?: ComponentChildren; class?: string }) {
+/**
+ * an inspector / panel section: a small title, actions on the right, the body, a hairline below.
+ * `onAdd` shows a "+" (add a fill, an effect, an expression...), `onRemove` a "−". a section with
+ * an `onAdd` and no children collapses to its title row (the "add a stroke" state).
+ */
+export function Section(props: {
+  title: ComponentChildren; children?: ComponentChildren; right?: ComponentChildren; class?: string;
+  onAdd?: () => void; addLabel?: string; onRemove?: () => void; removeLabel?: string;
+}) {
+  const empty = props.children === undefined || props.children === null || props.children === false || (Array.isArray(props.children) && props.children.every(c => c === null || c === undefined || c === false));
   return (
-    <section class={cx('section', 'insp-section', props.class)}>
-      <header class="section-header insp-title"><h3 class="section-title">{props.title}</h3>{props.right}</header>
+    <section class={cx('section', 'insp-section', empty && 'empty', props.class)}>
+      <header class="section-header insp-title">
+        <h3 class="section-title">{props.title}</h3>
+        <span class="section-actions">
+          {props.right}
+          {props.onRemove && <Button variant="ghost" icon size="sm" tip={props.removeLabel ?? 'Remove'} onClick={props.onRemove}><Minus size={14} /></Button>}
+          {props.onAdd && <Button variant="ghost" icon size="sm" tip={props.addLabel ?? 'Add'} onClick={props.onAdd}><Plus size={14} /></Button>}
+        </span>
+      </header>
       {props.children}
     </section>
+  );
+}
+
+/** a row of fields with a quiet label on the left (Position, Size…) and an optional trailing control (keyframe button) */
+export function FieldRow(props: { label?: ComponentChildren; children?: ComponentChildren; trail?: ComponentChildren; class?: string; title?: string }) {
+  return (
+    <div class={cx('field-row', props.class)} title={props.title}>
+      {props.label !== undefined && <span class="field-row-label">{props.label}</span>}
+      <span class="field-row-fields">{props.children}</span>
+      {props.trail !== undefined && <span class="field-row-trail">{props.trail}</span>}
+    </div>
+  );
+}
+
+/** a fill-style row: a color swatch, what it is (Solid, Linear…), and an amount (100%) */
+export function SwatchRow(props: { swatch: ComponentChildren; label: ComponentChildren; value?: ComponentChildren; trail?: ComponentChildren }) {
+  return (
+    <div class="swatch-row">
+      <span class="swatch-row-swatch">{props.swatch}</span>
+      <span class="swatch-row-label">{props.label}</span>
+      {props.value !== undefined && <span class="swatch-row-value">{props.value}</span>}
+      {props.trail}
+    </div>
   );
 }
 

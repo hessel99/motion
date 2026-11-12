@@ -5,20 +5,24 @@ import { ViewportController } from './viewport-controller';
 import { Timeline } from './timeline';
 import { SyncReview, STYLE_MIME, applyStyle } from './LibraryPanel';
 import { useChannels } from './hooks';
-import { showContextMenu, type MenuItem } from './menu';
-import {
-  exportLottie, exportAeScript, exportFramePng, confirmDiscard, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, runBenchmark, exportGifFile,
-} from '../app/actions';
-import { deleteLayers } from '../core/commands';
+import { menuFrom, showContextMenu } from './menu';
+import { agentMenuItems } from './agent-menu';
+import { AskBar } from './chrome/AskBar';
+import { EmptyCanvas, ImportSuggestion } from './chrome/CanvasAgent';
+import { SelectionBar, stopPreview } from './chrome/CanvasBars';
+import { openBrowserFile, setupShortcuts, runBenchmark, toast } from '../app/actions';
+import { prefs, setPref } from '../app/prefs';
+import { cloneLayers, deleteLayers } from '../core/commands';
 import { Button, Dialog, Kbd } from './ui';
-import { IconProvider, PanelLeftOpen } from './chrome/icons';
-import { TabStrip } from './chrome/TabStrip';
+import { IconProvider, X } from './chrome/icons';
+import { TopBar } from './chrome/TopBar';
+import { Home } from './chrome/Home';
 import { LeftPanel } from './chrome/LeftPanel';
 import { RightPanel } from './chrome/RightPanel';
 import { Toolbar } from './chrome/Toolbar';
-import { Transport, tlHeightStyle } from './chrome/Transport';
+import { TimelineHeader, tlHeightStyle } from './chrome/TimelineHeader';
 import { SettingsPage } from './settings/Settings';
-import { ui, openSettings, setUi, toggleAgent } from './chrome/ui-state';
+import { ui, closeSettings, openSettings, toggleAgent } from './chrome/ui-state';
 import { view } from './chrome/view';
 import { SHORTCUTS } from './chrome/shortcuts';
 
@@ -37,31 +41,35 @@ export function App() {
     // ⌘, opens Settings (like any mac app)
     const onKey = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === ',') { e.preventDefault(); openSettings(); } };
     window.addEventListener('keydown', onKey);
+    document.documentElement.dataset.view = ui.view;
     return () => window.removeEventListener('keydown', onKey);
   }, []);
-  // the panels changed width: the canvases follow on the next frame (their ResizeObservers also
+  // the panels changed size: the canvases follow on the next frame (their ResizeObservers also
   // fire, this only avoids one frame at the old size)
-  useEffect(() => { requestAnimationFrame(() => { vp?.resize(); tl?.resize(); }); }, [ui.leftOpen]);
-  // the window's layout, motion first: the canvas (stage) on top, the transport bar under it and
-  // a generous timeline (layer rows + keys) along the bottom, both as wide as the window minus
-  // the inspector. the agent (left) only sits beside the stage and collapses (⌘I); the
-  // inspector (right) runs the full height so the ease studio has room.
-  const settings = ui.view === 'settings';
+  useEffect(() => { requestAnimationFrame(() => { vp?.resize(); tl?.resize(); }); }, [ui.leftOpen, ui.view]);
+  // the window: the top bar (window tabs) on the window color, then white cards with a gap between
+  // them: the side panel (agent / assets) beside the canvas, the timeline under both, the
+  // inspector the full height on the right. Home covers the cards; Settings is a modal.
+  const home = ui.view === 'home';
   return (
     <IconProvider>
-      <div class={'app' + (ui.leftOpen ? '' : ' no-left') + (settings ? ' show-settings' : '')} style={tlHeightStyle()}>
-        <Guard name="Tab strip"><TabStrip appMenu={appMenu} /></Guard>
-        {/* the editor stays mounted under Settings: its canvases and WebGL context live for the session */}
-        <aside class="left" aria-label="Agent and library" hidden={!ui.leftOpen}><Guard name="Left panel"><LeftPanel /></Guard></aside>
-        <main class="center" aria-label="Canvas">
+      <div class={'app' + (ui.leftOpen ? '' : ' no-left') + (home ? ' show-home' : '') + (ui.previewing ? ' previewing' : '')} style={tlHeightStyle()}>
+        <Guard name="Top bar"><TopBar /></Guard>
+        {/* the editor stays mounted under Home: its canvases and WebGL context live for the session */}
+        <aside class="left card" aria-label="Agent and assets" hidden={!ui.leftOpen}><Guard name="Side panel"><LeftPanel /></Guard></aside>
+        <main class="center card" aria-label="Canvas">
           <Viewport />
-          {!ui.leftOpen && <Button variant="ghost" icon size="sm" class="lp-reopen" tip="Show agent panel (⌘I)" onClick={() => setUi({ leftOpen: true })}><PanelLeftOpen /></Button>}
+          {ui.previewing && <button type="button" class="preview-exit" onClick={stopPreview}>Esc · leave preview</button>}
         </main>
-        <div class="transport-host"><Guard name="Transport"><Transport /></Guard></div>
-        <section class="bottom" aria-label="Timeline"><TimelineHost /></section>
-        <aside class="right" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
-        {settings && <div class="settings-host"><Guard name="Settings"><SettingsPage /></Guard></div>}
+        <section class="bottom card" aria-label="Timeline">
+          <Guard name="Timeline header"><TimelineHeader /></Guard>
+          <TimelineHost />
+        </section>
+        <aside class="right card" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
+        {home && <div class="home-host"><Guard name="Home"><Home /></Guard></div>}
+        {ui.settingsOpen && <SettingsModal />}
         <Guard name="Sync"><SyncReview /></Guard>
+        <AskBar />
         <ShortcutHelp />
         <Welcome />
         <Benchmark />
@@ -70,47 +78,25 @@ export function App() {
   );
 }
 
-/** the app menu (home button in the tab strip) */
-export function appMenu(x: number, y: number) {
-  const s = editor.store;
-  const items: MenuItem[] = [
-    { label: 'New', shortcut: '', action: () => { if (confirmDiscard()) newProject(); } },
-    { label: 'Open / Import…', shortcut: '⌘O', action: openFileDialog },
-    { label: 'Save', shortcut: '⌘S', action: () => saveProject(false) },
-    { label: 'Save As…', shortcut: '⇧⌘S', action: () => saveProject(true) },
-    { separator: true },
-    {
-      label: 'Export', submenu: [
-        { label: 'Video…', action: () => { import('./ExportDialog').then(m => m.openExportDialog()); } },
-        { label: 'GIF', action: () => { exportGifFile().catch(() => {}); } },
-        { label: 'Frame as PNG', action: () => { exportFramePng().catch(() => {}); } },
-        { label: 'Lottie JSON', action: exportLottie },
-        { label: 'After Effects (.jsx)', action: exportAeScript },
-      ],
-    },
-    { separator: true },
-    { label: 'Undo', shortcut: '⌘Z', disabled: !s.canUndo, action: () => s.undo() },
-    { label: 'Redo', shortcut: '⇧⌘Z', disabled: !s.canRedo, action: () => s.redo() },
-    { separator: true },
-    { label: 'Load demo animation', action: () => { if (confirmDiscard()) loadDemo(); } },
-    {
-      label: 'Performance test', submenu: [
-        { label: '1,000 animated shapes', action: () => confirmDiscard() && loadStress(1000) },
-        { label: '5,000 animated shapes', action: () => confirmDiscard() && loadStress(5000) },
-        { label: '10,000 animated shapes', action: () => confirmDiscard() && loadStress(10000) },
-        { label: '25,000 animated shapes', action: () => confirmDiscard() && loadStress(25000) },
-        { label: '2,000 mixed (text, stars, shapes, groups)', action: () => confirmDiscard() && loadStress(2000, ['rect', 'ellipse', 'text', 'path'], true) },
-      ],
-    },
-    { label: 'Run performance benchmark', action: () => editor.emit('benchmark') },
-    { label: editor.showHud ? 'Hide performance HUD' : 'Show performance HUD', action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
-    { separator: true },
-    { label: 'Keyboard shortcuts', shortcut: '?', action: () => editor.emit('help') },
-    { label: 'Settings…', shortcut: '⌘,', action: () => openSettings() },
-  ];
-  showContextMenu(x, y, items);
+/** Settings as a large modal: aria-modal keeps the editor's shortcuts off while it is open */
+function SettingsModal() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    ref.current?.focus({ preventScroll: true });
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !document.querySelector('.ctx-menu')) { e.preventDefault(); closeSettings(); } };
+    window.addEventListener('keydown', onKey);
+    return () => { window.removeEventListener('keydown', onKey); if (prev && document.contains(prev)) prev.focus({ preventScroll: true }); };
+  }, []);
+  return (
+    <div class="dialog-backdrop settings-backdrop" onPointerDown={e => { if (e.target === e.currentTarget) closeSettings(); }}>
+      <div ref={ref} class="settings-modal" role="dialog" aria-modal="true" aria-label="Settings" tabIndex={-1}>
+        <Guard name="Settings"><SettingsPage /></Guard>
+        <Button variant="ghost" icon size="sm" class="settings-close" tip="Close (Esc)" onClick={closeSettings}><X size={14} /></Button>
+      </div>
+    </div>
+  );
 }
-
 
 // ---------------- viewport ----------------
 function Viewport() {
@@ -128,6 +114,19 @@ function Viewport() {
   }, []);
   return (
     <div class={'viewport' + (drag ? ' dropping' : '')} ref={host}
+      onContextMenu={e => {
+        // right-click on the canvas: the layer under the pointer (or the selection), then the agent's asks
+        if ((e.target as HTMLElement).closest('.vp-ui, .vp-empty-card')) return;
+        e.preventDefault();
+        const s = editor.store;
+        const hit = vp?.layerAt(e);
+        if (hit && !s.selection.includes(hit)) s.select([hit]);
+        const has = s.selection.length > 0;
+        showContextMenu(e.clientX, e.clientY, [
+          ...agentMenuItems(has ? 'layers' : 'comp'),
+          ...(has ? [{ separator: true } as const, { label: 'Duplicate', shortcut: '⌘D', action: () => { const ids = cloneLayers(s, s.selection); if (ids?.length) s.select(ids); } }, { label: 'Delete', shortcut: '⌫', action: () => deleteLayers(s, s.selection) }] : []),
+        ]);
+      }}
       onDragOver={e => { e.preventDefault(); if (e.dataTransfer?.types.includes(STYLE_MIME)) { e.dataTransfer.dropEffect = 'link'; vp?.hoverAt(e); return; } setDrag(true); }}
       onDragLeave={() => { setDrag(false); vp?.hoverAt(null); }}
       onDrop={async e => {
@@ -143,15 +142,17 @@ function Viewport() {
         }
         for (const f of e.dataTransfer?.files ?? []) await openBrowserFile(f);
       }}>
-      <Toolbar />
-      <ZoomBadge />
+      <EmptyCanvas />
+      <ImportSuggestion />
+      <SelectionBar />
+      <Toolbar><ZoomBadge /></Toolbar>
       <Hud />
     </div>
   );
 }
 
-/** canvas zoom readout at the stage's bottom right (click: fit). touches the dom only when the
- *  zoom changed */
+/** canvas zoom at the stage's bottom right: a menu with the zoom steps and the canvas view
+ *  options. touches the dom only when the zoom changed */
 function ZoomBadge() {
   const el = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -161,7 +162,21 @@ function ZoomBadge() {
       if (z !== lastZ && el.current) { lastZ = z; el.current.textContent = z + '%'; }
     });
   }, []);
-  return <button type="button" ref={el} class="zoom-badge vp-ui" data-tooltip="Zoom to fit (⌘0)" data-tooltip-side="top" onClick={() => vp?.fit()}>100%</button>;
+  const menu = () => {
+    if (!el.current) return;
+    menuFrom(el.current, [
+      { label: 'Zoom to fit', shortcut: '⌘0', action: () => vp?.fit() },
+      { label: 'Zoom to 100%', action: () => vp?.setZoom(1) },
+      { label: 'Zoom in', shortcut: '⌘+', action: () => vp?.setZoom(vp.zoom * 1.25) },
+      { label: 'Zoom out', shortcut: '⌘−', action: () => vp?.setZoom(vp.zoom / 1.25) },
+      { separator: true },
+      { label: 'Pixel grid (400% and above)', checked: prefs.pixelGrid, action: () => setPref('pixelGrid', !prefs.pixelGrid) },
+      { label: 'Snap to pixel grid', checked: prefs.snapToPixels, action: () => setPref('snapToPixels', !prefs.snapToPixels) },
+      { label: 'Play at composition fps', checked: editor.snapPlaybackToFrames, action: () => { editor.snapPlaybackToFrames = !editor.snapPlaybackToFrames; toast(editor.snapPlaybackToFrames ? 'Playback snaps to composition frames' : 'Playback is smooth (every display frame)'); } },
+      { label: 'Performance HUD', checked: editor.showHud, action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
+    ], { align: 'right', above: true });
+  };
+  return <button type="button" ref={el} class="zoom-badge" aria-haspopup="menu" data-tooltip="Zoom and view options" data-tooltip-side="top" onClick={menu}>100%</button>;
 }
 
 function Hud() {
@@ -300,7 +315,7 @@ function Welcome() {
           <li><b>Paste from Figma</b>: select layers in Figma, ⌘C, then ⌘V here. A single frame becomes the composition.</li>
           <li><b>Animate</b>: click a property's keyframe diamond to add keyframes, or use <i>Animate</i> presets and <i>Text animation</i> in the right panel. Press F9 for easy ease.</li>
           <li><b>AI agent</b> (left panel, ⌘I): describe an animation and Claude Code builds it in your file, with your own subscription. One click undoes everything it did.</li>
-          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video or Lottie from the Export button (top right) or the home menu.</li>
+          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video, GIF, Lottie or After Effects from the Export button (top right, ⌘E).</li>
         </ol>
     </Dialog>
   );

@@ -14,6 +14,8 @@ import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type 
 import { showContextMenu, type MenuItem } from './menu';
 import { createComponent, createInstance, detachInstance, instanceRootOf, overridesOf, resetOverrides } from '../core/components';
 import { GraphView } from './graph';
+import { agentMenuItems } from './agent-menu';
+import { agentProgress } from './agent-bridge';
 import { T, onThemeChange } from './theme';
 import { Eye, EyeOff, LAYER_ICON, Lock, LockOpen, Square, strokeIcon } from './chrome/icons';
 import { audioDuration, audioFailed, audioPeaks } from '../audio/engine';
@@ -21,7 +23,7 @@ import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
 import { setEase, setInterp, setSpring, updateMarker, deleteMarker, cloneLayers, deleteLayers } from '../core/commands';
 
 export const HEADER_H = 28;
-export const ROW_H = 24;
+export const ROW_H = 28;
 const INDENT = 14;
 
 /** prop rows a layer type can show, in row order (built once per type, not per layer per rebuild) */
@@ -170,6 +172,7 @@ export class Timeline {
       lastDur = st.comp.duration; this.expanded.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
     ed.onFrame(() => this.frame());
     ed.on('audio', () => { this.baseDirty = true; });
+    ed.on('agent-turn', () => { this.baseDirty = true; });
     onThemeChange(() => { this.baseDirty = true; this.lastPlayheadX = -1; });
     this.canvas.addEventListener('pointerdown', e => this.down(e));
     this.canvas.addEventListener('pointermove', e => this.move(e));
@@ -221,6 +224,20 @@ export class Timeline {
     this.scrollT = 0;
     this.baseDirty = true;
   }
+
+  /** what the track area shows: keyframes, value curves or speed curves */
+  get mode(): 'keys' | 'graph' | 'speed' { return !this.graphMode ? 'keys' : this.graph.speed ? 'speed' : 'graph'; }
+  setMode(m: 'keys' | 'graph' | 'speed') {
+    this.graphMode = m !== 'keys';
+    this.graph.speed = m === 'speed';
+    this.baseDirty = true;
+    this.ed.emit('tlmode');
+  }
+
+  /** pixels per second that fit the whole composition */
+  fitPx() { return Math.max(100, this.w - this.leftW - 30) / Math.max(1e-3, this.ed.store.comp.duration); }
+  /** time zoom relative to "fit" (1 = whole comp visible), around the playhead */
+  setZoomLevel(z: number) { this.zoomTime((this.fitPx() * z) / this.pxPerSec); }
 
   /** zoom the time scale by f around the playhead (transport − / +) */
   zoomTime(f: number) {
@@ -375,10 +392,10 @@ export class Timeline {
   private drawPlayhead(x: number) {
     const g = this.og;
     g.fillStyle = this.studio ? T.tlHot : T.tlPlayhead;
-    g.fillRect(x - 0.5, HEADER_H - 6, 1, this.h);
+    g.fillRect(x - 0.75, HEADER_H - 8, 1.5, this.h);
+    // a soft rounded knob in the ruler
     g.beginPath();
-    g.moveTo(x - 6, 4); g.lineTo(x + 6, 4); g.lineTo(x + 6, HEADER_H - 10); g.lineTo(x, HEADER_H - 4); g.lineTo(x - 6, HEADER_H - 10);
-    g.closePath();
+    g.roundRect(x - 5, 6, 10, HEADER_H - 13, 4);
     g.fill();
   }
 
@@ -410,8 +427,8 @@ export class Timeline {
       const r = this.rows[i];
       const y = this.rowY(i);
       const isSel = sel.has(r.id) && r.kind === 'layer';
-      if (isSel) { g.fillStyle = T.tlRowSelected; g.fillRect(0, y, this.w, ROW_H); }
-      else if (i === this.hoverRow) { g.fillStyle = T.tlRowHover; g.fillRect(0, y, this.w, ROW_H); }
+      // selected / hovered rows: a soft rounded pill (like the lists elsewhere)
+      if (isSel || i === this.hoverRow) { g.fillStyle = isSel ? T.tlRowSelected : T.tlRowHover; g.beginPath(); g.roundRect(4, y + 1, this.w - 8, ROW_H - 2, 7); g.fill(); }
       g.fillStyle = T.tlRowLine;
       g.fillRect(0, y + ROW_H - 1, this.w, 1);
       if (r.kind === 'layer') this.drawLayerRow(g, r, y, isSel);
@@ -433,20 +450,7 @@ export class Timeline {
     g.fillStyle = T.tlDivider;
     g.fillRect(0, HEADER_H - 1, this.w, 1);
     this.drawRuler(g);
-    g.fillStyle = T.tlTabText;
-    g.font = T.font.uiSm;
-    // (layer count lives in the search box placeholder area)
-    // keys / graph / speed toggle
-    const tx0 = this.leftW - 150;
-    for (const [i, label] of ['Keys', 'Graph', 'Speed'].entries()) {
-      const mode = !this.graphMode ? 0 : this.graph.speed ? 2 : 1;
-      const on = i === mode;
-      const bx = tx0 + i * 48;
-      g.fillStyle = on ? T.tlTabOn : T.tlTab;
-      g.beginPath(); g.roundRect(bx, 5, 44, HEADER_H - 10, 4); g.fill();
-      g.fillStyle = on ? T.tlTabOnText : T.tlTabText;
-      g.fillText(label, bx + 22 - g.measureText(label).width / 2, HEADER_H / 2);
-    }
+    // (keys / graph / speed is a segmented control in the timeline header: TimelineHeader.tsx)
 
     // scrollbars
     const vs = this.vScroll(), hs = this.hScroll();
@@ -493,7 +497,8 @@ export class Timeline {
       g.fillStyle = T.tlGrid;
       g.fillRect(x, HEADER_H, 1, this.h);
       g.fillStyle = T.tlRulerText;
-      g.fillText(fmtTime(f / fps, fps), x + 3, HEADER_H / 2 - 1);
+      // one format: seconds (0.5s, 1s) when the step is a tenth of a second or more, else frames
+      g.fillText((stepF * 10) % fps === 0 ? `${+(f / fps).toFixed(1)}s` : `${f}f`, x + 3, HEADER_H / 2 - 1);
       // minor ticks
       const minor = stepF >= 5 ? stepF / 5 : 0;
       if (minor >= 1) for (let m = 1; m < 5; m++) {
@@ -501,6 +506,12 @@ export class Timeline {
         g.fillStyle = T.tlTickMinor;
         g.fillRect(mx, HEADER_H - 4, 1, 4);
       }
+    }
+    // the storyboard beat the agent is building right now: a soft band over the tracks + the ruler
+    const ar = agentProgress()?.range;
+    if (ar) {
+      const ax = Math.max(this.leftW, this.tToX(ar[0])), bx = Math.min(this.w, this.tToX(ar[1]));
+      if (bx > ax) { g.fillStyle = T.tlMarqueeFill; g.fillRect(ax, 0, bx - ax, this.h); g.fillStyle = T.tlHot; g.fillRect(ax, HEADER_H - 3, bx - ax, 2); }
     }
     // work area (preview range)
     const wa = this.ed.store.workArea;
@@ -538,7 +549,6 @@ export class Timeline {
     const ix = 8 + r.depth * INDENT;
     const animated = hasAnim(l);
     const label = this.studio ? this.labelColor(l) : '';
-    if (this.studio) { g.fillStyle = label; g.beginPath(); g.arc(4.5, cy, 3, 0, Math.PI * 2); g.fill(); }
     // twirl (a chevron, like the layer tree)
     if (r.hasChildren || animated || this.allProps) {
       g.strokeStyle = T.tlTwirl;
@@ -586,9 +596,9 @@ export class Timeline {
       const endX = this.tToX(Math.min(comp.duration, l.outPoint));
       g.fillStyle = label;
       g.globalAlpha = isSel ? 1 : 0.82;
-      if (outX > inX) { g.beginPath(); g.roundRect(inX, y + 2, outX - inX, ROW_H - 4, 2); g.fill(); }
+      if (outX > inX) { g.beginPath(); g.roundRect(inX, y + 5, outX - inX, ROW_H - 10, 6); g.fill(); }
       const tailX = Math.max(this.leftW, endX);
-      if (tailX < this.w) { g.globalAlpha = 0.28; g.fillRect(tailX, y + 2, this.w - tailX, ROW_H - 4); }
+      if (tailX < this.w) { g.globalAlpha = 0.28; g.fillRect(tailX, y + 5, this.w - tailX, ROW_H - 10); }
       g.globalAlpha = 1;
     } else if (outX > inX) {
       g.fillStyle = isSel ? T.tlBarSelected : T.tlBar;
@@ -874,13 +884,6 @@ export class Timeline {
     if (y < HEADER_H && Math.abs(x - this.tToX(st.comp.duration)) < 5) { this.drag = { kind: 'compEnd' }; st.beginGesture('duration'); return; }
     const mk = this.markerAt(x, y);
     if (mk) { this.drag = { kind: 'marker', id: mk.id, sx: x, moved: false }; st.beginGesture('marker'); return; }
-    if (y < HEADER_H && x < this.leftW && x >= this.leftW - 150 && x < this.leftW - 6) {
-      const i = Math.floor((x - (this.leftW - 150)) / 48);
-      this.graphMode = i >= 1;
-      this.graph.speed = i === 2;
-      this.baseDirty = true;
-      return;
-    }
     if (this.graphMode && x > this.leftW && y > HEADER_H) {
       if (this.graph.down(x, y, e.shiftKey)) { this.drag = { kind: 'graph' }; this.baseDirty = true; }
       else if (!e.shiftKey) { st.keySelection = new Set(); st.emit('keys'); }
@@ -1289,6 +1292,10 @@ export class Timeline {
       items.push({ label: 'Spring', submenu: SPRING_PRESETS.map(p => ({ label: p.name, action: () => setSpring(st, keys, p.bounce) })) });
       items.push({ separator: true });
       items.push({ label: 'Delete keyframes', shortcut: '⌫', action: () => deleteKeyframes(st, keys) });
+      items.push({ separator: true }, ...agentMenuItems('keys'));
+    } else if (y < HEADER_H) {
+      // the ruler: the preview range (or the whole composition)
+      items.push(...agentMenuItems(st.workArea ? 'range' : 'comp'));
     } else {
       const i = this.rowAtY(y);
       const r = i >= 0 ? this.rows[i] : null;
@@ -1314,7 +1321,8 @@ export class Timeline {
         } else if (st.selection.length === 1) {
           items.push({ label: 'Create component', shortcut: '⌥⌘K', action: () => { try { createComponent(st, r.id); } catch (err: any) { alert(err.message); } } });
         }
-      }
+        items.push({ separator: true }, ...agentMenuItems('layers'));
+      } else items.push(...agentMenuItems('comp'));
     }
     if (items.length) showContextMenu(e.clientX, e.clientY, items);
   }

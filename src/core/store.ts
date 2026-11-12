@@ -80,6 +80,12 @@ export class Tx {
   comp() { this.change.comp = true; }
 }
 
+/** one open document's editor state (see Store.saveState) */
+export interface DocState {
+  project: Project; selection: string[]; keySelection: Set<string>; time: number; loop: boolean;
+  workArea: [number, number] | null; solo: Set<string>; undo: Entry[]; redo: Entry[]; dropped: number; openComps: string[];
+}
+
 export class Store {
   project: Project;
   selection: string[] = [];
@@ -353,22 +359,84 @@ export class Store {
     for (const id in project.components ?? {}) rememberTree(project, id);
     this.ensureActiveComp();
     this.workArea = null;
-    this.solo.clear();
     this.previewProps.clear();
-    this.undoStack.length = 0;
-    this.redoStack.length = 0;
+    // fresh objects, never cleared in place: a background document (window tab) may hold the old ones
+    this.undoStack = [];
+    this.redoStack = [];
     this.dropped = 0;
     this.selection = [];
-    this.keySelection.clear();
+    this.keySelection = new Set();
+    this.solo = new Set();
+    this.openComps = [project.activeComp];
     this.time = 0;
     this.emitChange({ structure: true, comp: true, layers: new Set(Object.keys(project.layers)), meta: true, assets: true });
     this.emit('selection');
     this.emit('time');
     this.emit('history');
+    this.emit('comps');
+  }
+
+  /** everything that belongs to one open document (project, history, selection, playhead, view
+   *  state). documents in other window tabs keep this object while they are in the background */
+  saveState(): DocState {
+    return {
+      project: this.project, selection: this.selection, keySelection: this.keySelection, time: this.time, loop: this.loop,
+      workArea: this.workArea, solo: this.solo, undo: this.undoStack, redo: this.redoStack, dropped: this.dropped, openComps: this.openComps,
+    };
+  }
+
+  /** bring a document back (window tab switch): like load() but keeps its history and view state */
+  restoreState(d: DocState) {
+    this.playing = false;
+    this.project = d.project;
+    this.selection = d.selection;
+    this.keySelection = d.keySelection;
+    this.time = d.time;
+    this.loop = d.loop;
+    this.workArea = d.workArea;
+    this.solo = d.solo;
+    this.undoStack = d.undo;
+    this.redoStack = d.redo;
+    this.dropped = d.dropped;
+    this.openComps = d.openComps;
+    this.gesture = null;
+    this.previewProps.clear();
+    this.ensureActiveComp();
+    this.emitChange({ structure: true, comp: true, layers: new Set(Object.keys(this.project.layers)), meta: true, assets: true });
+    this.emit('playing');
+    this.emit('selection');
+    this.emit('keys');
+    this.emit('time');
+    this.emit('history');
+    this.emit('comps');
+    this.emit('workarea');
+  }
+
+  /** compositions shown as tabs in the timeline header (view state, not part of the document).
+   *  the active comp is always in it */
+  openComps: string[] = [];
+  /** the open comp tabs that still exist, the active one included */
+  compTabs(): string[] {
+    const P = this.project;
+    const ids = this.openComps.filter(id => P.comps[id]);
+    if (!ids.includes(P.activeComp)) ids.push(P.activeComp);
+    if (ids.length !== this.openComps.length || ids.some((x, i) => x !== this.openComps[i])) this.openComps = ids;
+    return ids;
+  }
+  /** close a comp tab; closing the active one opens its neighbour. the last tab stays */
+  closeCompTab(id: string) {
+    const tabs = this.compTabs();
+    if (tabs.length <= 1) return;
+    const i = tabs.indexOf(id);
+    if (i < 0) return;
+    this.openComps = tabs.filter(x => x !== id);
+    if (id === this.project.activeComp) this.openComp(this.openComps[Math.min(i, this.openComps.length - 1)]);
+    else this.emit('comps');
   }
 
   /** switch the active composition (view state, not an undoable edit) */
   openComp(id: string) {
+    if (this.project.comps[id] && !this.openComps.includes(id)) { this.openComps = [...this.compTabs(), id]; if (id === this.project.activeComp) this.emit('comps'); }
     if (!this.project.comps[id] || id === this.project.activeComp) return;
     this.project.activeComp = id;
     this.workArea = null;
