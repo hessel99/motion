@@ -1,6 +1,24 @@
 // Preload (sandboxed): exposes a small, typed-by-convention API to the renderer as window.motionNative.
 const { contextBridge, ipcRenderer } = require('electron');
 
+// mac: report the Window Controls Overlay rect (the traffic lights' box plus its margins) so the
+// main process can centre the buttons in the title row with AppKit's real button size
+// (electron/main.cjs calibrateTrafficLights). plain DOM + ipc: nothing is exposed to the page.
+if (process.platform === 'darwin') {
+  const report = () => {
+    const wco = navigator.windowControlsOverlay;
+    if (!wco || !wco.visible) return;
+    const r = wco.getTitlebarAreaRect();
+    ipcRenderer.send('window:controlsOverlay', { x: r.x, y: r.y, width: r.width, height: r.height });
+  };
+  const watch = () => {
+    report();
+    if (navigator.windowControlsOverlay) navigator.windowControlsOverlay.addEventListener('geometrychange', report);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch, { once: true });
+  else watch();
+}
+
 contextBridge.exposeInMainWorld('motionNative', {
   platform: process.platform,
   /** full screen (mac: the traffic lights hide, src/ui/chrome/platform.ts stops reserving room) */

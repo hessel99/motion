@@ -36,10 +36,43 @@ app.commandLine.appendSwitch('enable-zero-copy');
 // figma shaders run on webgpu (render/shader-worker.ts): chromium still gates it behind a flag on linux
 if (process.platform === 'linux') app.commandLine.appendSwitch('enable-unsafe-webgpu');
 
+// ---------------- mac title bar geometry ----------------
+// the renderer's title row is TITLEBAR_H tall (= --titlebar-h in src/ui/tokens.css: keep both in
+// sync). the traffic lights sit TRAFFIC_X from the left edge (like Notes / Finder toolbar windows)
+// and are centred vertically: electron puts the top of the buttons at trafficLightPosition.y, so
+// y = (TITLEBAR_H - buttonHeight) / 2. the button height is AppKit's: 16pt up to macOS 15, and
+// differs on macOS 26 with the new window controls, so it is measured at runtime: titleBarOverlay
+// turns on the Window Controls Overlay, whose rect (seen by the preload) is the buttons' box
+// grown by the margin on each side: height = buttonHeight + 2 * y. calibrateTrafficLights then
+// moves the buttons once. (titleBarOverlay with a `height` would centre them natively, but on
+// macOS 26 that mis-places custom positions, electron/electron#49183, so it stays `true`.)
+const TITLEBAR_H = 52;
+const TRAFFIC_X = 20;
+const ASSUMED_BUTTON_H = 16; // macOS 11-15 NSWindow standard button frame (14 x 16)
+const trafficY = (buttonH) => Math.max(0, Math.floor((TITLEBAR_H - buttonH) / 2));
+let trafficPos = { x: TRAFFIC_X, y: trafficY(ASSUMED_BUTTON_H) };
+function macWindowFrame() {
+  return { titleBarStyle: 'hidden', titleBarOverlay: true, trafficLightPosition: { ...trafficPos } };
+}
+/** rect: navigator.windowControlsOverlay.getTitlebarAreaRect() from the preload (css px = points) */
+function calibrateTrafficLights(w, rect) {
+  if (process.platform !== 'darwin' || !w || w.isDestroyed() || w.isFullScreen()) return;
+  if (!rect || !(rect.height > 0) || !(rect.height < 200)) return; // full screen / overlay hidden
+  const buttonH = rect.height - 2 * trafficPos.y;
+  if (!(buttonH >= 8 && buttonH <= 40)) return;
+  const y = trafficY(buttonH);
+  if (y === trafficPos.y) return;
+  trafficPos = { x: TRAFFIC_X, y };
+  w.setWindowButtonPosition({ ...trafficPos });
+}
+ipcMain.on('window:controlsOverlay', (e, rect) => calibrateTrafficLights(BrowserWindow.fromWebContents(e.sender), rect));
+
 /** @type {BrowserWindow | null} */
 let win = null;
 let bridge = null;
-/** figma shader sources: app-level cache in userData, sign-in tokens encrypted with the os keychain */
+/** figma shader sources: app-level cache in userData, sign-in tokens encrypted with the os keychain.
+ *  the synchronous safeStorage calls are deprecated in electron 45 and removed in 46: before moving
+ *  to 46, switch bridge/figma-shaders.mjs fileSecrets to encryptStringAsync / decryptStringAsync. */
 function bridgeOpts() {
   const { safeStorage } = require('electron');
   const box = safeStorage.isEncryptionAvailable() ? { encrypt: (t) => safeStorage.encryptString(t), decrypt: (b) => safeStorage.decryptString(b) } : null;
@@ -261,12 +294,10 @@ function createWindow() {
     // below this the panels would have to overlap (scripts/layout-lock.mjs checks this size)
     minWidth: 1100,
     minHeight: 700,
-    // mac: no title bar; the traffic lights float at the left end of the renderer's 40px title
-    // row (--titlebar-h), vertically centred, and the row reserves --traffic-w (80px) for them
-    // (src/ui/chrome/platform.ts, chrome.css). windows / linux keep the native frame.
-    ...(process.platform === 'darwin'
-      ? { titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 20, y: 14 } }
-      : {}),
+    // mac: no title bar; the native traffic lights float at the left end of the renderer's title
+    // row, vertically centred in it (macWindowFrame above, docs/ui-structure.md "Traffic lights").
+    // windows / linux keep the native frame.
+    ...(process.platform === 'darwin' ? macWindowFrame() : {}),
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,

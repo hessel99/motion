@@ -22,18 +22,80 @@ theme (light works through the same tokens). Screenshots: `docs/shots/ui-v3/`
  rail   left sidebar          the stage (middle)             right sidebar
 ```
 
-**Why a title bar row.** The mac app hides the native title bar (`titleBarStyle: hiddenInset`), so
+**Why a title bar row.** The mac app hides the native title bar (`titleBarStyle: 'hidden'`), so
 the traffic lights float over whatever the renderer draws at the window's top left. In v4 that was
-the rail and the left sidebar's header, and they collided. Now one 40px row spans the window: its
-left `--traffic-w` (80px) is reserved for the traffic lights (electron `trafficLightPosition`
-x 20 / y 14 centres them in the row), and everything else (rail, sidebars, stage) starts below
-it, so nothing can reach them at any window size. The frame is read once at startup
+the rail and the left sidebar's header, and they collided. Now one 52px row (`--titlebar-h`, as
+tall as a Notes / Finder toolbar) spans the window: its left end is reserved for the traffic lights
+(`--traffic-w` 94px, or the real width the app reports, see "Traffic lights" below) and everything
+else (rail, sidebars, stage) starts below it, so nothing can reach them at any window size. The
+frame is read once at startup
 (`src/ui/chrome/platform.ts` → `<html data-platform data-traffic-lights data-fullscreen>`):
 - **mac app**: the zone is reserved; **mac full screen** (no traffic lights): it collapses to a
   small gutter (main.cjs forwards `enter/leave-full-screen`).
 - **windows / linux app**: the native frame stays; the row is an in-app bar, no reserve.
 - **browser**: nothing reserved. `?platform=mac` emulates the mac frame with stand-in circles at
   the real position (`&fullscreen` for full screen), so screenshots prove there is no overlap.
+
+**Traffic lights (macOS).** Two things made them look unlike Notes, and both are fixed:
+1. *Old controls.* macOS 26 (Tahoe) gives an app the new window controls (and the new corner
+   radius) only when the app is linked against the macOS 26 SDK; older binaries run in a
+   compatibility mode with the previous look. Electron 33 was linked against the macOS 14.0 SDK;
+   the app now uses **Electron 45.3.1**, linked against the **macOS 26.5 SDK** (read from the
+   `LC_BUILD_VERSION` load command of the packaged `Electron Framework`, minimum macOS 13.0).
+2. *Not centred.* The old row was 40px with `trafficLightPosition {x: 20, y: 14}`. Electron puts the
+   *top of the button frame* at `y`, and AppKit's button frame is 16pt tall up to macOS 15 (14 × 16,
+   a 12px circle in it), so the circles' centre was at 14 + 8 = 22, 2px below the row's centre (20).
+   On macOS 26 the buttons have another size, so a fixed `y` cannot be right on both.
+
+The geometry now (`electron/main.cjs`, "mac title bar geometry"):
+- `titleBarStyle: 'hidden'`, `trafficLightPosition: {x: 20, y: 18}`, `titleBarOverlay: true`.
+- Row height `TITLEBAR_H = 52` (= `--titlebar-h`; keep both in sync). Close button's left edge at
+  `x = 20` (`--traffic-x`), like toolbar windows (Notes, Finder, Safari).
+- Centring: `y = floor((52 − buttonHeight) / 2)`; with the 16pt buttons of macOS 11–15 that is 18
+  (circle centre 18 + 8 = 26 = 52 / 2). The real button height is measured at runtime: with
+  `titleBarOverlay: true` Chromium's Window Controls Overlay is on, and on macOS its rect is the
+  buttons' box grown by the margin on every side, so `rect.height = buttonHeight + 2·y` and
+  `rect.x = 2·x + buttonsWidth`. The preload sends the rect (`window:controlsOverlay`), the main
+  process derives `buttonHeight` and, if it differs from 16, moves the buttons once with
+  `setWindowButtonPosition` (the new `y` is stable: re-measuring gives the same height). The move
+  can happen right as the window appears, on macOS 26 only if its buttons are not 16pt tall.
+- Why not `titleBarOverlay: {height: 52}` (Electron then centres the buttons itself): on macOS 26 a
+  custom overlay height together with a custom position mis-places the buttons (electron/electron
+  #49183, open, fix PR #51989 not merged), and without a custom position `x` would be the plain
+  title bar's ~7px, not a toolbar inset.
+- Why not a native toolbar (`NSToolbar`): Electron has no option for it (the toolbar-style 26px
+  corner radius of Tahoe needs native code, electron/electron #47514); the hidden title bar keeps
+  the standard window corner radius.
+- Reserved width: `max(--traffic-w, env(titlebar-area-x))`. `--traffic-w` = 20 + 54 (3 × 14px
+  buttons + 2 × 6px gaps) + 20 = 94px; in the app `env(titlebar-area-x)` is the overlay's left edge
+  (2·x + the real buttons' width), so larger Tahoe buttons widen the zone instead of touching the tabs.
+- Full screen: the buttons are hidden, `data-traffic-lights` goes away and the zone collapses to the
+  small gutter (the Window Controls Overlay rect is empty there, so nothing is re-measured).
+- Dragging: `.titlebar` is `-webkit-app-region: drag`; its buttons, tabs and inputs are `no-drag`, so
+  the empty parts (the traffic-light zone, the gap between "+" and the actions) move the window.
+  Double-click on a drag region is handled natively by Electron since v23 (no app code; an app
+  handler would toggle twice) and should follow System Settings → Desktop & Dock → "Double-click a
+  window's title bar to" (Zoom / Fill / Minimize / Do nothing).
+- Emulation: `?platform=mac` draws 12px stand-ins at `--traffic-x + 1`, `+21`, `+41`, centred in
+  the row (`chrome.css .tb-traffic > i`); the layout lock checks they are centred and reads the zone
+  from the tokens.
+
+**After an Electron or macOS update, check on the Mac** (nothing here can be seen from Linux):
+1. The traffic lights look like Notes': same size, glyphs on hover, same spacing (compare side by
+   side with Notes in light and dark mode).
+2. They are vertically centred in the title bar: the gap above the circles equals the gap below
+   (to the hairline under the bar), and the tabs' middle lines up with the circles' middle.
+3. The first tab starts clear of the green button (about 20px gap) and nothing jumps after start.
+4. Dragging the empty title bar (between "+" and the undo buttons, and next to the traffic lights)
+   moves the window; clicking a tab, "+", undo / redo, "…" and Share works and does not drag.
+5. Double-clicking the empty title bar does what System Settings → Desktop & Dock → "Double-click a
+   window's title bar to" says (try Zoom and Minimize); double-clicking a tab renames it instead.
+6. Full screen (green button or ⌃⌘F): the traffic-light zone collapses, the tabs move left; leaving
+   full screen puts the buttons back at the same place, centred.
+7. Minimise and restore, and resize the window: the buttons stay where they were (no jump to the
+   top-left corner).
+8. If the buttons are off: the numbers to change are `TITLEBAR_H` / `TRAFFIC_X` in
+   `electron/main.cjs` and `--titlebar-h` / `--traffic-x` / `--traffic-w` in `src/ui/tokens.css`.
 
 **The grid is locked.** Five regions in `grid-template-areas` (`chrome.css .app`), every size in
 `tokens.css` "app shell" (`--titlebar-h`, `--traffic-w`, `--rail-w`, `--left-w`, `--right-w`,
