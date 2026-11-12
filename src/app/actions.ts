@@ -213,6 +213,31 @@ async function importAep(buf: ArrayBuffer, name: string) {
   }
 }
 
+/** gif export with a progress toast; desktop saves into the Motion export folder */
+export async function exportGifFile() {
+  const { exportGif } = await import('../export/gif');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = 'Exporting GIF…';
+  document.body.appendChild(el);
+  try {
+    const blob = await exportGif({}, (d, n) => { el.textContent = `Exporting GIF… ${Math.round((d / n) * 100)}%`; });
+    const name = `${(st().project.name || 'motion').replace(/[^\w\- ]+/g, '_')} - ${st().comp.name}.gif`;
+    const nat = native() as any;
+    if (nat?.saveExport) {
+      const buf = new Uint8Array(await blob.arrayBuffer());
+      let bin = '';
+      for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+      const p = await nat.saveExport({ name, data: btoa(bin), encoding: 'base64' });
+      toast(`GIF saved: ${p}`);
+    } else { download(name, blob, 'image/gif'); toast(`GIF exported (${Math.round(blob.size / 1024)} KB)`); }
+    return blob;
+  } catch (e: any) {
+    toast('GIF export failed: ' + (e?.message ?? e), 'error');
+    throw e;
+  } finally { el.remove(); }
+}
+
 export async function exportLottie() {
   const m = await mod('../export/lottie.ts');
   if (!m) { toast('Lottie export not available yet', 'error'); return; }

@@ -379,8 +379,13 @@ export const TOOLS: ToolDef[] = [
   {
     name: 'export_video',
     description: 'Render the active composition to a video file. Desktop app: saved to the Movies/Videos "Motion" folder (returns the path). Browser: downloaded. Takes a while for long comps.',
-    inputSchema: { type: 'object', properties: { format: { enum: ['mp4', 'webm'] }, scale: { type: 'number', description: '0.5, 1 or 2 (resolution multiplier)' }, quality: { enum: ['low', 'medium', 'high'] } } },
+    inputSchema: { type: 'object', properties: { format: { enum: ['mp4', 'webm', 'gif'] }, scale: { type: 'number', description: '0.5, 1 or 2 (resolution multiplier)' }, quality: { enum: ['low', 'medium', 'high'] } } },
     run: async (a) => {
+      if (a.format === 'gif') {
+        const { exportGifFile } = await import('../app/actions');
+        const blob = await exportGifFile();
+        return text({ format: 'gif', bytes: blob.size });
+      }
       const { exportVideoDetailed } = await import('../export/video');
       const res = await exportVideoDetailed({ format: a.format ?? 'mp4', scale: a.scale ?? 1, quality: a.quality ?? 'high' });
       const name = `${(st().project.name || 'motion').replace(/[^\w\- ]+/g, '_')} - ${st().comp.name}.${res.format}`;

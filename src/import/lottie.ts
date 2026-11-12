@@ -652,6 +652,30 @@ function invertPathLayer(l: Layer, box: [number, number, number, number]): boole
 }
 
 /**
+ * a layer whose masks were built as nested [mask, rest] groups cannot be used inside a mask
+ * (masks inside a mask subtree are not applied). its alpha is the product of the mask
+ * coverages and the content alpha, so split it into pieces (each under a copy of the layer
+ * transform) that are applied as successive masks.
+ */
+function splitMasked(ctx: BuildCtx, l: Layer): Layer[] {
+  if (l.type !== 'group' || l.children.length !== 2) return [l];
+  const [m, rest] = l.children.map(id => ctx.layers[id]);
+  if (!m?.mask || !rest) return [l];
+  m.mask = false;
+  const wrap = (child: Layer) => {
+    const g = ctx.make('group', l.name, { anchor: cloneProp(l.props.anchor!), position: cloneProp(l.props.position!), scale: cloneProp(l.props.scale!), rotation: cloneProp(l.props.rotation!), opacity: cloneProp(l.props.opacity!) }, { inPoint: l.inPoint, outPoint: l.outPoint });
+    g.props.size = sprop([0, 0]);
+    g.props.fill = sprop([1, 1, 1, 0]);
+    child.parent = null;
+    ctx.adopt(g, [child]);
+    return g;
+  };
+  const restPieces = splitMasked(ctx, rest);
+  delete ctx.layers[l.id];
+  return [wrap(m), ...restPieces.map(wrap)];
+}
+
+/**
  * map ae parenting + stacking onto our tree, keeping the exact ae stacking order: every
  * visual layer is placed in stacking order inside copies of its parent chain (transform-only
  * groups, opacity 100, unbounded in/out). consecutive layers sharing a parent chain share the
@@ -738,6 +762,7 @@ export function assembleStacked(ctx: BuildCtx, src: SrcLayerX[], stats?: Assembl
       mw.props.size = sprop([0, 0]);
       mw.props.fill = sprop([1, 1, 1, 0]);
       const ml = matteSrc.build(matteSrc.tr);
+      let pieces: Layer[] = [];
       if (ml) {
         ml.inPoint = matteSrc.inPoint; ml.outPoint = matteSrc.outPoint;
         const inv = s.matte === 2 || s.matte === 4;
@@ -751,11 +776,27 @@ export function assembleStacked(ctx: BuildCtx, src: SrcLayerX[], stats?: Assembl
             put(wrapChain(content, ch.slice(k)));
             continue;
           }
-        }
-        ctx.adopt(mw, [wrapChain(ml, mch.slice(k))]);
+          pieces = [ml];
+        } else pieces = splitMasked(ctx, ml);
       }
       if (stats) stats.mattes++;
-      ctx.adopt(unit, [mw, wrapChain(content, ch.slice(k))]);
+      // one mask level per piece (alpha multiplies), content innermost
+      let cur = unit;
+      pieces.forEach((pc, i) => {
+        const w = i === 0 ? mw : ctx.make('group', matteSrc!.name, identityTR(), { inPoint: WIDE_IN, outPoint: WIDE_OUT, mask: true });
+        w.props.size = sprop([0, 0]);
+        w.props.fill = sprop([1, 1, 1, 0]);
+        ctx.adopt(w, [wrapChain(pc, mch.slice(k))]);
+        if (i === pieces.length - 1) ctx.adopt(cur, [w, wrapChain(content, ch.slice(k))]);
+        else {
+          const g = ctx.make('group', s.name + ' (matte ' + (i + 2) + ')', identityTR(), { inPoint: WIDE_IN, outPoint: WIDE_OUT });
+          g.props.size = sprop([0, 0]);
+          g.props.fill = sprop([1, 1, 1, 0]);
+          ctx.adopt(cur, [w, g]);
+          cur = g;
+        }
+      });
+      if (!pieces.length) ctx.adopt(unit, [mw, wrapChain(content, ch.slice(k))]);
       put(unit);
       continue;
     }
