@@ -1,0 +1,478 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 298,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Title sequence for product launch: quick flashes of three feature words each on a beat with energetic transitions, then product name slams in big with shockwave ring, then \"Available now\" pill button. Dark background, electric orange accent, 120 BPM, fast confident."
+  },
+  "result": "# Example: Kinetic type cut to music (120 BPM): words on downbeats, not on every beat\n> tags: music, song, beat, bpm, rhythm, audio, kinetic, type, words, lyric, drop, sync, energetic, promo, cut to the beat\n\n## Brief\n\"Kinetic type for our launch track (120 BPM, 4/4): MOVE / FAST / BREAK / THINGS, then the drop with the logo word NOW. 8 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"get_audio_analysis\",…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 0,
+  "input": {
+   "name": "styles/kinetic-type"
+  },
+  "result": "# Kinetic type\n> Words are the visuals: big type cuts on rhythm, scales, rotates and replaces itself in sync with the beat.\n\n**Use for**: quotes, lyric videos, manifestos, event promos, social ads without imagery.\n\n## Palette\n- High-contrast duo `#0E0E0E` / `#F5F5F0` with one accent `#FF3D2E` (or `#C6FF00`). Swap background and ink between beats for punch.\n\n## Shapes\nMostly text. Support with bars…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2652,
+  "ok": true,
+  "ms": 504,
+  "editorMs": 5,
+  "input": {
+   "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration": 10,
+    "background": "#0B0B0D",
+    "name": "Main"
+   },
+   "layers": [
+    {
+     "key": "bg",
+     "type": "rect",
+     "x": 0,
+     "y": 0,
+     "w": 1920,
+     "h": 1080,
+     "fill": "#0B0B0D"
+    },
+    {
+     "key": "flash",
+     "type": "rect",
+     "x": 0,
+     "y": 0,
+     "w": 1920,
+     "h": 1080,
+     "fill": "#FF5A1F",
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 0.5,
+        "v": 100,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 0.66,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 1.5,
+        "v": 100,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 1.66,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 2.5,
+        "v": 100,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 2.66,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 3.5,
+        "v": 100,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 3.62,
+        "v": 0,
+        "interp": "hold"
+       }
+      ]
+     }
+    },
+    {
+     "key": "w1",
+     "text": "40h battery",
+     "fontSize": 200,
+     "fontWeight": 900,
+     "tracking": -8,
+     "align": "center",
+     "center": [
+      960,
+      540
+     ],
+     "fill": "#F5F5F0",
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 0.5,
+        "v": 100,
+        "interp": "hold"
+       },
+       {
+        "t": 1.5,
+        "v": 0,
+        "interp": "hold"
+       }
+      ],
+      "scale": [
+       {
+        "t": 0.5,
+        "v": 125,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 0.72,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "w2",
+     "text": "Spatial audio",
+     "fontSize": 200,
+     "fontWeight": 900,
+     "tracking": -8,
+     "align": "center",
+     "center": [
+      960,
+      540
+     ],
+     "fill": "#F5F5F0",
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 1.5,
+        "v": 100,
+        "interp": "hold"
+       },
+       {
+        "t": 2.5,
+        "v": 0,
+        "interp": "hold"
+       }
+      ],
+      "scale": [
+       {
+        "t": 1.5,
+        "v": 125,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 1.72,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "w3",
+     "text": "Pure silence",
+     "fontSize": 200,
+     "fontWeight": 900,
+     "tracking": -8,
+     "align": "center",
+     "center": [
+      960,
+      540
+     ],
+     "fill": "#F5F5F0",
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 2.5,
+        "v": 100,
+        "interp": "hold"
+       },
+       {
+        "t": 3.5,
+        "v": 0,
+        "interp": "hold"
+       }
+      ],
+      "scale": [
+       {
+        "t": 2.5,
+        "v": 125,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 2.72,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "ring",
+     "type": "ellipse",
+     "x": 760,
+     "y": 220,
+     "w": 400,
+     "h": 400,
+     "fill": "#00000000",
+     "stroke": "#FF5A1F",
+     "strokeWidth": 10,
+     "animate": {
+      "scale": [
+       {
+        "t": 3.5,
+        "v": 30,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 4.2,
+        "v": 260
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 3.5,
+        "v": 100,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 4.2,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "pulse",
+     "text": "PULSE 2",
+     "fontSize": 300,
+     "fontWeight": 900,
+     "tracking": -14,
+     "align": "center",
+     "center": [
+      960,
+      420
+     ],
+     "fill": "#F5F5F0",
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 3.5,
+        "v": 100,
+        "interp": "hold"
+       }
+      ],
+      "scale": [
+       {
+        "t": 3.5,
+        "v": 180,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 3.85,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "pillBg",
+     "type": "rect",
+     "x": 680,
+     "y": 630,
+     "w": 560,
+     "h": 140,
+     "radius": 70,
+     "fill": "#FF5A1F",
+     "animate": {
+      "scale": [
+       {
+        "t": 7,
+        "v": 0,
+        "ease": "spring:0.35"
+       },
+       {
+        "t": 7.5,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "pillText",
+     "text": "Available now",
+     "fontSize": 60,
+     "fontWeight": 800,
+     "tracking": -1,
+     "align": "center",
+     "center": [
+      960,
+      700
+     ],
+     "fill": "#0B0B0D",
+     "animate": {
+      "scale": [
+       {
+        "t": 7,
+        "v": 0,
+        "ease": "spring:0.35"
+       },
+       {
+        "t": 7.5,
+        "v": 100
+       }
+      ]
+     }
+    }
+   ],
+   "markers": [
+    {
+     "t": 0.5,
+     "label": "Beat 2"
+    },
+    {
+     "t": 1.5,
+     "label": "Beat 4"
+    },
+    {
+     "t": 2.5,
+     "label": "Beat 6"
+    },
+    {
+     "t": 3.5,
+     "label": "Slam"
+    },
+    {
+     "t": 7,
+     "label": "Available now"
+    }
+   ]
+  },
+  "result": "{\"summary\":\"9 created, 0 updated, 13 keyframe tracks; animation ends 7.5s\",\"ids\":{\"bg\":\"l_03jm2\",\"flash\":\"l_03jm3\",\"w1\":\"l_03jm4\",\"w2\":\"l_03jm5\",\"w3\":\"l_03jm6\",\"ring\":\"l_03jm7\",\"pulse\":\"l_03jm8\",\"pillBg\":\"l_03jm9\",\"pillText\":\"l_03jma\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 675,
+  "editorMs": 507,
+  "input": {
+   "times": [
+    0.3,
+    0.7,
+    1.7,
+    2.7,
+    3.6,
+    4,
+    6.5,
+    8
+   ]
+  },
+  "result": "8 frames left→right, top→bottom at 0.3s, 0.7s, 1.7s, 2.7s, 3.6s, 4s, 6.5s, 8s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/10150373-64c8-4ef7-928e-de9ecdbda2bf/tool-results/mcp-motion-blob-1794513048510-5juald.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 156,
+  "editorMs": 17,
+  "input": {},
+  "result": "score 84/100 (timing 94, choreography 94, richness 84)\n1. [medium] 7 elements and 7 moves for 10s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch\n   → secondary_motion {\"ids\":[\"l_03jm7\"],\"overshoot\":0.1,\"segments\":\"all\"}\n2. [low] 3 text layers cascade 1 s apart (2 s in total): items overlap, 0.05-0.12 s apart, the whole cascade …"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 161,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "layers": [
+    {
+     "key": "rule",
+     "type": "rect",
+     "x": 660,
+     "y": 556,
+     "w": 600,
+     "h": 10,
+     "fill": "#FF5A1F",
+     "animate": {
+      "scale": [
+       {
+        "t": 4,
+        "v": 0,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 4.5,
+        "v": 100
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"1 created, 0 updated, 1 keyframe tracks; animation ends 4.5s\",\"ids\":{\"rule\":\"l_03jmb\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 8,
+  "input": {},
+  "result": "score 87/100 (choreography 94, richness 84)\n1. [medium] 8 elements and 8 moves for 10s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch\n   → secondary_motion {\"ids\":[\"l_03jm7\"],\"overshoot\":0.1,\"segments\":\"all\"}\n2. [low] 3 text layers cascade 1 s apart (2 s in total): items overlap, 0.05-0.12 s apart, the whole cascade ≤ 0.6 s\n   …"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 414,
+  "editorMs": 315,
+  "input": {
+   "times": [
+    4.3,
+    5,
+    7.2,
+    9
+   ]
+  },
+  "result": "4 frames left→right, top→bottom at 4.3s, 5s, 7.2s, 9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/10150373-64c8-4ef7-928e-de9ecdbda2bf/tool-results/mcp-motion-blob-1794513052979-g8u012.jpg]"
+ }
+]

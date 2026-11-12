@@ -1,0 +1,63 @@
+- Camera · fixed [group] #ffffff a0
+  - Title [text] box 160,112,1200,80 #14161a "Revenue by quarter" Inter 64px w700
+  - Subtitle [text] box 160,186,1200,44 #6b7280 "Quarterly revenue, $M" Inter 28px w400
+- Camera · depth 1 [group] #ffffff a0
+  - Axis line [path] box 200,880,1521,1 #000000 a0 stroke #14161a 2px
+  - Bar Q1 [rect] box 300,640,240,240 #cfd3da
+  - Bar Q2 [rect] box 660,520,240,360 #cfd3da
+  - Bar Q3 [rect] box 1020,580,240,300 #cfd3da
+  - Bar Q4 (highlight) [rect] box 1380,340,240,540 #2563eb
+  - Value Q1 [text] box 300,582,240,48 #14161a "$12M" Inter 36px w600
+  - Value Q2 [text] box 660,462,240,48 #14161a "$18M" Inter 36px w600
+  - Value Q3 [text] box 1020,522,240,48 #14161a "$15M" Inter 36px w600
+  - Value Q4 (highlight) [text] box 1380,282,240,48 #2563eb "$27M" Inter 40px w700
+  - Quarter Q1 [text] box 300,902,240,40 #4b5563 "Q1" Inter 28px w500
+  - Quarter Q2 [text] box 660,902,240,40 #4b5563 "Q2" Inter 28px w500
+  - Quarter Q3 [text] box 1020,902,240,40 #4b5563 "Q3" Inter 28px w500
+  - Quarter Q4 [text] box 1380,902,240,40 #2563eb "Q4" Inter 28px w600
+
+comp 1920x1080 6s @30fps, background #f5f4f0
+"Title" (text l_03jm2)
+  position: 0s [760,168] ─Quart Out→ 0.6s [760,152]
+  opacity: 0s 0 ─Expo Out→ 0.3s 100
+"Subtitle" (text l_03jm3)
+  position: 0.15s [760,220] ─Quart Out→ 0.75s [760,208]
+  opacity: 0.15s 0 ─Expo Out→ 0.45s 100
+"Camera · depth 1" (group l_03jmi)
+  position: 2.7s [960,540] ─Sine In Out→ 6s [960,540]
+  scale: 2.7s 100 ─Sine In Out→ 6s 102
+"Axis line" (path l_03jm4)
+  trimStart: 0s 0
+  trimEnd: 0s 0 ─Ease In Out→ 0.6s 100
+"Bar Q1" (rect l_03jm5)
+  scale: 0.7s [100,0] ─Quart Out→ 1.5s 100
+"Bar Q2" (rect l_03jm6)
+  scale: 0.9s [100,0] ─Expo Out→ 1.7s 100
+"Bar Q3" (rect l_03jm7)
+  scale: 1.1s [100,0] ─Expo Out→ 1.9s 100
+"Bar Q4 (highlight)" (rect l_03jm8)
+  scale: 1.3s [100,0] ─Expo Out→ 2.1s 100 ─Ease In Out→ 2.35s [100,104] ─Ease In Out→ 2.7s 100
+"Value Q1" (text l_03jm9)
+  position: 1.2s [420,618] ─Expo Out→ 1.6s [420,606]
+  opacity: 1.2s 0 ─Expo Out→ 1.4s 100
+"Value Q2" (text l_03jma)
+  position: 1.4s [780,498] ─Expo Out→ 1.8s [780,486]
+  opacity: 1.4s 0 ─Expo Out→ 1.6s 100
+"Value Q3" (text l_03jmb)
+  position: 1.6s [1140,558] ─Expo Out→ 2s [1140,546]
+  opacity: 1.6s 0 ─Expo Out→ 1.8s 100
+"Value Q4 (highlight)" (text l_03jmc)
+  position: 1.8s [1500,318] ─Expo Out→ 2.2s [1500,306]
+  opacity: 1.8s 0 ─Expo Out→ 2s 100
+"Quarter Q1" (text l_03jmd)
+  position: 0.7s [420,930] ─Expo Out→ 1.1s [420,922]
+  opacity: 0.7s 0 ─Expo Out→ 0.9s 100
+"Quarter Q2" (text l_03jme)
+  position: 0.9s [780,930] ─Expo Out→ 1.3s [780,922]
+  opacity: 0.9s 0 ─Expo Out→ 1.1s 100
+"Quarter Q3" (text l_03jmf)
+  position: 1.1s [1140,930] ─Expo Out→ 1.5s [1140,922]
+  opacity: 1.1s 0 ─Expo Out→ 1.3s 100
+"Quarter Q4" (text l_03jmg)
+  position: 1.3s [1500,930] ─Expo Out→ 1.7s [1500,922]
+  opacity: 1.3s 0 ─Expo Out→ 1.5s 100

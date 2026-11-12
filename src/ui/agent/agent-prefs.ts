@@ -18,6 +18,8 @@ export const agentPrefs = {
   autoQuick: pref('autoQuick', 'sonnet'),
   /** storyboards: 'ask' = wait for the user's approval, 'auto' = build right away (read by src/agent/storyboard.ts) */
   storyboard: (pref('storyboard', 'ask') === 'auto' ? 'auto' : 'ask') as 'ask' | 'auto',
+  /** taste layer: the motion critic polishes builds automatically ('on' | 'off'; read by src/agent/taste.ts) */
+  taste: (pref('taste', 'on') === 'off' ? 'off' : 'on') as 'on' | 'off',
   /** after a turn that animated something: 'play' the changed range once, park the playhead at its
    *  'end', or leave it ('off'). see playResult in ../agent-bridge.ts */
   afterTurn: ((v: string) => (v === 'end' || v === 'off' ? v : 'play'))(pref('afterTurn', 'play')) as 'play' | 'end' | 'off',

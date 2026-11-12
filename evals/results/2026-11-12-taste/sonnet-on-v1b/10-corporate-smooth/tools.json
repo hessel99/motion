@@ -1,0 +1,554 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1584,
+  "ok": true,
+  "ms": 149,
+  "editorMs": 3,
+  "input": {
+   "comp": {
+    "background": "#1b2430"
+   },
+   "layers": [
+    {
+     "key": "panel",
+     "name": "Panel",
+     "type": "rect",
+     "x": 120,
+     "y": 800,
+     "w": 680,
+     "h": 150,
+     "fill": "#8fa3b8",
+     "opacity": 0,
+     "radius": 4,
+     "animate": {
+      "opacity": [
+       {
+        "t": 0.6,
+        "v": 0,
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 1.8,
+        "v": 28
+       },
+       {
+        "t": 4.9,
+        "v": 28,
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 5.7,
+        "v": 0
+       }
+      ],
+      "position": [
+       {
+        "t": 0.6,
+        "v": [
+         400,
+         875
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 1.8,
+        "v": [
+         460,
+         875
+        ],
+        "ease": "Linear"
+       },
+       {
+        "t": 4.9,
+        "v": [
+         460,
+         875
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 5.7,
+        "v": [
+         400,
+         875
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "line",
+     "name": "Accent Line",
+     "type": "rect",
+     "x": 120,
+     "y": 790,
+     "w": 680,
+     "h": 4,
+     "fill": "#6fa8dc",
+     "anchor": "left",
+     "animate": {
+      "scale": [
+       {
+        "t": 0.2,
+        "v": [
+         0,
+         100
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 1.4,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Linear"
+       },
+       {
+        "t": 5,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 5.8,
+        "v": [
+         0,
+         100
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "textclip",
+     "name": "Text Mask",
+     "type": "group",
+     "clip": true,
+     "x": 160,
+     "y": 820,
+     "w": 600,
+     "h": 110,
+     "children": [
+      {
+       "key": "name",
+       "name": "Name",
+       "type": "text",
+       "text": {
+        "content": "Dr. Amelia Hart",
+        "fontFamily": "Inter",
+        "fontSize": 46,
+        "fontWeight": 600
+       },
+       "fill": "#f2f6fa",
+       "x": 0,
+       "y": 0,
+       "w": 600,
+       "h": 58,
+       "animate": {
+        "position": [
+         {
+          "t": 1.1,
+          "v": [
+           300,
+           100
+          ],
+          "ease": "Cubic In Out"
+         },
+         {
+          "t": 2,
+          "v": [
+           300,
+           29
+          ],
+          "ease": "Linear"
+         },
+         {
+          "t": 4.7,
+          "v": [
+           300,
+           29
+          ],
+          "ease": "Cubic In Out"
+         },
+         {
+          "t": 5.4,
+          "v": [
+           300,
+           -40
+          ]
+         }
+        ]
+       }
+      },
+      {
+       "key": "title",
+       "name": "Title",
+       "type": "text",
+       "text": {
+        "content": "Head of Research, Larkspur Labs",
+        "fontFamily": "Inter",
+        "fontSize": 26,
+        "fontWeight": 400
+       },
+       "fill": "#b8c7d6",
+       "x": 0,
+       "y": 66,
+       "w": 600,
+       "h": 36,
+       "animate": {
+        "position": [
+         {
+          "t": 1.3,
+          "v": [
+           300,
+           150
+          ],
+          "ease": "Cubic In Out"
+         },
+         {
+          "t": 2.2,
+          "v": [
+           300,
+           84
+          ],
+          "ease": "Linear"
+         },
+         {
+          "t": 4.8,
+          "v": [
+           300,
+           84
+          ],
+          "ease": "Cubic In Out"
+         },
+         {
+          "t": 5.5,
+          "v": [
+           300,
+           -40
+          ]
+         }
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 5 keyframe tracks; animation ends 5.8s\",\"ids\":{\"panel\":\"l_03jm2\",\"line\":\"l_03jm3\",\"name\":\"l_03jm5\",\"title\":\"l_03jm6\",\"textclip\":\"l_03jm4\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 208,
+  "editorMs": 188,
+  "input": {
+   "times": [
+    0.5,
+    1,
+    1.6,
+    2.4,
+    5.2,
+    5.9
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 1s, 1.6s, 2.4s, 5.2s, 5.9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/3336e7e0-b978-41fd-8fa3-976fd5f8b1df/tool-results/mcp-motion-blob-1794512685914-w340dv.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 416,
+  "ok": true,
+  "ms": 8,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm5",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 1.1,
+       "v": [
+        300,
+        175
+       ],
+       "ease": "Cubic In Out"
+      },
+      {
+       "t": 2,
+       "v": [
+        300,
+        29
+       ],
+       "ease": "Linear"
+      },
+      {
+       "t": 4.7,
+       "v": [
+        300,
+        29
+       ],
+       "ease": "Cubic In Out"
+      },
+      {
+       "t": 5.4,
+       "v": [
+        300,
+        -50
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm6",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 1.3,
+       "v": [
+        300,
+        190
+       ],
+       "ease": "Cubic In Out"
+      },
+      {
+       "t": 2.2,
+       "v": [
+        300,
+        84
+       ],
+       "ease": "Linear"
+      },
+      {
+       "t": 4.8,
+       "v": [
+        300,
+        84
+       ],
+       "ease": "Cubic In Out"
+      },
+      {
+       "t": 5.5,
+       "v": [
+        300,
+        -50
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 2 tracks on 2 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 25,
+  "ok": true,
+  "ms": 75,
+  "editorMs": 50,
+  "input": {
+   "times": [
+    0.5,
+    1.4,
+    3,
+    5.1
+   ]
+  },
+  "result": "4 frames left→right, top→bottom at 0.5s, 1.4s, 3s, 5.1s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/3336e7e0-b978-41fd-8fa3-976fd5f8b1df/tool-results/mcp-motion-blob-1794512690603-qgclsz.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 407,
+  "ok": true,
+  "ms": 99,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm2",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0.6,
+       "v": [
+        400,
+        875
+       ],
+       "ease": "Quart Out"
+      },
+      {
+       "t": 1.3,
+       "v": [
+        460,
+        875
+       ],
+       "ease": "Linear"
+      },
+      {
+       "t": 4.9,
+       "v": [
+        460,
+        875
+       ],
+       "ease": "Cubic In Out"
+      },
+      {
+       "t": 5.7,
+       "v": [
+        400,
+        875
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.2,
+       "v": [
+        0,
+        100
+       ],
+       "ease": "Quart Out"
+      },
+      {
+       "t": 1.4,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Linear"
+      },
+      {
+       "t": 5,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Cubic In Out"
+      },
+      {
+       "t": 5.8,
+       "v": [
+        0,
+        100
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 2 tracks on 2 layers"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 114,
+  "editorMs": 3,
+  "input": {},
+  "result": "score 76/100 (timing 92, readability 64)\n1. [high] \"Name\" and \"Title\" overlap for 2.33 s (0s–6s): let the outgoing text clear (or move apart) before the next arrives\n   → retime {\"ids\":[\"l_03jm6\"],\"offset\":2.38}\n2. [low] \"Panel\".position exit takes 0.8 s for 60 px: sluggish, ~0.21 s fits (handbook timing table)\n   → retime {\"ids\":[\"l_03jm2\"],\"pivot\":4.9,\"scale\":0.26}\n3. [low] \"Title\".position move…"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 414,
+  "ok": true,
+  "ms": 212,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm6",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 1.3,
+       "v": [
+        300,
+        190
+       ],
+       "ease": "Quart Out"
+      },
+      {
+       "t": 1.9,
+       "v": [
+        300,
+        84
+       ],
+       "ease": "Linear"
+      },
+      {
+       "t": 4.8,
+       "v": [
+        300,
+        84
+       ],
+       "ease": "Cubic In Out"
+      },
+      {
+       "t": 5.5,
+       "v": [
+        300,
+        -50
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0.6,
+       "v": [
+        400,
+        875
+       ],
+       "ease": "Quart Out"
+      },
+      {
+       "t": 1.3,
+       "v": [
+        460,
+        875
+       ],
+       "ease": "Linear"
+      },
+      {
+       "t": 4.9,
+       "v": [
+        460,
+        875
+       ],
+       "ease": "Cubic In Out"
+      },
+      {
+       "t": 5.4,
+       "v": [
+        400,
+        875
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 2 tracks on 2 layers"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 104,
+  "editorMs": 8,
+  "input": {},
+  "result": "score 77/100 (timing 94, readability 64)\n1. [high] \"Name\" and \"Title\" overlap for 2.67 s (0s–6s): let the outgoing text clear (or move apart) before the next arrives\n   → retime {\"ids\":[\"l_03jm6\"],\"offset\":2.72}\n2. [low] nothing moves between 2s and 4.7s (2.7 s): hold ≤ 2 s, then the next beat (or keep a secondary move alive)\n   → retime {\"from\":4.69,\"offset\":-0.9}"
+ }
+]

@@ -1,0 +1,199 @@
+{
+ "run": {
+  "id": "10-corporate-smooth",
+  "name": "10-corporate-smooth",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 76,
+    "sub": {
+     "timing": 95.8,
+     "easing": 64.8,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 35.2,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:monotone-ease",
+     "medium:entrance-ease",
+     "low:timing-range"
+    ],
+    "ms": 29.1
+   },
+   "after": {
+    "score": 76,
+    "sub": {
+     "timing": 95.8,
+     "easing": 64.8,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 35.2,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:monotone-ease",
+     "medium:entrance-ease",
+     "low:timing-range"
+    ],
+    "ms": 29.1
+   }
+  },
+  "wallMs": 21792,
+  "timedOut": false,
+  "turns": 3,
+  "costUsd": 0.0491066,
+  "durationMs": 20025,
+  "usage": {
+   "input": 92498,
+   "cached": 88266,
+   "output": 2336
+  },
+  "errors": [],
+  "toolCalls": 2,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the lower third as a 6-second composition on a dark blue-grey background. I checked it in a six-frame contact sheet and the timing and layout look right. I didn't run any other checks.\n\n- **Accent line:** a thin pale-blue line (`Accent Line`) extends from the left edge from 0.2 to 1.4s.\n- **Panel:** a translucent slate panel (`Panel`) glides in from the left and fades up from 0.5 to 1.6s.\n- **Name and title:** \"Dr. Amelia Hart\" (`Name`, white) rises into its clipped mask from 1.0s. \"Head of Research, Larkspur Labs\" (`Title`, soft blue-grey) follows from 1.25s, each over 1s.\n- **Hold:** everything sits fully on screen from about 2.3s until 4.8s.\n- **Exit:** the text slides up and out of its masks from 5.4s, then the panel and line retract and fade, fully clear by 5.8s.\n\nEverything uses long Cubic In Out eases, with no overshoot or bounce. The lower third sits at the lower left, inside the title-safe area.\n\nI can add a subtle shadow or a thin vertical accent bar on the panel, or shorten the hold to leave more room for the interview footage."
+ },
+ "metrics": {
+  "layers": 6,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "rect": 2,
+   "group": 2,
+   "text": 2
+  },
+  "groups": 2,
+  "animatedLayers": 4,
+  "keys": 28,
+  "segments": 14,
+  "easesUsed": {
+   "Cubic In Out": 14
+  },
+  "distinctEases": 1,
+  "easeFamilies": 1,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#4a5d75",
+   "#9bbce0",
+   "#f2f6fa",
+   "#c3d1e2",
+   "#1b2430"
+  ],
+  "keyCoverage": 0.525,
+  "visualActivity": 0.503,
+  "firstMotion": 0.2,
+  "lastMotion": 5.8,
+  "endHold": 0.2,
+  "longestHold": 2.613,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.67,
+  "exits": 3,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.15,
+  "toolErrors": 0,
+  "toolCalls": 2
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "placed in the lower third",
+    "type": "lowerThird",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "animates out by the end",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "hold in the middle (≥1.5s without key motion)",
+    "type": "holdMin",
+    "pass": true
+   },
+   {
+    "text": "translucent panel (opacity < 100 or alpha)",
+    "type": "translucent",
+    "pass": true
+   },
+   {
+    "text": "accent line extends",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 8
+ },
+ "video": null
+}

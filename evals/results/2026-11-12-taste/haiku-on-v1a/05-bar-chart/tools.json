@@ -1,0 +1,419 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 199,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "animated bar chart revenue by quarter, axis draws first, bars grow from baseline one after another, value labels fade in, highlighted accent bar with pop, title top-left"
+  },
+  "result": "# Example: Data chart, bars grow from the baseline\n> tags: chart, bar, data, graph, statistics, numbers, revenue, growth, quarter, infographic, data-viz, report, kpi\n\n## Brief\n\"Animated bar chart: Revenue by quarter: Q1 12, Q2 18, Q3 15, Q4 27 ($M). Axis first, bars grow one after another, labels above, Q4 highlighted. 6 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": …"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3407,
+  "ok": true,
+  "ms": 83,
+  "editorMs": 3,
+  "input": "{\"comp\":{\"duration\":6,\"background\":\"#FFFFFF\"},\"layers\":[{\"key\":\"title\",\"type\":\"text\",\"text\":{\"content\":\"Revenue by quarter\",\"fontSize\":64,\"fontWeight\":800,\"align\":\"left\"},\"x\":160,\"y\":100,\"w\":1200,\"h\":80,\"fill\":\"#0F172A\",\"enter\":{\"t\":0.05,\"duration\":0.6,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":24}}},{\"key\":\"subtitle\",\"type\":\"text\",\"text\":{\"content\":\"Quarterly revenue, $M\",\"fontSize\":30,\"fontWeight\":500,\"align\":\"left\"},\"x\":160,\"y\":190,\"w\":1000,\"h\":44,\"fill\":\"#64748B\",\"enter\":{\"t\":0.2,\"duration\":0.6,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":16}}},{\"key\":\"axis\",\"type\":\"rect\",\"x\":160,\"y\":898,\"w\":1600,\"h\":4,\"radius\":2,\"fill\":\"#94A3B8\",\"anchor\":\"left\",\"animate\":{\"scale\":[{\"t\":0.2,\"v\":[0,100],\"ease\":\"Quart Out\"},{\"t\":0.8,\"v\":[100,100]}]}},{\"key\":\"q1\",\"type\":\"rect\",\"x\":380,\"y\":660,\"w\":200,\"h\":240,\"radius\":[10,10,0,0],\"fill\":\"#CBD5E1\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":0.9,\"v\":[100,0],\"ease\":\"Quart Out\"},{\"t\":1.5,\"v\":[100,100]}]}},{\"key\":\"q2\",\"type\":\"rect\",\"x\":700,\"y\":540,\"w\":200,\"h\":360,\"radius\":[10,10,0,0],\"fill\":\"#CBD5E1\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":1.05,\"v\":[100,0],\"ease\":\"Quart Out\"},{\"t\":1.65,\"v\":[100,100]}]}},{\"key\":\"q3\",\"type\":\"rect\",\"x\":1020,\"y\":600,\"w\":200,\"h\":300,\"radius\":[10,10,0,0],\"fill\":\"#CBD5E1\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":1.2,\"v\":[100,0],\"ease\":\"Quart Out\"},{\"t\":1.8,\"v\":[100,100]}]}},{\"key\":\"q4\",\"type\":\"rect\",\"x\":1340,\"y\":360,\"w\":200,\"h\":540,\"radius\":[10,10,0,0],\"fill\":\"#2563EB\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":1.35,\"v\":[100,0],\"ease\":\"Quart Out\"},{\"t\":1.95,\"v\":[100,100],\"ease\":\"Cubic In Out\"},{\"t\":2.25,\"v\":[100,104],\"ease\":\"Cubic In Out\"},{\"t\":2.55,\"v\":[100,100]}]}},{\"key\":\"v1\",\"type\":\"text\",\"text\":{\"content\":\"12\",\"fontSize\":48,\"fontWeight\":700,\"align\":\"center\"},\"center\":[480,600],\"w\":200,\"h\":60,\"fill\":\"#334155\",\"enter\":{\"t\":1.4,\"duration\":0.4,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":12}}},{\"key\":\"v2\",\"type\":\"text\",\"text\":{\"content\":\"18\",\"fontSize\":48,\"fontWeight\":700,\"align\":\"center\"},\"center\":[800,480],\"w\":200,\"h\":60,\"fill\":\"#334155\",\"enter\":{\"t\":1.55,\"duration\":0.4,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":12}}},{\"key\":\"v3\",\"type\":\"text\",\"text\":{\"content\":\"15\",\"fontSize\":48,\"fontWeight\":700,\"align\":\"center\"},\"center\":[1120,540],\"w\":200,\"h\":60,\"fill\":\"#334155\",\"enter\":{\"t\":1.7,\"duration\":0.4,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":12}}},{\"key\":\"v4\",\"type\":\"text\",\"text\":{\"content\":\"27\",\"fontSize\":64,\"fontWeight\":800,\"align\":\"center\"},\"center\":[1440,300],\"w\":200,\"h\":80,\"fill\":\"#2563EB\",\"enter\":{\"t\":1.95,\"duration\":0.5,\"ease\":\"spring:0.4\",\"from\":{\"opacity\":0,\"scale\":60}}},{\"key\":\"x1\",\"type\":\"text\",\"text\":{\"content\":\"Q1\",\"fontSize\":34,\"fontWeight\":500,\"align\":\"center\"},\"center\":[480,950],\"w\":200,\"h\":50,\"fill\":\"#64748B\",\"enter\":{\"t\":0.9,\"duration\":0.4,\"from\":{\"opacity\":0}}},{\"key\":\"x2\",\"type\":\"text\",\"text\":{\"content\":\"Q2\",\"fontSize\":34,\"fontWeight\":500,\"align\":\"center\"},\"center\":[800,950],\"w\":200,\"h\":50,\"fill\":\"#64748B\",\"enter\":{\"t\":1.05,\"duration\":0.4,\"from\":{\"opacity\":0}}},{\"key…",
+  "result": "{\"summary\":\"15 created, 0 updated, 21 keyframe tracks; animation ends 2.55s\",\"ids\":{\"title\":\"l_03jm2\",\"subtitle\":\"l_03jm3\",\"axis\":\"l_03jm4\",\"q1\":\"l_03jm5\",\"q2\":\"l_03jm6\",\"q3\":\"l_03jm7\",\"q4\":\"l_03jm8\",\"v1\":\"l_03jm9\",\"v2\":\"l_03jma\",\"v3\":\"l_03jmb\",\"v4\":\"l_03jmc\",\"x1\":\"l_03jmd\",\"x2\":\"l_03jme\",\"x3\":\"l_03jmf\",\"x4\":\"l_03jmg\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 86,
+  "editorMs": 69,
+  "input": {
+   "times": [
+    0.5,
+    1.2,
+    1.7,
+    2.3,
+    3.5,
+    5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 1.2s, 1.7s, 2.3s, 3.5s, 5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/447df077-23eb-4fe4-98c1-b68adbf28b79/tool-results/mcp-motion-blob-1794511873961-wmn23x.jpg]"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 15,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "times": [
+    3.5
+   ]
+  },
+  "result": "3.5s:\n  title, subtitle, x1 +3: outside title-safe area (10% margin)"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jm2",
+   "props": {
+    "position": [
+     192,
+     100
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm3",
+   "props": {
+    "position": [
+     192,
+     190
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 15,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "times": [
+    3.5
+   ]
+  },
+  "result": "3.5s:\n  title, subtitle, x1 +3: outside title-safe area (10% margin)"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm2",
+   "props": {
+    "position": [
+     792,
+     140
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm3",
+   "props": {
+    "position": [
+     692,
+     212
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 15,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "times": [
+    3.5
+   ]
+  },
+  "result": "3.5s:\n  title, subtitle, x1 +3: outside title-safe area (10% margin)"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 32,
+  "editorMs": 17,
+  "input": {
+   "t": 3.5,
+   "maxSize": 640
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/447df077-23eb-4fe4-98c1-b68adbf28b79/tool-results/mcp-motion-blob-1794511881679-syo4zp.png]"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 511,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "layers": [
+    {
+     "key": "title",
+     "type": "text",
+     "text": {
+      "content": "Revenue by quarter",
+      "fontSize": 64,
+      "fontWeight": 800,
+      "align": "left"
+     },
+     "x": 200,
+     "y": 100,
+     "w": 1200,
+     "h": 80,
+     "fill": "#0F172A",
+     "enter": {
+      "t": 0.05,
+      "duration": 0.6,
+      "ease": "Quart Out",
+      "from": {
+       "opacity": 0,
+       "dy": 24
+      }
+     }
+    },
+    {
+     "key": "subtitle",
+     "type": "text",
+     "text": {
+      "content": "Quarterly revenue, $M",
+      "fontSize": 30,
+      "fontWeight": 500,
+      "align": "left"
+     },
+     "x": 200,
+     "y": 190,
+     "w": 1000,
+     "h": 44,
+     "fill": "#64748B",
+     "enter": {
+      "t": 0.2,
+      "duration": 0.6,
+      "ease": "Quart Out",
+      "from": {
+       "opacity": 0,
+       "dy": 16
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 2 updated, 4 keyframe tracks; animation ends 0.8s\",\"ids\":{\"title\":\"l_03jm2\",\"subtitle\":\"l_03jm3\"}}"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 15,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "times": [
+    3.5
+   ]
+  },
+  "result": "3.5s:\n  title, x1, x2 +2: outside title-safe area (10% margin)"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 832,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "key": "x1",
+     "type": "text",
+     "text": {
+      "content": "Q1",
+      "fontSize": 34,
+      "fontWeight": 500,
+      "align": "center"
+     },
+     "center": [
+      480,
+      935
+     ],
+     "w": 200,
+     "h": 50,
+     "fill": "#64748B",
+     "enter": {
+      "t": 0.9,
+      "duration": 0.4,
+      "from": {
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "x2",
+     "type": "text",
+     "text": {
+      "content": "Q2",
+      "fontSize": 34,
+      "fontWeight": 500,
+      "align": "center"
+     },
+     "center": [
+      800,
+      935
+     ],
+     "w": 200,
+     "h": 50,
+     "fill": "#64748B",
+     "enter": {
+      "t": 1.05,
+      "duration": 0.4,
+      "from": {
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "x3",
+     "type": "text",
+     "text": {
+      "content": "Q3",
+      "fontSize": 34,
+      "fontWeight": 500,
+      "align": "center"
+     },
+     "center": [
+      1120,
+      935
+     ],
+     "w": 200,
+     "h": 50,
+     "fill": "#64748B",
+     "enter": {
+      "t": 1.2,
+      "duration": 0.4,
+      "from": {
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "x4",
+     "type": "text",
+     "text": {
+      "content": "Q4",
+      "fontSize": 34,
+      "fontWeight": 700,
+      "align": "center"
+     },
+     "center": [
+      1440,
+      935
+     ],
+     "w": 200,
+     "h": 50,
+     "fill": "#2563EB",
+     "enter": {
+      "t": 1.35,
+      "duration": 0.4,
+      "from": {
+       "opacity": 0
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 4 updated, 4 keyframe tracks; animation ends 1.55s\",\"ids\":{\"x1\":\"l_03jmd\",\"x2\":\"l_03jme\",\"x3\":\"l_03jmf\",\"x4\":\"l_03jmg\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 9,
+  "input": {},
+  "result": "score 80/100 (timing 64)\n1. [high] nothing moves for the last 3.45 s (motion ends 2.55s of 6s): keep the brief's length and carry the hold with a slow push / idle motion, or extend the build\n   → animate {\"tracks\":[{\"id\":\"l_03jm8\",\"prop\":\"scale\",\"merge\":true,\"keyframes\":[{\"t\":2.55,\"v\":[100,100],\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":[104,104]}]}]}"
+ },
+ {
+  "name": "group_layers",
+  "argsBytes": 154,
+  "ok": true,
+  "ms": 52,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm4",
+    "l_03jm5",
+    "l_03jm6",
+    "l_03jm7",
+    "l_03jm8",
+    "l_03jm9",
+    "l_03jma",
+    "l_03jmb",
+    "l_03jmc",
+    "l_03jmd",
+    "l_03jme",
+    "l_03jmf",
+    "l_03jmg"
+   ],
+   "name": "Chart"
+  },
+  "result": "{\"id\":\"l_03jmh\"}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 139,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jmh",
+     "prop": "scale",
+     "merge": true,
+     "keyframes": [
+      {
+       "t": 2.55,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 6,
+       "v": [
+        103,
+        103
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 8,
+  "input": {},
+  "result": "score 100/100 (no issues found)"
+ }
+]

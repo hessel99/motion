@@ -1,0 +1,85 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (07-product-promo, 1920x1080, 10s @30fps):
+Title sequence for the launch of "Pulse 2", wireless earbuds. Sequence: quick flashes of three feature words ("40h battery", "Spatial audio", "Pure silence") each on their own beat with energetic transitions, then the product name "PULSE 2" slams in big with a shockwave ring, then "Available now" with a button-like pill. Dark background, electric orange accent. Fast, confident, cut to an imagined 120 BPM beat.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- 3 feature words present [yes]
+- product name present [yes]
+- "Available now" present [yes]
+- ≥5 beats [yes]
+- shockwave ring (stroked ellipse scaling up) [yes]
+- feature words exit (transitions, not stacking) [yes]
+- beat-aligned timing (markers or keys on a 0.5s grid) [yes]
+- dark background [yes]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- bg [rect] box 0,0,1920,1080 #0b0b0d
+- flash [rect] box 0,0,1920,1080 #ff5a1f
+- w1 [text] box 407,420,1107,240 #f5f5f0 "40h battery" Inter 200px w900
+- w2 [text] box 360,420,1200,240 #f5f5f0 "Spatial audio" Inter 200px w900
+- w3 [text] box 392,420,1136,240 #f5f5f0 "Pure silence" Inter 200px w900
+- ring [ellipse] box 440,-100,1040,1040 #000000 a0 stroke #ff5a1f 10px
+- pulse [text] box 399,240,1123,360 #f5f5f0 "PULSE 2" Inter 300px w900
+- pillBg [rect] box 960,700,0,0 #ff5a1f
+- pillText [text] box 960,700,0,0 #0b0b0d "Available now" Inter 60px w800
+- rule [rect] box 660,556,600,10 #ff5a1f
+
+TIMELINE:
+comp 1920x1080 10s @30fps, background #0b0b0d, markers 0.5 Beat 2, 1.5 Beat 4, 2.5 Beat 6, 3.5 Slam, 7 Available now
+"flash" (rect l_03jm3)
+  opacity: 0s 0 ─hold→ 0.5s 100 ─Expo Out→ 0.66s 0 ─hold→ 1.5s 100 ─Expo Out→ 1.66s 0 ─hold→ 2.5s 100 ─Expo Out→ 2.66s 0 ─hold→ 3.5s 100 ─Expo Out→ 3.62s 0
+"w1" (text l_03jm4)
+  scale: 0.5s 125 ─Expo Out→ 0.72s 100
+  opacity: 0s 0 ─hold→ 0.5s 100 ─hold→ 1.5s 0
+"w2" (text l_03jm5)
+  scale: 1.5s 125 ─Expo Out→ 1.72s 100
+  opacity: 0s 0 ─hold→ 1.5s 100 ─hold→ 2.5s 0
+"w3" (text l_03jm6)
+  scale: 2.5s 125 ─Expo Out→ 2.72s 100
+  opacity: 0s 0 ─hold→ 2.5s 100 ─hold→ 3.5s 0
+"ring" (ellipse l_03jm7)
+  scale: 3.5s 30 ─Expo Out→ 4.2s 260
+  opacity: 0s 0 ─hold→ 3.5s 100 ─Quad Out→ 4.2s 0
+"pulse" (text l_03jm8)
+  scale: 3.5s 180 ─Expo Out→ 3.85s 100
+  opacity: 0s 0 ─hold→ 3.5s 100
+"pillBg" (rect l_03jm9)
+  scale: 7s 0 ─spring:0.35→ 7.5s 100
+"pillText" (text l_03jma)
+  scale: 7s 0 ─spring:0.35→ 7.5s 100
+"rule" (rect l_03jmb)
+  scale: 4s 0 ─Expo Out→ 4.5s 100
+
+AUTOMATIC METRICS:
+layers 10 drawable (rect 4, text 5, ellipse 1), 39 keys, 25 moving segments
+eases: Hold×12, Expo Out×10, Quad Out×1, Spring 0.4×2; springs 2, overshooting 2, hold 12
+expressions 0, text animators 0, precomps 0, paths 0, gradients 0, markers 5
+palette (3): #0b0b0d #ff5a1f #f5f5f0
+motion from 0.467s to 7.467s (end hold 2.533s, longest still 2.613s), visual activity 20% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 0s; text-on-text overlap 0s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

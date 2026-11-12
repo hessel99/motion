@@ -1,0 +1,6 @@
+A seamless looping ambient background for a conference stage screen: soft blurred-looking blobs/orbs in a purple-to-teal palette drifting slowly, plus a subtle grid of small dots that gently pulses. It must loop perfectly at 6 seconds (frame 0 == last frame), no visible jump. Calm, not busy.
+
+<editor_context>
+comp "Main" 1920x1080 30fps 6s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

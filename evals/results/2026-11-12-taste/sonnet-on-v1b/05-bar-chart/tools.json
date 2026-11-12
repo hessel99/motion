@@ -1,0 +1,29 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 3385,
+  "ok": true,
+  "ms": 146,
+  "editorMs": 6,
+  "input": "{\"comp\":{\"background\":\"#f7f8fa\",\"duration\":6},\"layers\":[{\"key\":\"title\",\"text\":{\"content\":\"Revenue by quarter\",\"fontSize\":64,\"fontWeight\":700,\"fontFamily\":\"Inter\"},\"x\":120,\"y\":80,\"w\":900,\"h\":80,\"fill\":\"#14171f\",\"align\":\"left\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20},\"duration\":0.6,\"ease\":\"Expo Out\"}},{\"key\":\"sub\",\"text\":{\"content\":\"$M, FY quarterly\",\"fontSize\":30,\"fontWeight\":400,\"fontFamily\":\"Inter\"},\"x\":120,\"y\":160,\"w\":600,\"h\":40,\"fill\":\"#6b7280\",\"align\":\"left\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20},\"t\":0.1,\"duration\":0.6,\"ease\":\"Expo Out\"}},{\"key\":\"axis\",\"type\":\"path\",\"d\":\"M320 900 L1600 900\",\"stroke\":\"#14171f\",\"strokeWidth\":4,\"drawOn\":{\"t\":0.2,\"duration\":0.7,\"ease\":\"Cubic Out\",\"from\":\"start\"}},{\"key\":\"b1\",\"type\":\"rect\",\"x\":400,\"y\":660,\"w\":200,\"h\":240,\"radius\":8,\"fill\":\"#b8c4d6\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":0.9,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":1.5,\"v\":[100,100]}]}},{\"key\":\"b2\",\"type\":\"rect\",\"x\":700,\"y\":540,\"w\":200,\"h\":360,\"radius\":8,\"fill\":\"#b8c4d6\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":1.5,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":2.1,\"v\":[100,100]}]}},{\"key\":\"b3\",\"type\":\"rect\",\"x\":1000,\"y\":600,\"w\":200,\"h\":300,\"radius\":8,\"fill\":\"#b8c4d6\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":2.1,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":2.7,\"v\":[100,100]}]}},{\"key\":\"b4\",\"type\":\"rect\",\"x\":1300,\"y\":360,\"w\":200,\"h\":540,\"radius\":8,\"fill\":\"#b8c4d6\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":2.7,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":3.4,\"v\":[100,108],\"ease\":\"Back Out\"},{\"t\":3.7,\"v\":[100,100],\"ease\":\"Cubic Out\"}],\"fill\":[{\"t\":3.2,\"v\":\"#b8c4d6\",\"ease\":\"Cubic Out\"},{\"t\":3.6,\"v\":\"#ff5a3c\"}]}},{\"key\":\"l1\",\"text\":{\"content\":\"12\",\"fontSize\":48,\"fontWeight\":700,\"fontFamily\":\"Inter\"},\"x\":400,\"y\":595,\"w\":200,\"h\":56,\"fill\":\"#14171f\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20},\"t\":1.4,\"duration\":0.5,\"ease\":\"Expo Out\"}},{\"key\":\"l2\",\"text\":{\"content\":\"18\",\"fontSize\":48,\"fontWeight\":700,\"fontFamily\":\"Inter\"},\"x\":700,\"y\":475,\"w\":200,\"h\":56,\"fill\":\"#14171f\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20},\"t\":2,\"duration\":0.5,\"ease\":\"Expo Out\"}},{\"key\":\"l3\",\"text\":{\"content\":\"15\",\"fontSize\":48,\"fontWeight\":700,\"fontFamily\":\"Inter\"},\"x\":1000,\"y\":535,\"w\":200,\"h\":56,\"fill\":\"#14171f\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20},\"t\":2.6,\"duration\":0.5,\"ease\":\"Expo Out\"}},{\"key\":\"l4\",\"text\":{\"content\":\"27\",\"fontSize\":56,\"fontWeight\":800,\"fontFamily\":\"Inter\"},\"x\":1300,\"y\":285,\"w\":200,\"h\":64,\"fill\":\"#ff5a3c\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20,\"scale\":80},\"t\":3.3,\"duration\":0.6,\"ease\":\"Back Out\"}},{\"key\":\"c1\",\"text\":{\"content\":\"Q1\",\"fontSize\":32,\"fontWeight\":500,\"fontFamily\":\"Inter\"},\"x\":400,\"y\":925,\"w\":200,\"h\":40,\"fill\":\"#6b7280\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0},\"t\":0.7,\"duration\":0.4}},{\"key\":\"c2\",\"text\":{\"content\":\"Q2\",\"fontSize\":32,\"fontWeight\":500,\"fontFamily\":\"Inter\"},\"x\":700,\"y\":925,\"w\":200,\"h\":40,\"fill\":\"#6b7280\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0},\"t\":0.8,\"duration\":0.4}},{\"key\":\"c3\",\"text\":{\"content\":\"Q…",
+  "result": "{\"summary\":\"15 created, 0 updated, 24 keyframe tracks; animation ends 3.9s\",\"ids\":{\"title\":\"l_03jm2\",\"sub\":\"l_03jm3\",\"axis\":\"l_03jm4\",\"b1\":\"l_03jm5\",\"b2\":\"l_03jm6\",\"b3\":\"l_03jm7\",\"b4\":\"l_03jm8\",\"l1\":\"l_03jm9\",\"l2\":\"l_03jma\",\"l3\":\"l_03jmb\",\"l4\":\"l_03jmc\",\"c1\":\"l_03jmd\",\"c2\":\"l_03jme\",\"c3\":\"l_03jmf\",\"c4\":\"l_03jmg\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 192,
+  "editorMs": 113,
+  "input": {
+   "times": [
+    0.6,
+    1.2,
+    2.4,
+    3.3,
+    4,
+    5.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.6s, 1.2s, 2.4s, 3.3s, 4s, 5.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/85cfd41d-db25-4afb-bfef-729431657b73/tool-results/mcp-motion-blob-1794512567414-ouql4s.jpg]"
+ }
+]

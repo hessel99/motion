@@ -1,0 +1,139 @@
+- Background [rect] box 0,0,1920,1080 #0b0818
+- Orb purple large [ellipse] box 70,-130,900,900 gradient(#7c3aed a0.55→#7c3aed a0)
+- Orb teal large [ellipse] box 830,137,820,820 gradient(#14b8a6 a0.53→#14b8a6 a0)
+- Orb violet mid [ellipse] box 690,-90,620,620 gradient(#a855f7 a0.5→#a855f7 a0)
+- Orb teal small [ellipse] box 120,570,560,560 gradient(#2dd4bf a0.4→#2dd4bf a0)
+- Orb deep purple [ellipse] box 1450,-20,480,480 gradient(#6d28d9 a0.53→#6d28d9 a0)
+- Dot grid [group] #ffffff a0
+  - Dot 0-0 [ellipse] box 327,177,6,6 #ffffff
+  - Dot 1-0 [ellipse] box 507,177,6,6 #ffffff
+  - Dot 2-0 [ellipse] box 687,177,6,6 #ffffff
+  - Dot 3-0 [ellipse] box 867,177,6,6 #ffffff
+  - Dot 4-0 [ellipse] box 1047,177,6,6 #ffffff
+  - Dot 5-0 [ellipse] box 1227,177,6,6 #ffffff
+  - Dot 6-0 [ellipse] box 1407,177,6,6 #ffffff
+  - Dot 7-0 [ellipse] box 1587,177,6,6 #ffffff
+  - Dot 0-1 [ellipse] box 327,357,6,6 #ffffff
+  - Dot 1-1 [ellipse] box 507,357,6,6 #ffffff
+  - Dot 2-1 [ellipse] box 687,357,6,6 #ffffff
+  - Dot 3-1 [ellipse] box 867,357,6,6 #ffffff
+  - Dot 4-1 [ellipse] box 1047,357,6,6 #ffffff
+  - Dot 5-1 [ellipse] box 1227,357,6,6 #ffffff
+  - Dot 6-1 [ellipse] box 1407,357,6,6 #ffffff
+  - Dot 7-1 [ellipse] box 1587,357,6,6 #ffffff
+  - Dot 0-2 [ellipse] box 327,537,6,6 #ffffff
+  - Dot 1-2 [ellipse] box 507,537,6,6 #ffffff
+  - Dot 2-2 [ellipse] box 687,537,6,6 #ffffff
+  - Dot 3-2 [ellipse] box 867,537,6,6 #ffffff
+  - Dot 4-2 [ellipse] box 1047,537,6,6 #ffffff
+  - Dot 5-2 [ellipse] box 1227,537,6,6 #ffffff
+  - Dot 6-2 [ellipse] box 1407,537,6,6 #ffffff
+  - Dot 7-2 [ellipse] box 1587,537,6,6 #ffffff
+  - Dot 0-3 [ellipse] box 327,717,6,6 #ffffff
+  - Dot 1-3 [ellipse] box 507,717,6,6 #ffffff
+  - Dot 2-3 [ellipse] box 687,717,6,6 #ffffff
+  - Dot 3-3 [ellipse] box 867,717,6,6 #ffffff
+  - Dot 4-3 [ellipse] box 1047,717,6,6 #ffffff
+  - Dot 5-3 [ellipse] box 1227,717,6,6 #ffffff
+  - Dot 6-3 [ellipse] box 1407,717,6,6 #ffffff
+  - Dot 7-3 [ellipse] box 1587,717,6,6 #ffffff
+  - Dot 0-4 [ellipse] box 327,897,6,6 #ffffff
+  - Dot 1-4 [ellipse] box 507,897,6,6 #ffffff
+  - Dot 2-4 [ellipse] box 687,897,6,6 #ffffff
+  - Dot 3-4 [ellipse] box 867,897,6,6 #ffffff
+  - Dot 4-4 [ellipse] box 1047,897,6,6 #ffffff
+  - Dot 5-4 [ellipse] box 1227,897,6,6 #ffffff
+  - Dot 6-4 [ellipse] box 1407,897,6,6 #ffffff
+  - Dot 7-4 [ellipse] box 1587,897,6,6 #ffffff
+
+comp 1920x1080 6s @30fps, background #121214
+"Orb purple large" (ellipse l_03jm3)
+  position: expr "[520 + 160*sin(time*1.0472), 420 + 100*cos(time*1.0472)]"
+"Orb teal large" (ellipse l_03jm4)
+  position: expr "[1380 + 140*cos(time*1.0472), 640 + 110*sin(time*1.0472 + 1)]"
+"Orb violet mid" (ellipse l_03jm5)
+  position: expr "[1000 + 120*sin(time*2.0944), 300 + 80*cos(time*1.0472)]"
+"Orb teal small" (ellipse l_03jm6)
+  position: expr "[300 + 100*cos(time*2.0944), 850 - 90*sin(time*1.0472)]"
+"Orb deep purple" (ellipse l_03jm7)
+  position: expr "[1600 - 90*cos(time*1.0472), 220 + 70*sin(time*2.0944)]"
+"Dot 0-0" (ellipse l_03jm9)
+  opacity: expr "30 + 20*sin(time*1.0472 + 0)"
+"Dot 1-0" (ellipse l_03jma)
+  opacity: expr "30 + 20*sin(time*1.0472 + 0.5)"
+"Dot 2-0" (ellipse l_03jmb)
+  opacity: expr "30 + 20*sin(time*1.0472 + 1)"
+"Dot 3-0" (ellipse l_03jmc)
+  opacity: expr "30 + 20*sin(time*1.0472 + 1.5)"
+"Dot 4-0" (ellipse l_03jmd)
+  opacity: expr "30 + 20*sin(time*1.0472 + 2)"
+"Dot 5-0" (ellipse l_03jme)
+  opacity: expr "30 + 20*sin(time*1.0472 + 2.5)"
+"Dot 6-0" (ellipse l_03jmf)
+  opacity: expr "30 + 20*sin(time*1.0472 + 3)"
+"Dot 7-0" (ellipse l_03jmg)
+  opacity: expr "30 + 20*sin(time*1.0472 + 3.5)"
+"Dot 0-1" (ellipse l_03jmh)
+  opacity: expr "30 + 20*sin(time*1.0472 + 0.5)"
+"Dot 1-1" (ellipse l_03jmi)
+  opacity: expr "30 + 20*sin(time*1.0472 + 1)"
+"Dot 2-1" (ellipse l_03jmj)
+  opacity: expr "30 + 20*sin(time*1.0472 + 1.5)"
+"Dot 3-1" (ellipse l_03jmk)
+  opacity: expr "30 + 20*sin(time*1.0472 + 2)"
+"Dot 4-1" (ellipse l_03jml)
+  opacity: expr "30 + 20*sin(time*1.0472 + 2.5)"
+"Dot 5-1" (ellipse l_03jmm)
+  opacity: expr "30 + 20*sin(time*1.0472 + 3)"
+"Dot 6-1" (ellipse l_03jmn)
+  opacity: expr "30 + 20*sin(time*1.0472 + 3.5)"
+"Dot 7-1" (ellipse l_03jmo)
+  opacity: expr "30 + 20*sin(time*1.0472 + 4)"
+"Dot 0-2" (ellipse l_03jmp)
+  opacity: expr "30 + 20*sin(time*1.0472 + 1)"
+"Dot 1-2" (ellipse l_03jmq)
+  opacity: expr "30 + 20*sin(time*1.0472 + 1.5)"
+"Dot 2-2" (ellipse l_03jmr)
+  opacity: expr "30 + 20*sin(time*1.0472 + 2)"
+"Dot 3-2" (ellipse l_03jms)
+  opacity: expr "30 + 20*sin(time*1.0472 + 2.5)"
+"Dot 4-2" (ellipse l_03jmt)
+  opacity: expr "30 + 20*sin(time*1.0472 + 3)"
+"Dot 5-2" (ellipse l_03jmu)
+  opacity: expr "30 + 20*sin(time*1.0472 + 3.5)"
+"Dot 6-2" (ellipse l_03jmv)
+  opacity: expr "30 + 20*sin(time*1.0472 + 4)"
+"Dot 7-2" (ellipse l_03jmw)
+  opacity: expr "30 + 20*sin(time*1.0472 + 4.5)"
+"Dot 0-3" (ellipse l_03jmx)
+  opacity: expr "30 + 20*sin(time*1.0472 + 1.5)"
+"Dot 1-3" (ellipse l_03jmy)
+  opacity: expr "30 + 20*sin(time*1.0472 + 2)"
+"Dot 2-3" (ellipse l_03jmz)
+  opacity: expr "30 + 20*sin(time*1.0472 + 2.5)"
+"Dot 3-3" (ellipse l_03jm10)
+  opacity: expr "30 + 20*sin(time*1.0472 + 3)"
+"Dot 4-3" (ellipse l_03jm11)
+  opacity: expr "30 + 20*sin(time*1.0472 + 3.5)"
+"Dot 5-3" (ellipse l_03jm12)
+  opacity: expr "30 + 20*sin(time*1.0472 + 4)"
+"Dot 6-3" (ellipse l_03jm13)
+  opacity: expr "30 + 20*sin(time*1.0472 + 4.5)"
+"Dot 7-3" (ellipse l_03jm14)
+  opacity: expr "30 + 20*sin(time*1.0472 + 5)"
+"Dot 0-4" (ellipse l_03jm15)
+  opacity: expr "30 + 20*sin(time*1.0472 + 2)"
+"Dot 1-4" (ellipse l_03jm16)
+  opacity: expr "30 + 20*sin(time*1.0472 + 2.5)"
+"Dot 2-4" (ellipse l_03jm17)
+  opacity: expr "30 + 20*sin(time*1.0472 + 3)"
+"Dot 3-4" (ellipse l_03jm18)
+  opacity: expr "30 + 20*sin(time*1.0472 + 3.5)"
+"Dot 4-4" (ellipse l_03jm19)
+  opacity: expr "30 + 20*sin(time*1.0472 + 4)"
+"Dot 5-4" (ellipse l_03jm1a)
+  opacity: expr "30 + 20*sin(time*1.0472 + 4.5)"
+"Dot 6-4" (ellipse l_03jm1b)
+  opacity: expr "30 + 20*sin(time*1.0472 + 5)"
+"Dot 7-4" (ellipse l_03jm1c)
+  opacity: expr "30 + 20*sin(time*1.0472 + 5.5)"

@@ -1,0 +1,384 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1051,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 1,
+  "input": {
+   "title": "Pulse 2 — Launch Title",
+   "duration": 10,
+   "style": "Kinetic typography, dark + electric orange",
+   "styleReason": "Fast beat-cut flashes and a hard slam fit an energetic product launch.",
+   "beats": [
+    {
+     "name": "Feature flashes",
+     "start": 0,
+     "end": 3.5,
+     "description": "120 BPM = 0.5s/beat. Three words on beats 1/3/5 (0.5s, 1.5s, 2.5s), each held 1s: scale-punch in with orange wipe bar, snap out on the next beat. Small orange tick marks pulse on every beat.",
+     "style": "Expo Out in, Expo In out; orange bar wipes between words"
+    },
+    {
+     "name": "Slam",
+     "start": 4,
+     "end": 6,
+     "description": "On the bar downbeat (4.0s) screen flashes orange, 'PULSE 2' slams from 300% to 100% with camera shake; shockwave ring expands and fades.",
+     "style": "Expo Out slam, ring 0→2000px, small shake"
+    },
+    {
+     "name": "CTA",
+     "start": 6,
+     "end": 10,
+     "description": "'Available now' rises in at 6.5s, orange pill springs in behind it with a gentle pulse; holds to the end.",
+     "style": "spring Bouncy pill, subtle loop pulse"
+    }
+   ],
+   "notes": "Palette: #0A0A0C background, #FF5A1F accent, #F5F5F7 text. Font Inter 800/900."
+  },
+  "result": "storyboard \"Pulse 2 — Launch Title\" shown to the user (3 beats, 10s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 4035,
+  "ok": true,
+  "ms": 19207,
+  "editorMs": 2,
+  "input": "{\"comp\":{\"background\":\"#0A0A0C\",\"duration\":10,\"fps\":30},\"layers\":[{\"key\":\"bg\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":1920,\"h\":1080,\"fill\":\"#0A0A0C\"},{\"key\":\"beatdot\",\"type\":\"ellipse\",\"center\":[960,960],\"w\":24,\"h\":24,\"fill\":\"#FF5A1F\",\"animate\":{\"scale\":[{\"t\":0.5,\"v\":100,\"ease\":\"Expo Out\"},{\"t\":0.5,\"v\":100},{\"t\":0.75,\"v\":40},{\"t\":1,\"v\":100,\"ease\":\"Expo Out\"},{\"t\":1.25,\"v\":40},{\"t\":1.5,\"v\":160,\"ease\":\"Expo Out\"},{\"t\":2,\"v\":40},{\"t\":2.5,\"v\":160,\"ease\":\"Expo Out\"},{\"t\":3,\"v\":40},{\"t\":3.5,\"v\":100}],\"opacity\":[{\"t\":0,\"v\":100},{\"t\":3.8,\"v\":100},{\"t\":4,\"v\":0}]}},{\"key\":\"ring1\",\"type\":\"ellipse\",\"center\":[960,490],\"w\":200,\"h\":200,\"stroke\":\"#FF5A1F\",\"strokeWidth\":14,\"animate\":{\"scale\":[{\"t\":4,\"v\":0},{\"t\":5,\"v\":1100,\"ease\":\"Expo Out\"}],\"opacity\":[{\"t\":0,\"v\":0},{\"t\":4,\"v\":100},{\"t\":5,\"v\":0,\"ease\":\"Quad Out\"}]}},{\"key\":\"ring2\",\"type\":\"ellipse\",\"center\":[960,490],\"w\":200,\"h\":200,\"stroke\":\"#F5F5F7\",\"strokeWidth\":5,\"animate\":{\"scale\":[{\"t\":4.12,\"v\":0},{\"t\":5,\"v\":800,\"ease\":\"Expo Out\"}],\"opacity\":[{\"t\":0,\"v\":0},{\"t\":4.12,\"v\":70},{\"t\":5,\"v\":0,\"ease\":\"Quad Out\"}]}},{\"key\":\"w1\",\"type\":\"text\",\"center\":[960,540],\"w\":1700,\"h\":220,\"text\":{\"content\":\"40h battery\",\"fontFamily\":\"Inter\",\"fontSize\":190,\"fontWeight\":900,\"align\":\"center\"},\"fill\":\"#F5F5F7\",\"animate\":{\"opacity\":[{\"t\":0,\"v\":0},{\"t\":0.5,\"v\":100},{\"t\":1.4,\"v\":100},{\"t\":1.5,\"v\":0}],\"scale\":[{\"t\":0.5,\"v\":150,\"ease\":\"Expo Out\"},{\"t\":0.75,\"v\":100},{\"t\":1.4,\"v\":100,\"ease\":\"Expo In\"},{\"t\":1.5,\"v\":85}]}},{\"key\":\"w2\",\"type\":\"text\",\"center\":[960,540],\"w\":1700,\"h\":220,\"text\":{\"content\":\"Spatial audio\",\"fontFamily\":\"Inter\",\"fontSize\":190,\"fontWeight\":900,\"align\":\"center\"},\"fill\":\"#FF5A1F\",\"animate\":{\"opacity\":[{\"t\":0,\"v\":0},{\"t\":1.5,\"v\":100},{\"t\":2.4,\"v\":100},{\"t\":2.5,\"v\":0}],\"scale\":[{\"t\":1.5,\"v\":150,\"ease\":\"Expo Out\"},{\"t\":1.75,\"v\":100},{\"t\":2.4,\"v\":100,\"ease\":\"Expo In\"},{\"t\":2.5,\"v\":85}]}},{\"key\":\"w3\",\"type\":\"text\",\"center\":[960,540],\"w\":1700,\"h\":220,\"text\":{\"content\":\"Pure silence\",\"fontFamily\":\"Inter\",\"fontSize\":190,\"fontWeight\":900,\"align\":\"center\"},\"fill\":\"#F5F5F7\",\"animate\":{\"opacity\":[{\"t\":0,\"v\":0},{\"t\":2.5,\"v\":100},{\"t\":3.4,\"v\":100},{\"t\":3.5,\"v\":0}],\"scale\":[{\"t\":2.5,\"v\":150,\"ease\":\"Expo Out\"},{\"t\":2.75,\"v\":100},{\"t\":3.4,\"v\":100,\"ease\":\"Expo In\"},{\"t\":3.5,\"v\":85}]}},{\"key\":\"name\",\"type\":\"text\",\"center\":[960,470],\"w\":1800,\"h\":380,\"text\":{\"content\":\"PULSE 2\",\"fontFamily\":\"Inter\",\"fontSize\":340,\"fontWeight\":900,\"align\":\"center\",\"letterSpacing\":8},\"fill\":\"#F5F5F7\",\"animate\":{\"opacity\":[{\"t\":0,\"v\":0},{\"t\":4,\"v\":100}],\"scale\":[{\"t\":4,\"v\":320,\"ease\":\"Expo Out\"},{\"t\":4.25,\"v\":100}],\"position\":[{\"t\":4.25,\"v\":[960,470]},{\"t\":4.3,\"v\":[972,462]},{\"t\":4.36,\"v\":[950,478]},{\"t\":4.43,\"v\":[966,468]},{\"t\":4.5,\"v\":[957,473]},{\"t\":4.6,\"v\":[960,470]}]}},{\"key\":\"pill\",\"type\":\"rect\",\"center\":[960,720],\"w\":560,\"h\":120,\"radius\":60,\"fill\":\"#FF5A1F\",\"animate\":{\"scale\":[{\"t\":0,\"v\":0},{\"t\":6.5,\"v\":0},{\"t\":7,\"v\":100,\"ease\":\"spring Bouncy\"},{\"t\":8,\"v\":100},{\"t\":8.5,\"v\":106,\"ease\":\"Sine In Out\"},{\"t\":9,\"v\":100,\"ease\":\"Sine In Out\"}]}},{\"key\":\"pilltext\",\"type…",
+  "result": "{\"summary\":\"14 created, 0 updated, 22 keyframe tracks; animation ends 9s\",\"ids\":{\"bg\":\"l_03jm2\",\"beatdot\":\"l_03jm3\",\"ring1\":\"l_03jm4\",\"ring2\":\"l_03jm5\",\"w1\":\"l_03jm6\",\"w2\":\"l_03jm7\",\"w3\":\"l_03jm8\",\"name\":\"l_03jm9\",\"pill\":\"l_03jma\",\"pilltext\":\"l_03jmb\",\"bar1\":\"l_03jmc\",\"bar2\":\"l_03jmd\",\"bar3\":\"l_03jme\",\"flash\":\"l_03jmf\"}}"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 32,
+  "editorMs": 3,
+  "input": {
+   "beat": 3,
+   "status": "done"
+  },
+  "result": "beat 3 \"CTA\" done; 1/3 beats finished"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 56,
+  "ok": true,
+  "ms": 2088,
+  "editorMs": 2008,
+  "input": {
+   "times": [
+    0.55,
+    1,
+    1.6,
+    2.6,
+    4.05,
+    4.4,
+    5,
+    7.2,
+    9.5
+   ],
+   "cell": 300
+  },
+  "result": "9 frames left→right, top→bottom at 0.57s, 1s, 1.6s, 2.6s, 4.07s, 4.4s, 5s, 7.2s, 9.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/36c654f1-7015-4988-8807-9d3d04c0a8f3/tool-results/mcp-motion-blob-1794513969889-va1tvz.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 1261,
+  "ok": true,
+  "ms": 40,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm9",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 4,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm6",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 0.5,
+       "v": 100,
+       "interp": "hold"
+      },
+      {
+       "t": 1.4,
+       "v": 100
+      },
+      {
+       "t": 1.5,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 1.5,
+       "v": 100,
+       "interp": "hold"
+      },
+      {
+       "t": 2.4,
+       "v": 100
+      },
+      {
+       "t": 2.5,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 2.5,
+       "v": 100,
+       "interp": "hold"
+      },
+      {
+       "t": 3.4,
+       "v": 100
+      },
+      {
+       "t": 3.5,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 4,
+       "v": 100
+      },
+      {
+       "t": 5,
+       "v": 0,
+       "ease": "Quad Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm5",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 4.12,
+       "v": 70
+      },
+      {
+       "t": 5,
+       "v": 0,
+       "ease": "Quad Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jmb",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 6.75,
+       "v": 0
+      },
+      {
+       "t": 7,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jma",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 6.5,
+       "v": 0
+      },
+      {
+       "t": 7,
+       "v": 100,
+       "ease": "spring Bouncy"
+      },
+      {
+       "t": 8,
+       "v": 100
+      },
+      {
+       "t": 8.5,
+       "v": 106,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 9,
+       "v": 100,
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jmf",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 4,
+       "v": 100
+      },
+      {
+       "t": 4.35,
+       "v": 0,
+       "ease": "Expo Out"
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 9 tracks on 9 layers"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "props": {
+    "fill": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "props": {
+    "fill": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmb",
+   "text": {
+    "fontSize": 60
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 49,
+  "ok": true,
+  "ms": 393,
+  "editorMs": 342,
+  "input": {
+   "times": [
+    0.3,
+    0.6,
+    1,
+    2,
+    3,
+    4.05,
+    4.4,
+    7.2
+   ],
+   "cell": 300
+  },
+  "result": "8 frames left→right, top→bottom at 0.3s, 0.6s, 1s, 2s, 3s, 4.07s, 4.4s, 7.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/36c654f1-7015-4988-8807-9d3d04c0a8f3/tool-results/mcp-motion-blob-1794513978986-7ibfjb.jpg]"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 25,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 2,
+  "input": {
+   "times": [
+    1,
+    4.6,
+    7.5,
+    9.5
+   ]
+  },
+  "result": "1s:\n  w1: outside title-safe area (10% margin)\n  pill: tiny (0×0px)\n  bar1, bar2, bar3: entirely off-canvas but visible (opacity 100%)\n4.6s:\n  ring2: outside action-safe area (5% margin)\n  name: outside title-safe area (10% margin)\n  pill: tiny (0×0px)\n  bar1, bar2, bar3: entirely off-canvas but visible (opacity 100%)\n7.5s:\n  name: outside title-safe area (10% margin)\n  bar1, bar2, bar3: entirely …"
+ }
+]

@@ -82,7 +82,9 @@ function measure() {
     titlebar: box('.titlebar'), rail: box('.rail'), left: box('aside.left'), canvas: box('main.center'),
     timeline: box('section.bottom'), inspector: box('aside.right'), home: box('.home-host'),
   };
-  const traffic = document.documentElement.hasAttribute('data-traffic-lights') ? { x: 0, y: 0, w: 80, h: 40 } : null;
+  // the traffic-light zone: --traffic-w × --titlebar-h at the window's top left (tokens.css)
+  const tok = n => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n)) || 0;
+  const traffic = document.documentElement.hasAttribute('data-traffic-lights') ? { x: 0, y: 0, w: tok('--traffic-w'), h: tok('--titlebar-h') } : null;
   // the traffic lights draw over the title bar's reserved end: that one pair may overlap
   const tl = box('.tb-traffic');
   const problems = [];
@@ -98,7 +100,11 @@ function measure() {
     if (inter(regions[a], regions[b]) > 1) problems.push(`${a} overlaps ${b}`);
   }
   if (traffic) {
-    if (!tl || tl.w < 79.5 || tl.x > 0.5) problems.push('the title bar does not reserve the traffic-light zone');
+    if (!traffic.w || !traffic.h) problems.push('--traffic-w / --titlebar-h are not set');
+    if (!tl || tl.w < traffic.w - 0.5 || tl.x > 0.5) problems.push('the title bar does not reserve the traffic-light zone');
+    // the stand-in buttons (?platform=mac) sit vertically centred in the title bar
+    const tb = regions.titlebar, dots = [...document.querySelectorAll('.tb-traffic > i')].map(i => i.getBoundingClientRect());
+    if (tb) for (const d of dots) if (Math.abs(d.top + d.height / 2 - (tb.y + tb.h / 2)) > 0.75) problems.push(`traffic light not centred: ${d.top + d.height / 2} vs ${tb.y + tb.h / 2}`);
     for (const k of names) if (k !== 'titlebar' && inter(regions[k], traffic) > 0) problems.push(`${k} reaches into the traffic-light zone`);
     for (const el of document.querySelectorAll('button, [role=tab], input, textarea, select, a[href]')) {
       const r = el.getBoundingClientRect();

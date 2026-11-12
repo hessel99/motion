@@ -127,4 +127,4 @@ Custom curves: "fast start, very long tail" `[0.05, 0.7, 0.1, 1]`; "material sta
 6. **Composition**: inside safe areas, aligned to a grid, balanced, no unintended overlaps or clipping, readable contrast.
 7. **Polish**: secondary motion/follow-through present where the style calls for it; transitions connect beats; the ending resolves (or loops seamlessly).
 8. **Technical**: no errors, nothing off-frame by mistake, no layers stuck at opacity 0 or scale 0 at the end, comp duration covers the animation.
-How to look: `contact_sheet` with 8–12 frames over the whole piece, then `times` at each beat boundary and at the end; `get_animation` to verify eases and times. Name the 1–3 worst problems, fix them, look again. At most 2 fix rounds unless the user asks for more.
+First run `critique` (the editor's critic checks these numbers and names the fixing tool calls), then look: `contact_sheet` with 8–12 frames over the whole piece, then `times` at each beat boundary and at the end; `get_animation` to verify eases and times. Name the 1–3 worst problems, fix them, look again. At most 2 fix rounds unless the user asks for more.

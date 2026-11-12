@@ -19,6 +19,8 @@
 //     --summarize DIR        rebuild summary.md/json of DIR
 //     --rescore DIR          recompute metrics + checklist of saved runs (reloads document.json; no model)
 //     --dry                  no model: a scripted tool sequence (tests the pipeline for free)
+//     --taste on|off         the taste layer (quality-first defaults + automatic polishing rounds after the
+//                            turn, as in the app); default on. Every run records the critic's score either way.
 //
 // Needs: the dev server running (npx vite --port 5271 --strictPort), the `claude` CLI logged in, ffmpeg for mp4.
 // Bridges are started in-process (bridge/server.mjs), one per worker.
@@ -57,6 +59,7 @@ const O = {
   dry: flag('dry'),
   rescore: opt('rescore', null),
   rejudge: flag('rejudge'),
+  taste: opt('taste', 'on') !== 'off',
 };
 
 const briefs = fs.readdirSync(path.join(ROOT, 'evals', 'briefs')).filter((f) => f.endsWith('.json')).sort()
@@ -251,7 +254,8 @@ async function runBrief(worker, brief, rep) {
   const dir = path.join(O.out, name);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'brief.json'), JSON.stringify(brief, null, 2));
-  await page.goto(`${O.url}?blank&bridge=${port}`);
+  // a busy dev server can be slow to serve the first page: retry before giving up on the brief
+  for (let a = 0; ; a++) { try { await page.goto(`${O.url}?blank&bridge=${port}`, { timeout: 90_000 }); break; } catch (e) { if (a >= 2) throw e; log(`[w${worker.i}] ${brief.id}: page load retry (${String(e.message).slice(0, 60)})`); } }
   await page.waitForFunction(() => window.editor?.store && window.editor.renderer);
   for (let i = 0; i < 100; i++) {
     const h = await fetch(`http://127.0.0.1:${port}/health`).then((r) => r.json()).catch(() => ({}));
@@ -260,15 +264,19 @@ async function runBrief(worker, brief, rep) {
   }
   const events = [];
   let done;
-  const finished = new Promise((r) => { done = r; });
-  worker.onEvent = (ev) => { if (ev.kind !== 'text_delta') events.push(ev); if (ev.kind === 'done') done(); };
+  let finished = new Promise((r) => { done = r; });
+  let sessionId;
+  worker.onEvent = (ev) => { if (ev.kind !== 'text_delta') events.push(ev); if (ev.kind === 'session') sessionId = ev.sessionId; if (ev.kind === 'done') done(); };
   const t0 = Date.now();
-  const setup = await page.evaluate(async ({ comp, prompt, model, dry, audio }) => {
+  const setup = await page.evaluate(async ({ comp, prompt, model, dry, audio, taste }) => {
+    globalThis.__motionTaste = taste;
     const { agentClient } = await import('/src/agent/client.ts');
     const { composeMessage } = await import('/src/agent/context.ts');
     const { setCompSettings } = await import('/src/core/commands.ts');
     const { TOOLS } = await import('/src/agent/tools.ts');
     const st = window.editor.store;
+    // every brief starts from an empty document (nothing restored or left over)
+    if (Object.keys(st.project.layers).length) { const { createProject } = await import("/src/core/model.ts"); window.editor.load(createProject()); }
     setCompSettings(st, { width: comp.width, height: comp.height, fps: comp.fps, duration: comp.duration });
     st.setTime(0); st.select([]);
     window.__evalLog = [];
@@ -310,7 +318,7 @@ async function runBrief(worker, brief, rep) {
       window.__chatId = 'dry';
     } else window.__chatId = agentClient.chat({ provider: 'claude', message, model }, (ev) => window.__evalEvent({ ...ev, at: Date.now() }));
     return { message, tools: TOOLS.map((t) => t.name) };
-  }, { comp: brief.comp, prompt: brief.prompt, model: O.model, dry: O.dry, audio: brief.audio ?? null });
+  }, { comp: brief.comp, prompt: brief.prompt, model: O.model, dry: O.dry, audio: brief.audio ?? null, taste: O.taste });
   log(`[w${worker.i}] ${name}: turn started (${setup.tools.length} tools)`);
   let timedOut = false;
   await Promise.race([finished, new Promise((r) => setTimeout(r, O.timeoutMin * 60_000)).then(() => { timedOut = true; })]);
@@ -319,6 +327,27 @@ async function runBrief(worker, brief, rep) {
     await page.evaluate(async () => { const { agentClient } = await import('/src/agent/client.ts'); agentClient.cancel(window.__chatId); });
     await Promise.race([finished, new Promise((r) => setTimeout(r, 20_000))]);
   }
+  // taste layer: the automatic polishing rounds the app runs after a build (src/agent/taste.ts polishPlan)
+  const polish = [];
+  const criticNow = () => page.evaluate(async () => { const { critique } = await import('/src/agent/critic.ts'); const c = critique(window.editor.store, { max: 20 }); return { score: c.score, sub: c.sub, penalties: c.penalties, issues: c.issues.map((i) => `${i.severity}:${i.rule}`), ms: c.stats.ms }; });
+  const criticBefore = await criticNow();
+  if (O.taste && !O.dry && !timedOut && !events.some((e) => e.kind === 'error')) {
+    for (let round = 1; round <= 2; round++) {
+      const plan = await page.evaluate(async (round) => { const { polishPlan } = await import('/src/agent/taste.ts'); const p = polishPlan(window.editor.store, round); return p && { message: p.message, count: p.count, score: p.score }; }, round);
+      if (!plan) break;
+      finished = new Promise((r) => { done = r; });
+      log(`[w${worker.i}] ${name}: polishing round ${round} (score ${plan.score}, ${plan.count} fixes)`);
+      await page.evaluate(async ({ message, model, sessionId }) => {
+        const { agentClient } = await import('/src/agent/client.ts');
+        window.__chatId = agentClient.chat({ provider: 'claude', message, model, sessionId }, (ev) => window.__evalEvent({ ...ev, at: Date.now() }));
+      }, { message: plan.message, model: O.model, sessionId });
+      let to = false;
+      await Promise.race([finished, new Promise((r) => setTimeout(r, O.timeoutMin * 60_000)).then(() => { to = true; })]);
+      polish.push({ round, scoreBefore: plan.score, fixes: plan.count, timedOut: to });
+      if (to) { await page.evaluate(async () => { const { agentClient } = await import('/src/agent/client.ts'); agentClient.cancel(window.__chatId); }); break; }
+    }
+  }
+  const criticAfter = polish.length ? await criticNow() : criticBefore;
   const wallMs = Date.now() - t0;
   const toolLog = await page.evaluate(() => window.__evalLog);
   // stream events → tool calls (with results) + text
@@ -332,10 +361,11 @@ async function runBrief(worker, brief, rep) {
   const queue = {};
   for (const t of toolLog) (queue[t.name] ??= []).push(t);
   for (const c of calls) { const t = queue[c.name]?.shift(); if (t) { c.editorMs = t.ms; if (!t.ok) c.error = t.error; } }
-  const doneEv = events.find((e) => e.kind === 'done') ?? {};
+  const dones = events.filter((e) => e.kind === 'done');
+  const doneEv = dones.length ? { ...dones[0], numTurns: dones.reduce((a, e) => a + (e.numTurns ?? 0), 0), costUsd: dones.reduce((a, e) => a + (e.costUsd ?? 0), 0), durationMs: dones.reduce((a, e) => a + (e.durationMs ?? 0), 0) } : {};
   const errors = events.filter((e) => e.kind === 'error').map((e) => e.message);
   const run = {
-    id: brief.id, name, model: O.model, seed: O.seed, wallMs, timedOut, turns: doneEv.numTurns ?? null, costUsd: doneEv.costUsd ?? 0,
+    id: brief.id, name, model: O.model, seed: O.seed, taste: O.taste, polish, critic: { before: criticBefore, after: criticAfter }, wallMs, timedOut, turns: doneEv.numTurns ?? null, costUsd: doneEv.costUsd ?? 0,
     durationMs: doneEv.durationMs ?? null, usage: doneEv.usage ?? null, errors,
     toolCalls: calls.length, toolErrors: calls.filter((c) => c.ok === false).length, toolsAvailable: setup.tools.length,
     finalText: events.filter((e) => e.kind === 'text').map((e) => e.text).join('\n').slice(-3000),
@@ -388,6 +418,7 @@ export function summarize(dir) {
     distinctEases: r.metrics.distinctEases, springs: r.metrics.springSegments, textAnimators: r.metrics.textAnimators, expressions: r.metrics.expressions,
     precomps: r.metrics.precomps, coverage: r.metrics.visualActivity, offCanvasS: r.metrics.offCanvasTime, textOverlapS: r.metrics.textOverlapTime,
     checklistHits: r.checklist.hits, checklistCheckable: r.checklist.checkable,
+    taste: r.run.taste ?? null, polishRounds: r.run.polish?.length ?? 0, criticBefore: r.run.critic?.before?.score ?? null, critic: r.run.critic?.after?.score ?? null,
     judge: r.judge ? { ...r.judge.scores, overall: r.judge.overall, critique: r.judge.critique } : null,
   }));
   const mean = (f) => { const v = rows.map(f).filter((x) => typeof x === 'number'); return v.length ? Math.round((v.reduce((a, b) => a + b, 0) / v.length) * 100) / 100 : null; };
@@ -396,16 +427,16 @@ export function summarize(dir) {
     judgeCostUsd: Math.round(runs.reduce((a, r) => a + (r.judge?.cost ?? 0), 0) * 100) / 100,
     meanWallS: mean((r) => r.wallS), meanTurns: mean((r) => r.turns), meanCost: mean((r) => r.costUsd), meanToolCalls: mean((r) => r.toolCalls),
     toolErrors: rows.reduce((a, r) => a + r.toolErrors, 0), checklistRate: Math.round((rows.reduce((a, r) => a + r.checklistHits, 0) / Math.max(1, rows.reduce((a, r) => a + r.checklistCheckable, 0))) * 1000) / 1000,
-    judgeOverall: mean((r) => r.judge?.overall), ...Object.fromEntries(JUDGE_KEYS.map((k) => ['judge_' + k, mean((r) => r.judge?.[k])])),
+    judgeOverall: mean((r) => r.judge?.overall), critic: mean((r) => r.critic), meanPolishRounds: mean((r) => r.polishRounds), ...Object.fromEntries(JUDGE_KEYS.map((k) => ['judge_' + k, mean((r) => r.judge?.[k])])),
   };
   fs.writeFileSync(path.join(dir, 'summary.json'), JSON.stringify({ generated: new Date().toISOString(), totals, rows }, null, 1));
   const J = (r, k) => (r.judge ? r.judge[k] : '–');
   const md = [
     `# Agent eval — ${path.basename(dir)}`, '',
-    `${rows.length} runs, model ${[...new Set(rows.map((r) => r.model))].join(', ')}. Agent cost $${totals.costUsd} (judge $${totals.judgeCostUsd}); mean ${totals.meanWallS}s, ${totals.meanTurns} turns, ${totals.meanToolCalls} tool calls, $${totals.meanCost} per brief. Tool errors ${totals.toolErrors}. Checklist ${Math.round(totals.checklistRate * 100)}% of machine-checkable items. Judge overall **${totals.judgeOverall ?? '–'}**/10 (${JUDGE_KEYS.map((k) => `${k} ${totals['judge_' + k] ?? '–'}`).join(', ')}).`, '',
-    '| brief | time | turns | cost | tools (err) | layers | keys | eases | spr/txt/expr/pre | activity | off-canvas | txt overlap | checklist | fit | style | timing | comp | rich | polish | **overall** |',
-    '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
-    ...rows.map((r) => `| ${r.name} | ${r.wallS}s${r.timedOut ? ' ⏱' : ''} | ${r.turns ?? '–'} | $${r.costUsd.toFixed(2)} | ${r.toolCalls} (${r.toolErrors}) | ${r.layers} | ${r.keys} | ${r.distinctEases} | ${r.springs}/${r.textAnimators}/${r.expressions}/${r.precomps} | ${Math.round(r.coverage * 100)}% | ${r.offCanvasS}s | ${r.textOverlapS}s | ${r.checklistHits}/${r.checklistCheckable} | ${J(r, 'brief_fit')} | ${J(r, 'style_match')} | ${J(r, 'timing_easing')} | ${J(r, 'composition')} | ${J(r, 'richness')} | ${J(r, 'polish')} | **${J(r, 'overall')}** |`),
+    `${rows.length} runs, model ${[...new Set(rows.map((r) => r.model))].join(', ')}. Agent cost $${totals.costUsd} (judge $${totals.judgeCostUsd}); mean ${totals.meanWallS}s, ${totals.meanTurns} turns, ${totals.meanToolCalls} tool calls, $${totals.meanCost} per brief. Tool errors ${totals.toolErrors}. Checklist ${Math.round(totals.checklistRate * 100)}% of machine-checkable items. Critic ${totals.critic ?? '–'}/100 (polishing rounds ${totals.meanPolishRounds ?? 0}/brief). Judge overall **${totals.judgeOverall ?? '–'}**/10 (${JUDGE_KEYS.map((k) => `${k} ${totals['judge_' + k] ?? '–'}`).join(', ')}).`, '',
+    '| brief | time | turns | cost | tools (err) | layers | keys | eases | spr/txt/expr/pre | activity | off-canvas | txt overlap | checklist | critic | fit | style | timing | comp | rich | polish | **overall** |',
+    '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
+    ...rows.map((r) => `| ${r.name} | ${r.wallS}s${r.timedOut ? ' ⏱' : ''} | ${r.turns ?? '–'} | $${r.costUsd.toFixed(2)} | ${r.toolCalls} (${r.toolErrors}) | ${r.layers} | ${r.keys} | ${r.distinctEases} | ${r.springs}/${r.textAnimators}/${r.expressions}/${r.precomps} | ${Math.round(r.coverage * 100)}% | ${r.offCanvasS}s | ${r.textOverlapS}s | ${r.checklistHits}/${r.checklistCheckable} | ${r.critic ?? '–'}${r.polishRounds ? ` (${r.criticBefore}→, ${r.polishRounds}r)` : ''} | ${J(r, 'brief_fit')} | ${J(r, 'style_match')} | ${J(r, 'timing_easing')} | ${J(r, 'composition')} | ${J(r, 'richness')} | ${J(r, 'polish')} | **${J(r, 'overall')}** |`),
     '', '## Judge critique', '',
     ...rows.map((r) => `- **${r.name}**: ${r.judge ? r.judge.critique.join(' / ') : '–'}`), '',
   ].join('\n');
@@ -492,6 +523,10 @@ async function main() {
     const bridge = await startBridge({ port: O.port + i, log: () => {}, workDir });
     const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
     await ctx.addInitScript(SEED_SCRIPT, O.seed);
+    // headless turns: storyboards build right away (nobody is there to approve the card)
+    await ctx.addInitScript(() => { try { localStorage.setItem("motion.agent.storyboard", "auto"); } catch { /* */ } });
+    // the taste layer flag must be set before the editor connects (it decides the advertised tools)
+    await ctx.addInitScript((taste) => { globalThis.__motionTaste = taste; }, O.taste);
     const page = await ctx.newPage();
     const w = { i, port: bridge.port, bridge, page, onEvent: null, pageErrors: [] };
     page.on('pageerror', (e) => w.pageErrors.push(e.message));

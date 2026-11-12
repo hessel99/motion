@@ -1,0 +1,205 @@
+{
+ "run": {
+  "id": "10-corporate-smooth",
+  "name": "10-corporate-smooth",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 63,
+    "sub": {
+     "timing": 61.40000000000001,
+     "easing": 64.8,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 38.6,
+     "easing": 35.2,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:monotone-ease",
+     "medium:entrance-ease",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:dead-time",
+     "low:timing-range"
+    ],
+    "ms": 4.8
+   },
+   "after": {
+    "score": 63,
+    "sub": {
+     "timing": 61.40000000000001,
+     "easing": 64.8,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 38.6,
+     "easing": 35.2,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:monotone-ease",
+     "medium:entrance-ease",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:dead-time",
+     "low:timing-range"
+    ],
+    "ms": 4.8
+   }
+  },
+  "wallMs": 28856,
+  "timedOut": false,
+  "turns": 4,
+  "costUsd": 0.004853360000000001,
+  "durationMs": 27456,
+  "usage": {
+   "input": 98610,
+   "cached": 91546,
+   "output": 5051
+  },
+  "errors": [],
+  "toolCalls": 3,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the lower third as four layers on a 6 s comp: **Lower third panel**, **Accent line**, **Name** (\"Dr. Amelia Hart\") and **Title** (\"Head of Research, Larkspur Labs\"). Everything uses Quart In Out, and the piece is clear by 5.7 s.\n\n- **Panel:** translucent blue-grey (#1c2733 at 60%) slides in 60 px from the left and fades in from 0.2 s.\n- **Accent line:** a thin 3 px line grows from its left edge from 0.6 s.\n- **Name and title:** each fades up 24 px and 16 px, starting at 0.9 s and 1.15 s. The soft reveal is opacity plus slide, not a true mask.\n- **Hold:** about 2.9 s with the full lockup visible.\n- **Out:** text drifts up and fades (4.85–5.35 s), the accent line retracts to its left edge, and the panel slides out to the left, finishing at 5.7 s.\n\nI set the comp background to a placeholder dark slate (#2a3440) so the panel reads. Swap it for the interview footage.\n\nThe critic scored this 63/100 and asked for Expo/Quart Out entrances and shorter slides. I kept the long in-out easing because you asked for it. The hold is intentional reading time.\n\nIf you want, I can make the entrances decelerate harder, add a lower-contrast variant, or create a version with a left-aligned accent bar instead of the horizontal line."
+ },
+ "metrics": {
+  "layers": 4,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "rect": 2,
+   "text": 2
+  },
+  "groups": 0,
+  "animatedLayers": 4,
+  "keys": 28,
+  "segments": 14,
+  "easesUsed": {
+   "Quart In Out": 14
+  },
+  "distinctEases": 1,
+  "easeFamilies": 1,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#1c2733",
+   "#8fa6bd",
+   "#f4f7fa",
+   "#aebdcc"
+  ],
+  "keyCoverage": 0.433,
+  "visualActivity": 0.402,
+  "firstMotion": 0.2,
+  "lastMotion": 5.667,
+  "endHold": 0.333,
+  "longestHold": 3.082,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 3,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.201,
+  "toolErrors": 0,
+  "toolCalls": 3
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "placed in the lower third",
+    "type": "lowerThird",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "animates out by the end",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "hold in the middle (≥1.5s without key motion)",
+    "type": "holdMin",
+    "pass": true
+   },
+   {
+    "text": "translucent panel (opacity < 100 or alpha)",
+    "type": "translucent",
+    "pass": true
+   },
+   {
+    "text": "accent line extends",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 8
+ },
+ "video": null
+}

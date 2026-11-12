@@ -1,0 +1,158 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (06-loop-bg, 1920x1080, 6s @30fps):
+A seamless looping ambient background for a conference stage screen: soft blurred-looking blobs/orbs in a purple-to-teal palette drifting slowly, plus a subtle grid of small dots that gently pulses. It must loop perfectly at 6 seconds (frame 0 == last frame), no visible jump. Calm, not busy.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- loops seamlessly (first frame ≈ frame at the loop point) [yes]
+- everything moves (animated coverage ≥90%) [yes]
+- ≥3 blobs/orbs (ellipses) [yes]
+- dot grid (≥15 layers) [yes]
+- uses loop expressions or matching first/last keys [yes]
+- purple/teal palette [yes]
+- calm: no fast motion [?]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- o1 [ellipse] box 100,20,760,760 #7b3fe4
+- o2 [ellipse] box 1151,401,779,779 #14b8a6
+- o3 [ellipse] box 659,541,600,600 #4f46e5
+- o4 [ellipse] box 1379,-50,560,560 #a855f7
+- o5 [ellipse] box -143,649,620,620 #2dd4bf
+- dotsA [group] #ffffff a0
+  - a00 [ellipse] box 132,87,6,6 #ffffff
+  - a01 [ellipse] box 432,87,6,6 #ffffff
+  - a02 [ellipse] box 732,87,6,6 #ffffff
+  - a03 [ellipse] box 1032,87,6,6 #ffffff
+  - a04 [ellipse] box 1332,87,6,6 #ffffff
+  - a05 [ellipse] box 1632,87,6,6 #ffffff
+  - a10 [ellipse] box 282,237,6,6 #ffffff
+  - a11 [ellipse] box 582,237,6,6 #ffffff
+  - a12 [ellipse] box 882,237,6,6 #ffffff
+  - a13 [ellipse] box 1182,237,6,6 #ffffff
+  - a14 [ellipse] box 1482,237,6,6 #ffffff
+  - a15 [ellipse] box 1782,237,6,6 #ffffff
+  - a20 [ellipse] box 132,387,6,6 #ffffff
+  - a21 [ellipse] box 432,387,6,6 #ffffff
+  - a22 [ellipse] box 732,387,6,6 #ffffff
+  - a23 [ellipse] box 1032,387,6,6 #ffffff
+  - a24 [ellipse] box 1332,387,6,6 #ffffff
+  - a25 [ellipse] box 1632,387,6,6 #ffffff
+  - a30 [ellipse] box 282,537,6,6 #ffffff
+  - a31 [ellipse] box 582,537,6,6 #ffffff
+  - a32 [ellipse] box 882,537,6,6 #ffffff
+  - a33 [ellipse] box 1182,537,6,6 #ffffff
+  - a34 [ellipse] box 1482,537,6,6 #ffffff
+  - a35 [ellipse] box 1782,537,6,6 #ffffff
+  - a40 [ellipse] box 132,687,6,6 #ffffff
+  - a41 [ellipse] box 432,687,6,6 #ffffff
+  - a42 [ellipse] box 732,687,6,6 #ffffff
+  - a43 [ellipse] box 1032,687,6,6 #ffffff
+  - a44 [ellipse] box 1332,687,6,6 #ffffff
+  - a45 [ellipse] box 1632,687,6,6 #ffffff
+  - a50 [ellipse] box 282,837,6,6 #ffffff
+  - a51 [ellipse] box 582,837,6,6 #ffffff
+  - a52 [ellipse] box 882,837,6,6 #ffffff
+  - a53 [ellipse] box 1182,837,6,6 #ffffff
+  - a54 [ellipse] box 1482,837,6,6 #ffffff
+  - a55 [ellipse] box 1782,837,6,6 #ffffff
+  - a60 [ellipse] box 132,987,6,6 #ffffff
+  - a61 [ellipse] box 432,987,6,6 #ffffff
+  - a62 [ellipse] box 732,987,6,6 #ffffff
+  - a63 [ellipse] box 1032,987,6,6 #ffffff
+  - a64 [ellipse] box 1332,987,6,6 #ffffff
+  - a65 [ellipse] box 1632,987,6,6 #ffffff
+- dotsB [group] #ffffff a0
+  - b00 [ellipse] box 282,87,6,6 #ffffff
+  - b01 [ellipse] box 582,87,6,6 #ffffff
+  - b02 [ellipse] box 882,87,6,6 #ffffff
+  - b03 [ellipse] box 1182,87,6,6 #ffffff
+  - b04 [ellipse] box 1482,87,6,6 #ffffff
+  - b05 [ellipse] box 1782,87,6,6 #ffffff
+  - b10 [ellipse] box 132,237,6,6 #ffffff
+  - b11 [ellipse] box 432,237,6,6 #ffffff
+  - b12 [ellipse] box 732,237,6,6 #ffffff
+  - b13 [ellipse] box 1032,237,6,6 #ffffff
+  - b14 [ellipse] box 1332,237,6,6 #ffffff
+  - b15 [ellipse] box 1632,237,6,6 #ffffff
+  - b20 [ellipse] box 282,387,6,6 #ffffff
+  - b21 [ellipse] box 582,387,6,6 #ffffff
+  - b22 [ellipse] box 882,387,6,6 #ffffff
+  - b23 [ellipse] box 1182,387,6,6 #ffffff
+  - b24 [ellipse] box 1482,387,6,6 #ffffff
+  - b25 [ellipse] box 1782,387,6,6 #ffffff
+  - b30 [ellipse] box 132,537,6,6 #ffffff
+  - b31 [ellipse] box 432,537,6,6 #ffffff
+  - b32 [ellipse] box 732,537,6,6 #ffffff
+  - b33 [ellipse] box 1032,537,6,6 #ffffff
+  - b34 [ellipse] box 1332,537,6,6 #ffffff
+  - b35 [ellipse] box 1632,537,6,6 #ffffff
+  - b40 [ellipse] box 282,687,6,6 #ffffff
+  - b41 [ellipse] box 582,687,6,6 #ffffff
+  - b42 [ellipse] box 882,687,6,6 #ffffff
+  - b43 [ellipse] box 1182,687,6,6 #ffffff
+  - b44 [ellipse] box 1482,687,6,6 #ffffff
+  - b45 [ellipse] box 1782,687,6,6 #ffffff
+  - b50 [ellipse] box 132,837,6,6 #ffffff
+  - b51 [ellipse] box 432,837,6,6 #ffffff
+  - b52 [ellipse] box 732,837,6,6 #ffffff
+  - b53 [ellipse] box 1032,837,6,6 #ffffff
+  - b54 [ellipse] box 1332,837,6,6 #ffffff
+  - b55 [ellipse] box 1632,837,6,6 #ffffff
+  - b60 [ellipse] box 282,987,6,6 #ffffff
+  - b61 [ellipse] box 582,987,6,6 #ffffff
+  - b62 [ellipse] box 882,987,6,6 #ffffff
+  - b63 [ellipse] box 1182,987,6,6 #ffffff
+  - b64 [ellipse] box 1482,987,6,6 #ffffff
+  - b65 [ellipse] box 1782,987,6,6 #ffffff
+
+TIMELINE:
+comp 1920x1080 6s @30fps, background #0b0820
+"o1" (ellipse l_03jm2)
+  position: expr "value + [90*Math.sin(time*2*Math.PI/6), 60*Math.cos(time*2*Math.PI/6)]"
+  scale: expr "100 + 6*Math.sin(time*2*Math.PI/6)"
+"o2" (ellipse l_03jm3)
+  position: expr "value + [-80*Math.cos(time*2*Math.PI/6), 70*Math.sin(time*2*Math.PI/6)]"
+  scale: expr "100 + 5*Math.cos(time*2*Math.PI/6)"
+"o3" (ellipse l_03jm4)
+  position: expr "value + [70*Math.sin(time*4*Math.PI/6+1), 50*Math.cos(time*2*Math.PI/6+2)]"
+"o4" (ellipse l_03jm5)
+  position: expr "value + [-60*Math.sin(time*2*Math.PI/6+0.5), 70*Math.cos(time*4*Math.PI/6)]"
+"o5" (ellipse l_03jm6)
+  position: expr "value + [80*Math.cos(time*2*Math.PI/6+1), -60*Math.sin(time*2*Math.PI/6+3)]"
+"dotsA" (group l_03jm7)
+  opacity: expr "55 + 30*Math.sin(time*2*Math.PI/6)"
+"dotsB" (group l_03jm1e)
+  opacity: expr "55 - 30*Math.sin(time*2*Math.PI/6)"
+
+AUTOMATIC METRICS:
+layers 89 drawable (ellipse 89, group 2), 0 keys, 0 moving segments
+eases: none; springs 0, overshooting 0, hold 0
+expressions 9, text animators 0, precomps 0, paths 0, gradients 0, markers 0
+palette (7): #7b3fe4 #14b8a6 #4f46e5 #a855f7 #2dd4bf #ffffff #0b0820
+motion from 0s to 6s (end hold 0s, longest still 0s), visual activity 100% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 6.097s, clipped in the last frame: o2, o5; text-on-text overlap 0s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

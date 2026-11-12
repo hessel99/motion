@@ -1,0 +1,203 @@
+{
+ "run": {
+  "id": "06-loop-bg",
+  "name": "06-loop-bg",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 51,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 0,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 108,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:off-canvas",
+     "high:off-canvas",
+     "high:off-canvas"
+    ],
+    "ms": 12.8
+   },
+   "after": {
+    "score": 51,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 0,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 108,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:off-canvas",
+     "high:off-canvas",
+     "high:off-canvas"
+    ],
+    "ms": 12.8
+   }
+  },
+  "wallMs": 43913,
+  "timedOut": false,
+  "turns": 21,
+  "costUsd": 0.10669590000000001,
+  "durationMs": 41934,
+  "usage": {
+   "input": 245738,
+   "cached": 238199,
+   "output": 5274
+  },
+  "errors": [],
+  "toolCalls": 20,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "Now duplicate the row 8 times and phase-shift the pulse for a gentle wave.\nI built a 6-second, 30 fps ambient loop at 1920×1080 on a deep indigo background. The contact sheet shows it rendering, and frame 5.97s lines up with frame 0 (the closing frame is one frame before the loop point).\n\n- **Orbs:** Five blurred, soft-edged orbs (**Orb Purple**, **Orb Teal**, **Orb Violet**, **Orb Cyan**, **Orb Indigo**) drift slowly in small elliptical paths. I drove them with sine and cosine expressions that each complete a whole number of cycles in exactly 6 seconds, so there are no keyframes or seam to ease around.\n- **Dot grid:** A 16×9 grid of small white dots, built as nine row layers. Each row's opacity pulses gently between about 8% and 36%. Each row is offset slightly from the one above, so the pulse ripples down the screen. It also loops cleanly at 6 seconds.\n\nI didn't run critique. The dots are very faint in the thumbnails, so if the stage screen is washed out, raise the 22 and 14 in the row opacity expressions.\n\nNext I could make the orbs larger and slower for a calmer feel, or change the palette toward the conference's brand colors."
+ },
+ "metrics": {
+  "layers": 14,
+  "drawableLayers": 14,
+  "layerTypes": {
+   "ellipse": 5,
+   "path": 9
+  },
+  "groups": 0,
+  "animatedLayers": 14,
+  "keys": 0,
+  "segments": 0,
+  "easesUsed": {},
+  "distinctEases": 0,
+  "easeFamilies": 0,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 14,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 9,
+  "gradientLayers": 5,
+  "paletteSize": 7,
+  "palette": [
+   "#8b4dff",
+   "#19d3c5",
+   "#c06bff",
+   "#38e8ff",
+   "#5a3dff",
+   "#ffffff",
+   "#0b0820"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 6.097,
+  "offCanvasLayers": {
+   "Orb Teal": 4.757,
+   "Orb Violet": 6.097,
+   "Orb Cyan": 5.293,
+   "Orb Indigo": 4.288
+  },
+  "clippedAtEnd": [
+   "Orb Teal",
+   "Orb Violet",
+   "Orb Cyan",
+   "Orb Indigo"
+  ],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 0,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.154,
+  "toolErrors": 0,
+  "toolCalls": 20
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "loops seamlessly (first frame ≈ frame at the loop point)",
+    "type": "loops",
+    "pass": true
+   },
+   {
+    "text": "everything moves (animated coverage ≥90%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 blobs/orbs (ellipses)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "dot grid (≥15 layers)",
+    "type": "layersMin",
+    "pass": false
+   },
+   {
+    "text": "uses loop expressions or matching first/last keys",
+    "type": "loopTechnique",
+    "pass": true
+   },
+   {
+    "text": "purple/teal palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "calm: no fast motion",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 5,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

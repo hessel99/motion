@@ -1,0 +1,68 @@
+- Candy pink circle [ellipse] box 225,305,150,150 #ff4f8b
+- Candy yellow star [path] box 425,235,190,190 #ffc93c star
+- Candy teal rounded square [rect] box 690,310,140,140 #2ec4b6
+- Candy violet circle [ellipse] box 375,445,110,110 #7b5cff
+- Candy orange star [path] box 585,425,130,130 #ff8a3d star
+- Candy mint circle [ellipse] box 135,455,90,90 #3ddc97
+- Letter B [text] box 153,463,154,276 #d92d6e "B" Inter 230px w900
+- Letter o 1 [text] box 320,515,141,285 #c27c00 "o" Inter 230px w900
+- Letter o 2 [text] box 474,646,133,305 #137f76 "o" Inter 230px w900
+- Letter p [text] box 624,740,131,320 #5638e0 "p" Inter 230px w900
+- Letter ! [text] box 801,740,77,320 #e0561a "!" Inter 230px w900
+
+comp 1080x1080 6s @60fps, background #fff6e9
+"Candy pink circle" (ellipse l_03jm2)
+  position: 0.1s [300,-150] ─Quad In→ 0.6s [300,380] ─Quad Out→ 0.8s [300,310] ─Quad In→ 0.98s [300,380] ─Quad Out→ 1.12s [300,362] ─Quad In→ 1.24s [300,380] ─Quad In Out→ 1.9s [300,380] ─Easy Ease→ 2.04s [314,380] ─Quad Out→ 2.2s [292,380] ─Quad In Out→ 2.35s [300,380]
+  scale: 0.1s [88,118] ─Quad In→ 0.6s [130,72] ─Cubic Out→ 0.8s [88,116] ─Quad Out→ 0.98s [126,76] ─Quad In→ 1.12s [92,110] ─Quad Out→ 1.24s 100 ─spring Bouncy→ 1.9s 100 ─Quad Out→ 2.04s [112,90] ─Quad Out→ 2.2s [96,104] ─Quad In Out→ 2.35s 100
+  rotation: 0s 0 ─Easy Ease→ 1.9s 0 ─Easy Ease→ 2.04s -10 ─Quad Out→ 2.2s 8 ─Quad In Out→ 2.35s -4 ─Quad In Out→ 2.5s 0
+  rotation: expr "value + clamp((time-4.4)*3,0,1)*4*Math.sin(time*2*Math.PI/2.2 + 1.3*index)"
+"Candy yellow star" (path l_03jm3)
+  position: 0.22s [520,-150] ─Quad In→ 0.72s [520,330] ─Quad Out→ 0.92s [520,260] ─Quad In→ 1.1s [520,330] ─Quad Out→ 1.24s [520,312] ─Quad In→ 1.36s [520,330] ─Quad In Out→ 1.98s [520,330] ─Easy Ease→ 2.12s [506,330] ─Quad Out→ 2.28s [528,330] ─Quad In Out→ 2.43s [520,330]
+  scale: 0.22s [88,118] ─Quad In→ 0.72s [130,72] ─Cubic Out→ 0.92s [88,116] ─Quad Out→ 1.1s [126,76] ─Quad In→ 1.24s [92,110] ─Quad Out→ 1.36s 100 ─spring Bouncy→ 1.98s 100 ─Quad Out→ 2.12s [112,90] ─Quad Out→ 2.28s [96,104] ─Quad In Out→ 2.43s 100
+  rotation: 0s 0 ─Easy Ease→ 1.98s 0 ─Easy Ease→ 2.12s 10 ─Quad Out→ 2.28s -8 ─Quad In Out→ 2.43s 4 ─Quad In Out→ 2.58s 0
+  rotation: expr "value + clamp((time-4.4)*3,0,1)*4*Math.sin(time*2*Math.PI/2.2 + 1.3*index)"
+"Candy teal rounded square" (rect l_03jm4)
+  position: 0.34s [760,-150] ─Quad In→ 0.84s [760,380] ─Quad Out→ 1.04s [760,310] ─Quad In→ 1.22s [760,380] ─Quad Out→ 1.36s [760,362] ─Quad In→ 1.48s [760,380] ─Quad In Out→ 2.06s [760,380] ─Easy Ease→ 2.2s [774,380] ─Quad Out→ 2.36s [752,380] ─Quad In Out→ 2.51s [760,380]
+  scale: 0.34s [88,118] ─Quad In→ 0.84s [130,72] ─Cubic Out→ 1.04s [88,116] ─Quad Out→ 1.22s [126,76] ─Quad In→ 1.36s [92,110] ─Quad Out→ 1.48s 100 ─spring Bouncy→ 2.06s 100 ─Quad Out→ 2.2s [112,90] ─Quad Out→ 2.36s [96,104] ─Quad In Out→ 2.51s 100
+  rotation: 0s 0 ─Easy Ease→ 2.06s 0 ─Easy Ease→ 2.2s -10 ─Quad Out→ 2.36s 8 ─Quad In Out→ 2.51s -4 ─Quad In Out→ 2.66s 0
+  rotation: expr "value + clamp((time-4.4)*3,0,1)*4*Math.sin(time*2*Math.PI/2.2 + 1.3*index)"
+"Candy violet circle" (ellipse l_03jm5)
+  position: 0.46s [430,-150] ─Quad In→ 0.96s [430,500] ─Quad Out→ 1.16s 430 ─Quad In→ 1.34s [430,500] ─Quad Out→ 1.48s [430,482] ─Quad In→ 1.6s [430,500] ─Quad In Out→ 2.14s [430,500] ─Easy Ease→ 2.28s [416,500] ─Quad Out→ 2.44s [438,500] ─Quad In Out→ 2.59s [430,500]
+  scale: 0.46s [88,118] ─Quad In→ 0.96s [130,72] ─Cubic Out→ 1.16s [88,116] ─Quad Out→ 1.34s [126,76] ─Quad In→ 1.48s [92,110] ─Quad Out→ 1.6s 100 ─spring Bouncy→ 2.14s 100 ─Quad Out→ 2.28s [112,90] ─Quad Out→ 2.44s [96,104] ─Quad In Out→ 2.59s 100
+  rotation: 0s 0 ─Easy Ease→ 2.14s 0 ─Easy Ease→ 2.28s 10 ─Quad Out→ 2.44s -8 ─Quad In Out→ 2.59s 4 ─Quad In Out→ 2.74s 0
+  rotation: expr "value + clamp((time-4.4)*3,0,1)*4*Math.sin(time*2*Math.PI/2.2 + 1.3*index)"
+"Candy orange star" (path l_03jm6)
+  position: 0.58s [650,-150] ─Quad In→ 1.08s [650,490] ─Quad Out→ 1.28s [650,420] ─Quad In→ 1.46s [650,490] ─Quad Out→ 1.6s [650,472] ─Quad In→ 1.72s [650,490] ─Quad In Out→ 2.22s [650,490] ─Easy Ease→ 2.36s [664,490] ─Quad Out→ 2.52s [642,490] ─Quad In Out→ 2.67s [650,490]
+  scale: 0.58s [88,118] ─Quad In→ 1.08s [130,72] ─Cubic Out→ 1.28s [88,116] ─Quad Out→ 1.46s [126,76] ─Quad In→ 1.6s [92,110] ─Quad Out→ 1.72s 100 ─spring Bouncy→ 2.22s 100 ─Quad Out→ 2.36s [112,90] ─Quad Out→ 2.52s [96,104] ─Quad In Out→ 2.67s 100
+  rotation: 0s 0 ─Easy Ease→ 2.22s 0 ─Easy Ease→ 2.36s -10 ─Quad Out→ 2.52s 8 ─Quad In Out→ 2.67s -4 ─Quad In Out→ 2.82s 0
+  rotation: expr "value + clamp((time-4.4)*3,0,1)*4*Math.sin(time*2*Math.PI/2.2 + 1.3*index)"
+"Candy mint circle" (ellipse l_03jm7)
+  position: 0.7s [180,-150] ─Quad In→ 1.2s [180,500] ─Quad Out→ 1.4s [180,430] ─Quad In→ 1.58s [180,500] ─Quad Out→ 1.72s [180,482] ─Quad In→ 1.84s [180,500] ─Quad In Out→ 2.3s [180,500] ─Easy Ease→ 2.44s [166,500] ─Quad Out→ 2.6s [188,500] ─Quad In Out→ 2.75s [180,500]
+  scale: 0.7s [88,118] ─Quad In→ 1.2s [130,72] ─Cubic Out→ 1.4s [88,116] ─Quad Out→ 1.58s [126,76] ─Quad In→ 1.72s [92,110] ─Quad Out→ 1.84s 100 ─spring Bouncy→ 2.3s 100 ─Quad Out→ 2.44s [112,90] ─Quad Out→ 2.6s [96,104] ─Quad In Out→ 2.75s 100
+  rotation: 0s 0 ─Easy Ease→ 2.3s 0 ─Easy Ease→ 2.44s 10 ─Quad Out→ 2.6s -8 ─Quad In Out→ 2.75s 4 ─Quad In Out→ 2.9s 0
+  rotation: expr "value + clamp((time-4.4)*3,0,1)*4*Math.sin(time*2*Math.PI/2.2 + 1.3*index)"
+"Letter B" (text l_03jm8)
+  position: 2.7s [230,900] ─Quad Out→ 3.02s [230,600] ─Quad In→ 3.25s [230,730] ─Quad Out→ 3.42s [230,690] ─Quad In→ 3.56s [230,730]
+  scale: 2.7s [88,116] ─Quad Out→ 3.02s 100 ─Quad In→ 3.25s [132,70] ─Cubic Out→ 3.42s [92,112] ─Quad Out→ 3.56s [126,76] ─Quad In→ 3.7s 100
+  rotation: expr "value + clamp((time-4.4)*3,0,1)*3*Math.sin(time*2*Math.PI/1.6 + 0.6*index)"
+  opacity: 0s 0 ─linear→ 2.7s 0 ─linear→ 2.76s 100
+"Letter o 1" (text l_03jm9)
+  position: 2.82s [390,900] ─Quad Out→ 3.14s [390,600] ─Quad In→ 3.37s [390,730] ─Quad Out→ 3.54s [390,690] ─Quad In→ 3.68s [390,730]
+  scale: 2.82s [88,116] ─Quad Out→ 3.14s 100 ─Quad In→ 3.37s [132,70] ─Cubic Out→ 3.54s [92,112] ─Quad Out→ 3.68s [126,76] ─Quad In→ 3.82s 100
+  rotation: expr "value + clamp((time-4.4)*3,0,1)*3*Math.sin(time*2*Math.PI/1.6 + 0.6*index)"
+  opacity: 0s 0 ─linear→ 2.82s 0 ─linear→ 2.88s 100
+"Letter o 2" (text l_03jma)
+  position: 2.94s [540,900] ─Quad Out→ 3.26s [540,600] ─Quad In→ 3.49s [540,730] ─Quad Out→ 3.66s [540,690] ─Quad In→ 3.8s [540,730]
+  scale: 2.94s [88,116] ─Quad Out→ 3.26s 100 ─Quad In→ 3.49s [132,70] ─Cubic Out→ 3.66s [92,112] ─Quad Out→ 3.8s [126,76] ─Quad In→ 3.94s 100
+  rotation: expr "value + clamp((time-4.4)*3,0,1)*3*Math.sin(time*2*Math.PI/1.6 + 0.6*index)"
+  opacity: 0s 0 ─linear→ 2.94s 0 ─linear→ 3s 100
+"Letter p" (text l_03jmb)
+  position: 3.06s [690,900] ─Quad Out→ 3.38s [690,600] ─Quad In→ 3.61s [690,730] ─Quad Out→ 3.78s 690 ─Quad In→ 3.92s [690,730]
+  scale: 3.06s [88,116] ─Quad Out→ 3.38s 100 ─Quad In→ 3.61s [132,70] ─Cubic Out→ 3.78s [92,112] ─Quad Out→ 3.92s [126,76] ─Quad In→ 4.06s 100
+  rotation: expr "value + clamp((time-4.4)*3,0,1)*3*Math.sin(time*2*Math.PI/1.6 + 0.6*index)"
+  opacity: 0s 0 ─linear→ 3.06s 0 ─linear→ 3.12s 100
+"Letter !" (text l_03jmc)
+  position: 3.18s [840,900] ─Quad Out→ 3.5s [840,600] ─Quad In→ 3.73s [840,730] ─Quad Out→ 3.9s [840,690] ─Quad In→ 4.04s [840,730]
+  scale: 3.18s [88,116] ─Quad Out→ 3.5s 100 ─Quad In→ 3.73s [132,70] ─Cubic Out→ 3.9s [92,112] ─Quad Out→ 4.04s [126,76] ─Quad In→ 4.18s 100
+  rotation: expr "value + clamp((time-4.4)*3,0,1)*3*Math.sin(time*2*Math.PI/1.6 + 0.6*index)"
+  opacity: 0s 0 ─linear→ 3.18s 0 ─linear→ 3.24s 100

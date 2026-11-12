@@ -1,0 +1,51 @@
+- bg [rect] box 0,0,1920,1080 #0a0a0c
+- beatdot [ellipse] box 948,948,24,24 #ff5a1f
+- ring1 [ellipse] box -140,-610,2200,2200 #000000 a0 stroke #ff5a1f 14px
+- ring2 [ellipse] box 160,-310,1600,1600 #000000 a0 stroke #f5f5f7 5px
+- w1 [text] box 238,447,1445,187 #f5f5f7 "40h battery" Inter 190px w900
+- w2 [text] box 238,447,1445,187 #ff5a1f "Spatial audio" Inter 190px w900
+- w3 [text] box 238,447,1445,187 #f5f5f7 "Pure silence" Inter 190px w900
+- name [text] box 60,280,1800,380 #f5f5f7 "PULSE 2" Inter 340px w900
+- pill [rect] box 960,720,0,0 #ff5a1f
+- pilltext [text] box 690,710,540,70 #0a0a0c "Available now" Inter 60px w800
+- bar1 [rect] box 1920,0,1920,1080 #ff5a1f
+- bar2 [rect] box -1920,0,1920,1080 #ff5a1f
+- bar3 [rect] box 1920,0,1920,1080 #ff5a1f
+- flash [rect] box 0,0,1920,1080 #ff5a1f
+
+comp 1920x1080 10s @30fps, background #0a0a0c
+"beatdot" (ellipse l_03jm3)
+  scale: 0.5s 100 ─Easy Ease→ 0.75s 40 ─Easy Ease→ 1s 100 ─Expo Out→ 1.25s 40 ─Easy Ease→ 1.5s 160 ─Expo Out→ 2s 40 ─Easy Ease→ 2.5s 160 ─Expo Out→ 3s 40 ─Easy Ease→ 3.5s 100
+  opacity: 0s 100 ─Easy Ease→ 3.8s 100 ─Easy Ease→ 4s 0
+"ring1" (ellipse l_03jm4)
+  scale: 4s 0 ─Easy Ease→ 5s 1100
+  opacity: 0s 0 ─hold→ 4s 100 ─Easy Ease→ 5s 0
+"ring2" (ellipse l_03jm5)
+  scale: 4.12s 0 ─Easy Ease→ 5s 800
+  opacity: 0s 0 ─hold→ 4.12s 70 ─Easy Ease→ 5s 0
+"w1" (text l_03jm6)
+  scale: 0.5s 150 ─Expo Out→ 0.75s 100 ─Easy Ease→ 1.4s 100 ─Expo In→ 1.5s 85
+  opacity: 0s 0 ─hold→ 0.5s 100 ─hold→ 1.4s 100 ─Easy Ease→ 1.5s 0
+"w2" (text l_03jm7)
+  scale: 1.5s 150 ─Expo Out→ 1.75s 100 ─Easy Ease→ 2.4s 100 ─Expo In→ 2.5s 85
+  opacity: 0s 0 ─hold→ 1.5s 100 ─hold→ 2.4s 100 ─Easy Ease→ 2.5s 0
+"w3" (text l_03jm8)
+  scale: 2.5s 150 ─Expo Out→ 2.75s 100 ─Easy Ease→ 3.4s 100 ─Expo In→ 3.5s 85
+  opacity: 0s 0 ─hold→ 2.5s 100 ─hold→ 3.4s 100 ─Easy Ease→ 3.5s 0
+"name" (text l_03jm9)
+  position: 4.25s [960,470] ─Easy Ease→ 4.3s [972,462] ─Easy Ease→ 4.36s [950,478] ─Easy Ease→ 4.43s [966,468] ─Easy Ease→ 4.5s [957,473] ─Easy Ease→ 4.6s [960,470]
+  scale: 4s 320 ─Expo Out→ 4.25s 100
+  opacity: 0s 0 ─hold→ 4s 100
+"pill" (rect l_03jma)
+  scale: 0s 0 ─hold→ 6.5s 0 ─Easy Ease→ 7s 100 ─spring Bouncy→ 8s 100 ─Easy Ease→ 8.5s 106 ─Sine In Out→ 9s 100
+"pilltext" (text l_03jmb)
+  position: 6.75s [960,745] ─Easy Ease→ 7.2s [960,720]
+  opacity: 0s 0 ─hold→ 6.75s 0 ─Easy Ease→ 7s 100
+"bar1" (rect l_03jmc)
+  position: 0.4s [-960,540] ─Easy Ease→ 0.7s [2880,540]
+"bar2" (rect l_03jmd)
+  position: 1.4s [2880,540] ─Easy Ease→ 1.7s [-960,540]
+"bar3" (rect l_03jme)
+  position: 2.4s [-960,540] ─Easy Ease→ 2.7s [2880,540]
+"flash" (rect l_03jmf)
+  opacity: 0s 0 ─hold→ 4s 100 ─Easy Ease→ 4.35s 0

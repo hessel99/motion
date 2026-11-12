@@ -1,0 +1,188 @@
+{
+ "run": {
+  "id": "12-hand-drawn",
+  "name": "12-hand-drawn",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 4.7
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 4.7
+   }
+  },
+  "wallMs": 39657,
+  "timedOut": false,
+  "turns": 6,
+  "costUsd": 0.00883107,
+  "durationMs": 38666,
+  "usage": {
+   "input": 258763,
+   "cached": 246237,
+   "output": 7729
+  },
+  "errors": [],
+  "toolCalls": 5,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I'll start by checking the closest proven example for this kind of brief.\nStoryboard approved for auto-build. Building the five beats now: blobs first, then the stalk, loaf, and name.\nI built the Crumb & Co sting: 6 s, 1920×1080, 24 fps, on a cream background (#F6EFE3). The critique scored it 100/100 with no issues, and the contact sheet confirms the sequence.\n\n- **Blobs:** four irregular blobs in wheat gold, terracotta, olive and crust brown swell in from 0 to 1.2 s, staggered, then breathe slowly (±1.5% scale, 3.4–4.2 s cycles).\n- **Wheat stalk:** a wobbly line stalk with paired grains draws itself from the base upward (0.2–1.8 s).\n- **Loaf:** a loaf outline with a score line draws on from 1.2 s, overlapping the wheat.\n- **Name:** \"Crumb & Co\" in dark brown, bold, fades up letter by letter from 3.1 s with a Quart Out ease.\n- **Hand feel:** the stalk and loaf jitter by about 1 px at 12 fps. The jitter fades out between roughly 4.1 and 4.9 s, so the final frame is a clean lockup.\n\nChoices I made that you may want to change:\n- The layers are named Blob wheat gold, Blob terracotta, Blob olive, Blob crust brown, Wheat stalk, Loaf and Name.\n- The name uses the default sans font, not a rounder display face, since I couldn't confirm a friendly font is available here. Tell me a font you'd like and I'll swap it in.\n- The mark is fairly small in the frame. I can scale the stalk, loaf and name up if you want it to read bigger."
+ },
+ "metrics": {
+  "layers": 7,
+  "drawableLayers": 7,
+  "layerTypes": {
+   "path": 6,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 7,
+  "keys": 22,
+  "segments": 10,
+  "easesUsed": {
+   "Sine Out": 8,
+   "Sine In Out": 1,
+   "Cubic In Out": 1
+  },
+  "distinctEases": 3,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 6,
+  "textAnimators": 1,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 6,
+  "gradientLayers": 0,
+  "paletteSize": 6,
+  "palette": [
+   "#e3b25b",
+   "#d9825b",
+   "#9aa05a",
+   "#b07a45",
+   "#3b2a1e",
+   "#f6efe3"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.67,
+  "firstMotion": 0,
+  "lastMotion": 4.6,
+  "endHold": 1.4,
+  "longestHold": 0.067,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 2.948,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.024,
+  "midLuma": 0.926,
+  "toolErrors": 0,
+  "toolCalls": 5
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "stroke draw-on (trim paths animated)",
+    "type": "trimAnimated",
+    "pass": true
+   },
+   {
+    "text": "custom paths (≥2)",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "boil/wobble (wiggle expression, hold keys or path keys)",
+    "type": "jitter",
+    "pass": false
+   },
+   {
+    "text": "breathing blobs (scale animated)",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "warm palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "no linear eases",
+    "type": "noLinear",
+    "pass": true
+   }
+  ],
+  "hits": 6,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

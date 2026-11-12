@@ -1,0 +1,33 @@
+- line [path] box 370,1010,340,2 #000000 a0 stroke #c9a96e 2px
+- name [group] #ffffff a0
+  - É [text] box 304,820,92,180 #efe9dc "É" serif 150px w400
+  - C [text] box 394,820,101,180 #efe9dc "C" serif 150px w400
+  - L [text] box 504,820,92,180 #efe9dc "L" serif 150px w400
+  - A [text] box 589,820,109,180 #efe9dc "A" serif 150px w400
+  - T [text] box 692,820,92,180 #efe9dc "T" serif 150px w400
+- descriptor [text] box 0,1045,1080,40 #a38f66 "EAU DE PARFUM" Inter 26px w400
+
+comp 1080x1920 7s @30fps, background #0b0a09
+"line" (path l_03jm2)
+  trimStart: 0.4s 50 ─Sine In Out→ 2.8s 0
+  trimEnd: 0.4s 50 ─Sine In Out→ 2.8s 100
+"name" (group l_03jm5)
+  scale: 4.4s 100 ─Sine In Out→ 7s 103
+"É" (text l_03jm6)
+  position: 0s [317,90] ─Cubic In Out→ 1s [317,90] ─Quart Out→ 2.8s [349.02,90]
+  opacity: 0s 0 ─Ease In→ 1s 0 ─Sine Out→ 2.2s 100
+"C" (text l_03jm7)
+  position: 0s [433,90] ─Cubic In Out→ 1.22s [433,90] ─Quart Out→ 3.02s [448.89,90]
+  opacity: 0s 0 ─Ease In→ 1.22s 0 ─Sine Out→ 2.42s 100
+"L" (text l_03jm8)
+  position: 0s [546.08,90] ─Cubic In Out→ 1.44s [546.08,90] ─Quart Out→ 3.24s [546.08,90]
+  opacity: 0s 0 ─Ease In→ 1.44s 0 ─Sine Out→ 2.64s 100
+"A" (text l_03jm9)
+  position: 0s [656,90] ─Cubic In Out→ 1.66s [656,90] ─Quart Out→ 3.46s [640.23,90]
+  opacity: 0s 0 ─Ease In→ 1.66s 0 ─Sine Out→ 2.86s 100
+"T" (text l_03jma)
+  position: 0s [772,90] ─Cubic In Out→ 1.88s [772,90] ─Quart Out→ 3.68s [740.39,90]
+  opacity: 0s 0 ─Ease In→ 1.88s 0 ─Sine Out→ 3.08s 100
+"descriptor" (text l_03jm4)
+  position: 3.2s [540,1068] ─Sine Out→ 4.4s [540,1060]
+  opacity: 3.2s 0 ─Sine Out→ 3.8s 100

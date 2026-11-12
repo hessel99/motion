@@ -4,13 +4,13 @@
 import { editor } from '../app/editor';
 import {
   addLayer, cloneLayers, deleteLayers, groupLayers, isAnimated, keyId, setCompSettings, setEase, setLayerField, setProp,
-  setPropTx, valueAt, setSpring, precompose, setExpr,
+  setPropTx, valueAt, setSpring, precompose, setExpr, EFFECT_PROPS, removeEffect, setEffectVisible,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { ANIM_PRESETS, applyPreset, setTextAnim, TEXT_ANIM_PRESETS } from '../core/presets';
 import { parsePathD } from '../import/svg';
-import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
+import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type EffectType, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
 import type { Tx } from '../core/store';
 import { animRange, describeLayerAnimation, fmtTime } from './describe';
 import { editorContext } from './context';
@@ -26,6 +26,7 @@ export type { ToolDef, ToolContent } from './tool-kit';
 import { enableTrim, st, renderer, hasRenderer, inBackground, text, colorSchema, propValueSchema, easeSchema, keyframeSchema, idsSchema, parseColor, toValue, checkProp, need, round, buildKeys, writeTrack, shiftLayerKeys, contactSheet, resolveEase, boundsOf } from './tool-kit';
 export { parseColor, boundsOf } from './tool-kit';
 import { SCENE_TOOLS, textAnimFrom } from './tools-scene';
+import { tasteDefaults } from './taste-defaults';
 import { TYPE_TOOLS } from './tools-type';
 import { ANALYSIS_TOOLS } from './tools-analysis';
 import { PREVIEW_TOOLS } from './tools-preview';
@@ -402,9 +403,10 @@ export const TOOLS: ToolDef[] = [
   {
     name: 'apply_preset',
     description: 'Apply a ready-made animation to layers at a time (default: playhead). "in" presets start at t, "out" presets end at t. stagger offsets each next layer (seconds) — great for lists/logos. Presets: ' + ANIM_PRESETS.map(p => `${p.name} (${p.kind})`).join(', '),
-    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, preset: { type: 'string' }, t: { type: 'number' }, duration: { type: 'number', default: 0.6 }, stagger: { type: 'number', default: 0 } }, required: ['ids', 'preset'] },
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, preset: { type: 'string' }, t: { type: 'number' }, duration: { type: 'number', description: 'default: from the element size (handbook timing table)' }, stagger: { type: 'number', description: 'default: the style\'s list step for several layers' } }, required: ['ids', 'preset'] },
     run: ({ ids, preset, t, duration, stagger }) => {
       if (t !== undefined) st().setTime(t);
+      ({ duration, stagger } = tasteDefaults(ids, duration, stagger));
       applyPreset(st(), ids, preset, { duration, stagger });
       return text('ok');
     },
@@ -434,7 +436,7 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: 'precompose',
-    description: 'Pre-compose top-level layers of the active composition into a new composition (After Effects style). Returns the new comp id and the precomp layer id. Useful to animate a group of layers as one unit or to reuse it.',
+    description: 'Pre-compose layers of the active composition into a new composition (After Effects style). The layers must share a parent (top level, or e.g. children of a pasted frame: the new composition then takes the parent frame\'s size and space). Returns the new comp id and the precomp layer id. Useful to animate a group of layers as one unit or to reuse it.',
     inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, name: { type: 'string' } }, required: ['ids'] },
     run: ({ ids, name }) => { const r = precompose(st(), ids, name); return text({ compId: r.comp.id, layerId: r.layer.id }); },
   },
@@ -443,6 +445,19 @@ export const TOOLS: ToolDef[] = [
     description: 'Switch the editor (and all other tools) to another composition by id.',
     inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
     run: ({ id }) => { if (!st().project.comps[id]) throw new Error('no such composition'); st().openComp(id); return text('ok'); },
+  },
+  {
+    name: 'set_effect_state',
+    description: 'Turn a layer effect off/on (values and keyframes kept) or remove it (its effect props and keyframes go too). Effects are added by setting their props (shadowColor/shadowOffset/shadowBlur/shadowSpread, innerShadow*, blur, backgroundBlur, noiseColor/noiseSize/noiseDensity). One undo step.',
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, effect: { enum: ['dropShadow', 'innerShadow', 'layerBlur', 'backgroundBlur', 'noise'] }, action: { enum: ['hide', 'show', 'remove'] } }, required: ['ids', 'effect', 'action'] },
+    run: ({ ids, effect, action }) => {
+      if (!EFFECT_PROPS[effect as EffectType]) throw new Error('unknown effect ' + effect);
+      const known = (ids as string[]).filter(id => st().layer(id));
+      if (!known.length) throw new Error('no such layers');
+      if (action === 'remove') removeEffect(st(), known, effect);
+      else setEffectVisible(st(), known, effect, action === 'show');
+      return text('ok');
+    },
   },
   {
     name: 'set_expression',
@@ -464,12 +479,12 @@ export const TOOLS: ToolDef[] = [
       renderer(); // exports render the file on screen: not from a background tab
       if (a.format === 'gif') {
         const { exportGifFile } = await import('../app/actions');
-        const blob = await exportGifFile();
+        const blob = await exportGifFile({}, 'agent');
         return text({ format: 'gif', bytes: blob.size });
       }
       const { exportVideoDetailed } = await import('../export/video');
       const res = await exportVideoDetailed({ format: a.format ?? 'mp4', scale: a.scale ?? 1, quality: a.quality ?? 'high' });
-      const name = `${(st().project.name || 'motion').replace(/[^\w\- ]+/g, '_')} - ${st().comp.name}.${res.format}`;
+      const name = (await import('../app/actions')).exportFileName(res.format);
       const native = (globalThis as any).motionNative;
       if (native?.saveExport) {
         const buf = new Uint8Array(await res.blob.arrayBuffer());
@@ -553,21 +568,21 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: 'retime',
-    description: 'Speed up / slow down / shift animation: key times become pivot + (t - pivot) * scale + offset, for every animated property, path shape keys and text animators of the layers. scale 1.25 = 25% slower, 0.8 = faster. ids default to the selection, else all layers. pivot defaults to the earliest key.',
-    inputSchema: { type: 'object', properties: { ids: idsSchema, scale: { type: 'number', default: 1 }, offset: { type: 'number', default: 0, description: 'seconds' }, pivot: { type: 'number' } } },
-    run: ({ ids, scale = 1, offset = 0, pivot }) => {
+    description: 'Speed up / slow down / shift animation: key times become pivot + (t - pivot) * scale + offset (only keys at/after `from` when given), for every animated property, path shape keys and text animators of the layers. scale 1.25 = 25% slower, 0.8 = faster. ids default to the selection, else all layers. pivot defaults to the earliest key.',
+    inputSchema: { type: 'object', properties: { ids: idsSchema, scale: { type: 'number', default: 1 }, offset: { type: 'number', default: 0, description: 'seconds' }, pivot: { type: 'number' }, from: { type: 'number', description: 'only keys at or after this time move (e.g. delay an exit: from = exit start, offset 0.5); default all' } } },
+    run: ({ ids, scale = 1, offset = 0, pivot, from }) => {
       const s = st();
       if (!(scale > 0) || !isFinite(scale)) throw new Error('scale must be a positive number');
       if (!isFinite(offset) || (pivot != null && !isFinite(pivot))) throw new Error('offset and pivot must be numbers');
       const list: Layer[] = ids?.length ? ids.map(need) : s.selection.length ? s.selection.map(need) : Object.values(s.project.layers);
       const ranges = list.map(animRange).filter(Boolean) as [number, number][];
       if (!ranges.length) throw new Error('none of these layers is animated');
-      const p0 = pivot ?? Math.min(...ranges.map(r => r[0]));
+      const p0 = pivot ?? from ?? Math.min(...ranges.map(r => r[0]));
       // the whole mapping must keep keys at t >= 0: clamping each key would stack them on 0
-      const earliest = Math.min(...ranges.map(r => r[0]));
+      const earliest = from != null ? Math.max(from, Math.min(...ranges.map(r => r[0]))) : Math.min(...ranges.map(r => r[0]));
       const mapped0 = p0 + (earliest - p0) * scale + offset;
       if (mapped0 < -1e-9) throw new Error(`this would move the first key to ${fmtTime(mapped0)} (before 0). The smallest allowed offset here is ${fmtTime(offset - mapped0)}.`);
-      const f = (t: number) => Math.max(0, p0 + (t - p0) * scale + offset);
+      const f = (t: number) => (from != null && t < from - 1e-6 ? t : Math.max(0, p0 + (t - p0) * scale + offset));
       let end = 0;
       s.transact('Agent: retime', tx => {
         for (const l of list) {

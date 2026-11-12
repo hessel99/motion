@@ -1,0 +1,32 @@
+- Blob mustard [path] box 473,274,464,411 #e9b44c
+- Blob terracotta [path] box 1005,370,450,380 #d97757
+- Blob sage [path] box 1443,153,295,255 #7a9e7e
+- Wheat stalk [path] box 667,223,64,478 #000000 a0 stroke #2e2a24 6px
+- Loaf [path] box 1059,463,340,190 #000000 a0 stroke #2e2a24 6px
+- Loaf scores [path] box 1149,481,182,40 #000000 a0 stroke #2e2a24 6px
+- Wordmark [text] box 360,800,1200,190 #2e2a24 "Crumb & Co" serif 150px w600
+
+comp 1920x1080 6s @24fps, background #f6efe3
+"Blob mustard" (path l_03jm2)
+  scale: 0s 80 ─Quad Out→ 1.2s 100
+  scale: expr "value + [2.2*Math.sin(time*2*Math.PI/5), 2.2*Math.sin(time*2*Math.PI/5 + 1.3)]"
+"Blob terracotta" (path l_03jm3)
+  scale: 0.15s 80 ─Quad Out→ 1.35s 100
+  scale: expr "value + [2.4*Math.sin(time*2*Math.PI/6 + 2), 2.4*Math.sin(time*2*Math.PI/6)]"
+"Blob sage" (path l_03jm4)
+  scale: 0.3s 80 ─Quad Out→ 1.5s 100
+  scale: expr "value + [2*Math.sin(time*2*Math.PI/4.5), 2*Math.sin(time*2*Math.PI/4.5 + 0.7)]"
+"Wheat stalk" (path l_03jm5)
+  position: expr "value + [Math.sin(Math.floor(time*12)*7.3)*1.4, Math.sin(Math.floor(time*12)*5.1+1)*1.4]"
+  trimStart: 0.3s 0
+  trimEnd: 0.3s 0 ─Sine In Out→ 1.7s 100
+"Loaf" (path l_03jm6)
+  position: expr "value + [Math.sin(Math.floor(time*12)*7.3)*1.4, Math.sin(Math.floor(time*12)*5.1+1)*1.4]"
+  trimStart: 1.3s 0
+  trimEnd: 1.3s 0 ─Sine In Out→ 2.5s 100
+"Loaf scores" (path l_03jm7)
+  position: expr "value + [Math.sin(Math.floor(time*12)*7.3)*1.4, Math.sin(Math.floor(time*12)*5.1+1)*1.4]"
+  trimStart: 2.3s 0
+  trimEnd: 2.3s 0 ─Sine In Out→ 2.8s 100
+"Wordmark" (text l_03jm8)
+  text animator: in by char, start 2.5s, 0.7s each, stagger 0.05s, ease Expo Out

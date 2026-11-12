@@ -1,0 +1,180 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1391,
+  "ok": true,
+  "ms": 122,
+  "editorMs": 3,
+  "input": {
+   "comp": {
+    "name": "Main",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration": 6,
+    "background": "#2a3440"
+   },
+   "layers": [
+    {
+     "key": "panel",
+     "name": "Lower third panel",
+     "type": "rect",
+     "x": 96,
+     "y": 812,
+     "w": 800,
+     "h": 180,
+     "radius": 8,
+     "fill": "#1c273399",
+     "stroke": "#8fa6bd33",
+     "strokeWidth": 1,
+     "enter": {
+      "t": 0.2,
+      "duration": 0.9,
+      "ease": "Quart In Out",
+      "from": {
+       "opacity": 0,
+       "dx": -60
+      }
+     },
+     "exit": {
+      "t": 5.7,
+      "duration": 0.7,
+      "ease": "Quart In Out",
+      "to": {
+       "opacity": 0,
+       "dx": -60
+      }
+     }
+    },
+    {
+     "key": "accent",
+     "name": "Accent line",
+     "type": "rect",
+     "x": 128,
+     "y": 846,
+     "w": 320,
+     "h": 3,
+     "radius": 1.5,
+     "anchor": "left",
+     "fill": "#8fa6bd",
+     "enter": {
+      "t": 0.6,
+      "duration": 0.9,
+      "ease": "Quart In Out",
+      "from": {
+       "scale": [
+        0,
+        100
+       ]
+      }
+     },
+     "exit": {
+      "t": 5.5,
+      "duration": 0.6,
+      "ease": "Quart In Out",
+      "to": {
+       "scale": [
+        0,
+        100
+       ]
+      }
+     }
+    },
+    {
+     "key": "name",
+     "name": "Name",
+     "type": "text",
+     "x": 128,
+     "y": 862,
+     "w": 740,
+     "h": 66,
+     "text": "Dr. Amelia Hart",
+     "font": "Inter",
+     "fontSize": 54,
+     "fontWeight": 600,
+     "fill": "#f4f7fa",
+     "enter": {
+      "t": 0.9,
+      "duration": 0.8,
+      "ease": "Quart In Out",
+      "from": {
+       "opacity": 0,
+       "dy": 24
+      }
+     },
+     "exit": {
+      "t": 5.35,
+      "duration": 0.5,
+      "ease": "Quart In Out",
+      "to": {
+       "opacity": 0,
+       "dy": -12
+      }
+     }
+    },
+    {
+     "key": "title",
+     "name": "Title",
+     "type": "text",
+     "x": 128,
+     "y": 934,
+     "w": 740,
+     "h": 40,
+     "text": "Head of Research, Larkspur Labs",
+     "font": "Inter",
+     "fontSize": 28,
+     "fontWeight": 400,
+     "fill": "#aebdcc",
+     "enter": {
+      "t": 1.15,
+      "duration": 0.8,
+      "ease": "Quart In Out",
+      "from": {
+       "opacity": 0,
+       "dy": 16
+      }
+     },
+     "exit": {
+      "t": 5.35,
+      "duration": 0.5,
+      "ease": "Quart In Out",
+      "to": {
+       "opacity": 0,
+       "dy": -12
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 7 keyframe tracks; animation ends 5.7s\",\"ids\":{\"panel\":\"l_03jm2\",\"accent\":\"l_03jm3\",\"name\":\"l_03jm4\",\"title\":\"l_03jm5\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 14,
+  "input": {},
+  "result": "score 63/100 (timing 61, easing 65)\n1. [medium] 100% of 14 moves use Quart In Out: give entrances a decelerating ease, exits an accelerating one, accents a spring/overshoot\n   → set_easing {\"id\":\"l_03jm2\",\"prop\":\"position\",\"indices\":[0],\"ease\":\"Expo Out\"}\n   → set_easing {\"id\":\"l_03jm3\",\"prop\":\"scale\",\"indices\":[0],\"ease\":\"Expo Out\"}\n   → set_easing {\"id\":\"l_03jm4\",\"prop\":\"position\",\"indices\":[0],…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 89,
+  "editorMs": 73,
+  "input": {
+   "times": [
+    0.3,
+    0.9,
+    1.5,
+    2.5,
+    4.5,
+    5.2,
+    5.6,
+    5.95
+   ]
+  },
+  "result": "8 frames left→right, top→bottom at 0.3s, 0.9s, 1.5s, 2.5s, 4.5s, 5.2s, 5.6s, 5.97s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/aab3dcc5-6fbc-48cb-adf5-1efc5b41557a/tool-results/mcp-motion-blob-1794513618639-rmc5g1.jpg]"
+ }
+]

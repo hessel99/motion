@@ -1,0 +1,187 @@
+{
+ "run": {
+  "id": "03-toggle-micro",
+  "name": "03-toggle-micro",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 1.7
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 1.7
+   }
+  },
+  "wallMs": 34767,
+  "timedOut": false,
+  "turns": 4,
+  "costUsd": 0.00570607,
+  "durationMs": 32414,
+  "usage": {
+   "input": 150562,
+   "cached": 143567,
+   "output": 5744
+  },
+  "errors": [],
+  "toolCalls": 3,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The toggle micro-interaction is built and checked. It starts off (grey track, knob left), toggles at 0.4s, and settles by about 0.9s, inside your 1.2s target. The critic scores it 100/100 with no issues.\n\nWhat's in the comp (800×600, 2s, light `#f2f2f7` background):\n\n- **Track**: a 120×64 pill at the centre. Its fill crossfades from `#c7c7cc` to iOS green `#34c759` between 0.4s and 0.75s.\n- **Knob**: a group with a white circle (soft shadow) and a **Check** stroke inside it. The knob moves from x 372 to x 428 with a cubic in-out over 0.4–0.72s, overshoots to 432, then settles back to 428 by 0.86s.\n- **Squash and stretch**: the knob stretches to 116×88 mid-travel, squashes to 96×104 as it lands, and returns to 100% by 0.9s.\n- **Checkmark**: draws on from 0.6s to 0.85s, after the knob has mostly arrived.\n\nEasing is cubic and sine throughout, with no linear moves. I can make the overshoot bigger or add a press-down anticipation before the toggle, or make a bouncy spring version as a saved variation."
+ },
+ "metrics": {
+  "layers": 4,
+  "drawableLayers": 3,
+  "layerTypes": {
+   "rect": 1,
+   "group": 1,
+   "ellipse": 1,
+   "path": 1
+  },
+  "groups": 1,
+  "animatedLayers": 3,
+  "keys": 12,
+  "segments": 7,
+  "easesUsed": {
+   "Sine In Out": 5,
+   "Cubic In Out": 1,
+   "Sine Out": 1
+  },
+  "distinctEases": 3,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 2,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#34c759",
+   "#c7c7cc",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.25,
+  "visualActivity": 0.235,
+  "firstMotion": 0.4,
+  "lastMotion": 0.867,
+  "endHold": 1.133,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.005,
+  "midLuma": 0.948,
+  "toolErrors": 0,
+  "toolCalls": 3
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "track + knob layers",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "knob position animated",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "track color changes grey → green (fill keys or crossfade)",
+    "type": "colorChange",
+    "pass": true
+   },
+   {
+    "text": "overshoot on the knob (Back/spring)",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch (non-uniform scale or size)",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "checkmark (path) appears",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "settled by ~1.2s (motion ends ≤1.5s)",
+    "type": "motionEndsBy",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

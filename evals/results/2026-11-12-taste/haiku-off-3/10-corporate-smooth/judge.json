@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 6,
+  "style_match": 6,
+  "timing_easing": 6,
+  "composition": 6,
+  "richness": 4,
+  "polish": 6
+ },
+ "overall": 5.67,
+ "critique": [
+  "The build sequence is muddled and generic. The panel starts fading in at 0.1s, before the accent line starts at 0.25s, so the line never leads. The 'soft mask/slide' reveal is only an opacity fade with a 12–16px nudge. The result reads as four layers fading in together, not a choreographed premium lower third.",
+  "Re-sequence it as line → panel → text. Grow the 3px line first (0–0.6s), then wipe or slide the panel out from behind it using a scale-x or mask reveal anchored at the line (0.4–1.2s). Then reveal the name and title through a real track-matte mask clipped to the panel, staggered about 0.15s apart. Mirror this order on the way out, so the line retracts last."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0532238,
+ "ms": 11577,
+ "raw": "```json\n{\"brief_fit\": 6, \"style_match\": 6, \"timing_easing\": 6, \"composition\": 6, \"richness\": 4, \"polish\": 6,\n \"critique\": [\"The build sequence is muddled and generic. The panel starts fading in at 0.1s, before the accent line starts at 0.25s, so the line never leads. The 'soft mask/slide' reveal is only an opacity fade with a 12–16px nudge. The result reads as four layers fading in together, not a choreographed premium lower third.\", \"Re-sequence it as line → panel → text. Grow the 3px line first (0–0.6s), then wipe or slide the panel out from behind it using a scale-x or mask reveal anchored at the line (0.4–1.2s). Then reveal the name and title through a real track-matte mask clipped to the panel, staggered about 0.15s apart. Mirror this order on the way out, so the line retracts last.\"]}\n```"
+}

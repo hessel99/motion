@@ -379,6 +379,7 @@ Figma's custom shaders (fills and effects, e.g. Halftone, Bloom, Warp, Dither, M
 - **Persistence**: the conversation and CLI session ids are stored per project (keyed by the first composition id, which is saved in the file). Review cards from earlier sessions are marked stale, because the undo history is gone.
 - Checks: `tests/agent.test.ts` (schema validation, tools against a real store, diff/context, guides load + only name real eases/springs + their expressions compile, prompt size budget, storyboard flow with per-beat undo), `tests/bridge-agent.test.mjs` (a fake `claude` replays recorded stream-json: success, auth, crash, timeout, cancel, lean fallback), `scripts/agent-ui-check.mjs` (Playwright, full panel against `tests/fixtures/fake-claude/claude`, which really calls the MCP tools), `scripts/agent-real-check.mjs` (real subscription runs: build, variations, critique), `scripts/agent-director-check.mjs` (real run of the director flow: style chip → storyboard card → approve → beats → critique).
 
+- **Taste layer** (`docs/taste-layer.md`): quality from the app, for any model/provider. A deterministic motion critic (`src/agent/critic.ts`, ~30 rules: hard stops, monotone eases, everything at once, stagger, timing table, dead endings, reading time, text collisions, clipping, contrast, bars growing from the middle, secondary motion, loop seams, music, palette/fonts, dead draw-ons, font fallback, copy-paste motion; score 0–100 + worst-first fixes with exact tool calls; the read-only `critique` tool), an automatic polishing loop (after a build the worst 3 fixes go back to the agent, max 2 rounds, a quiet "Polishing: N fixes" row; beat notes in `update_progress`), quality-first defaults when the model leaves eases/durations/stagger out (handbook tables + the style's feel), and 13 gold examples (`src/agent/guides/examples/`, `get_guide {name:'examples', brief}`). Setting: Models → Polish automatically (on). Critic vs judge r = 0.52 over 136 eval runs; judge on−off +0.25 (fast model), +0.05 (default).
 - **Eval harness** (`scripts/agent-eval.mjs`, briefs in `evals/briefs/`, judge rubric in `evals/judge.md`, baseline findings in `evals/BASELINE.md`): each brief runs as a real headless agent turn (own in-process bridge + Playwright editor page per worker, blank doc, comp set from the brief, seeded `Math.random`, same model for all, `--model/--only/--repeat/--concurrency 1..3`). Records every tool call (args size, ok/error, editor ms), turns, wall time, tokens, cost; saves the final document, a 12-frame contact sheet, an MP4 (editor export → ffmpeg H.264, < 2 MB), automatic metrics (eases, springs, text animators, expressions, precomps, animated coverage, off-canvas / text-overlap time, loop seam, beats, exits) and machine checks of the brief's checklist; then a read-only judge call (`claude -p --tools ""`, contact sheet image + timeline text) scores brief fit, style, timing/easing, composition, richness, polish. `--dry` tests the pipeline without a model; `--judge-only DIR --judge-repeat N` re-judges saved runs (calibration). Compare runs with `scripts/agent-eval-compare.mjs`.
 - Checks: `tests/agent.test.ts` (schema validation, tools against a real store, diff/context), `tests/bridge-agent.test.mjs` (a fake `claude` replays recorded stream-json: success, auth, crash, timeout, cancel, lean fallback), `scripts/agent-ui-check.mjs` (Playwright, full panel against `tests/fixtures/fake-claude/claude`, which really calls the MCP tools), `scripts/agent-real-check.mjs` (real subscription runs: build, variations, critique).
 
@@ -409,6 +410,36 @@ The look is token driven, so a visual pass should only need to edit `tokens.css`
   - Menus (`menu.ts`) support arrow keys, Home/End, →/← for submenus, type-ahead, and Enter/Space.
 - **Style guide**: `?styleguide` shows every token and component in both themes. It also runs live WCAG contrast checks (all text pairs reach AA) and draws a timeline and graph sample through `theme.ts`.
 - **Performance rules**: no backdrop-filter or blur, and transitions only on the color and opacity of small controls. Panels use `contain`. The per-frame timecode uses tabular digits in a fixed-width box.
+
+## Desktop shell: Electron 45 and the mac title bar (Nov 2026)
+
+- **Why the upgrade.** On macOS 26 the owner saw older-style traffic lights than Notes. macOS 26
+  gives the new window controls only to apps linked against the macOS 26 SDK. Electron 33.4.11 was
+  linked against SDK 14.0 (minos 11.0); **Electron 45.3.1** is linked against **SDK 26.5** (minos
+  13.0). Both read from `LC_BUILD_VERSION` of the darwin binaries. electron-builder 25 → 26.18.
+- **Breaking changes checked (34 → 45)**: sandboxed preloads lost the `Buffer` / `events` / `timers`
+  / `url` shims (45; `electron/preload.cjs` uses none); `electron` no longer downloads itself in
+  `postinstall` (42), it downloads on the first `require('electron')` / `npx electron` (the scripts
+  and `npm run qa:electron` do that; electron-builder downloads its own darwin zips);
+  synchronous `safeStorage` is deprecated (45) and **removed in 46**: before moving to 46, switch
+  `bridge/figma-shaders.mjs` `fileSecrets` to `encryptStringAsync` / `decryptStringAsync`;
+  `clipboard` is gone from renderers (44; the app uses `navigator.clipboard`); ASAR fds only work
+  through `fs` (45; nothing reads raw fds); `app.commandLine` lowercases switches (36; ours are
+  lowercase); Linux defaults to Wayland where available (38; xvfb runs still use X11). WebGPU still
+  needs `enable-unsafe-webgpu` on Linux (kept). No change to `protocol`, `net.fetch`, ipc or the
+  updater was needed.
+- **Minimum macOS is now 13 (Ventura)**: Electron 44 dropped macOS 12. The update manifest has no
+  OS gate, so a Mac on macOS 12 or older that installs this as a full app update would get an app
+  that does not start. Fine for the current users (macOS 26); add a `minMacOS` field to the
+  manifest before shipping to a wider audience.
+- **The release is a full app update**: the Electron version is part of the shell fingerprint
+  (`scripts/release-lib.mjs`), so `minShell` moves to this version.
+- **Title bar**: 52px row, native traffic lights at x 20, centred with AppKit's real button size
+  (measured through the Window Controls Overlay and corrected once at start). Numbers, the
+  reasoning and the owner's checklist: `docs/ui-structure.md` "Traffic lights (macOS)".
+- **Build check (Linux)**: `npm ci` + `npx electron-builder --mac zip --arm64 --x64 --publish never`
+  produce `Motion-<v>-mac-arm64.zip` (≈138 MB) and `-mac-x64.zip` (≈142 MB) on Linux, unsigned
+  as before.
 
 ## Known limitations / next
 

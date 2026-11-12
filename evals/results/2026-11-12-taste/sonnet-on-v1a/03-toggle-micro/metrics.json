@@ -1,0 +1,186 @@
+{
+ "run": {
+  "id": "03-toggle-micro",
+  "name": "03-toggle-micro",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 17.5
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 17.5
+   }
+  },
+  "wallMs": 16400,
+  "timedOut": false,
+  "turns": 3,
+  "costUsd": 0.036939299999999994,
+  "durationMs": 13964,
+  "usage": {
+   "input": 93003,
+   "cached": 89873,
+   "output": 1544
+  },
+  "errors": [],
+  "toolCalls": 2,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the toggle. It starts off and grey, and the sequence plays from 0.4s to about 1.05s. I checked it with a contact sheet at six frames.\n\n- **Track** (320×160 pill): the colour crossfades from grey `#c7c7cc` to green `#34c759` between 0.4s and 0.8s.\n- **Knob** (white disc plus checkmark, grouped): it slides from left to right starting at 0.4s. It stretches wide to 116×90 early in the move, then squashes to 92×106 on arrival. It overshoots the end by 10px and settles at 1.0s.\n- **Checkmark** (green stroke inside the knob): it draws on from 0.75s to 1.05s as the knob lands.\n\nThe frames show the green track and the checked knob in place by 0.9s. It holds that pose through the end of the 2s comp.\n\nI can add a soft shadow under the knob, a small press-down on the knob before the toggle, or a loop that toggles back off."
+ },
+ "metrics": {
+  "layers": 4,
+  "drawableLayers": 3,
+  "layerTypes": {
+   "rect": 1,
+   "group": 1,
+   "ellipse": 1,
+   "path": 1
+  },
+  "groups": 1,
+  "animatedLayers": 3,
+  "keys": 13,
+  "segments": 7,
+  "easesUsed": {
+   "Easy Ease": 3,
+   "Cubic Out": 4
+  },
+  "distinctEases": 2,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 2,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#34c759",
+   "#c7c7cc",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.325,
+  "visualActivity": 0.268,
+  "firstMotion": 0.4,
+  "lastMotion": 1,
+  "endHold": 1,
+  "longestHold": 0.067,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.034,
+  "midLuma": 0.929,
+  "toolErrors": 0,
+  "toolCalls": 2
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "track + knob layers",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "knob position animated",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "track color changes grey → green (fill keys or crossfade)",
+    "type": "colorChange",
+    "pass": true
+   },
+   {
+    "text": "overshoot on the knob (Back/spring)",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch (non-uniform scale or size)",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "checkmark (path) appears",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "settled by ~1.2s (motion ends ≤1.5s)",
+    "type": "motionEndsBy",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

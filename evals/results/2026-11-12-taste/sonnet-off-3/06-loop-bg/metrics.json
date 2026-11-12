@@ -1,0 +1,199 @@
+{
+ "run": {
+  "id": "06-loop-bg",
+  "name": "06-loop-bg",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 73,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 28,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 72,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:off-canvas",
+     "high:off-canvas"
+    ],
+    "ms": 54.8
+   },
+   "after": {
+    "score": 73,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 28,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 72,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:off-canvas",
+     "high:off-canvas"
+    ],
+    "ms": 54.8
+   }
+  },
+  "wallMs": 45035,
+  "timedOut": false,
+  "turns": 3,
+  "costUsd": 0.11449089999999999,
+  "durationMs": 43642,
+  "usage": {
+   "input": 98385,
+   "cached": 88249,
+   "output": 6513
+  },
+  "errors": [],
+  "toolCalls": 2,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the 6-second loop: five blurred purple and teal orbs drifting slowly, over a dot grid that pulses gently. I checked it in a contact sheet at 0, 1.5, 3, 4.5 and 5.97 s, and the first and last frames match. I haven't exported or played it back.\n\n- **Orbs (**o1–o5**):** each is a large, heavily blurred ellipse in violet, indigo, lavender or teal. Each drifts a small distance on a sine/cos path with a period of exactly 6 s (some run at two cycles per 6 s). Orbs 1 and 2 also breathe slightly in scale. Because the motion comes from expressions rather than keyframes, the loop has no hard stop and no jump at the seam.\n- **Dot grid:** 12×7 small white dots in two checkerboard groups (**dotsA**, **dotsB**). Their opacity swells in opposite phase on the same 6 s cycle, so a soft shimmer ripples across the grid instead of the whole grid blinking.\n- **Background:** deep navy, `#0b0820`.\n\nI can make the drift slower or the dots stronger, shift the palette, or increase the grid density to 16×9 if you want."
+ },
+ "metrics": {
+  "layers": 91,
+  "drawableLayers": 89,
+  "layerTypes": {
+   "ellipse": 89,
+   "group": 2
+  },
+  "groups": 2,
+  "animatedLayers": 7,
+  "keys": 0,
+  "segments": 0,
+  "easesUsed": {},
+  "distinctEases": 0,
+  "easeFamilies": 0,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 9,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 7,
+  "palette": [
+   "#7b3fe4",
+   "#14b8a6",
+   "#4f46e5",
+   "#a855f7",
+   "#2dd4bf",
+   "#ffffff",
+   "#0b0820"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 6.097,
+  "offCanvasLayers": {
+   "o2": 3.149,
+   "o5": 6.097,
+   "o4": 4.288,
+   "o3": 0.067
+  },
+  "clippedAtEnd": [
+   "o2",
+   "o5"
+  ],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 0,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.172,
+  "toolErrors": 0,
+  "toolCalls": 2
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "loops seamlessly (first frame ≈ frame at the loop point)",
+    "type": "loops",
+    "pass": true
+   },
+   {
+    "text": "everything moves (animated coverage ≥90%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 blobs/orbs (ellipses)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "dot grid (≥15 layers)",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "uses loop expressions or matching first/last keys",
+    "type": "loopTechnique",
+    "pass": true
+   },
+   {
+    "text": "purple/teal palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "calm: no fast motion",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

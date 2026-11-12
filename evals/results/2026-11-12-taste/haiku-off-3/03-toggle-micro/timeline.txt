@@ -1,0 +1,14 @@
+- Toggle [group] #ffffff a0
+  - Track [rect] box 340,266,120,68 #34c759
+  - Knob [group] #ffffff a0
+    - Knob dot [ellipse] box 398,272,56,56 #ffffff
+    - Checkmark [path] box 398,272,56,56 #000000 a0 stroke #34c759 4px
+
+comp 800x600 2s @60fps, background #f2f2f7
+"Track" (rect l_03jm3)
+  fill: 0.4s #c7c7cc ─Ease In Out→ 0.8s #34c759
+"Knob" (group l_03jm4)
+  position: 0.4s 34 ─Back Out→ 0.7s [86,34]
+  scale: 0.4s 100 ─Ease In Out→ 0.5s [116,88] ─Ease In Out→ 0.62s [96,104] ─Ease In Out→ 0.74s 100
+"Checkmark" (path l_03jm6)
+  trimEnd: 0s 0 ─linear→ 0.55s 0 ─Ease Out→ 0.8s 100

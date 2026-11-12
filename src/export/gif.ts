@@ -12,6 +12,13 @@ import { FrameGrabber, frameTime, unpremultiply } from './frames';
 import { prepareExport } from './prepare';
 import { gifDelayCs, gifFrameCount, gifSize } from './gif-timing';
 
+/** per-frame delays in centiseconds (what GIF stores) for `n` frames at `fps`: the rounding is
+ *  spread over the frames (30 fps: 3,4,3,3,4,3…) so frame i starts at round(i * 100 / fps) and the
+ *  whole loop lasts exactly n / fps (MD-43: a flat round(100 / fps) made 30 fps 10% too fast) */
+export function gifDelaysCs(n: number, fps: number): number[] {
+  return Array.from({ length: n }, (_, i) => gifDelayCs(i, fps));
+}
+
 export interface GifOptions { maxSize?: number; fps?: number; start?: number; end?: number }
 
 export { gifFrameCount, gifDelayCs, gifSize };

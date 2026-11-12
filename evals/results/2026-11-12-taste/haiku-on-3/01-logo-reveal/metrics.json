@@ -1,0 +1,192 @@
+{
+ "run": {
+  "id": "01-logo-reveal",
+  "name": "01-logo-reveal",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 93,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:one-move"
+    ],
+    "ms": 1.3
+   },
+   "after": {
+    "score": 93,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:one-move"
+    ],
+    "ms": 1.3
+   }
+  },
+  "wallMs": 54079,
+  "timedOut": false,
+  "turns": 22,
+  "costUsd": 0.01358878,
+  "durationMs": 53019,
+  "usage": {
+   "input": 561494,
+   "cached": 544208,
+   "output": 9383
+  },
+  "errors": [],
+  "toolCalls": 21,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The NOVA logo reveal is built in the Main comp (4 s, 60 fps, navy background). I went with the **Cut** concept: the ring draws on, then the accent slash strikes through it as the circle closes.\n\n- **Mark ring** draws on from 0.1 s (Sine In Out, 0.8 s).\n- **Mark slash** (mint `#3DDC97`, the only accent) cuts through the ring from 0.75 s (Expo Out, 0.45 s).\n- **Wordmark NOVA** sits in a clipping group at the mark's edge. It starts fully hidden behind the mark, slides out from 1.2 s (Quart Out, 0.9 s), and has a 6% settle.\n- **Tagline \"Money, made simple\"** sits below the ring, fades in from 2.2 s and rises 12 px (Sine Out, 0.6 s).\n- **Hold** of the full lockup runs from about 2.8 s to 4 s, with no motion.\n\nCritique scores the piece 93/100. The one remaining note is that most elements move once and stop, which I left as is for a calm, precise feel. The ring/slash overlap it flags is intentional. Tell me if you want the mark to have a settle or a subtle breathing move during the hold.\n\nI can also build the Assemble or Ignite concept instead, or change the accent color."
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "path": 2,
+   "group": 1,
+   "text": 2
+  },
+  "groups": 1,
+  "animatedLayers": 4,
+  "keys": 14,
+  "segments": 7,
+  "easesUsed": {
+   "Sine In Out": 3,
+   "Expo Out": 1,
+   "Quart Out": 1,
+   "Sine Out": 2
+  },
+  "distinctEases": 4,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 1,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#f4f6fa",
+   "#3ddc97",
+   "#8fa3bf",
+   "#0b1a33"
+  ],
+  "keyCoverage": 0.675,
+  "visualActivity": 0.385,
+  "firstMotion": 1.2,
+  "lastMotion": 2.8,
+  "endHold": 1.2,
+  "longestHold": 0.067,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 1.541,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.016,
+  "midLuma": 0.112,
+  "toolErrors": 0,
+  "toolCalls": 21
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"NOVA\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "tagline present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "sequenced: mark → wordmark → tagline (≥3 entrance waves)",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "holds the final lockup ≥1s",
+    "type": "endHoldMin",
+    "pass": true
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "wordmark revealed from behind the mark (mask/clip or layer order)",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

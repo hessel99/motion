@@ -1,0 +1,190 @@
+{
+ "run": {
+  "id": "06-loop-bg",
+  "name": "06-loop-bg",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 22.9
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 22.9
+   }
+  },
+  "wallMs": 54921,
+  "timedOut": false,
+  "turns": 4,
+  "costUsd": 0.010568719999999998,
+  "durationMs": 54038,
+  "usage": {
+   "input": 163229,
+   "cached": 147992,
+   "output": 12084
+  },
+  "errors": [],
+  "toolCalls": 3,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The ambient loop is built: **Background** plus five soft radial orbs (purple and teal) and a **Dot grid** of 40 small dots, all in the 1920×1080, 30 fps, 6 s comp.\n\n- **Seamless loop:** every motion is a sine or cosine at 2π/6 rad/s, or a multiple of it, so frame 0 and frame 180 match exactly. I used expressions rather than keyframes, so there is no closing key to get wrong.\n- **Orbs:** each drifts in a slow ellipse of about 60–160 px. Each has a radial gradient that fades to transparent at the edge, which gives the blurred look without a blur effect. Several orbs bleed past the frame edges on purpose, which the layout check flags as off-canvas; that is intended for a background.\n- **Dots:** white, 6 px, opacity rippling diagonally across the grid (about 10–50%) with a 0.5 rad phase step per dot. That keeps the pulse gentle.\n\nI checked the 0 s, 1.5 s, 3 s, 4.5 s and last-frame contact sheet. The dots are quite faint against the dark background. If they need more presence on a projector, I can raise their opacity range."
+ },
+ "metrics": {
+  "layers": 47,
+  "drawableLayers": 46,
+  "layerTypes": {
+   "rect": 1,
+   "ellipse": 45,
+   "group": 1
+  },
+  "groups": 1,
+  "animatedLayers": 45,
+  "keys": 0,
+  "segments": 0,
+  "easesUsed": {},
+  "distinctEases": 0,
+  "easeFamilies": 0,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 45,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 5,
+  "paletteSize": 7,
+  "palette": [
+   "#0b0818",
+   "#7c3aed",
+   "#14b8a6",
+   "#a855f7",
+   "#2dd4bf",
+   "#6d28d9",
+   "#ffffff"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 3.015,
+  "offCanvasLayers": {
+   "Orb deep purple": 1.474,
+   "Orb teal small": 2.278,
+   "Orb purple large": 0.603
+  },
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 0,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.102,
+  "toolErrors": 0,
+  "toolCalls": 3
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "loops seamlessly (first frame ≈ frame at the loop point)",
+    "type": "loops",
+    "pass": true
+   },
+   {
+    "text": "everything moves (animated coverage ≥90%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 blobs/orbs (ellipses)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "dot grid (≥15 layers)",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "uses loop expressions or matching first/last keys",
+    "type": "loopTechnique",
+    "pass": true
+   },
+   {
+    "text": "purple/teal palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "calm: no fast motion",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

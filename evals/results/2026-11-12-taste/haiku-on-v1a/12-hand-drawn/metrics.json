@@ -1,0 +1,186 @@
+{
+ "run": {
+  "id": "12-hand-drawn",
+  "name": "12-hand-drawn",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 5.3
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 5.3
+   }
+  },
+  "wallMs": 56394,
+  "timedOut": false,
+  "turns": 15,
+  "costUsd": 0.013144499999999998,
+  "durationMs": 55346,
+  "usage": {
+   "input": 448698,
+   "cached": 431850,
+   "output": 10916
+  },
+  "errors": [],
+  "toolCalls": 14,
+  "toolErrors": 4,
+  "toolsAvailable": 76,
+  "finalText": "Those ids were the build keys; the real layer ids are different. Retrying with the actual ids.\nI built the 6 s \"Crumb & Co\" sting in the open composition. It has a wobbly wheat stalk and a loaf that draw on as strokes, a terracotta score line, three warm blobs that breathe slowly, and the name fading in letter by letter.\n\n- **Background and palette:** paper `#F6EFE3`, ink `#2E2A24`, with terracotta, mustard and sage blobs. The blobs grow in from 0.1 s to 0.6 s, staggered.\n- **Wheat stalk** (`Wheat stalk`) draws on from 0.3 s, Sine In Out, 1.3 s. It is scaled to 130% and centred at about x 760.\n- **Loaf** (`Loaf`) draws on from 0.9 s, 1.2 s long, with its **Loaf score** cut in at 1.9 s.\n- **Wordmark** (`Wordmark`) is set in a serif at 128 px and fades up per character from 2.3 s, 0.045 s apart. It is centred under the pair.\n- **Imperfection:** the stalk, loaf and score have a light rotation wobble (`wiggle(12, 0.5)`, under 1°). It is a smooth wobble rather than true 12 fps stepped frames.\n\nThe critic scores it 100/100 with no issues, and the contact sheet shows the sequence reading correctly and the frame clean. I didn't run a separate storyboard step because your brief already named the concept.\n\nTwo things to check: the font is a generic `serif` placeholder, so swap in your brand face if you have one; and the loaf and stalk are simple drawings I made, so send real artwork if you want those replaced.\n\nI can tune the wobble to a stepped 12 fps hold, slow the blob breathing, or try a bolder or lighter line weight."
+ },
+ "metrics": {
+  "layers": 7,
+  "drawableLayers": 7,
+  "layerTypes": {
+   "path": 6,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 7,
+  "keys": 15,
+  "segments": 6,
+  "easesUsed": {
+   "Quad Out": 4,
+   "Sine In Out": 2
+  },
+  "distinctEases": 2,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 6,
+  "textAnimators": 1,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 6,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#d97757",
+   "#e9b44c",
+   "#7a9e7e",
+   "#2e2a24",
+   "#f6efe3"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.86,
+  "firstMotion": 0,
+  "lastMotion": 5.933,
+  "endHold": 0.067,
+  "longestHold": 0.134,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.051,
+  "midLuma": 0.89,
+  "toolErrors": 4,
+  "toolCalls": 14
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "stroke draw-on (trim paths animated)",
+    "type": "trimAnimated",
+    "pass": true
+   },
+   {
+    "text": "custom paths (≥2)",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "boil/wobble (wiggle expression, hold keys or path keys)",
+    "type": "jitter",
+    "pass": true
+   },
+   {
+    "text": "breathing blobs (scale animated)",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "warm palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "no linear eases",
+    "type": "noLinear",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

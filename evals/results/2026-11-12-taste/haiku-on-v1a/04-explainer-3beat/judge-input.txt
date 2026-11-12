@@ -1,0 +1,122 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (04-explainer-3beat, 1920x1080, 12s @30fps):
+A 12-second explainer scene for a password manager, in three beats of ~4s each: (1) a messy pile of sticky notes with passwords appears and jitters anxiously, (2) they get sucked into a shield/vault icon, (3) the shield glows and a single "One key. Every login." headline lands with a check mark. Flat illustration style, friendly colors. Each beat should hand over to the next — no hard cuts.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- 3 beats [yes]
+- headline present [yes]
+- ≥5 sticky notes (rects) in beat 1 [yes]
+- jitter/anxious motion (wiggle expression or many small keys) [NO]
+- shield/vault as a custom path [yes]
+- uses most of the 12s (animated coverage ≥70%) [yes]
+- notes converge (moving toward one point) [?]
+- transitions between beats are continuous [?]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- Sticky notes pile [group] #ffffff a0
+  - Note 1 [group] #ffffff a0
+    - Paper [rect] box 960,540,0,0 #f582ae
+    - Line 1 [rect] box 960,540,0,0 #172c66
+    - Line 2 [rect] box 960,540,0,0 #172c66
+    - Line 3 [rect] box 960,540,0,0 #172c66
+    - Line 4 [rect] box 960,540,0,0 #172c66
+  - Note 2 [group] #ffffff a0
+    - Paper [rect] box 960,540,0,0 #8bd3dd
+    - Line 1 [rect] box 960,540,0,0 #172c66
+    - Line 2 [rect] box 960,540,0,0 #172c66
+    - Line 3 [rect] box 960,540,0,0 #172c66
+    - Line 4 [rect] box 960,540,0,0 #172c66
+  - Note 3 [group] #ffffff a0
+    - Paper [rect] box 960,540,0,0 #ffd803
+    - Line 1 [rect] box 960,540,0,0 #172c66
+    - Line 2 [rect] box 960,540,0,0 #172c66
+    - Line 3 [rect] box 960,540,0,0 #172c66
+    - Line 4 [rect] box 960,540,0,0 #172c66
+  - Note 4 [group] #ffffff a0
+    - Paper [rect] box 960,540,0,0 #8bd3dd
+    - Line 1 [rect] box 960,540,0,0 #172c66
+    - Line 2 [rect] box 960,540,0,0 #172c66
+    - Line 3 [rect] box 960,540,0,0 #172c66
+    - Line 4 [rect] box 960,540,0,0 #172c66
+  - Note 5 [group] #ffffff a0
+    - Paper [rect] box 960,540,0,0 #f582ae
+    - Line 1 [rect] box 960,540,0,0 #172c66
+    - Line 2 [rect] box 960,540,0,0 #172c66
+    - Line 3 [rect] box 960,540,0,0 #172c66
+    - Line 4 [rect] box 960,540,0,0 #172c66
+- Shield glow [ellipse] box 750,330,420,420 #8bd3dd
+- Vault shield [path] box 840,400,240,280 #8bd3dd stroke #172c66 10px
+- Check mark [path] box 905,505,115,80 #000000 a0 stroke #172c66 22px
+- Headline [text] box 260,790,1400,120 #172c66 "One key. Every login." Inter 104px w800
+
+TIMELINE:
+comp 1920x1080 12s @30fps, background #fef6e4
+"Note 1" (group l_03jm3)
+  position: 3.7s [860,470] ─Quart In→ 4.06s [960,540]
+  scale: 0.2s 0 ─Back Out→ 0.8s 100 ─linear→ 3.7s 100 ─Quart In→ 4.06s 0
+  rotation: 0.2s -40 ─Back Out→ 0.8s -12
+  rotation: expr "value + 3.5*Math.sin(time*2*Math.PI/0.55)"
+"Note 2" (group l_03jm9)
+  position: 3.82s [1070,450] ─Quart In→ 4.18s [960,540]
+  scale: 0.27s 0 ─Back Out→ 0.87s 100 ─linear→ 3.82s 100 ─Quart In→ 4.18s 0
+  rotation: 0.27s 40 ─Back Out→ 0.87s 9
+  rotation: expr "value - 3.5*Math.sin(time*2*Math.PI/0.62)"
+"Note 3" (group l_03jmf)
+  position: 3.94s [960,610] ─Quart In→ 4.3s [960,540]
+  scale: 0.34s 0 ─Back Out→ 0.94s 100 ─linear→ 3.94s 100 ─Quart In→ 4.3s 0
+  rotation: 0.34s -30 ─Back Out→ 0.94s -5
+  rotation: expr "value + 3.5*Math.sin(time*2*Math.PI/0.48)"
+"Note 4" (group l_03jml)
+  position: 4.06s [770,640] ─Quart In→ 4.42s [960,540]
+  scale: 0.41s 0 ─Back Out→ 1.01s 100 ─linear→ 4.06s 100 ─Quart In→ 4.42s 0
+  rotation: 0.41s 50 ─Back Out→ 1.01s 14
+  rotation: expr "value - 3.5*Math.sin(time*2*Math.PI/0.7)"
+"Note 5" (group l_03jmr)
+  position: 4.18s [1110,630] ─Quart In→ 4.54s [960,540]
+  scale: 0.48s 0 ─Back Out→ 1.08s 100 ─linear→ 4.18s 100 ─Quart In→ 4.54s 0
+  rotation: 0.48s -50 ─Back Out→ 1.08s -16
+  rotation: expr "value + 3.5*Math.sin(time*2*Math.PI/0.58)"
+"Shield glow" (ellipse l_03jmy)
+  opacity: 4.8s 0 ─Sine In Out→ 5.4s 70 ─Sine In Out→ 6.8s 35 ─Sine In Out→ 8.2s 60
+"Vault shield" (path l_03jmz)
+  scale: 3.6s 0 ─Back Out→ 4.2s 100 ─Cubic In Out→ 4.7s 100 ─Sine In Out→ 4.85s 106 ─Sine In Out→ 5.15s 100
+"Check mark" (path l_03jm10)
+  trimStart: 6s 0
+  trimEnd: 6s 0 ─Cubic Out→ 6.5s 100
+"Headline" (text l_03jm11)
+  position: 6.6s [960,850] ─Quart Out→ 7.3s [960,820]
+  opacity: 6.6s 0 ─Quart Out→ 6.95s 100 ─Ease In→ 7.2s 100
+
+AUTOMATIC METRICS:
+layers 29 drawable (group 6, rect 25, ellipse 1, path 2, text 1), 57 keys, 29 moving segments
+eases: Quart In×10, Back Out×11, Sine In Out×5, Cubic Out×1, Quart Out×2; springs 0, overshooting 11, hold 0
+expressions 5, text animators 0, precomps 0, paths 2, gradients 0, markers 0
+palette (5): #f582ae #172c66 #8bd3dd #ffd803 #fef6e4
+motion from 0.2s to 7.933s (end hold 4.067s, longest still 0.201s), visual activity 63% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 0s; text-on-text overlap 0s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

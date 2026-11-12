@@ -1,0 +1,13 @@
+- Gold Line [path] box 540,420,1,420 #000000 a0 stroke #d6b98a 2px
+- ECLAT Name [text] box 78,898,924,164 #d6b98a "ÉCLAT" Playfair Display 120px w400
+- Eau de Parfum [text] box 90,1080,900,50 #a8926c "EAU DE PARFUM" Playfair Display 30px w500
+
+comp 1080x1920 7s @30fps, background #0a0908
+"Gold Line" (path l_03jm2)
+  trimStart: 0.6s 0
+  trimEnd: 0.6s 0 ─Sine In Out→ 3.8s 100
+"ECLAT Name" (text l_03jm3)
+  scale: 2s 106 ─Sine Out→ 6s 100
+  text animator: in by char, start 2s, 1.6s each, stagger 0.4s, ease Sine Out
+"Eau de Parfum" (text l_03jm4)
+  opacity: 4.4s 0 ─Easy Ease→ 6s 100

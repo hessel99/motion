@@ -1,0 +1,576 @@
+[
+ {
+  "name": "get_audio_analysis",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 53,
+  "editorMs": 1,
+  "input": {},
+  "result": "music \"Sting 120 BPM\" (layer l_03jm3): 120 BPM, 4/4, steady grid; audible 0.00–9.50s in comp (comp is 8.00s)\nbeat 0.50s, bar 2.00s; 16 beats from 0.00s; 4 bars, downbeats: 0.00 2.00 4.00 6.00\nsections: build 0.00–4.00 (energy 0.59) | drop 4.00–8.00 (energy 1)\naccents (strongest hits, time:strength): 0.50:0.38 1.00:0.34 3.50:0.33 4.00:1.00 5.50:0.31 6.00:0.32\nenergy per bar (▁ quiet .. █ loud): ▄▅█…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 39,
+  "editorMs": 0,
+  "input": {},
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":8,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":1,\"layers\":[{\"id\":\"l_03jm3\",\"name\":\"Sting 120 BPM\",\"type\":\"audio\",\"props\":{\"anchor\":[0,0],\"position\":[0,0],\"scale\":[100,100],\"rotation\":…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1895,
+  "ok": true,
+  "ms": 139,
+  "editorMs": 3,
+  "input": {
+   "layers": [
+    {
+     "key": "shock",
+     "type": "ellipse",
+     "x": 760,
+     "y": 340,
+     "w": 400,
+     "h": 400,
+     "stroke": "#4de1c1",
+     "strokeWidth": 6,
+     "opacity": 0,
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 50
+       },
+       {
+        "t": 4,
+        "v": 50,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 4.7,
+        "v": 160
+       },
+       {
+        "t": 5.5,
+        "v": 60,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 6.2,
+        "v": 150
+       },
+       {
+        "t": 6,
+        "v": 150
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 4,
+        "v": 90
+       },
+       {
+        "t": 4.7,
+        "v": 0
+       },
+       {
+        "t": 5.5,
+        "v": 80
+       },
+       {
+        "t": 6.2,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "ring",
+     "type": "ellipse",
+     "x": 860,
+     "y": 440,
+     "w": 200,
+     "h": 200,
+     "stroke": "#f2f4f5",
+     "strokeWidth": 14,
+     "animate": {
+      "position": [
+       {
+        "t": 0,
+        "v": 960
+       },
+       {
+        "t": 4.5,
+        "v": 960,
+        "ease": "Expo In Out"
+       },
+       {
+        "t": 5.1,
+        "v": 760
+       }
+      ],
+      "scale": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 2,
+        "v": 0
+       },
+       {
+        "t": 3.5,
+        "v": 40,
+        "ease": "Quad In"
+       },
+       {
+        "t": 4,
+        "v": 100,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 5.5,
+        "v": 100
+       },
+       {
+        "t": 5.65,
+        "v": 108,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 6,
+        "v": 100,
+        "ease": "spring Bouncy"
+       },
+       {
+        "t": 6,
+        "v": 100
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 2,
+        "v": 0
+       },
+       {
+        "t": 2.01,
+        "v": 30
+       },
+       {
+        "t": 3.5,
+        "v": 60
+       },
+       {
+        "t": 4,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "dot",
+     "type": "ellipse",
+     "x": 920,
+     "y": 500,
+     "w": 80,
+     "h": 80,
+     "fill": "#4de1c1",
+     "animate": {
+      "position": [
+       {
+        "t": 0,
+        "v": 960
+       },
+       {
+        "t": 4.5,
+        "v": 960,
+        "ease": "Expo In Out"
+       },
+       {
+        "t": 5.1,
+        "v": 760
+       }
+      ],
+      "scale": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 0.4,
+        "v": 100,
+        "ease": "Back Out"
+       },
+       {
+        "t": 0.5,
+        "v": 100
+       },
+       {
+        "t": 0.65,
+        "v": 120,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 1,
+        "v": 100
+       },
+       {
+        "t": 1.15,
+        "v": 125,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 1.5,
+        "v": 100
+       },
+       {
+        "t": 1.65,
+        "v": 130
+       },
+       {
+        "t": 2,
+        "v": 100
+       },
+       {
+        "t": 2.15,
+        "v": 140
+       },
+       {
+        "t": 2.5,
+        "v": 100
+       },
+       {
+        "t": 2.65,
+        "v": 150
+       },
+       {
+        "t": 3,
+        "v": 100
+       },
+       {
+        "t": 3.15,
+        "v": 165
+       },
+       {
+        "t": 3.5,
+        "v": 110
+       },
+       {
+        "t": 3.99,
+        "v": 30,
+        "ease": "Quad In"
+       },
+       {
+        "t": 4,
+        "v": 30
+       },
+       {
+        "t": 4.3,
+        "v": 100,
+        "ease": "Back Out"
+       },
+       {
+        "t": 5.5,
+        "v": 100
+       },
+       {
+        "t": 5.65,
+        "v": 150,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 6,
+        "v": 100,
+        "ease": "spring Bouncy"
+       }
+      ]
+     }
+    },
+    {
+     "key": "word",
+     "type": "text",
+     "x": 900,
+     "y": 455,
+     "w": 560,
+     "h": 170,
+     "text": {
+      "content": "Pulse",
+      "fontSize": 150,
+      "fontWeight": 700,
+      "fontFamily": "Inter",
+      "align": "left"
+     },
+     "fill": "#f2f4f5",
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 4.7,
+        "v": 0
+       },
+       {
+        "t": 5.2,
+        "v": 100,
+        "ease": "Cubic Out"
+       }
+      ],
+      "position": [
+       {
+        "t": 4.7,
+        "v": 1000,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 5.4,
+        "v": 1180
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 9 keyframe tracks; animation ends 6.2s\",\"ids\":{\"shock\":\"l_03jm4\",\"ring\":\"l_03jm5\",\"dot\":\"l_03jm6\",\"word\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 808,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm5",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        540
+       ]
+      },
+      {
+       "t": 4.5,
+       "v": [
+        960,
+        540
+       ],
+       "ease": "Expo In Out"
+      },
+      {
+       "t": 5.1,
+       "v": [
+        760,
+        540
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm6",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        540
+       ]
+      },
+      {
+       "t": 4.5,
+       "v": [
+        960,
+        540
+       ],
+       "ease": "Expo In Out"
+      },
+      {
+       "t": 5.1,
+       "v": [
+        760,
+        540
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        1180,
+        540
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 4.7,
+       "v": 0
+      },
+      {
+       "t": 5.2,
+       "v": 100,
+       "ease": "Cubic Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        540
+       ]
+      },
+      {
+       "t": 4.5,
+       "v": [
+        960,
+        540
+       ],
+       "ease": "Expo In Out"
+      },
+      {
+       "t": 5.1,
+       "v": [
+        760,
+        540
+       ]
+      },
+      {
+       "t": 5.5,
+       "v": [
+        760,
+        540
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 50
+      },
+      {
+       "t": 4,
+       "v": 50,
+       "ease": "Expo Out"
+      },
+      {
+       "t": 4.7,
+       "v": 160
+      },
+      {
+       "t": 5.5,
+       "v": 60,
+       "ease": "Expo Out"
+      },
+      {
+       "t": 6.2,
+       "v": 150
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 6 tracks on 4 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 51,
+  "ok": true,
+  "ms": 251,
+  "editorMs": 191,
+  "input": {
+   "times": [
+    0.5,
+    2,
+    3.5,
+    4,
+    4.3,
+    5.1,
+    5.65,
+    7.5
+   ],
+   "cell": 320
+  },
+  "result": "8 frames left→right, top→bottom at 0.5s, 2s, 3.5s, 4s, 4.3s, 5.1s, 5.67s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/1c3fbf31-364a-427e-acc6-4b36a82c857a/tool-results/mcp-motion-blob-1794511099999-5e72p9.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "props": {
+    "fill": "#00000000"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "props": {
+    "fill": "#00000000"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 113,
+  "editorMs": 59,
+  "input": {
+   "times": [
+    3.5,
+    4,
+    4.3,
+    5.1,
+    5.67,
+    7.5
+   ],
+   "cell": 320
+  },
+  "result": "6 frames left→right, top→bottom at 3.5s, 4s, 4.3s, 5.1s, 5.67s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/1c3fbf31-364a-427e-acc6-4b36a82c857a/tool-results/mcp-motion-blob-1794511102230-dcji3t.jpg]"
+ }
+]

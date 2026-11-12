@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 7,
+  "style_match": 7,
+  "timing_easing": 6,
+  "composition": 5,
+  "richness": 5,
+  "polish": 5
+ },
+ "overall": 5.83,
+ "critique": [
+  "The candy drop is one copy-pasted keyframe template (same 0.42s fall, same 130/74 squash, same three-step settle, same 4° sine wiggle) with no jostling between shapes. The letters squash to 125% wide, so they visibly collide mid-hop (o2 over o1 and p at ~2.27s, B over the pink circle at ~1.82s). They also pop in on an 8-frame opacity fade from below instead of landing from above.",
+  "Rebuild the letter hop as a true trampoline cycle: start each letter above frame, stretch it on the fall, squash it on contact, and rebound on a spring. Keep squash width below the letter spacing, or offset the gaps, so neighbours never overlap. Then make the candies jostle: have each landing nudge its nearest neighbour with a small position/rotation spring, and vary drop durations. Fill the dead 2.6–3s gap by starting the idle bob (scale + y, not just 4° rotation) as soon as the '!' lands. Move the pale-pink circle away from the '!'."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0937038,
+ "ms": 13153,
+ "raw": "```json\n{\"brief_fit\": 7, \"style_match\": 7, \"timing_easing\": 6, \"composition\": 5, \"richness\": 5, \"polish\": 5,\n \"critique\": [\"The candy drop is one copy-pasted keyframe template (same 0.42s fall, same 130/74 squash, same three-step settle, same 4° sine wiggle) with no jostling between shapes. The letters squash to 125% wide, so they visibly collide mid-hop (o2 over o1 and p at ~2.27s, B over the pink circle at ~1.82s). They also pop in on an 8-frame opacity fade from below instead of landing from above.\", \"Rebuild the letter hop as a true trampoline cycle: start each letter above frame, stretch it on the fall, squash it on contact, and rebound on a spring. Keep squash width below the letter spacing, or offset the gaps, so neighbours never overlap. Then make the candies jostle: have each landing nudge its nearest neighbour with a small position/rotation spring, and vary drop durations. Fill the dead 2.6–3s gap by starting the idle bob (scale + y, not just 4° rotation) as soon as the '!' lands. Move the pale-pink circle away from the '!'.\"]}\n```"
+}

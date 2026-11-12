@@ -1,0 +1,68 @@
+- Pink circle [ellipse] box 60,66,220,220 #ff5c8a
+- Yellow star [path] box 754,64,213,213 #ffc93c
+- Teal square [rect] box 66,786,178,178 #2ec4b6
+- Purple circle [ellipse] box 820,794,160,160 #8e6cff
+- Orange star [path] box 449,54,142,142 #ff8a3d
+- Blue square [rect] box 269,839,132,132 #4da8ff
+- Green circle [ellipse] box 640,848,120,120 #7ed957
+- Pink star [path] box 24,434,113,113 #ff5c8a
+- Letter B [text] box 107,287,206,327 #ff5c8a "B" Inter 300px w900
+- Letter o1 [text] box 266,259,208,323 #ff8a3d "o" Inter 300px w900
+- Letter o2 [text] box 454,798,172,397 #2ec4b6 "o" Inter 300px w900
+- Letter p [text] box 635,1129,150,442 #8e6cff "p" Inter 300px w900
+- Letter ! [text] box 795,1129,150,442 #4da8ff "!" Inter 300px w900
+
+comp 1080x1080 5s @60fps, background #fff4e0
+"Pink circle" (ellipse l_03jm2)
+  position: 0s [170,-1020] ─spring:0.5→ 1s [170,180]
+  position: expr "value+[0,6*Math.sin(time*4)]"
+  scale: 0s [80,125] ─spring:0.5→ 1s 100
+"Yellow star" (path l_03jm3)
+  position: 0.15s [860,-1030] ─spring:0.5→ 1.15s [860,170]
+  scale: 0.15s [80,125] ─spring:0.5→ 1.15s 100
+  rotation: 0.15s -90 ─spring:0.5→ 1.15s 0
+  rotation: expr "value+4*Math.sin(time*3)"
+"Teal square" (rect l_03jm4)
+  position: 0.3s [155,-525] ─spring:0.5→ 1.3s [155,875]
+  scale: 0.3s [80,125] ─spring:0.5→ 1.3s 100
+  rotation: expr "value+5*Math.sin(time*3.5)"
+"Purple circle" (ellipse l_03jm5)
+  position: 0.45s [900,-520] ─spring:0.5→ 1.45s [900,880]
+  position: expr "value+[0,6*Math.sin(time*4+1)]"
+  scale: 0.45s [80,125] ─spring:0.5→ 1.45s 100
+"Orange star" (path l_03jm6)
+  position: 0.6s [520,-1075] ─spring:0.5→ 1.6s [520,125]
+  scale: 0.6s [80,125] ─spring:0.5→ 1.6s 100
+  rotation: expr "value-6*Math.sin(time*3)"
+"Blue square" (rect l_03jm7)
+  position: 0.75s [335,-495] ─spring:0.5→ 1.75s [335,905]
+  scale: 0.75s [80,125] ─spring:0.5→ 1.75s 100
+  rotation: expr "value+6*Math.sin(time*3+2)"
+"Green circle" (ellipse l_03jm8)
+  position: 0.9s [700,-490] ─spring:0.5→ 1.9s [700,910]
+  position: expr "value+[0,5*Math.sin(time*4+2)]"
+  scale: 0.9s [80,125] ─spring:0.5→ 1.9s 100
+"Pink star" (path l_03jm9)
+  position: 1.05s [80,-710] ─spring:0.5→ 2.05s [80,490]
+  scale: 1.05s [80,125] ─spring:0.5→ 2.05s 100
+  rotation: expr "value+8*Math.sin(time*3)"
+"Letter B" (text l_03jma)
+  position: 2s [210,1350] ─spring:0.55→ 2.9s [210,550]
+  scale: 2s [75,130] ─spring:0.55→ 2.9s 100
+  rotation: expr "value+clamp((time-3.4)*3,0,1)*5*Math.sin(time*6)"
+"Letter o1" (text l_03jmb)
+  position: 2.2s [370,1350] ─spring:0.55→ 3.1s [370,550]
+  scale: 2.2s [75,130] ─spring:0.55→ 3.1s 100
+  rotation: expr "value+clamp((time-3.4)*3,0,1)*5*Math.sin(time*6+1)"
+"Letter o2" (text l_03jmc)
+  position: 2.4s [540,1350] ─spring:0.55→ 3.3s [540,550]
+  scale: 2.4s [75,130] ─spring:0.55→ 3.3s 100
+  rotation: expr "value+clamp((time-3.4)*3,0,1)*5*Math.sin(time*6+2)"
+"Letter p" (text l_03jmd)
+  position: 2.6s [710,1350] ─spring:0.55→ 3.5s [710,550]
+  scale: 2.6s [75,130] ─spring:0.55→ 3.5s 100
+  rotation: expr "value+clamp((time-3.4)*3,0,1)*5*Math.sin(time*6+3)"
+"Letter !" (text l_03jme)
+  position: 2.8s [870,1350] ─spring:0.55→ 3.7s [870,550]
+  scale: 2.8s [75,130] ─spring:0.55→ 3.7s 100
+  rotation: expr "value+clamp((time-3.4)*3,0,1)*5*Math.sin(time*6+4)"

@@ -1,0 +1,189 @@
+{
+ "run": {
+  "id": "03-toggle-micro",
+  "name": "03-toggle-micro",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 2.5
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 2.5
+   }
+  },
+  "wallMs": 30707,
+  "timedOut": false,
+  "turns": 6,
+  "costUsd": 0.00567459,
+  "durationMs": 28101,
+  "usage": {
+   "input": 199935,
+   "cached": 193419,
+   "output": 4876
+  },
+  "errors": [],
+  "toolCalls": 5,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the toggle micro-interaction in the Main composition (800×600, 60 fps, 2 s). It starts off and toggles at 0.4 s, and everything has settled by 0.95 s.\n\n- **Toggle track**: grey (#c7c7cc) to green (#34c759), crossfading from 0.4 s to 0.8 s.\n- **Toggle knob**: a group holding a shadow, the white disc and the checkmark. It slides from left to right over 0.4–0.85 s with a Back Out ease, so it overshoots slightly and settles.\n- **Squash and stretch**: the knob stretches to 118×88 mid-travel, then squashes to 97×103 on arrival, and returns to 100×100.\n- **Checkmark**: a green stroke drawn on from 0.62 s to 0.92 s.\n\nThe critique scored it 100/100 with no issues, and the contact sheet confirms the sequence. The track and checkmark timing are my choices, not from a spec. Want a bouncier overshoot or a faster knob slide?"
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "rect": 1,
+   "group": 1,
+   "ellipse": 2,
+   "path": 1
+  },
+  "groups": 1,
+  "animatedLayers": 3,
+  "keys": 14,
+  "segments": 6,
+  "easesUsed": {
+   "Ease In Out": 3,
+   "Back Out": 1,
+   "Ease Out": 1,
+   "Quart Out": 1
+  },
+  "distinctEases": 4,
+  "easeFamilies": 3,
+  "overshootSegments": 1,
+  "keyedOvershoots": 1,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#34c759",
+   "#c7c7cc",
+   "#000000",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.275,
+  "visualActivity": 0.268,
+  "firstMotion": 0.4,
+  "lastMotion": 0.933,
+  "endHold": 1.067,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.009,
+  "midLuma": 0.945,
+  "toolErrors": 0,
+  "toolCalls": 5
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "track + knob layers",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "knob position animated",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "track color changes grey → green (fill keys or crossfade)",
+    "type": "colorChange",
+    "pass": true
+   },
+   {
+    "text": "overshoot on the knob (Back/spring)",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch (non-uniform scale or size)",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "checkmark (path) appears",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "settled by ~1.2s (motion ends ≤1.5s)",
+    "type": "motionEndsBy",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

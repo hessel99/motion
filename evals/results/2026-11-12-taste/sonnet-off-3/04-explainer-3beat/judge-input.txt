@@ -1,0 +1,131 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (04-explainer-3beat, 1920x1080, 12s @30fps):
+A 12-second explainer scene for a password manager, in three beats of ~4s each: (1) a messy pile of sticky notes with passwords appears and jitters anxiously, (2) they get sucked into a shield/vault icon, (3) the shield glows and a single "One key. Every login." headline lands with a check mark. Flat illustration style, friendly colors. Each beat should hand over to the next — no hard cuts.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- 3 beats [yes]
+- headline present [yes]
+- ≥5 sticky notes (rects) in beat 1 [yes]
+- jitter/anxious motion (wiggle expression or many small keys) [yes]
+- shield/vault as a custom path [yes]
+- uses most of the 12s (animated coverage ≥70%) [yes]
+- notes converge (moving toward one point) [?]
+- transitions between beats are continuous [?]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- halo [ellipse] box 834,294,252,252 #8fa2ff
+- shield [path] box 828,267,265,305 #3b4ba8
+- check [path] box 895,370,130,100 #000000 a0 stroke #ffffff 20px
+- headline [text] box 260,700,1400,150 #2b2f6b "One key. Every login." Inter 112px w800
+- n1 [group] #ffffff a0
+  - n1r [rect] box 960,420,0,0 #ffd95a
+  - n1t [text] box 960,420,0,0 #5a4a1a "P@ss123!" Inter 30px w700
+- n2 [group] #ffffff a0
+  - n2r [rect] box 960,420,0,0 #ff9eb5
+  - n2t [text] box 960,420,0,0 #6b2437 "fluffy2019" Inter 30px w700
+- n3 [group] #ffffff a0
+  - n3r [rect] box 960,420,0,0 #8ee3c2
+  - n3t [text] box 960,420,0,0 #14513b "bank_pw?" Inter 30px w700
+- n4 [group] #ffffff a0
+  - n4r [rect] box 939,392,71,71 #8cc8ff
+  - n4t [text] box 946,416,57,22 #163e6b "qwerty99" Inter 30px w700
+- n5 [group] #ffffff a0
+  - n5r [rect] box 627,395,200,200 #8ee3c2
+  - n5t [text] box 647,464,159,66 #14513b "Netflix: ??" Inter 30px w700
+- n6 [group] #ffffff a0
+  - n6r [rect] box 1308,261,247,247 #ffd95a
+  - n6t [text] box 1337,343,191,88 #5a4a1a "Ilove<3you" Inter 30px w700
+- n7 [group] #ffffff a0
+  - n7r [rect] box 844,684,232,232 #ff9eb5
+  - n7t [text] box 865,766,190,72 #6b2437 "admin1234" Inter 30px w700
+- n8 [group] #ffffff a0
+  - n8r [rect] box 594,114,213,213 #8cc8ff
+  - n8t [text] box 613,189,174,66 #163e6b "work-VPN-7" Inter 30px w700
+- n9 [group] #ffffff a0
+  - n9r [rect] box 1127,687,227,227 #ffd95a
+  - n9t [text] box 1153,762,176,80 #5a4a1a "letmein!" Inter 30px w700
+
+TIMELINE:
+comp 1920x1080 12s @30fps, background #fff6e5
+"halo" (ellipse l_03jm2)
+  scale: 0s 60 ─Easy Ease→ 8s 60 ─Expo Out→ 9.2s 135
+  opacity: 0s 0 ─Easy Ease→ 8s 0 ─Easy Ease→ 8.1s 55 ─Quad Out→ 9.4s 14
+"shield" (path l_03jm3)
+  scale: 4.8s 100 ─Back Out→ 5s 106 ─Easy Ease→ 5.3s 100 ─Easy Ease→ 5.8s 107 ─Easy Ease→ 6.1s 100 ─Easy Ease→ 6.6s 109 ─Easy Ease→ 7s 100 ─Easy Ease→ 7.5s 112 ─Easy Ease→ 8s 100 ─Easy Ease→ 8.3s 112 ─Back Out→ 9s 100
+  opacity: 0s 0 ─Easy Ease→ 2.8s 0 ─Easy Ease→ 3.8s 60 ─Easy Ease→ 4.8s 60 ─Easy Ease→ 5.5s 100
+  fill: 4s #d9ddf5 ─Easy Ease→ 5.5s #3b4ba8
+"check" (path l_03jm4)
+  trimStart: 8.4s 0
+  trimEnd: 8.4s 0 ─Cubic Out→ 9s 100
+"headline" (text l_03jm5)
+  text animator: in by word, start 9.3s, 0.6s each, stagger 0.08s, ease Expo Out
+"n1" (group l_03jm6)
+  position: 0s [560,300] ─Easy Ease→ 4.3s [560,300] ─Easy Ease→ 5.2s [960,420]
+  scale: 0.2s 0 ─Easy Ease→ 0.8s 100 ─spring Bouncy→ 4s 100 ─Quad Out→ 4.3s 110 ─Cubic In→ 5.2s 0
+  rotation: expr "wiggle(6, 4)"
+"n2" (group l_03jm9)
+  position: 0s [760,640] ─Easy Ease→ 4.6s [760,640] ─Easy Ease→ 5.5s [960,420]
+  scale: 0.45s 0 ─Easy Ease→ 1.05s 100 ─spring Bouncy→ 4.3s 100 ─Quad Out→ 4.6s 110 ─Cubic In→ 5.5s 0
+  rotation: expr "wiggle(6, 4)"
+"n3" (group l_03jmc)
+  position: 0s [1180,280] ─Easy Ease→ 4.9s [1180,280] ─Easy Ease→ 5.8s [960,420]
+  scale: 0.7s 0 ─Easy Ease→ 1.3s 100 ─spring Bouncy→ 4.6s 100 ─Quad Out→ 4.9s 110 ─Cubic In→ 5.8s 0
+  rotation: expr "wiggle(6, 4)"
+"n4" (group l_03jmf)
+  position: 0s [1380,620] ─Easy Ease→ 5.2s [1380,620] ─Easy Ease→ 6.1s [960,420]
+  scale: 0.95s 0 ─Easy Ease→ 1.55s 100 ─spring Bouncy→ 4.9s 100 ─Quad Out→ 5.2s 110 ─Cubic In→ 6.1s 0
+  rotation: expr "wiggle(6, 4)"
+"n5" (group l_03jmi)
+  position: 0s [400,600] ─Easy Ease→ 5.5s [400,600] ─Easy Ease→ 6.4s [960,420]
+  scale: 1.2s 0 ─Easy Ease→ 1.8s 100 ─spring Bouncy→ 5.2s 100 ─Quad Out→ 5.5s 110 ─Cubic In→ 6.4s 0
+  rotation: expr "wiggle(6, 4)"
+"n6" (group l_03jml)
+  position: 0s [1500,380] ─Easy Ease→ 5.8s [1500,380] ─Easy Ease→ 6.7s [960,420]
+  scale: 1.45s 0 ─Easy Ease→ 2.05s 100 ─spring Bouncy→ 5.5s 100 ─Quad Out→ 5.8s 110 ─Cubic In→ 6.7s 0
+  rotation: expr "wiggle(6, 4)"
+"n7" (group l_03jmo)
+  position: 0s [960,800] ─Easy Ease→ 6.1s [960,800] ─Easy Ease→ 7s [960,420]
+  scale: 1.7s 0 ─Easy Ease→ 2.3s 100 ─spring Bouncy→ 5.8s 100 ─Quad Out→ 6.1s 110 ─Cubic In→ 7s 0
+  rotation: expr "wiggle(6, 4)"
+"n8" (group l_03jmr)
+  position: 0s [700,220] ─Easy Ease→ 6.4s [700,220] ─Easy Ease→ 7.3s [960,420]
+  scale: 1.95s 0 ─Easy Ease→ 2.55s 100 ─spring Bouncy→ 6.1s 100 ─Quad Out→ 6.4s 110 ─Cubic In→ 7.3s 0
+  rotation: expr "wiggle(6, 4)"
+"n9" (group l_03jmu)
+  position: 0s [1240,800] ─Easy Ease→ 6.7s [1240,800] ─Easy Ease→ 7.6s [960,420]
+  scale: 2.2s 0 ─Easy Ease→ 2.8s 100 ─spring Bouncy→ 6.4s 100 ─Quad Out→ 6.7s 110 ─Cubic In→ 7.6s 0
+  rotation: expr "wiggle(6, 4)"
+
+AUTOMATIC METRICS:
+layers 22 drawable (ellipse 1, path 2, text 10, group 9, rect 9), 100 keys, 53 moving segments
+eases: Expo Out×1, Easy Ease×30, Quad Out×10, Back Out×2, Cubic Out×1, Cubic In×9; springs 0, overshooting 2, hold 0
+expressions 9, text animators 1, precomps 0, paths 2, gradients 0, markers 0
+palette (12): #8fa2ff #3b4ba8 #d9ddf5 #ffffff #2b2f6b #ffd95a #5a4a1a #ff9eb5 #6b2437 #8ee3c2 #14513b #8cc8ff
+motion from 0.2s to 9.333s (end hold 2.667s, longest still 0.201s), visual activity 75% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 0s; text-on-text overlap 0s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

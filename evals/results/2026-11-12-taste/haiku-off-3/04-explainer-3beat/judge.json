@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 7,
+  "style_match": 6,
+  "timing_easing": 6,
+  "composition": 5,
+  "richness": 5,
+  "polish": 5
+ },
+ "overall": 5.67,
+ "critique": [
+  "The sticky-note pile is tiny (notes ~35-110px wide in a 1920x1080 frame) and huddled at center for the first 4s, so beat 1 reads as a small static clump. The sine-expression jitter (6px/7°) is barely perceptible at that scale, and the 'anxious mess' never fills the frame or creates tension; the shield glow is a faint amber smudge and the check badge is undersized.",
+  "Scale the notes up 2-3x and scatter them across the frame with varied rotations, then hold the shield closed for the suck-in. Make the notes visibly overlap the shield as they shrink into the keyhole, with a squash/pulse on each impact. That turns beat 1→2 into a real handoff with payoff instead of notes vanishing in the air while the shield pops in beside them."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0790798,
+ "ms": 13182,
+ "raw": "```json\n{\"brief_fit\": 7, \"style_match\": 6, \"timing_easing\": 6, \"composition\": 5, \"richness\": 5, \"polish\": 5,\n \"critique\": [\"The sticky-note pile is tiny (notes ~35-110px wide in a 1920x1080 frame) and huddled at center for the first 4s, so beat 1 reads as a small static clump. The sine-expression jitter (6px/7°) is barely perceptible at that scale, and the 'anxious mess' never fills the frame or creates tension; the shield glow is a faint amber smudge and the check badge is undersized.\", \"Scale the notes up 2-3x and scatter them across the frame with varied rotations, then hold the shield closed for the suck-in. Make the notes visibly overlap the shield as they shrink into the keyhole, with a squash/pulse on each impact. That turns beat 1→2 into a real handoff with payoff instead of notes vanishing in the air while the shield pops in beside them.\"]}\n```"
+}

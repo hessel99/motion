@@ -1,0 +1,174 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1006,
+  "ok": true,
+  "ms": 53,
+  "editorMs": 0,
+  "input": {
+   "title": "Crumb & Co: hand-drawn bakery",
+   "duration": 6,
+   "style": "Hand-drawn / paper cutout, 12fps boil",
+   "styleReason": "Organic, imperfect line work with soft eases fits a friendly bakery.",
+   "beats": [
+    {
+     "name": "Blobs wake",
+     "start": 0,
+     "end": 1.5,
+     "description": "Cream paper background. Irregular warm blobs (terracotta, mustard, sage) fade and scale in softly, then breathe slowly.",
+     "style": "Sine In Out, slow scale 96-104%"
+    },
+    {
+     "name": "Draw on",
+     "start": 0.8,
+     "end": 3.2,
+     "description": "Wobbly wheat stalk and loaf draw themselves on with trim-path, staggered; lines boil at 12fps via stepped wobble.",
+     "style": "Easy Ease, brown ink #5a3a22, round strokes"
+    },
+    {
+     "name": "Name appears",
+     "start": 3,
+     "end": 4.5,
+     "description": "'Crumb & Co' rises word by word with soft overshoot and slight rotation; small tagline fades in.",
+     "style": "spring 0.25, friendly rounded font"
+    },
+    {
+     "name": "Settle",
+     "start": 4.5,
+     "end": 6,
+     "description": "Everything keeps boiling and breathing gently; hold the lockup.",
+     "style": "wiggle expressions, no hard stops"
+    }
+   ]
+  },
+  "result": "storyboard \"Crumb & Co: hand-drawn bakery\" shown to the user (4 beats, 6s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3149,
+  "ok": true,
+  "ms": 269,
+  "editorMs": 7,
+  "input": "{\"comp\":{\"background\":\"#f6ecd9\",\"duration\":6,\"fps\":24},\"layers\":[{\"key\":\"blob1\",\"shape\":\"blob\",\"shapeOptions\":{\"seed\":3,\"complexity\":6},\"x\":160,\"y\":560,\"w\":620,\"h\":520,\"fill\":\"#e9b872\",\"opacity\":85,\"enter\":{\"from\":{\"opacity\":0,\"scale\":80},\"duration\":1.2,\"ease\":\"Sine Out\"},\"expr\":{\"scale\":\"value + 3*Math.sin(time*1.3)\"}},{\"key\":\"blob2\",\"shape\":\"blob\",\"shapeOptions\":{\"seed\":8,\"complexity\":5},\"x\":1180,\"y\":90,\"w\":600,\"h\":520,\"fill\":\"#c9714b\",\"opacity\":70,\"enter\":{\"from\":{\"opacity\":0,\"scale\":80},\"duration\":1.3,\"t\":0.2,\"ease\":\"Sine Out\"},\"expr\":{\"scale\":\"value + 3*Math.sin(time*1.1+2)\"}},{\"key\":\"blob3\",\"shape\":\"blob\",\"shapeOptions\":{\"seed\":5,\"complexity\":7},\"x\":1380,\"y\":600,\"w\":460,\"h\":400,\"fill\":\"#a9b78a\",\"opacity\":80,\"enter\":{\"from\":{\"opacity\":0,\"scale\":80},\"duration\":1.3,\"t\":0.4,\"ease\":\"Sine Out\"},\"expr\":{\"scale\":\"value + 4*Math.sin(time*0.9+4)\"}},{\"key\":\"wheat\",\"type\":\"group\",\"x\":0,\"y\":0,\"children\":[{\"key\":\"stem\",\"d\":\"M420 900 C 400 760 445 620 410 470 C 395 400 420 330 405 250\",\"stroke\":\"#5a3a22\",\"strokeWidth\":9,\"fill\":\"#00000000\",\"drawOn\":{\"t\":0.8,\"duration\":1.2,\"ease\":\"Sine In Out\"}},{\"key\":\"g1\",\"d\":\"M410 400 C 350 390 330 340 335 300 C 385 305 410 345 410 400\",\"stroke\":\"#5a3a22\",\"strokeWidth\":8,\"fill\":\"#00000000\",\"drawOn\":{\"t\":1.7,\"duration\":0.6,\"ease\":\"Sine Out\"}},{\"key\":\"g2\",\"d\":\"M408 400 C 470 385 490 335 482 295 C 435 305 410 345 408 400\",\"stroke\":\"#5a3a22\",\"strokeWidth\":8,\"fill\":\"#00000000\",\"drawOn\":{\"t\":1.9,\"duration\":0.6,\"ease\":\"Sine Out\"}},{\"key\":\"g3\",\"d\":\"M412 520 C 350 510 330 465 335 425 C 385 430 410 470 412 520\",\"stroke\":\"#5a3a22\",\"strokeWidth\":8,\"fill\":\"#00000000\",\"drawOn\":{\"t\":2.1,\"duration\":0.6,\"ease\":\"Sine Out\"}},{\"key\":\"g4\",\"d\":\"M412 520 C 475 505 495 460 487 420 C 440 430 415 470 412 520\",\"stroke\":\"#5a3a22\",\"strokeWidth\":8,\"fill\":\"#00000000\",\"drawOn\":{\"t\":2.3,\"duration\":0.6,\"ease\":\"Sine Out\"}}]},{\"key\":\"loaf\",\"type\":\"group\",\"x\":0,\"y\":0,\"children\":[{\"key\":\"loafbody\",\"d\":\"M1000 820 C 960 820 940 770 965 735 C 940 650 1050 590 1200 590 C 1350 590 1460 650 1435 735 C 1460 770 1440 820 1400 820 Z\",\"stroke\":\"#5a3a22\",\"strokeWidth\":10,\"fill\":\"#00000000\",\"drawOn\":{\"t\":1.2,\"duration\":1.6,\"ease\":\"Sine In Out\"}},{\"key\":\"s1\",\"d\":\"M1100 640 C 1120 665 1130 690 1135 710\",\"stroke\":\"#5a3a22\",\"strokeWidth\":8,\"fill\":\"#00000000\",\"drawOn\":{\"t\":2.8,\"duration\":0.4}},{\"key\":\"s2\",\"d\":\"M1210 630 C 1230 660 1240 690 1245 715\",\"stroke\":\"#5a3a22\",\"strokeWidth\":8,\"fill\":\"#00000000\",\"drawOn\":{\"t\":2.95,\"duration\":0.4}},{\"key\":\"s3\",\"d\":\"M1320 640 C 1340 665 1350 690 1352 712\",\"stroke\":\"#5a3a22\",\"strokeWidth\":8,\"fill\":\"#00000000\",\"drawOn\":{\"t\":3.1,\"duration\":0.4}}]},{\"key\":\"name\",\"text\":{\"content\":\"Crumb & Co\",\"fontFamily\":\"Fredoka\",\"fontSize\":150,\"fontWeight\":600,\"align\":\"center\"},\"x\":460,\"y\":850,\"w\":1000,\"h\":190,\"fill\":\"#5a3a22\",\"textAnim\":{\"by\":\"word\",\"start\":3.2,\"duration\":0.7,\"stagger\":0.2,\"ease\":\"spring:0.3\",\"from\":{\"opacity\":0,\"dy\":40,\"rotation\":-4,\"scale\":90}}},{\"key\":\"tag\",\"text\":{\"content\":\"baked by hand, every morning\",\"fontFamily\":\"Fredoka\",\"font…",
+  "result": "{\"summary\":\"16 created, 0 updated, 25 keyframe tracks; animation ends 4.6s\",\"ids\":{\"blob1\":\"l_03jm2\",\"blob2\":\"l_03jm3\",\"blob3\":\"l_03jm4\",\"stem\":\"l_03jm6\",\"g1\":\"l_03jm7\",\"g2\":\"l_03jm8\",\"g3\":\"l_03jm9\",\"g4\":\"l_03jma\",\"wheat\":\"l_03jm5\",\"loafbody\":\"l_03jmc\",\"s1\":\"l_03jmd\",\"s2\":\"l_03jme\",\"s3\":\"l_03jmf\",\"loaf\":\"l_03jmb\",\"name\":\"l_03jmg\",\"tag\":\"l_03jmh\"}}"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 103,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm5",
+    "l_03jmb"
+   ],
+   "prop": "rotation",
+   "expr": "value + 0.7*Math.sin(Math.floor(time*12)*2.7) "
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 139,
+  "ok": true,
+  "ms": 95,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm5",
+    "l_03jmb"
+   ],
+   "prop": "position",
+   "expr": "value + [2*Math.sin(Math.floor(time*12)*1.9), 2*Math.cos(Math.floor(time*12)*3.3)]"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 232,
+  "editorMs": 195,
+  "input": {
+   "frames": 6,
+   "cell": 400
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 1.21s, 2.42s, 3.58s, 4.79s, 6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b5905e63-2150-48be-8dd2-297314ae6fec/tool-results/mcp-motion-blob-1794512696318-2h5sxq.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 77,
+  "ok": true,
+  "ms": 141,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jmg",
+   "text": {
+    "fontFamily": "Inter"
+   },
+   "props": {
+    "position": [
+     960,
+     880
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 60,
+  "ok": true,
+  "ms": 133,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmh",
+   "text": {
+    "fontFamily": "Inter",
+    "fontSize": 42
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 34,
+  "ok": true,
+  "ms": 262,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jmh"
+   ],
+   "offset": -0.25
+  },
+  "result": "retimed 1 layers; animation now ends at 4.35s"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 279,
+  "editorMs": 11,
+  "input": {},
+  "result": "score 98/100 (composition 97)\n1. [low] \"tag\" is outside the title-safe area (5% margin)\n   → update_layer {\"id\":\"l_03jmh\",\"props\":{\"position\":[960,996]}}"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 37,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmh",
+   "props": {
+    "position": [
+     960,
+     996
+    ]
+   }
+  },
+  "result": "ok"
+ }
+]

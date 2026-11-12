@@ -1,0 +1,219 @@
+{
+ "run": {
+  "id": "07-product-promo",
+  "name": "07-product-promo",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 69,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 79.69999999999999,
+     "choreography": 94.4,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 20.3,
+     "choreography": 5.6000000000000005,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:slow-stagger",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:timing-range",
+     "low:exit-ease"
+    ],
+    "ms": 18.6
+   },
+   "after": {
+    "score": 69,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 79.69999999999999,
+     "choreography": 94.4,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 20.3,
+     "choreography": 5.6000000000000005,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:slow-stagger",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:timing-range",
+     "low:exit-ease"
+    ],
+    "ms": 18.6
+   }
+  },
+  "wallMs": 61528,
+  "timedOut": false,
+  "turns": 10,
+  "costUsd": 0.16879259999999996,
+  "durationMs": 59885,
+  "usage": {
+   "input": 361847,
+   "cached": 350266,
+   "output": 8747
+  },
+  "errors": [],
+  "toolCalls": 9,
+  "toolErrors": 1,
+  "toolsAvailable": 76,
+  "finalText": "The title sequence is built: 8 seconds at 120 BPM, with a dark background and electric orange accents. I checked it on a contact sheet at key frames but haven't played it back or run the critique pass. The \"Available now\" label on the pill is still small. My size change to 54 didn't seem to take, so it needs another look.\n\n- **Feature flashes, 0.5–3.5 s:** **40h battery**, **Spatial audio** and **Pure silence** (the last in orange) each get one beat pair. An orange wipe sweeps the screen on the beat, and each word punches in from 130% to 100% under it.\n- **Name slam, 4.0 s (downbeat):** **PULSE 2** drops in from 300% with a white flash and a short shake. An orange and a white shockwave ring expand and fade. The name then lifts to make room.\n- **Available now, 6.2 s:** an orange pill springs in with a bounce, and its label rises into place. The pill breathes slightly until the end at 7.6 s.\n\nNext I could add a faint product silhouette or sound-wave motif behind the words, or bump the pill label size."
+ },
+ "metrics": {
+  "layers": 13,
+  "drawableLayers": 13,
+  "layerTypes": {
+   "text": 5,
+   "rect": 6,
+   "ellipse": 2
+  },
+  "groups": 0,
+  "animatedLayers": 13,
+  "keys": 63,
+  "segments": 36,
+  "easesUsed": {
+   "Expo Out": 11,
+   "Hold": 10,
+   "Expo In": 4,
+   "Easy Ease": 4,
+   "Expo In Out": 1,
+   "Quad Out": 2,
+   "Spring 0.5": 1,
+   "Sine In Out": 1,
+   "Cubic Out": 2
+  },
+  "distinctEases": 9,
+  "easeFamilies": 7,
+  "overshootSegments": 1,
+  "keyedOvershoots": 0,
+  "springSegments": 1,
+  "holdKeys": 10,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#ffffff",
+   "#ff5a1f",
+   "#0a0a0c"
+  ],
+  "keyCoverage": 0.85,
+  "visualActivity": 0.611,
+  "firstMotion": 0.333,
+  "lastMotion": 7.6,
+  "endHold": 0.4,
+  "longestHold": 0.938,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.067,
+  "exits": 6,
+  "beats": 6,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.077,
+  "midLuma": 0.907,
+  "toolErrors": 1,
+  "toolCalls": 9
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "3 feature words present",
+    "type": "textAllOf",
+    "pass": true
+   },
+   {
+    "text": "product name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "\"Available now\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 beats",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "shockwave ring (stroked ellipse scaling up)",
+    "type": "ring",
+    "pass": true
+   },
+   {
+    "text": "feature words exit (transitions, not stacking)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "beat-aligned timing (markers or keys on a 0.5s grid)",
+    "type": "beatGrid",
+    "pass": false
+   },
+   {
+    "text": "dark background",
+    "type": "darkBackground",
+    "pass": false
+   }
+  ],
+  "hits": 6,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

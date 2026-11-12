@@ -1,0 +1,215 @@
+{
+ "run": {
+  "id": "09-playful-bouncy",
+  "name": "09-playful-bouncy",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 97,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 90.4,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 9.6,
+     "music": 0
+    },
+    "issues": [
+     "medium:palette-drift"
+    ],
+    "ms": 17.4
+   },
+   "after": {
+    "score": 97,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 90.4,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 9.6,
+     "music": 0
+    },
+    "issues": [
+     "medium:palette-drift"
+    ],
+    "ms": 17.4
+   }
+  },
+  "wallMs": 122392,
+  "timedOut": false,
+  "turns": 20,
+  "costUsd": 0.029329980000000002,
+  "durationMs": 121546,
+  "usage": {
+   "input": 704892,
+   "cached": 666118,
+   "output": 29832
+  },
+  "errors": [],
+  "toolCalls": 19,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the \"Boop!\" intro as a 6-second, 1080×1080 comp on a cream background (#FFF6E9). The critic scores it 97/100, and the frame checks at 1.2 s, 3.6 s and 5.5 s are clean.\n\n- **Candy drop (0–1.5 s):** six candies fall from above, one every 0.12 s: pink circle, yellow star, teal rounded square, violet circle, orange star and mint circle. Each one stretches on the way down, squashes on contact (130×72) and bounces twice before settling.\n- **Jostle (1.9–2.9 s):** the candies knock each other in turn with small sideways nudges and rotation wobbles, then come to rest in a loose cluster above the wordmark.\n- **Letters hop (2.7–4.2 s):** B, o, o, p, ! rise from below one at a time, 0.12 s apart. Each arcs up, lands with a squash, bounces once and settles.\n- **Idle wiggle (4.4 s on):** the candies and letters rock gently on sine expressions that ease in after the intro, so the final frame stays alive.\n\nI darkened the letter colours after the critic flagged low contrast on the cream background. The wordmark is now pink, amber, teal, violet and orange. The critic still notes ten accent colours; I kept them because the candy mix is the point of the brief, but I can cut the palette to fewer colours if you want it calmer.\n\nWant the idle wiggle to loop, or a sound-effect pass?"
+ },
+ "metrics": {
+  "layers": 11,
+  "drawableLayers": 11,
+  "layerTypes": {
+   "ellipse": 3,
+   "path": 2,
+   "rect": 1,
+   "text": 5
+  },
+  "groups": 0,
+  "animatedLayers": 11,
+  "keys": 226,
+  "segments": 170,
+  "easesUsed": {
+   "Quad In": 50,
+   "Quad Out": 68,
+   "Easy Ease": 12,
+   "Quad In Out": 24,
+   "Cubic Out": 11,
+   "Linear": 5
+  },
+  "distinctEases": 6,
+  "easeFamilies": 4,
+  "overshootSegments": 0,
+  "keyedOvershoots": 23,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 5,
+  "expressions": 11,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 12,
+  "palette": [
+   "#ff4f8b",
+   "#ffc93c",
+   "#2ec4b6",
+   "#7b5cff",
+   "#ff8a3d",
+   "#3ddc97",
+   "#d92d6e",
+   "#c27c00",
+   "#137f76",
+   "#5638e0",
+   "#e0561a",
+   "#fff6e9"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.96,
+  "firstMotion": 0.067,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0.201,
+  "offCanvasTime": 0.536,
+  "offCanvasLayers": {
+   "Candy pink circle": 0.134,
+   "Candy yellow star": 0.201,
+   "Candy teal rounded square": 0.134,
+   "Candy violet circle": 0.067,
+   "Candy orange star": 0.067,
+   "Candy mint circle": 0.067
+  },
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 1.474,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.051,
+  "midLuma": 0.926,
+  "toolErrors": 0,
+  "toolCalls": 19
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "\"Boop\" present (one layer or letter layers)",
+    "type": "textOrLetters",
+    "pass": true
+   },
+   {
+    "text": "per-letter hop (text animator by char or separate letter layers)",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "springs or Back eases",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "star shapes present",
+    "type": "starShape",
+    "pass": true
+   },
+   {
+    "text": "≥5 candy shapes",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "idle wiggle at the end (motion in the last 0.8s)",
+    "type": "activeAtEnd",
+    "pass": true
+   },
+   {
+    "text": "≥4 colors",
+    "type": "paletteMin",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

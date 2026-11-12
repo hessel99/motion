@@ -1,0 +1,448 @@
+[
+ {
+  "name": "get_audio_analysis",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 171,
+  "editorMs": 2,
+  "input": {},
+  "result": "music \"Sting 120 BPM\" (layer l_03jm3): 120 BPM, 4/4, steady grid; audible 0.00–9.50s in comp (comp is 8.00s)\nbeat 0.50s, bar 2.00s; 16 beats from 0.00s; 4 bars, downbeats: 0.00 2.00 4.00 6.00\nsections: build 0.00–4.00 (energy 0.59) | drop 4.00–8.00 (energy 1)\naccents (strongest hits, time:strength): 0.50:0.38 1.00:0.34 3.50:0.33 4.00:1.00 5.50:0.31 6.00:0.32\nenergy per bar (▁ quiet .. █ loud): ▄▅█…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 162,
+  "editorMs": 0,
+  "input": {},
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":8,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":1,\"layers\":[{\"id\":\"l_03jm3\",\"name\":\"Sting 120 BPM\",\"type\":\"audio\",\"props\":{\"anchor\":[0,0],\"position\":[0,0],\"scale\":[100,100],\"rotation\":…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1948,
+  "ok": true,
+  "ms": 115,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "key": "shock",
+     "type": "ellipse",
+     "x": 665,
+     "y": 450,
+     "w": 180,
+     "h": 180,
+     "stroke": "#ff4d6d",
+     "strokeWidth": 6,
+     "opacity": 0,
+     "animate": {
+      "scale": [
+       {
+        "t": 4,
+        "v": 100,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 4.7,
+        "v": 330
+       },
+       {
+        "t": 6,
+        "v": 100,
+        "interp": "hold"
+       },
+       {
+        "t": 6.8,
+        "v": 260,
+        "ease": "Expo Out"
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 4,
+        "v": 70
+       },
+       {
+        "t": 4.7,
+        "v": 0,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 6,
+        "v": 50
+       },
+       {
+        "t": 6.8,
+        "v": 0,
+        "ease": "Quad Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "ring",
+     "type": "ellipse",
+     "x": 665,
+     "y": 450,
+     "w": 180,
+     "h": 180,
+     "stroke": "#f5f5f7",
+     "strokeWidth": 14,
+     "animate": {
+      "scale": [
+       {
+        "t": 2,
+        "v": 260,
+        "ease": "Expo In"
+       },
+       {
+        "t": 4,
+        "v": 100,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 4.25,
+        "v": 112,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 4.7,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 6,
+        "v": 100,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 6.12,
+        "v": 108,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 6.6,
+        "v": 100
+       }
+      ],
+      "opacity": [
+       {
+        "t": 2,
+        "v": 0
+       },
+       {
+        "t": 3.9,
+        "v": 60,
+        "ease": "Quad In"
+       },
+       {
+        "t": 4,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "dot",
+     "type": "ellipse",
+     "x": 720,
+     "y": 505,
+     "w": 70,
+     "h": 70,
+     "fill": "#ff4d6d",
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 0.5,
+        "v": 35,
+        "ease": "Back Out"
+       },
+       {
+        "t": 0.8,
+        "v": 25,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 1,
+        "v": 45,
+        "ease": "Back Out"
+       },
+       {
+        "t": 1.3,
+        "v": 30,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 1.5,
+        "v": 55,
+        "ease": "Back Out"
+       },
+       {
+        "t": 1.8,
+        "v": 38,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 2,
+        "v": 65,
+        "ease": "Back Out"
+       },
+       {
+        "t": 2.3,
+        "v": 45,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 2.5,
+        "v": 75,
+        "ease": "Back Out"
+       },
+       {
+        "t": 2.8,
+        "v": 52,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 3,
+        "v": 85,
+        "ease": "Back Out"
+       },
+       {
+        "t": 3.3,
+        "v": 60,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 3.5,
+        "v": 95,
+        "ease": "Back Out"
+       },
+       {
+        "t": 3.85,
+        "v": 15,
+        "ease": "Expo In"
+       },
+       {
+        "t": 4,
+        "v": 150,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 4.45,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 5.5,
+        "v": 100,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 5.62,
+        "v": 140,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 6.1,
+        "v": 100,
+        "ease": "Cubic Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "wordmark",
+     "type": "text",
+     "x": 875,
+     "y": 450,
+     "w": 520,
+     "h": 180,
+     "text": {
+      "content": "Pulse",
+      "fontFamily": "Inter",
+      "fontSize": 150,
+      "fontWeight": 700,
+      "align": "left"
+     },
+     "fill": "#f5f5f7",
+     "animate": {
+      "position": [
+       {
+        "t": 4.15,
+        "v": [
+         1135,
+         540
+        ],
+        "ease": "Expo Out"
+       },
+       {
+        "t": 4.9,
+        "v": [
+         1135,
+         540
+        ]
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 4.15,
+        "v": 0
+       },
+       {
+        "t": 4.6,
+        "v": 100,
+        "ease": "Quad Out"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 7 keyframe tracks; animation ends 6.8s\",\"ids\":{\"shock\":\"l_03jm4\",\"ring\":\"l_03jm5\",\"dot\":\"l_03jm6\",\"wordmark\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 260,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm7",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 4.15,
+       "v": [
+        1075,
+        540
+       ],
+       "ease": "Expo Out"
+      },
+      {
+       "t": 4.95,
+       "v": [
+        1135,
+        540
+       ],
+       "ease": "Quad Out"
+      },
+      {
+       "t": 6,
+       "v": [
+        1135,
+        540
+       ],
+       "ease": "Quad Out"
+      },
+      {
+       "t": 6.12,
+       "v": [
+        1135,
+        532
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 6.6,
+       "v": [
+        1135,
+        540
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 373,
+  "editorMs": 286,
+  "input": {
+   "times": [
+    1,
+    3,
+    3.9,
+    4.1,
+    4.5,
+    5.6,
+    6.1,
+    7.5
+   ]
+  },
+  "result": "8 frames left→right, top→bottom at 1s, 3s, 3.9s, 4.1s, 4.5s, 5.6s, 6.1s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/d4fc1dee-0819-4731-966a-da8bdacefc9b/tool-results/mcp-motion-blob-1794511414250-k8he6p.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 42,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "props": {
+    "fill": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 90,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "props": {
+    "fill": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 183,
+  "editorMs": 89,
+  "input": {
+   "times": [
+    2.5,
+    3.9,
+    4.1,
+    4.5,
+    6.1,
+    7.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 2.5s, 3.9s, 4.1s, 4.5s, 6.1s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/d4fc1dee-0819-4731-966a-da8bdacefc9b/tool-results/mcp-motion-blob-1794511417036-tq0jtm.jpg]"
+ }
+]

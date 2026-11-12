@@ -1,0 +1,5980 @@
+{
+ "n": 136,
+ "pearson": 0.5162772834578367,
+ "spearman": 0.45115861664248963,
+ "rows": [
+  {
+   "name": "01-logo-reveal",
+   "dir": "evals/results/2026-11-12",
+   "judge": 4.33,
+   "judgeSub": {
+    "brief_fit": 4,
+    "style_match": 6,
+    "timing_easing": 4,
+    "composition": 6,
+    "richness": 3,
+    "polish": 3
+   },
+   "score": 39,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 68,
+    "richness": 70,
+    "technical": 16,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 32,
+    "richness": 30,
+    "technical": 84,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 8.7,
+   "issues": [
+    "h:dead-trim",
+    "h:dead-trim",
+    "h:one-move",
+    "m:no-secondary",
+    "m:default-fill"
+   ]
+  },
+  {
+   "name": "02-kinetic-quote",
+   "dir": "evals/results/2026-11-12",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 5,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 42,
+   "sub": {
+    "timing": 100,
+    "easing": 64,
+    "choreography": 94.4,
+    "composition": 100,
+    "readability": 8.799999999999997,
+    "polish": 70,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 36,
+    "choreography": 5.6000000000000005,
+    "composition": 0,
+    "readability": 91.2,
+    "polish": 30,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 7,
+   "issues": [
+    "h:monotone-ease",
+    "h:read-hold",
+    "h:read-hold",
+    "h:no-secondary",
+    "m:read-hold",
+    "m:thin",
+    "l:slow-stagger"
+   ]
+  },
+  {
+   "name": "03-toggle-micro",
+   "dir": "evals/results/2026-11-12",
+   "judge": 6.17,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 7,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 69,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 58,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 42,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.2,
+   "issues": [
+    "h:dead-trim"
+   ]
+  },
+  {
+   "name": "04-explainer-3beat",
+   "dir": "evals/results/2026-11-12",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 34,
+   "sub": {
+    "timing": 86.2,
+    "easing": 84,
+    "choreography": 97.2,
+    "composition": 100,
+    "readability": 0,
+    "polish": 84,
+    "richness": 100,
+    "technical": 58,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 13.8,
+    "easing": 16,
+    "choreography": 2.8000000000000003,
+    "composition": 0,
+    "readability": 100,
+    "polish": 16,
+    "richness": 0,
+    "technical": 42,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 26.8,
+   "issues": [
+    "h:dead-trim",
+    "h:text-collision",
+    "m:text-collision",
+    "m:text-collision",
+    "m:entrance-ease",
+    "m:default-fill",
+    "m:covers-text",
+    "m:covers-text",
+    "m:timing-range",
+    "l:timing-range",
+    "l:palette-drift",
+    "l:uniform-stagger"
+   ]
+  },
+  {
+   "name": "05-bar-chart",
+   "dir": "evals/results/2026-11-12",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 7,
+    "timing_easing": 5,
+    "composition": 7,
+    "richness": 4,
+    "polish": 4
+   },
+   "score": 53,
+   "sub": {
+    "timing": 80.8,
+    "easing": 48,
+    "choreography": 95.8,
+    "composition": 42.39999999999999,
+    "readability": 100,
+    "polish": 100,
+    "richness": 70,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 19.2,
+    "easing": 52,
+    "choreography": 4.2,
+    "composition": 57.599999999999994,
+    "readability": 0,
+    "polish": 0,
+    "richness": 30,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 8.1,
+   "issues": [
+    "h:monotone-ease",
+    "h:one-move",
+    "m:end-hold",
+    "m:grow-middle",
+    "m:grow-middle",
+    "m:grow-middle",
+    "m:entrance-ease",
+    "l:lead-late"
+   ]
+  },
+  {
+   "name": "06-loop-bg",
+   "dir": "evals/results/2026-11-12",
+   "judge": 4.83,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 5,
+    "timing_easing": 5,
+    "composition": 5,
+    "richness": 4,
+    "polish": 4
+   },
+   "score": 82,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 28,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 90.4,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 72,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 9.6,
+    "music": 0
+   },
+   "ms": 15.8,
+   "issues": [
+    "h:off-canvas",
+    "h:off-canvas",
+    "m:palette-drift"
+   ]
+  },
+  {
+   "name": "07-product-promo",
+   "dir": "evals/results/2026-11-12",
+   "judge": 5,
+   "judgeSub": {
+    "brief_fit": 5,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 4
+   },
+   "score": 69,
+   "sub": {
+    "timing": 47.80000000000001,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 44.8,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 52.2,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 55.2,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.9,
+   "issues": [
+    "h:read-hold",
+    "m:end-hold",
+    "m:read-hold",
+    "m:timing-range",
+    "m:timing-range",
+    "m:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "08-swiss-brutalist",
+   "dir": "evals/results/2026-11-12",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 4
+   },
+   "score": 43,
+   "sub": {
+    "timing": 100,
+    "easing": 1.4210854715202004e-14,
+    "choreography": 100,
+    "composition": 38.89999999999999,
+    "readability": 74.4,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 100,
+    "choreography": 0,
+    "composition": 61.099999999999994,
+    "readability": 25.6,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 7.6,
+   "issues": [
+    "h:monotone-ease",
+    "m:grow-middle",
+    "m:grow-middle",
+    "m:grow-middle",
+    "m:entrance-ease",
+    "m:covers-text",
+    "m:covers-text",
+    "m:hard-stop",
+    "m:hard-stop",
+    "m:hard-stop",
+    "m:hard-stop",
+    "m:hard-stop",
+    "l:safe-area"
+   ]
+  },
+  {
+   "name": "09-playful-bouncy",
+   "dir": "evals/results/2026-11-12",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 65,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 79,
+    "polish": 100,
+    "richness": 100,
+    "technical": 64,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 21,
+    "polish": 0,
+    "richness": 0,
+    "technical": 36,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 16.8,
+   "issues": [
+    "h:font-fallback",
+    "l:contrast",
+    "l:contrast",
+    "l:contrast",
+    "l:palette-drift"
+   ]
+  },
+  {
+   "name": "10-corporate-smooth",
+   "dir": "evals/results/2026-11-12",
+   "judge": 5,
+   "judgeSub": {
+    "brief_fit": 5,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 4
+   },
+   "score": 66,
+   "sub": {
+    "timing": 95.8,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 84,
+    "richness": 100,
+    "technical": 58,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 4.2,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 16,
+    "richness": 0,
+    "technical": 42,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.3,
+   "issues": [
+    "h:dead-trim",
+    "m:default-fill",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "11-glitch-retro",
+   "dir": "evals/results/2026-11-12",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 5,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 55,
+   "sub": {
+    "timing": 95.8,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 47,
+    "polish": 100,
+    "richness": 100,
+    "technical": 64,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 4.2,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 53,
+    "polish": 0,
+    "richness": 0,
+    "technical": 36,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 6.7,
+   "issues": [
+    "h:font-fallback",
+    "h:contrast",
+    "m:contrast",
+    "l:contrast",
+    "l:late-start",
+    "l:palette-drift"
+   ]
+  },
+  {
+   "name": "12-hand-drawn",
+   "dir": "evals/results/2026-11-12",
+   "judge": 4.83,
+   "judgeSub": {
+    "brief_fit": 4,
+    "style_match": 5,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 3
+   },
+   "score": 9,
+   "sub": {
+    "timing": 100,
+    "easing": 84,
+    "choreography": 64,
+    "composition": 96.5,
+    "readability": 80.8,
+    "polish": 100,
+    "richness": 100,
+    "technical": 0,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 16,
+    "choreography": 36,
+    "composition": 3.5,
+    "readability": 19.2,
+    "polish": 0,
+    "richness": 0,
+    "technical": 204,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 6.7,
+   "issues": [
+    "h:dead-trim",
+    "h:dead-trim",
+    "h:dead-trim",
+    "h:dead-trim",
+    "h:all-at-once",
+    "h:font-fallback",
+    "m:read-hold",
+    "m:entrance-ease",
+    "l:safe-area"
+   ]
+  },
+  {
+   "name": "13-parallax-depth",
+   "dir": "evals/results/2026-11-12",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 5,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 56,
+   "sub": {
+    "timing": 95.8,
+    "easing": 48,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 93,
+    "polish": 70,
+    "richness": 54,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 4.2,
+    "easing": 52,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 7,
+    "polish": 30,
+    "richness": 46,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3.6,
+   "issues": [
+    "h:monotone-ease",
+    "h:no-secondary",
+    "h:one-move",
+    "m:entrance-ease",
+    "m:thin",
+    "l:contrast",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "14-neo-brutalist-sticker",
+   "dir": "evals/results/2026-11-12",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 7,
+    "timing_easing": 4,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 74,
+   "sub": {
+    "timing": 95.8,
+    "easing": 48,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 4.2,
+    "easing": 52,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 6,
+   "issues": [
+    "h:monotone-ease",
+    "m:entrance-ease",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "15-minimal-luxury",
+   "dir": "evals/results/2026-11-12",
+   "judge": 4.67,
+   "judgeSub": {
+    "brief_fit": 5,
+    "style_match": 4,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 3,
+    "polish": 4
+   },
+   "score": 51,
+   "sub": {
+    "timing": 95.8,
+    "easing": 93,
+    "choreography": 94.4,
+    "composition": 80.8,
+    "readability": 100,
+    "polish": 70,
+    "richness": 70,
+    "technical": 64,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 4.2,
+    "easing": 7,
+    "choreography": 5.6000000000000005,
+    "composition": 19.2,
+    "readability": 0,
+    "polish": 30,
+    "richness": 30,
+    "technical": 36,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1.6,
+   "issues": [
+    "h:font-fallback",
+    "h:no-secondary",
+    "h:thin",
+    "m:grow-middle",
+    "l:entrance-ease",
+    "l:slow-stagger",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "16-reference-match",
+   "dir": "evals/results/2026-11-12",
+   "judge": 4.83,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 4,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 4,
+    "polish": 4
+   },
+   "score": 94,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 94.4,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 5.6000000000000005,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 6.9,
+   "issues": [
+    "l:slow-stagger"
+   ]
+  },
+  {
+   "name": "01-logo-reveal",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 7,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 81,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 84,
+    "richness": 54,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 16,
+    "richness": 46,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3.1,
+   "issues": [
+    "h:one-move",
+    "m:no-secondary",
+    "m:thin"
+   ]
+  },
+  {
+   "name": "02-kinetic-quote",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 62,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 6.399999999999995,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 93.60000000000001,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.8,
+   "issues": [
+    "h:read-hold",
+    "m:read-hold",
+    "m:read-hold",
+    "m:read-hold"
+   ]
+  },
+  {
+   "name": "03-toggle-micro",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 6.5,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 6,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 0.6,
+   "issues": []
+  },
+  {
+   "name": "04-explainer-3beat",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 5,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 4,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 46,
+   "sub": {
+    "timing": 67.00000000000001,
+    "easing": 100,
+    "choreography": 95.8,
+    "composition": 100,
+    "readability": 0,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 33,
+    "easing": 0,
+    "choreography": 4.2,
+    "composition": 0,
+    "readability": 133.6,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 26.5,
+   "issues": [
+    "h:text-collision",
+    "h:text-collision",
+    "h:text-collision",
+    "m:covers-text",
+    "m:covers-text",
+    "m:timing-range",
+    "m:timing-range",
+    "m:timing-range",
+    "l:lead-late",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "05-bar-chart",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 6.67,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 7,
+    "richness": 5,
+    "polish": 7
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 5.5,
+   "issues": []
+  },
+  {
+   "name": "06-loop-bg",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 39.2,
+   "issues": []
+  },
+  {
+   "name": "07-product-promo",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 4
+   },
+   "score": 79,
+   "sub": {
+    "timing": 91.6,
+    "easing": 96.5,
+    "choreography": 87.2,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 8.4,
+    "easing": 3.5,
+    "choreography": 12.8,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 13.7,
+   "issues": [
+    "m:thin",
+    "m:slow-stagger",
+    "l:timing-range",
+    "l:timing-range",
+    "l:exit-ease"
+   ]
+  },
+  {
+   "name": "09-playful-bouncy",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 6.33,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 6,
+    "polish": 6
+   },
+   "score": 99,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 90.4,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 9.6,
+    "music": 0
+   },
+   "ms": 20.3,
+   "issues": [
+    "m:palette-drift"
+   ]
+  },
+  {
+   "name": "10-corporate-smooth",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 73,
+   "sub": {
+    "timing": 87.39999999999999,
+    "easing": 64.8,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 80.8,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 12.600000000000001,
+    "easing": 35.2,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 19.2,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.4,
+   "issues": [
+    "m:monotone-ease",
+    "m:text-collision",
+    "m:entrance-ease",
+    "l:timing-range",
+    "l:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "12-hand-drawn",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 4,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3.9,
+   "issues": []
+  },
+  {
+   "name": "15-minimal-luxury",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 94,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 8.2,
+   "issues": [
+    "m:thin"
+   ]
+  },
+  {
+   "name": "17-music-logo-sting",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 84,
+   "sub": {
+    "timing": 100,
+    "easing": 75.49999999999999,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 84,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 24.5,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 16,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 8.5,
+   "issues": [
+    "m:copy-paste",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:exit-ease"
+   ]
+  },
+  {
+   "name": "01-logo-reveal",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 6.17,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 94,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1.1,
+   "issues": [
+    "m:one-move"
+   ]
+  },
+  {
+   "name": "02-kinetic-quote",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 5,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 7,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 67,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 42.39999999999999,
+    "polish": 54,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 57.599999999999994,
+    "polish": 46,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3.6,
+   "issues": [
+    "h:no-secondary",
+    "m:read-hold",
+    "m:read-hold",
+    "m:read-hold",
+    "m:copy-paste"
+   ]
+  },
+  {
+   "name": "03-toggle-micro",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 6.5,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 6,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 0.6,
+   "issues": []
+  },
+  {
+   "name": "04-explainer-3beat",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 4.67,
+   "judgeSub": {
+    "brief_fit": 5,
+    "style_match": 6,
+    "timing_easing": 4,
+    "composition": 5,
+    "richness": 3,
+    "polish": 5
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 18.6,
+   "issues": []
+  },
+  {
+   "name": "05-bar-chart",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 6.5,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 7,
+    "richness": 5,
+    "polish": 7
+   },
+   "score": 89,
+   "sub": {
+    "timing": 64,
+    "easing": 100,
+    "choreography": 95.8,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 36,
+    "easing": 0,
+    "choreography": 4.2,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 5.6,
+   "issues": [
+    "h:end-hold",
+    "l:lead-late"
+   ]
+  },
+  {
+   "name": "06-loop-bg",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 91,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 64,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 36,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3,
+   "issues": [
+    "h:off-canvas"
+   ]
+  },
+  {
+   "name": "07-product-promo",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 4.67,
+   "judgeSub": {
+    "brief_fit": 4,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 5,
+    "richness": 4,
+    "polish": 4
+   },
+   "score": 67,
+   "sub": {
+    "timing": 91.6,
+    "easing": 96.5,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 28,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 8.4,
+    "easing": 3.5,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 72,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3,
+   "issues": [
+    "h:read-hold",
+    "h:read-hold",
+    "l:timing-range",
+    "l:timing-range",
+    "l:exit-ease"
+   ]
+  },
+  {
+   "name": "09-playful-bouncy",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 6.17,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 99,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 5,
+   "issues": [
+    "l:palette-drift"
+   ]
+  },
+  {
+   "name": "10-corporate-smooth",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 5.83,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 81,
+   "sub": {
+    "timing": 94.4,
+    "easing": 64.8,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 5.6000000000000005,
+    "easing": 35.2,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1.7,
+   "issues": [
+    "m:monotone-ease",
+    "m:entrance-ease",
+    "l:dead-time"
+   ]
+  },
+  {
+   "name": "12-hand-drawn",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3.9,
+   "issues": []
+  },
+  {
+   "name": "15-minimal-luxury",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 74,
+   "sub": {
+    "timing": 87.39999999999999,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 80.8,
+    "readability": 80.8,
+    "polish": 70,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 12.600000000000001,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 19.2,
+    "readability": 19.2,
+    "polish": 30,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.2,
+   "issues": [
+    "h:no-secondary",
+    "m:read-hold",
+    "m:grow-middle",
+    "m:thin",
+    "l:timing-range",
+    "l:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "17-music-logo-sting",
+   "dir": "evals/results/2026-11-12-taste/haiku-loopoff-b",
+   "judge": 5.83,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 6,
+    "polish": 4
+   },
+   "score": 80,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 80.8,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 19.2,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.1,
+   "issues": [
+    "m:all-at-once"
+   ]
+  },
+  {
+   "name": "01-logo-reveal",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 5.83,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 77,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 80.8,
+    "readability": 100,
+    "polish": 84,
+    "richness": 54,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 19.2,
+    "readability": 0,
+    "polish": 16,
+    "richness": 46,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1,
+   "issues": [
+    "h:one-move",
+    "m:grow-middle",
+    "m:no-secondary",
+    "m:thin"
+   ]
+  },
+  {
+   "name": "02-kinetic-quote",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 5,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 46,
+   "sub": {
+    "timing": 100,
+    "easing": 64,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 23.199999999999992,
+    "polish": 54,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 36,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 76.8,
+    "polish": 46,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.1,
+   "issues": [
+    "h:monotone-ease",
+    "h:no-secondary",
+    "m:read-hold",
+    "m:read-hold",
+    "m:read-hold",
+    "m:read-hold",
+    "m:thin",
+    "m:copy-paste"
+   ]
+  },
+  {
+   "name": "03-toggle-micro",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 6.5,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 7,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 0.6,
+   "issues": []
+  },
+  {
+   "name": "04-explainer-3beat",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 83,
+   "sub": {
+    "timing": 67.00000000000001,
+    "easing": 100,
+    "choreography": 93,
+    "composition": 100,
+    "readability": 100,
+    "polish": 84,
+    "richness": 100,
+    "technical": 100,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 33,
+    "easing": 0,
+    "choreography": 7,
+    "composition": 0,
+    "readability": 0,
+    "polish": 16,
+    "richness": 0,
+    "technical": 0,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 44,
+   "issues": [
+    "m:default-fill",
+    "m:timing-range",
+    "m:timing-range",
+    "m:timing-range",
+    "l:lead-late",
+    "l:timing-range",
+    "l:palette-drift",
+    "l:uniform-stagger"
+   ]
+  },
+  {
+   "name": "05-bar-chart",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 5,
+    "composition": 7,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 60,
+   "sub": {
+    "timing": 64,
+    "easing": 80.8,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 64,
+    "polish": 84,
+    "richness": 70,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 36,
+    "easing": 19.2,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 36,
+    "polish": 16,
+    "richness": 30,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 5.2,
+   "issues": [
+    "h:end-hold",
+    "h:text-collision",
+    "h:one-move",
+    "m:monotone-ease",
+    "m:default-fill"
+   ]
+  },
+  {
+   "name": "06-loop-bg",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 6.5,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 7
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 18,
+   "issues": []
+  },
+  {
+   "name": "07-product-promo",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 3.17,
+   "judgeSub": {
+    "brief_fit": 4,
+    "style_match": 5,
+    "timing_easing": 3,
+    "composition": 2,
+    "richness": 3,
+    "polish": 2
+   },
+   "score": 35,
+   "sub": {
+    "timing": 31.000000000000014,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 0,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 69,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 180,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.7,
+   "issues": [
+    "h:end-hold",
+    "h:read-hold",
+    "h:read-hold",
+    "h:text-collision",
+    "h:text-collision",
+    "h:text-collision",
+    "m:timing-range",
+    "m:timing-range",
+    "m:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "09-playful-bouncy",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 99,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 5.5,
+   "issues": [
+    "l:palette-drift"
+   ]
+  },
+  {
+   "name": "10-corporate-smooth",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 90,
+   "sub": {
+    "timing": 91.6,
+    "easing": 84,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 8.4,
+    "easing": 16,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1.6,
+   "issues": [
+    "m:entrance-ease",
+    "l:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "12-hand-drawn",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 5.83,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 5,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 85,
+   "sub": {
+    "timing": 87.39999999999999,
+    "easing": 84,
+    "choreography": 95.8,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 12.600000000000001,
+    "easing": 16,
+    "choreography": 4.2,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3.8,
+   "issues": [
+    "m:entrance-ease",
+    "l:lead-late",
+    "l:timing-range",
+    "l:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "15-minimal-luxury",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 5,
+    "timing_easing": 7,
+    "composition": 6,
+    "richness": 4,
+    "polish": 4
+   },
+   "score": 60,
+   "sub": {
+    "timing": 67.00000000000001,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 70,
+    "richness": 84,
+    "technical": 64,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 33,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 30,
+    "richness": 16,
+    "technical": 36,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.6,
+   "issues": [
+    "h:font-fallback",
+    "h:no-secondary",
+    "m:thin",
+    "m:timing-range",
+    "m:timing-range",
+    "m:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "17-music-logo-sting",
+   "dir": "evals/results/2026-11-12-taste/haiku-off-3",
+   "judge": 4.83,
+   "judgeSub": {
+    "brief_fit": 5,
+    "style_match": 5,
+    "timing_easing": 4,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 58,
+   "sub": {
+    "timing": 80.8,
+    "easing": 93,
+    "choreography": 64,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 19.2,
+    "easing": 7,
+    "choreography": 36,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3.1,
+   "issues": [
+    "h:all-at-once",
+    "m:end-hold",
+    "m:thin",
+    "l:entrance-ease"
+   ]
+  },
+  {
+   "name": "01-logo-reveal",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 6.17,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 94,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1,
+   "issues": [
+    "m:one-move"
+   ]
+  },
+  {
+   "name": "02-kinetic-quote",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 90,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 84,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 16,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.8,
+   "issues": [
+    "m:thin",
+    "m:copy-paste"
+   ]
+  },
+  {
+   "name": "03-toggle-micro",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 6.67,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 0.6,
+   "issues": []
+  },
+  {
+   "name": "04-explainer-3beat",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 5.17,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 5,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 77,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 48.8,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 51.2,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 12.9,
+   "issues": [
+    "m:text-collision",
+    "m:text-collision",
+    "m:covers-text"
+   ]
+  },
+  {
+   "name": "05-bar-chart",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 6.67,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 7,
+    "richness": 5,
+    "polish": 7
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 7.6,
+   "issues": []
+  },
+  {
+   "name": "06-loop-bg",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.9,
+   "issues": []
+  },
+  {
+   "name": "07-product-promo",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 92,
+   "sub": {
+    "timing": 100,
+    "easing": 96.5,
+    "choreography": 94.4,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 3.5,
+    "choreography": 5.6000000000000005,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 6.8,
+   "issues": [
+    "l:slow-stagger",
+    "l:exit-ease"
+   ]
+  },
+  {
+   "name": "09-playful-bouncy",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 5.83,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 99,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 90.4,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 9.6,
+    "music": 0
+   },
+   "ms": 13.2,
+   "issues": [
+    "m:palette-drift"
+   ]
+  },
+  {
+   "name": "10-corporate-smooth",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 91,
+   "sub": {
+    "timing": 100,
+    "easing": 84,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 16,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1.9,
+   "issues": [
+    "m:entrance-ease"
+   ]
+  },
+  {
+   "name": "12-hand-drawn",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 5.17,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 5,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3.3,
+   "issues": []
+  },
+  {
+   "name": "15-minimal-luxury",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 93,
+   "sub": {
+    "timing": 91.6,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 8.4,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3,
+   "issues": [
+    "m:thin",
+    "l:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "17-music-logo-sting",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-3",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 90,
+   "sub": {
+    "timing": 100,
+    "easing": 92.3,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 7.7,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.4,
+   "issues": [
+    "m:thin",
+    "l:hard-stop",
+    "l:exit-ease"
+   ]
+  },
+  {
+   "name": "01-logo-reveal",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 6.17,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 6,
+    "timing_easing": 7,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 94,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1,
+   "issues": [
+    "m:one-move"
+   ]
+  },
+  {
+   "name": "02-kinetic-quote",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 5.1,
+   "issues": []
+  },
+  {
+   "name": "03-toggle-micro",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 6.33,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 6,
+    "timing_easing": 7,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 0.6,
+   "issues": []
+  },
+  {
+   "name": "04-explainer-3beat",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 7,
+    "timing_easing": 4,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 95,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 95.8,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 4.2,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 22,
+   "issues": [
+    "l:lead-late"
+   ]
+  },
+  {
+   "name": "05-bar-chart",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 6.67,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 5,
+    "polish": 7
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 5,
+   "issues": []
+  },
+  {
+   "name": "06-loop-bg",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 5,
+    "composition": 5,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 26.9,
+   "issues": []
+  },
+  {
+   "name": "07-product-promo",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 5.17,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 4,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 95,
+   "sub": {
+    "timing": 86.2,
+    "easing": 95.8,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 13.8,
+    "easing": 4.2,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 7.6,
+   "issues": [
+    "m:timing-range",
+    "l:hard-stop",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "09-playful-bouncy",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 5.83,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 6,
+    "polish": 5
+   },
+   "score": 99,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 6.4,
+   "issues": [
+    "l:palette-drift"
+   ]
+  },
+  {
+   "name": "10-corporate-smooth",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 86,
+   "sub": {
+    "timing": 100,
+    "easing": 84,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 16,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.5,
+   "issues": [
+    "m:entrance-ease",
+    "m:thin"
+   ]
+  },
+  {
+   "name": "12-hand-drawn",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 5,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 5,
+    "timing_easing": 5,
+    "composition": 5,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 7.7,
+   "issues": []
+  },
+  {
+   "name": "15-minimal-luxury",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 94,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.6,
+   "issues": [
+    "m:thin"
+   ]
+  },
+  {
+   "name": "17-music-logo-sting",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1a",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 5,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 91,
+   "sub": {
+    "timing": 100,
+    "easing": 83.19999999999999,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 16.8,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 8.3,
+   "issues": [
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:hard-stop"
+   ]
+  },
+  {
+   "name": "01-logo-reveal",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 6.17,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 94,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1.2,
+   "issues": [
+    "m:one-move"
+   ]
+  },
+  {
+   "name": "02-kinetic-quote",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 76,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 44.8,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 55.2,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3.2,
+   "issues": [
+    "h:read-hold",
+    "m:read-hold"
+   ]
+  },
+  {
+   "name": "03-toggle-micro",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 6.5,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 7,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 0.7,
+   "issues": []
+  },
+  {
+   "name": "04-explainer-3beat",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 5.17,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 5,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 84,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 95.8,
+    "composition": 100,
+    "readability": 74.4,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 4.2,
+    "composition": 0,
+    "readability": 25.6,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 44.7,
+   "issues": [
+    "m:covers-text",
+    "m:covers-text",
+    "l:lead-late"
+   ]
+  },
+  {
+   "name": "05-bar-chart",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 5.83,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 7,
+    "timing_easing": 5,
+    "composition": 7,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 74,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 64,
+    "polish": 100,
+    "richness": 70,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 36,
+    "polish": 0,
+    "richness": 30,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 6.5,
+   "issues": [
+    "h:text-collision",
+    "h:one-move"
+   ]
+  },
+  {
+   "name": "06-loop-bg",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 35.5,
+   "issues": []
+  },
+  {
+   "name": "07-product-promo",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 88,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 94.4,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 5.6000000000000005,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 9.1,
+   "issues": [
+    "m:thin",
+    "l:slow-stagger"
+   ]
+  },
+  {
+   "name": "09-playful-bouncy",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 6.17,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 79,
+   "sub": {
+    "timing": 100,
+    "easing": 78.99999999999999,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 79,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 21,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 21,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 45,
+   "issues": [
+    "l:contrast",
+    "l:contrast",
+    "l:contrast",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:palette-drift"
+   ]
+  },
+  {
+   "name": "10-corporate-smooth",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 91,
+   "sub": {
+    "timing": 100,
+    "easing": 84,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 16,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2,
+   "issues": [
+    "m:entrance-ease"
+   ]
+  },
+  {
+   "name": "12-hand-drawn",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 5.17,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 5,
+    "timing_easing": 6,
+    "composition": 4,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 30.4,
+   "issues": []
+  },
+  {
+   "name": "15-minimal-luxury",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 93,
+   "sub": {
+    "timing": 91.6,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 8.4,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 5.1,
+   "issues": [
+    "m:thin",
+    "l:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "17-music-logo-sting",
+   "dir": "evals/results/2026-11-12-taste/haiku-on-v1b",
+   "judge": 6.17,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 7,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 93,
+   "sub": {
+    "timing": 100,
+    "easing": 87.39999999999999,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 12.600000000000001,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3.4,
+   "issues": [
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:hard-stop"
+   ]
+  },
+  {
+   "name": "01-logo-reveal",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 81,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 84,
+    "richness": 54,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 16,
+    "richness": 46,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2,
+   "issues": [
+    "h:one-move",
+    "m:no-secondary",
+    "m:thin"
+   ]
+  },
+  {
+   "name": "02-kinetic-quote",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 5,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 75,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 94.4,
+    "composition": 80.8,
+    "readability": 80.8,
+    "polish": 70,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 5.6000000000000005,
+    "composition": 19.2,
+    "readability": 19.2,
+    "polish": 30,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 6,
+   "issues": [
+    "h:no-secondary",
+    "m:read-hold",
+    "m:grow-middle",
+    "l:slow-stagger"
+   ]
+  },
+  {
+   "name": "03-toggle-micro",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 6.5,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 6,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 0.8,
+   "issues": []
+  },
+  {
+   "name": "04-explainer-3beat",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 7,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 6,
+    "polish": 7
+   },
+   "score": 72,
+   "sub": {
+    "timing": 67.00000000000001,
+    "easing": 100,
+    "choreography": 97.2,
+    "composition": 100,
+    "readability": 55.2,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 90.4,
+    "music": 100
+   },
+   "pen": {
+    "timing": 33,
+    "easing": 0,
+    "choreography": 2.8000000000000003,
+    "composition": 0,
+    "readability": 44.8,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 9.6,
+    "music": 0
+   },
+   "ms": 36,
+   "issues": [
+    "m:text-collision",
+    "m:covers-text",
+    "m:covers-text",
+    "m:timing-range",
+    "m:timing-range",
+    "m:timing-range",
+    "m:palette-drift",
+    "l:timing-range",
+    "l:uniform-stagger"
+   ]
+  },
+  {
+   "name": "05-bar-chart",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 6.83,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 5,
+    "polish": 7
+   },
+   "score": 93,
+   "sub": {
+    "timing": 80.8,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 84,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 19.2,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 16,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 20.2,
+   "issues": [
+    "m:end-hold",
+    "m:default-fill"
+   ]
+  },
+  {
+   "name": "06-loop-bg",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 6.33,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 7,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 76,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 0,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 108,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 11.9,
+   "issues": [
+    "h:off-canvas",
+    "h:off-canvas",
+    "h:off-canvas"
+   ]
+  },
+  {
+   "name": "07-product-promo",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 5,
+   "judgeSub": {
+    "brief_fit": 5,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 5,
+    "richness": 5,
+    "polish": 4
+   },
+   "score": 79,
+   "sub": {
+    "timing": 67.00000000000001,
+    "easing": 79.69999999999999,
+    "choreography": 94.4,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 33,
+    "easing": 20.3,
+    "choreography": 5.6000000000000005,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 16.7,
+   "issues": [
+    "m:timing-range",
+    "m:timing-range",
+    "m:timing-range",
+    "l:slow-stagger",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:hard-stop",
+    "l:timing-range",
+    "l:exit-ease"
+   ]
+  },
+  {
+   "name": "09-playful-bouncy",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 80,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 56,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 44,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 10,
+   "issues": [
+    "h:contrast",
+    "l:contrast",
+    "l:contrast",
+    "l:palette-drift"
+   ]
+  },
+  {
+   "name": "10-corporate-smooth",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 5.83,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 5
+   },
+   "score": 81,
+   "sub": {
+    "timing": 95.8,
+    "easing": 64.8,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 4.2,
+    "easing": 35.2,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1.8,
+   "issues": [
+    "m:monotone-ease",
+    "m:entrance-ease",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "12-hand-drawn",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 73,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 64,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 36,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 6.2,
+   "issues": [
+    "h:font-fallback"
+   ]
+  },
+  {
+   "name": "15-minimal-luxury",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 5.17,
+   "judgeSub": {
+    "brief_fit": 5,
+    "style_match": 5,
+    "timing_easing": 7,
+    "composition": 6,
+    "richness": 4,
+    "polish": 4
+   },
+   "score": 57,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 94.4,
+    "composition": 100,
+    "readability": 100,
+    "polish": 70,
+    "richness": 70,
+    "technical": 64,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 5.6000000000000005,
+    "composition": 0,
+    "readability": 0,
+    "polish": 30,
+    "richness": 30,
+    "technical": 36,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 12.9,
+   "issues": [
+    "h:font-fallback",
+    "h:no-secondary",
+    "h:thin",
+    "l:slow-stagger"
+   ]
+  },
+  {
+   "name": "17-music-logo-sting",
+   "dir": "evals/results/2026-11-12-taste/sonnet-loopoff",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 82,
+   "sub": {
+    "timing": 100,
+    "easing": 76.3,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 23.7,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 6.4,
+   "issues": [
+    "m:entrance-ease",
+    "m:thin",
+    "l:hard-stop",
+    "l:exit-ease"
+   ]
+  },
+  {
+   "name": "01-logo-reveal",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 78,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 68,
+    "richness": 54,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 32,
+    "richness": 46,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1.2,
+   "issues": [
+    "h:one-move",
+    "m:no-secondary",
+    "m:thin",
+    "m:default-fill"
+   ]
+  },
+  {
+   "name": "02-kinetic-quote",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 5,
+    "polish": 4
+   },
+   "score": 59,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 23.199999999999992,
+    "polish": 70,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 76.8,
+    "polish": 30,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.2,
+   "issues": [
+    "h:no-secondary",
+    "m:read-hold",
+    "m:read-hold",
+    "m:text-collision",
+    "m:text-collision",
+    "m:thin"
+   ]
+  },
+  {
+   "name": "03-toggle-micro",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 6.5,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 7,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1,
+   "issues": []
+  },
+  {
+   "name": "04-explainer-3beat",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 6.33,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 6,
+    "polish": 6
+   },
+   "score": 85,
+   "sub": {
+    "timing": 100,
+    "easing": 84,
+    "choreography": 94.4,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 90.4,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 16,
+    "choreography": 5.6000000000000005,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 9.6,
+    "music": 0
+   },
+   "ms": 61.7,
+   "issues": [
+    "m:entrance-ease",
+    "m:palette-drift",
+    "l:slow-stagger"
+   ]
+  },
+  {
+   "name": "05-bar-chart",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 6.67,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 7,
+    "richness": 5,
+    "polish": 7
+   },
+   "score": 86,
+   "sub": {
+    "timing": 80.8,
+    "easing": 100,
+    "choreography": 95.8,
+    "composition": 100,
+    "readability": 86,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 19.2,
+    "easing": 0,
+    "choreography": 4.2,
+    "composition": 0,
+    "readability": 14,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 6.7,
+   "issues": [
+    "m:end-hold",
+    "l:contrast",
+    "l:contrast",
+    "l:lead-late"
+   ]
+  },
+  {
+   "name": "06-loop-bg",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 6.67,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 7,
+    "composition": 6,
+    "richness": 5,
+    "polish": 7
+   },
+   "score": 83,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 28,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 72,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 57.8,
+   "issues": [
+    "h:off-canvas",
+    "h:off-canvas"
+   ]
+  },
+  {
+   "name": "07-product-promo",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 85,
+   "sub": {
+    "timing": 67.00000000000001,
+    "easing": 93,
+    "choreography": 94.4,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 33,
+    "easing": 7,
+    "choreography": 5.6000000000000005,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 61.9,
+   "issues": [
+    "m:timing-range",
+    "m:timing-range",
+    "m:timing-range",
+    "l:entrance-ease",
+    "l:slow-stagger",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "09-playful-bouncy",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 6,
+    "polish": 5
+   },
+   "score": 99,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 13,
+   "issues": [
+    "l:palette-drift"
+   ]
+  },
+  {
+   "name": "10-corporate-smooth",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 6.17,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 81,
+   "sub": {
+    "timing": 95.8,
+    "easing": 64.8,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 4.2,
+    "easing": 35.2,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 3.8,
+   "issues": [
+    "m:monotone-ease",
+    "m:entrance-ease",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "12-hand-drawn",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 6.33,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 6,
+    "polish": 5
+   },
+   "score": 67,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 68,
+    "richness": 100,
+    "technical": 64,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 32,
+    "richness": 0,
+    "technical": 36,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 11.6,
+   "issues": [
+    "h:font-fallback",
+    "m:default-fill",
+    "m:default-fill"
+   ]
+  },
+  {
+   "name": "15-minimal-luxury",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 5,
+   "judgeSub": {
+    "brief_fit": 5,
+    "style_match": 4,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 4,
+    "polish": 3
+   },
+   "score": 57,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 94.4,
+    "composition": 100,
+    "readability": 100,
+    "polish": 70,
+    "richness": 70,
+    "technical": 64,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 5.6000000000000005,
+    "composition": 0,
+    "readability": 0,
+    "polish": 30,
+    "richness": 30,
+    "technical": 36,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1.1,
+   "issues": [
+    "h:font-fallback",
+    "h:no-secondary",
+    "h:thin",
+    "l:slow-stagger"
+   ]
+  },
+  {
+   "name": "17-music-logo-sting",
+   "dir": "evals/results/2026-11-12-taste/sonnet-off-3",
+   "judge": 5.17,
+   "judgeSub": {
+    "brief_fit": 5,
+    "style_match": 6,
+    "timing_easing": 4,
+    "composition": 6,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 62,
+   "sub": {
+    "timing": 100,
+    "easing": 93,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 58,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 7,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 42,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.1,
+   "issues": [
+    "h:dead-trim",
+    "m:thin",
+    "l:entrance-ease"
+   ]
+  },
+  {
+   "name": "01-logo-reveal",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 6.33,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 7,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 81,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 84,
+    "richness": 54,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 16,
+    "richness": 46,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1.2,
+   "issues": [
+    "h:one-move",
+    "m:no-secondary",
+    "m:thin"
+   ]
+  },
+  {
+   "name": "02-kinetic-quote",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 6.17,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 86,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 80.8,
+    "readability": 80.8,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 19.2,
+    "readability": 19.2,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.3,
+   "issues": [
+    "m:read-hold",
+    "m:grow-middle"
+   ]
+  },
+  {
+   "name": "03-toggle-micro",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 6.5,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 6,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 0.5,
+   "issues": []
+  },
+  {
+   "name": "04-explainer-3beat",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 5.33,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 5,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 78,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 97.2,
+    "composition": 100,
+    "readability": 68,
+    "polish": 84,
+    "richness": 100,
+    "technical": 100,
+    "brand": 90.4,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 2.8000000000000003,
+    "composition": 0,
+    "readability": 32,
+    "polish": 16,
+    "richness": 0,
+    "technical": 0,
+    "brand": 9.6,
+    "music": 0
+   },
+   "ms": 19.6,
+   "issues": [
+    "m:text-collision",
+    "m:default-fill",
+    "m:covers-text",
+    "m:palette-drift",
+    "l:uniform-stagger"
+   ]
+  },
+  {
+   "name": "05-bar-chart",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 6.5,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 7,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 96,
+   "sub": {
+    "timing": 80.8,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 19.2,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 28.1,
+   "issues": [
+    "m:end-hold"
+   ]
+  },
+  {
+   "name": "06-loop-bg",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 7,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 83,
+   "sub": {
+    "timing": 100,
+    "easing": 80.8,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 70,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 19.2,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 30,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.1,
+   "issues": [
+    "h:no-secondary",
+    "m:monotone-ease"
+   ]
+  },
+  {
+   "name": "07-product-promo",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 6.83,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 7,
+    "richness": 6,
+    "polish": 7
+   },
+   "score": 88,
+   "sub": {
+    "timing": 67.00000000000001,
+    "easing": 100,
+    "choreography": 94.4,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 33,
+    "easing": 0,
+    "choreography": 5.6000000000000005,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 7.9,
+   "issues": [
+    "m:timing-range",
+    "m:timing-range",
+    "m:timing-range",
+    "l:slow-stagger",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "09-playful-bouncy",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 6,
+    "polish": 5
+   },
+   "score": 88,
+   "sub": {
+    "timing": 91.6,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 79,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 8.4,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 21,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 21.6,
+   "issues": [
+    "l:contrast",
+    "l:contrast",
+    "l:contrast",
+    "l:timing-range",
+    "l:timing-range",
+    "l:palette-drift"
+   ]
+  },
+  {
+   "name": "10-corporate-smooth",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 6,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 89,
+   "sub": {
+    "timing": 86,
+    "easing": 84,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 14,
+    "easing": 16,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.5,
+   "issues": [
+    "m:entrance-ease",
+    "l:dead-time",
+    "l:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "12-hand-drawn",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 5,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 4
+   },
+   "score": 92,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 68,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 32,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 14.1,
+   "issues": [
+    "m:default-fill",
+    "m:default-fill"
+   ]
+  },
+  {
+   "name": "15-minimal-luxury",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 6.33,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 82,
+   "sub": {
+    "timing": 67.00000000000001,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 68,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 33,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 32,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4,
+   "issues": [
+    "m:thin",
+    "m:default-fill",
+    "m:default-fill",
+    "m:timing-range",
+    "m:timing-range",
+    "m:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "17-music-logo-sting",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1a",
+   "judge": 5.67,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 86,
+   "sub": {
+    "timing": 95.8,
+    "easing": 85.3,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 4.2,
+    "easing": 14.7,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.3,
+   "issues": [
+    "m:thin",
+    "l:entrance-ease",
+    "l:hard-stop",
+    "l:timing-range",
+    "l:exit-ease"
+   ]
+  },
+  {
+   "name": "01-logo-reveal",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 5,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 3,
+    "polish": 4
+   },
+   "score": 78,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 68,
+    "richness": 54,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 32,
+    "richness": 46,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.2,
+   "issues": [
+    "h:one-move",
+    "m:no-secondary",
+    "m:thin",
+    "m:default-fill"
+   ]
+  },
+  {
+   "name": "02-kinetic-quote",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 5.83,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 7,
+    "richness": 4,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.6,
+   "issues": []
+  },
+  {
+   "name": "03-toggle-micro",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 6.83,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 6,
+    "polish": 6
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 0.5,
+   "issues": []
+  },
+  {
+   "name": "04-explainer-3beat",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 6.33,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 6,
+    "polish": 6
+   },
+   "score": 84,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 93,
+    "composition": 100,
+    "readability": 80.8,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 7,
+    "composition": 0,
+    "readability": 19.2,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 24.1,
+   "issues": [
+    "m:text-collision",
+    "l:lead-late",
+    "l:uniform-stagger"
+   ]
+  },
+  {
+   "name": "05-bar-chart",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 6.5,
+   "judgeSub": {
+    "brief_fit": 8,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 7,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 84,
+   "sub": {
+    "timing": 80.8,
+    "easing": 100,
+    "choreography": 94.4,
+    "composition": 100,
+    "readability": 93,
+    "polish": 84,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 19.2,
+    "easing": 0,
+    "choreography": 5.6000000000000005,
+    "composition": 0,
+    "readability": 7,
+    "polish": 16,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.9,
+   "issues": [
+    "m:end-hold",
+    "m:default-fill",
+    "l:contrast",
+    "l:slow-stagger"
+   ]
+  },
+  {
+   "name": "06-loop-bg",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 6.33,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 5,
+    "polish": 7
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 2.9,
+   "issues": []
+  },
+  {
+   "name": "07-product-promo",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 6.17,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 7,
+    "timing_easing": 6,
+    "composition": 6,
+    "richness": 6,
+    "polish": 6
+   },
+   "score": 94,
+   "sub": {
+    "timing": 67.00000000000001,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 33,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 6.7,
+   "issues": [
+    "m:timing-range",
+    "m:timing-range",
+    "m:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "09-playful-bouncy",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 6,
+    "style_match": 6,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 80,
+   "sub": {
+    "timing": 100,
+    "easing": 80.8,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 79,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 95.8,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 19.2,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 21,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 4.2,
+    "music": 0
+   },
+   "ms": 7.7,
+   "issues": [
+    "m:monotone-ease",
+    "l:contrast",
+    "l:contrast",
+    "l:contrast",
+    "l:palette-drift"
+   ]
+  },
+  {
+   "name": "10-corporate-smooth",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 5.83,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 7,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 83,
+   "sub": {
+    "timing": 94.4,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 64,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 5.6000000000000005,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 36,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 1.6,
+   "issues": [
+    "h:text-collision",
+    "l:dead-time"
+   ]
+  },
+  {
+   "name": "12-hand-drawn",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 5.5,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 5,
+    "timing_easing": 6,
+    "composition": 5,
+    "richness": 5,
+    "polish": 5
+   },
+   "score": 100,
+   "sub": {
+    "timing": 100,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 13.8,
+   "issues": []
+  },
+  {
+   "name": "15-minimal-luxury",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 6.67,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 8,
+    "timing_easing": 7,
+    "composition": 7,
+    "richness": 5,
+    "polish": 6
+   },
+   "score": 89,
+   "sub": {
+    "timing": 91.6,
+    "easing": 100,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 84,
+    "richness": 84,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 8.4,
+    "easing": 0,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 16,
+    "richness": 16,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 4.2,
+   "issues": [
+    "m:thin",
+    "m:default-fill",
+    "l:timing-range",
+    "l:timing-range"
+   ]
+  },
+  {
+   "name": "17-music-logo-sting",
+   "dir": "evals/results/2026-11-12-taste/sonnet-on-v1b",
+   "judge": 5.83,
+   "judgeSub": {
+    "brief_fit": 7,
+    "style_match": 6,
+    "timing_easing": 5,
+    "composition": 6,
+    "richness": 6,
+    "polish": 5
+   },
+   "score": 98,
+   "sub": {
+    "timing": 100,
+    "easing": 96.5,
+    "choreography": 100,
+    "composition": 100,
+    "readability": 100,
+    "polish": 100,
+    "richness": 100,
+    "technical": 100,
+    "brand": 100,
+    "music": 100
+   },
+   "pen": {
+    "timing": 0,
+    "easing": 3.5,
+    "choreography": 0,
+    "composition": 0,
+    "readability": 0,
+    "polish": 0,
+    "richness": 0,
+    "technical": 0,
+    "brand": 0,
+    "music": 0
+   },
+   "ms": 6.1,
+   "issues": [
+    "l:exit-ease"
+   ]
+  }
+ ]
+}

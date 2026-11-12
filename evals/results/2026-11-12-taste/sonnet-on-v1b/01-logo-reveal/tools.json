@@ -1,0 +1,315 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1234,
+  "ok": false,
+  "ms": 49,
+  "editorMs": 4,
+  "error": "layer \"ring\": drawOn needs a path layer (type path / shape / star)",
+  "input": {
+   "comp": {
+    "background": "#0B1630",
+    "duration": 4,
+    "fps": 60,
+    "name": "NOVA Logo Reveal"
+   },
+   "layers": [
+    {
+     "key": "ring",
+     "name": "Mark Circle",
+     "type": "ellipse",
+     "x": 640,
+     "y": 400,
+     "w": 160,
+     "h": 160,
+     "stroke": "#2EE6A6",
+     "strokeWidth": 14,
+     "drawOn": {
+      "t": 0.3,
+      "duration": 0.9,
+      "ease": "Cubic Out",
+      "from": "start"
+     }
+    },
+    {
+     "key": "slash",
+     "name": "Mark Slash",
+     "type": "path",
+     "d": "M668 532 L772 428",
+     "stroke": "#2EE6A6",
+     "strokeWidth": 14,
+     "drawOn": {
+      "t": 0.9,
+      "duration": 0.5,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "wmgroup",
+     "name": "Wordmark Mask",
+     "type": "group",
+     "x": 830,
+     "y": 392,
+     "w": 700,
+     "h": 176,
+     "clip": true,
+     "children": [
+      {
+       "key": "wordmark",
+       "name": "Wordmark",
+       "type": "text",
+       "x": 10,
+       "y": 0,
+       "w": 600,
+       "h": 176,
+       "text": {
+        "content": "NOVA",
+        "fontFamily": "Inter",
+        "fontSize": 150,
+        "fontWeight": 800,
+        "letterSpacing": 12,
+        "align": "left"
+       },
+       "fill": "#FFFFFF",
+       "animate": {
+        "position": [
+         {
+          "t": 1.5,
+          "v": [
+           -340,
+           88
+          ],
+          "ease": "Expo Out"
+         },
+         {
+          "t": 2.3,
+          "v": [
+           320,
+           88
+          ]
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "key": "tagline",
+     "name": "Tagline",
+     "type": "text",
+     "x": 842,
+     "y": 590,
+     "w": 600,
+     "h": 50,
+     "text": {
+      "content": "Money, made simple",
+      "fontFamily": "Inter",
+      "fontSize": 34,
+      "fontWeight": 400,
+      "letterSpacing": 3,
+      "align": "left"
+     },
+     "fill": "#2EE6A6",
+     "animate": {
+      "opacity": [
+       {
+        "t": 2.4,
+        "v": 0,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 3,
+        "v": 100
+       }
+      ],
+      "position": [
+       {
+        "t": 2.4,
+        "v": [
+         1142,
+         625
+        ],
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 3,
+        "v": [
+         1142,
+         615
+        ]
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "layer \"ring\": drawOn needs a path layer (type path / shape / star)"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 230,
+  "editorMs": 159,
+  "input": {
+   "times": [
+    0.8,
+    1.4,
+    1.9,
+    2.4,
+    3.2,
+    3.9
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.8s, 1.4s, 1.9s, 2.4s, 3.2s, 3.9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/a4cf3a9c-ab56-43a9-b5f7-dc3d9664c38f/tool-results/mcp-motion-blob-1794512518390-jzsxj5.jpg]"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1201,
+  "ok": true,
+  "ms": 131,
+  "editorMs": 5,
+  "input": {
+   "comp": {
+    "background": "#0B1630",
+    "duration": 4,
+    "fps": 60,
+    "name": "NOVA Logo Reveal"
+   },
+   "layers": [
+    {
+     "key": "ring",
+     "name": "Mark Circle",
+     "type": "path",
+     "shape": "circle",
+     "x": 640,
+     "y": 400,
+     "w": 160,
+     "h": 160,
+     "stroke": "#2EE6A6",
+     "strokeWidth": 14,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 0.3,
+      "duration": 0.9,
+      "ease": "Cubic Out",
+      "from": "start",
+      "fill": "hide"
+     }
+    },
+    {
+     "key": "slash",
+     "name": "Mark Slash",
+     "type": "path",
+     "d": "M668 532 L772 428",
+     "stroke": "#2EE6A6",
+     "strokeWidth": 14,
+     "drawOn": {
+      "t": 0.9,
+      "duration": 0.5,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "wmgroup",
+     "name": "Wordmark Mask",
+     "type": "group",
+     "x": 830,
+     "y": 392,
+     "w": 700,
+     "h": 176,
+     "clip": true,
+     "children": [
+      {
+       "key": "wordmark",
+       "name": "Wordmark",
+       "type": "text",
+       "x": 10,
+       "y": 0,
+       "w": 600,
+       "h": 176,
+       "text": {
+        "content": "NOVA",
+        "fontFamily": "Inter",
+        "fontSize": 150,
+        "fontWeight": 800,
+        "letterSpacing": 12,
+        "align": "left"
+       },
+       "fill": "#FFFFFF",
+       "animate": {
+        "position": [
+         {
+          "t": 1.5,
+          "v": [
+           -340,
+           88
+          ],
+          "ease": "Expo Out"
+         },
+         {
+          "t": 2.3,
+          "v": [
+           310,
+           88
+          ]
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "key": "tagline",
+     "name": "Tagline",
+     "type": "text",
+     "x": 842,
+     "y": 590,
+     "w": 600,
+     "h": 50,
+     "text": {
+      "content": "Money, made simple",
+      "fontFamily": "Inter",
+      "fontSize": 34,
+      "fontWeight": 400,
+      "letterSpacing": 3,
+      "align": "left"
+     },
+     "fill": "#2EE6A6",
+     "animate": {
+      "opacity": [
+       {
+        "t": 2.4,
+        "v": 0,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 3,
+        "v": 100
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 6 keyframe tracks; animation ends 3s\",\"ids\":{\"ring\":\"l_03jm3\",\"slash\":\"l_03jm4\",\"wordmark\":\"l_03jm6\",\"wmgroup\":\"l_03jm5\",\"tagline\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 480,
+  "editorMs": 339,
+  "input": {
+   "times": [
+    0.8,
+    1.4,
+    1.9,
+    2.4,
+    3.2,
+    3.9
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.8s, 1.4s, 1.9s, 2.4s, 3.2s, 3.9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/a4cf3a9c-ab56-43a9-b5f7-dc3d9664c38f/tool-results/mcp-motion-blob-1794512523701-j4389e.jpg]"
+ }
+]

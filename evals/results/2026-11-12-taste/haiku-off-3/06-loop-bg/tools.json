@@ -1,0 +1,43 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 7391,
+  "ok": true,
+  "ms": 128,
+  "editorMs": 6,
+  "input": "{\"layers\":[{\"key\":\"bg\",\"name\":\"Background\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":1920,\"h\":1080,\"fill\":\"#0b0818\"},{\"key\":\"orb-purple\",\"name\":\"Orb purple large\",\"type\":\"ellipse\",\"center\":[520,420],\"w\":900,\"h\":900,\"fill\":{\"type\":\"radial\",\"stops\":[{\"pos\":0,\"color\":\"#7c3aed8c\"},{\"pos\":1,\"color\":\"#7c3aed00\"}]},\"expr\":{\"position\":\"[520 + 160*sin(time*1.0472), 420 + 100*cos(time*1.0472)]\"}},{\"key\":\"orb-teal\",\"name\":\"Orb teal large\",\"type\":\"ellipse\",\"center\":[1380,640],\"w\":820,\"h\":820,\"fill\":{\"type\":\"radial\",\"stops\":[{\"pos\":0,\"color\":\"#14b8a688\"},{\"pos\":1,\"color\":\"#14b8a600\"}]},\"expr\":{\"position\":\"[1380 + 140*cos(time*1.0472), 640 + 110*sin(time*1.0472 + 1)]\"}},{\"key\":\"orb-violet\",\"name\":\"Orb violet mid\",\"type\":\"ellipse\",\"center\":[1000,300],\"w\":620,\"h\":620,\"fill\":{\"type\":\"radial\",\"stops\":[{\"pos\":0,\"color\":\"#a855f780\"},{\"pos\":1,\"color\":\"#a855f700\"}]},\"expr\":{\"position\":\"[1000 + 120*sin(time*2.0944), 300 + 80*cos(time*1.0472)]\"}},{\"key\":\"orb-teal-small\",\"name\":\"Orb teal small\",\"type\":\"ellipse\",\"center\":[300,850],\"w\":560,\"h\":560,\"fill\":{\"type\":\"radial\",\"stops\":[{\"pos\":0,\"color\":\"#2dd4bf66\"},{\"pos\":1,\"color\":\"#2dd4bf00\"}]},\"expr\":{\"position\":\"[300 + 100*cos(time*2.0944), 850 - 90*sin(time*1.0472)]\"}},{\"key\":\"orb-deep\",\"name\":\"Orb deep purple\",\"type\":\"ellipse\",\"center\":[1600,220],\"w\":480,\"h\":480,\"fill\":{\"type\":\"radial\",\"stops\":[{\"pos\":0,\"color\":\"#6d28d988\"},{\"pos\":1,\"color\":\"#6d28d900\"}]},\"expr\":{\"position\":\"[1600 - 90*cos(time*1.0472), 220 + 70*sin(time*2.0944)]\"}},{\"key\":\"dots\",\"name\":\"Dot grid\",\"type\":\"group\",\"children\":[{\"key\":\"d-0-0\",\"name\":\"Dot 0-0\",\"type\":\"ellipse\",\"x\":327,\"y\":177,\"w\":6,\"h\":6,\"fill\":\"#ffffff\",\"expr\":{\"opacity\":\"30 + 20*sin(time*1.0472 + 0)\"}},{\"key\":\"d-1-0\",\"name\":\"Dot 1-0\",\"type\":\"ellipse\",\"x\":507,\"y\":177,\"w\":6,\"h\":6,\"fill\":\"#ffffff\",\"expr\":{\"opacity\":\"30 + 20*sin(time*1.0472 + 0.5)\"}},{\"key\":\"d-2-0\",\"name\":\"Dot 2-0\",\"type\":\"ellipse\",\"x\":687,\"y\":177,\"w\":6,\"h\":6,\"fill\":\"#ffffff\",\"expr\":{\"opacity\":\"30 + 20*sin(time*1.0472 + 1)\"}},{\"key\":\"d-3-0\",\"name\":\"Dot 3-0\",\"type\":\"ellipse\",\"x\":867,\"y\":177,\"w\":6,\"h\":6,\"fill\":\"#ffffff\",\"expr\":{\"opacity\":\"30 + 20*sin(time*1.0472 + 1.5)\"}},{\"key\":\"d-4-0\",\"name\":\"Dot 4-0\",\"type\":\"ellipse\",\"x\":1047,\"y\":177,\"w\":6,\"h\":6,\"fill\":\"#ffffff\",\"expr\":{\"opacity\":\"30 + 20*sin(time*1.0472 + 2)\"}},{\"key\":\"d-5-0\",\"name\":\"Dot 5-0\",\"type\":\"ellipse\",\"x\":1227,\"y\":177,\"w\":6,\"h\":6,\"fill\":\"#ffffff\",\"expr\":{\"opacity\":\"30 + 20*sin(time*1.0472 + 2.5)\"}},{\"key\":\"d-6-0\",\"name\":\"Dot 6-0\",\"type\":\"ellipse\",\"x\":1407,\"y\":177,\"w\":6,\"h\":6,\"fill\":\"#ffffff\",\"expr\":{\"opacity\":\"30 + 20*sin(time*1.0472 + 3)\"}},{\"key\":\"d-7-0\",\"name\":\"Dot 7-0\",\"type\":\"ellipse\",\"x\":1587,\"y\":177,\"w\":6,\"h\":6,\"fill\":\"#ffffff\",\"expr\":{\"opacity\":\"30 + 20*sin(time*1.0472 + 3.5)\"}},{\"key\":\"d-0-1\",\"name\":\"Dot 0-1\",\"type\":\"ellipse\",\"x\":327,\"y\":357,\"w\":6,\"h\":6,\"fill\":\"#ffffff\",\"expr\":{\"opacity\":\"30 + 20*sin(time*1.0472 + 0.5)\"}},{\"key\":\"d-1-1\",\"name\":\"Dot 1-1\",\"type\":\"ellipse\",\"x\":507,\"y\":357,\"w\":6,\"h\":6,\"fill\":\"#ffffff\",\"expr\":{\"opacity\":\"30 + 20*sin(time*1.0472 + 1)\"}},{\"key\":\"…",
+  "result": "{\"summary\":\"47 created, 0 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"bg\":\"l_03jm2\",\"orb-purple\":\"l_03jm3\",\"orb-teal\":\"l_03jm4\",\"orb-violet\":\"l_03jm5\",\"orb-teal-small\":\"l_03jm6\",\"orb-deep\":\"l_03jm7\",\"d-0-0\":\"l_03jm9\",\"d-1-0\":\"l_03jma\",\"d-2-0\":\"l_03jmb\",\"d-3-0\":\"l_03jmc\",\"d-4-0\":\"l_03jmd\",\"d-5-0\":\"l_03jme\",\"d-6-0\":\"l_03jmf\",\"d-7-0\":\"l_03jmg\",\"d-0-1\":\"l_03jmh\",\"d-1-1\":\"l_03jmi\",\"d-2-1\":\"l…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 41,
+  "ok": true,
+  "ms": 223,
+  "editorMs": 205,
+  "input": {
+   "times": [
+    0,
+    1.5,
+    3,
+    4.5,
+    5.9667
+   ],
+   "cell": 320
+  },
+  "result": "5 frames left→right, top→bottom at 0s, 1.5s, 3s, 4.5s, 5.97s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/e05c8529-b538-4136-9038-0b3f0cdfbf98/tool-results/mcp-motion-blob-1794514227246-uepur9.jpg]"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 15,
+  "ok": true,
+  "ms": 99,
+  "editorMs": 10,
+  "input": {
+   "times": [
+    0,
+    3
+   ]
+  },
+  "result": "0s:\n  Orb purple large, Orb teal large, Orb teal small +1: outside action-safe area (5% margin)\n  Orb teal large, Orb teal small: 9% off-canvas\n  Orb purple large ↔ Orb teal small: overlap 71%\n  Orb purple large ↔ Dot 0-0, Orb purple large ↔ Dot 1-0, Orb purple large ↔ Dot 2-0 +8: overlap 100%\n3s:\n  Orb purple large: 14% off-canvas\n  Orb purple large, Orb violet mid, Orb teal small +1: outside act…"
+ }
+]

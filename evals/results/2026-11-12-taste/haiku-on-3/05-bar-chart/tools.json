@@ -1,0 +1,293 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 220,
+  "ok": true,
+  "ms": 40,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Animated bar chart \"Revenue by quarter\" with 4 bars, axis line drawn first, bars grow from baseline in sequence, value labels fade in above, highlighted accent bar with pop, title top-left"
+  },
+  "result": "# Example: Data chart, bars grow from the baseline\n> tags: chart, bar, data, graph, statistics, numbers, revenue, growth, quarter, infographic, data-viz, report, kpi\n\n## Brief\n\"Animated bar chart: Revenue by quarter: Q1 12, Q2 18, Q3 15, Q4 27 ($M). Axis first, bars grow one after another, labels above, Q4 highlighted. 6 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": …"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3404,
+  "ok": true,
+  "ms": 137,
+  "editorMs": 7,
+  "input": "{\"comp\":{\"duration\":6,\"background\":\"#FFFFFF\",\"name\":\"Main\"},\"layers\":[{\"key\":\"title\",\"text\":{\"content\":\"Revenue by quarter\",\"fontSize\":72,\"fontWeight\":700,\"align\":\"left\"},\"x\":160,\"y\":100,\"w\":1000,\"h\":90,\"fill\":\"#0F172A\",\"enter\":{\"t\":0,\"duration\":0.6,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":20}}},{\"key\":\"subtitle\",\"text\":{\"content\":\"Quarterly revenue, $M\",\"fontSize\":32,\"fontWeight\":500,\"align\":\"left\"},\"x\":162,\"y\":196,\"w\":900,\"h\":44,\"fill\":\"#64748B\",\"enter\":{\"t\":0.15,\"duration\":0.6,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":16}}},{\"key\":\"axis\",\"type\":\"rect\",\"x\":240,\"y\":858,\"w\":1440,\"h\":4,\"radius\":2,\"fill\":\"#94A3B8\",\"anchor\":\"left\",\"animate\":{\"scale\":[{\"t\":0.2,\"v\":[0,100],\"ease\":\"Quart Out\"},{\"t\":0.8,\"v\":[100,100]}]}},{\"key\":\"bar-q1\",\"type\":\"rect\",\"x\":380,\"y\":620,\"w\":200,\"h\":240,\"radius\":[8,8,0,0],\"fill\":\"#CBD5E1\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":0.9,\"v\":[100,0],\"ease\":\"Quart Out\"},{\"t\":1.6,\"v\":[100,100]}]}},{\"key\":\"bar-q2\",\"type\":\"rect\",\"x\":700,\"y\":500,\"w\":200,\"h\":360,\"radius\":[8,8,0,0],\"fill\":\"#CBD5E1\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":1.05,\"v\":[100,0],\"ease\":\"Quart Out\"},{\"t\":1.75,\"v\":[100,100]}]}},{\"key\":\"bar-q3\",\"type\":\"rect\",\"x\":1020,\"y\":560,\"w\":200,\"h\":300,\"radius\":[8,8,0,0],\"fill\":\"#CBD5E1\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":1.2,\"v\":[100,0],\"ease\":\"Quart Out\"},{\"t\":1.9,\"v\":[100,100]}]}},{\"key\":\"bar-q4\",\"type\":\"rect\",\"x\":1340,\"y\":320,\"w\":200,\"h\":540,\"radius\":[8,8,0,0],\"fill\":\"#2563EB\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":1.35,\"v\":[100,0],\"ease\":\"Quart Out\"},{\"t\":2.05,\"v\":[100,100],\"ease\":\"Cubic Out\"},{\"t\":2.3,\"v\":[100,104],\"ease\":\"Cubic In Out\"},{\"t\":2.65,\"v\":[100,100]}]}},{\"key\":\"val-q1\",\"text\":{\"content\":\"12\",\"fontSize\":48,\"fontWeight\":700,\"align\":\"center\"},\"center\":[480,580],\"w\":200,\"h\":60,\"fill\":\"#334155\",\"enter\":{\"t\":1.2,\"duration\":0.5,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":16}}},{\"key\":\"val-q2\",\"text\":{\"content\":\"18\",\"fontSize\":48,\"fontWeight\":700,\"align\":\"center\"},\"center\":[800,460],\"w\":200,\"h\":60,\"fill\":\"#334155\",\"enter\":{\"t\":1.35,\"duration\":0.5,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":16}}},{\"key\":\"val-q3\",\"text\":{\"content\":\"15\",\"fontSize\":48,\"fontWeight\":700,\"align\":\"center\"},\"center\":[1120,520],\"w\":200,\"h\":60,\"fill\":\"#334155\",\"enter\":{\"t\":1.5,\"duration\":0.5,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":16}}},{\"key\":\"val-q4\",\"text\":{\"content\":\"27\",\"fontSize\":64,\"fontWeight\":800,\"align\":\"center\"},\"center\":[1440,280],\"w\":200,\"h\":80,\"fill\":\"#2563EB\",\"enter\":{\"t\":1.65,\"duration\":0.5,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":16}}},{\"key\":\"x-q1\",\"text\":{\"content\":\"Q1\",\"fontSize\":36,\"fontWeight\":500,\"align\":\"center\"},\"center\":[480,910],\"w\":200,\"h\":50,\"fill\":\"#64748B\",\"enter\":{\"t\":0.8,\"duration\":0.5,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":8}}},{\"key\":\"x-q2\",\"text\":{\"content\":\"Q2\",\"fontSize\":36,\"fontWeight\":500,\"align\":\"center\"},\"center\":[800,910],\"w\":200,\"h\":50,\"fill\":\"#64748B\",\"enter\":{\"t\":0.8,\"duration\":0.5,\"ease\":\"Quart Out\",\"from\":{\"opacity\":0,\"dy\":8}}},{\"key\":\"x-q3\",\"text\":{\"content\":\"Q3…",
+  "result": "{\"summary\":\"15 created, 0 updated, 25 keyframe tracks; animation ends 2.65s\",\"ids\":{\"title\":\"l_03jm2\",\"subtitle\":\"l_03jm3\",\"axis\":\"l_03jm4\",\"bar-q1\":\"l_03jm5\",\"bar-q2\":\"l_03jm6\",\"bar-q3\":\"l_03jm7\",\"bar-q4\":\"l_03jm8\",\"val-q1\":\"l_03jm9\",\"val-q2\":\"l_03jma\",\"val-q3\":\"l_03jmb\",\"val-q4\":\"l_03jmc\",\"x-q1\":\"l_03jmd\",\"x-q2\":\"l_03jme\",\"x-q3\":\"l_03jmf\",\"x-q4\":\"l_03jmg\"}}"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 14,
+  "ok": true,
+  "ms": 38,
+  "editorMs": 1,
+  "input": {
+   "deep": false
+  },
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":6,\"background\":[1,1,1,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":15,\"layers\":[{\"id\":\"l_03jm2\",\"name\":\"title\",\"type\":\"text\",\"position\":[660,165],\"size\":[1000,90],\"animated\":{\"position\":2,\"opacity\":2},\"text\":\"Rev…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 157,
+  "editorMs": 134,
+  "input": {
+   "frames": 6,
+   "start": 0,
+   "end": 3
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 0.6s, 1.2s, 1.8s, 2.4s, 3s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/49bd53ac-01c2-4992-9a84-2a379e6ff6f6/tool-results/mcp-motion-blob-1794514581978-pe97sc.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 66,
+  "editorMs": 27,
+  "input": {},
+  "result": "score 72/100 (timing 64, easing 81, richness 84)\n1. [high] nothing moves for the last 3.35 s (motion ends 2.65s of 6s): keep the brief's length and carry the hold with a slow push / idle motion, or extend the build\n   → animate {\"tracks\":[{\"id\":\"l_03jm8\",\"prop\":\"scale\",\"merge\":true,\"keyframes\":[{\"t\":2.65,\"v\":[100,100],\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":[104,104]}]}]}\n2. [medium] 93% of 27 moves use …"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 209,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jmc",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 1.65,
+       "v": [
+        80,
+        80
+       ]
+      },
+      {
+       "t": 2.05,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "spring:0.4"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "fill",
+     "keyframes": [
+      {
+       "t": 2.05,
+       "v": "#2563EB"
+      }
+     ],
+     "merge": true
+    }
+   ]
+  },
+  "result": "ok: 2 tracks on 2 layers"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 63,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "prop": "scale",
+   "ease": "Expo Out",
+   "indices": [
+    0
+   ]
+  },
+  "result": "ok"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 3,
+  "input": {},
+  "result": "0s:\n  axis: tiny (0×4px)\n  bar-q1, bar-q2, bar-q3 +1: tiny (200×0px)\n1.5s:\n  title, subtitle: outside title-safe area (10% margin)\n3s:\n  title, subtitle: outside title-safe area (10% margin)\n4.5s:\n  title, subtitle: outside title-safe area (10% margin)\n5.97s:\n  title, subtitle: outside title-safe area (10% margin)"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 478,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "key": "title",
+     "text": {
+      "content": "Revenue by quarter",
+      "fontSize": 72,
+      "fontWeight": 700,
+      "align": "left"
+     },
+     "x": 192,
+     "y": 116,
+     "w": 1000,
+     "h": 90,
+     "fill": "#0F172A",
+     "enter": {
+      "t": 0,
+      "duration": 0.6,
+      "ease": "Expo Out",
+      "from": {
+       "opacity": 0,
+       "dy": 20
+      }
+     }
+    },
+    {
+     "key": "subtitle",
+     "text": {
+      "content": "Quarterly revenue, $M",
+      "fontSize": 32,
+      "fontWeight": 500,
+      "align": "left"
+     },
+     "x": 194,
+     "y": 212,
+     "w": 900,
+     "h": 44,
+     "fill": "#64748B",
+     "enter": {
+      "t": 0.15,
+      "duration": 0.6,
+      "ease": "Expo Out",
+      "from": {
+       "opacity": 0,
+       "dy": 16
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 2 updated, 4 keyframe tracks; animation ends 0.75s\",\"ids\":{\"title\":\"l_03jm2\",\"subtitle\":\"l_03jm3\"}}"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 3,
+  "input": {},
+  "result": "0s:\n  axis: tiny (0×4px)\n  bar-q1, bar-q2, bar-q3 +1: tiny (200×0px)\n1.5s: ok\n3s: ok\n4.5s: ok\n5.97s: ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 27,
+  "ok": true,
+  "ms": 99,
+  "editorMs": 72,
+  "input": {
+   "times": [
+    0.9,
+    1.6,
+    2.1,
+    3.5
+   ]
+  },
+  "result": "4 frames left→right, top→bottom at 0.9s, 1.6s, 2.1s, 3.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/49bd53ac-01c2-4992-9a84-2a379e6ff6f6/tool-results/mcp-motion-blob-1794514588290-kvxdcm.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 139,
+  "ok": true,
+  "ms": 34,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jmc",
+     "prop": "scale",
+     "merge": true,
+     "keyframes": [
+      {
+       "t": 2.65,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 6,
+       "v": [
+        104,
+        104
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "secondary_motion",
+  "argsBytes": 76,
+  "ok": true,
+  "ms": 81,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm2",
+    "l_03jm3",
+    "l_03jmc"
+   ],
+   "overshoot": 0.1,
+   "segments": "\"all\""
+  },
+  "result": "added overshoot 10% to title (1 moves), subtitle (1 moves), val-q4 (3 moves)"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 37,
+  "editorMs": 9,
+  "input": {},
+  "result": "score 89/100 (technical 87)\n1. [medium] animation runs to 6.6s, past the comp end 6s (val-q4)\n   → retime {\"ids\":[\"l_03jmc\"],\"offset\":-0.9}"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 56,
+  "ok": true,
+  "ms": 18714,
+  "editorMs": 3,
+  "input": {
+   "ids": [
+    "l_03jmc"
+   ],
+   "pivot": 2.65,
+   "from": 2.65,
+   "scale": 0.8
+  },
+  "result": "retimed 1 layers; animation now ends at 5.81s"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 64,
+  "editorMs": 8,
+  "input": {},
+  "result": "score 100/100 (no issues found)"
+ }
+]

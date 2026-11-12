@@ -1,0 +1,29 @@
+- Phrase 1 - Design is not just [text] box 126,408,828,125 #f5f5f0 "Design is not just" Inter 104px w800
+- Phrase 2 - what it looks like [text] box 123,548,834,125 #8a8a8a "what it looks like." Inter 104px w800
+- Phrase 3 - Design is [text] box 318,478,445,125 #f5f5f0 "Design is" Inter 104px w800
+- Phrase 4 - how it works (payoff) [text] #ff3d2e "how it works." Inter 124px w900
+- Payoff underline [rect] #ff3d2e
+- Attribution - Steve Jobs [text] box 442,863,196,34 #8a8a8a "— Steve Jobs" Inter 28px w500
+
+comp 1080x1080 8s @30fps, background #0e0e0e
+"Phrase 1 - Design is not just" (text l_03jm2)
+  position: 0s 540 ─Sine In Out→ 1.7s 540 ─Expo In→ 2.21s [540,470]
+  opacity: 0s 100 ─Ease In→ 1.85s 100 ─Expo In→ 2.21s 0
+  text animator: in by word, start 0s, 0.45s each, stagger 0.07s, ease Expo Out
+"Phrase 2 - what it looks like" (text l_03jm3) visible 2.2s–1000000000s
+  position: 2.2s 540 ─Sine In Out→ 3.7s 540 ─Expo In→ 4s [540,610]
+  opacity: 2.2s 100 ─Ease In→ 3.85s 100 ─Expo In→ 4s 0
+  text animator: in by word, start 0.25s, 0.45s each, stagger 0.06s, ease Expo Out
+"Phrase 3 - Design is" (text l_03jm4) visible 3.95s–1000000000s
+  position: 4.75s 540 ─Expo In→ 5s [540,500]
+  opacity: 4.85s 100 ─Expo In→ 5s 0
+  text animator: in by word, start 0.25s, 0.4s each, stagger 0.05s, ease Expo Out
+"Phrase 4 - how it works (payoff)" (text l_03jm5) visible 4.95s–1000000000s
+  scale: 6.85s 100 ─Cubic In→ 7.15s 0.96
+  opacity: 7s 100 ─Cubic In→ 7.15s 0
+  text animator: in by word, start 0.25s, 0.55s each, stagger 0.1s, ease spring:0.35
+"Payoff underline" (rect l_03jm6) visible 4.95s–1000000000s
+  scale: 5.55s [0,100] ─Expo Out→ 6.15s 100 ─Cubic In Out→ 7.15s 100 ─Cubic In Out→ 7.45s [0,100]
+"Attribution - Steve Jobs" (text l_03jm7)
+  position: 6.51s [540,880] ─Ease Out→ 7.01s [540,860]
+  opacity: 6.51s 0 ─Ease Out→ 7.01s 100

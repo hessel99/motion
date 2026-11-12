@@ -1,0 +1,30 @@
+- p1 [text] #f4f1ea "Design is" Inter 150px w800
+- p2a [text] #f4f1ea "not just what" Inter 104px w700
+- p2b [text] box 40,496,1000,130 #b8b4ac "it looks like." Inter 104px w700
+- p3 [text] box 40,230,1000,140 #f4f1ea "Design is" Inter 110px w700
+- p4a [text] #ff5a1f "how it" Inter 220px w900
+- p4b [text] #ff5a1f "works." Inter 220px w900
+- attr [text] #8e8a83 "— STEVE JOBS" Inter 34px w500
+
+comp 1080x1080 8s @30fps, background #0e0e12
+"p1" (text l_03jm2) visible 0s–1.95s
+  position: 0s 540 ─Quart In Out→ 1.55s 540 ─Expo In→ 1.9s [540,410.4] ─Sine In Out→ 1.98s [540,424.32] ─Sine In Out→ 2.05s [540,420]
+  opacity: 0s 100 ─Ease In→ 1.65s 100 ─Expo In→ 1.9s 0
+  text animator: in by word, start 0s, 0.6s each, stagger 0.15s, ease Expo Out
+"p2a" (text l_03jm3) visible 1.7s–4s
+  position: 0s [540,455] ─Quart In Out→ 3.55s [540,455] ─Expo In→ 3.9s [540,335]
+  opacity: 0s 100 ─Ease In→ 3.65s 100 ─Expo In→ 3.9s 0
+  text animator: in by word, start 0s, 0.6s each, stagger 0.08s, ease Expo Out
+"p2b" (text l_03jm4) visible 2s–4.05s
+  position: 0s [540,585] ─Quart In Out→ 3.6s [540,585] ─Expo In→ 4.12s [540,465]
+  opacity: 0s 100 ─Ease In→ 3.7s 100 ─Expo In→ 4.12s 0
+  text animator: in by word, start 0s, 0.6s each, stagger 0.08s, ease Expo Out
+"p3" (text l_03jm5) visible 3.8s–1000000000s
+  text animator: in by word, start 0s, 0.6s each, stagger 0.08s, ease Expo Out
+"p4a" (text l_03jm6) visible 4.7s–1000000000s
+  text animator: in by word, start 0s, 0.6s each, stagger 0.08s, ease Expo Out
+"p4b" (text l_03jm7) visible 5.1s–1000000000s
+  text animator: in by word, start 0s, 0.6s each, stagger 0.08s, ease Expo Out
+"attr" (text l_03jm8) visible 6.4s–1000000000s
+  position: 6.4s [540,965] ─Cubic Out→ 7.1s [540,943.4] ─Sine In Out→ 7.24s [540,945.72] ─Sine In Out→ 7.38s [540,945]
+  opacity: 6.4s 0 ─Cubic Out→ 6.75s 100

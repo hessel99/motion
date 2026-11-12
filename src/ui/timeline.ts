@@ -111,6 +111,8 @@ export class Timeline {
   scrollY = 0;
   rows: Row[] = [];
   expanded = new Set<string>();
+  /** properties revealed per layer (Shift+P/S/R/T/A, after effects): listed even when not animated */
+  shownProps = new Map<string, Set<PropKey>>();
   private rowsDirty = true;
   private baseDirty = true;
   private drag: Drag | null = null;
@@ -165,7 +167,8 @@ export class Timeline {
       if ((c.structure || c.comp || c.layers.size) && this.matchCache.size) this.matchCache.clear();
       // visibility / clip / start time recompile the renderer but keep the row list: per-layer path
       if (c.comp || (c.structure && !c.sameTree)) { this.rowsDirty = true; this.keyTimesCache.clear(); return; }
-      for (const id of c.layers) this.keyTimesCache.delete(id);
+      // a collapsed group's summary holds its descendants' keys: drop the ancestors' entries too
+      for (const id of c.layers) { let cur: string | null | undefined = id; while (cur) { this.keyTimesCache.delete(cur); cur = st.layer(cur)?.parent; } }
       if (!this.rowsDirty) this.rowsDirty = this.rowsChanged(c.layers);
     });
     st.on('doc', () => {
@@ -176,9 +179,9 @@ export class Timeline {
     st.on('workarea', () => { this.baseDirty = true; });
     st.on('keys', () => { this.baseDirty = true; });
     st.on('time', () => { if (!st.playing) this.baseDirty = true; });
-    st.on('comps', () => { this.expanded.clear(); this.scrollY = 0; this.fitTime(); this.rowsDirty = true; this.baseDirty = true; });
+    st.on('comps', () => { this.expanded.clear(); this.shownProps.clear(); this.scrollY = 0; this.fitTime(); this.rowsDirty = true; this.baseDirty = true; });
     ed.on('loaded', () => {
-      lastDur = st.comp.duration; this.expanded.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
+      lastDur = st.comp.duration; this.expanded.clear(); this.shownProps.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
     ed.onFrame(() => this.frame());
     ed.on('audio', () => { this.baseDirty = true; });
     ed.on('agent-turn', () => { this.baseDirty = true; });
@@ -346,7 +349,7 @@ export class Timeline {
           for (let k = 0; k < keys.length; k++) {
             const p = l.props[keys[k]];
             if (p && (p.kf?.length || p.expr)) m |= 1 << k;
-            if (p && (this.allProps || p.kf?.length || p.expr)) { rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: keys[k], hasChildren: false, mask: -1 }); }
+            if ((p && (this.allProps || p.kf?.length || p.expr)) || this.shownProps.get(l.id)?.has(keys[k])) { rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: keys[k], hasChildren: false, mask: -1 }); }
           }
           if (l.paints || l.shaderEffects) {
             let n = 0;
@@ -413,6 +416,16 @@ export class Timeline {
       else if (y + ROW_H > this.scrollY + this.h - HEADER_H) this.scrollY = y + ROW_H - (this.h - HEADER_H);
     }
     this.baseDirty = true;
+  }
+
+  /** after effects Shift+<prop>: add a property row to what the layer shows (and open it) */
+  showProp(id: string, key: PropKey) {
+    let set = this.shownProps.get(id);
+    if (!set) this.shownProps.set(id, (set = new Set()));
+    set.add(key);
+    this.expanded.add(id);
+    this.rowsDirty = true;
+    this.reveal(id);
   }
 
   expand(id: string, on = true) {
@@ -693,10 +706,10 @@ export class Timeline {
         if (x1 - x0 > 60) g.fillText(`text ${ta.by}`, x0 + 5, cy);
       }
     }
-    // keyframe summary (collapsed) — union of key times
-    if (!this.expanded.has(l.id) && animated) {
-      let times = this.keyTimesCache.get(l.id);
-      if (!times) this.keyTimesCache.set(l.id, (times = layerKeyTimes(l)));
+    // keyframe summary (collapsed) — union of the key times of the layer and, for a group, of
+    // everything inside it (MD-55: an animated group reads as animated without expanding it)
+    const times = this.expanded.has(l.id) ? null : this.summaryTimes(l);
+    if (times?.length) {
       g.fillStyle = this.studio ? T.tlLabelKey : isSel ? T.tlKeySummarySelected : T.tlKeySummary;
       let lastX = -10;
       // only the keys inside the visible time range (times are sorted)
@@ -903,17 +916,39 @@ export class Timeline {
     return [];
   }
 
-  /** collapsed-layer summary diamonds: returns all keys of that layer at the hit time */
+  /** key times a collapsed row summarizes: the layer's own keys plus its descendants' (cached) */
+  private summaryTimes(l: Layer): number[] {
+    let times = this.keyTimesCache.get(l.id);
+    if (times) return times;
+    if (!l.children.length) times = layerKeyTimes(l);
+    else {
+      const set = new Set<number>();
+      const L = this.ed.store.project.layers;
+      const walk = (x: Layer) => { for (const t of layerKeyTimes(x)) set.add(t); for (const c of x.children) { const cl = L[c]; if (cl) walk(cl); } };
+      walk(l);
+      times = [...set].sort((a, b) => a - b);
+    }
+    this.keyTimesCache.set(l.id, times);
+    return times;
+  }
+
+  /** collapsed-layer summary diamonds: returns all keys at the hit time of that layer and, for a
+   *  collapsed group, of the layers inside it (drag = retime them together) */
   private summaryKeysAt(x: number, y: number): string[] {
     const i = this.rowAtY(y);
     if (i < 0) return [];
     const r = this.rows[i];
     if (r.kind !== 'layer' || this.expanded.has(r.id)) return [];
     const out: string[] = [];
-    for (const k in r.layer.props) {
-      const kf = r.layer.props[k as PropKey]?.kf ?? [];
-      kf.forEach((f, j) => { if (Math.abs(this.tToX(f.t) - x) <= 5) out.push(keyId(r.id, k as PropKey, j)); });
-    }
+    const L = this.ed.store.project.layers;
+    const walk = (l: Layer) => {
+      for (const k in l.props) {
+        const kf = l.props[k as PropKey]?.kf ?? [];
+        kf.forEach((f, j) => { if (Math.abs(this.tToX(f.t) - x) <= 5) out.push(keyId(l.id, k as PropKey, j)); });
+      }
+      for (const c of l.children) { const cl = L[c]; if (cl) walk(cl); }
+    };
+    walk(r.layer);
     return out;
   }
 
@@ -1044,8 +1079,12 @@ export class Timeline {
       if (e.shiftKey) {
         for (const kk of keys) already ? st.keySelection.delete(kk) : st.keySelection.add(kk);
       } else if (!already) st.keySelection = new Set(keys);
+      // the layers that own the keys get selected (a collapsed group's summary keys belong to its
+      // children; the store keeps only keys of selected layers)
+      const owners = [...new Set([...st.keySelection].map(kk => parseKeyId(kk).layerId))];
       const r = this.rows[i];
-      if (!st.selection.includes(r.id)) st.select([r.id]);
+      if (!owners.length) { if (!st.selection.includes(r.id)) st.select([r.id]); }
+      else if (!owners.every(id => st.selection.includes(id))) { const ks = st.keySelection; st.select(e.shiftKey ? [...new Set([...st.selection, ...owners])] : owners); st.keySelection = ks; }
       st.emit('keys');
       const first = parseKeyId(keys[0]);
       const t0 = st.layer(first.layerId)!.props[first.key]!.kf![first.index].t;

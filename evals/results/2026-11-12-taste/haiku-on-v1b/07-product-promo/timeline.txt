@@ -1,0 +1,35 @@
+- bg [rect] box 0,0,1920,1080 #0b0b0d
+- flash [rect] box 0,0,1920,1080 #ff5a1f
+- w1 [text] box 407,420,1107,240 #f5f5f0 "40h battery" Inter 200px w900
+- w2 [text] box 360,420,1200,240 #f5f5f0 "Spatial audio" Inter 200px w900
+- w3 [text] box 392,420,1136,240 #f5f5f0 "Pure silence" Inter 200px w900
+- ring [ellipse] box 440,-100,1040,1040 #000000 a0 stroke #ff5a1f 10px
+- pulse [text] box 399,240,1123,360 #f5f5f0 "PULSE 2" Inter 300px w900
+- pillBg [rect] box 960,700,0,0 #ff5a1f
+- pillText [text] box 960,700,0,0 #0b0b0d "Available now" Inter 60px w800
+- rule [rect] box 660,556,600,10 #ff5a1f
+
+comp 1920x1080 10s @30fps, background #0b0b0d, markers 0.5 Beat 2, 1.5 Beat 4, 2.5 Beat 6, 3.5 Slam, 7 Available now
+"flash" (rect l_03jm3)
+  opacity: 0s 0 ─hold→ 0.5s 100 ─Expo Out→ 0.66s 0 ─hold→ 1.5s 100 ─Expo Out→ 1.66s 0 ─hold→ 2.5s 100 ─Expo Out→ 2.66s 0 ─hold→ 3.5s 100 ─Expo Out→ 3.62s 0
+"w1" (text l_03jm4)
+  scale: 0.5s 125 ─Expo Out→ 0.72s 100
+  opacity: 0s 0 ─hold→ 0.5s 100 ─hold→ 1.5s 0
+"w2" (text l_03jm5)
+  scale: 1.5s 125 ─Expo Out→ 1.72s 100
+  opacity: 0s 0 ─hold→ 1.5s 100 ─hold→ 2.5s 0
+"w3" (text l_03jm6)
+  scale: 2.5s 125 ─Expo Out→ 2.72s 100
+  opacity: 0s 0 ─hold→ 2.5s 100 ─hold→ 3.5s 0
+"ring" (ellipse l_03jm7)
+  scale: 3.5s 30 ─Expo Out→ 4.2s 260
+  opacity: 0s 0 ─hold→ 3.5s 100 ─Quad Out→ 4.2s 0
+"pulse" (text l_03jm8)
+  scale: 3.5s 180 ─Expo Out→ 3.85s 100
+  opacity: 0s 0 ─hold→ 3.5s 100
+"pillBg" (rect l_03jm9)
+  scale: 7s 0 ─spring:0.35→ 7.5s 100
+"pillText" (text l_03jma)
+  scale: 7s 0 ─spring:0.35→ 7.5s 100
+"rule" (rect l_03jmb)
+  scale: 4s 0 ─Expo Out→ 4.5s 100

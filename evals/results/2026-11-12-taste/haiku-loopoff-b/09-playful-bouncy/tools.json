@@ -1,0 +1,64 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 291,
+  "ok": true,
+  "ms": 37,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Playful bouncy kids app intro \"Boop!\": colorful candy shapes (circles, stars, rounded squares) drop in and bounce with squash and stretch, jostle each other, then letters B-o-o-p-! hop in one by one like a trampoline, elastic and joyful, ends with idle wiggle"
+  },
+  "result": "# Example: Playful logo sting, the dot drops in and lands (make my logo move)\n> tags: logo, sting, playful, bouncy, fun, kids, app, mark, wordmark, drop, land, squash, bounce, simple, make my logo move\n\n## Brief\n\"Make my logo move: a round orange mark and the word 'pip'. Fun and friendly, about 3 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"duration\": 3, \"backgrou…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 14,
+  "ok": true,
+  "ms": 45,
+  "editorMs": 0,
+  "input": {
+   "deep": false
+  },
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1080,\"height\":1080,\"fps\":60,\"duration\":5,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":0,\"layers\":[]}"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 8253,
+  "ok": true,
+  "ms": 185,
+  "editorMs": 5,
+  "input": "{\"comp\":{\"duration\":5,\"background\":\"#2B1A6E\"},\"layers\":[{\"key\":\"candy-circle-coral\",\"name\":\"Candy circle (coral)\",\"type\":\"ellipse\",\"center\":[200,300],\"w\":150,\"h\":150,\"fill\":\"#FF5C7A\",\"animate\":{\"position\":[{\"t\":0,\"v\":[200,-180],\"ease\":\"Quad In\"},{\"t\":0.42,\"v\":[200,300],\"ease\":\"Quad Out\"},{\"t\":0.62,\"v\":[200,180],\"ease\":\"Quad Out\"},{\"t\":0.84,\"v\":[200,300],\"ease\":\"Quad In\"},{\"t\":1.7,\"v\":[240,286],\"ease\":\"spring Bouncy\"},{\"t\":2.1,\"v\":[200,300],\"ease\":\"spring Quick\"}],\"scale\":[{\"t\":0,\"v\":[85,118],\"ease\":\"Quad In\"},{\"t\":0.42,\"v\":[130,72],\"ease\":\"Back Out\"},{\"t\":0.62,\"v\":[92,110],\"ease\":\"Quad Out\"},{\"t\":0.84,\"v\":[118,84],\"ease\":\"Quad Out\"},{\"t\":1.05,\"v\":[100,100],\"ease\":\"spring Bouncy\"},{\"t\":1.7,\"v\":[112,90],\"ease\":\"Quad Out\"},{\"t\":2.1,\"v\":[100,100],\"ease\":\"spring Bouncy\"}]},\"expr\":{\"rotation\":\"clamp((time-3.6)*3,0,1)*5*Math.sin((time-3.6)*2*Math.PI/1.4)\"}},{\"key\":\"candy-star-yellow\",\"name\":\"Candy star (yellow)\",\"type\":\"star\",\"points\":5,\"inner\":0.5,\"center\":[870,280],\"w\":170,\"h\":170,\"fill\":\"#FFD23F\",\"animate\":{\"position\":[{\"t\":0.1,\"v\":[870,-180],\"ease\":\"Quad In\"},{\"t\":0.52,\"v\":[870,280],\"ease\":\"Quad Out\"},{\"t\":0.72,\"v\":[870,160],\"ease\":\"Quad Out\"},{\"t\":0.94,\"v\":[870,280],\"ease\":\"Quad In\"},{\"t\":1.7,\"v\":[830,266],\"ease\":\"spring Bouncy\"},{\"t\":2.1,\"v\":[870,280],\"ease\":\"spring Quick\"}],\"scale\":[{\"t\":0.1,\"v\":[85,118],\"ease\":\"Quad In\"},{\"t\":0.52,\"v\":[130,72],\"ease\":\"Back Out\"},{\"t\":0.72,\"v\":[92,110],\"ease\":\"Quad Out\"},{\"t\":0.94,\"v\":[118,84],\"ease\":\"Quad Out\"},{\"t\":1.15,\"v\":[100,100],\"ease\":\"spring Bouncy\"},{\"t\":1.7,\"v\":[112,90],\"ease\":\"Quad Out\"},{\"t\":2.1,\"v\":[100,100],\"ease\":\"spring Bouncy\"}]},\"expr\":{\"rotation\":\"clamp((time-3.6)*3,0,1)*5*Math.sin((time-3.6-0.2)*2*Math.PI/1.4)\"}},{\"key\":\"candy-square-mint\",\"name\":\"Candy square (mint)\",\"type\":\"rect\",\"radius\":30,\"center\":[560,215],\"w\":120,\"h\":120,\"rotation\":12,\"fill\":\"#3DDC97\",\"animate\":{\"position\":[{\"t\":0.2,\"v\":[560,-180],\"ease\":\"Quad In\"},{\"t\":0.62,\"v\":[560,215],\"ease\":\"Quad Out\"},{\"t\":0.82,\"v\":[560,95],\"ease\":\"Quad Out\"},{\"t\":1.04,\"v\":[560,215],\"ease\":\"Quad In\"},{\"t\":1.7,\"v\":[535,201],\"ease\":\"spring Bouncy\"},{\"t\":2.1,\"v\":[560,215],\"ease\":\"spring Quick\"}],\"scale\":[{\"t\":0.2,\"v\":[85,118],\"ease\":\"Quad In\"},{\"t\":0.62,\"v\":[130,72],\"ease\":\"Back Out\"},{\"t\":0.82,\"v\":[92,110],\"ease\":\"Quad Out\"},{\"t\":1.04,\"v\":[118,84],\"ease\":\"Quad Out\"},{\"t\":1.25,\"v\":[100,100],\"ease\":\"spring Bouncy\"},{\"t\":1.7,\"v\":[112,90],\"ease\":\"Quad Out\"},{\"t\":2.1,\"v\":[100,100],\"ease\":\"spring Bouncy\"}]},\"expr\":{\"rotation\":\"12 + clamp((time-3.6)*3,0,1)*5*Math.sin((time-3.6-0.4)*2*Math.PI/1.4)\"}},{\"key\":\"candy-circle-sky\",\"name\":\"Candy circle (sky)\",\"type\":\"ellipse\",\"center\":[880,770],\"w\":130,\"h\":130,\"fill\":\"#4CC9F0\",\"animate\":{\"position\":[{\"t\":0.3,\"v\":[880,-180],\"ease\":\"Quad In\"},{\"t\":0.72,\"v\":[880,770],\"ease\":\"Quad Out\"},{\"t\":0.92,\"v\":[880,650],\"ease\":\"Quad Out\"},{\"t\":1.14,\"v\":[880,770],\"ease\":\"Quad In\"},{\"t\":1.7,\"v\":[845,756],\"ease\":\"spring Bouncy\"},{\"t\":2.1,\"v\":[880,770],\"ease\":\"spring Quick\"}],\"scale\":[{\"t\":0.3,\"v\":[85,118],\"ease\":\"Quad In\"},{\"t\":…",
+  "result": "{\"summary\":\"11 created, 0 updated, 27 keyframe tracks; animation ends 3.7s\",\"ids\":{\"candy-circle-coral\":\"l_03jm2\",\"candy-star-yellow\":\"l_03jm3\",\"candy-square-mint\":\"l_03jm4\",\"candy-circle-sky\":\"l_03jm5\",\"candy-star-pink\":\"l_03jm6\",\"candy-square-orange\":\"l_03jm7\",\"letter-B\":\"l_03jm8\",\"letter-o1\":\"l_03jm9\",\"letter-o2\":\"l_03jma\",\"letter-p\":\"l_03jmb\",\"letter-excl\":\"l_03jmc\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 52,
+  "ok": true,
+  "ms": 192,
+  "editorMs": 171,
+  "input": {
+   "times": [
+    0.3,
+    0.8,
+    1.4,
+    2,
+    2.6,
+    3.2,
+    3.8,
+    4.6
+   ],
+   "cell": 240
+  },
+  "result": "8 frames left→right, top→bottom at 0.3s, 0.8s, 1.4s, 2s, 2.6s, 3.2s, 3.8s, 4.6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/062bed43-daa5-4fb5-943a-d43595cc5f26/tool-results/mcp-motion-blob-1794513607143-e9cty0.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 56,
+  "editorMs": 19,
+  "input": {},
+  "result": "score 99/100 (brand 96)\n1. [low] 6 different accent colors (#ff5c7a #ffd23f #3ddc97 #4cc9f0 #ff8fd8 #ff9f1c…): keep 1 accent + 1-2 support colors"
+ }
+]

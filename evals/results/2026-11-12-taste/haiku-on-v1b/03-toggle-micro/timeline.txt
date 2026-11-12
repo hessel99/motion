@@ -1,0 +1,15 @@
+- Toggle track [rect] box 320,255,160,90 #34c759
+- Toggle knob [group] #ffffff a0
+  - Knob shadow [ellipse] box 398,266,74,74 #000000 a0.15
+  - Knob disc [ellipse] box 398,263,74,74 #ffffff
+  - Checkmark [path] box 398,263,74,74 #000000 a0 stroke #34c759 6px
+
+comp 800x600 2s @60fps, background #f2f2f7
+"Toggle track" (rect l_03jm2)
+  fill: 0s #c7c7cc ─Cubic In Out→ 0.4s #c7c7cc ─Ease In Out→ 0.8s #34c759
+"Toggle knob" (group l_03jm3)
+  position: 0s [365,300] ─Cubic In Out→ 0.4s [365,300] ─Back Out→ 0.85s [435,300]
+  scale: 0s 100 ─Cubic In Out→ 0.4s 100 ─Ease Out→ 0.55s [118,88] ─Ease In Out→ 0.8s [97,103] ─Ease In Out→ 0.95s 100
+"Checkmark" (path l_03jm6)
+  trimStart: 0.62s 0
+  trimEnd: 0.62s 0 ─Quart Out→ 0.92s 100

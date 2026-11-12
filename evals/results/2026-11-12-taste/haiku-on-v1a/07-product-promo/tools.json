@@ -1,0 +1,824 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 323,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Title sequence for product launch \"Pulse 2\" wireless earbuds: quick flashes of three feature words each on a beat with energetic transitions, then product name slams in with shockwave ring, then \"Available now\" pill button. Dark background, electric orange accent, fast confident, 120 BPM."
+  },
+  "result": "# Example: Kinetic type cut to music (120 BPM): words on downbeats, not on every beat\n> tags: music, song, beat, bpm, rhythm, audio, kinetic, type, words, lyric, drop, sync, energetic, promo, cut to the beat\n\n## Brief\n\"Kinetic type for our launch track (120 BPM, 4/4): MOVE / FAST / BREAK / THINGS, then the drop with the logo word NOW. 8 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"get_audio_analysis\",…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 14,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 0,
+  "input": {
+   "deep": false
+  },
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":10,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":0,\"layers\":[]}"
+ },
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1347,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 1,
+  "input": {
+   "title": "Pulse 2 title sequence",
+   "style": "Kinetic type, cut to 120 BPM",
+   "styleReason": "Fast, confident product-launch energy: hard cuts on the beat, one accent colour, big type.",
+   "duration": 10,
+   "notes": "Dark background #0B0B0D, electric orange accent #FF5A1F, off-white #F5F5F5 type, Inter 900. 120 BPM = beat every 0.5 s, bar every 2 s. Markers on every beat. No audio file: the beat is imagined. Comp 1920x1080 30 fps.",
+   "beats": [
+    {
+     "name": "Feature words",
+     "start": 0,
+     "end": 3,
+     "description": "'40h battery', 'Spatial audio', 'Pure silence' each land on a bar downbeat (0 s, 1 s, 2 s) in off-white, big and centred. Each enters with a different snap (scale punch, slide from the right, rotation snap) and cuts out on the next beat.",
+     "style": "Expo Out entrances, hard hold cuts between words, no overlap."
+    },
+    {
+     "name": "Name slam + shockwave",
+     "start": 3,
+     "end": 6,
+     "description": "Orange full-frame flash on beat 6 (3 s). 'PULSE 2' slams in from 170% to 100% and a stroked orange ring expands from the wordmark and fades.",
+     "style": "Expo Out slam, ring scale 0 to 500% with fade, flash fades in 0.35 s."
+    },
+    {
+     "name": "Available now",
+     "start": 6,
+     "end": 10,
+     "description": "Name settles upward; an orange pill with 'Available now' springs in on beat 12 (6 s) and holds with a slow breathing glow to the end.",
+     "style": "Back Out pill, slow pulse, final frame is the lockup."
+    }
+   ]
+  },
+  "result": "storyboard \"Pulse 2 title sequence\" shown to the user (3 beats, 10s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 1,
+  "input": {
+   "beat": 1,
+   "status": "active"
+  },
+  "result": "beat 1 \"Feature words\" active; 0/3 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1529,
+  "ok": true,
+  "ms": 62,
+  "editorMs": 4,
+  "input": {
+   "comp": {
+    "duration": 10,
+    "background": "#0B0B0D"
+   },
+   "layers": [
+    {
+     "key": "w1",
+     "name": "Word 1 - 40h battery",
+     "text": {
+      "content": "40h battery",
+      "fontSize": 180,
+      "fontWeight": 900,
+      "tracking": -6,
+      "align": "center"
+     },
+     "type": "text",
+     "center": [
+      960,
+      540
+     ],
+     "w": 1600,
+     "h": 240,
+     "fill": "#F5F5F5",
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 130,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 0.3,
+        "v": 100
+       },
+       {
+        "t": 0.85,
+        "v": 100,
+        "ease": "Ease In"
+       },
+       {
+        "t": 0.9,
+        "v": 100
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 0.02,
+        "v": 100
+       },
+       {
+        "t": 0.93,
+        "v": 100,
+        "interp": "hold"
+       },
+       {
+        "t": 0.94,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "w2",
+     "name": "Word 2 - Spatial audio",
+     "text": {
+      "content": "Spatial audio",
+      "fontSize": 180,
+      "fontWeight": 900,
+      "tracking": -6,
+      "align": "center"
+     },
+     "type": "text",
+     "center": [
+      960,
+      540
+     ],
+     "w": 1600,
+     "h": 240,
+     "fill": "#FF5A1F",
+     "animate": {
+      "position": [
+       {
+        "t": 0.94,
+        "v": [
+         1360,
+         540
+        ],
+        "ease": "Expo Out"
+       },
+       {
+        "t": 1.25,
+        "v": [
+         960,
+         540
+        ]
+       },
+       {
+        "t": 1.85,
+        "v": [
+         960,
+         540
+        ],
+        "ease": "Ease In"
+       },
+       {
+        "t": 1.9,
+        "v": [
+         560,
+         540
+        ]
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0.94,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 0.95,
+        "v": 100
+       },
+       {
+        "t": 1.93,
+        "v": 100,
+        "interp": "hold"
+       },
+       {
+        "t": 1.94,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "w3",
+     "name": "Word 3 - Pure silence",
+     "text": {
+      "content": "Pure silence",
+      "fontSize": 180,
+      "fontWeight": 900,
+      "tracking": -6,
+      "align": "center"
+     },
+     "type": "text",
+     "center": [
+      960,
+      540
+     ],
+     "w": 1600,
+     "h": 240,
+     "fill": "#F5F5F5",
+     "animate": {
+      "rotation": [
+       {
+        "t": 1.94,
+        "v": -8,
+        "interp": "hold"
+       },
+       {
+        "t": 1.95,
+        "v": -8
+       },
+       {
+        "t": 2.25,
+        "v": 0,
+        "ease": "spring:0.4"
+       }
+      ],
+      "scale": [
+       {
+        "t": 1.94,
+        "v": 115,
+        "interp": "hold"
+       },
+       {
+        "t": 1.95,
+        "v": 115,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 2.25,
+        "v": 100
+       }
+      ],
+      "opacity": [
+       {
+        "t": 1.94,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 1.95,
+        "v": 100
+       },
+       {
+        "t": 2.9,
+        "v": 100,
+        "interp": "hold"
+       },
+       {
+        "t": 2.95,
+        "v": 0
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"3 created, 0 updated, 7 keyframe tracks; animation ends 2.95s\",\"ids\":{\"w1\":\"l_03jm2\",\"w2\":\"l_03jm3\",\"w3\":\"l_03jm4\"}}"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 10,
+  "input": {
+   "beat": 1,
+   "status": "done"
+  },
+  "result": "beat 1 \"Feature words\" done; 1/3 beats finished\ncritic on this beat (0–3s): [high] nothing moves for the last 7.05 s (motion ends 2.95s of 10s): keep the brief's length and carry the hold with a slow push / idle motion, or extend the build → animate {\"tracks\":[{\"id\":\"l_03jm2\",\"prop\":\"scale\",\"merge\":true,\"keyframes\":[{\"t\":2.95,\"v\":[100,100],\"ease\":\"Sine In Out\"},{\"t\":10,\"v\":[104,104]}]}]} | [high] …"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 0,
+  "input": {
+   "beat": 2,
+   "status": "active"
+  },
+  "result": "beat 2 \"Name slam + shockwave\" active; 1/3 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1074,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "layers": [
+    {
+     "key": "flash",
+     "name": "Orange flash",
+     "type": "rect",
+     "x": 0,
+     "y": 0,
+     "w": 1920,
+     "h": 1080,
+     "fill": "#FF5A1F",
+     "animate": {
+      "opacity": [
+       {
+        "t": 2.99,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 3,
+        "v": 100,
+        "ease": "Ease Out"
+       },
+       {
+        "t": 3.35,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "ring",
+     "name": "Shockwave ring",
+     "type": "ellipse",
+     "center": [
+      960,
+      500
+     ],
+     "w": 260,
+     "h": 260,
+     "fill": "#FF5A1F00",
+     "stroke": "#FF5A1F",
+     "strokeWidth": 14,
+     "animate": {
+      "scale": [
+       {
+        "t": 2.99,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 3,
+        "v": 0,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 3.9,
+        "v": 520
+       }
+      ],
+      "opacity": [
+       {
+        "t": 2.99,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 3,
+        "v": 100,
+        "ease": "Ease In"
+       },
+       {
+        "t": 3.9,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "name",
+     "name": "Product name PULSE 2",
+     "text": {
+      "content": "PULSE 2",
+      "fontSize": 300,
+      "fontWeight": 900,
+      "tracking": -12,
+      "align": "center"
+     },
+     "type": "text",
+     "center": [
+      960,
+      500
+     ],
+     "w": 1600,
+     "h": 360,
+     "fill": "#F5F5F5",
+     "animate": {
+      "scale": [
+       {
+        "t": 2.99,
+        "v": 170,
+        "interp": "hold"
+       },
+       {
+        "t": 3,
+        "v": 170,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 3.4,
+        "v": 100
+       },
+       {
+        "t": 6,
+        "v": 100,
+        "ease": "Expo In Out"
+       },
+       {
+        "t": 6.5,
+        "v": 100
+       }
+      ],
+      "position": [
+       {
+        "t": 6,
+        "v": [
+         960,
+         500
+        ],
+        "ease": "Expo In Out"
+       },
+       {
+        "t": 6.5,
+        "v": [
+         960,
+         430
+        ]
+       }
+      ],
+      "opacity": [
+       {
+        "t": 2.99,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 3,
+        "v": 100
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"3 created, 0 updated, 6 keyframe tracks; animation ends 6.5s\",\"ids\":{\"flash\":\"l_03jm5\",\"ring\":\"l_03jm6\",\"name\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 38,
+  "editorMs": 13,
+  "input": {
+   "beat": 2,
+   "status": "done"
+  },
+  "result": "beat 2 \"Name slam + shockwave\" done; 2/3 beats finished\ncritic on this beat (3–6s): [medium] 4 elements and 8 moves for 10s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch → secondary_motion {\"ids\":[\"l_03jm7\"],\"overshoot\":0.1,\"segments\":\"all\"}. Fix before the next beat if it is quick."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "beat": 3,
+   "status": "active"
+  },
+  "result": "beat 3 \"Available now\" active; 2/3 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 792,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "key": "pill",
+     "name": "Available now pill",
+     "type": "rect",
+     "x": 740,
+     "y": 588,
+     "w": 440,
+     "h": 124,
+     "radius": 62,
+     "fill": "#FF5A1F",
+     "animate": {
+      "scale": [
+       {
+        "t": 5.99,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 6,
+        "v": 0,
+        "ease": "Back Out"
+       },
+       {
+        "t": 6.5,
+        "v": 100
+       },
+       {
+        "t": 8.25,
+        "v": 103,
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 10,
+        "v": 100
+       }
+      ],
+      "opacity": [
+       {
+        "t": 5.99,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 6.02,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "pill-text",
+     "name": "Available now text",
+     "text": {
+      "content": "Available now",
+      "fontSize": 52,
+      "fontWeight": 700,
+      "tracking": -1,
+      "align": "center"
+     },
+     "type": "text",
+     "center": [
+      960,
+      650
+     ],
+     "w": 440,
+     "h": 80,
+     "fill": "#0B0B0D",
+     "animate": {
+      "scale": [
+       {
+        "t": 5.99,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 6,
+        "v": 0,
+        "ease": "Back Out"
+       },
+       {
+        "t": 6.5,
+        "v": 100
+       },
+       {
+        "t": 8.25,
+        "v": 103,
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 10,
+        "v": 100
+       }
+      ],
+      "opacity": [
+       {
+        "t": 5.99,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 6.05,
+        "v": 100
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"2 created, 0 updated, 4 keyframe tracks; animation ends 10s\",\"ids\":{\"pill\":\"l_03jm8\",\"pill-text\":\"l_03jm9\"}}"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 46,
+  "editorMs": 15,
+  "input": {
+   "beat": 3,
+   "status": "done"
+  },
+  "result": "beat 3 \"Available now\" done; 3/3 beats finished — now critique (the critique tool, then contact_sheet; rubric: get_guide handbook, section \"Critique\")\ncritic on this beat (6–10s): [medium] \"Product name PULSE 2\" and \"Available now text\" overlap for 0.25 s (6.08s–6.25s): let the outgoing text clear (or move apart) before the next arrives → retime {\"ids\":[\"l_03jm9\"],\"offset\":0.3}. Fix before the nex…"
+ },
+ {
+  "name": "set_markers",
+  "argsBytes": 211,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 1,
+  "input": {
+   "add": [
+    {
+     "t": 0,
+     "label": "Beat 1 · 40h battery"
+    },
+    {
+     "t": 1,
+     "label": "Beat 3 · Spatial audio"
+    },
+    {
+     "t": 2,
+     "label": "Beat 5 · Pure silence"
+    },
+    {
+     "t": 3,
+     "label": "Beat 7 · PULSE 2 slam"
+    },
+    {
+     "t": 6,
+     "label": "Beat 13 · Available now"
+    }
+   ]
+  },
+  "result": "[{\"id\":\"m_03jma\",\"t\":0,\"label\":\"Beat 1 · 40h battery\"},{\"id\":\"m_03jmb\",\"t\":1,\"label\":\"Beat 3 · Spatial audio\"},{\"id\":\"m_03jmc\",\"t\":2,\"label\":\"Beat 5 · Pure silence\"},{\"id\":\"m_03jmd\",\"t\":3,\"label\":\"Beat 7 · PULSE 2 slam\"},{\"id\":\"m_03jme\",\"t\":6,\"label\":\"Beat 13 · Available now\"}]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 6,
+  "input": {},
+  "result": "score 79/100 (timing 86, easing 96, readability 81)\n1. [medium] \"Product name PULSE 2\" and \"Available now text\" overlap for 0.25 s (6.08s–6.25s): let the outgoing text clear (or move apart) before the next arrives\n   → retime {\"ids\":[\"l_03jm9\"],\"offset\":0.3}\n2. [medium] \"Word 2 - Spatial audio\".position move takes 0.05 s for 400 px: too abrupt, ~0.15 s fits (handbook timing table)\n   → retime {\"id…"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 54,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm8",
+    "l_03jm9"
+   ],
+   "from": 5.99,
+   "offset": 0.3
+  },
+  "result": "retimed 2 layers; animation now ends at 10.3s — past the comp end (10s); consider set_composition duration"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 275,
+  "editorMs": 254,
+  "input": {
+   "times": [
+    0.2,
+    1,
+    2,
+    3.1,
+    3.6,
+    5,
+    6.6,
+    9
+   ]
+  },
+  "result": "8 frames left→right, top→bottom at 0.2s, 1s, 2s, 3.1s, 3.6s, 5s, 6.6s, 9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/d18bbec2-0814-424e-b99c-2c64b3d46a63/tool-results/mcp-motion-blob-1794511953873-52a1ik.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 590,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm8",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 5.99,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 6.3,
+       "v": 0,
+       "ease": "Back Out"
+      },
+      {
+       "t": 6.8,
+       "v": 100
+      },
+      {
+       "t": 8.55,
+       "v": 103,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 9.9,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm9",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 5.99,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 6.3,
+       "v": 0,
+       "ease": "Back Out"
+      },
+      {
+       "t": 6.8,
+       "v": 100
+      },
+      {
+       "t": 8.55,
+       "v": 103,
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 9.9,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 5.99,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 6.32,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm9",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 5.99,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 6.35,
+       "v": 100
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 4 tracks on 2 layers"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 15,
+  "input": {},
+  "result": "score 89/100 (timing 86, easing 96)\n1. [medium] \"Word 2 - Spatial audio\".position move takes 0.05 s for 400 px: too abrupt, ~0.15 s fits (handbook timing table)\n   → retime {\"ids\":[\"l_03jm3\"],\"pivot\":1.85,\"scale\":3}\n2. [low] \"Word 2 - Spatial audio\".position arrives at full speed at 1.9s (Ease In): ease the landing (Cubic In Out) or add a settle\n   → set_easing {\"id\":\"l_03jm3\",\"prop\":\"position\",\"i…"
+ }
+]

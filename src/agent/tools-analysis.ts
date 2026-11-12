@@ -7,6 +7,7 @@ import { EXPR_PROPS } from '../core/expr';
 import { st, text, need, idsSchema, type ToolDef } from './tool-kit';
 import { animRange, fmtTime } from './describe';
 import { propAt, worldBox, shownAt, contrast, over, r2, r0 } from './motion-math';
+import { critique, formatCritique } from './critic';
 
 const UNIT: Partial<Record<PropKey, string>> = { position: 'px', anchor: 'px', size: 'px', scale: '%', rotation: '°', opacity: '%', strokeWidth: 'px', trimStart: '%', trimEnd: '%', trimOffset: '°', radius: 'px' };
 
@@ -277,6 +278,17 @@ export const ANALYSIS_TOOLS: ToolDef[] = [
       const lastEnd = Math.max(...rows.map(x => x.r[1]));
       if (lastEnd < D - 1) out.push(`last motion ends ${fmtTime(lastEnd)}: ${fmtTime(D - lastEnd)} of stillness at the end`);
       return text(out.join('\n'));
+    },
+  },
+  {
+    name: 'critique',
+    readOnly: true,
+    description: 'The editor\'s motion critic (deterministic, ~10 ms): scores the piece 0-100 with sub-scores (timing, easing, choreography, composition, readability, polish, richness, technical, brand, music) and lists the problems worst-first, each with the layers, times and the exact tool call(s) that fix it (→ lines). Checks hard stops, one ease everywhere, everything moving at once, stagger rhythm, durations vs the handbook timing table, dead time / long static endings, reading time of text, text collisions, clipping / safe areas, contrast, bars growing from the middle, missing secondary motion, loop seams, music alignment, palette / font drift, draw-ons that don\'t render, fonts that fall back. Use it after building and after each beat (from/to = the beat).',
+    inputSchema: { type: 'object', properties: { from: { type: 'number', description: 'only issues touching this time range (s)' }, to: { type: 'number' }, max: { type: 'number', description: 'max issues (default 8)' }, loop: { type: 'boolean', description: 'the piece is a seamless loop (default: detected)' } } },
+    run: ({ from, to, max = 8, loop }) => {
+      const s = st();
+      const c = critique(s, { range: from !== undefined || to !== undefined ? [from ?? 0, to ?? s.comp.duration] : undefined, max, loop });
+      return text(formatCritique(c, { max }));
     },
   },
 ];

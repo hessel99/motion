@@ -1,0 +1,186 @@
+{
+ "run": {
+  "id": "06-loop-bg",
+  "name": "06-loop-bg",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 6.8
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 6.8
+   }
+  },
+  "wallMs": 42710,
+  "timedOut": false,
+  "turns": 5,
+  "costUsd": 0.00818869,
+  "durationMs": 41800,
+  "usage": {
+   "input": 210110,
+   "cached": 200329,
+   "output": 8460
+  },
+  "errors": [],
+  "toolCalls": 4,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The 6-second ambient loop is built on the Main composition (1920×1080, 30 fps). Critique scores it 100/100 with no issues.\n\n- **Background:** deep navy-violet `#0b0718`.\n- **Orbs:** four heavily blurred ellipses in purple, violet, fuchsia and teal, named \"Orb cyan\", \"Orb violet\", \"Orb teal\" and \"Orb fuchsia\". Each drifts on a slow sine/cosine path of about 70–110 px.\n- **Dot grid:** one \"Dot grid\" layer of 84 small lavender dots (12×7). It breathes in opacity (about 15–75%) with a slight scale swing (±4%).\n\nThe loop is seamless by construction. Every motion is a sine or cosine with a period of exactly 6 s, driven by expressions rather than keyframes, so frame 0 and frame 6 s match with no closing key needed. The contact sheet at 0, 2, 4 and 6 s shows the expected drift.\n\nI raised the dot opacity after the first check because the dots were barely visible. I haven't re-rendered the contact sheet since that change.\n\nPossible next tweaks: a per-dot ripple across the grid instead of a whole-grid breath, or slower or faster orb drift."
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 5,
+  "layerTypes": {
+   "ellipse": 4,
+   "path": 1
+  },
+  "groups": 0,
+  "animatedLayers": 5,
+  "keys": 0,
+  "segments": 0,
+  "easesUsed": {},
+  "distinctEases": 0,
+  "easeFamilies": 0,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 6,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 6,
+  "palette": [
+   "#2dd4bf",
+   "#7c3aed",
+   "#14b8a6",
+   "#a855f7",
+   "#c4b5fd",
+   "#0b0718"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 3.082,
+  "offCanvasLayers": {
+   "Orb cyan": 3.082
+  },
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 0,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.16,
+  "toolErrors": 0,
+  "toolCalls": 4
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "loops seamlessly (first frame ≈ frame at the loop point)",
+    "type": "loops",
+    "pass": true
+   },
+   {
+    "text": "everything moves (animated coverage ≥90%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 blobs/orbs (ellipses)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "dot grid (≥15 layers)",
+    "type": "layersMin",
+    "pass": false
+   },
+   {
+    "text": "uses loop expressions or matching first/last keys",
+    "type": "loopTechnique",
+    "pass": true
+   },
+   {
+    "text": "purple/teal palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "calm: no fast motion",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 5,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

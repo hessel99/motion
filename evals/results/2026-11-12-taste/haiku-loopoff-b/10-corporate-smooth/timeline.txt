@@ -1,0 +1,17 @@
+- Lower third panel [rect] box 96,812,800,180 #1c2733 a0.6 stroke #8fa6bd a0.2 1px
+- Accent line [rect] box 128,846,320,3 #8fa6bd
+- Name [text] box 128,862,740,66 #f4f7fa "Dr. Amelia Hart" Inter 54px w600
+- Title [text] box 128,934,740,40 #aebdcc "Head of Research, Larkspur Labs" Inter 28px w400
+
+comp 1920x1080 6s @30fps, background #2a3440
+"Lower third panel" (rect l_03jm2)
+  position: 0.2s [436,902] ─Quart In Out→ 1.1s [496,902] ─Easy Ease→ 5s [496,902] ─Quart In Out→ 5.7s [436,902]
+  opacity: 0.2s 0 ─Quart In Out→ 0.65s 100 ─Easy Ease→ 5.35s 100 ─Quart In Out→ 5.7s 0
+"Accent line" (rect l_03jm3)
+  scale: 0.6s [0,100] ─Quart In Out→ 1.5s 100 ─Easy Ease→ 4.9s 100 ─Quart In Out→ 5.5s [0,100]
+"Name" (text l_03jm4)
+  position: 0.9s [498,919] ─Quart In Out→ 1.7s [498,895] ─Easy Ease→ 4.85s [498,895] ─Quart In Out→ 5.35s [498,883]
+  opacity: 0.9s 0 ─Quart In Out→ 1.3s 100 ─Easy Ease→ 5.1s 100 ─Quart In Out→ 5.35s 0
+"Title" (text l_03jm5)
+  position: 1.15s [498,970] ─Quart In Out→ 1.95s [498,954] ─Easy Ease→ 4.85s [498,954] ─Quart In Out→ 5.35s [498,942]
+  opacity: 1.15s 0 ─Quart In Out→ 1.55s 100 ─Easy Ease→ 5.1s 100 ─Quart In Out→ 5.35s 0

@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 5,
+  "style_match": 5,
+  "timing_easing": 4,
+  "composition": 6,
+  "richness": 4,
+  "polish": 5
+ },
+ "overall": 4.83,
+ "critique": [
+  "Apart from the 4.0s drop, the motion ignores the 120 BPM grid: the ring settles at 0.9s, the build pulses run in 0.25s steps that drift off the beat, the shockwave ends at 4.9s, the wordmark chars land around 5.1-5.3s, and the two secondary hits peak at 5.6s/6.1s, 3 frames after the 5.5s/6.0s beats. The comp is also 9.5s against an 8s brief, and the last 3.2s is a dead hold.",
+  "Snap every landing to the 0.5s grid: build pulses on 0.5/1.0/1.5..., ring settle and wordmark reveal finishing on 4.5s, secondary hit peaks exactly on 5.5s and 6.0s. Make the 0-4s build escalate (growing scale, faster subdivisions, a tension squash right before the drop), then trim the comp to 8s with roughly a 1.5s clean lockup hold."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0635318,
+ "ms": 16978,
+ "raw": "```json\n{\"brief_fit\": 5, \"style_match\": 5, \"timing_easing\": 4, \"composition\": 6, \"richness\": 4, \"polish\": 5,\n \"critique\": [\"Apart from the 4.0s drop, the motion ignores the 120 BPM grid: the ring settles at 0.9s, the build pulses run in 0.25s steps that drift off the beat, the shockwave ends at 4.9s, the wordmark chars land around 5.1-5.3s, and the two secondary hits peak at 5.6s/6.1s, 3 frames after the 5.5s/6.0s beats. The comp is also 9.5s against an 8s brief, and the last 3.2s is a dead hold.\", \"Snap every landing to the 0.5s grid: build pulses on 0.5/1.0/1.5..., ring settle and wordmark reveal finishing on 4.5s, secondary hit peaks exactly on 5.5s and 6.0s. Make the 0-4s build escalate (growing scale, faster subdivisions, a tension squash right before the drop), then trim the comp to 8s with roughly a 1.5s clean lockup hold.\"]}\n```"
+}

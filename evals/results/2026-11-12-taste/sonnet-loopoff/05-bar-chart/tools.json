@@ -1,0 +1,38 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 3409,
+  "ok": true,
+  "ms": 161,
+  "editorMs": 4,
+  "input": "{\"comp\":{\"background\":\"#F7F8FA\",\"duration\":6},\"layers\":[{\"key\":\"title\",\"text\":{\"content\":\"Revenue by quarter\",\"fontSize\":64,\"fontWeight\":700,\"fontFamily\":\"Inter\"},\"x\":120,\"y\":80,\"w\":900,\"h\":80,\"fill\":\"#14213D\",\"align\":\"left\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20},\"duration\":0.6,\"ease\":\"Expo Out\"}},{\"key\":\"sub\",\"text\":{\"content\":\"$M, 2025\",\"fontSize\":30,\"fontWeight\":400,\"fontFamily\":\"Inter\"},\"x\":120,\"y\":160,\"w\":600,\"h\":40,\"fill\":\"#6B7280\",\"align\":\"left\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20},\"t\":0.15,\"duration\":0.6,\"ease\":\"Expo Out\"}},{\"key\":\"axis\",\"type\":\"path\",\"d\":\"M300 900 L1620 900\",\"stroke\":\"#14213D\",\"strokeWidth\":4,\"drawOn\":{\"t\":0.4,\"duration\":0.8,\"ease\":\"Cubic Out\",\"from\":\"start\"}},{\"key\":\"b1\",\"type\":\"rect\",\"x\":370,\"y\":636,\"w\":220,\"h\":264,\"radius\":[10,10,0,0],\"fill\":\"#9AA9C7\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":1.3,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":2,\"v\":[100,100]}]}},{\"key\":\"b2\",\"type\":\"rect\",\"x\":690,\"y\":504,\"w\":220,\"h\":396,\"radius\":[10,10,0,0],\"fill\":\"#9AA9C7\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":1.65,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":2.35,\"v\":[100,100]}]}},{\"key\":\"b3\",\"type\":\"rect\",\"x\":1010,\"y\":570,\"w\":220,\"h\":330,\"radius\":[10,10,0,0],\"fill\":\"#9AA9C7\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":2,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":2.7,\"v\":[100,100]}]}},{\"key\":\"b4\",\"type\":\"rect\",\"x\":1330,\"y\":306,\"w\":220,\"h\":594,\"radius\":[10,10,0,0],\"fill\":\"#9AA9C7\",\"anchor\":\"bottom\",\"animate\":{\"scale\":[{\"t\":2.35,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":3.15,\"v\":[100,108],\"ease\":\"Back Out\"},{\"t\":3.5,\"v\":[100,100],\"ease\":\"Quad Out\"}],\"fill\":[{\"t\":3,\"v\":\"#9AA9C7\",\"ease\":\"Quad Out\"},{\"t\":3.4,\"v\":\"#F25C54\"}]}},{\"key\":\"v1\",\"text\":{\"content\":\"12\",\"fontSize\":48,\"fontWeight\":700,\"fontFamily\":\"Inter\"},\"x\":370,\"y\":570,\"w\":220,\"h\":60,\"fill\":\"#14213D\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20},\"t\":1.9,\"duration\":0.5,\"ease\":\"Quart Out\"}},{\"key\":\"v2\",\"text\":{\"content\":\"18\",\"fontSize\":48,\"fontWeight\":700,\"fontFamily\":\"Inter\"},\"x\":690,\"y\":438,\"w\":220,\"h\":60,\"fill\":\"#14213D\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20},\"t\":2.25,\"duration\":0.5,\"ease\":\"Quart Out\"}},{\"key\":\"v3\",\"text\":{\"content\":\"15\",\"fontSize\":48,\"fontWeight\":700,\"fontFamily\":\"Inter\"},\"x\":1010,\"y\":504,\"w\":220,\"h\":60,\"fill\":\"#14213D\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20},\"t\":2.6,\"duration\":0.5,\"ease\":\"Quart Out\"}},{\"key\":\"v4\",\"text\":{\"content\":\"27\",\"fontSize\":56,\"fontWeight\":800,\"fontFamily\":\"Inter\"},\"x\":1330,\"y\":232,\"w\":220,\"h\":66,\"fill\":\"#F25C54\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0,\"dy\":20},\"t\":3,\"duration\":0.5,\"ease\":\"Back Out\"}},{\"key\":\"l1\",\"text\":{\"content\":\"Q1\",\"fontSize\":34,\"fontWeight\":500,\"fontFamily\":\"Inter\"},\"x\":370,\"y\":925,\"w\":220,\"h\":44,\"fill\":\"#6B7280\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0},\"t\":1.1,\"duration\":0.5}},{\"key\":\"l2\",\"text\":{\"content\":\"Q2\",\"fontSize\":34,\"fontWeight\":500,\"fontFamily\":\"Inter\"},\"x\":690,\"y\":925,\"w\":220,\"h\":44,\"fill\":\"#6B7280\",\"align\":\"center\",\"enter\":{\"from\":{\"opacity\":0},\"t\":1.2,\"duration\":0.5}},{\"key\":\"l3…",
+  "result": "{\"summary\":\"15 created, 0 updated, 23 keyframe tracks; animation ends 3.5s\",\"ids\":{\"title\":\"l_03jm2\",\"sub\":\"l_03jm3\",\"axis\":\"l_03jm4\",\"b1\":\"l_03jm5\",\"b2\":\"l_03jm6\",\"b3\":\"l_03jm7\",\"b4\":\"l_03jm8\",\"v1\":\"l_03jm9\",\"v2\":\"l_03jma\",\"v3\":\"l_03jmb\",\"v4\":\"l_03jmc\",\"l1\":\"l_03jmd\",\"l2\":\"l_03jme\",\"l3\":\"l_03jmf\",\"l4\":\"l_03jmg\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 32,
+  "ok": true,
+  "ms": 154,
+  "editorMs": 132,
+  "input": {
+   "frames": 6,
+   "start": 0.5,
+   "end": 4
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 1.2s, 1.9s, 2.6s, 3.3s, 4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/a3cd24ca-785e-4d9a-adef-b56ff8cef2e9/tool-results/mcp-motion-blob-1794510951810-ibp3e7.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 40,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm3",
+   "text": {
+    "content": "$M"
+   }
+  },
+  "result": "ok"
+ }
+]

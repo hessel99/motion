@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 7,
+  "style_match": 6,
+  "timing_easing": 5,
+  "composition": 7,
+  "richness": 4,
+  "polish": 6
+ },
+ "overall": 5.83,
+ "critique": [
+  "Motion is thin and repetitive: every phrase uses the same by-word Expo Out fade-in, the payoff 'how it works.' simply appears and stacks under a static 'Design is', and from ~5.8s to 8s nothing moves except a small attribution fade. With only 19% visual activity, it reads as a slideshow, not kinetic type.",
+  "Make the emphasis beat a real transition. Carry the first 'Design is' (150px) into the second one (110px, moved up) instead of re-fading it in. Drive 'how it works.' per letter with scale/overshoot and a punchy stagger, then add a subtle secondary move (slight scale-up or tracking drift) through the end hold so the final frame isn't dead."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0621878,
+ "ms": 11959,
+ "raw": "```json\n{\"brief_fit\": 7, \"style_match\": 6, \"timing_easing\": 5, \"composition\": 7, \"richness\": 4, \"polish\": 6,\n \"critique\": [\"Motion is thin and repetitive: every phrase uses the same by-word Expo Out fade-in, the payoff 'how it works.' simply appears and stacks under a static 'Design is', and from ~5.8s to 8s nothing moves except a small attribution fade. With only 19% visual activity, it reads as a slideshow, not kinetic type.\", \"Make the emphasis beat a real transition. Carry the first 'Design is' (150px) into the second one (110px, moved up) instead of re-fading it in. Drive 'how it works.' per letter with scale/overshoot and a punchy stagger, then add a subtle secondary move (slight scale-up or tracking drift) through the end hold so the final frame isn't dead.\"]}\n```"
+}

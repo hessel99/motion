@@ -1,0 +1,658 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 895,
+  "ok": true,
+  "ms": 43,
+  "editorMs": 1,
+  "input": {
+   "title": "Design is how it works",
+   "duration": 8,
+   "style": "Bold kinetic type",
+   "styleReason": "Dark bg, white heavy type, one warm accent for the emphasis phrase.",
+   "beats": [
+    {
+     "name": "Design is not",
+     "start": 0,
+     "end": 2,
+     "description": "\"Design is not\" slides up word by word, then wipes up and out.",
+     "style": "Expo Out, 0.08s word stagger, white"
+    },
+    {
+     "name": "just what it looks like.",
+     "start": 1.8,
+     "end": 3.6,
+     "description": "Phrase 2 rises in as phrase 1 exits upward; 'just' small, 'looks like' dims at the end.",
+     "style": "Quart Out, grey-white"
+    },
+    {
+     "name": "Design is",
+     "start": 3.4,
+     "end": 4.8,
+     "description": "Letters pop in per char, then slide left to make room.",
+     "style": "spring pop, white"
+    },
+    {
+     "name": "how it works.",
+     "start": 4.6,
+     "end": 7.2,
+     "description": "Huge orange words scale in with overshoot, push 'Design is' up; attribution fades in small at bottom.",
+     "style": "Back Out, accent #FF5A1F, 140px black weight"
+    }
+   ]
+  },
+  "result": "storyboard \"Design is how it works\" shown to the user (4 beats, 8s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1690,
+  "ok": true,
+  "ms": 79,
+  "editorMs": 10,
+  "input": {
+   "comp": {
+    "background": "#0E0E12"
+   },
+   "layers": [
+    {
+     "key": "p1",
+     "text": {
+      "content": "Design is not",
+      "fontSize": 120,
+      "fontWeight": 800,
+      "align": "center"
+     },
+     "x": 90,
+     "y": 450,
+     "w": 900,
+     "h": 150,
+     "fill": "#FFFFFF",
+     "inPoint": 0,
+     "outPoint": 2.1,
+     "textAnim": {
+      "by": "word",
+      "preset": "Slide words",
+      "start": 0.1,
+      "stagger": 0.12,
+      "duration": 0.6,
+      "ease": "Expo Out"
+     },
+     "exit": {
+      "t": 2,
+      "duration": 0.35,
+      "ease": "Expo In",
+      "to": {
+       "dy": -160,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "p2",
+     "text": {
+      "content": "just what\nit looks like.",
+      "fontSize": 100,
+      "fontWeight": 600,
+      "align": "center",
+      "lineHeight": 1.15
+     },
+     "x": 90,
+     "y": 420,
+     "w": 900,
+     "h": 240,
+     "fill": "#C9CAD3",
+     "delay": 1.9,
+     "inPoint": 1.9,
+     "outPoint": 3.7,
+     "textAnim": {
+      "by": "word",
+      "preset": "Slide words",
+      "start": 0,
+      "stagger": 0.1,
+      "duration": 0.6,
+      "ease": "Quart Out"
+     },
+     "exit": {
+      "t": 3.6,
+      "duration": 0.35,
+      "ease": "Expo In",
+      "to": {
+       "dy": -160,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "p3",
+     "text": {
+      "content": "Design is",
+      "fontSize": 90,
+      "fontWeight": 700,
+      "align": "center"
+     },
+     "x": 90,
+     "y": 400,
+     "w": 900,
+     "h": 120,
+     "fill": "#FFFFFF",
+     "inPoint": 3.5,
+     "textAnim": {
+      "by": "char",
+      "preset": "Pop letters",
+      "start": 3.5,
+      "stagger": 0.04,
+      "duration": 0.5,
+      "ease": "spring:0.4"
+     },
+     "animate": {
+      "position": [
+       {
+        "t": 4.6,
+        "v": [
+         540,
+         460
+        ],
+        "ease": "Expo Out"
+       },
+       {
+        "t": 5.1,
+        "v": [
+         540,
+         330
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "p4",
+     "text": {
+      "content": "how it works.",
+      "fontSize": 124,
+      "fontWeight": 900,
+      "align": "center"
+     },
+     "x": 60,
+     "y": 470,
+     "w": 960,
+     "h": 170,
+     "fill": "#FF5A1F",
+     "inPoint": 4.7,
+     "textAnim": {
+      "by": "word",
+      "start": 4.8,
+      "stagger": 0.18,
+      "duration": 0.7,
+      "ease": "Back Out",
+      "from": {
+       "scale": 0.3,
+       "dy": 60,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "attr",
+     "text": {
+      "content": "— STEVE JOBS",
+      "fontSize": 30,
+      "fontWeight": 500,
+      "align": "center",
+      "tracking": 6
+     },
+     "x": 90,
+     "y": 740,
+     "w": 900,
+     "h": 50,
+     "fill": "#8A8B96",
+     "inPoint": 6,
+     "enter": {
+      "t": 6,
+      "duration": 0.6,
+      "ease": "Cubic Out",
+      "from": {
+       "opacity": 0,
+       "dy": 20
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 7 keyframe tracks; animation ends 6.6s\",\"ids\":{\"p1\":\"l_03jm2\",\"p2\":\"l_03jm3\",\"p3\":\"l_03jm4\",\"p4\":\"l_03jm5\",\"attr\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 31,
+  "ok": true,
+  "ms": 194,
+  "editorMs": 174,
+  "input": {
+   "times": [
+    0.8,
+    2.1,
+    3,
+    4.2,
+    5.4,
+    7
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.8s, 2.1s, 3s, 4.2s, 5.4s, 7s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/027b7f49-9529-40a7-96c6-706521c8ceeb/tool-results/mcp-motion-blob-1794511148827-ozfabr.jpg]"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 63,
+  "editorMs": 3,
+  "input": {},
+  "result": "comp 8s @30fps\n\"p1\" (text l_03jm2) visible 0s–2.1s\n  position: 1.65s [540,525] ─Expo In→ 2s [540,365]\n  opacity: 1.83s 100 ─Expo In→ 2s 0\n  text animator: in by word, start 0.1s, 0.6s each, stagger 0.12s, ease Expo Out\n\"p2\" (text l_03jm3) visible 3.8s–5.6s\n  position: 5.15s 540 ─Expo In→ 5.5s [540,380]\n  opacity: 5.33s 100 ─Expo In→ 5.5s 0\n  text animator: in by word, start 1.9s, 0.6s each, stagge…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 38,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm5"
+  },
+  "result": "{\"id\":\"l_03jm5\",\"name\":\"p4\",\"type\":\"text\",\"parent\":null,\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":4.7,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[480,85]},\"position\":{\"v\":[540,555]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[960,170]},\"fill\":{\"v\":[1,0.35294117647058826,0.12156862745098039,1]}},\"text\":{\"content\":\"how it works.\",\"fontFamily\":\"Inter\"…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 964,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 3,
+  "input": {
+   "layers": [
+    {
+     "key": "p2",
+     "text": {
+      "content": "just what\nit looks like.",
+      "fontSize": 100,
+      "fontWeight": 600,
+      "align": "center",
+      "lineHeight": 1.15
+     },
+     "x": 90,
+     "y": 420,
+     "w": 900,
+     "h": 240,
+     "fill": "#C9CAD3",
+     "delay": 0,
+     "inPoint": 1.9,
+     "outPoint": 3.7,
+     "textAnim": {
+      "by": "word",
+      "start": 0,
+      "stagger": 0.1,
+      "duration": 0.6,
+      "ease": "Quart Out",
+      "from": {
+       "opacity": 0,
+       "dy": 70
+      }
+     },
+     "exit": {
+      "t": 3.6,
+      "duration": 0.35,
+      "ease": "Expo In",
+      "to": {
+       "dy": -160,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "p3",
+     "text": {
+      "content": "Design is",
+      "fontSize": 90,
+      "fontWeight": 700,
+      "align": "center"
+     },
+     "x": 90,
+     "y": 400,
+     "w": 900,
+     "h": 120,
+     "fill": "#FFFFFF",
+     "inPoint": 3.5,
+     "textAnim": {
+      "by": "char",
+      "preset": "Pop letters",
+      "start": 0,
+      "stagger": 0.04,
+      "duration": 0.5,
+      "ease": "spring:0.4"
+     }
+    },
+    {
+     "key": "p4",
+     "text": {
+      "content": "how it works.",
+      "fontSize": 124,
+      "fontWeight": 900,
+      "align": "center"
+     },
+     "x": 60,
+     "y": 470,
+     "w": 960,
+     "h": 170,
+     "fill": "#FF5A1F",
+     "inPoint": 4.7,
+     "textAnim": {
+      "by": "word",
+      "start": 0.1,
+      "stagger": 0.18,
+      "duration": 0.7,
+      "ease": "Back Out",
+      "from": {
+       "scale": 0.3,
+       "dy": 60,
+       "opacity": 0
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 3 updated, 2 keyframe tracks; animation ends 5.1s\",\"ids\":{\"p2\":\"l_03jm3\",\"p3\":\"l_03jm4\",\"p4\":\"l_03jm5\"},\"notes\":[\"p3: position is animated: static value ignored (send \\\"animate\\\" to replace the animation)\"]}"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 29,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "ids": [
+    "l_03jm3",
+    "l_03jm4"
+   ]
+  },
+  "result": "comp 8s @30fps\n\"p2\" (text l_03jm3) visible 1.9s–3.7s\n  position: 3.25s 540 ─Expo In→ 3.6s [540,380]\n  opacity: 3.43s 100 ─Expo In→ 3.6s 0\n  text animator: in by word, start 0s, 0.6s each, stagger 0.1s, ease Quart Out\n\"p3\" (text l_03jm4) visible 3.5s–1000000000s\n  position: 4.6s [540,460] ─Expo Out→ 5.1s [540,330]\n  text animator: in by char, start 0s, 0.5s each, stagger 0.04s, ease spring:0.4"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 31,
+  "ok": true,
+  "ms": 105,
+  "editorMs": 88,
+  "input": {
+   "times": [
+    0.8,
+    2.4,
+    3,
+    3.9,
+    5.4,
+    7
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.8s, 2.4s, 3s, 3.9s, 5.4s, 7s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/027b7f49-9529-40a7-96c6-706521c8ceeb/tool-results/mcp-motion-blob-1794511157211-vhx7u5.jpg]"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm2"
+   ],
+   "from": 1.92,
+   "offset": 0.26
+  },
+  "result": "retimed 1 layers; animation now ends at 2.26s"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm3"
+   ],
+   "from": 3.5,
+   "offset": 0.9
+  },
+  "result": "retimed 1 layers; animation now ends at 4.5s"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 62,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm4",
+    "l_03jm5",
+    "l_03jm6"
+   ],
+   "offset": 0.8,
+   "pivot": 0
+  },
+  "result": "retimed 3 layers; animation now ends at 7.4s"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 0,
+  "input": {},
+  "result": "comp 8s @30fps\n\"p1\" (text l_03jm2) visible 0s–2.1s\n  position: 1.65s [540,525] ─Expo In→ 2.26s [540,365]\n  opacity: 1.83s 100 ─Expo In→ 2.26s 0\n  text animator: in by word, start 0.1s, 0.6s each, stagger 0.12s, ease Expo Out\n\"p2\" (text l_03jm3) visible 1.9s–3.7s\n  position: 3.25s 540 ─Expo In→ 4.5s [540,380]\n  opacity: 3.43s 100 ─Expo In→ 4.5s 0\n  text animator: in by word, start 0s, 0.6s each, st…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 371,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 1,
+  "input": {
+   "layers": [
+    {
+     "key": "p2",
+     "inPoint": 2.2,
+     "outPoint": 4.6
+    },
+    {
+     "key": "p3",
+     "inPoint": 4.3,
+     "textAnim": {
+      "by": "char",
+      "preset": "Pop letters",
+      "start": 0,
+      "stagger": 0.04,
+      "duration": 0.5,
+      "ease": "spring:0.4"
+     }
+    },
+    {
+     "key": "p4",
+     "inPoint": 5.5,
+     "textAnim": {
+      "by": "word",
+      "start": 0.1,
+      "stagger": 0.18,
+      "duration": 0.7,
+      "ease": "Back Out",
+      "from": {
+       "scale": 0.3,
+       "dy": 60,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "attr",
+     "inPoint": 6.8
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 4 updated, 0 keyframe tracks; animation ends 7.4s\",\"ids\":{\"p2\":\"l_03jm3\",\"p3\":\"l_03jm4\",\"p4\":\"l_03jm5\",\"attr\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 340,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm3",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 4.1,
+       "v": [
+        540,
+        540
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 4.5,
+       "v": [
+        540,
+        380
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 4.1,
+       "v": 100,
+       "ease": "Expo In"
+      },
+      {
+       "t": 4.5,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 5.4,
+       "v": [
+        540,
+        460
+       ],
+       "ease": "Expo Out"
+      },
+      {
+       "t": 5.9,
+       "v": [
+        540,
+        330
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 3 tracks on 2 layers"
+ },
+ {
+  "name": "secondary_motion",
+  "argsBytes": 71,
+  "ok": true,
+  "ms": 37,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm4",
+    "l_03jm6"
+   ],
+   "overshoot": 0.08,
+   "segments": "[\"first\"]"
+  },
+  "result": "added overshoot 8% to p3 (1 moves), attr (1 moves)"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 126,
+  "editorMs": 8,
+  "input": {},
+  "result": "score 71/100 (readability 62, richness 84)\n1. [medium] \"p2\" (5 words) is readable for 1.17 s, needs ~1.73 s: exit later\n   → retime {\"ids\":[\"l_03jm3\"],\"from\":4.33,\"offset\":0.66}\n2. [medium] \"attr\" (3 words) is readable for 1.08 s, needs ~1.16 s: it appears too late for the comp end\n   → retime {\"ids\":[\"l_03jm6\"],\"offset\":-0.17}\n3. [medium] 5 elements and 16 moves for 8s: add supporting elements (s…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 257,
+  "ok": true,
+  "ms": 32,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "key": "p2",
+     "inPoint": 1.9
+    },
+    {
+     "key": "attr",
+     "inPoint": 6.6
+    },
+    {
+     "key": "rule",
+     "type": "rect",
+     "x": 440,
+     "y": 660,
+     "w": 200,
+     "h": 6,
+     "radius": 3,
+     "fill": "#FF5A1F",
+     "inPoint": 6.2,
+     "enter": {
+      "t": 6.2,
+      "duration": 0.6,
+      "ease": "Expo Out",
+      "from": {
+       "scale": [
+        0,
+        100
+       ],
+       "opacity": 0
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"1 created, 2 updated, 2 keyframe tracks; animation ends 7.64s\",\"ids\":{\"p2\":\"l_03jm3\",\"attr\":\"l_03jm6\",\"rule\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 34,
+  "ok": true,
+  "ms": 84,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm6"
+   ],
+   "offset": -0.17
+  },
+  "result": "retimed 1 layers; animation now ends at 7.47s"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 6,
+  "input": {},
+  "result": "score 79/100 (composition 81, readability 81)\n1. [medium] \"p2\" (5 words) is readable for 1.5 s, needs ~1.73 s: exit later\n   → retime {\"ids\":[\"l_03jm3\"],\"from\":4.33,\"offset\":0.33}\n2. [medium] \"rule\" grows left and right from its middle: pin it to the left edge so it grows from the baseline\n   → set_pivot {\"id\":\"l_03jm7\",\"at\":\"left\"}"
+ }
+]

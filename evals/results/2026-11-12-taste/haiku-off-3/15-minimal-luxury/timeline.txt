@@ -1,0 +1,30 @@
+- Gold line [path] box 300,1000,480,1 #000000 a0 stroke #c9a96e 1.25px
+- Name ÉCLAT [group] #ffffff a0
+  - É [text] box 225,820,123,159 #e8d9b5 "É" Georgia 132px w300
+  - C [text] box 347,820,141,159 #e8d9b5 "C" Georgia 132px w300
+  - L [text] box 487,820,119,159 #e8d9b5 "L" Georgia 132px w300
+  - A [text] box 606,820,133,159 #e8d9b5 "A" Georgia 132px w300
+  - T [text] box 740,820,128,159 #e8d9b5 "T" Georgia 132px w300
+- Subline [text] box 0,1060,1080,50 #c9a96e "EAU DE PARFUM" Inter 28px w400
+
+comp 1080x1920 7s @30fps, background #0b0a08
+"Gold line" (path l_03jm2)
+  trimStart: 0.4s 50 ─Sine In Out→ 2.8s 0
+  trimEnd: 0.4s 50 ─Sine In Out→ 2.8s 100
+"É" (text l_03jm6)
+  position: 1.6s [249.9,79.2] ─Cubic Out→ 3.4s [285.9,79.2]
+  opacity: 1.6s 0 ─Cubic Out→ 2.6s 100
+"C" (text l_03jm7)
+  position: 1.76s [399.2,79.2] ─Cubic Out→ 3.56s [417.2,79.2]
+  opacity: 1.76s 0 ─Cubic Out→ 2.76s 100
+"L" (text l_03jm8)
+  position: 1.92s [546.5,79.2] ─Cubic Out→ 3.72s [546.5,79.2]
+  opacity: 1.92s 0 ─Cubic Out→ 2.92s 100
+"A" (text l_03jm9)
+  position: 2.08s [690.2,79.2] ─Cubic Out→ 3.88s [672.2,79.2]
+  opacity: 2.08s 0 ─Cubic Out→ 3.08s 100
+"T" (text l_03jma)
+  position: 2.24s [838.6,79.2] ─Cubic Out→ 4.04s [802.6,79.2]
+  opacity: 2.24s 0 ─Cubic Out→ 3.24s 100
+"Subline" (text l_03jm4)
+  opacity: 3.9s 0 ─Sine Out→ 4.9s 100

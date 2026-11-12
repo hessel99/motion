@@ -1,0 +1,201 @@
+{
+ "run": {
+  "id": "05-bar-chart",
+  "name": "05-bar-chart",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 80,
+    "fixes": 1,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 80,
+    "sub": {
+     "timing": 64,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 36,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:end-hold"
+    ],
+    "ms": 5.3
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 5
+   }
+  },
+  "wallMs": 45262,
+  "timedOut": false,
+  "turns": 20,
+  "costUsd": 0.02570324,
+  "durationMs": 43706,
+  "usage": {
+   "input": 495069,
+   "cached": 480749,
+   "output": 7762
+  },
+  "errors": [],
+  "toolCalls": 18,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the animated bar chart in the Main comp (1920×1080, 6 s, white background).\n\n- **Title:** \"Revenue by quarter\" (**title**) with a grey subline \"Quarterly revenue, $M\" (**subtitle**), both fading and rising in at the top left, inside the title-safe area.\n- **Axis:** **axis** draws in from the left at 0.2 s, before any bars.\n- **Bars:** **q1** to **q4** grow up from the baseline, 0.15 s apart (0.9, 1.05, 1.2, 1.35 s), with Quart Out easing. Heights are proportional to 12, 18, 15, 27.\n- **Values:** **v1** to **v3** fade and rise into place just after each bar lands. **v4** (27) springs in larger and blue.\n- **Highlight:** Q4 (**q4**) is the only blue bar, with the value and the \"Q4\" label in the same blue. The other bars are light grey. Q4 gets a small extra pop: it overshoots to 104% at 2.25 s and settles at 2.55 s.\n- **Quarter labels:** **x1** to **x4** fade in under the baseline.\n\nThe critic scored it 80/100. Its main note is that nothing moves after 2.55 s, so the last 3.5 s are a static hold. I left it static so the chart stays easy to read. If you want motion there, I can add a slow push on the whole chart.\n\nI also moved the quarter labels up slightly to stay inside the bottom safe margin. The value labels are fade-ins, not counting numbers. I can switch them to count up from 0 if you prefer.\nFixed: the chart now sits in a group (\"Chart\") with a slow 100→103% push from 2.55 s to 6 s, and the critic scores it 100/100."
+ },
+ "metrics": {
+  "layers": 16,
+  "drawableLayers": 15,
+  "layerTypes": {
+   "text": 10,
+   "rect": 5,
+   "group": 1
+  },
+  "groups": 1,
+  "animatedLayers": 16,
+  "keys": 46,
+  "segments": 24,
+  "easesUsed": {
+   "Quart Out": 15,
+   "Cubic In Out": 2,
+   "Spring 0.4": 1,
+   "Ease Out": 5,
+   "Sine In Out": 1
+  },
+  "distinctEases": 5,
+  "easeFamilies": 5,
+  "overshootSegments": 1,
+  "keyedOvershoots": 0,
+  "springSegments": 1,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 7,
+  "palette": [
+   "#0f172a",
+   "#64748b",
+   "#94a3b8",
+   "#cbd5e1",
+   "#2563eb",
+   "#334155",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.975,
+  "visualActivity": 0.715,
+  "firstMotion": 0,
+  "lastMotion": 5.2,
+  "endHold": 0.8,
+  "longestHold": 0.871,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.053,
+  "midLuma": 0.944,
+  "toolErrors": 0,
+  "toolCalls": 18
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "4 bars (rects)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "bars grow from the baseline (size/scale animated, bottom edge fixed)",
+    "type": "barsGrow",
+    "pass": false
+   },
+   {
+    "text": "staggered bar entrances",
+    "type": "staggered",
+    "pass": true
+   },
+   {
+    "text": "value labels present (≥4 numeric text layers)",
+    "type": "numericTextMin",
+    "pass": true
+   },
+   {
+    "text": "accent highlight on Q4 (≥2 bar colors)",
+    "type": "paletteMin",
+    "pass": true
+   },
+   {
+    "text": "bar heights proportional to data",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 5,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

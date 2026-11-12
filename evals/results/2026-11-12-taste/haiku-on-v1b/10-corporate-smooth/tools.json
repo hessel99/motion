@@ -1,0 +1,399 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1496,
+  "ok": true,
+  "ms": 149,
+  "editorMs": 3,
+  "input": {
+   "layers": [
+    {
+     "key": "panel",
+     "name": "Panel",
+     "type": "rect",
+     "x": 120,
+     "y": 796,
+     "w": 660,
+     "h": 168,
+     "radius": 4,
+     "fill": "#1f2c38b8",
+     "opacity": 100,
+     "enter": {
+      "t": 0.1,
+      "duration": 1,
+      "ease": "Quart In Out",
+      "from": {
+       "dx": -60,
+       "opacity": 0
+      }
+     },
+     "exit": {
+      "t": 5.4,
+      "duration": 0.8,
+      "ease": "Cubic In",
+      "to": {
+       "dx": -60,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "accent",
+     "name": "Accent line",
+     "type": "rect",
+     "x": 152,
+     "y": 898,
+     "w": 96,
+     "h": 2,
+     "anchor": "left",
+     "fill": "#8fa9bd",
+     "enter": {
+      "t": 0.6,
+      "duration": 0.9,
+      "ease": "Quart In Out",
+      "from": {
+       "scale": [
+        0,
+        100
+       ]
+      }
+     },
+     "exit": {
+      "t": 4.9,
+      "duration": 0.6,
+      "ease": "Cubic In",
+      "to": {
+       "scale": [
+        0,
+        100
+       ]
+      }
+     }
+    },
+    {
+     "key": "name-mask",
+     "name": "Name mask",
+     "type": "group",
+     "x": 152,
+     "y": 826,
+     "w": 600,
+     "h": 60,
+     "clip": true,
+     "children": [
+      {
+       "key": "name",
+       "name": "Name",
+       "type": "text",
+       "x": 0,
+       "y": 0,
+       "w": 600,
+       "h": 60,
+       "text": {
+        "content": "Dr. Amelia Hart",
+        "fontSize": 46,
+        "fontWeight": 600,
+        "align": "left"
+       },
+       "fill": "#f3f6f8",
+       "enter": {
+        "t": 0.9,
+        "duration": 0.9,
+        "ease": "Quart In Out",
+        "from": {
+         "dy": 40,
+         "opacity": 0
+        }
+       },
+       "exit": {
+        "t": 4.7,
+        "duration": 0.6,
+        "ease": "Cubic In",
+        "to": {
+         "dy": -40,
+         "opacity": 0
+        }
+       }
+      }
+     ]
+    },
+    {
+     "key": "title-mask",
+     "name": "Title mask",
+     "type": "group",
+     "x": 152,
+     "y": 914,
+     "w": 600,
+     "h": 36,
+     "clip": true,
+     "children": [
+      {
+       "key": "title",
+       "name": "Title",
+       "type": "text",
+       "x": 0,
+       "y": 0,
+       "w": 600,
+       "h": 36,
+       "text": {
+        "content": "Head of Research, Larkspur Labs",
+        "fontSize": 24,
+        "fontWeight": 400,
+        "align": "left"
+       },
+       "fill": "#b9c8d4",
+       "enter": {
+        "t": 1.2,
+        "duration": 0.9,
+        "ease": "Quart In Out",
+        "from": {
+         "dy": 30,
+         "opacity": 0
+        }
+       },
+       "exit": {
+        "t": 4.8,
+        "duration": 0.6,
+        "ease": "Cubic In",
+        "to": {
+         "dy": -30,
+         "opacity": 0
+        }
+       }
+      }
+     ]
+    }
+   ],
+   "comp": {
+    "duration": 6,
+    "fps": 30
+   }
+  },
+  "result": "{\"summary\":\"6 created, 0 updated, 7 keyframe tracks; animation ends 5.4s\",\"ids\":{\"panel\":\"l_03jm2\",\"accent\":\"l_03jm3\",\"name\":\"l_03jm5\",\"name-mask\":\"l_03jm4\",\"title\":\"l_03jm7\",\"title-mask\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 208,
+  "editorMs": 135,
+  "input": {
+   "times": [
+    0.3,
+    0.9,
+    1.5,
+    2.5,
+    4.5,
+    5.2
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.3s, 0.9s, 1.5s, 2.5s, 4.5s, 5.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b00eae05-01e6-49b0-a913-714e5193f2cd/tool-results/mcp-motion-blob-1794513084450-ndlzxi.jpg]"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 15,
+  "ok": true,
+  "ms": 57,
+  "editorMs": 1,
+  "input": {
+   "times": [
+    2.5
+   ]
+  },
+  "result": "2.5s:\n  Accent line: tiny (96×2px)\n  Name, Title: outside title-safe area (10% margin)\n  Panel ↔ Accent line: overlap 100%"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1478,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 6,
+  "input": {
+   "layers": [
+    {
+     "key": "panel",
+     "name": "Panel",
+     "type": "rect",
+     "x": 192,
+     "y": 796,
+     "w": 660,
+     "h": 168,
+     "radius": 4,
+     "fill": "#1f2c38b8",
+     "opacity": 100,
+     "enter": {
+      "t": 0.1,
+      "duration": 1,
+      "ease": "Quart In Out",
+      "from": {
+       "dx": -60,
+       "opacity": 0
+      }
+     },
+     "exit": {
+      "t": 5.4,
+      "duration": 0.8,
+      "ease": "Cubic In",
+      "to": {
+       "dx": -60,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "accent",
+     "name": "Accent line",
+     "type": "rect",
+     "x": 224,
+     "y": 898,
+     "w": 96,
+     "h": 2,
+     "anchor": "left",
+     "fill": "#8fa9bd",
+     "enter": {
+      "t": 0.6,
+      "duration": 0.9,
+      "ease": "Quart In Out",
+      "from": {
+       "scale": [
+        0,
+        100
+       ]
+      }
+     },
+     "exit": {
+      "t": 4.9,
+      "duration": 0.6,
+      "ease": "Cubic In",
+      "to": {
+       "scale": [
+        0,
+        100
+       ]
+      }
+     }
+    },
+    {
+     "key": "name-mask",
+     "name": "Name mask",
+     "type": "group",
+     "x": 224,
+     "y": 826,
+     "w": 600,
+     "h": 60,
+     "clip": true,
+     "children": [
+      {
+       "key": "name",
+       "name": "Name",
+       "type": "text",
+       "x": 0,
+       "y": 0,
+       "w": 600,
+       "h": 60,
+       "text": {
+        "content": "Dr. Amelia Hart",
+        "fontSize": 46,
+        "fontWeight": 600,
+        "align": "left"
+       },
+       "fill": "#f3f6f8",
+       "enter": {
+        "t": 0.9,
+        "duration": 0.9,
+        "ease": "Quart In Out",
+        "from": {
+         "dy": 40,
+         "opacity": 0
+        }
+       },
+       "exit": {
+        "t": 4.7,
+        "duration": 0.6,
+        "ease": "Cubic In",
+        "to": {
+         "dy": -40,
+         "opacity": 0
+        }
+       }
+      }
+     ]
+    },
+    {
+     "key": "title-mask",
+     "name": "Title mask",
+     "type": "group",
+     "x": 224,
+     "y": 914,
+     "w": 600,
+     "h": 36,
+     "clip": true,
+     "children": [
+      {
+       "key": "title",
+       "name": "Title",
+       "type": "text",
+       "x": 0,
+       "y": 0,
+       "w": 600,
+       "h": 36,
+       "text": {
+        "content": "Head of Research, Larkspur Labs",
+        "fontSize": 24,
+        "fontWeight": 400,
+        "align": "left"
+       },
+       "fill": "#b9c8d4",
+       "enter": {
+        "t": 1.2,
+        "duration": 0.9,
+        "ease": "Quart In Out",
+        "from": {
+         "dy": 30,
+         "opacity": 0
+        }
+       },
+       "exit": {
+        "t": 4.8,
+        "duration": 0.6,
+        "ease": "Cubic In",
+        "to": {
+         "dy": -30,
+         "opacity": 0
+        }
+       }
+      }
+     ]
+    }
+   ],
+   "prune": true
+  },
+  "result": "{\"summary\":\"0 created, 6 updated, 7 keyframe tracks; animation ends 5.4s\",\"ids\":{\"panel\":\"l_03jm2\",\"accent\":\"l_03jm3\",\"name\":\"l_03jm5\",\"name-mask\":\"l_03jm4\",\"title\":\"l_03jm7\",\"title-mask\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 49,
+  "editorMs": 11,
+  "input": {},
+  "result": "score 73/100 (timing 67, easing 84)\n1. [medium] 4 of 4 entrances don't decelerate (Quart In Out): entrances ease out (Expo/Quart/Cubic Out) or spring\n   → set_easing {\"id\":\"l_03jm2\",\"prop\":\"position\",\"indices\":[0],\"ease\":\"Quart Out\"}\n   → set_easing {\"id\":\"l_03jm3\",\"prop\":\"scale\",\"indices\":[0],\"ease\":\"Quart Out\"}\n   → set_easing {\"id\":\"l_03jm5\",\"prop\":\"position\",\"indices\":[0],\"ease\":\"Quart Out\"}\n …"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 31,
+  "ok": true,
+  "ms": 138,
+  "editorMs": 127,
+  "input": {
+   "times": [
+    0.5,
+    1.2,
+    2,
+    4.5,
+    5,
+    5.8
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 1.2s, 2s, 4.5s, 5s, 5.8s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b00eae05-01e6-49b0-a913-714e5193f2cd/tool-results/mcp-motion-blob-1794513091792-x2vglt.jpg]"
+ }
+]

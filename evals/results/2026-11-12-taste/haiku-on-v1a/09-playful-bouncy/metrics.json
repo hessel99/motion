@@ -1,0 +1,214 @@
+{
+ "run": {
+  "id": "09-playful-bouncy",
+  "name": "09-playful-bouncy",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 99,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 95.8,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 4.2,
+     "music": 0
+    },
+    "issues": [
+     "low:palette-drift"
+    ],
+    "ms": 8.3
+   },
+   "after": {
+    "score": 99,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 95.8,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 4.2,
+     "music": 0
+    },
+    "issues": [
+     "low:palette-drift"
+    ],
+    "ms": 8.3
+   }
+  },
+  "wallMs": 113989,
+  "timedOut": false,
+  "turns": 21,
+  "costUsd": 0.02964563,
+  "durationMs": 113140,
+  "usage": {
+   "input": 891436,
+   "cached": 854413,
+   "output": 27399
+  },
+  "errors": [],
+  "toolCalls": 20,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the \"Boop!\" intro as a 6-second, 1080×1080 piece on a cream `#FFF4E6` background. The critic scores it 99/100.\n\n- **Candy drop (0–1.6 s):** six shapes fall in staggered 0.12 s apart: a coral circle, two sun-yellow stars, a green rounded square, a blue circle, a lilac star and a small sun circle. Each stretches on the way down, squashes on contact, and rebounds.\n- **Jostle (1.6–2.4 s):** each shape gets a quick sideways bump with a squash, one after another, then settles.\n- **Letters hop (2.5–4.2 s):** **B**, **o**, **o**, **p** and **!** drop onto the baseline one by one, 0.14 s apart. Each squashes on landing and bounces up. The **!** is coral and gets the biggest hop.\n- **Idle wiggle (4.6 s on):** all shapes and letters rock gently with out-of-phase rotation, so the final frame stays alive.\n\nChoices I made:\n- Letters are ink `#2B2D42`, with the **!** in a darker coral (`#D9364A`) so it passes contrast.\n- The lockup sits slightly high on the canvas, with empty space below the wordmark. I didn't move it; I can shift the whole lockup down if you want it centred.\n- No sound effects or music, since you didn't ask for them.\n\nWant the wiggle stronger, the bounces bouncier, or the lockup moved down?"
+ },
+ "metrics": {
+  "layers": 11,
+  "drawableLayers": 11,
+  "layerTypes": {
+   "ellipse": 3,
+   "path": 2,
+   "rect": 1,
+   "text": 5
+  },
+  "groups": 0,
+  "animatedLayers": 11,
+  "keys": 177,
+  "segments": 128,
+  "easesUsed": {
+   "Quad In": 22,
+   "Quad Out": 12,
+   "Cubic In Out": 28,
+   "Sine Out": 34,
+   "Sine In Out": 22,
+   "Cubic Out": 5,
+   "Ease Out": 5
+  },
+  "distinctEases": 7,
+  "easeFamilies": 4,
+  "overshootSegments": 0,
+  "keyedOvershoots": 21,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 11,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 8,
+  "palette": [
+   "#ff6b6b",
+   "#ffd93d",
+   "#6bcb77",
+   "#4d96ff",
+   "#c77dff",
+   "#2b2d42",
+   "#d9364a",
+   "#fff4e6"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.927,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0.335,
+  "offCanvasTime": 0.469,
+  "offCanvasLayers": {
+   "candy-coral-circle": 0.067,
+   "candy-sun-star": 0.067,
+   "candy-green-square": 0.134,
+   "candy-blue-circle": 0.067,
+   "candy-lilac-star": 0.067,
+   "candy-sun-circle": 0.067
+  },
+  "clippedAtEnd": [],
+  "textOverlapTime": 0.67,
+  "textOverlapPairs": {
+   "letter-p × letter-excl": 0.67
+  },
+  "partialOverlapTime": 2.613,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.057,
+  "midLuma": 0.912,
+  "toolErrors": 0,
+  "toolCalls": 20
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "\"Boop\" present (one layer or letter layers)",
+    "type": "textOrLetters",
+    "pass": true
+   },
+   {
+    "text": "per-letter hop (text animator by char or separate letter layers)",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "springs or Back eases",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "star shapes present",
+    "type": "starShape",
+    "pass": true
+   },
+   {
+    "text": "≥5 candy shapes",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "idle wiggle at the end (motion in the last 0.8s)",
+    "type": "activeAtEnd",
+    "pass": true
+   },
+   {
+    "text": "≥4 colors",
+    "type": "paletteMin",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

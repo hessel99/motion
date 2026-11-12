@@ -1,0 +1,259 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 34,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "name": "cookbook",
+   "section": "UI"
+  },
+  "result": "## UI micro-interaction (button press + success, 1.2 s)\n1. `add_layer` { type: \"rect\", name: \"Button\", x: 760, y: 490, w: 400, h: 100, radius: 50, fill: \"#2563EB\" } and a label text { content: \"Pay now\", fontSize: 40, fontWeight: 600, align: \"center\" } with `parent: <button>` (coords relative to the button box: x 0, y 24, w 400, h 52).\n2. Press (anticipation + release with overshoot):\n   `animate`…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1071,
+  "ok": true,
+  "ms": 457,
+  "editorMs": 8,
+  "input": {
+   "comp": {
+    "background": "#F2F2F7",
+    "duration": 2,
+    "fps": 60
+   },
+   "layers": [
+    {
+     "key": "track",
+     "name": "Track",
+     "type": "rect",
+     "x": 310,
+     "y": 249,
+     "w": 180,
+     "h": 102,
+     "radius": 51,
+     "fill": "#C9C9CE",
+     "animate": {
+      "fill": [
+       {
+        "t": 0.4,
+        "v": "#C9C9CE",
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 0.7,
+        "v": "#34C759"
+       }
+      ]
+     }
+    },
+    {
+     "key": "thumb",
+     "name": "Thumb",
+     "type": "group",
+     "x": 319,
+     "y": 258,
+     "w": 84,
+     "h": 84,
+     "animate": {
+      "position": [
+       {
+        "t": 0.4,
+        "v": [
+         361,
+         300
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 0.68,
+        "v": [
+         439,
+         300
+        ],
+        "ease": "Quad Out"
+       },
+       {
+        "t": 0.8,
+        "v": [
+         443,
+         300
+        ],
+        "ease": "Quad In Out"
+       },
+       {
+        "t": 0.95,
+        "v": [
+         439,
+         300
+        ]
+       }
+      ],
+      "scale": [
+       {
+        "t": 0.4,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Quad Out"
+       },
+       {
+        "t": 0.52,
+        "v": [
+         116,
+         88
+        ],
+        "ease": "Quad In Out"
+       },
+       {
+        "t": 0.68,
+        "v": [
+         96,
+         104
+        ],
+        "ease": "Quad Out"
+       },
+       {
+        "t": 0.9,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ]
+     },
+     "children": [
+      {
+       "key": "knob",
+       "name": "Knob",
+       "type": "ellipse",
+       "x": 0,
+       "y": 0,
+       "w": 84,
+       "h": 84,
+       "fill": "#FFFFFF",
+       "props": {
+        "shadowColor": "#00000033",
+        "shadowOffset": [
+         0,
+         2
+        ],
+        "shadowBlur": 6
+       }
+      },
+      {
+       "key": "check",
+       "name": "Check",
+       "type": "path",
+       "d": "M2 14 L12 24 L30 3",
+       "x": 26,
+       "y": 30,
+       "w": 32,
+       "h": 26,
+       "stroke": "#34C759",
+       "strokeWidth": 6,
+       "animate": {
+        "trimEnd": [
+         {
+          "t": 0.6,
+          "v": 0
+         },
+         {
+          "t": 0.85,
+          "v": 100,
+          "ease": "Cubic Out"
+         }
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 4 keyframe tracks; animation ends 0.95s\",\"ids\":{\"track\":\"l_03jm2\",\"knob\":\"l_03jm4\",\"check\":\"l_03jm5\",\"thumb\":\"l_03jm3\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 222,
+  "editorMs": 200,
+  "input": {
+   "start": 0,
+   "end": 1.4,
+   "frames": 8,
+   "cell": 240
+  },
+  "result": "8 frames left→right, top→bottom at 0s, 0.2s, 0.4s, 0.6s, 0.8s, 1s, 1.2s, 1.4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b8c7061c-8775-4938-b4c6-87cb5af1db49/tool-results/mcp-motion-blob-1794514508526-d53mol.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 128,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm5",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 0.6,
+       "v": 0
+      },
+      {
+       "t": 0.85,
+       "v": 100,
+       "ease": "Cubic Out"
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 10,
+  "input": {},
+  "result": "score 95/100 (polish 84)\n1. [medium] \"Check\" still has the editor's default blue fill (#6b8cff) behind its stroke\n   → update_layer {\"id\":\"l_03jm5\",\"props\":{\"fill\":\"#00000000\"}}"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 7,
+  "editorMs": 3,
+  "input": {
+   "id": "l_03jm5",
+   "props": {
+    "fill": "#00000000"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 269,
+  "editorMs": 246,
+  "input": {
+   "start": 0,
+   "end": 1.4,
+   "frames": 8,
+   "cell": 240
+  },
+  "result": "8 frames left→right, top→bottom at 0s, 0.2s, 0.4s, 0.6s, 0.8s, 1s, 1.2s, 1.4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b8c7061c-8775-4938-b4c6-87cb5af1db49/tool-results/mcp-motion-blob-1794514512070-skag4s.jpg]"
+ }
+]

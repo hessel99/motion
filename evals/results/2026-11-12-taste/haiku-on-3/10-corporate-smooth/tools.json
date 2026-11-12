@@ -1,0 +1,207 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 191,
+  "ok": true,
+  "ms": 52,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "corporate smooth lower third interview name and title, thin accent line, translucent panel slides in, soft mask reveal of text, calm long ease-in-out, exit by 6s"
+  },
+  "result": "# Example: Corporate lower third (name + title), in and out\n> tags: lower third, name, title, caption, interview, corporate, news, broadcast, speaker, smooth, professional, label\n\n## Brief\n\"Lower third for an interview: Maria Lopez, Head of Design at Acme. Clean corporate look, it comes in, holds, and goes out. 6 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"durati…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1464,
+  "ok": true,
+  "ms": 93,
+  "editorMs": 3,
+  "input": {
+   "comp": {
+    "duration": 6,
+    "background": "#2B3947",
+    "name": "Lower third - Dr. Amelia Hart"
+   },
+   "layers": [
+    {
+     "key": "panel",
+     "name": "Panel",
+     "type": "rect",
+     "x": 160,
+     "y": 790,
+     "w": 700,
+     "h": 160,
+     "radius": 6,
+     "fill": "#1E2B3Ab8",
+     "enter": {
+      "t": 0.6,
+      "duration": 0.9,
+      "ease": "Quart In Out",
+      "from": {
+       "dx": -40,
+       "opacity": 0
+      }
+     },
+     "exit": {
+      "t": 5.5,
+      "duration": 0.5,
+      "ease": "Quart In",
+      "to": {
+       "dx": -40,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "accent",
+     "name": "Accent line",
+     "type": "rect",
+     "x": 160,
+     "y": 790,
+     "w": 700,
+     "h": 3,
+     "anchor": "left",
+     "fill": "#8FB3CC",
+     "enter": {
+      "t": 0.2,
+      "duration": 0.9,
+      "ease": "Quart In Out",
+      "from": {
+       "scale": [
+        0,
+        100
+       ]
+      }
+     },
+     "exit": {
+      "t": 5.8,
+      "duration": 0.5,
+      "ease": "Quart In",
+      "to": {
+       "scale": [
+        0,
+        100
+       ]
+      }
+     }
+    },
+    {
+     "key": "name-mask",
+     "name": "Name mask",
+     "type": "group",
+     "clip": true,
+     "x": 190,
+     "y": 806,
+     "w": 650,
+     "h": 66,
+     "children": [
+      {
+       "key": "name",
+       "name": "Name",
+       "text": "Dr. Amelia Hart",
+       "fontSize": 52,
+       "fontWeight": 600,
+       "tracking": 0.5,
+       "x": 0,
+       "y": 0,
+       "w": 650,
+       "h": 66,
+       "fill": "#F4F7FA",
+       "enter": {
+        "t": 1,
+        "duration": 0.9,
+        "ease": "Quart In Out",
+        "from": {
+         "dy": 50,
+         "opacity": 0
+        }
+       },
+       "exit": {
+        "t": 5,
+        "duration": 0.4,
+        "ease": "Quart In",
+        "to": {
+         "dy": -10,
+         "opacity": 0
+        }
+       }
+      }
+     ]
+    },
+    {
+     "key": "role-mask",
+     "name": "Title mask",
+     "type": "group",
+     "clip": true,
+     "x": 190,
+     "y": 872,
+     "w": 650,
+     "h": 44,
+     "children": [
+      {
+       "key": "role",
+       "name": "Title",
+       "text": "Head of Research, Larkspur Labs",
+       "fontSize": 28,
+       "fontWeight": 400,
+       "x": 0,
+       "y": 0,
+       "w": 650,
+       "h": 44,
+       "fill": "#A9BCCD",
+       "enter": {
+        "t": 1.25,
+        "duration": 0.9,
+        "ease": "Quart In Out",
+        "from": {
+         "dy": 30,
+         "opacity": 0
+        }
+       },
+       "exit": {
+        "t": 5,
+        "duration": 0.4,
+        "ease": "Quart In",
+        "to": {
+         "dy": -10,
+         "opacity": 0
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"6 created, 0 updated, 7 keyframe tracks; animation ends 5.8s\",\"ids\":{\"panel\":\"l_03jm2\",\"accent\":\"l_03jm3\",\"name\":\"l_03jm5\",\"name-mask\":\"l_03jm4\",\"role\":\"l_03jm7\",\"role-mask\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 14,
+  "input": {},
+  "result": "score 89/100 (easing 84)\n1. [medium] 4 of 4 entrances don't decelerate (Quart In Out): entrances ease out (Expo/Quart/Cubic Out) or spring\n   → set_easing {\"id\":\"l_03jm2\",\"prop\":\"position\",\"indices\":[0],\"ease\":\"Quart Out\"}\n   → set_easing {\"id\":\"l_03jm3\",\"prop\":\"scale\",\"indices\":[0],\"ease\":\"Quart Out\"}\n   → set_easing {\"id\":\"l_03jm5\",\"prop\":\"position\",\"indices\":[0],\"ease\":\"Quart Out\"}\n   → set_eas…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 160,
+  "editorMs": 133,
+  "input": {
+   "times": [
+    0.3,
+    1,
+    1.5,
+    3,
+    5,
+    5.5,
+    5.9
+   ],
+   "cell": 400
+  },
+  "result": "7 frames left→right, top→bottom at 0.3s, 1s, 1.5s, 3s, 5s, 5.5s, 5.9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/9c6753ff-997b-42cd-b222-e34b840ab52f/tool-results/mcp-motion-blob-1794514710042-6flcn6.jpg]"
+ }
+]

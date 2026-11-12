@@ -1,0 +1,529 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 922,
+  "ok": true,
+  "ms": 43,
+  "editorMs": 1,
+  "input": {
+   "title": "Design is how it works",
+   "duration": 8,
+   "style": "Bold kinetic type, dark ink + warm accent",
+   "styleReason": "Big grotesk type with Expo Out snaps suits a punchy quote.",
+   "beats": [
+    {
+     "name": "Design is not",
+     "start": 0,
+     "end": 2,
+     "description": "Words 'Design is not' slide up word by word, centered large white type.",
+     "style": "Expo Out, 0.08s word stagger"
+    },
+    {
+     "name": "just what it looks like.",
+     "start": 2,
+     "end": 4,
+     "description": "Previous phrase slides up/out; 'just what it looks like.' wipes in per word, dimmer weight.",
+     "style": "Exit Expo In, overlap with entrance"
+    },
+    {
+     "name": "Design is",
+     "start": 4,
+     "end": 5.2,
+     "description": "Previous phrase exits; 'Design is' drops in per letter.",
+     "style": "Letter stagger 0.03s"
+    },
+    {
+     "name": "how it works.",
+     "start": 5.2,
+     "end": 8,
+     "description": "Huge bold orange 'how it works.' pops in per letter with overshoot, with attribution '— Steve Jobs' fading in small last.",
+     "style": "Spring, accent #FF5A1F"
+    }
+   ]
+  },
+  "result": "storyboard \"Design is how it works\" shown to the user (4 beats, 8s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1755,
+  "ok": false,
+  "ms": 65,
+  "editorMs": 9,
+  "error": "unknown ease \"Expo InOut\". presets: Linear, Easy Ease, Ease In, Ease Out, Ease In Out, Sine In, Sine Out, Sine In Out, Quad In, Quad Out, Quad In Out, Cubic In, Cubic Out, Cubic In Out, Quart In, Quart Out, Quart In Out, Expo In, Expo Out, Expo In Out, Back In, Back Out, Back In Out, Snappy, Gentle",
+  "input": {
+   "comp": {
+    "background": "#111114",
+    "duration": 8
+   },
+   "layers": [
+    {
+     "key": "p1",
+     "text": {
+      "content": "Design is not",
+      "fontSize": 130,
+      "fontWeight": 800,
+      "align": "center",
+      "fontFamily": "Inter"
+     },
+     "x": 40,
+     "y": 440,
+     "w": 1000,
+     "h": 170,
+     "fill": "#F4F1EA",
+     "textAnim": {
+      "by": "word",
+      "preset": "Slide words",
+      "start": 0.1,
+      "stagger": 0.12,
+      "duration": 0.6,
+      "ease": "Expo Out"
+     },
+     "exit": {
+      "t": 2.2,
+      "duration": 0.4,
+      "ease": "Expo In",
+      "to": {
+       "opacity": 0,
+       "dy": -120
+      }
+     }
+    },
+    {
+     "key": "p2",
+     "text": {
+      "content": "just what\nit looks like.",
+      "fontSize": 120,
+      "fontWeight": 500,
+      "align": "center",
+      "fontFamily": "Inter",
+      "lineHeight": 1.1
+     },
+     "x": 40,
+     "y": 390,
+     "w": 1000,
+     "h": 300,
+     "fill": "#B9B6AE",
+     "delay": 1.9,
+     "textAnim": {
+      "by": "word",
+      "preset": "Slide words",
+      "start": 0,
+      "stagger": 0.12,
+      "duration": 0.6,
+      "ease": "Expo Out"
+     },
+     "exit": {
+      "t": 4.3,
+      "duration": 0.4,
+      "ease": "Expo In",
+      "to": {
+       "opacity": 0,
+       "dy": -120
+      }
+     }
+    },
+    {
+     "key": "p3",
+     "text": {
+      "content": "Design is",
+      "fontSize": 120,
+      "fontWeight": 800,
+      "align": "center",
+      "fontFamily": "Inter"
+     },
+     "x": 40,
+     "y": 440,
+     "w": 1000,
+     "h": 170,
+     "fill": "#F4F1EA",
+     "delay": 4,
+     "textAnim": {
+      "by": "char",
+      "preset": "Fade up",
+      "start": 0,
+      "stagger": 0.04,
+      "duration": 0.5,
+      "ease": "Expo Out"
+     },
+     "animate": {
+      "position": [
+       {
+        "t": 0,
+        "v": [
+         540,
+         525
+        ]
+       },
+       {
+        "t": 1.2,
+        "v": [
+         540,
+         525
+        ],
+        "ease": "Expo InOut"
+       },
+       {
+        "t": 1.8,
+        "v": [
+         540,
+         265
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "p4",
+     "text": {
+      "content": "how it\nworks.",
+      "fontSize": 230,
+      "fontWeight": 900,
+      "align": "center",
+      "fontFamily": "Inter",
+      "lineHeight": 0.95
+     },
+     "x": 40,
+     "y": 340,
+     "w": 1000,
+     "h": 460,
+     "fill": "#FF5A1F",
+     "delay": 5.4,
+     "textAnim": {
+      "by": "char",
+      "preset": "Pop letters",
+      "start": 0,
+      "stagger": 0.05,
+      "duration": 0.6,
+      "ease": "spring:0.4"
+     }
+    },
+    {
+     "key": "attr",
+     "text": {
+      "content": "— STEVE JOBS",
+      "fontSize": 32,
+      "fontWeight": 500,
+      "align": "center",
+      "fontFamily": "Inter",
+      "tracking": 6
+     },
+     "x": 40,
+     "y": 930,
+     "w": 1000,
+     "h": 50,
+     "fill": "#8C8A84",
+     "enter": {
+      "t": 7,
+      "duration": 0.6,
+      "ease": "Expo Out",
+      "from": {
+       "opacity": 0,
+       "dy": 20
+      }
+     }
+    }
+   ]
+  },
+  "result": "unknown ease \"Expo InOut\". presets: Linear, Easy Ease, Ease In, Ease Out, Ease In Out, Sine In, Sine Out, Sine In Out, Quad In, Quad Out, Quad In Out, Cubic In, Cubic Out, Cubic In Out, Quart In, Quart Out, Quart In Out, Expo In, Expo Out, Expo In Out, Back In, Back Out, Back In Out, Snappy, Gentle"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1756,
+  "ok": true,
+  "ms": 70,
+  "editorMs": 9,
+  "input": {
+   "comp": {
+    "background": "#111114",
+    "duration": 8
+   },
+   "layers": [
+    {
+     "key": "p1",
+     "text": {
+      "content": "Design is not",
+      "fontSize": 130,
+      "fontWeight": 800,
+      "align": "center",
+      "fontFamily": "Inter"
+     },
+     "x": 40,
+     "y": 440,
+     "w": 1000,
+     "h": 170,
+     "fill": "#F4F1EA",
+     "textAnim": {
+      "by": "word",
+      "preset": "Slide words",
+      "start": 0.1,
+      "stagger": 0.12,
+      "duration": 0.6,
+      "ease": "Expo Out"
+     },
+     "exit": {
+      "t": 2.2,
+      "duration": 0.4,
+      "ease": "Expo In",
+      "to": {
+       "opacity": 0,
+       "dy": -120
+      }
+     }
+    },
+    {
+     "key": "p2",
+     "text": {
+      "content": "just what\nit looks like.",
+      "fontSize": 120,
+      "fontWeight": 500,
+      "align": "center",
+      "fontFamily": "Inter",
+      "lineHeight": 1.1
+     },
+     "x": 40,
+     "y": 390,
+     "w": 1000,
+     "h": 300,
+     "fill": "#B9B6AE",
+     "delay": 1.9,
+     "textAnim": {
+      "by": "word",
+      "preset": "Slide words",
+      "start": 0,
+      "stagger": 0.12,
+      "duration": 0.6,
+      "ease": "Expo Out"
+     },
+     "exit": {
+      "t": 4.3,
+      "duration": 0.4,
+      "ease": "Expo In",
+      "to": {
+       "opacity": 0,
+       "dy": -120
+      }
+     }
+    },
+    {
+     "key": "p3",
+     "text": {
+      "content": "Design is",
+      "fontSize": 120,
+      "fontWeight": 800,
+      "align": "center",
+      "fontFamily": "Inter"
+     },
+     "x": 40,
+     "y": 440,
+     "w": 1000,
+     "h": 170,
+     "fill": "#F4F1EA",
+     "delay": 4,
+     "textAnim": {
+      "by": "char",
+      "preset": "Fade up",
+      "start": 0,
+      "stagger": 0.04,
+      "duration": 0.5,
+      "ease": "Expo Out"
+     },
+     "animate": {
+      "position": [
+       {
+        "t": 0,
+        "v": [
+         540,
+         525
+        ]
+       },
+       {
+        "t": 1.2,
+        "v": [
+         540,
+         525
+        ],
+        "ease": "Expo In Out"
+       },
+       {
+        "t": 1.8,
+        "v": [
+         540,
+         265
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "p4",
+     "text": {
+      "content": "how it\nworks.",
+      "fontSize": 230,
+      "fontWeight": 900,
+      "align": "center",
+      "fontFamily": "Inter",
+      "lineHeight": 0.95
+     },
+     "x": 40,
+     "y": 340,
+     "w": 1000,
+     "h": 460,
+     "fill": "#FF5A1F",
+     "delay": 5.4,
+     "textAnim": {
+      "by": "char",
+      "preset": "Pop letters",
+      "start": 0,
+      "stagger": 0.05,
+      "duration": 0.6,
+      "ease": "spring:0.4"
+     }
+    },
+    {
+     "key": "attr",
+     "text": {
+      "content": "— STEVE JOBS",
+      "fontSize": 32,
+      "fontWeight": 500,
+      "align": "center",
+      "fontFamily": "Inter",
+      "tracking": 6
+     },
+     "x": 40,
+     "y": 930,
+     "w": 1000,
+     "h": 50,
+     "fill": "#8C8A84",
+     "enter": {
+      "t": 7,
+      "duration": 0.6,
+      "ease": "Expo Out",
+      "from": {
+       "opacity": 0,
+       "dy": 20
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 7 keyframe tracks; animation ends 7.6s\",\"ids\":{\"p1\":\"l_03jm5\",\"p2\":\"l_03jm6\",\"p3\":\"l_03jm7\",\"p4\":\"l_03jm8\",\"attr\":\"l_03jm9\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 52,
+  "ok": true,
+  "ms": 340,
+  "editorMs": 231,
+  "input": {
+   "times": [
+    0.5,
+    1.5,
+    2.1,
+    3.2,
+    4.4,
+    5,
+    6.2,
+    7.6
+   ],
+   "cell": 270
+  },
+  "result": "8 frames left→right, top→bottom at 0.5s, 1.5s, 2.1s, 3.2s, 4.4s, 5s, 6.2s, 7.6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/4fb042f8-1121-4a53-b92c-0ddbbadbfe95/tool-results/mcp-motion-blob-1794513859401-6scber.jpg]"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 29,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm5",
+    "l_03jm6"
+   ]
+  },
+  "result": "comp 8s @30fps\n\"p1\" (text l_03jm5)\n  position: 1.8s [540,525] ─Expo In→ 2.2s [540,405]\n  opacity: 2s 100 ─Expo In→ 2.2s 0\n  text animator: in by word, start 0.1s, 0.6s each, stagger 0.12s, ease Expo Out\n\"p2\" (text l_03jm6)\n  position: 5.8s 540 ─Expo In→ 6.2s [540,420]\n  opacity: 6s 100 ─Expo In→ 6.2s 0\n  text animator: in by word, start 1.9s, 0.6s each, stagger 0.12s, ease Expo Out"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 225,
+  "ok": true,
+  "ms": 155,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm6",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 3.9,
+       "v": [
+        540,
+        540
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 4.3,
+       "v": [
+        540,
+        420
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm6",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 3.9,
+       "v": 100,
+       "ease": "Expo In"
+      },
+      {
+       "t": 4.3,
+       "v": 0
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 2 tracks on 1 layers"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 29,
+  "ok": true,
+  "ms": 59,
+  "editorMs": 0,
+  "input": {
+   "ids": [
+    "l_03jm7",
+    "l_03jm8"
+   ]
+  },
+  "result": "comp 8s @30fps\n\"p3\" (text l_03jm7)\n  position: 4s [540,525] ─Easy Ease→ 5.2s [540,525] ─Expo In Out→ 5.8s [540,265]\n  text animator: in by char, start 4s, 0.5s each, stagger 0.04s, ease Expo Out\n\"p4\" (text l_03jm8)\n  text animator: in by char, start 5.4s, 0.6s each, stagger 0.05s, ease spring:0.4"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 50,
+  "ok": true,
+  "ms": 217,
+  "editorMs": 187,
+  "input": {
+   "times": [
+    1.9,
+    2.3,
+    3,
+    4.1,
+    4.6,
+    5.5,
+    6,
+    7.6
+   ],
+   "cell": 270
+  },
+  "result": "8 frames left→right, top→bottom at 1.9s, 2.3s, 3s, 4.1s, 4.6s, 5.5s, 6s, 7.6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/4fb042f8-1121-4a53-b92c-0ddbbadbfe95/tool-results/mcp-motion-blob-1794513867450-hiepcn.jpg]"
+ }
+]

@@ -1,0 +1,13 @@
+- Track [rect] box 310,249,180,102 #34c759
+- Thumb [group] #ffffff a0
+  - Knob [ellipse] box 397,258,84,84 #ffffff
+  - Check [path] box 423,288,32,26 #000000 a0 stroke #34c759 6px
+
+comp 800x600 2s @60fps, background #f2f2f7
+"Track" (rect l_03jm2)
+  fill: 0.4s #c9c9ce ─Cubic In Out→ 0.7s #34c759
+"Thumb" (group l_03jm3)
+  position: 0.4s [361,300] ─Cubic In Out→ 0.68s [439,300] ─Quad Out→ 0.8s [443,300] ─Quad In Out→ 0.95s [439,300]
+  scale: 0.4s 100 ─Quad Out→ 0.52s [116,88] ─Quad In Out→ 0.68s [96,104] ─Quad Out→ 0.9s 100
+"Check" (path l_03jm5)
+  trimEnd: 0s 0 ─Cubic In Out→ 0.6s 0 ─Cubic In Out→ 0.85s 100

@@ -1,0 +1,74 @@
+- wash [ellipse] box 1360,540,0,0 #dce9ff
+- glow [ellipse] box 970,150,780,780 gradient(#ffe27a→#ffe27a a0)
+- shield [group] #ffffff a0
+  - shield-body [path] box 1210,360,300,360 #5b6cff
+  - shield-inner [path] box 1210,360,300,360 #7b8bff
+  - check [path] box 1210,360,300,360 #6b8cff stroke #3ddc97 28px
+- headline [text] box 160,710,1600,140 #2b2f7a "One key. Every login." Inter 120px w800
+- n1 [group] #ffffff a0
+  - n1r [rect] box 1342,522,36,36 #ffd95a
+  - n1t [text] box 1346,534,28,13 #5a4a1a "hunter2" Inter 34px w700
+- n2 [group] #ffffff a0
+  - n2r [rect] box 1343,523,34,34 #ff9eb5
+  - n2t [text] box 1346,534,28,11 #6b2238 "Pa$$w0rd!" Inter 34px w700
+- n3 [group] #ffffff a0
+  - n3r [rect] box 1344,524,33,33 #8fe3c0
+  - n3t [text] box 1346,535,28,10 #14543c "fluffy123" Inter 34px w700
+- n4 [group] #ffffff a0
+  - n4r [rect] box 1342,522,36,36 #8cc8ff
+  - n4t [text] box 1346,533,28,14 #16407a "admin2020" Inter 34px w700
+- n5 [group] #ffffff a0
+  - n5r [rect] box 1343,523,35,35 #ffb36b
+  - n5t [text] box 1346,534,28,12 #6b3a10 "qwerty!" Inter 34px w700
+- n6 [group] #ffffff a0
+  - n6r [rect] box 1343,523,35,35 #c9b3ff
+  - n6t [text] box 1346,534,28,12 #3a2478 "Summer#99" Inter 34px w700
+
+comp 1920x1080 12s @30fps, background #fff6e5
+"wash" (ellipse l_03jm2)
+  scale: 0s 0 ─Cubic In Out→ 7.3s 0 ─Expo Out→ 8.8s 1000
+"glow" (ellipse l_03jm3)
+  position: 0s [1360,540] ─Cubic In Out→ 7.6s [1360,540] ─Cubic In Out→ 8.4s [960,380]
+  scale: 0s 150
+  opacity: 0s 0 ─Ease In→ 7.6s 0 ─Ease Out→ 8.3s 90 ─Expo Out→ 10s 60 ─Sine In Out→ 11.5s 90
+"shield" (group l_03jm4)
+  position: 0s [1360,540] ─Cubic In Out→ 7.6s [1360,540] ─Cubic In Out→ 8.4s [960,380]
+  scale: 0s 85 ─Cubic In Out→ 4.5s 85 ─Cubic In Out→ 4.6s 95 ─Quad Out→ 4.7s 104 ─Quad Out→ 4.85s 98 ─Quad Out→ 5s 106 ─Quad Out→ 5.15s 99 ─Quad Out→ 5.3s 108 ─Quad Out→ 5.8s 100
+  opacity: 0s 0 ─Ease Out→ 0.6s 40 ─Quad Out→ 3.5s 40 ─Ease Out→ 4.2s 100
+"check" (path l_03jm7)
+  opacity: 0s 0 ─Ease In→ 8.65s 0 ─Ease Out→ 8.7s 100
+  trimStart: 8.7s 0
+  trimEnd: 8.7s 0 ─Expo Out→ 9.3s 100
+"headline" (text l_03jm8)
+  position: 8.3s [960,780] ─Expo Out→ 9.2s [960,720]
+  opacity: 8.3s 0 ─Expo Out→ 8.75s 100
+"n1" (group l_03jm9)
+  position: 0s [600,420] ─Cubic In Out→ 3.6s [600,420] ─Quad Out→ 3.9s [560,430] ─Expo In→ 4.6s [1360,540]
+  scale: 0s 0 ─Cubic In Out→ 0.2s 0 ─spring:0.35→ 0.7s 100 ─Back Out→ 3.9s 100 ─Expo In→ 4.6s 15
+  rotation: expr "value + 4*sin(time*28 + index*2) * (time < 3.8 ? 1 : 0)"
+  opacity: 4.4s 100 ─Ease In→ 4.6s 0
+"n2" (group l_03jmc)
+  position: 0s [780,380] ─Cubic In Out→ 3.7s [780,380] ─Quad Out→ 4s [790,340] ─Expo In→ 4.7s [1360,540]
+  scale: 0s 0 ─Cubic In Out→ 0.32s 0 ─spring:0.35→ 0.82s 100 ─Back Out→ 4s 100 ─Expo In→ 4.7s 15
+  rotation: expr "value + 4*sin(time*28 + index*2) * (time < 3.8 ? 1 : 0)"
+  opacity: 4.5s 100 ─Ease In→ 4.7s 0
+"n3" (group l_03jmf)
+  position: 0s [700,560] ─Cubic In Out→ 3.8s [700,560] ─Quad Out→ 4.1s [670,580] ─Expo In→ 4.8s [1360,540]
+  scale: 0s 0 ─Cubic In Out→ 0.44s 0 ─spring:0.35→ 0.94s 100 ─Back Out→ 4.1s 100 ─Expo In→ 4.8s 15
+  rotation: expr "value + 4*sin(time*28 + index*2) * (time < 3.8 ? 1 : 0)"
+  opacity: 4.6s 100 ─Ease In→ 4.8s 0
+"n4" (group l_03jmi)
+  position: 0s [880,520] ─Cubic In Out→ 3.9s [880,520] ─Quad Out→ 4.2s [900,560] ─Expo In→ 4.9s [1360,540]
+  scale: 0s 0 ─Cubic In Out→ 0.56s 0 ─spring:0.35→ 1.06s 100 ─Back Out→ 4.2s 100 ─Expo In→ 4.9s 15
+  rotation: expr "value + 4*sin(time*28 + index*2) * (time < 3.8 ? 1 : 0)"
+  opacity: 4.7s 100 ─Ease In→ 4.9s 0
+"n5" (group l_03jml)
+  position: 0s [560,640] ─Cubic In Out→ 4s [560,640] ─Quad Out→ 4.3s [520,660] ─Expo In→ 5s [1360,540]
+  scale: 0s 0 ─Cubic In Out→ 0.68s 0 ─spring:0.35→ 1.18s 100 ─Back Out→ 4.3s 100 ─Expo In→ 5s 15
+  rotation: expr "value + 4*sin(time*28 + index*2) * (time < 3.8 ? 1 : 0)"
+  opacity: 4.8s 100 ─Ease In→ 5s 0
+"n6" (group l_03jmo)
+  position: 0s [800,690] ─Cubic In Out→ 4.1s [800,690] ─Quad Out→ 4.4s [800,720] ─Expo In→ 5.1s [1360,540]
+  scale: 0s 0 ─Cubic In Out→ 0.8s 0 ─spring:0.35→ 1.3s 100 ─Back Out→ 4.4s 100 ─Expo In→ 5.1s 15
+  rotation: expr "value + 4*sin(time*28 + index*2) * (time < 3.8 ? 1 : 0)"
+  opacity: 4.9s 100 ─Ease In→ 5.1s 0

@@ -1,0 +1,183 @@
+{
+ "run": {
+  "id": "06-loop-bg",
+  "name": "06-loop-bg",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 23.8
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 23.8
+   }
+  },
+  "wallMs": 38368,
+  "timedOut": false,
+  "turns": 6,
+  "costUsd": 0.00885625,
+  "durationMs": 36888,
+  "usage": {
+   "input": 213881,
+   "cached": 199285,
+   "output": 7890
+  },
+  "errors": [],
+  "toolCalls": 5,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the seamless 6-second ambient loop on the **Main** comp (1920×1080, 30 fps). It passed the critic with 100/100 and no loop issues.\n\n- **Blobs:** three blurred orbs, **Blob purple** (#7F5AF0), **Blob teal** (#2CB1BC) and **Blob violet** (#A855F7), on a deep navy background (#0B1026). Each drifts on a sine/cosine path with a 6 s period and breathes slightly in scale, with phase offsets so they pass each other rather than moving in step.\n- **Dot grid:** a 10×5 grid of small white dots, one group per row. Each row's opacity pulses on a 3 s period, offset row by row, so a gentle wave travels down the screen.\n\nBecause every expression is periodic over 6 s (and the 3 s pulse divides evenly into it), frame 0 and the frame after the last one match in both position and velocity. I checked frames at 0, 1.5, 3, 4.5 and 5.97 s; I did not export a video.\n\nChoices you may want to change: the dots are 6 px, which is quite subtle on a large screen, so I can make them larger or brighter. I can also add more blobs or slow the drift down."
+ },
+ "metrics": {
+  "layers": 59,
+  "drawableLayers": 53,
+  "layerTypes": {
+   "ellipse": 53,
+   "group": 6
+  },
+  "groups": 6,
+  "animatedLayers": 8,
+  "keys": 0,
+  "segments": 0,
+  "easesUsed": {},
+  "distinctEases": 0,
+  "easeFamilies": 0,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 10,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#7f5af0",
+   "#2cb1bc",
+   "#a855f7",
+   "#ffffff",
+   "#0b1026"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 0,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.203,
+  "toolErrors": 0,
+  "toolCalls": 5
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "loops seamlessly (first frame ≈ frame at the loop point)",
+    "type": "loops",
+    "pass": true
+   },
+   {
+    "text": "everything moves (animated coverage ≥90%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 blobs/orbs (ellipses)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "dot grid (≥15 layers)",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "uses loop expressions or matching first/last keys",
+    "type": "loopTechnique",
+    "pass": true
+   },
+   {
+    "text": "purple/teal palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "calm: no fast motion",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

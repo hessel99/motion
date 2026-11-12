@@ -1,0 +1,26 @@
+- Sting 120 BPM [audio] #6b8cff
+- Pulse mark [group] #ffffff a0
+  - Mark ring [ellipse] box 560,415,250,250 #000000 a0 stroke #f5f5f7 18px
+  - Pulse wave 1 [ellipse] box 560,415,250,250 #000000 a0 stroke #ff5a36 8px
+  - Pulse wave 2 [ellipse] box 560,415,250,250 #000000 a0 stroke #ff5a36 8px
+  - Pulse wave 3 [ellipse] box 560,415,250,250 #000000 a0 stroke #ff5a36 8px
+  - Mark dot [ellipse] box 620,475,131,131 #ff5a36
+- Wordmark [text] box 853,420,549,240 #f5f5f7 "Pulse" Inter 200px w800
+
+comp 1920x1080 8s @30fps, background #0e0e12
+"Pulse mark" (group l_03jm4)
+  scale: 0s 60 ─Ease Out→ 0.4s 70 ─Quart Out→ 1s 76 ─Cubic In Out→ 2s 80 ─Cubic In Out→ 3s 84 ─Cubic In Out→ 3.5s 74 ─Quart In→ 4s 104 ─Cubic Out→ 4.45s 100
+  opacity: 0s 0 ─Ease Out→ 0.35s 100
+"Pulse wave 1" (ellipse l_03jm6)
+  scale: 0s 100 ─Easy Ease→ 4s 100 ─Cubic In→ 5s 230
+  opacity: 0s 0 ─Ease Out→ 4s 90 ─Ease Out→ 5s 0
+"Pulse wave 2" (ellipse l_03jm7)
+  scale: 0s 100 ─Easy Ease→ 5s 100 ─Cubic In→ 6s 230
+  opacity: 0s 0 ─Ease Out→ 5s 90 ─Ease Out→ 6s 0
+"Pulse wave 3" (ellipse l_03jm8)
+  scale: 0s 100 ─Easy Ease→ 6s 100 ─Cubic In→ 7s 230
+  opacity: 0s 0 ─Ease Out→ 6s 90 ─Ease Out→ 7s 0
+"Mark dot" (ellipse l_03jm9)
+  scale: 0s 100 ─Cubic Out→ 0.5s 100 ─Cubic Out→ 0.62s 110 ─Cubic In Out→ 1s 100 ─Cubic Out→ 1.12s 112 ─Cubic In Out→ 1.5s 100 ─Cubic Out→ 1.62s 115 ─Cubic In Out→ 2s 100 ─Cubic Out→ 2.12s 118 ─Cubic In Out→ 2.5s 100 ─Cubic Out→ 2.62s 122 ─Cubic In Out→ 3s 100 ─Cubic Out→ 3.12s 126 ─Cubic In Out→ 3.5s 100 ─Cubic Out→ 3.62s 132 ─Cubic In Out→ 4s 150 ─spring Gentle→ 4.4s 100 ─Cubic Out→ 4.5s 100 ─Cubic Out→ 4.62s 118 ─Cubic In Out→ 5s 100 ─Cubic Out→ 5.12s 125 ─Cubic In Out→ 5.5s 100 ─Cubic Out→ 5.62s 115 ─Cubic In Out→ 6s 100 ─Cubic Out→ 6.12s 120 ─Cubic In Out→ 6.5s 100
+"Wordmark" (text l_03jma)
+  text animator: in by char, start 4.05s, 0.5s each, stagger 0.05s, ease spring:0.5

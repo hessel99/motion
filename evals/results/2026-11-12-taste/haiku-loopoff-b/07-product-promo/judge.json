@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 4,
+  "style_match": 6,
+  "timing_easing": 5,
+  "composition": 5,
+  "richness": 4,
+  "polish": 4
+ },
+ "overall": 4.67,
+ "critique": [
+  "The piece runs 6s instead of the briefed 10s, and the CTA beat is misbuilt: 'Available now' sits jammed against the top edge of the pill instead of centred, the pill and text land at 3.2s/3.45s off the 0.5s beat grid, and the whole thing then sits in a dead 1.4s hold, so the ending feels unfinished rather than confident.",
+  "Extend the comp to 10s on a strict 0.5s grid: give each feature word a 1-beat cut with a varied exit, hit the PULSE 2 slam with the flash, rings and a camera shake on a downbeat, then bring in a vertically centred CTA pill (text parented to the pill so they scale together) on the next downbeat. Use the extra time for a rhythmic pulse on the title/pill every beat and a decisive out at 10s."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0619078,
+ "ms": 13917,
+ "raw": "```json\n{\"brief_fit\": 4, \"style_match\": 6, \"timing_easing\": 5, \"composition\": 5, \"richness\": 4, \"polish\": 4,\n \"critique\": [\"The piece runs 6s instead of the briefed 10s, and the CTA beat is misbuilt: 'Available now' sits jammed against the top edge of the pill instead of centred, the pill and text land at 3.2s/3.45s off the 0.5s beat grid, and the whole thing then sits in a dead 1.4s hold, so the ending feels unfinished rather than confident.\", \"Extend the comp to 10s on a strict 0.5s grid: give each feature word a 1-beat cut with a varied exit, hit the PULSE 2 slam with the flash, rings and a camera shake on a downbeat, then bring in a vertically centred CTA pill (text parented to the pill so they scale together) on the next downbeat. Use the extra time for a rhythmic pulse on the title/pill every beat and a decisive out at 10s.\"]}\n```"
+}

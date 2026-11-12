@@ -1,0 +1,86 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (12-hand-drawn, 1920x1080, 6s @24fps):
+Hand-drawn, organic feel for a bakery called "Crumb & Co". A wobbly line-drawn wheat stalk and a loaf draw themselves on (stroke reveal), a few irregular blob shapes in warm earthy colors breathe slowly, the name appears in a friendly way. Imperfect is good: slight boil/wobble on the lines (like hand-animated at 12fps), soft eases, nothing mechanical.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- name present [yes]
+- stroke draw-on (trim paths animated) [yes]
+- custom paths (≥2) [yes]
+- boil/wobble (wiggle expression, hold keys or path keys) [NO]
+- breathing blobs (scale animated) [yes]
+- warm palette [yes]
+- no linear eases [yes]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- blob1 [path] box 187,137,506,467 #e9b872
+- blob2 [path] box 1194,571,573,439 #c9d4a0
+- blob3 [path] box 1396,77,388,347 #e3a58a
+- stalk [path] box 342,215,151,532 #000000 a0 stroke #6b4a2b 8px
+- loaf [path] box 841,343,594,275 #000000 a0 stroke #6b4a2b 8px
+- name [text] box 358,761,1200,200 #6b4a2b "Crumb & Co" Georgia 150px w700
+- tag [text] box 460,974,1000,60 #a0522d "baked by hand, with love" Georgia 44px w600
+
+TIMELINE:
+comp 1920x1080 6s @24fps, background #f6ead6
+"blob1" (path l_03jm2)
+  scale: 0s 70 ─Cubic Out→ 1.2s 100
+  scale: expr "value + [4,4]*Math.sin(time*1.3)"
+  opacity: 0s 0 ─Cubic Out→ 0.6s 85
+"blob2" (path l_03jm3)
+  scale: 0.3s 70 ─Cubic Out→ 1.5s 100
+  scale: expr "value + [5,5]*Math.sin(time*1.1+1)"
+  opacity: 0.3s 0 ─Cubic Out→ 0.9s 85
+"blob3" (path l_03jm4)
+  scale: 0.5s 70 ─Cubic Out→ 1.7s 100
+  scale: expr "value + [4,4]*Math.sin(time*1.6+2)"
+  opacity: 0.5s 0 ─Cubic Out→ 1.1s 80
+"stalk" (path l_03jm5)
+  position: expr "value + [Math.sin(Math.floor(time*12)*7.3)*2.5, Math.cos(Math.floor(time*12)*5.1)*2.5]"
+  rotation: expr "Math.sin(Math.floor(time*12)*3.7)*0.6"
+  trimStart: 0.6s 0
+  trimEnd: 0.6s 0 ─Sine In Out→ 2.4s 100
+"loaf" (path l_03jm6)
+  position: expr "value + [Math.sin(Math.floor(time*12)*7.3)*2.5, Math.cos(Math.floor(time*12)*5.1)*2.5]"
+  rotation: expr "Math.sin(Math.floor(time*12)*3.7)*0.6"
+  trimStart: 1.2s 0
+  trimEnd: 1.2s 0 ─Sine In Out→ 3s 100
+"name" (text l_03jm7)
+  position: expr "value + [Math.sin(Math.floor(time*12)*7.3)*2.5, Math.cos(Math.floor(time*12)*5.1)*2.5]"
+  text animator: in by char, start 3s, 0.6s each, stagger 0.07s, ease spring:0.3
+"tag" (text l_03jm8)
+  position: 0s [960,990] ─Easy Ease→ 4s [960,1006] ─Cubic Out→ 4.8s [960,990]
+  opacity: 4s 0 ─Cubic Out→ 4.4s 100
+
+AUTOMATIC METRICS:
+layers 7 drawable (path 5, text 2), 23 keys, 11 moving segments
+eases: Cubic Out×8, Sine In Out×2, Easy Ease×1; springs 0, overshooting 0, hold 0
+expressions 8, text animators 1, precomps 0, paths 5, gradients 0, markers 0
+palette (6): #e9b872 #c9d4a0 #e3a58a #6b4a2b #a0522d #f6ead6
+motion from 0s to 6s (end hold 0s, longest still 0.067s), visual activity 98% of the comp
+fonts that did not load (rendered in a fallback): Georgia; trim keys that cannot render: none
+partially off-canvas 0s; text-on-text overlap 0s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

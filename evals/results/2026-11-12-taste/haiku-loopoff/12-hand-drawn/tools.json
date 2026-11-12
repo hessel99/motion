@@ -1,0 +1,277 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 241,
+  "ok": true,
+  "ms": 76,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Hand-drawn organic logo sting for a bakery: wobbly line-drawn wheat stalk and loaf draw on (stroke reveal), irregular warm blobs breathe slowly, bakery name appears friendly. Imperfect boil at 12fps, soft eases."
+  },
+  "result": "# Example: Elegant logo reveal, the line draws the mark and the wordmark slides out from behind it\n> tags: logo, reveal, elegant, minimal, luxury, corporate, line, stroke, draw, draw-on, trim, wordmark, mask, behind, monogram, calm\n\n## Brief\n\"Logo reveal for NOVA (a circle monogram with a slash). Calm and premium, dark background, 4 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n…"
+ },
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 2110,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 0,
+  "input": {
+   "title": "Crumb & Co — hand-drawn bakery sting",
+   "duration": 6,
+   "style": "Hand-drawn organic (warm, imperfect, slow)",
+   "styleReason": "A bakery brand wants warmth and craft: wobbly ink lines and soft earthy blobs feel made by hand, not generated.",
+   "concepts": [
+    {
+     "name": "Hand-drawn hand-off",
+     "idea": "The wheat stalk and loaf are inked by an unseen hand: each stroke draws itself with a slight 12fps boil, then the name is written/rises in.",
+     "why": "Matches the craft of baking and the hand-made brand feel."
+    },
+    {
+     "name": "Oven warmth",
+     "idea": "Blobs swell like rising dough behind the drawing while the stalk and loaf draw on, the name rises out of the warm glow.",
+     "why": "Dough rising is the bakery's own action; blobs carry the warmth."
+    }
+   ],
+   "recommended": 0,
+   "beats": [
+    {
+     "name": "Blobs settle in",
+     "start": 0,
+     "end": 1.2,
+     "description": "Three to four irregular blobs in warm earthy tones (wheat gold, terracotta, crust brown, olive) fade and scale in from the background, slightly off-centre, then breathe slowly (±2% scale, 3–4 s loops).",
+     "style": "Sine In Out, long soft eases, no overshoot. Background blobs are the quietest layer."
+    },
+    {
+     "name": "Wheat stalk draws",
+     "start": 0.2,
+     "end": 2,
+     "description": "A wobbly line-drawn wheat stalk (stem plus paired grain ovals) draws itself from the base upward with stroke trim, grains following in sequence.",
+     "style": "Trim-path reveal, Sine In Out, ~1.6 s; hand boil via small wobble expression at 12fps feel."
+    },
+    {
+     "name": "Loaf draws",
+     "start": 1.2,
+     "end": 3,
+     "description": "A rounded loaf outline with a score line draws on beside the wheat, the score cut last.",
+     "style": "Overlaps the wheat by ~0.6 s; Cubic In Out; slight irregular wobble on the stroke."
+    },
+    {
+     "name": "Name appears",
+     "start": 3.1,
+     "end": 4.6,
+     "description": "'Crumb & Co' rises in with a gentle slide-up and fade, letters lightly staggered, under the mark.",
+     "style": "Quart Out, 0.04 s letter stagger, dark ink #3B2A1E on cream #F6EFE3."
+    },
+    {
+     "name": "Hold and resolve",
+     "start": 4.6,
+     "end": 6,
+     "description": "Full lockup holds with blobs still breathing; the ink wobble settles to a calm final frame.",
+     "style": "No exit; final frame is the exact lockup."
+    }
+   ]
+  },
+  "result": "storyboard \"Crumb & Co — hand-drawn bakery sting\" shown to the user (5 beats, 6s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2928,
+  "ok": true,
+  "ms": 171,
+  "editorMs": 6,
+  "input": {
+   "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "duration": 6,
+    "background": "#F6EFE3"
+   },
+   "layers": [
+    {
+     "key": "blob-gold",
+     "name": "Blob wheat gold",
+     "type": "path",
+     "d": "M440 330 C480 270 580 280 620 330 C660 380 640 470 580 490 C520 510 440 480 430 420 C425 385 425 355 440 330 Z",
+     "fill": "#E3B25B",
+     "opacity": 85,
+     "enter": {
+      "t": 0,
+      "duration": 1.2,
+      "ease": "Sine Out",
+      "from": {
+       "opacity": 0,
+       "scale": [
+        80,
+        80
+       ]
+      }
+     },
+     "expr": {
+      "scale": "value + [1.5*Math.sin(time*2*Math.PI/3.4), 1.5*Math.sin(time*2*Math.PI/3.4)]"
+     }
+    },
+    {
+     "key": "blob-terra",
+     "name": "Blob terracotta",
+     "type": "path",
+     "d": "M1340 280 C1390 250 1460 270 1475 320 C1490 375 1450 410 1400 400 C1350 392 1310 360 1340 280 Z",
+     "fill": "#D9825B",
+     "opacity": 80,
+     "enter": {
+      "t": 0.15,
+      "duration": 1.2,
+      "ease": "Sine Out",
+      "from": {
+       "opacity": 0,
+       "scale": [
+        80,
+        80
+       ]
+      }
+     },
+     "expr": {
+      "scale": "value + [1.5*Math.sin(time*2*Math.PI/3.9+1), 1.5*Math.sin(time*2*Math.PI/3.9+1)]"
+     }
+    },
+    {
+     "key": "blob-olive",
+     "name": "Blob olive",
+     "type": "path",
+     "d": "M1380 720 C1420 690 1490 710 1500 760 C1510 810 1460 840 1420 828 C1380 815 1350 750 1380 720 Z",
+     "fill": "#9AA05A",
+     "opacity": 70,
+     "enter": {
+      "t": 0.3,
+      "duration": 1.2,
+      "ease": "Sine Out",
+      "from": {
+       "opacity": 0,
+       "scale": [
+        80,
+        80
+       ]
+      }
+     },
+     "expr": {
+      "scale": "value + [1.5*Math.sin(time*2*Math.PI/4.2+2), 1.5*Math.sin(time*2*Math.PI/4.2+2)]"
+     }
+    },
+    {
+     "key": "blob-crust",
+     "name": "Blob crust brown",
+     "type": "path",
+     "d": "M380 720 C420 690 500 700 510 750 C520 800 470 830 430 820 C390 810 350 750 380 720 Z",
+     "fill": "#B07A45",
+     "opacity": 75,
+     "enter": {
+      "t": 0.45,
+      "duration": 1.2,
+      "ease": "Sine Out",
+      "from": {
+       "opacity": 0,
+       "scale": [
+        80,
+        80
+       ]
+      }
+     },
+     "expr": {
+      "scale": "value + [1.5*Math.sin(time*2*Math.PI/3.6+3), 1.5*Math.sin(time*2*Math.PI/3.6+3)]"
+     }
+    },
+    {
+     "key": "wheat",
+     "name": "Wheat stalk",
+     "type": "path",
+     "d": "M800 720 C796 620 806 480 800 300 M800 600 Q772 592 760 566 M800 530 Q772 522 760 496 M800 460 Q772 452 760 426 M800 390 Q772 382 760 356 M800 565 Q828 557 840 531 M800 495 Q828 487 840 461 M800 425 Q828 417 840 391 M800 355 Q828 347 840 321 M800 300 Q788 270 800 236 Q812 270 800 300",
+     "fill": "#00000000",
+     "stroke": "#3B2A1E",
+     "strokeWidth": 7,
+     "drawOn": {
+      "t": 0.2,
+      "duration": 1.6,
+      "ease": "Sine In Out",
+      "fill": "keep"
+     },
+     "expr": {
+      "position": "value + clamp((4.9-time)*1.2,0,1)*[0.9*Math.sin(Math.floor(time*12)*2.3), 0.9*Math.cos(Math.floor(time*12)*1.9)]"
+     }
+    },
+    {
+     "key": "loaf",
+     "name": "Loaf",
+     "type": "path",
+     "d": "M930 660 C905 640 912 560 960 530 C1010 500 1110 500 1160 530 C1205 560 1212 640 1190 660 Z M1000 575 Q1060 552 1120 575",
+     "fill": "#00000000",
+     "stroke": "#3B2A1E",
+     "strokeWidth": 7,
+     "drawOn": {
+      "t": 1.2,
+      "duration": 1.8,
+      "ease": "Cubic In Out",
+      "fill": "keep"
+     },
+     "expr": {
+      "position": "value + clamp((4.9-time)*1.2,0,1)*[0.9*Math.cos(Math.floor(time*12)*1.7), 0.9*Math.sin(Math.floor(time*12)*2.1)]"
+     }
+    },
+    {
+     "key": "name",
+     "name": "Name Crumb & Co",
+     "type": "text",
+     "text": {
+      "content": "Crumb & Co",
+      "fontSize": 120,
+      "fontWeight": 700,
+      "align": "center"
+     },
+     "x": 360,
+     "y": 790,
+     "w": 1200,
+     "h": 150,
+     "fill": "#3B2A1E",
+     "textAnim": {
+      "by": "char",
+      "preset": "Fade up",
+      "start": 3.1,
+      "duration": 0.6,
+      "stagger": 0.04,
+      "ease": "Quart Out"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"7 created, 0 updated, 12 keyframe tracks; animation ends 3s\",\"ids\":{\"blob-gold\":\"l_03jm2\",\"blob-terra\":\"l_03jm3\",\"blob-olive\":\"l_03jm4\",\"blob-crust\":\"l_03jm5\",\"wheat\":\"l_03jm6\",\"loaf\":\"l_03jm7\",\"name\":\"l_03jm8\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 203,
+  "editorMs": 164,
+  "input": {
+   "times": [
+    0.5,
+    1.5,
+    2.5,
+    3.5,
+    4.5,
+    5.8
+   ],
+   "cell": 400
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 1.5s, 2.5s, 3.5s, 4.5s, 5.79s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/4aeec13c-43ee-477d-9fdb-d95133b94ec3/tool-results/mcp-motion-blob-1794511652079-68c0du.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 55,
+  "editorMs": 14,
+  "input": {},
+  "result": "score 100/100 (no issues found)"
+ }
+]

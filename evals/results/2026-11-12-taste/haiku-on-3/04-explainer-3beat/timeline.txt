@@ -1,0 +1,54 @@
+- Glow halo [ellipse] box 799,379,322,322 #2ec4b6
+- Sticky note 1 [group] #ffffff a0
+  - note-1-bg [rect] box 960,540,0,0 #ffbf69
+  - note-1-txt [text] box 960,540,0,0 #22313f "hunter2" Inter 28px w600
+- Sticky note 2 [group] #ffffff a0
+  - note-2-bg [rect] box 960,540,0,0 #2ec4b6
+  - note-2-txt [text] box 960,540,0,0 #22313f "qwerty!" Inter 28px w600
+- Sticky note 3 [group] #ffffff a0
+  - note-3-bg [rect] box 960,540,0,0 #ff7f50
+  - note-3-txt [text] box 960,540,0,0 #22313f "1234abcd" Inter 28px w600
+- Sticky note 4 [group] #ffffff a0
+  - note-4-bg [rect] box 960,540,0,0 #ffffff
+  - note-4-txt [text] box 960,540,0,0 #22313f "Summer24" Inter 28px w600
+- Sticky note 5 [group] #ffffff a0
+  - note-5-bg [rect] box 960,540,0,0 #ffe3a3
+  - note-5-txt [text] box 960,540,0,0 #22313f "p@ssw0rd" Inter 28px w600
+- Vault shield [group] #ffffff a0
+  - shield-outer [path] box 840,400,240,280 #2ec4b6
+  - shield-inner [path] box 840,400,240,280 #56d3c7
+  - check [path] box 840,400,240,280 #ffffff a0 stroke #ffffff 18px
+- Headline [text] box 160,740,1600,120 #22313f "One key. Every login." Inter 96px w800
+
+comp 1920x1080 12s @30fps, background #fff8f0
+"Glow halo" (ellipse l_03jm2)
+  position: 0s [960,540] ─Cubic In Out→ 8s [960,540] ─Cubic In Out→ 8.9s [960,440]
+  scale: 7.9s 70 ─Cubic Out→ 8.9s 110 ─Cubic Out→ 12s 120
+  opacity: 0s 0 ─Ease In→ 7.9s 0 ─Cubic Out→ 8.7s 40 ─Ease In Out→ 10.5s 26 ─Ease In Out→ 12s 40
+"Sticky note 1" (group l_03jm3)
+  position: 2.8s [760,430] ─Cubic In→ 3.5s [960,540]
+  scale: 0.2s 0 ─Back Out→ 0.7s 100 ─Cubic In Out→ 2.8s 100 ─Cubic In→ 3.5s 0
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/0.45)*clamp((time-0.8)/0.3,0,1)*(1-clamp((time-2.6)/0.4,0,1))"
+"Sticky note 2" (group l_03jm6)
+  position: 2.87s [960,380] ─Cubic In→ 3.57s [960,540]
+  scale: 0.3s 0 ─Back Out→ 0.8s 100 ─Cubic In Out→ 2.87s 100 ─Cubic In→ 3.57s 0
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/0.48)*clamp((time-0.8)/0.3,0,1)*(1-clamp((time-2.6)/0.4,0,1))"
+"Sticky note 3" (group l_03jm9)
+  position: 2.94s [1160,560] ─Cubic In→ 3.64s [960,540]
+  scale: 0.4s 0 ─Back Out→ 0.9s 100 ─Cubic In Out→ 2.94s 100 ─Cubic In→ 3.64s 0
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/0.52)*clamp((time-0.8)/0.3,0,1)*(1-clamp((time-2.6)/0.4,0,1))"
+"Sticky note 4" (group l_03jmc)
+  position: 3.01s [820,640] ─Cubic In→ 3.71s [960,540]
+  scale: 0.5s 0 ─Back Out→ 1s 100 ─Cubic In Out→ 3.01s 100 ─Cubic In→ 3.71s 0
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/0.55)*clamp((time-0.8)/0.3,0,1)*(1-clamp((time-2.6)/0.4,0,1))"
+"Sticky note 5" (group l_03jmf)
+  position: 3.08s [960,500] ─Cubic In→ 3.78s [960,540]
+  scale: 0.6s 0 ─Back Out→ 1.1s 100 ─Cubic In Out→ 3.08s 100 ─Cubic In→ 3.78s 0
+  rotation: expr "value + 4*Math.sin(time*2*Math.PI/0.6)*clamp((time-0.8)/0.3,0,1)*(1-clamp((time-2.6)/0.4,0,1))"
+"Vault shield" (group l_03jmi)
+  position: 0s [960,540] ─Cubic In Out→ 8s [960,540] ─Cubic In Out→ 8.9s [960,440]
+  scale: 3.5s 0 ─Back Out→ 4.1s 100 ─Cubic Out→ 4.6s 100 ─Cubic Out→ 4.8s [108,92] ─Cubic Out→ 5.1s 100
+"check" (path l_03jml)
+  trimEnd: 9.2s 0 ─Cubic Out→ 9.7s 100
+"Headline" (text l_03jmm)
+  text animator: in by word, start 8.6s, 0.5s each, stagger 0.12s, ease Expo Out

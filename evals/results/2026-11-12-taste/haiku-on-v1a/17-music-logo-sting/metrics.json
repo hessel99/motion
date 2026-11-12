@@ -1,0 +1,193 @@
+{
+ "run": {
+  "id": "17-music-logo-sting",
+  "name": "17-music-logo-sting",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 88,
+    "sub": {
+     "timing": 100,
+     "easing": 83.19999999999999,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 95.8
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 16.8,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 4.2
+    },
+    "issues": [
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:every-beat"
+    ],
+    "ms": 7.7
+   },
+   "after": {
+    "score": 88,
+    "sub": {
+     "timing": 100,
+     "easing": 83.19999999999999,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 95.8
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 16.8,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 4.2
+    },
+    "issues": [
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:hard-stop",
+     "low:every-beat"
+    ],
+    "ms": 7.7
+   }
+  },
+  "wallMs": 97792,
+  "timedOut": false,
+  "turns": 14,
+  "costUsd": 0.020398219999999998,
+  "durationMs": 96011,
+  "usage": {
+   "input": 503915,
+   "cached": 477722,
+   "output": 20768
+  },
+  "errors": [],
+  "toolCalls": 13,
+  "toolErrors": 1,
+  "toolsAvailable": 76,
+  "finalText": "I built the Pulse logo sting in the Main comp (8 s, 120 BPM track). I drew the mark myself, since the document only had the audio: a white ring with a red dot inside, and a \"Pulse\" wordmark in the same off-white on near-black.\n\n**Timing against the music**\n- **Build (0–4 s):** **Mark ring** draws on over the first 1.4 s, then squeezes in toward the drop. **Mark dot** punches on every beat, with the punch growing from 108% to 124%.\n- **Drop (4.0 s):** The ring bursts to 112% and springs back to 100%. The dot overshoots to 150% and settles. **Ripple 1 (drop)** expands out of the mark. The **Wordmark** letters rise in from 4.1 s, 0.05 s apart.\n- **Secondary hits (5.0, 5.5, 6.0 s):** The dot hits at 112%, 110% and 108%, each smaller than the last. **Ripple 2** and **Ripple 3** fire on 5.0 and 6.0.\n- **Lockup hold (6.5–8 s):** Everything rests at 100% and nothing moves, so the piece ends on the clean mark plus wordmark.\n\n**Checks:** A contact sheet across 0.4–7.5 s shows the build, the landing and the final lockup as intended. The critic scored it 88/100 (music sync 96, easing 83). Its flags were minor: the dot and ring arrive at full speed on their beat-hit keys, which is deliberate for the anticipation snaps, and the dot hits on every beat, which is the concept. I did not change those.\n\n**Choices I made**\n- Concept: \"Heartbeat\". The dot is the pulse; I went with it over the orbit concept.\n- Colours: #F4F4F5 on #0B0B10, with one red accent (#FF3B5C) for the dot and ripples.\n- Lockup: mark at left, wordmark at right, centred in the frame.\n- Font: the default sans at 700 weight, since no brand font was given.\n\nI can swap in your real mark if you have artwork, or try a different accent colour or a tighter drop."
+ },
+ "metrics": {
+  "layers": 7,
+  "drawableLayers": 6,
+  "layerTypes": {
+   "audio": 1,
+   "ellipse": 4,
+   "path": 1,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 6,
+  "keys": 56,
+  "segments": 39,
+  "easesUsed": {
+   "Quart In Out": 3,
+   "Hold": 4,
+   "Quad Out": 3,
+   "Cubic In Out": 2,
+   "Quad In": 14,
+   "Expo Out": 12,
+   "Spring 0.5": 1
+  },
+  "distinctEases": 7,
+  "easeFamilies": 6,
+  "overshootSegments": 1,
+  "keyedOvershoots": 0,
+  "springSegments": 1,
+  "holdKeys": 4,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 1,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#ff3b5c",
+   "#f4f4f5",
+   "#0b0b10"
+  ],
+  "keyCoverage": 0.863,
+  "visualActivity": 0.628,
+  "firstMotion": 0.4,
+  "lastMotion": 6.867,
+  "endHold": 1.133,
+  "longestHold": 0.268,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.067,
+  "exits": 3,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.023,
+  "midLuma": 0.056,
+  "toolErrors": 1,
+  "toolCalls": 13
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "the music is kept",
+    "type": "audioKept",
+    "pass": true
+   },
+   {
+    "text": "a hero landing on the drop (4.0 s, ±1 frame)",
+    "type": "hitAt",
+    "pass": true
+   },
+   {
+    "text": "moves land on beats (≥60% of landings within ±1 frame of the 120 BPM grid)",
+    "type": "onBeats",
+    "pass": true
+   },
+   {
+    "text": "restraint: not every beat carries a landing",
+    "type": "notEveryBeat",
+    "pass": false
+   }
+  ],
+  "hits": 4,
+  "checkable": 5,
+  "total": 5
+ },
+ "video": null
+}

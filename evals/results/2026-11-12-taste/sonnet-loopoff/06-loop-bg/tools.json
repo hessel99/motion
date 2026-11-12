@@ -1,0 +1,481 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1576,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 3,
+  "input": {
+   "comp": {
+    "background": "#0b0820",
+    "duration": 6,
+    "fps": 30,
+    "width": 1920,
+    "height": 1080,
+    "name": "Ambient Loop"
+   },
+   "layers": [
+    {
+     "key": "b1",
+     "name": "Orb Purple",
+     "type": "ellipse",
+     "x": 100,
+     "y": 50,
+     "w": 900,
+     "h": 900,
+     "fill": {
+      "type": "radial",
+      "stops": [
+       {
+        "pos": 0,
+        "color": "#8b4dffcc"
+       },
+       {
+        "pos": 1,
+        "color": "#8b4dff00"
+       }
+      ]
+     },
+     "props": {
+      "blur": 40
+     },
+     "expr": {
+      "position": "value + [90*Math.sin(2*Math.PI*time/6), 60*Math.cos(2*Math.PI*time/6)]"
+     }
+    },
+    {
+     "key": "b2",
+     "name": "Orb Teal",
+     "type": "ellipse",
+     "x": 1000,
+     "y": 300,
+     "w": 950,
+     "h": 950,
+     "fill": {
+      "type": "radial",
+      "stops": [
+       {
+        "pos": 0,
+        "color": "#19d3c5b3"
+       },
+       {
+        "pos": 1,
+        "color": "#19d3c500"
+       }
+      ]
+     },
+     "props": {
+      "blur": 40
+     },
+     "expr": {
+      "position": "value + [-80*Math.cos(2*Math.PI*time/6), 70*Math.sin(2*Math.PI*time/6)]"
+     }
+    },
+    {
+     "key": "b3",
+     "name": "Orb Violet",
+     "type": "ellipse",
+     "x": 700,
+     "y": -250,
+     "w": 700,
+     "h": 700,
+     "fill": {
+      "type": "radial",
+      "stops": [
+       {
+        "pos": 0,
+        "color": "#c06bff99"
+       },
+       {
+        "pos": 1,
+        "color": "#c06bff00"
+       }
+      ]
+     },
+     "props": {
+      "blur": 40
+     },
+     "expr": {
+      "position": "value + [70*Math.sin(2*Math.PI*time/6+2), 50*Math.sin(4*Math.PI*time/6)]"
+     }
+    },
+    {
+     "key": "b4",
+     "name": "Orb Cyan",
+     "type": "ellipse",
+     "x": 150,
+     "y": 600,
+     "w": 650,
+     "h": 650,
+     "fill": {
+      "type": "radial",
+      "stops": [
+       {
+        "pos": 0,
+        "color": "#38e8ff80"
+       },
+       {
+        "pos": 1,
+        "color": "#38e8ff00"
+       }
+      ]
+     },
+     "props": {
+      "blur": 40
+     },
+     "expr": {
+      "position": "value + [60*Math.cos(2*Math.PI*time/6+1), 80*Math.sin(2*Math.PI*time/6+3)]"
+     }
+    },
+    {
+     "key": "b5",
+     "name": "Orb Indigo",
+     "type": "ellipse",
+     "x": 1350,
+     "y": -100,
+     "w": 600,
+     "h": 600,
+     "fill": {
+      "type": "radial",
+      "stops": [
+       {
+        "pos": 0,
+        "color": "#5a3dff99"
+       },
+       {
+        "pos": 1,
+        "color": "#5a3dff00"
+       }
+      ]
+     },
+     "props": {
+      "blur": 40
+     },
+     "expr": {
+      "position": "value + [-60*Math.sin(2*Math.PI*time/6+4), 60*Math.cos(2*Math.PI*time/6+1)]"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"b1\":\"l_03jm2\",\"b2\":\"l_03jm3\",\"b3\":\"l_03jm4\",\"b4\":\"l_03jm5\",\"b5\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 734,
+  "ok": true,
+  "ms": 327,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "key": "r0",
+     "name": "Dots Row 1",
+     "x": 0,
+     "y": 57,
+     "w": 1920,
+     "h": 6,
+     "fill": "#ffffff",
+     "d": "M57 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM177 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM297 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM417 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM537 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM657 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM777 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM897 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM1017 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM1137 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM1257 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM1377 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM1497 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM1617 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM1737 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0ZM1857 3a3 3 0 1 0 6 0a3 3 0 1 0 -6 0Z",
+     "expr": {
+      "opacity": "22+14*Math.sin(2*Math.PI*time/6)"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"1 created, 0 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"r0\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "duplicate_layers",
+  "argsBytes": 89,
+  "ok": true,
+  "ms": 352,
+  "editorMs": 4,
+  "input": {
+   "ids": [
+    "l_03jm7",
+    "l_03jm7",
+    "l_03jm7",
+    "l_03jm7",
+    "l_03jm7",
+    "l_03jm7",
+    "l_03jm7",
+    "l_03jm7"
+   ]
+  },
+  "result": "{\"ids\":[\"l_03jm8\",\"l_03jm9\",\"l_03jma\",\"l_03jmb\",\"l_03jmc\",\"l_03jmd\",\"l_03jme\",\"l_03jmf\"]}"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 479,
+  "editorMs": 16,
+  "input": {
+   "id": "l_03jm8",
+   "props": {
+    "position": [
+     960,
+     180
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 605,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm9",
+   "props": {
+    "position": [
+     960,
+     300
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 1187,
+  "editorMs": 12,
+  "input": {
+   "id": "l_03jma",
+   "props": {
+    "position": [
+     960,
+     420
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 1753,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmb",
+   "props": {
+    "position": [
+     960,
+     540
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 928,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jmc",
+   "props": {
+    "position": [
+     960,
+     660
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 1357,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmd",
+   "props": {
+    "position": [
+     960,
+     780
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 2197,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jme",
+   "props": {
+    "position": [
+     960,
+     900
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 1633,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jmf",
+   "props": {
+    "position": [
+     960,
+     1020
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 82,
+  "ok": true,
+  "ms": 1377,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm8"
+   ],
+   "prop": "opacity",
+   "expr": "22+14*Math.sin(2*Math.PI*time/6-0.7)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 82,
+  "ok": true,
+  "ms": 1174,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm9"
+   ],
+   "prop": "opacity",
+   "expr": "22+14*Math.sin(2*Math.PI*time/6-1.4)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 82,
+  "ok": true,
+  "ms": 1522,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jma"
+   ],
+   "prop": "opacity",
+   "expr": "22+14*Math.sin(2*Math.PI*time/6-2.1)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 82,
+  "ok": true,
+  "ms": 1033,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jmb"
+   ],
+   "prop": "opacity",
+   "expr": "22+14*Math.sin(2*Math.PI*time/6-2.8)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 82,
+  "ok": true,
+  "ms": 1680,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jmc"
+   ],
+   "prop": "opacity",
+   "expr": "22+14*Math.sin(2*Math.PI*time/6-3.5)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 82,
+  "ok": true,
+  "ms": 576,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jmd"
+   ],
+   "prop": "opacity",
+   "expr": "22+14*Math.sin(2*Math.PI*time/6-4.2)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 82,
+  "ok": true,
+  "ms": 1051,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jme"
+   ],
+   "prop": "opacity",
+   "expr": "22+14*Math.sin(2*Math.PI*time/6-4.9)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 82,
+  "ok": true,
+  "ms": 1468,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jmf"
+   ],
+   "prop": "opacity",
+   "expr": "22+14*Math.sin(2*Math.PI*time/6-5.6)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 4634,
+  "editorMs": 4580,
+  "input": {
+   "times": [
+    0,
+    1.5,
+    3,
+    4.5,
+    5.97
+   ],
+   "cell": 380
+  },
+  "result": "5 frames left→right, top→bottom at 0s, 1.5s, 3s, 4.5s, 5.97s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/dd8c3634-4241-4e41-ba0d-a178a0203b45/tool-results/mcp-motion-blob-1794510973167-azgudd.jpg]"
+ }
+]

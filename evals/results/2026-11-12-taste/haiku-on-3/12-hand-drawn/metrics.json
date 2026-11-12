@@ -1,0 +1,186 @@
+{
+ "run": {
+  "id": "12-hand-drawn",
+  "name": "12-hand-drawn",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 4.1
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 4.1
+   }
+  },
+  "wallMs": 54586,
+  "timedOut": false,
+  "turns": 11,
+  "costUsd": 0.01173371,
+  "durationMs": 53860,
+  "usage": {
+   "input": 384677,
+   "cached": 369391,
+   "output": 9968
+  },
+  "errors": [],
+  "toolCalls": 10,
+  "toolErrors": 1,
+  "toolsAvailable": 76,
+  "finalText": "I'll start by checking the closest proven example for this kind of piece.\nThe brief is specific enough to build directly: wheat and loaf line art, three breathing blobs, and the name fading in. I'll build the whole scene in one call.\nScene is in. Next I'll add the name's letter-by-letter entrance and the 12 fps boil on the line art.\nThe critic flagged the font: Georgia isn't available here, so it falls back. I'll switch to the built-in serif and re-check.\nI built the \"Crumb & Co\" sting as a 6-second piece on a warm paper background, with the wheat and loaf drawn on in the same ink as the name. The critic scores it 100/100 after I fixed one font fallback.\n\n- **Wheat stalk** (**Wheat stalk**): draws on from 0.3 s over 1.4 s, with a Sine In Out ease.\n- **Loaf** (**Loaf**): draws on from 1.3 s over 1.2 s. Its three score marks (**Loaf scores**) follow at 2.3 s.\n- **Blobs**: three irregular blobs in mustard, terracotta and sage (**Blob mustard**, **Blob terracotta**, **Blob sage**) grow in from 80% during the first 1.5 s, then breathe slowly on sine loops.\n- **Name** (**Wordmark**): \"Crumb & Co\" fades up letter by letter from 2.5 s, 0.05 s apart, and holds until the end.\n- **Imperfection**: the line art jitters by about 1.4 px, stepped at 12 fps, so the strokes look hand-animated.\n\nTwo things to know:\n- I used the built-in serif because Georgia isn't available here. If you have a specific bakery typeface, I can swap it in.\n- I built this straight from your description rather than proposing concepts first, since you'd already specified the motion. The wheat is quite slim at the current size, so I can scale it up if you want more presence."
+ },
+ "metrics": {
+  "layers": 7,
+  "drawableLayers": 7,
+  "layerTypes": {
+   "path": 6,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 7,
+  "keys": 15,
+  "segments": 6,
+  "easesUsed": {
+   "Quad Out": 3,
+   "Sine In Out": 3
+  },
+  "distinctEases": 2,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 6,
+  "textAnimators": 1,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 6,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#e9b44c",
+   "#d97757",
+   "#7a9e7e",
+   "#2e2a24",
+   "#f6efe3"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.793,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0.134,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.024,
+  "midLuma": 0.903,
+  "toolErrors": 1,
+  "toolCalls": 10
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "stroke draw-on (trim paths animated)",
+    "type": "trimAnimated",
+    "pass": true
+   },
+   {
+    "text": "custom paths (≥2)",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "boil/wobble (wiggle expression, hold keys or path keys)",
+    "type": "jitter",
+    "pass": false
+   },
+   {
+    "text": "breathing blobs (scale animated)",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "warm palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "no linear eases",
+    "type": "noLinear",
+    "pass": true
+   }
+  ],
+  "hits": 6,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

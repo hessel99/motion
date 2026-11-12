@@ -1,0 +1,64 @@
+{
+  "id": "03-toggle-micro",
+  "title": "UI micro-interaction: toggle",
+  "complexity": "simple",
+  "style": [
+    "ui",
+    "product"
+  ],
+  "comp": {
+    "width": 800,
+    "height": 600,
+    "fps": 60,
+    "duration": 2
+  },
+  "prompt": "A toggle switch micro-interaction: an iOS-style pill toggle goes from off (grey) to on (green). The knob slides across with a slight squash-and-stretch and a tiny overshoot, the track color crossfades, and a small checkmark appears in the knob. Start in the off state, toggle at about 0.4s, settle by 1.2s.",
+  "checklist": [
+    {
+      "text": "track + knob layers",
+      "check": {
+        "type": "layersMin",
+        "min": 2
+      }
+    },
+    {
+      "text": "knob position animated",
+      "check": {
+        "type": "propAnimated",
+        "prop": "position"
+      }
+    },
+    {
+      "text": "track color changes grey → green (fill keys or crossfade)",
+      "check": {
+        "type": "colorChange"
+      }
+    },
+    {
+      "text": "overshoot on the knob (Back/spring)",
+      "check": {
+        "type": "overshoot"
+      }
+    },
+    {
+      "text": "squash & stretch (non-uniform scale or size)",
+      "check": {
+        "type": "squash"
+      }
+    },
+    {
+      "text": "checkmark (path) appears",
+      "check": {
+        "type": "pathLayersMin",
+        "min": 1
+      }
+    },
+    {
+      "text": "settled by ~1.2s (motion ends ≤1.5s)",
+      "check": {
+        "type": "motionEndsBy",
+        "seconds": 1.5
+      }
+    }
+  ]
+}

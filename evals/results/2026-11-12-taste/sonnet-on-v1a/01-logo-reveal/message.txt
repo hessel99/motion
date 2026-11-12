@@ -1,0 +1,6 @@
+Logo reveal for "NOVA", a small fintech. Build a simple geometric mark (a circle and a diagonal slash work) next to the wordmark. The mark draws/assembles first, then the wordmark slides out from behind it, then a tagline "Money, made simple" fades in underneath. Navy background, one accent color. End on a clean hold of the full lockup for at least a second.
+
+<editor_context>
+comp "Main" 1920x1080 60fps 4s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

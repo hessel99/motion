@@ -1,0 +1,25 @@
+- p1 [text] #f4f1ea "Design is not" Inter 120px w800
+- p2 [text] box 40,455,1000,120 #f4f1ea "just what it looks like." Inter 76px w600
+- p3a [text] #9a9aa6 "Design is" Inter 64px w500
+- p3b [text] #ff5a1f "how it works." Inter 150px w900
+- rule [rect] #ff5a1f
+- attr [text] #f4f1ea "— Steve Jobs" Inter 30px w500
+
+comp 1080x1080 8s @30fps, background #0e0e12
+"p1" (text l_03jm2) visible 0s–2.3s
+  position: 1.85s [540,520] ─Cubic In→ 2.2s [540,420]
+  opacity: 2.03s 100 ─Cubic In→ 2.2s 0
+  text animator: in by word, start 0.2s, 0.5s each, stagger 0.12s, ease Expo Out
+"p2" (text l_03jm3) visible 2s–4.4s
+  position: 3.95s [540,515] ─Cubic In→ 4.3s [540,415]
+  opacity: 4.13s 100 ─Cubic In→ 4.3s 0
+  text animator: in by char, start 0.1s, 0.4s each, stagger 0.03s, ease Expo Out
+"p3a" (text l_03jm4) visible 4.2s–1000000000s
+  text animator: in by word, start 0.1s, 0.4s each, stagger 0.1s, ease Expo Out
+"p3b" (text l_03jm5) visible 4.6s–1000000000s
+  text animator: in by word, start 0.1s, 0.6s each, stagger 0.22s, ease spring:0.35
+"rule" (rect l_03jm6) visible 6.2s–1000000000s
+  scale: 6.2s [0,100] ─Expo Out→ 6.8s 100
+"attr" (text l_03jm7) visible 6.4s–1000000000s
+  position: 6.5s [540,815] ─Expo Out→ 7.1s [540,795]
+  opacity: 6.5s 0 ─Expo Out→ 6.8s 100

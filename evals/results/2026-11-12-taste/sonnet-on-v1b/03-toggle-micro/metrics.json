@@ -1,0 +1,188 @@
+{
+ "run": {
+  "id": "03-toggle-micro",
+  "name": "03-toggle-micro",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 4.7
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 4.7
+   }
+  },
+  "wallMs": 21085,
+  "timedOut": false,
+  "turns": 5,
+  "costUsd": 0.0482174,
+  "durationMs": 18604,
+  "usage": {
+   "input": 141152,
+   "cached": 137374,
+   "output": 1938
+  },
+  "errors": [],
+  "toolCalls": 4,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the toggle in the 800×600 comp, 2 s at 60 fps, and checked it in a contact sheet. The first render showed a stray blue fill inside the checkmark, which I removed. The re-check shows the right frames; I didn't scrub through every frame.\n\n- **Off state:** it sits still until 0.4 s with a grey **Track** (`#c7c7cc`) and the white knob on the left.\n- **Knob slide:** at 0.4 s the **Knob** glides right and overshoots by about 10 px. It settles at 1.2 s, exactly on the right-hand end.\n- **Squash and stretch:** the knob stretches to 124% wide and 88% tall mid-travel, then squashes to 92% wide and 108% tall on arrival. It relaxes to 100% by 1.2 s.\n- **Track colour:** it crossfades from grey to iOS green (`#34c759`) between 0.4 and 0.8 s.\n- **Checkmark:** a green stroke inside the knob draws itself on from 0.75 to 1.05 s, so it appears just as the knob lands.\n\nI can add a soft knob shadow, make the squash bouncier, or loop it back to off for a continuous demo."
+ },
+ "metrics": {
+  "layers": 4,
+  "drawableLayers": 3,
+  "layerTypes": {
+   "rect": 1,
+   "group": 1,
+   "ellipse": 1,
+   "path": 1
+  },
+  "groups": 1,
+  "animatedLayers": 3,
+  "keys": 13,
+  "segments": 8,
+  "easesUsed": {
+   "Easy Ease": 5,
+   "Quart Out": 1,
+   "Quad Out": 1,
+   "Cubic Out": 1
+  },
+  "distinctEases": 4,
+  "easeFamilies": 4,
+  "overshootSegments": 0,
+  "keyedOvershoots": 2,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#34c759",
+   "#c7c7cc",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.4,
+  "visualActivity": 0.402,
+  "firstMotion": 0.4,
+  "lastMotion": 1.2,
+  "endHold": 0.8,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.034,
+  "midLuma": 0.929,
+  "toolErrors": 0,
+  "toolCalls": 4
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "track + knob layers",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "knob position animated",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "track color changes grey → green (fill keys or crossfade)",
+    "type": "colorChange",
+    "pass": true
+   },
+   {
+    "text": "overshoot on the knob (Back/spring)",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch (non-uniform scale or size)",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "checkmark (path) appears",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "settled by ~1.2s (motion ends ≤1.5s)",
+    "type": "motionEndsBy",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

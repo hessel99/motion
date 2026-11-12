@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 6,
+  "style_match": 6,
+  "timing_easing": 5,
+  "composition": 6,
+  "richness": 4,
+  "polish": 5
+ },
+ "overall": 5.33,
+ "critique": [
+  "The comp runs 10s instead of the briefed 8s, and the attribution only appears at 8.0s; within the requested duration it never lands. Each phrase is the same generic move (word fade-in, hold, 40px drift-up fade-out), so the beats stack in sequence instead of transitioning into each other, and the hero gets no lead-in.",
+  "Retime to 8s and land the attribution by about 6.8s. Build real hand-offs between phrases, e.g. 'Design is' stays as an anchor and slides up while 'not just…' wipes out and 'how it works.' punches in beneath it with scale and overshoot. Also give the hero more side margin than the current ~40px."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0598318,
+ "ms": 12053,
+ "raw": "```json\n{\"brief_fit\": 6, \"style_match\": 6, \"timing_easing\": 5, \"composition\": 6, \"richness\": 4, \"polish\": 5,\n \"critique\": [\"The comp runs 10s instead of the briefed 8s, and the attribution only appears at 8.0s; within the requested duration it never lands. Each phrase is the same generic move (word fade-in, hold, 40px drift-up fade-out), so the beats stack in sequence instead of transitioning into each other, and the hero gets no lead-in.\", \"Retime to 8s and land the attribution by about 6.8s. Build real hand-offs between phrases, e.g. 'Design is' stays as an anchor and slides up while 'not just…' wipes out and 'how it works.' punches in beneath it with scale and overshoot. Also give the hero more side margin than the current ~40px.\"]}\n```"
+}

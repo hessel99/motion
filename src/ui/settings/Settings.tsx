@@ -314,6 +314,9 @@ function Models() {
         <Row label="Storyboards" sub="For full pieces the agent first proposes beats you can edit.">
           <Select size="sm" aria-label="Storyboard approval" value={agentPrefs.storyboard} onChange={v => setAgentPref('storyboard', v === 'auto' ? 'auto' : 'ask')} options={[{ value: 'ask', label: 'Wait for my approval' }, { value: 'auto', label: 'Build right away' }]} />
         </Row>
+        <Row label="Polish automatically" sub="After a build, the motion critic checks timing, easing, layout and readability and sends the worst issues back to the agent (up to 2 rounds).">
+          <Select size="sm" aria-label="Polish automatically" value={agentPrefs.taste} onChange={v => setAgentPref('taste', v === 'off' ? 'off' : 'on')} options={[{ value: 'on', label: 'On' }, { value: 'off', label: 'Off' }]} />
+        </Row>
         <Row label="Turn budget" sub="Max tool round trips per message (empty = 90). Say “continue” when it runs out.">
           <input class="input input-sm" type="number" min="5" max="500" step="5" style={{ width: '72px' }} aria-label="Turn budget" placeholder="90" value={agentPrefs.turns} onChange={e => setAgentPref('turns', (e.target as HTMLInputElement).value.replace(/[^\d]/g, ''))} />
         </Row>
