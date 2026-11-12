@@ -408,6 +408,36 @@ The look is token driven, so a visual pass should only need to edit `tokens.css`
 - **Style guide**: `?styleguide` shows every token and component in both themes. It also runs live WCAG contrast checks (all text pairs reach AA) and draws a timeline and graph sample through `theme.ts`.
 - **Performance rules**: no backdrop-filter or blur, and transitions only on the color and opacity of small controls. Panels use `contain`. The per-frame timecode uses tabular digits in a fixed-width box.
 
+## Desktop shell: Electron 45 and the mac title bar (Nov 2026)
+
+- **Why the upgrade.** On macOS 26 the owner saw older-style traffic lights than Notes. macOS 26
+  gives the new window controls only to apps linked against the macOS 26 SDK. Electron 33.4.11 was
+  linked against SDK 14.0 (minos 11.0); **Electron 45.3.1** is linked against **SDK 26.5** (minos
+  13.0). Both read from `LC_BUILD_VERSION` of the darwin binaries. electron-builder 25 → 26.18.
+- **Breaking changes checked (34 → 45)**: sandboxed preloads lost the `Buffer` / `events` / `timers`
+  / `url` shims (45; `electron/preload.cjs` uses none); `electron` no longer downloads itself in
+  `postinstall` (42), it downloads on the first `require('electron')` / `npx electron` (the scripts
+  and `npm run qa:electron` do that; electron-builder downloads its own darwin zips);
+  synchronous `safeStorage` is deprecated (45) and **removed in 46**: before moving to 46, switch
+  `bridge/figma-shaders.mjs` `fileSecrets` to `encryptStringAsync` / `decryptStringAsync`;
+  `clipboard` is gone from renderers (44; the app uses `navigator.clipboard`); ASAR fds only work
+  through `fs` (45; nothing reads raw fds); `app.commandLine` lowercases switches (36; ours are
+  lowercase); Linux defaults to Wayland where available (38; xvfb runs still use X11). WebGPU still
+  needs `enable-unsafe-webgpu` on Linux (kept). No change to `protocol`, `net.fetch`, ipc or the
+  updater was needed.
+- **Minimum macOS is now 13 (Ventura)**: Electron 44 dropped macOS 12. The update manifest has no
+  OS gate, so a Mac on macOS 12 or older that installs this as a full app update would get an app
+  that does not start. Fine for the current users (macOS 26); add a `minMacOS` field to the
+  manifest before shipping to a wider audience.
+- **The release is a full app update**: the Electron version is part of the shell fingerprint
+  (`scripts/release-lib.mjs`), so `minShell` moves to this version.
+- **Title bar**: 52px row, native traffic lights at x 20, centred with AppKit's real button size
+  (measured through the Window Controls Overlay and corrected once at start). Numbers, the
+  reasoning and the owner's checklist: `docs/ui-structure.md` "Traffic lights (macOS)".
+- **Build check (Linux)**: `npm ci` + `npx electron-builder --mac zip --arm64 --x64 --publish never`
+  produce `Motion-<v>-mac-arm64.zip` (≈138 MB) and `-mac-x64.zip` (≈142 MB) on Linux, unsigned
+  as before.
+
 ## Known limitations / next
 
 - **Effects**: drop / inner shadow, layer blur (incl. progressive), background blur, noise, texture, glass and backdrop blend modes are real (`src/render/effects.ts` + `fx.ts`, see "Layer effects (implemented)"). Not yet: motion blur (prototype only), glow, effect result caching for static subtrees, bounds-sized offscreen targets.
