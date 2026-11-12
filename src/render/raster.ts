@@ -584,25 +584,22 @@ function filteredImage(asset: Asset, bmp: ImageBitmap, f: ImageFilters | undefin
   return cv;
 }
 
-/** figma-style image adjustments on straight rgba bytes (approximation of figma's curves; each
- *  slider is -1..1). exposure: stops of light; contrast / saturation: around mid grey / luma;
- *  temperature: warm (+) / cool (-); tint: magenta (+) / green (-); highlights / shadows: tone curve
- *  on the bright / dark range */
+/** figma-style image adjustments on straight rgba bytes (each slider -1..1). the curves were fitted
+ *  to figma's own render of a filtered image (rmse 0.04): exposure in linear light (2.5 stops per
+ *  unit), temperature / tint as channel offsets, highlights / shadows as luma-weighted lifts, then
+ *  contrast around mid grey and saturation around luma */
 export function applyImageFilters(d: Uint8ClampedArray | Uint8Array, f: ImageFilters) {
-  const ex = Math.pow(2, (f.exposure ?? 0) * 2), ct = 1 + (f.contrast ?? 0), sat = 1 + (f.saturation ?? 0);
-  const temp = (f.temperature ?? 0) * 0.18, tint = (f.tint ?? 0) * 0.12, hi = f.highlights ?? 0, sh = f.shadows ?? 0;
+  const ex = Math.pow(2, (f.exposure ?? 0) * 2.5), ct = 1 + (f.contrast ?? 0) * 0.188, sat = Math.max(0, 1 + (f.saturation ?? 0) * 1.3);
+  const temp = (f.temperature ?? 0) * 0.244, tint = (f.tint ?? 0) * 0.425, hi = (f.highlights ?? 0) * 0.125, sh = (f.shadows ?? 0) * 0.825;
   const lut = new Float32Array(256);
-  for (let i = 0; i < 256; i++) lut[i] = Math.pow(i / 255, 2.2); // srgb -> ~linear
+  for (let i = 0; i < 256; i++) lut[i] = Math.pow(Math.min(1, Math.pow(i / 255, 2.2) * ex), 1 / 2.2);
   for (let i = 0; i < d.length; i += 4) {
-    let r = lut[d[i]] * ex, g = lut[d[i + 1]] * ex, b = lut[d[i + 2]] * ex;
-    r = Math.pow(Math.min(1, r), 1 / 2.2); g = Math.pow(Math.min(1, g), 1 / 2.2); b = Math.pow(Math.min(1, b), 1 / 2.2);
-    r += temp; b -= temp; g -= tint; r += tint * 0.5; b += tint * 0.5;
+    let r = lut[d[i]], g = lut[d[i + 1]], b = lut[d[i + 2]];
+    r += temp + tint * 0.5; g -= tint; b += tint * 0.5 - temp;
     const y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    if (hi || sh) {
-      const hw = Math.max(0, (y - 0.5) * 2), sw = Math.max(0, (0.5 - y) * 2);
-      const dl = hi * 0.25 * hw * hw + sh * 0.25 * sw * sw;
-      r += dl; g += dl; b += dl;
-    }
+    const yc = y < 0 ? 0 : y > 1 ? 1 : y;
+    const dl = hi * Math.pow(yc, 7.8) + sh * (1 - yc);
+    r += dl; g += dl; b += dl;
     r = (r - 0.5) * ct + 0.5; g = (g - 0.5) * ct + 0.5; b = (b - 0.5) * ct + 0.5;
     const y2 = 0.2126 * r + 0.7152 * g + 0.0722 * b;
     r = y2 + (r - y2) * sat; g = y2 + (g - y2) * sat; b = y2 + (b - y2) * sat;
@@ -616,6 +613,8 @@ function drawImagePaint(c: Ctx, p: Paint, bw: number, bh: number) {
   if (!asset || !bmp) { c.fillStyle = 'rgba(204,204,204,1)'; c.fillRect(-1e4, -1e4, 2e4, 2e4); return; }
   const img = filteredImage(asset, bmp, p.filters);
   const iw = bmp.width, ih = bmp.height;
+  // figma upsamples images with nearest neighbour (blocky small images); downsampling stays smooth
+  const up = (k: number) => { c.imageSmoothingEnabled = !(k * Math.hypot(c.getTransform().a, c.getTransform().b) > 1.01); };
   const rot = ((Math.round((p.rotation ?? 0) / 90) % 4) + 4) % 4;
   c.imageSmoothingQuality = 'high';
   const mode = p.scaleMode ?? 'fill';
@@ -623,7 +622,9 @@ function drawImagePaint(c: Ctx, p: Paint, bw: number, bh: number) {
     const m = p.transform ?? [1, 0, 0, 1, 0, 0];
     c.transform(bw, 0, 0, bh, 0, 0);
     c.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+    up(1 / Math.max(1, Math.max(iw, ih)));
     c.drawImage(img, 0, 0, 1, 1);
+    c.imageSmoothingEnabled = true;
     return;
   }
   // rotation about the box center; a quarter turn swaps the image's sides for fitting
@@ -641,7 +642,9 @@ function drawImagePaint(c: Ctx, p: Paint, bw: number, bh: number) {
   const s = mode === 'fit' ? Math.min(bw / rw, bh / rh) : Math.max(bw / rw, bh / rh);
   c.translate(bw / 2, bh / 2);
   c.rotate(rot * Math.PI / 2);
+  up(s);
   c.drawImage(img, -iw * s / 2, -ih * s / 2, iw * s, ih * s);
+  c.imageSmoothingEnabled = true;
 }
 
 /** deterministic hash of a grain cell -> 0..1 */
@@ -1000,7 +1003,9 @@ export function rasterImage(asset: Asset, scale: number, size: number[], clip?: 
   const pw = Math.max(1, Math.round(w * s)), ph = Math.max(1, Math.round(h * s));
   const c = getCtx(pw, ph);
   c.imageSmoothingQuality = 'high';
+  c.imageSmoothingEnabled = !(pw > bmp.width * 1.01 || ph > bmp.height * 1.01); // nearest when upsampling, like figma
   c.drawImage(bmp, 0, 0, pw, ph);
+  c.imageSmoothingEnabled = true;
   return { kind: 'rgba', pw, ph, x: 0, y: 0, w, h, data: rgbaData(c, pw, ph) };
 }
 
