@@ -19,6 +19,8 @@ The existing `scripts/e2e.mjs`, `scripts/ui-check.mjs`, `scripts/audio-smoke.mjs
 
 ## Handed off (layout / chrome: shell agent)
 
+Re-checked after merging the shell agent's work (85a7f26): H-1, H-2, H-4 and H-7 are resolved (title bar with a traffic-light zone, `minWidth 1100 / minHeight 700`, 13px agent text, layout lock passes); H-3, H-5, H-8 and H-9 are still open.
+
 | # | issue |
 |---|---|
 | H-1 | macOS: the traffic lights (`trafficLightPosition {14,13}`, `electron/main.cjs`) sit over the top of the left sidebar. The rail starts lower, but the sidebar header ("Agent", x≈68) starts right next to the traffic lights and the `.tb-traffic` spacer is only added when the left sidebar is closed. |
