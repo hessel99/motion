@@ -13,7 +13,7 @@ import { compileExpr, compileProgram, runProgram, type ExprFrame, type ExprProgr
 import { PROP_DEFS, type Layer, type Paint, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
 import { Atlas, type AtlasEntry } from './atlas';
-import { ShaderHost, type FxFrame, type ItemShaders } from './shader-host';
+import { newFxFrame, ShaderHost, type FxFrame, type ItemShaders } from './shader-host';
 import type { PathGeometry, PathKey } from '../core/model';
 import { loadBundledFonts } from './fonts';
 import { EffectEval, hasEffects, needsBlendShader, type ResolvedEffect } from './effects';
@@ -62,6 +62,8 @@ layout(location=9) in vec4 iI;
 layout(location=10) in vec4 iJ;
 uniform vec3 uView;
 uniform vec2 uRes;
+// view rotation: identity, except while drawing a layer into its local-space effect target
+uniform vec4 uRot;
 out vec2 vLocal;
 out vec2 vWorld;
 out vec2 vUV;
@@ -92,7 +94,7 @@ void main() {
     vUV = kind > 4.5 && kind < 6.5 ? mat2(iFill.xy, iFill.zw) * lp + iUV.xy : vec2(0.0);
   }
   vec2 w = mat2(iA.xy, iA.zw) * lp + iB.xy;
-  vec2 s = w * uView.x + uView.yz;
+  vec2 s = (mat2(uRot.xy, uRot.zw) * w) * uView.x + uView.yz;
   vec2 ndc = s / uRes * 2.0 - 1.0;
   gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
   vLocal = lp;
@@ -229,7 +231,7 @@ void main() {
 const CMD_DRAW = 0, CMD_PUSH = 1, CMD_POP = 2, CMD_MASK = 3, CMD_BLEND = 4, CMD_FXPOP = 5, CMD_MASKMODE = 6;
 const MASK_MODE: Record<string, number> = { alpha: 0, luminance: 1, vector: 2 };
 // figma shader fills / effects (render/shader-host.ts)
-const CMD_SHD = 7, CMD_SFXPOP = 8;
+const CMD_SHD = 7, CMD_SFXPOP = 8, CMD_LPUSH = 9;
 const BLEND_IDS: Record<string, number> = { normal: 0, multiply: 1, screen: 2, add: 3, darken: 4, lighten: 5 };
 
 interface UnitState { unit: TextUnit; delay: number; ease: (p: number) => number; entry: AtlasEntry | null; raster: RasterResult | null; scale: number }
@@ -355,6 +357,12 @@ export class Renderer {
   private inst = new Float32Array(0);
   private uView!: WebGLUniformLocation;
   private uRes!: WebGLUniformLocation;
+  private uRot!: WebGLUniformLocation;
+  /** the canvas cursor in comp coords while it hovers the viewport (editor only): mouse-driven
+   *  shaders follow it. null = use their keyframable mouse prop (renders, exports) */
+  pointer: { x: number; y: number } | null = null;
+  /** any mouse-driven shader drawn last frame (the viewport redraws on pointer moves only then) */
+  usesPointer = false;
   atlas: Atlas;
 
   items: Item[] = [];
@@ -475,6 +483,7 @@ export class Renderer {
     this.prog = this.buildProgram();
     this.uView = gl.getUniformLocation(this.prog, 'uView')!;
     this.uRes = gl.getUniformLocation(this.prog, 'uRes')!;
+    this.uRot = gl.getUniformLocation(this.prog, 'uRot')!;
     this.vao = gl.createVertexArray()!;
     gl.bindVertexArray(this.vao);
     const qb = gl.createBuffer();
@@ -1745,13 +1754,16 @@ export class Renderer {
     let k = 0;
     let culled = 0;
     const cullOn = this.cullOffscreen;
+    this.usesPointer = false;
+    // inside a local-space effect region the whole layer renders, on screen or not (no culling)
+    let localDepth = 0;
     const px0 = this.panX * this.dpr, py0 = this.panY * this.dpr, cw0 = this.targetW(), ch0 = this.targetH();
     const mask = this.drawnMask;
     const cmds = this.cmds;
     cmds.length = 0;
     let pending = 0; // first instance not yet covered by a DRAW command
     // open isolation regions: end index, composite opacity, divisor to restore, optional mask range
-    const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number; box: number; fx: number; kStart: number; mode: number; sfx?: boolean }[] = [];
+    const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number; box: number; fx: number; kStart: number; mode: number; sfx?: FxFrame; cmdStart?: number }[] = [];
     const fxFrame = this.fxFrame;
     fxFrame.length = 0;
     // screen bounds (device px) of what each isolated region draws: its offscreen clear and its
@@ -1788,6 +1800,12 @@ export class Renderer {
           R.kStart = r.kStart; R.kCount = k - r.kStart;
           if (boxes[bi] <= boxes[bi + 2]) { boxes[bi] -= R.pad; boxes[bi + 1] -= R.pad; boxes[bi + 2] += R.pad; boxes[bi + 3] += R.pad; }
           cmds.push(CMD_FXPOP, r.box, r.fx);
+        } else if (r.sfx?.local) {
+          localDepth--;
+          // the result is current (or in flight with one to show): the layer's own draws aren't needed
+          const st = r.sfx.shaders.e;
+          if (!r.sfx.capture && st.tex && st.shown !== -1) { cmds.length = r.cmdStart!; cmds.push(CMD_BLEND, 0, 0); }
+          cmds.push(CMD_SFXPOP, r.box, r.opacity);
         } else cmds.push(r.sfx ? CMD_SFXPOP : CMD_POP, r.box, r.opacity);
         if (stack.length) {
           // the composite lands inside the parent region
@@ -1839,8 +1857,9 @@ export class Renderer {
         const box = newBox();
         boxes[box] = fxf.sx0; boxes[box + 1] = fxf.sy0; boxes[box + 2] = fxf.sx1; boxes[box + 3] = fxf.sy1;
         this.fxOf.set(box, fxf);
-        cmds.push(CMD_PUSH, box, 0);
-        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box, fx: -1, kStart: k, mode: 0, sfx: true });
+        cmds.push(fxf.local ? CMD_LPUSH : CMD_PUSH, box, 0);
+        if (fxf.local) localDepth++;
+        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box, fx: -1, kStart: k, mode: 0, sfx: fxf, cmdStart: cmds.length });
         div = O[i];
         isolated++;
       }
@@ -1849,7 +1868,7 @@ export class Renderer {
       const bm = BLEND[i];
       if (bm !== curBlend) { flush(); cmds.push(CMD_BLEND, bm, 0); curBlend = bm; }
       if ((bits & SB_SHD) && !(bits & 4)) {
-        const tex = this.shaderFill(i, t, z, px0, py0, cw0, ch0, cullOn);
+        const tex = this.shaderFill(i, t, z, px0, py0, cw0, ch0, cullOn && !localDepth);
         if (!tex) { lastK[i] = -1; culled++; continue; }
         flush();
         cmds.push(CMD_SHD, this.shdTex.length, 0);
@@ -1893,7 +1912,7 @@ export class Renderer {
       let shA = 0, shB = 0, shC = 0, shD = 0;
       // viewport culling: skip layers whose (padded) box is completely off-screen.
       // saves rasterization + atlas space for raster layers and fill work for everything.
-      if (cullOn && !(bits & 1)) {
+      if (cullOn && !(bits & 1) && !localDepth) {
         const pad = Math.max(w, h) * 0.25 + (S[os + 14] || 0) + 4 / z;
         // screen aabb of the padded box: center +- the absolute extents (same as its 4 corners)
         const hx = w / 2 + pad, hy = h / 2 + pad, mx = w / 2, my = h / 2;
@@ -2044,6 +2063,7 @@ export class Renderer {
     gl.useProgram(this.prog);
     gl.uniform3f(this.uView, z, this.panX * this.dpr, this.panY * this.dpr);
     gl.uniform2f(this.uRes, cw, ch);
+    gl.uniform4f(this.uRot, 1, 0, 0, 1);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.atlas.tex);
     this.bindRamps();
@@ -2110,7 +2130,32 @@ export class Renderer {
       if (cx + ex < 0 || cy + ey < 0 || cx - ex > cw || cy - ey > ch) return null;
     }
     const rs = Math.sqrt(Math.abs(a * d - b * c)) * z;
-    return this.shaders.fill(sd, w, h, rs, t - this.sTOff[i], this.store.comp, this.sIn[i]);
+    // mouse-driven: the hovering cursor as a fraction of the layer box (inverse of its world matrix)
+    let hx = NaN, hy = NaN;
+    if (sd.fill!.mouseOff >= 0) {
+      this.usesPointer = true;
+      const P = this.livePointer();
+      if (P) {
+        const det = a * d - b * c || 1e-12, dx = P.x - e, dy = P.y - f;
+        hx = (d * dx - c * dy) / det / (w || 1); hy = (a * dy - b * dx) / det / (h || 1);
+      }
+    }
+    return this.shaders.fill(sd, w, h, rs, t - this.sTOff[i], this.store.comp, this.sIn[i], hx, hy);
+  }
+
+  /** the hover pointer, only while editing (renders for export / settle use the mouse props) */
+  private livePointer() { return this.syncRaster || this.settling ? null : this.pointer; }
+
+  /** may item i's shader effects run in its local space? not when its subtree has isolated
+   *  regions of its own (masks, effects, group opacity): those draw in screen space */
+  private localFxOk(i: number): boolean {
+    const BITS = this.sBits, end = this.subEnd[i];
+    for (let j = i + 1; j < end; j++) {
+      const bj = BITS[j];
+      if (bj & (1 | 16 | SB_FX)) return false;
+      if ((bj & 2) && this.lopa[j] < 0.999 && this.subEnd[j] > j + 1) return false;
+    }
+    return true;
   }
 
   /** shader effects of item i: its screen region and whether it must be captured this frame.
@@ -2124,25 +2169,61 @@ export class Renderer {
     const W = this.world, S = this.style, o6 = i * 6, os = i * ST;
     const a = W[o6], b = W[o6 + 1], c = W[o6 + 2], d = W[o6 + 3], e = W[o6 + 4], f = W[o6 + 5];
     const w = S[os], h = S[os + 1];
-    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    for (let k = 0; k < 4; k++) {
-      const X = k & 1 ? w : 0, Y = k & 2 ? h : 0;
-      const sx = (a * X + c * Y + e) * z + px0, sy = (b * X + d * Y + f) * z + py0;
-      if (sx < x0) x0 = sx; if (sx > x1) x1 = sx; if (sy < y0) y0 = sy; if (sy > y1) y1 = sy;
-    }
+    const fr = sd.frame ?? (sd.frame = newFxFrame(i, sd));
+    fr.item = i; fr.shaders = sd;
+    const B = fr.box;
+    B[0] = e; B[1] = f; B[2] = a * w; B[3] = b * w; B[4] = c * h; B[5] = d * h;
     // clamp to the target (and to the comp when it clips: the offscreen target is only cleared there)
     let lx = 0, ly = 0, hx = cw, hy = ch;
     if (this.clipToComp) { const comp = this.store.comp; lx = Math.max(0, Math.round(px0)); ly = Math.max(0, Math.round(py0)); hx = Math.min(cw, Math.round(px0 + comp.width * z)); hy = Math.min(ch, Math.round(py0 + comp.height * z)); }
-    const sx0 = Math.max(lx, Math.floor(x0)), sy0 = Math.max(ly, Math.floor(y0)), sx1 = Math.min(hx, Math.ceil(x1)), sy1 = Math.min(hy, Math.ceil(y1));
-    if (sx1 - sx0 < 1 || sy1 - sy0 < 1) return null;
-    const fr = sd.frame ?? (sd.frame = { item: i, shaders: sd, key: 0, capture: false, sx0: 0, sy0: 0, sx1: 0, sy1: 0, cw: 0, ch: 0, rs: 1, rect: [0, 0, 0, 0], time: 0 });
-    fr.item = i; fr.shaders = sd;
-    fr.sx0 = sx0; fr.sy0 = sy0; fr.sx1 = sx1; fr.sy1 = sy1;
-    const pw = sx1 - sx0, ph = sy1 - sy0;
-    const q = Math.min(1, Math.sqrt(2048 * 2048 / (pw * ph)));
-    fr.cw = Math.max(1, Math.round(pw * q)); fr.ch = Math.max(1, Math.round(ph * q));
-    fr.rs = Math.sqrt(Math.abs(a * d - b * c)) * z * q;
-    fr.rect[0] = (sx0 - px0) / z; fr.rect[1] = (sy0 - py0) / z; fr.rect[2] = (sx1 - px0) / z; fr.rect[3] = (sy1 - py0) / z;
+    const X = fr.xf;
+    fr.local = this.localFxOk(i);
+    if (fr.local) {
+      // local space (as figma): the layer renders unrotated into its own target, its whole box
+      // whatever part of it the viewport shows (capped), the effect runs there, the result is
+      // drawn back rotated. comp -> target: S * R(-θ) * p + T
+      const th = Math.atan2(b, a), co = Math.cos(th), si = Math.sin(th);
+      let u0 = Infinity, v0 = Infinity, u1 = -Infinity, v1 = -Infinity;
+      for (let k = 0; k < 4; k++) {
+        const Xl = k & 1 ? w : 0, Yl = k & 2 ? h : 0;
+        const wx = a * Xl + c * Yl + e, wy = b * Xl + d * Yl + f;
+        const ru = co * wx + si * wy, rv = -si * wx + co * wy;
+        if (ru < u0) u0 = ru; if (ru > u1) u1 = ru; if (rv < v0) v0 = rv; if (rv > v1) v1 = rv;
+      }
+      const sw = (u1 - u0) * z, sh = (v1 - v0) * z;
+      if (!(sw >= 0.5 && sh >= 0.5)) return null;
+      const q = Math.min(1, Math.sqrt(2048 * 2048 / (sw * sh)), 4096 / Math.max(sw, sh));
+      const Sc = z * q;
+      fr.lw = fr.cw = Math.max(1, Math.ceil(sw * q)); fr.lh = fr.ch = Math.max(1, Math.ceil(sh * q));
+      const V = fr.view;
+      V[0] = Sc; V[1] = -u0 * Sc; V[2] = -v0 * Sc; V[3] = co; V[4] = -si; V[5] = si; V[6] = co;
+      const du = fr.lw / Sc, dv = fr.lh / Sc; // (the target's extent: whole pixels)
+      X[0] = co * u0 - si * v0; X[1] = si * u0 + co * v0; X[2] = du * co; X[3] = du * si; X[4] = -dv * si; X[5] = dv * co;
+      fr.rs = Math.sqrt(Math.abs(a * d - b * c)) * Sc;
+      // screen bounds of the drawn-back result (the region's box for the parent's scissor)
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (let k = 0; k < 4; k++) {
+        const sx = (X[0] + (k & 1 ? X[2] : 0) + (k & 2 ? X[4] : 0)) * z + px0, sy = (X[1] + (k & 1 ? X[3] : 0) + (k & 2 ? X[5] : 0)) * z + py0;
+        if (sx < x0) x0 = sx; if (sx > x1) x1 = sx; if (sy < y0) y0 = sy; if (sy > y1) y1 = sy;
+      }
+      fr.sx0 = Math.max(lx, Math.floor(x0)); fr.sy0 = Math.max(ly, Math.floor(y0)); fr.sx1 = Math.min(hx, Math.ceil(x1)); fr.sy1 = Math.min(hy, Math.ceil(y1));
+      if (fr.sx1 - fr.sx0 < 1 || fr.sy1 - fr.sy0 < 1) return null; // off-screen: nothing to show
+    } else {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (let k = 0; k < 4; k++) {
+        const Xl = k & 1 ? w : 0, Yl = k & 2 ? h : 0;
+        const sx = (a * Xl + c * Yl + e) * z + px0, sy = (b * Xl + d * Yl + f) * z + py0;
+        if (sx < x0) x0 = sx; if (sx > x1) x1 = sx; if (sy < y0) y0 = sy; if (sy > y1) y1 = sy;
+      }
+      const sx0 = Math.max(lx, Math.floor(x0)), sy0 = Math.max(ly, Math.floor(y0)), sx1 = Math.min(hx, Math.ceil(x1)), sy1 = Math.min(hy, Math.ceil(y1));
+      if (sx1 - sx0 < 1 || sy1 - sy0 < 1) return null;
+      fr.sx0 = sx0; fr.sy0 = sy0; fr.sx1 = sx1; fr.sy1 = sy1;
+      const pw = sx1 - sx0, ph = sy1 - sy0;
+      const q = Math.min(1, Math.sqrt(2048 * 2048 / (pw * ph)));
+      fr.cw = Math.max(1, Math.round(pw * q)); fr.ch = Math.max(1, Math.round(ph * q));
+      fr.rs = Math.sqrt(Math.abs(a * d - b * c)) * z * q;
+      X[0] = (sx0 - px0) / z; X[1] = (sy0 - py0) / z; X[2] = pw / z; X[3] = 0; X[4] = 0; X[5] = ph / z;
+    }
     // what the effect input depends on: edits / animation below it (changed flags), async rasters
     // (dirty frames) and the shader results of the layers inside
     let changed = this.fxDirty, sig = 0;
@@ -2154,7 +2235,11 @@ export class Renderer {
     }
     if (sig !== sd.childSig) { sd.childSig = sig; changed = true; }
     if (changed) sd.contentGen++;
-    if (!this.shaders.fxPlan(fr, sd, t - this.sTOff[i], sd.contentGen, this.store.comp, this.sIn[i])) return null;
+    let mx = NaN, my = NaN;
+    let mouseFx = false;
+    for (let r = 0; r < sd.fx.length; r++) if (sd.fx[r].mouseOff >= 0) mouseFx = true;
+    if (mouseFx) { this.usesPointer = true; const P = this.livePointer(); if (P) { mx = P.x; my = P.y; } }
+    if (!this.shaders.fxPlan(fr, sd, t - this.sTOff[i], sd.contentGen, this.store.comp, this.sIn[i], mx, my)) return null;
     return fr;
   }
 
@@ -2164,6 +2249,8 @@ export class Renderer {
     const end = performance.now() + timeoutMs;
     this.settling = true;
     try {
+      // (render once in settle mode: what a frame wants can differ from the editor's, e.g. the mouse)
+      this.render(t);
       while ((this.shaders.unsettled > 0 || this.shaders.inflight > 0) && performance.now() < end) {
         await this.shaders.nextResult(250);
         this.render(t);
@@ -2456,6 +2543,22 @@ export class Renderer {
         gl.bindTexture(gl.TEXTURE_2D, this.shdTex[a]);
         gl.activeTexture(gl.TEXTURE0);
       }
+      else if (type === CMD_LPUSH) {
+        // local-space effect region: its own target, the layer unrotated (see planFx)
+        const fr = this.fxOf.get(a)!, V = fr.view;
+        const L = this.shaders.localTarget(fr.shaders, fr.lw, fr.lh);
+        targets.push(L.fb);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, L.fb);
+        gl.viewport(0, 0, fr.lw, fr.lh);
+        const r = [0, 0, fr.lw, fr.lh];
+        sc.push(r);
+        setSc(r);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform3f(this.uView, V[0], V[1], V[2]);
+        gl.uniform2f(this.uRes, fr.lw, fr.lh);
+        gl.uniform4f(this.uRot, V[3], V[4], V[5], V[6]);
+      }
       else if (type === CMD_PUSH) {
         const f = this.fbo(depth);
         depth++;
@@ -2498,25 +2601,32 @@ export class Renderer {
         maskMode = 0;
       } else if (type === CMD_SFXPOP) {
         // shader effects: capture the isolated layer for the worker, draw the last result over it
-        const src = this.fbos[depth - 1];
-        depth--;
+        const fr = this.fxOf.get(a)!;
+        const view = { z: this.zoom * this.dpr, px: this.panX * this.dpr, py: this.panY * this.dpr, w: cw, h: ch };
+        let srcTex: WebGLTexture;
+        if (fr.local) {
+          srcTex = fr.shaders.lt!.tex;
+          gl.uniform3f(this.uView, view.z, view.px, view.py);
+          gl.uniform2f(this.uRes, cw, ch);
+          gl.uniform4f(this.uRot, 1, 0, 0, 1);
+        } else { srcTex = this.fbos[depth - 1].tex; depth--; }
         targets.pop();
         const parentFb = targets[targets.length - 1];
         sc.pop();
-        const fr = this.fxOf.get(a)!;
-        if (fr.capture) {
-          this.shaders.capture(fr, src.tex, cw, ch, this.syncRaster);
-          gl.bindFramebuffer(gl.FRAMEBUFFER, parentFb);
-        }
+        if (fr.capture) this.shaders.capture(fr, srcTex, fr.local ? fr.lw : cw, fr.local ? fr.lh : ch, this.syncRaster);
         gl.bindFramebuffer(gl.FRAMEBUFFER, parentFb);
+        gl.viewport(0, 0, cw, ch);
         setSc(sc[sc.length - 1]);
-        if (!this.shaders.composite(fr.shaders, { z: this.zoom * this.dpr, px: this.panX * this.dpr, py: this.panY * this.dpr, w: cw, h: ch }, b)) {
+        if (fr.local) {
+          // the layer's own pixels until a result exists (drawn back in place, rotated)
+          if (!this.shaders.composite(fr.shaders, view, b)) this.shaders.drawTex(srcTex, fr.xf, view, b);
+        } else if (!this.shaders.composite(fr.shaders, view, b)) {
           // no result yet (or no webgpu): the layer as it is
           gl.useProgram(this.compositeProgram());
           gl.uniform1f(this.cuOpacity, b);
           gl.uniform1f(this.cuUseMask, 0);
           gl.activeTexture(gl.TEXTURE1);
-          gl.bindTexture(gl.TEXTURE_2D, src.tex);
+          gl.bindTexture(gl.TEXTURE_2D, srcTex);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
           gl.bindTexture(gl.TEXTURE_2D, null);
           gl.activeTexture(gl.TEXTURE0);

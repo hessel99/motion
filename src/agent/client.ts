@@ -108,6 +108,8 @@ class AgentClient {
       } catch (e: any) {
         this.send({ type: 'tool_result', id: m.id, ok: false, error: String(e?.message ?? e) });
       }
+    } else if (m.type !== 'chat_event') {
+      this.extra.forEach(f => f(m));
     } else if (m.type === 'chat_event') {
       this.chatHandlers.get(m.chatId)?.(m.event);
       if (m.event.kind === 'done') { this.chatHandlers.delete(m.chatId); this.readOnlyChats.delete(m.chatId); }
@@ -115,6 +117,10 @@ class AgentClient {
   }
 
   private send(m: any) { this.ws?.readyState === 1 && this.ws.send(JSON.stringify(m)); }
+  /** other bridge services (figma shader sources): raw messages both ways */
+  private extra = new Set<(m: any) => void>();
+  listen(fn: (m: any) => void) { this.extra.add(fn); return () => { this.extra.delete(fn); }; }
+  post(m: any): boolean { if (this.ws?.readyState !== 1) return false; this.send(m); return true; }
 
   chat(opts: { provider: string; message: string; sessionId?: string; model?: string; mode?: ChatMode; maxTurns?: number }, onEvent: (e: ChatEvent) => void) {
     const chatId = 'c' + Math.random().toString(36).slice(2);

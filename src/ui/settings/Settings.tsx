@@ -2,6 +2,8 @@
 // card sections. Appearance, Connections, Keyboard shortcuts, Models and Agent runs are real;
 // Updates is real too (src/app/updates.ts, electron/updates/). Profile, Notifications and Members are placeholders.
 
+import { shaderSources } from '../../app/shader-sources';
+import { importShaderFiles } from '../ShaderPanel';
 import { useEffect, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 import { editor } from '../../app/editor';
@@ -256,6 +258,7 @@ function Connections() {
           {status === 'connected' ? <Status kind="ok">Running</Status> : <Status kind="off">Offline</Status>}
         </Row>
       </Card>
+      <FigmaConnection />
       <LinkSharing />
     </>
   );
@@ -502,4 +505,27 @@ function renderNotes(notes: string) {
   }
   flush();
   return out;
+}
+
+/** figma: shader code for pasted designs (bridge/figma-shaders.mjs) */
+function FigmaConnection() {
+  const [, force] = useState(0);
+  useEffect(() => { const off = shaderSources.on(() => force(x => x + 1)); const off2 = agentClient.on(() => force(x => x + 1)); shaderSources.refresh(); return () => { off(); off2(); }; }, []);
+  const s = shaderSources.status;
+  const bridge = agentClient.status === 'connected';
+  return (
+    <Card title="Figma" sub="Figma's clipboard never contains a shader's code. Motion fetches it from Figma (or through Claude Code's Figma connection) and keeps a copy on this computer, so pasted shaders render exactly.">
+      <Row icon={<Plug />} label="Figma account" sub={s?.figma === 'connected' ? `Signed in${s.encrypted ? '' : ' (token stored unencrypted: no OS keychain)'}` : s?.error || 'Sign in to fetch shaders directly from Figma.'}>
+        {!bridge ? <Status kind="off">Bridge offline</Status>
+          : s?.figma === 'connected' ? <Button size="sm" onClick={() => shaderSources.disconnect()}>Disconnect</Button>
+          : <Button size="sm" onClick={() => shaderSources.connect()}>Connect Figma</Button>}
+      </Row>
+      <Row icon={<SquareTerminal />} label="Through Claude Code" sub="Used when Motion is not signed in: Claude Code's own Figma MCP server answers get_shader.">
+        {s?.claude ? <Status kind="ok">Available</Status> : <Status kind="off">No Figma server in Claude Code</Status>}
+      </Row>
+      <Row label="Shader files" sub="Have the files (main.ts, features.json)? Import them: they fill the shader a pasted layer is missing.">
+        <Button size="sm" onClick={() => importShaderFiles()}>Import shader…</Button>
+      </Row>
+    </Card>
+  );
 }
