@@ -136,7 +136,18 @@ export class AudioEngine {
   constructor(private ed: Editor) {
     onDecoded = () => { ed.emit('audio'); if (ed.store.playing) this.restart(); };
     // clips are re-collected only after a document change (not every frame)
-    ed.store.on('doc', () => { this.stale = true; });
+    // ...and only after one that can change them: a drag of thousands of shape layers while playing
+    // must not re-walk the whole layer tree every frame
+    ed.store.onChange(c => {
+      if (this.stale) return;
+      if (c.structure || c.comp || c.assets) { this.stale = true; return; }
+      const L = ed.store.project.layers;
+      for (const id of c.layers) {
+        // audio layers, precomps and anything with children (their in/out/visibility bound the clips below)
+        const l = L[id];
+        if (!l || l.type === 'audio' || l.type === 'precomp' || l.children.length) { this.stale = true; return; }
+      }
+    });
     ed.store.on('comps', () => { this.stale = true; pruneAudio(ed.store.project.assets); });
     ed.onFrame((_now, t, playing) => {
       if (playing && !this.wasPlaying) this.restart();

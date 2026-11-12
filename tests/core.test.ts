@@ -206,6 +206,45 @@ describe('review regressions', () => {
     moveKeysFrom(s, snap, 0.5);
     expect(s.layer(l.id)!.props.rotation!.kf!.map(k => k.t)).toEqual([0.5, 1, 2]);
   });
+  it('a merged drag keeps one undo/redo op per slot and undoes/redoes exactly', () => {
+    const s = new Store();
+    const a = keyed(s, [0, 1, 2]);
+    const b = keyed(s, [0.5, 1.5]);
+    const before = [a, b].map(l => JSON.stringify(s.layer(l.id)!.props.rotation));
+    const keys = [keyId(a.id, 'rotation', 0), keyId(a.id, 'rotation', 1), keyId(a.id, 'rotation', 2), keyId(b.id, 'rotation', 0)];
+    s.keySelection = new Set(keys);
+    s.beginGesture('keys');
+    const snap = snapshotKeys(s, s.keySelection);
+    for (let i = 1; i <= 50; i++) moveKeysFrom(s, snap, i * 0.05); // b's key crosses 1.5 and replaces nothing mid-drag
+    s.endGesture();
+    const after = [a, b].map(l => JSON.stringify(s.layer(l.id)!.props.rotation));
+    expect(s.layer(a.id)!.props.rotation!.kf!.map(k => +k.t.toFixed(6))).toEqual([2.5, 3.5, 4.5]);
+    expect(s.layer(b.id)!.props.rotation!.kf!.map(k => +k.t.toFixed(6))).toEqual([1.5, 3]);
+    expect([...s.keySelection].sort()).toEqual([keyId(a.id, 'rotation', 0), keyId(a.id, 'rotation', 1), keyId(a.id, 'rotation', 2), keyId(b.id, 'rotation', 1)].sort());
+    expect(s.historyLabels.at(-1)).toBe('Move keyframes');
+    const entry = (s as any).undoStack.at(-1);
+    expect(entry.undo.length).toBe(2);
+    expect(entry.redo.length).toBe(2);
+    const n = s.historyLength;
+    s.undo();
+    expect([a, b].map(l => JSON.stringify(s.layer(l.id)!.props.rotation))).toEqual(before);
+    s.redo();
+    expect([a, b].map(l => JSON.stringify(s.layer(l.id)!.props.rotation))).toEqual(after);
+    expect(s.historyLength).toBe(n);
+  });
+  it('merged steps that create then edit a slot undo to the original state', () => {
+    const s = new Store();
+    const l = addLayer(s, 'rect');
+    const had = 'rotation' in s.layer(l.id)!.props;
+    for (let i = 0; i < 5; i++) s.transact('Edit', tx => { const L = s.layer(l.id)!; tx.set(L.props, 'rotation', { v: [i] }); tx.set(L.props.rotation!, 'v', [i * 10]); tx.set(L, 'name', 'n' + i); tx.touch(l.id); }, 'm');
+    expect(s.layer(l.id)!.props.rotation!.v).toEqual([40]);
+    s.undo();
+    expect('rotation' in s.layer(l.id)!.props).toBe(had);
+    expect(s.layer(l.id)!.name).not.toBe('n0');
+    s.redo();
+    expect(s.layer(l.id)!.props.rotation!.v).toEqual([40]);
+    expect(s.layer(l.id)!.name).toBe('n4');
+  });
   it('multi-key drag toward 0 keeps spacing', () => {
     const s = new Store();
     s.setTime(0.2);

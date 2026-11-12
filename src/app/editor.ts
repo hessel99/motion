@@ -5,6 +5,7 @@
 import { Store } from '../core/store';
 import { Renderer } from '../render/renderer';
 import type { Project } from '../core/model';
+import * as commands from '../core/commands';
 
 export type Tool = 'select' | 'rect' | 'ellipse' | 'star' | 'polygon' | 'text' | 'pen' | 'hand';
 
@@ -134,3 +135,4 @@ export class Editor {
 
 export const editor = new Editor();
 (globalThis as any).editor = editor; // handy for debugging + perf tests
+(globalThis as any).__cmds = commands; // perf scripts (scripts/edit-profile.mjs) drive commands directly

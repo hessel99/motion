@@ -281,7 +281,7 @@ export function AgentPanel() {
       </div>
       <VariationTray />
       <div class="ag-composer">
-        <div class="ag-context" title={editorContext(s, mentioned)}>
+        <div class="ag-context" onPointerEnter={e => { (e.currentTarget as HTMLElement).title = editorContext(s, mentioned); }}>
           <span class="ag-muted">Context:</span>
           {selCount ? <span class="ag-chip">{selCount === 1 ? s.layer(s.selection[0])?.name : `${selCount} selected`}</span> : <span class="ag-muted">no selection</span>}
           {mentioned.map(l => <span class="ag-chip mention">@{l.name}</span>)}
