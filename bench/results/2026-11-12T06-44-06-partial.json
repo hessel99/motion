@@ -1,0 +1,1121 @@
+{
+ "date": "2026-11-12T06:44:06.458Z",
+ "commit": "57118a1",
+ "gl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+ "cpus": 4,
+ "quick": false,
+ "measureMs": 4000,
+ "soakSec": 180,
+ "results": {
+  "iso-fbo-stack": {
+   "kind": "play",
+   "setup": {
+    "buildMs": 32.3000000002794,
+    "loadMs": 1.6999999997206032,
+    "firstFrameMs": 294.39999999990687,
+    "layers": 2079,
+    "items": 2079,
+    "drawn": 2005,
+    "culled": 11,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 63,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 203774,
+    "heapMB": 51.456744
+   },
+   "fps": 48.08,
+   "frameP50": 20.8,
+   "frameP95": 35.3,
+   "frameP99": 40.9,
+   "tickP50": 1.8,
+   "tickP95": 5.7,
+   "tickP99": 9.4,
+   "tickMax": 13,
+   "cpuP50": 1.7,
+   "cpuP95": 5.1,
+   "evalP50": 1,
+   "writeP50": 0.3,
+   "rasterP50": 0,
+   "rasterP95": 0,
+   "gpuP50": 0.3,
+   "longTasks": 0,
+   "longMax": 0,
+   "heapDeltaMB": -9.76,
+   "frames": 191,
+   "busyPct": 99.04,
+   "scriptPct": 12.02,
+   "gcPct": 0.14,
+   "profile": [
+    {
+     "fn": "eval src/core/trackpool.ts:105",
+     "ms": 184.73,
+     "pct": 40.35
+    },
+    {
+     "fn": "render src/render/renderer.ts:1233",
+     "ms": 70.83,
+     "pct": 15.47
+    },
+    {
+     "fn": "evalItem src/render/renderer.ts:738",
+     "ms": 39.14,
+     "pct": 8.55
+    },
+    {
+     "fn": "evaluateRange src/render/renderer.ts:880",
+     "ms": 17.16,
+     "pct": 3.75
+    },
+    {
+     "fn": "scissor (native):0",
+     "ms": 14.03,
+     "pct": 3.07
+    },
+    {
+     "fn": "tick src/app/editor.ts:94",
+     "ms": 13.11,
+     "pct": 2.86
+    },
+    {
+     "fn": "clear (native):0",
+     "ms": 11.39,
+     "pct": 2.49
+    },
+    {
+     "fn": "bufferSubData (native):0",
+     "ms": 11.03,
+     "pct": 2.41
+    }
+   ],
+   "after": {
+    "items": 2079,
+    "drawn": 2004,
+    "culled": 12,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 63,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 203774,
+    "heapMB": 41.744618
+   },
+   "swFps": 3.71,
+   "swFrameP95": 368,
+   "swTickP50": 1.9,
+   "swLongTasks": 41,
+   "errors": [],
+   "load": 6.44,
+   "seconds": 18
+  },
+  "path-morph-trim-1k": {
+   "kind": "play",
+   "setup": {
+    "buildMs": 28.40000000037253,
+    "loadMs": 1,
+    "firstFrameMs": 130.29999999981374,
+    "layers": 1000,
+    "items": 1000,
+    "drawn": 1000,
+    "culled": 0,
+    "atlasEntries": 40,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 16.777216,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 10000,
+    "heapMB": 35.184566
+   },
+   "fps": 38.76,
+   "frameP50": 25.8,
+   "frameP95": 58.2,
+   "frameP99": 129.2,
+   "tickP50": 15.9,
+   "tickP95": 38.6,
+   "tickP99": 118.7,
+   "tickMax": 131.7,
+   "cpuP50": 15.7,
+   "cpuP95": 38.5,
+   "evalP50": 0.2,
+   "writeP50": 1.2,
+   "rasterP50": 4.4,
+   "rasterP95": 13.3,
+   "gpuP50": 9.8,
+   "longTasks": 6,
+   "longMax": 150,
+   "heapDeltaMB": -6.7,
+   "frames": 138,
+   "busyPct": 99.73,
+   "scriptPct": 67.05,
+   "gcPct": 1.57,
+   "profile": [
+    {
+     "fn": "texSubImage2D (native):0",
+     "ms": 1598.13,
+     "pct": 57.43
+    },
+    {
+     "fn": "render src/render/renderer.ts:1233",
+     "ms": 203.98,
+     "pct": 7.33
+    },
+    {
+     "fn": "measureSubpaths src/render/raster.ts:116",
+     "ms": 179.63,
+     "pct": 6.45
+    },
+    {
+     "fn": "texImage2D (native):0",
+     "ms": 79.03,
+     "pct": 2.84
+    },
+    {
+     "fn": "(garbage collector)",
+     "ms": 65.91,
+     "pct": 2.37
+    },
+    {
+     "fn": "stroke (native):0",
+     "ms": 58.35,
+     "pct": 2.1
+    },
+    {
+     "fn": "now (native):0",
+     "ms": 41.54,
+     "pct": 1.49
+    },
+    {
+     "fn": "save (native):0",
+     "ms": 41.5,
+     "pct": 1.49
+    }
+   ],
+   "after": {
+    "items": 1000,
+    "drawn": 1000,
+    "culled": 0,
+    "atlasEntries": 238,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 16.777216,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 10000,
+    "heapMB": 48.719542
+   },
+   "swFps": 11.63,
+   "swFrameP95": 113.8,
+   "swTickP50": 16.9,
+   "swLongTasks": 41,
+   "errors": [],
+   "load": 6.41,
+   "seconds": 11
+  },
+  "rasters-500": {
+   "kind": "play",
+   "setup": {
+    "buildMs": 159.59999999962747,
+    "loadMs": 1.1000000000931323,
+    "firstFrameMs": 46.60000000009313,
+    "layers": 500,
+    "items": 500,
+    "drawn": 334,
+    "culled": 0,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 14500,
+    "heapMB": 14.713634
+   },
+   "fps": 135.14,
+   "frameP50": 7.4,
+   "frameP95": 11,
+   "frameP99": 13.6,
+   "tickP50": 0.4,
+   "tickP95": 1,
+   "tickP99": 3.2,
+   "tickMax": 8.6,
+   "cpuP50": 0.4,
+   "cpuP95": 0.9,
+   "evalP50": 0.1,
+   "writeP50": 0.2,
+   "rasterP50": 0,
+   "rasterP95": 0.2,
+   "gpuP50": 0.1,
+   "longTasks": 0,
+   "longMax": 0,
+   "heapDeltaMB": -7.76,
+   "frames": 523,
+   "busyPct": 98.28,
+   "scriptPct": 7.8,
+   "gcPct": 0.61,
+   "profile": [
+    {
+     "fn": "render src/render/renderer.ts:1233",
+     "ms": 85.95,
+     "pct": 25.25
+    },
+    {
+     "fn": "eval src/core/trackpool.ts:105",
+     "ms": 31.77,
+     "pct": 9.33
+    },
+    {
+     "fn": "(garbage collector)",
+     "ms": 25.32,
+     "pct": 7.44
+    },
+    {
+     "fn": "evalItem src/render/renderer.ts:738",
+     "ms": 24.34,
+     "pct": 7.15
+    },
+    {
+     "fn": "getImageData (native):0",
+     "ms": 17.24,
+     "pct": 5.06
+    },
+    {
+     "fn": "drawImage (native):0",
+     "ms": 17.17,
+     "pct": 5.04
+    },
+    {
+     "fn": "now (native):0",
+     "ms": 16.29,
+     "pct": 4.79
+    },
+    {
+     "fn": "rgbaData src/render/raster.ts:85",
+     "ms": 13.06,
+     "pct": 3.84
+    }
+   ],
+   "after": {
+    "items": 500,
+    "drawn": 500,
+    "culled": 0,
+    "atlasEntries": 75,
+    "atlasPages": 4,
+    "rasterMeta": 75,
+    "shadowMB": 67.108864,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 14500,
+    "heapMB": 80.804005
+   },
+   "swFps": 1.33,
+   "swFrameP95": 1434.6,
+   "swTickP50": 0.8,
+   "swLongTasks": 22,
+   "errors": [],
+   "load": 6.41,
+   "seconds": 22
+  },
+  "masks-blend-300": {
+   "kind": "play",
+   "setup": {
+    "buildMs": 34.700000000186265,
+    "loadMs": 1.3999999999068677,
+    "firstFrameMs": 103.39999999990687,
+    "layers": 3000,
+    "items": 3000,
+    "drawn": 2700,
+    "culled": 0,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 300,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 199800,
+    "heapMB": 32.608169
+   },
+   "fps": 44.44,
+   "frameP50": 22.5,
+   "frameP95": 34.8,
+   "frameP99": 35.7,
+   "tickP50": 3.1,
+   "tickP95": 7.1,
+   "tickP99": 8.5,
+   "tickMax": 8.7,
+   "cpuP50": 3,
+   "cpuP95": 6.8,
+   "evalP50": 1.1,
+   "writeP50": 0.5,
+   "rasterP50": 0,
+   "rasterP95": 0,
+   "gpuP50": 1.3,
+   "longTasks": 1,
+   "longMax": 51,
+   "heapDeltaMB": 0.22,
+   "frames": 182,
+   "busyPct": 99.64,
+   "scriptPct": 17.15,
+   "gcPct": 0.13,
+   "profile": [
+    {
+     "fn": "eval src/core/trackpool.ts:105",
+     "ms": 165.15,
+     "pct": 25.87
+    },
+    {
+     "fn": "render src/render/renderer.ts:1233",
+     "ms": 70.56,
+     "pct": 11.05
+    },
+    {
+     "fn": "evalItem src/render/renderer.ts:738",
+     "ms": 50.72,
+     "pct": 7.95
+    },
+    {
+     "fn": "runCommands src/render/renderer.ts:1737",
+     "ms": 46.07,
+     "pct": 7.22
+    },
+    {
+     "fn": "bindVertexArray (native):0",
+     "ms": 44.78,
+     "pct": 7.02
+    },
+    {
+     "fn": "blendFunc (native):0",
+     "ms": 27.29,
+     "pct": 4.27
+    },
+    {
+     "fn": "setBlend src/render/renderer.ts:1659",
+     "ms": 24.03,
+     "pct": 3.77
+    },
+    {
+     "fn": "bindFramebuffer (native):0",
+     "ms": 23.3,
+     "pct": 3.65
+    }
+   ],
+   "after": {
+    "items": 3000,
+    "drawn": 2700,
+    "culled": 0,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 300,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 199800,
+    "heapMB": 23.29136
+   },
+   "swFps": 2.56,
+   "swFrameP95": 480.3,
+   "swTickP50": 3.2,
+   "swLongTasks": 38,
+   "errors": [],
+   "load": 6.25,
+   "seconds": 23
+  },
+  "mixed-10k": {
+   "kind": "play",
+   "setup": {
+    "buildMs": 189.5,
+    "loadMs": 2.2999999998137355,
+    "firstFrameMs": 1205.3999999999069,
+    "layers": 9286,
+    "items": 9646,
+    "drawn": 9005,
+    "culled": 20,
+    "atlasEntries": 3334,
+    "atlasPages": 4,
+    "rasterMeta": 3334,
+    "shadowMB": 50.331648,
+    "isolated": 50,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 795535,
+    "heapMB": 245.344812
+   },
+   "fps": 26.39,
+   "frameP50": 37.9,
+   "frameP95": 51.6,
+   "frameP99": 53.4,
+   "tickP50": 25.2,
+   "tickP95": 34.3,
+   "tickP99": 35.7,
+   "tickMax": 68.5,
+   "cpuP50": 25.2,
+   "cpuP95": 34.1,
+   "evalP50": 9.4,
+   "writeP50": 2,
+   "rasterP50": 3.9,
+   "rasterP95": 6.5,
+   "gpuP50": 9.1,
+   "longTasks": 3,
+   "longMax": 89,
+   "heapDeltaMB": 0.54,
+   "frames": 105,
+   "busyPct": 99.83,
+   "scriptPct": 69.19,
+   "gcPct": 0.91,
+   "profile": [
+    {
+     "fn": "texSubImage2D (native):0",
+     "ms": 884.78,
+     "pct": 30.55
+    },
+    {
+     "fn": "eval src/core/trackpool.ts:105",
+     "ms": 316.51,
+     "pct": 10.93
+    },
+    {
+     "fn": "render src/render/renderer.ts:1233",
+     "ms": 232.66,
+     "pct": 8.03
+    },
+    {
+     "fn": "evalExprs src/render/renderer.ts:790",
+     "ms": 210.36,
+     "pct": 7.26
+    },
+    {
+     "fn": "n src/core/expr.ts:156",
+     "ms": 154.88,
+     "pct": 5.35
+    },
+    {
+     "fn": "evalItem src/render/renderer.ts:738",
+     "ms": 111.37,
+     "pct": 3.85
+    },
+    {
+     "fn": "measureSubpaths src/render/raster.ts:116",
+     "ms": 93.94,
+     "pct": 3.24
+    },
+    {
+     "fn": "eval src/core/evaluate.ts:67",
+     "ms": 84.65,
+     "pct": 2.92
+    }
+   ],
+   "after": {
+    "items": 9646,
+    "drawn": 12249,
+    "culled": 19,
+    "atlasEntries": 3356,
+    "atlasPages": 4,
+    "rasterMeta": 3350,
+    "shadowMB": 67.108864,
+    "isolated": 50,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 795535,
+    "heapMB": 243.756197
+   },
+   "swFps": 1.73,
+   "swFrameP95": 800.1,
+   "swTickP50": 24.2,
+   "swLongTasks": 26,
+   "errors": [],
+   "load": 5.52,
+   "seconds": 24
+  },
+  "camera-mixed-10k": {
+   "kind": "camera",
+   "setup": {
+    "buildMs": 161.79999999981374,
+    "loadMs": 2.8000000002793968,
+    "firstFrameMs": 1310.6999999997206,
+    "layers": 9286,
+    "items": 9646,
+    "drawn": 9005,
+    "culled": 20,
+    "atlasEntries": 3334,
+    "atlasPages": 4,
+    "rasterMeta": 3334,
+    "shadowMB": 50.331648,
+    "isolated": 50,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 795535,
+    "heapMB": 257.16451
+   },
+   "fps": 25.06,
+   "frameP50": 39.9,
+   "frameP95": 68.4,
+   "frameP99": 375.3,
+   "tickP50": 27.3,
+   "tickP95": 42,
+   "tickP99": 345.3,
+   "tickMax": 345.3,
+   "cpuP50": 26.8,
+   "cpuP95": 41.9,
+   "evalP50": 8.8,
+   "writeP50": 1.3,
+   "rasterP50": 11.1,
+   "rasterP95": 13.8,
+   "gpuP50": 4.3,
+   "longTasks": 13,
+   "longMax": 367,
+   "heapDeltaMB": 72.32,
+   "frames": 86,
+   "busyPct": 99.71,
+   "scriptPct": 71.59,
+   "gcPct": 1.25,
+   "profile": [
+    {
+     "fn": "texSubImage3D (native):0",
+     "ms": 431.44,
+     "pct": 14.25
+    },
+    {
+     "fn": "texSubImage2D (native):0",
+     "ms": 307.43,
+     "pct": 10.15
+    },
+    {
+     "fn": "eval src/core/trackpool.ts:105",
+     "ms": 252.95,
+     "pct": 8.35
+    },
+    {
+     "fn": "get src/render/atlas.ts:87",
+     "ms": 216.41,
+     "pct": 7.15
+    },
+    {
+     "fn": "render src/render/renderer.ts:1233",
+     "ms": 176.02,
+     "pct": 5.81
+    },
+    {
+     "fn": "writeUnits src/render/renderer.ts:1597",
+     "ms": 157.83,
+     "pct": 5.21
+    },
+    {
+     "fn": "getImageData (native):0",
+     "ms": 156.21,
+     "pct": 5.16
+    },
+    {
+     "fn": "evalExprs src/render/renderer.ts:790",
+     "ms": 149.78,
+     "pct": 4.95
+    }
+   ],
+   "after": {
+    "items": 9646,
+    "drawn": 12315,
+    "culled": 21,
+    "atlasEntries": 4671,
+    "atlasPages": 12,
+    "rasterMeta": 4582,
+    "shadowMB": 150.994944,
+    "isolated": 50,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 795535,
+    "heapMB": 319.019327
+   },
+   "swFps": 1.84,
+   "swFrameP95": 841.8,
+   "swTickP50": 26.7,
+   "swLongTasks": 26,
+   "errors": [],
+   "load": 5.47,
+   "seconds": 25
+  }
+ },
+ "regressions": [
+  {
+   "scenario": "iso-fbo-stack",
+   "metric": "tickP50",
+   "before": 1.3,
+   "after": 1.8,
+   "change": "38% worse",
+   "baseline": "6642cc7",
+   "noisy": "load 2.74->6.44"
+  },
+  {
+   "scenario": "iso-fbo-stack",
+   "metric": "tickP95",
+   "before": 2.2,
+   "after": 5.7,
+   "change": "159% worse",
+   "baseline": "6642cc7",
+   "noisy": "load 2.74->6.44"
+  },
+  {
+   "scenario": "iso-fbo-stack",
+   "metric": "tickP99",
+   "before": 2.8,
+   "after": 9.4,
+   "change": "236% worse",
+   "baseline": "6642cc7",
+   "noisy": "load 2.74->6.44"
+  },
+  {
+   "scenario": "iso-fbo-stack",
+   "metric": "cpuP50",
+   "before": 1.2,
+   "after": 1.7,
+   "change": "42% worse",
+   "baseline": "6642cc7",
+   "noisy": "load 2.74->6.44"
+  },
+  {
+   "scenario": "iso-fbo-stack",
+   "metric": "cpuP95",
+   "before": 2.1,
+   "after": 5.1,
+   "change": "143% worse",
+   "baseline": "6642cc7",
+   "noisy": "load 2.74->6.44"
+  },
+  {
+   "scenario": "iso-fbo-stack",
+   "metric": "frameP95",
+   "before": 20.5,
+   "after": 35.3,
+   "change": "72% worse",
+   "baseline": "6642cc7",
+   "noisy": "load 2.74->6.44"
+  },
+  {
+   "scenario": "iso-fbo-stack",
+   "metric": "fps",
+   "before": 68.49,
+   "after": 48.08,
+   "change": "30% worse",
+   "baseline": "6642cc7",
+   "noisy": "load 2.74->6.44"
+  },
+  {
+   "scenario": "path-morph-trim-1k",
+   "metric": "tickP99",
+   "before": 91.1,
+   "after": 118.7,
+   "change": "30% worse",
+   "baseline": "6642cc7",
+   "noisy": "load 3.24->6.41"
+  },
+  {
+   "scenario": "camera-mixed-10k",
+   "metric": "tickP99",
+   "before": 148.1,
+   "after": 345.3,
+   "change": "133% worse",
+   "baseline": "6642cc7",
+   "noisy": "load 6.02->5.47"
+  }
+ ],
+ "improvements": [
+  {
+   "scenario": "path-morph-trim-1k",
+   "metric": "tickP50",
+   "before": 55,
+   "after": 15.9,
+   "change": "71% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.24->6.41"
+  },
+  {
+   "scenario": "path-morph-trim-1k",
+   "metric": "tickP95",
+   "before": 79.8,
+   "after": 38.6,
+   "change": "52% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.24->6.41"
+  },
+  {
+   "scenario": "path-morph-trim-1k",
+   "metric": "cpuP50",
+   "before": 54.8,
+   "after": 15.7,
+   "change": "71% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.24->6.41"
+  },
+  {
+   "scenario": "path-morph-trim-1k",
+   "metric": "cpuP95",
+   "before": 79.7,
+   "after": 38.5,
+   "change": "52% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.24->6.41"
+  },
+  {
+   "scenario": "path-morph-trim-1k",
+   "metric": "rasterP50",
+   "before": 14.1,
+   "after": 4.4,
+   "change": "69% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.24->6.41"
+  },
+  {
+   "scenario": "path-morph-trim-1k",
+   "metric": "frameP95",
+   "before": 99.3,
+   "after": 58.2,
+   "change": "41% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.24->6.41"
+  },
+  {
+   "scenario": "path-morph-trim-1k",
+   "metric": "fps",
+   "before": 14.81,
+   "after": 38.76,
+   "change": "162% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.24->6.41"
+  },
+  {
+   "scenario": "path-morph-trim-1k",
+   "metric": "longTasks",
+   "before": 55,
+   "after": 6,
+   "change": "89% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.24->6.41"
+  },
+  {
+   "scenario": "rasters-500",
+   "metric": "tickP50",
+   "before": 79.1,
+   "after": 0.4,
+   "change": "99% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.34->6.41"
+  },
+  {
+   "scenario": "rasters-500",
+   "metric": "tickP95",
+   "before": 230.9,
+   "after": 1,
+   "change": "100% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.34->6.41"
+  },
+  {
+   "scenario": "rasters-500",
+   "metric": "tickP99",
+   "before": 239.4,
+   "after": 3.2,
+   "change": "99% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.34->6.41"
+  },
+  {
+   "scenario": "rasters-500",
+   "metric": "cpuP50",
+   "before": 75.5,
+   "after": 0.4,
+   "change": "99% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.34->6.41"
+  },
+  {
+   "scenario": "rasters-500",
+   "metric": "cpuP95",
+   "before": 109.3,
+   "after": 0.9,
+   "change": "99% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.34->6.41"
+  },
+  {
+   "scenario": "rasters-500",
+   "metric": "rasterP50",
+   "before": 33.2,
+   "after": 0,
+   "change": "100% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.34->6.41"
+  },
+  {
+   "scenario": "rasters-500",
+   "metric": "frameP95",
+   "before": 386.3,
+   "after": 11,
+   "change": "97% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.34->6.41"
+  },
+  {
+   "scenario": "rasters-500",
+   "metric": "fps",
+   "before": 5.09,
+   "after": 135.14,
+   "change": "2555% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.34->6.41"
+  },
+  {
+   "scenario": "rasters-500",
+   "metric": "longTasks",
+   "before": 55,
+   "after": 0,
+   "change": "100% better",
+   "baseline": "6642cc7",
+   "noisy": "load 3.34->6.41"
+  },
+  {
+   "scenario": "masks-blend-300",
+   "metric": "tickP50",
+   "before": 4,
+   "after": 3.1,
+   "change": "22% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.26->6.25"
+  },
+  {
+   "scenario": "masks-blend-300",
+   "metric": "tickP99",
+   "before": 11.7,
+   "after": 8.5,
+   "change": "27% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.26->6.25"
+  },
+  {
+   "scenario": "masks-blend-300",
+   "metric": "cpuP50",
+   "before": 3.8,
+   "after": 3,
+   "change": "21% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.26->6.25"
+  },
+  {
+   "scenario": "masks-blend-300",
+   "metric": "frameP95",
+   "before": 103.8,
+   "after": 34.8,
+   "change": "66% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.26->6.25"
+  },
+  {
+   "scenario": "masks-blend-300",
+   "metric": "fps",
+   "before": 12.41,
+   "after": 44.44,
+   "change": "258% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.26->6.25"
+  },
+  {
+   "scenario": "masks-blend-300",
+   "metric": "longTasks",
+   "before": 50,
+   "after": 1,
+   "change": "98% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.26->6.25"
+  },
+  {
+   "scenario": "mixed-10k",
+   "metric": "tickP50",
+   "before": 104.8,
+   "after": 25.2,
+   "change": "76% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.96->5.52"
+  },
+  {
+   "scenario": "mixed-10k",
+   "metric": "tickP95",
+   "before": 321.8,
+   "after": 34.3,
+   "change": "89% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.96->5.52"
+  },
+  {
+   "scenario": "mixed-10k",
+   "metric": "tickP99",
+   "before": 326.3,
+   "after": 35.7,
+   "change": "89% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.96->5.52"
+  },
+  {
+   "scenario": "mixed-10k",
+   "metric": "cpuP50",
+   "before": 104.7,
+   "after": 25.2,
+   "change": "76% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.96->5.52"
+  },
+  {
+   "scenario": "mixed-10k",
+   "metric": "cpuP95",
+   "before": 321.6,
+   "after": 34.1,
+   "change": "89% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.96->5.52"
+  },
+  {
+   "scenario": "mixed-10k",
+   "metric": "rasterP50",
+   "before": 30.7,
+   "after": 3.9,
+   "change": "87% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.96->5.52"
+  },
+  {
+   "scenario": "mixed-10k",
+   "metric": "frameP95",
+   "before": 482.4,
+   "after": 51.6,
+   "change": "89% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.96->5.52"
+  },
+  {
+   "scenario": "mixed-10k",
+   "metric": "fps",
+   "before": 3.55,
+   "after": 26.39,
+   "change": "643% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.96->5.52"
+  },
+  {
+   "scenario": "mixed-10k",
+   "metric": "longTasks",
+   "before": 62,
+   "after": 3,
+   "change": "95% better",
+   "baseline": "6642cc7",
+   "noisy": "load 4.96->5.52"
+  },
+  {
+   "scenario": "camera-mixed-10k",
+   "metric": "tickP50",
+   "before": 106.1,
+   "after": 27.3,
+   "change": "74% better",
+   "baseline": "6642cc7",
+   "noisy": "load 6.02->5.47"
+  },
+  {
+   "scenario": "camera-mixed-10k",
+   "metric": "tickP95",
+   "before": 143.2,
+   "after": 42,
+   "change": "71% better",
+   "baseline": "6642cc7",
+   "noisy": "load 6.02->5.47"
+  },
+  {
+   "scenario": "camera-mixed-10k",
+   "metric": "cpuP50",
+   "before": 105.9,
+   "after": 26.8,
+   "change": "75% better",
+   "baseline": "6642cc7",
+   "noisy": "load 6.02->5.47"
+  },
+  {
+   "scenario": "camera-mixed-10k",
+   "metric": "cpuP95",
+   "before": 143,
+   "after": 41.9,
+   "change": "71% better",
+   "baseline": "6642cc7",
+   "noisy": "load 6.02->5.47"
+  },
+  {
+   "scenario": "camera-mixed-10k",
+   "metric": "evalP50",
+   "before": 14.9,
+   "after": 8.8,
+   "change": "41% better",
+   "baseline": "6642cc7",
+   "noisy": "load 6.02->5.47"
+  },
+  {
+   "scenario": "camera-mixed-10k",
+   "metric": "rasterP50",
+   "before": 21.1,
+   "after": 11.1,
+   "change": "47% better",
+   "baseline": "6642cc7",
+   "noisy": "load 6.02->5.47"
+  },
+  {
+   "scenario": "camera-mixed-10k",
+   "metric": "frameP95",
+   "before": 373.2,
+   "after": 68.4,
+   "change": "82% better",
+   "baseline": "6642cc7",
+   "noisy": "load 6.02->5.47"
+  },
+  {
+   "scenario": "camera-mixed-10k",
+   "metric": "fps",
+   "before": 3.79,
+   "after": 25.06,
+   "change": "561% better",
+   "baseline": "6642cc7",
+   "noisy": "load 6.02->5.47"
+  },
+  {
+   "scenario": "camera-mixed-10k",
+   "metric": "longTasks",
+   "before": 69,
+   "after": 13,
+   "change": "81% better",
+   "baseline": "6642cc7",
+   "noisy": "load 6.02->5.47"
+  }
+ ],
+ "baselines": {
+  "path-morph-trim-1k": "2026-11-12T06-33-11-partial.json",
+  "iso-fbo-stack": "2026-11-12T06-18-48-partial.json",
+  "rasters-500": "2026-11-12T06-18-48-partial.json",
+  "masks-blend-300": "2026-11-12T06-18-48-partial.json",
+  "mixed-10k": "2026-11-12T06-18-48-partial.json",
+  "camera-mixed-10k": "2026-11-12T06-18-48-partial.json"
+ }
+}
