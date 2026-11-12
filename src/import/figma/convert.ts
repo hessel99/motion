@@ -13,6 +13,22 @@
 import { decodeVectorNetwork } from './vectornet';
 import { createLayer, uid, type Asset, type Layer, type LayerType, type Paint, type PathCmd, type PathGeometry, type TextData } from '../../core/model';
 import { bytesToBase64 } from './decode';
+import type { IncomingToken } from '../../core/token-sync';
+
+/** a layer property that was linked to a figma variable or style */
+export interface FigmaRef { layer: string; prop: 'fill' | 'stroke' | 'opacity' | 'radius' | 'strokeWidth'; key: string }
+/** a pasted component instance (root layer) and the component it came from */
+export interface FigmaInstance { layer: string; key: string; name: string }
+export interface FigmaDesignData {
+  tokens: IncomingToken[];
+  refs: FigmaRef[];
+  instances: FigmaInstance[];
+  /** component definitions (main components) by key: root layer id; their layers are in `defLayers` */
+  defs: { key: string; name: string; root: string }[];
+  defLayers: Layer[];
+  /** the variable mode the pasted layers were showing (e.g. "Dark") */
+  mode?: string;
+}
 
 type Guid = { sessionID: number; localID: number };
 type Color = [number, number, number, number];
@@ -21,7 +37,7 @@ const gkey = (g: Guid | undefined | null) => (g ? `${g.sessionID}:${g.localID}` 
 
 const FRAME_LIKE = new Set(['FRAME', 'SECTION', 'SYMBOL', 'INSTANCE', 'COMPONENT', 'COMPONENT_SET', 'SLIDE', 'SLIDE_GRID', 'SLIDE_ROW', 'TABLE']);
 const PATH_TYPES = new Set(['VECTOR', 'STAR', 'REGULAR_POLYGON', 'LINE', 'BOOLEAN_OPERATION', 'SHAPE_WITH_TEXT', 'CONNECTOR', 'STICKY', 'WASHI_TAPE', 'HIGHLIGHT']);
-const SKIP_TYPES = new Set(['DOCUMENT', 'CANVAS']);
+const SKIP_TYPES = new Set(['DOCUMENT', 'CANVAS', 'VARIABLE', 'VARIABLE_SET', 'VARIABLE_OVERRIDE']);
 const MAX_INSTANCE_DEPTH = 32;
 
 // ---------------- path blobs ----------------
@@ -138,6 +154,17 @@ class Converter {
   private blobs: any[];
   private geomCache = new Map<number, PathCmd[]>();
   private assetByHash = new Map<string, Asset>();
+  // design system data (variables, styles, components)
+  refs: FigmaRef[] = [];
+  tokens = new Map<string, IncomingToken>();
+  instances: (FigmaInstance & { inInstance: boolean; sym: any })[] = [];
+  defs = new Map<string, { key: string; name: string; root: string }>();
+  defLayers: Layer[] = [];
+  mode?: string;
+  private byKey = new Map<string, any>();
+  private setModes = new Map<string, { id: string; name: string }[]>();
+  private instanceDepth = 0;
+  private defStack: string[] = [];
 
   constructor(private message: any) {
     this.blobs = Array.isArray(message?.blobs) ? message.blobs : [];
@@ -145,6 +172,14 @@ class Converter {
     for (const n of list) {
       if (!n || !n.guid || n.phase === 'REMOVED') continue;
       this.nodes.set(gkey(n.guid), n);
+    }
+    for (const n of this.nodes.values()) {
+      if (typeof n.key === 'string' && n.key) this.byKey.set(n.key, n);
+      if (n.type === 'VARIABLE_SET' && Array.isArray(n.variableSetModes)) {
+        const modes = n.variableSetModes.map((m: any) => ({ id: gkey(m.id), name: String(m.name ?? 'Mode') }));
+        this.setModes.set(gkey(n.guid), modes);
+        if (n.key) this.setModes.set('k:' + n.key, modes);
+      }
     }
     for (const n of this.nodes.values()) {
       const p = gkey(n.parentIndex?.guid);
@@ -169,6 +204,7 @@ class Converter {
       if (parent && !SKIP_TYPES.has(parent.type)) continue; // converted as a child
       // nodes on figma's hidden "internal only" canvas are component definitions used by
       // instances in the paste; they are not part of the selection.
+      if (n.styleType) continue; // a style definition (name + value), read through styleIdFor*
       if (parent && parent.type === 'CANVAS' && parent.internalOnly) internal.push(n);
       else rootNodes.push(n);
     }
@@ -179,7 +215,99 @@ class Converter {
       const id = this.emit(n, null, [], 0);
       if (id) roots.push(id);
     }
+    // definitions of the components the pasted instances use (and of the ones those use)
+    const main = this.layers;
+    this.layers = this.defLayers;
+    for (let i = 0; i < this.instances.length; i++) {
+      const inst = this.instances[i];
+      if (inst.inInstance || this.defs.has(inst.key) || !inst.sym) continue;
+      this.defStack.push(inst.key);
+      const root = this.emit(inst.sym, null, [], 0);
+      this.defStack.pop();
+      if (root) this.defs.set(inst.key, { key: inst.key, name: inst.name, root });
+    }
+    this.layers = main;
     return roots;
+  }
+
+  // ---------------- variables / styles ----------------
+
+  /** token for a figma variable alias (VariableID), registered once per key */
+  private variableToken(alias: any, resolved: number[], type: 'color' | 'number', scale = 1): string | null {
+    if (!alias) return null;
+    const key = alias.assetRef?.key || gkey(alias.guid);
+    if (!key) return null;
+    if (this.tokens.has(key)) return key;
+    const node = (alias.assetRef?.key && this.byKey.get(alias.assetRef.key)) || this.nodes.get(gkey(alias.guid));
+    const values: Record<string, number[]> = {};
+    if (node && Array.isArray(node.variableDataValues?.entries)) {
+      const set = node.variableSetID;
+      const modes = this.setModes.get(gkey(set?.guid)) ?? (set?.assetRef?.key ? this.setModes.get('k:' + set.assetRef.key) : undefined) ?? [];
+      for (const e of node.variableDataValues.entries) {
+        const name = modes.find(m => m.id === gkey(e.modeID))?.name ?? (modes.length ? undefined : 'Default');
+        const v = e.variableData?.value;
+        if (!name || !v) continue;
+        if (type === 'color' && v.colorValue) values[name] = colorOf(v.colorValue);
+        else if (type === 'number' && typeof v.floatValue === 'number') values[name] = [v.floatValue * scale];
+      }
+      // the mode the pasted layers show
+      if (!this.mode && Object.keys(values).length > 1) {
+        for (const [m, v] of Object.entries(values)) if (v.every((x, i) => Math.abs(x - (resolved[i] ?? 0)) < 1e-3)) { this.mode = m; break; }
+      }
+    }
+    if (!Object.keys(values).length) values.Default = resolved.slice();
+    const name = typeof node?.name === 'string' && node.name ? node.name : `Figma/${type === 'color' ? 'Color' : 'Number'} ${this.tokens.size + 1}`;
+    this.tokens.set(key, { key, name, type, values, kind: 'figma-variable', ...(node?.description ? { description: node.description } : {}) });
+    return key;
+  }
+
+  /** token for a figma color style reference (StyleId) */
+  private styleToken(ref: any): string | null {
+    if (!ref) return null;
+    const key = ref.assetRef?.key || gkey(ref.guid);
+    if (!key) return null;
+    if (this.tokens.has(key)) return key;
+    const node = (ref.assetRef?.key && this.byKey.get(ref.assetRef.key)) || this.nodes.get(gkey(ref.guid));
+    if (!node || typeof node.name !== 'string') return null;
+    const vis = (node.fillPaints ?? []).filter(visiblePaint);
+    if (vis.length !== 1 || vis[0].type !== 'SOLID') return null; // gradient / multi-paint styles are not one color
+    this.tokens.set(key, { key, name: node.name, type: 'color', values: { Default: colorOf(vis[0].color, num(vis[0].opacity, 1)) }, kind: 'figma-style', ...(node.styleDescription ? { description: node.styleDescription } : {}) });
+    return key;
+  }
+
+  /** record which properties of `layer` are linked to variables / styles in figma */
+  private collectRefs(layer: Layer, n: any) {
+    const solidRef = (paints: any[] | undefined, style: any, prop: 'fill' | 'stroke') => {
+      const vis = (paints ?? []).filter(visiblePaint);
+      const top = vis[vis.length - 1];
+      if (!top || top.type !== 'SOLID' || vis.length > 1 || !layer.props[prop]) return;
+      const resolved = layer.props[prop]!.v;
+      const alias = top.colorVar?.value?.alias;
+      let key: string | null = null;
+      if (alias && num(top.opacity, 1) === 1) key = this.variableToken(alias, resolved, 'color');
+      if (!key && style) key = this.styleToken(style);
+      if (key) this.refs.push({ layer: layer.id, prop, key });
+    };
+    if (!layer.paints && layer.type !== 'image') solidRef(n.fillPaints, n.styleIdForFill, 'fill');
+    if (num(n.strokeWeight, 0) > 0) solidRef(n.strokePaints, n.styleIdForStrokeFill, 'stroke');
+    const entries = n.variableConsumptionMap?.entries;
+    if (!Array.isArray(entries)) return;
+    for (const e of entries) {
+      const alias = e?.variableData?.value?.alias;
+      if (!alias) continue;
+      const f = e.variableField;
+      if (f === 'OPACITY' && layer.props.opacity) {
+        // figma opacity variables are 0..1 (shown as %): ours are percent
+        const key = this.variableToken(alias, layer.props.opacity.v, 'number', 100);
+        if (key) this.refs.push({ layer: layer.id, prop: 'opacity', key });
+      } else if (f === 'CORNER_RADIUS' && layer.props.radius) {
+        const key = this.variableToken(alias, [layer.props.radius.v[0]], 'number');
+        if (key) this.refs.push({ layer: layer.id, prop: 'radius', key });
+      } else if (f === 'STROKE_WEIGHT' && layer.props.strokeWidth && layer.props.strokeWidth.v[0] > 0) {
+        const key = this.variableToken(alias, layer.props.strokeWidth.v, 'number');
+        if (key) this.refs.push({ layer: layer.id, prop: 'strokeWidth', key });
+      }
+    }
   }
 
   private emit(raw: any, parentId: string | null, levels: OverrideLevel[], depth: number): string | null {
@@ -192,13 +320,18 @@ class Converter {
 
     if (n.type === 'BOOLEAN_OPERATION') return layer.id; // operands are baked into fillGeometry
 
+    this.collectRefs(layer, n);
     let kids = this.children.get(gkey(raw.guid));
     let childLevels = levels;
+    let isInstance = false;
     if (n.type === 'INSTANCE' && (!kids || kids.length === 0) && depth < MAX_INSTANCE_DEPTH) {
       // instance sublayers are not real nodes: clone the component's subtree with overrides
       const symId = gkey(n.overriddenSymbolID) || gkey(n.symbolData?.symbolID);
       const sym = symId ? this.nodes.get(symId) : undefined;
       if (sym) {
+        const key = (typeof sym.componentKey === 'string' && sym.componentKey) || n.sharedSymbolReference?.componentKey || `figma:${symId}`;
+        if (!this.defStack.includes(key)) this.instances.push({ layer: layer.id, key, name: typeof sym.name === 'string' && sym.name ? sym.name : layer.name, inInstance: this.instanceDepth > 0, sym });
+        isInstance = true;
         kids = this.children.get(symId);
         const map = new Map<string, any[]>();
         // derived data (resized geometry etc.) first, explicit overrides win
@@ -209,6 +342,7 @@ class Converter {
         if (!n.fillPaints && sym.fillPaints && layer.type === 'group') this.applyFrameFill(layer, sym);
       }
     }
+    if (isInstance) this.instanceDepth++;
     if (kids) {
       for (const k of kids) {
         const seg = gkey(k.guid);
@@ -218,6 +352,7 @@ class Converter {
         if (cid) layer.children.push(cid);
       }
     }
+    if (isInstance) this.instanceDepth--;
     return layer.id;
   }
 
@@ -495,8 +630,17 @@ function textData(n: any): TextData {
   };
 }
 
-export function figmaMessageToLayers(message: any): { layers: Layer[]; roots: string[]; assets: Asset[] } {
+export function figmaMessageToLayers(message: any): { layers: Layer[]; roots: string[]; assets: Asset[]; design: FigmaDesignData } {
   const c = new Converter(message);
   const roots = c.run();
-  return { layers: c.layers, roots, assets: c.assets };
+  const design: FigmaDesignData = {
+    tokens: [...c.tokens.values()],
+    refs: c.refs,
+    // an instance nested in another pasted instance follows its outer instance (one link per layer)
+    instances: c.instances.filter(i => !i.inInstance).map(i => ({ layer: i.layer, key: i.key, name: i.name })),
+    defs: [...c.defs.values()],
+    defLayers: c.defLayers,
+    ...(c.mode ? { mode: c.mode } : {}),
+  };
+  return { layers: c.layers, roots, assets: c.assets, design };
 }
