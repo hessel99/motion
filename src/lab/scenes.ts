@@ -435,5 +435,80 @@ export function syntheticFigma(o: { frames?: number; perFrame?: number; seed?: n
   return { type: 'NODE_CHANGES', nodeChanges: nodes, blobs };
 }
 
-export const SCENES = { springs, nested, precomps, textAnim, pathMorph, expressions, rasters, masksBlend, overdraw, mixed };
+
+/** deep-zoom workload: big text, big paths, large images, gradients + a crowd of scaling rasters and
+ *  small text (zoom sweeps while playing: crispness + atlas churn, scripts/zoom-check.mjs) */
+export function zoomMix(o: { n?: number; texts?: number; seed?: number } = {}): Project {
+  const c = base('zoom mix', o.seed);
+  const assets = images(4, 1024);
+  for (const a of assets) c.p.assets[a.id] = a;
+  const r = c.r;
+  const n = o.n ?? 240, nt = o.texts ?? 120;
+  for (let i = 0; i < n; i++) {
+    const s = 150 + r() * 350, x = r() * c.W - s / 2, y = r() * c.H - s / 2;
+    let l: Layer;
+    if (i % 4 === 3) { l = createLayer('image', { x, y, w: s, h: s * 0.75, name: `Image ${i}` }); l.imageRef = assets[i % assets.length].id; }
+    else {
+      l = createLayer('path', { x, y, w: s, h: s, color: hsl(r(), 0.7, 0.6), name: `Star ${i}` });
+      l.geometry = [{ cmds: i % 2 ? starCmds(s / 2, s / 2, s / 2, s / 4.5, 5 + (i % 4)) : blobCmds(r, s, 6), fillRule: 'nonzero' }];
+      l.geomSize = [s, s];
+      l.props.stroke = { v: hsl(r(), 0.8, 0.3) }; l.props.strokeWidth = { v: [2 + (i % 3)] };
+    }
+    const times = [0, c.D / 2, c.D];
+    l.props.scale = { v: [100, 100], kf: keys(r, times, k => { const sc = k === 1 ? 150 + r() * 100 : 40 + r() * 40; return [sc, sc]; }) };
+    l.props.rotation = { v: [0], kf: keys(r, times, () => [(r() - 0.5) * 60]) };
+    add(c, l);
+  }
+  for (let i = 0; i < nt; i++) {
+    const x = r() * c.W, y = r() * c.H;
+    const l = createLayer('text', { x, y, w: 0, h: 0, color: hsl(r(), 0.5, 0.8), name: `Label ${i}`, text: { content: `${WORDS[i % WORDS.length]} ${WORDS[(i * 7) % WORDS.length]}`, fontFamily: 'Inter', fontSize: [16, 24, 40, 64][i % 4], fontWeight: [400, 700][i % 2], lineHeight: 1.2, letterSpacing: 0, align: 'left' } } as any);
+    l.props.position = { v: [x, y], kf: keys(r, [0, c.D], () => [x + (r() - 0.5) * 120, y + (r() - 0.5) * 60]) };
+    add(c, l);
+  }
+  // the big stuff on top: headline text, big paths, gradients, a big image
+  for (let i = 0; i < 3; i++) {
+    const l = createLayer('text', { x: 120 + i * 300, y: 140 + i * 300, w: 0, h: 0, color: [1, 1, 1, 1], name: `Headline ${i}`, text: { content: ['Crisp at any zoom', 'Motion 256x', 'Agile text'][i], fontFamily: 'Inter', fontSize: 180 - i * 40, fontWeight: 700, lineHeight: 1.2, letterSpacing: 0, align: 'left' } } as any);
+    l.props.rotation = { v: [0], kf: keys(r, [0, c.D], () => [(r() - 0.5) * 8]) };
+    add(c, l);
+  }
+  for (let i = 0; i < 3; i++) {
+    const s = 900 - i * 200, x = 300 + i * 450, y = 60 + i * 120;
+    const l = createLayer('path', { x, y, w: s, h: s, color: hsl(i * 0.3, 0.7, 0.55), name: `Big star ${i}` });
+    l.geometry = [{ cmds: starCmds(s / 2, s / 2, s / 2, s / 5, 7 + i), fillRule: 'nonzero' }];
+    l.geomSize = [s, s];
+    l.props.stroke = { v: [1, 1, 1, 1] }; l.props.strokeWidth = { v: [4] };
+    l.props.opacity = { v: [85] };
+    add(c, l);
+  }
+  for (let i = 0; i < 3; i++) {
+    const l = createLayer(i % 2 ? 'ellipse' : 'rect', { x: 100 + i * 560, y: 640, w: 520, h: 380, name: `Gradient ${i}` });
+    l.paints = [{ type: i % 2 ? 'radial' : 'linear', stops: [{ pos: 0, color: hsl(i * 0.2, 0.8, 0.6) }, { pos: 1, color: hsl(i * 0.2 + 0.5, 0.8, 0.4) }], transform: [1, 0, 0, 1, 0, 0] }];
+    add(c, l);
+  }
+  const big = createLayer('image', { x: 1300, y: 500, w: 560, h: 560, name: 'Big image' });
+  big.imageRef = assets[0].id;
+  add(c, big);
+  return c.p;
+}
+
+/** static crispness probe: white shapes on black (scripts/zoom-check.mjs compares zoomed renders
+ *  with a direct canvas2d render of the same view) */
+export function crisp(): Project {
+  const c = base('crisp');
+  c.p.comps[c.p.activeComp].background = [0, 0, 0, 1];
+  const t = createLayer('text', { x: 160, y: 200, w: 0, h: 0, color: [1, 1, 1, 1], name: 'Text', text: { content: 'Crisp Ag', fontFamily: 'Inter', fontSize: 160, fontWeight: 400, lineHeight: 1.2, letterSpacing: 0, align: 'left' } } as any);
+  add(c, t);
+  const sm = createLayer('text', { x: 180, y: 460, w: 0, h: 0, color: [1, 1, 1, 1], name: 'Small', text: { content: 'small 12px label', fontFamily: 'Inter', fontSize: 12, fontWeight: 400, lineHeight: 1.2, letterSpacing: 0, align: 'left' } } as any);
+  add(c, sm);
+  const s = 760;
+  const p = createLayer('path', { x: 1000, y: 120, w: s, h: s, color: [1, 1, 1, 1], name: 'Star' });
+  p.geometry = [{ cmds: starCmds(s / 2, s / 2, s / 2, s / 5, 7), fillRule: 'nonzero' }];
+  p.geomSize = [s, s];
+  add(c, p);
+  const e = createLayer('ellipse', { x: 200, y: 600, w: 500, h: 360, color: [1, 1, 1, 1], name: 'Ellipse' });
+  add(c, e);
+  return c.p;
+}
+
+export const SCENES = { springs, nested, precomps, textAnim, pathMorph, expressions, rasters, masksBlend, overdraw, mixed, zoomMix, crisp };
 export type SceneName = keyof typeof SCENES;
