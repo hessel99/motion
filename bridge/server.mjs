@@ -4,10 +4,37 @@
 import http from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { WebSocketServer } from 'ws';
 import { detectProviders, runTurn, PROVIDERS } from './providers.mjs';
 
 export const TOOL_TIMEOUT_MS = 120_000;
+const MAX_PREVIEW_FILE = 32 * 1024 * 1024;
+
+/**
+ * tool results may carry rendered previews as {type:'file', name, data (base64), mimeType}: MCP has no
+ * such content type, so they are written to the OS temp dir (motion-previews/, sanitized basename) and
+ * replaced by a text item with the path, which a local agent CLI can open.
+ */
+export function materializeFiles(content, dir = join(tmpdir(), 'motion-previews')) {
+  if (!Array.isArray(content)) return content;
+  return content.map((c) => {
+    if (!c || c.type !== 'file') return c;
+    try {
+      const name = String(c.name ?? 'preview').replace(/[^\w.\-]+/g, '_').replace(/^\.+/, '').slice(0, 80) || 'preview';
+      const buf = Buffer.from(String(c.data ?? ''), 'base64');
+      if (buf.length > MAX_PREVIEW_FILE) return { type: 'text', text: `preview too large (${buf.length} bytes)` };
+      mkdirSync(dir, { recursive: true });
+      const path = join(dir, name);
+      writeFileSync(path, buf);
+      return { type: 'text', text: `saved ${c.mimeType ?? 'file'}: ${path} (${Math.round(buf.length / 1024)} KB)` };
+    } catch (e) {
+      return { type: 'text', text: `could not save preview file: ${e?.message ?? e}` };
+    }
+  });
+}
 const MAX_BODY = 4 * 1024 * 1024;
 const SUPPORTED_PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 
@@ -123,7 +150,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
         }
         const r = await callEditorTool(name, msg.params?.arguments);
         if (r.ok) {
-          const content = Array.isArray(r.content) && r.content.length ? r.content : [{ type: 'text', text: 'ok' }];
+          const content = Array.isArray(r.content) && r.content.length ? materializeFiles(r.content) : [{ type: 'text', text: 'ok' }];
           return reply({ content, isError: false });
         }
         const content = Array.isArray(r.content) && r.content.length ? r.content : [{ type: 'text', text: r.error ?? 'Tool failed' }];

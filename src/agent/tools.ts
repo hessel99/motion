@@ -26,6 +26,8 @@ import { st, text, colorSchema, propValueSchema, easeSchema, keyframeSchema, ids
 export { parseColor, boundsOf } from './tool-kit';
 import { SCENE_TOOLS, textAnimFrom } from './tools-scene';
 import { TYPE_TOOLS } from './tools-type';
+import { ANALYSIS_TOOLS } from './tools-analysis';
+import { PREVIEW_TOOLS } from './tools-preview';
 import { SHAPE_TOOLS } from './tools-shapes';
 import { MOTION_TOOLS } from './tools-motion';
 
@@ -645,6 +647,8 @@ export const TOOLS: ToolDef[] = [
   ...SHAPE_TOOLS,
   ...MOTION_TOOLS,
   ...TYPE_TOOLS,
+  ...ANALYSIS_TOOLS,
+  ...PREVIEW_TOOLS,
 ];
 
 export const AGENT_SYSTEM_PROMPT = `You are working inside "Motion", a motion design editor (like After Effects / Figma Motion).

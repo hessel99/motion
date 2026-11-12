@@ -15,7 +15,9 @@ export interface ToolDef {
   /** does not change the document (allowed in Ask mode; advertised as readOnlyHint over MCP) */
   readOnly?: boolean;
 }
-export type ToolContent = { type: 'text'; text: string } | { type: 'image'; data: string; mimeType: string };
+export type ToolContent = { type: 'text'; text: string } | { type: 'image'; data: string; mimeType: string }
+  /** a rendered file (base64): the bridge saves it to a temp file and replaces it with its path */
+  | { type: 'file'; name: string; data: string; mimeType: string };
 
 export const st = () => editor.store;
 // compact json: tool results go straight into the model context, whitespace is wasted tokens
