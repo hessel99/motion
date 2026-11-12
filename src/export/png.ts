@@ -4,6 +4,7 @@
 import { zipSync } from 'fflate';
 import { editor } from '../app/editor';
 import { FrameGrabber, frameTime, unpremultiply } from './frames';
+import { prepareExport } from './prepare';
 
 /** output size for a comp at a scale (at least 1 px) */
 export function pngSize(w: number, h: number, scale = 1) { return { width: Math.max(1, Math.round(w * scale)), height: Math.max(1, Math.round(h * scale)) }; }
@@ -27,6 +28,7 @@ async function withGrabber<T>(scale: number, fn: (g: FrameGrabber) => Promise<T>
   const wasPlaying = editor.store.playing;
   editor.pause();
   editor.stop();
+  await prepareExport();
   const g = new FrameGrabber(editor.renderer, c, { width, height });
   g.begin();
   try { return await fn(g); } finally { g.end(); editor.resume(); if (wasPlaying) editor.play(); }

@@ -9,6 +9,7 @@
 import { GIFEncoder, quantize, applyPalette } from 'gifenc';
 import { editor } from '../app/editor';
 import { FrameGrabber, frameTime, unpremultiply } from './frames';
+import { prepareExport } from './prepare';
 import { gifDelayCs, gifFrameCount, gifSize } from './gif-timing';
 
 export interface GifOptions { maxSize?: number; fps?: number; start?: number; end?: number }
@@ -47,6 +48,7 @@ export async function exportGif(opts: GifOptions = {}, onProgress?: (done: numbe
   const format = alpha ? 'rgba4444' : 'rgb565';
   editor.pause();
   editor.stop();
+  await prepareExport();
   const g = new FrameGrabber(editor.renderer, comp, { width: w, height: h });
   g.begin();
   const read = async (t: number) => {

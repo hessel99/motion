@@ -59,16 +59,19 @@ const TOL = {
 
 // ---------------- dev server ----------------
 let server = null, URL_ = opt('url', process.env.URL || '');
-if (!URL_) {
+// a free port among a few random ones (other agents' servers live on 4173 / 5173 / …)
+for (let attempt = 0; !URL_ && attempt < 6; attempt++) {
   const port = 5400 + Math.floor(Math.random() * 400);
   server = spawn(join(ROOT, 'node_modules/.bin/vite'), ['--port', String(port), '--strictPort'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
-  await new Promise((res, rej) => {
-    const to = setTimeout(() => rej(new Error('vite did not start')), 30000);
-    server.stdout.on('data', d => { if (String(d).includes('Local')) { clearTimeout(to); res(); } });
-    server.on('exit', c => rej(new Error('vite exited ' + c)));
+  const ok = await new Promise(res => {
+    const to = setTimeout(() => res(false), 30000);
+    server.stdout.on('data', d => { if (String(d).includes('Local')) { clearTimeout(to); res(true); } });
+    server.on('exit', () => { clearTimeout(to); res(false); });
   });
-  URL_ = `http://localhost:${port}/`;
+  if (ok) URL_ = `http://localhost:${port}/`;
+  else { try { server.kill(); } catch { /* */ } server = null; }
 }
+if (!URL_) throw new Error('could not start vite');
 const cleanup = () => { try { server?.kill(); } catch { /* */ } };
 process.on('exit', cleanup);
 

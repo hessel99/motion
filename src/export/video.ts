@@ -12,8 +12,8 @@ import {
 import { mixAudio } from '../audio/engine';
 import { setBusy } from '../app/updates';
 import { editor } from '../app/editor';
-import { getBitmap } from '../render/raster';
 import { FrameGrabber, frameTime } from './frames';
+import { prepareExport } from './prepare';
 import { i420Size, rgbaToI420, VIDEO_COLOR_SPACE } from './yuv';
 
 export type VideoFormat = 'mp4' | 'webm';
@@ -165,14 +165,6 @@ export async function probeVideoSupport(width = 1920, height = 1080, fps = 30): 
 
 const yieldTask = () => new Promise<void>(r => { const c = new MessageChannel(); c.port1.onmessage = () => r(); c.port2.postMessage(0); });
 
-async function waitForAssets() {
-  try { await (document as any).fonts?.ready; } catch { /* */ }
-  const assets = Object.values(editor.store.project.assets ?? {});
-  const until = performance.now() + 5000;
-  for (const a of assets) {
-    while (a.kind === 'image' && !getBitmap(a) && performance.now() < until) await new Promise(r => setTimeout(r, 20));
-  }
-}
 
 let exporting = false;
 export const isExportingVideo = () => exporting;
@@ -243,7 +235,7 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
     // audio first (it is small): the muxer can then interleave each video packet immediately
     if (audio) { await audio.src.add(audio.buf); audio.src.close(); }
     encoder.configure(picked.config);
-    await waitForAssets();
+    await prepareExport();
     grabber.begin();
     const keyEvery = Math.max(1, Math.round(fps * 2));
     let lastYield = performance.now(), lastReport = 0;

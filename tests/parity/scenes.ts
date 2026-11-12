@@ -448,6 +448,9 @@ export const SCENES: ParityScene[] = [
       p.assets[asset.id] = asset;
       const a = add(createLayer('audio', { w: 0, h: 0, name: 'clicks' }));
       a.imageRef = asset.id; a.startTime = 0.25; a.volume = 1;
+      // audio-reactive: reads the comp's music analysis (0 when the clip is not detected as music)
+      const r = add(createLayer('ellipse', { x: 60, y: 40, w: 40, h: 40, color: [1, 0.6, 0.2, 1], name: 'audio reactive' }));
+      r.props.scale = { v: [100, 100], expr: "[100 + audio('amp') * 80, 100 + audio('beat') * 80]" };
       return p;
     },
   },

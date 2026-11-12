@@ -97,6 +97,8 @@ export function editorSampler() {
  *  the renderer, Inter text as glyph outlines */
 export async function exportLottieFull(project: Project, ignore: Iterable<string> = []) {
   const { exportLottieDoc } = await import('./lottie');
+  const { prepareExport } = await import('./prepare');
+  await prepareExport();
   const baker = createBaker(project);
   try {
     const res = await exportLottieDoc(project, { ignore, bake: baker.bake, sample: editorSampler() });

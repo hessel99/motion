@@ -17,6 +17,7 @@ const u8b64 = (u: Uint8Array) => { let s = ''; for (let i = 0; i < u.length; i +
 
 async function settle() {
   const s = editor.store;
+  await (await import('../../src/export/prepare')).prepareExport();
   try { await (document as any).fonts?.ready; } catch { /* */ }
   const until = performance.now() + 8000;
   for (const a of Object.values(s.project.assets)) {
