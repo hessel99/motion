@@ -376,7 +376,6 @@ kbd, .kbd {
 .lib-comp-icon, .comp-icon { color: var(--preset-loop); font-size: 11px; }
 .lib-empty p { margin: 0 0 var(--space-3); }
 .lib-hint { margin: 0; line-height: 1.45; }
-.lib-source { margin-top: var(--space-4); }
 .link { background: none; border: 0; padding: 0; min-height: 0; color: var(--accent-text); cursor: pointer; font: inherit; }
 .link:hover { text-decoration: underline; background: none; }
 .chip { display: inline-block; flex: none; width: 16px; height: 16px; border-radius: var(--radius-xs); border: 1px solid var(--border-strong); background-clip: padding-box; }
@@ -396,16 +395,6 @@ kbd, .kbd {
 .ov-list { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-bottom: var(--space-3); }
 .ov-chip { min-height: 20px; padding: 0 var(--space-3); border-radius: var(--radius-pill); font-size: var(--text-xs); background: var(--surface-2); border: 1px solid var(--border); color: var(--text-secondary); }
 .ov-chip:hover { border-color: var(--border-strong); color: var(--text); }
-/* sync review dialog */
-.sync-summary { font-size: var(--text-md, 14px); font-weight: var(--weight-semibold); margin: 0 0 var(--space-4); }
-.sync-list { list-style: none; margin: 0 0 var(--space-4); padding: 0; max-height: 50vh; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-md); }
-.sync-list li { display: grid; grid-template-columns: 64px 1fr auto auto; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); }
-.sync-list li:last-child { border-bottom: 0; }
-.sync-vals { display: inline-flex; align-items: center; gap: var(--space-2); }
-.sync-tag { font-size: var(--text-xs); border-radius: var(--radius-pill); padding: 1px var(--space-3); text-align: center; }
-.sync-tag.changed { background: var(--accent-soft); color: var(--accent-soft-text); }
-.sync-tag.added { background: rgba(62, 207, 110, 0.15); color: var(--success); }
-.sync-tag.removed { background: var(--danger-soft); color: var(--danger-text); }
 .fill-kind { margin-top: var(--space-3); }
 .fill-kind .seg { flex: 0 0 auto; }
 .fill-kind .num { flex: 1; }

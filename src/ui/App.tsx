@@ -3,7 +3,7 @@ import { Component, type ComponentChildren } from 'preact';
 import { editor } from '../app/editor';
 import { ViewportController } from './viewport-controller';
 import { Timeline } from './timeline';
-import { SyncReview, STYLE_MIME, applyStyle } from './LibraryPanel';
+import { STYLE_MIME, applyStyle } from './LibraryPanel';
 import { useChannels } from './hooks';
 import { menuFrom, showContextMenu } from './menu';
 import { agentMenuItems } from './agent-menu';
@@ -70,7 +70,6 @@ export function App() {
         <aside class="right sidebar" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
         {home && <div class="home-host"><Guard name="Home"><Home /></Guard></div>}
         {ui.settingsOpen && <SettingsModal />}
-        <Guard name="Sync"><SyncReview /></Guard>
         <AskBar />
         <ShortcutHelp />
         <Welcome />
