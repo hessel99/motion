@@ -18,11 +18,12 @@ import { variations } from './variations';
 import { addToken, BINDABLE, findToken, linkProp, prettyName, setTokenMode, setTokenValue, tokenUsage, tokenValue, linkOf } from '../core/tokens';
 import { toHex } from '../core/token-sync';
 import { createComponent, createInstance, instanceRootOf, instancesOf } from '../core/components';
+import { GUIDE_TOOLS } from './tools-guides';
 
 import type { ToolDef } from './tool-kit';
 export type { ToolDef, ToolContent } from './tool-kit';
 
-import { st, text, colorSchema, propValueSchema, easeSchema, keyframeSchema, idsSchema, parseColor, toValue, checkProp, need, round, buildKeys, writeTrack, shiftLayerKeys, contactSheet, resolveEase, boundsOf } from './tool-kit';
+import { enableTrim, st, text, colorSchema, propValueSchema, easeSchema, keyframeSchema, idsSchema, parseColor, toValue, checkProp, need, round, buildKeys, writeTrack, shiftLayerKeys, contactSheet, resolveEase, boundsOf } from './tool-kit';
 export { parseColor, boundsOf } from './tool-kit';
 import { SCENE_TOOLS, textAnimFrom } from './tools-scene';
 import { TYPE_TOOLS } from './tools-type';
@@ -277,7 +278,7 @@ export const TOOLS: ToolDef[] = [
           const ns = toValue('size', props.size);
           if (Math.abs(an[0] - sz[0] / 2) < 0.5 && Math.abs(an[1] - sz[1] / 2) < 0.5) setPropTx(tx, l, 'anchor', [ns[0] / 2, ns[1] / 2], s.time);
         }
-        for (const [k, v] of Object.entries(props)) setPropTx(tx, l, checkProp(k), toValue(k as PropKey, v), s.time);
+        for (const [k, v] of Object.entries(props)) { setPropTx(tx, l, checkProp(k), toValue(k as PropKey, v), s.time); enableTrim(tx, l, k as PropKey); }
         tx.touch(l.id);
       });
       return text('ok');
@@ -649,41 +650,10 @@ export const TOOLS: ToolDef[] = [
   ...TYPE_TOOLS,
   ...ANALYSIS_TOOLS,
   ...PREVIEW_TOOLS,
+  ...GUIDE_TOOLS,
 ];
 
-export const AGENT_SYSTEM_PROMPT = `You are working inside "Motion", a motion design editor (like After Effects / Figma Motion).
-You can see and edit the user's open document only through the mcp__motion__* tools.
-Conventions: composition pixels, origin top-left, y down. Times in seconds. Rotation in degrees clockwise.
-Opacity and scale are percent (100 = normal). Colors are "#rrggbb" or [r,g,b,a] 0..1.
-Each layer has an anchor point (default: center of its box) and position = where the anchor sits in the parent.
-Layers inside a group use coordinates relative to the group's box.
-
-Every user message ends with an <editor_context> block: composition, playhead, markers, the SELECTED layers
-(ids, what is animated) and layers the user @-mentioned. "this", "these", "it" mean the selection unless said otherwise.
-If the selection already tells you enough, you don't need get_document.
-
-Tools by job (prefer the high level ones, and batch: fewer calls = faster for the user):
-- Read animation: get_animation (compact keys/eases per layer). get_layer only for raw details.
-- Entrances/exits/loops for one or many layers: apply_preset (Fade in, Slide up, Pop, Zoom in, Spin in, Fade out, Pulse, ...) with stagger for lists.
-- Text reveals per letter/word/line: set_text_animation (presets: Fade up, Typewriter, Pop letters, Slide words, Drop lines, Spin letters, Center burst).
-- Precise motion: animate (many layers/properties in one call, one undo step) or set_keyframes, with eases ("Expo Out" for entrances, "Back Out" for playful pops, "Easy Ease" for neutral moves, "spring Bouncy"/"spring:0.4" for physical motion). Position keys can curve with sOut/sIn.
-- Timing edits: retime (faster/slower/shift), stagger (offset layers one after another), set_easing (change feel without moving keys).
-- Procedural motion: set_expression (wiggle(2, 20), time * 90, loopOut('pingpong'), linear(time, 0, 1, 0, 100)).
-- Custom shapes: add_layer type "path" with SVG path data in "d".
-- Two versions of a design (e.g. two pasted Figma frames, start and end state): smart_animate matches layers by name and animates every difference.
-- Timing to music or story beats: markers are in the context; set_markers adds/removes them. Put keys on marker times.
-- Organize: group_layers, precompose (animate a group as one unit), open_composition.
-- Reuse: create_component turns a layer (logo, button, card + its animation) into a main component; add_instance places linked copies (own position and delay; edits on an instance become overrides).
-- Brand colors: list_styles shows the project's named colors/numbers (often synced from Figma); use link_style instead of raw hex so they follow library updates and light/dark mode (set_style_mode).
-- Options for the user to choose from: build each version, then save_variation (A, B, C...). The user previews and picks in the sidebar.
-- Check your work: contact_sheet (one image, many frames: best for motion), screenshot for a single detailed frame. export_video renders a file only when asked.
-Motion craft: entrances ease out, exits ease in; overlap and stagger (60-120ms) instead of moving everything at once;
-anticipation = small opposite move before the main move; follow-through/overshoot via Back Out or springs; keep 0.2-0.6s for UI moves.
-Keep the user's existing work intact unless asked. The user reviews every turn's changes (with a diff and one-click revert), so act, don't ask for permission.
-Keep replies short: say what you changed (layer names) and offer one or two tweaks.`;
-
-/** extra instruction for read-only "Ask" turns (critique / explain): the editor also blocks editing tools */
-export const ASK_MODE_PROMPT = 'This turn is READ-ONLY (Ask mode): do not try to change the document; editing tools are disabled. Inspect with get_animation, contact_sheet and screenshot, then answer.';
+export { AGENT_SYSTEM_PROMPT, ASK_MODE_PROMPT } from './prompt';
 
 /** tool names the agent may use in Ask mode */
 export const READ_ONLY_TOOLS = () => TOOLS.filter(t => t.readOnly).map(t => t.name);

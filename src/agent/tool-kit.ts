@@ -109,7 +109,13 @@ export function writeTrack(tx: Tx, l: Layer, key: PropKey, incoming: Keyframe[],
     kf = [...rest, ...incoming].sort((x, y) => x.t - y.t);
   }
   tx.set(p, 'kf', kf);
+  enableTrim(tx, l, key);
   tx.touch(l.id);
+}
+
+/** trim keys/values only render with the layer's "Trim paths" switch on: turn it on for the agent */
+export function enableTrim(tx: Tx, l: Layer, key: PropKey) {
+  if ((key === 'trimStart' || key === 'trimEnd' || key === 'trimOffset') && !l.trimOn) { tx.set(l, 'trimOn', true); tx.recompile(); }
 }
 
 /** remap every key time of a layer (props, path shape, text animator). returns whether anything moved */

@@ -1,7 +1,9 @@
 // websocket client to the local bridge (bridge/server.mjs). registers the editor tools and
 // relays chat with cli agents (claude code / codex / gemini) using the user's subscription.
 
-import { TOOLS, AGENT_SYSTEM_PROMPT, ASK_MODE_PROMPT, READ_ONLY_TOOLS } from './tools';
+import { TOOLS, READ_ONLY_TOOLS } from './tools';
+import { AGENT_SYSTEM_PROMPT, ASK_MODE_PROMPT } from './prompt';
+import { GUIDES } from './guides';
 
 export interface Provider { id: string; name: string; available: boolean; version?: string }
 export interface ChatEvent { kind: string; [k: string]: any }
@@ -17,6 +19,11 @@ export function toolManifest() {
     inputSchema: t.inputSchema,
     annotations: { readOnlyHint: !!t.readOnly, destructiveHint: t.name === 'delete_layers' || t.name === 'undo', openWorldHint: false },
   }));
+}
+
+/** the motion guides as MCP resources (served by the bridge: resources/list, resources/read) */
+export function resourceManifest() {
+  return GUIDES.map(g => ({ uri: `motion://guides/${g.name}`, name: g.name, title: g.title, description: g.summary, mimeType: 'text/markdown', text: g.text }));
 }
 
 class AgentClient {
@@ -57,7 +64,7 @@ class AgentClient {
     ws.onopen = () => {
       this.status = 'connected';
       this.retry = 500;
-      ws.send(JSON.stringify({ type: 'hello', tools: toolManifest() }));
+      ws.send(JSON.stringify({ type: 'hello', tools: toolManifest(), resources: resourceManifest() }));
       this.emit();
     };
     ws.onclose = () => {
@@ -109,7 +116,7 @@ class AgentClient {
 
   private send(m: any) { this.ws?.readyState === 1 && this.ws.send(JSON.stringify(m)); }
 
-  chat(opts: { provider: string; message: string; sessionId?: string; model?: string; mode?: ChatMode }, onEvent: (e: ChatEvent) => void) {
+  chat(opts: { provider: string; message: string; sessionId?: string; model?: string; mode?: ChatMode; maxTurns?: number }, onEvent: (e: ChatEvent) => void) {
     const chatId = 'c' + Math.random().toString(36).slice(2);
     if (this.ws?.readyState !== 1) {
       queueMicrotask(() => { onEvent({ kind: 'error', errorKind: 'bridge', message: 'The agent bridge is offline.' }); onEvent({ kind: 'done' }); });
@@ -120,7 +127,7 @@ class AgentClient {
     if (ask) this.readOnlyChats.add(chatId);
     this.send({
       // the ask-mode note goes into the message (codex/gemini only get the system prompt on the first turn)
-      type: 'chat', chatId, provider: opts.provider, message: ask ? `${ASK_MODE_PROMPT}\n\n${opts.message}` : opts.message, sessionId: opts.sessionId, model: opts.model,
+      type: 'chat', chatId, provider: opts.provider, message: ask ? `${ASK_MODE_PROMPT}\n\n${opts.message}` : opts.message, sessionId: opts.sessionId, model: opts.model, maxTurns: opts.maxTurns,
       systemPrompt: AGENT_SYSTEM_PROMPT,
       readOnlyTools: ask ? READ_ONLY_TOOLS() : undefined,
     });

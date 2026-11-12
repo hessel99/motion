@@ -39,3 +39,16 @@ export function targetPhrase(store: Store): string {
 export function availableActions(selCount: number): QuickAction[] {
   return QUICK_ACTIONS.filter(a => selCount >= a.minSel && !(a.id === 'animate-in' && selCount === 0));
 }
+
+/** how big a brief is: picks the model in "auto" (strongest for pieces) and nothing else.
+ *  edit = change what exists / quick action; build = one element or beat; piece = a directed,
+ *  multi-beat piece (storyboard, style, explainer, promo, title sequence, long brief) */
+export function briefScope(text: string, opts: { chip?: string; selCount?: number; style?: boolean } = {}): 'edit' | 'build' | 'piece' {
+  const t = text.toLowerCase();
+  if (/<storyboard>|storyboard approved/.test(t) || opts.style) return 'piece';
+  if (opts.chip) return /variation/i.test(opts.chip) ? 'build' : 'edit';
+  if (/storyboard|explainer|promo|title sequence|intro|trailer|teaser|commercial|\bad\b|beats?\b|scenes?\b|kinetic|style|full piece|video|(\d{2}|[5-9])\s*(s|sec|seconds)\b/.test(t) || t.length > 280) return 'piece';
+  if ((opts.selCount ?? 0) > 0 && t.length < 160) return 'edit';
+  if (/^(make|set|change|move|slow|speed|add (a )?(bit|little)|more|less|fix|tweak|nudge|bouncier|snappier|smoother)\b/.test(t)) return 'edit';
+  return 'build';
+}

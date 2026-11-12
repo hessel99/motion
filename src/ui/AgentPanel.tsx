@@ -5,13 +5,18 @@ import { composeMessage, editorContext, resolveMentions } from '../agent/context
 import { diffDocs, diffIsEmpty, snapshotDoc, type DocSnapshot } from '../agent/diff';
 import { loadChat, projectKey, saveChat, type Msg, type ReviewInfo } from '../agent/history';
 import { toolLabel } from '../agent/labels';
-import { availableActions, targetPhrase, type QuickAction } from '../agent/quick';
+import { availableActions, briefScope, targetPhrase, type QuickAction } from '../agent/quick';
+import { approvalMessage, storyboards, type Storyboard } from '../agent/storyboard';
+import { TOOLS } from '../agent/tools';
 import { animRange } from '../agent/describe';
 import { variations } from '../agent/variations';
 import { MentionInput, type Mention } from './agent/MentionInput';
 import { TurnReview } from './agent/TurnReview';
 import { VariationTray, installVariationThumbs } from './agent/VariationTray';
-import { agentPrefs, setAgentPref, CLAUDE_MODELS, PROVIDER_LABEL, modelLabel } from './agent/agent-prefs';
+import { StoryboardCard } from './agent/StoryboardCard';
+import { StylePicker, styleLabel, stylePrefix } from './agent/StylePicker';
+import { STYLE_GUIDES } from '../agent/guides';
+import { agentPrefs, setAgentPref, CLAUDE_MODELS, PROVIDER_LABEL, modelLabel, resolveModel, turnBudget } from './agent/agent-prefs';
 import { showContextMenu, type MenuItem } from './menu';
 import { openSettings } from './chrome/ui-state';
 import { useChannels } from './hooks';
@@ -36,6 +41,8 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   const session = useRef<Record<string, string | undefined>>(restored?.sessions ?? {});
   const [input, setInput] = useState('');
   const [mentions, setMentions] = useState<Mention[]>([]);
+  /** style picked in the style row: prefixes the next brief */
+  const [style, setStyle] = useState('');
   const [turn, setTurn] = useState<Turn | null>(null);
   const turnRef = useRef<Turn | null>(null);
   turnRef.current = turn;
@@ -103,19 +110,31 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
     });
   }), []);
 
+  // the storyboard card: proposed by the agent (propose_storyboard), progress per beat (update_progress)
+  useEffect(() => storyboards.on(sb => setMsgs(m => {
+    const i = m.findIndex(x => x.storyboard?.id === sb.id);
+    if (i >= 0) { const c = m.slice(); c[i] = { ...m[i], storyboard: sb }; return c; }
+    return turnRef.current ? [...m, { role: 'storyboard', text: '', storyboard: sb }] : m;
+  })), []);
+
   const layerName = (id: string) => editor.store.layer(id)?.name;
 
-  const send = (text: string, opts: { mode?: ChatMode; chip?: string } = {}) => {
+  const send = (text: string, opts: { mode?: ChatMode; chip?: string; style?: string } = {}) => {
     text = text.trim();
     if (!text || turnRef.current || agentClient.status !== 'connected') return;
     const s = editor.store;
     const m = opts.mode ?? mode;
     const m0 = m;
-    const message = composeMessage(s, text, mentions);
+    const st = opts.style ?? '';
+    const pre = st ? stylePrefix(st) : '';
+    // the style line goes in the message (never the system prompt: that is the cached prefix)
+    const message = composeMessage(s, pre ? `${pre}\n${text}` : text, mentions);
+    const scope = briefScope(text, { chip: opts.chip, selCount: s.selection.length, style: !!st });
     setInput('');
     setMentions([]);
+    if (st) setStyle('');
     stick.current = true;
-    setMsgs(x => [...x, { role: 'user', text, mode: m, chip: opts.chip }]);
+    setMsgs(x => [...x, { role: 'user', text, mode: m, chip: opts.chip, ...(st ? { style: st } : {}) }]);
     const snap = snapshotDoc(s.project);
     const marker = s.historyLength; // only for the step count shown on the card
     const startId = s.topEntryId; // identifies the exact pre-turn state (revert / compare)
@@ -138,13 +157,16 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
         let a = Infinity, b = -Infinity;
         for (const c of [...diff.added, ...diff.changed]) { const l = s.layer(c.id); const r = l && animRange(l); if (r) { a = Math.min(a, r[0]); b = Math.max(b, r[1]); } }
         const review: ReviewInfo = { startId, endId: s.topEntryId, steps, diff, state: 'pending', range: isFinite(a) ? [a, b] : undefined };
-        append(x => [...x, { role: 'review', text: '', review }]);
+        // the preview's box is reserved right away, so its arrival doesn't shift / scroll the card
+        append(x => [...x, { role: 'review', text: '', review, ...(editor.renderer ? { preview: 'pending' } : {}) }]);
+        // inline preview of the result: one contact sheet over what the turn animated
+        resultPreview(review.range).then(src => append(x => x.map(y => (y.review?.endId === review.endId && y.role === 'review' ? { ...y, preview: src } : y))));
       }
       const bits = [e.durationMs ? `${(e.durationMs / 1000).toFixed(1)}s` : '', e.costUsd ? `$${e.costUsd.toFixed(3)}` : '', e.usage ? `${fmtTok(e.usage.input)} in · ${fmtTok(e.usage.output)} out` : ''].filter(Boolean);
       if (bits.length) append(x => [...x, { role: 'info', text: bits.join(' · ') }]);
     };
 
-    const chatId = agentClient.chat({ provider, message, sessionId: session.current[provider], model: provider === 'claude' && model ? model : undefined, mode: m }, (e: ChatEvent) => {
+    const chatId = agentClient.chat({ provider, message, sessionId: session.current[provider], model: provider === 'claude' ? resolveModel(scope, model) : undefined, mode: m, maxTurns: turnBudget() }, (e: ChatEvent) => {
       switch (e.kind) {
         case 'session': session.current[provider] = e.sessionId; break;
         case 'text_delta':
@@ -196,6 +218,10 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   };
 
   const runQuick = (a: QuickAction) => send(a.prompt(targetPhrase(editor.store)), { mode: a.mode, chip: a.label });
+  const approveStoryboard = (sb: Storyboard) => send(approvalMessage(storyboards.approve(sb)), { mode: 'edit', chip: sb.edited ? 'Approved storyboard (edited)' : 'Approved storyboard' });
+  /** the storyboard being built right now (for the working indicator) */
+  const building = turn ? [...msgs].reverse().find(x => x.storyboard)?.storyboard : undefined;
+  const activeBeat = building?.state === 'building' ? building.beats.findIndex(b => b.status === 'active') : -1;
 
   const setReview = (i: number, state: ReviewInfo['state'], note?: string) => setMsgs(all => all.map((x, j) => (j === i && x.review ? { ...x, review: { ...x.review, state }, text: note ?? x.text } : x)));
 
@@ -249,7 +275,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   const placeholder = status !== 'connected' ? 'Agent offline: start the bridge to chat'
     : mode === 'ask' ? (selCount ? 'Ask about the selection…' : 'Ask about this composition…')
     : selCount ? 'What should happen to the selection?' : 'Describe an animation…';
-  const submit = () => { if (input.trim()) { props.onSent?.(); send(input); } };
+  const submit = () => { if (input.trim()) { props.onSent?.(); send(input, { style }); } };
 
   return (
     <div class="agent ag-panel">
@@ -287,7 +313,15 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
               <ToolGroup items={b.items.map(x => x.m)} running={!!turn && b.items[b.items.length - 1].i === lastToolIndex(msgs)} layerName={layerName} />
             ) : (() => {
               const { m, i } = b;
-              if (m.role === 'review') return <TurnReview review={m.review!} busy={!!turn} onState={(st, note) => setReview(i, st, note)} />;
+              if (m.role === 'storyboard' && m.storyboard) return <StoryboardCard sb={m.storyboard} busy={!ready} onApprove={approveStoryboard} />;
+              if (m.role === 'review') return (
+                <>
+                  <TurnReview review={m.review!} busy={!!turn} onState={(st, note) => setReview(i, st, note)} />
+                  {/* below the card: arriving late, it must not shift the card's buttons */}
+                  {m.preview === 'pending' && <div class="ag-result pending" style={{ aspectRatio: previewAspect() }} />}
+                  {m.preview && m.preview !== 'pending' && <button type="button" class="ag-result" title="Replay the result" onClick={() => { const r = m.review!.range; s.setTime(Math.max(0, (r?.[0] ?? 0) - 0.1)); editor.play(); }}><img src={m.preview} alt="Result: frames over time" data-testid="result-preview" /></button>}
+                </>
+              );
               if (m.role === 'error') return (
                 <div class={'msg error ag-error ' + (m.errorKind ?? '')}>
                   <div><b>{ERROR_TITLE[m.errorKind ?? ''] ?? 'Something went wrong'}</b></div>
@@ -303,6 +337,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
               if (m.role === 'user') return (
                 <div class={'msg user' + (m.mode === 'ask' ? ' ask' : '')}>
                   {m.mode === 'ask' && <span class="ag-tag">Ask</span>}
+                  {m.style && <span class="ag-tag">{styleLabel(STYLE_GUIDES.find(g => g.name === m.style) ?? { title: m.style } as any)}</span>}
                   {m.chip ? <span title={m.text}><b>{m.chip}</b></span> : m.text}
                 </div>
               );
@@ -311,12 +346,13 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
             {turn && (
               <div class="ag-working" data-testid="agent-working">
                 <span class="ag-spinner" />
-                <span class="ag-grow">{turn.activity}{turn.live > 0 && <span class="ag-muted"> · {turn.live} layer{turn.live === 1 ? '' : 's'} changed</span>}</span>
+                <span class="ag-grow">{activeBeat >= 0 && <b>Beat {activeBeat + 1}/{building!.beats.length} · {building!.beats[activeBeat].name} · </b>}{turn.activity}{turn.live > 0 && <span class="ag-muted"> · {turn.live} layer{turn.live === 1 ? '' : 's'} changed</span>}</span>
                 <span class="ag-muted">{Math.floor((Date.now() - turn.startedAt) / 1000)}s</span>
               </div>
             )}
           </div>
           <VariationTray />
+          <StylePicker value={style} onChange={setStyle} disabled={status !== 'connected'} />
           <div class="ag-quick" role="toolbar" aria-label="Quick actions">
             {availableActions(selCount).map(a => (
               <button class={'ag-qchip' + (a.mode === 'ask' ? ' ask' : '')} disabled={!ready} title={`${a.title}${a.mode === 'ask' ? ' (read-only)' : ''}\nfor: ${selCount ? targetPhrase(s) : 'the whole animation'}`} onClick={() => runQuick(a)}>{a.label}</button>
@@ -370,7 +406,31 @@ const ERROR_TITLE: Record<string, string> = {
   network: 'Network problem',
   timeout: 'The agent stopped responding',
   bridge: 'Bridge disconnected',
+  turn_budget: 'Turn budget used up',
 };
+
+/** width / height of the 6-frame result sheet (3 x 2 cells, labels, padding: see contactSheet in tools.ts) */
+function previewAspect() {
+  const c = editor.store.comp;
+  const sc = Math.min(1, 220 / Math.max(c.width, c.height));
+  const w = Math.round(c.width * sc), h = Math.round(c.height * sc);
+  return `${3 * (w + 4) + 4} / ${2 * (h + 4 + 16) + 4}`;
+}
+
+/** a contact sheet of the turn's animated range (whole comp when the range is tiny) for the chat */
+async function resultPreview(range?: [number, number]): Promise<string | undefined> {
+  const s = editor.store;
+  if (!editor.renderer) return undefined;
+  const D = s.comp.duration;
+  let [a, b] = range ?? [0, D];
+  if (b - a < 0.4) { a = 0; b = D; }
+  a = Math.max(0, a - 0.05); b = Math.min(D, b + 0.3);
+  try {
+    const res = await TOOLS.find(t => t.name === 'contact_sheet')!.run({ frames: 6, start: a, end: b, cell: 220 });
+    const img = res.find(c => c.type === 'image') as { data: string; mimeType: string } | undefined;
+    return img ? `data:${img.mimeType};base64,${img.data}` : undefined;
+  } catch { return undefined; }
+}
 
 function fmtTok(n: number) { return n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(n); }
 

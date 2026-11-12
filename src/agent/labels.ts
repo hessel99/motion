@@ -69,6 +69,9 @@ export function toolLabel(rawName: string, input: any, layerName: (id: string) =
     case 'timeline_summary': return 'Read the timeline';
     case 'preview_strip': return `Preview strip${a.layout ? ' (' + a.layout + ')' : ''}`;
     case 'preview_video': return 'Render GIF preview';
+    case 'get_guide': return a.name ? `Read guide ${q(a.name + (a.section ? ' › ' + a.section : ''))}` : 'List guides';
+    case 'propose_storyboard': return `Storyboard ${q(a.title ?? '')}${Array.isArray(a.beats) ? ` · ${plural(a.beats.length, 'beat')}` : ''}`;
+    case 'update_progress': return `Beat ${a.beat} ${a.status === 'active' ? 'started' : a.status ?? ''}`;
     default: return name.replace(/_/g, ' ');
   }
 }

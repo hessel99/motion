@@ -372,3 +372,235 @@ describe('agent tools: styles and components', () => {
     expect(READ_ONLY_TOOLS()).toContain('list_styles');
   });
 });
+
+// ---------- director: guides, storyboard, prompt ----------
+
+import { GUIDES, STYLE_GUIDES, findGuide, guideSections } from '../src/agent/guides';
+import { storyboards, approvalMessage, normalizeStoryboard } from '../src/agent/storyboard';
+import { briefScope } from '../src/agent/quick';
+import { resourceManifest } from '../src/agent/client';
+import { checkExpr } from '../src/core/expr';
+import { EASE_PRESETS, SPRING_PRESETS } from '../src/core/easing';
+
+describe('agent guides (get_guide)', () => {
+  it('all guides load with a title and a one-line summary; the index lists every name', async () => {
+    for (const n of ['handbook', 'workflow', 'cookbook']) expect(findGuide(n)?.text.length).toBeGreaterThan(2000);
+    expect(STYLE_GUIDES.length).toBeGreaterThanOrEqual(16);
+    for (const g of GUIDES) {
+      expect(g.title.length, g.name).toBeGreaterThan(2);
+      expect(g.summary.length, g.name).toBeGreaterThan(20);
+    }
+    const index = await run('get_guide', {});
+    for (const n of ['handbook', 'workflow', 'cookbook', 'styles']) expect(index).toContain(n);
+    const styles = await run('get_guide', { name: 'styles' });
+    for (const g of STYLE_GUIDES) expect(styles).toContain(g.name);
+    for (const g of GUIDES) expect(await run('get_guide', { name: g.name })).toBe(g.text);
+  });
+
+  it('every style recipe has the full template and real hex colors', () => {
+    for (const g of STYLE_GUIDES) {
+      for (const h of ['Palette', 'Shapes', 'Typography', 'Easing & timing', 'Signature moves', 'Transitions', 'Do / Don', 'Mini scene plan']) expect(guideSections(g).some(s => s.startsWith(h)), `${g.name}: ${h}`).toBe(true);
+      expect((g.text.match(/#[0-9A-Fa-f]{6}\b/g) ?? []).length, g.name).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it('finds guides loosely, loads single sections, and errors helpfully', async () => {
+    expect(findGuide('swiss')?.name).toBe('styles/swiss');
+    expect(findGuide('Neo brutalist')?.name).toBe('styles/neo-brutalist');
+    expect(findGuide('Swiss / International')?.name).toBe('styles/swiss');
+    const sec = await run('get_guide', { name: 'handbook', section: 'Critique' });
+    expect(sec).toMatch(/^## 11\. Critique rubric/);
+    expect(sec.length).toBeLessThan(findGuide('handbook')!.text.length / 4);
+    await expect(run('get_guide', { name: 'nope' })).rejects.toThrow(/guides: .*handbook/);
+    await expect(run('get_guide', { name: 'handbook', section: 'zzz' })).rejects.toThrow(/sections: /);
+  });
+
+  it('the guides only name eases, springs and presets that exist', () => {
+    const eases = new Set(EASE_PRESETS.map(p => p.name));
+    const springs = new Set(SPRING_PRESETS.map(p => p.name));
+    const bad: string[] = [];
+    for (const g of GUIDES) {
+      for (const m of g.text.matchAll(/`spring ([A-Z][a-z]+)`/g)) if (!springs.has(m[1])) bad.push(`${g.name}: spring ${m[1]}`);
+      for (const m of g.text.matchAll(/`((?:Sine|Quad|Cubic|Quart|Expo|Back|Ease) (?:In Out|In|Out)|Easy Ease|Linear|Snappy|Gentle)`/g)) if (!eases.has(m[1])) bad.push(`${g.name}: ${m[1]}`);
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it('expressions quoted in the guides compile', () => {
+    const exprs = ['value + 3*Math.sin(time*2*Math.PI/1.5)', 'Math.floor(time*2)%2*100', 'value + (time % 2 < 0.15 ? [random(-12,12), 0] : [0,0])', 'value + (Math.floor(time*12)%2 ? 0.6 : -0.6)', 'wiggle(8, 0.8)', 'value + 8*Math.sin(time*2*Math.PI/5)', 'time*360/4'];
+    for (const e of exprs) expect(GUIDES.some(g => g.text.includes(e)), e).toBe(true);
+    for (const e of exprs) expect(checkExpr(e, /\[/.test(e) ? 2 : 1), e).toBeNull();
+    expect(checkExpr('value + [30*Math.sin((time/4 + index*0.33)*2*Math.PI), 20*Math.cos((time/2 + index*0.2)*2*Math.PI)]', 2)).toBeNull();
+  });
+
+  it('guides are served as MCP resources', () => {
+    const r = resourceManifest();
+    expect(r.length).toBe(GUIDES.length);
+    expect(r.find(x => x.uri === 'motion://guides/styles/swiss')).toMatchObject({ mimeType: 'text/markdown', title: 'Swiss / International' });
+  });
+});
+
+describe('agent system prompt', () => {
+  it('stays a small, stable core (< 1,200 words) that points to the guides and the director tools', () => {
+    const words = AGENT_SYSTEM_PROMPT.split(/\s+/).filter(Boolean).length;
+    expect(words).toBeLessThan(1200);
+    for (const name of ['get_guide', 'propose_storyboard', 'update_progress', 'contact_sheet', 'handbook', 'styles', 'cookbook', 'workflow']) expect(AGENT_SYSTEM_PROMPT).toContain(name);
+    // nothing per-turn or time-dependent in the cached prefix
+    expect(AGENT_SYSTEM_PROMPT).not.toMatch(/\$\{|\d{4}-\d{2}-\d{2}/);
+  });
+
+  it('briefScope: storyboards / styles / long briefs are pieces; quick actions are edits', () => {
+    expect(briefScope('Make a 12 second explainer about our app')).toBe('piece');
+    expect(briefScope('anything', { style: true })).toBe('piece');
+    expect(briefScope('Make it bouncier', { chip: 'Bouncier' })).toBe('edit');
+    expect(briefScope('slower please', { selCount: 1 })).toBe('edit');
+    expect(briefScope('Add a red circle that pops in')).toBe('build');
+  });
+});
+
+describe('director tools: storyboard flow', () => {
+  beforeEach(() => { fresh(); storyboards.clear(); });
+  const plan = { title: 'Launch', style: 'Swiss / International', styleReason: 'grid-strict brand', duration: 6, beats: [
+    { name: 'Hook', start: 0, end: 2, description: 'Red bar wipes in', style: 'Expo Out' },
+    { name: 'Reveal', start: 2, end: 6, description: 'Logo lands' },
+  ] };
+
+  it('schemas: beats need name/start/end/description; status is an enum', () => {
+    const p = tool('propose_storyboard').inputSchema;
+    expect(p.required).toEqual(['title', 'beats']);
+    expect(p.properties.beats.items.required).toEqual(['name', 'start', 'end', 'description']);
+    expect(tool('update_progress').inputSchema.properties.status.enum).toEqual(['active', 'done', 'skipped']);
+    expect(READ_ONLY_TOOLS()).toContain('get_guide');
+    expect(READ_ONLY_TOOLS()).not.toContain('propose_storyboard');
+  });
+
+  it('validates beats with actionable errors', () => {
+    expect(() => normalizeStoryboard({ title: 'x', beats: [] })).toThrow(/non-empty/);
+    expect(() => normalizeStoryboard({ title: 'x', beats: [{ name: 'a', start: 2, end: 1, description: '' }] })).toThrow(/start < end/);
+    expect(() => normalizeStoryboard({ title: 'x', beats: [{ name: 'a', start: 2, end: 3 }, { name: 'b', start: 0, end: 1 }] })).toThrow(/time order/);
+    expect(normalizeStoryboard({ title: 'x', beats: [{ name: 'a', start: 0, end: 3 }] }).duration).toBe(3);
+  });
+
+  it('propose → wait (ask mode) → approve with edits → progress per beat, each beat one undo step', async () => {
+    const seen: any[] = [];
+    const off = storyboards.on(sb => seen.push(sb));
+    const r = await run('propose_storyboard', plan);
+    expect(r).toMatch(/Wait for approval: end your turn/);
+    expect(storyboards.current).toMatchObject({ title: 'Launch', state: 'proposed' });
+    expect(seen.at(-1).beats.map((b: any) => b.status)).toEqual(['todo', 'todo']);
+
+    // the user renames beat 2 and approves: the message back to the agent carries the edited plan
+    const edited = { ...storyboards.current!, beats: storyboards.current!.beats.map((b, i) => (i === 1 ? { ...b, name: 'Logo resolve' } : b)), edited: true };
+    const msg = approvalMessage(storyboards.approve(edited));
+    expect(msg).toMatch(/approved with my edits/);
+    expect(JSON.parse(msg.match(/<storyboard>(.*)<\/storyboard>/)![1]).beats[1].name).toBe('Logo resolve');
+
+    const s = editor.store;
+    const h0 = s.historyLength;
+    expect(await run('update_progress', { beat: 1, status: 'active' })).toMatch(/beat 1 "Hook" active/);
+    await run('add_layer', { type: 'rect', name: 'Bar', x: 96, y: 200, w: 1728, h: 24, fill: '#E30613' });
+    await run('add_layer', { type: 'text', name: 'Head', text: { content: 'FORM' } });
+    const bar = s.comp.root.map(id => s.layer(id)!).find(l => l.name === 'Bar')!;
+    await run('animate', { tracks: [{ id: bar.id, prop: 'scale', keyframes: [{ t: 0, v: [0, 100], ease: 'Expo Out' }, { t: 0.6, v: [100, 100] }] }] });
+    expect(s.historyLength - h0).toBeGreaterThanOrEqual(3);
+    expect(await run('update_progress', { beat: 'hook', status: 'done', note: 'bar + head' })).toMatch(/1\/2 beats/);
+    expect(s.historyLength - h0).toBe(1);
+    expect(s.undoLabel).toBe('Beat 1 · Hook');
+
+    // beat 2 by name; "done" without a separate "active" call starts where beat 1 ended
+    await run('add_layer', { type: 'ellipse', name: 'Logo' });
+    await run('add_layer', { type: 'rect', name: 'Logo bar' });
+    expect(await run('update_progress', { beat: 'Logo resolve', status: 'done' })).toMatch(/2\/2 beats finished — now critique/);
+    expect(s.undoLabel).toBe('Beat 2 · Logo resolve');
+    expect(storyboards.current!.state).toBe('done');
+    expect(seen.at(-1).beats.map((b: any) => b.status)).toEqual(['done', 'done']);
+
+    // one undo removes a whole beat; redo brings it back
+    const n = s.comp.root.length;
+    s.undo();
+    expect(s.comp.root.length).toBe(n - 2);
+    s.undo();
+    expect(s.comp.root.length).toBe(n - 4);
+    s.redo(); s.redo();
+    expect(s.comp.root.length).toBe(n);
+    await expect(run('update_progress', { beat: 7, status: 'done' })).rejects.toThrow(/1\.\.2/);
+    off();
+  });
+
+  it('auto-approval mode tells the agent to build right away', async () => {
+    const g = globalThis as any;
+    const prev = Object.getOwnPropertyDescriptor(g, 'localStorage');
+    const mem: Record<string, string> = { 'motion.agent.storyboard': 'auto' };
+    Object.defineProperty(g, 'localStorage', { configurable: true, writable: true, value: { getItem: (k: string) => mem[k] ?? null, setItem: (k: string, v: string) => { mem[k] = v; }, removeItem: (k: string) => { delete mem[k]; } } });
+    try {
+      expect(await run('propose_storyboard', plan)).toMatch(/Auto-approved: build it now/);
+      expect(storyboards.current!.state).toBe('approved');
+    } finally {
+      if (prev) Object.defineProperty(g, 'localStorage', prev); else delete g.localStorage;
+    }
+  });
+
+  it('store.squashSince merges entries into one labeled step and is a no-op for unknown ids', () => {
+    const s = editor.store;
+    const top = s.topEntryId;
+    addLayer(s, 'rect', { name: 'A' });
+    addLayer(s, 'rect', { name: 'B' });
+    expect(s.squashSince(top, 'Both')).toBe(2);
+    expect(s.undoLabel).toBe('Both');
+    expect(s.squashSince(123, 'x')).toBe(0);
+    expect(s.squashSince(s.topEntryId, 'x')).toBe(0);
+  });
+
+  it('tool labels for the director tools', () => {
+    expect(toolLabel('mcp__motion__get_guide', { name: 'styles/swiss' }, () => undefined)).toBe('Read guide “styles/swiss”');
+    expect(toolLabel('propose_storyboard', plan, () => undefined)).toBe('Storyboard “Launch” · 2 beats');
+    expect(toolLabel('update_progress', { beat: 2, status: 'done' }, () => undefined)).toBe('Beat 2 done');
+  });
+});
+
+// ---------- concept-driven motion ----------
+
+import conceptBriefs from '../src/agent/guides/evals/concept-briefs.json';
+
+describe('concept-driven motion', () => {
+  beforeEach(() => { fresh(); storyboards.clear(); });
+
+  it('the concepts guide and the prompt rule exist and name the artwork tools', async () => {
+    const g = await run('get_guide', { name: 'concepts' });
+    for (const w of ['Door opens', 'Leaf grows', 'Rocket launches', 'tittle', 'Anti-patterns', 'inspect_artwork', 'split_shape', 'set_pivot', 'rig']) expect(g).toContain(w);
+    for (const w of ['inspect_artwork', 'split_shape', 'set_pivot', 'rig', 'concepts', 'MUST first look']) expect(AGENT_SYSTEM_PROMPT).toContain(w);
+    expect(await run('get_guide', {})).toContain('concepts');
+  });
+
+  it('storyboards carry 2-3 concepts; the approval names the picked one and flags a switch', async () => {
+    await run('propose_storyboard', { title: 'Haven logo', beats: [{ name: 'Door', start: 0, end: 2, description: 'door swings open' }], recommended: 0, concepts: [
+      { name: 'Door opens', idea: 'the door swings on its hinge, light spills out', why: 'welcome home' },
+      { name: 'House draws itself', idea: 'outline draws on, then fills' },
+    ] });
+    const sb = storyboards.current!;
+    expect(sb.concepts!.length).toBe(2);
+    expect(sb.chosen).toBe(0);
+    expect(approvalMessage(sb)).toMatch(/Concept: "Door opens"\. Build/);
+    const other = approvalMessage({ ...sb, chosen: 1 });
+    expect(other).toMatch(/Concept: "House draws itself" \(I picked this instead/);
+    expect(JSON.parse(other.match(/<storyboard>(.*)<\/storyboard>/)![1]).concept).toMatch(/^House draws itself: outline/);
+    expect(() => normalizeStoryboard({ title: 'x', beats: [{ name: 'a', start: 0, end: 1 }], concepts: [{ name: 'no idea' }] })).toThrow(/needs name and idea/);
+  });
+
+  it('eval briefs: every setup call is a valid tool call that builds the artwork', async () => {
+    expect(conceptBriefs.briefs.length).toBeGreaterThanOrEqual(4);
+    for (const b of conceptBriefs.briefs) {
+      fresh();
+      for (const c of b.setup) await tool(c.tool).run(c.args);
+      expect(editor.store.comp.root.length, b.id).toBeGreaterThanOrEqual(5);
+      expect(b.expect.concept.length).toBeGreaterThan(20);
+    }
+  });
+
+  it('animating trim on a path turns its "Trim paths" switch on (draw-on recipes render)', async () => {
+    const { id } = JSON.parse(await run('add_layer', { type: 'path', name: 'Line', d: 'M0 0 L100 0', w: 100, h: 2, stroke: '#000000', strokeWidth: 4 }));
+    expect(editor.store.layer(id)!.trimOn).toBeFalsy();
+    await run('animate', { tracks: [{ id, prop: 'trimEnd', keyframes: [{ t: 0, v: 0 }, { t: 1, v: 100 }] }] });
+    expect(editor.store.layer(id)!.trimOn).toBe(true);
+  });
+});

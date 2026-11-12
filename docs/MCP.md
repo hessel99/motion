@@ -8,7 +8,10 @@ VS Code, Codex or your own agent.
   a free port and shows the URL in *Settings → Connections*, with setup snippets per client)
 - Transport: Streamable HTTP, `POST` only, JSON responses (no SSE stream). JSON-RPC batches work.
 - Protocol versions: `2025-06-18`, `2025-03-26`, `2024-11-05`
-- Methods: `initialize`, `ping`, `tools/list`, `tools/call` (`resources/list` and `prompts/list` are empty)
+- Methods: `initialize`, `ping`, `tools/list`, `tools/call`, `resources/list`, `resources/read` (`prompts/list` is empty)
+- Resources: the motion guides as markdown, `motion://guides/<name>` (`handbook`, `workflow`, `concepts`, `cookbook`,
+  `styles/<style>`), the same text the `get_guide` tool returns. Text tool results over 24k characters are cut
+  with a note (`MOTION_MAX_TOOL_TEXT`).
 - Local only: binds 127.0.0.1; requests with a non-loopback `Host` or a non-local browser `Origin` get 403.
 - Health: `GET /health` → `{ ok, editorConnected, tools }`
 
@@ -38,8 +41,9 @@ missing layer id, Ask mode, ...). If no editor is open the call fails with "The 
 
 Composition pixels, origin top-left, y down. Times in seconds. Rotation in degrees clockwise. Opacity and
 scale in percent. Colors `"#rrggbb"` or `[r,g,b,a]` (0..1). Every edit is a normal undoable editor
-transaction and shows up live (every tool call is one undo step). The full agent guide is `AGENT_SYSTEM_PROMPT` in
-`src/agent/tools.ts`; worked examples for the higher-level tools are in `docs/agent-tools-cookbook.md`.
+transaction and shows up live (every tool call is one undo step). The agent's system prompt is `AGENT_SYSTEM_PROMPT` in
+`src/agent/prompt.ts` (a small stable core); craft knowledge lives in `src/agent/guides/*.md` and is loaded on demand.
+Worked examples for the higher-level tools are in `docs/agent-tools-cookbook.md`.
 
 ## Tools
 
@@ -88,6 +92,10 @@ transaction and shows up live (every tool call is one undo step). The full agent
 | **Preview** | | |
 | `preview_strip` | yes | Many small labeled frames in one image: row, grid (≤24) or onion skin |
 | `preview_video` | yes | Short low-res GIF saved to a file (desktop: exports folder; bridge: OS temp `motion-previews/`), returns the path |
+| **Director & knowledge** | | |
+| `get_guide` | yes | Motion knowledge on demand: handbook, workflow, cookbook, 16 style recipes (or one section) |
+| `propose_storyboard` | | Director mode: show the plan (beats, times, style, 2–3 concepts for logos) as an editable card; the user picks/approves |
+| `update_progress` | | Per-beat progress on the card; each beat's edits become one undo step |
 
 All input schemas are validated as strict JSON Schema in `tests/agent.test.ts` (every array has
 `items`, enums are non-empty, `required` names real properties), so they load in Claude, Gemini and
