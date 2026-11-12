@@ -8,8 +8,8 @@ import { buildCommand, DEFAULT_MAX_TURNS } from '../bridge/providers.mjs';
 let bridge;
 let base;
 
-async function rpc(body, headers = {}) {
-  const res = await fetch(`${base}/mcp`, {
+async function rpc(body, headers = {}, path = '/mcp') {
+  const res = await fetch(`${base}${path}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream', ...headers },
     body: JSON.stringify(body),
@@ -92,6 +92,13 @@ describe('bridge MCP relay', () => {
     expect(call.body.result.content[1].type).toBe('image');
     const tc = msgs.find((m) => m.type === 'tool_call');
     expect(tc).toMatchObject({ name: 'add_layer', args: { kind: 'rect' } });
+    expect(tc.chatId).toBeUndefined();
+
+    // the per-chat MCP url (/mcp?chat=…) tags the call with its chat: runs belong to a document
+    await rpc({ jsonrpc: '2.0', id: 41, method: 'tools/call', params: { name: 'add_layer', arguments: { kind: 'oval' } } }, {}, '/mcp?chat=c-abc123');
+    expect(msgs.filter((m) => m.type === 'tool_call').pop()).toMatchObject({ args: { kind: 'oval' }, chatId: 'c-abc123' });
+    await rpc({ jsonrpc: '2.0', id: 42, method: 'tools/call', params: { name: 'add_layer', arguments: { kind: 'tri' } } }, {}, '/mcp?chat=' + encodeURIComponent('bad id!'));
+    expect(msgs.filter((m) => m.type === 'tool_call').pop().chatId).toBeUndefined();
 
     const err = await rpc({ jsonrpc: '2.0', id: 5, method: 'tools/call', params: { name: 'add_layer', arguments: { kind: 'boom' } } });
     expect(err.body.result).toEqual({ content: [{ type: 'text', text: 'bad kind' }], isError: true });

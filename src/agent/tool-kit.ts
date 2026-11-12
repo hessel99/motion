@@ -5,7 +5,7 @@ import { editor } from '../app/editor';
 import { valueAt } from '../core/commands';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { PROP_DEFS, PROP_KEYS, type Keyframe, type Layer, type PropKey } from '../core/model';
-import type { Tx } from '../core/store';
+import type { Store, Tx } from '../core/store';
 
 export interface ToolDef {
   name: string;
@@ -19,7 +19,27 @@ export type ToolContent = { type: 'text'; text: string } | { type: 'image'; data
   /** a rendered file (base64): the bridge saves it to a temp file and replaces it with its path */
   | { type: 'file'; name: string; data: string; mimeType: string };
 
-export const st = () => editor.store;
+/** the store a tool call works on: the active document's, or (while a run works in a document
+ *  that is in a background tab) that document's own store. set only around one tool call
+ *  (AgentClient.runTool serializes calls, so it never leaks into another call) */
+let target: Store | null = null;
+export const st = () => target ?? editor.store;
+/** run a tool on another (background) document's store */
+export async function withToolStore<T>(store: Store | null, fn: () => Promise<T> | T): Promise<T> {
+  const prev = target;
+  target = store && store !== editor.store ? store : null;
+  try { return await fn(); } finally { target = prev; }
+}
+/** the tool works on a document in a background tab (nothing of it is on screen) */
+export const inBackground = () => target !== null;
+/** the renderer, for tools that render. a background document has no renderer (it is not on the
+ *  canvas): those tools fail with a message the agent can work around */
+export function renderer() {
+  if (target) throw new Error('This file is in a background tab (the user is looking at another file), so rendered previews (screenshot, contact_sheet, frames) are unavailable until they switch back. Keep working with get_animation / describe tools and check visually later.');
+  return editor.renderer;
+}
+/** a renderer for the document the tool works on, if there is one (optional visuals) */
+export const hasRenderer = () => !target && !!editor.renderer;
 // compact json: tool results go straight into the model context, whitespace is wasted tokens
 export const text = (v: unknown): ToolContent[] => [{ type: 'text', text: typeof v === 'string' ? v : JSON.stringify(v) }];
 
@@ -149,7 +169,7 @@ export async function contactSheet(times: number[], cell: number): Promise<strin
   g.font = '11px ui-monospace, Menlo, monospace';
   g.textBaseline = 'middle';
   for (let i = 0; i < times.length; i++) {
-    const url = editor.renderer.snapshot(times[i], Math.max(w, h));
+    const url = renderer().snapshot(times[i], Math.max(w, h));
     const im = new Image();
     await new Promise<void>((res, rej) => { im.onload = () => res(); im.onerror = () => rej(new Error('snapshot decode failed')); im.src = url; });
     const x = pad + (i % cols) * (w + pad), y = pad + Math.floor(i / cols) * (h + pad + label);
@@ -178,7 +198,7 @@ export function resolveEase(e: any): { v: [number, number, number, number]; line
 
 export function boundsOf(ids: string[]) {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-  const r = editor.renderer;
+  const r = renderer();
   for (const id of ids) {
     // bounds in the parent's space: use world corners mapped through the parent inverse
     const l = st().layer(id);

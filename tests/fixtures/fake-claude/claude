@@ -5,7 +5,8 @@
 // spending a subscription. Behaviour is picked from the prompt:
 //   "Ask mode"/"Critique" → read-only look + a refused edit;
 //   "storyboard" → director flow (propose, then build the approved plan with update_progress);
-//   "fail auth" → auth error;  "slow" → waits (for cancel tests);  otherwise builds two shapes.
+//   "fail auth" → auth error;  "fail budget" → turn budget used up;  "slow" → waits (for cancel
+//   tests);  "wait Ns" → waits N seconds, then builds;  otherwise builds two shapes.
 const args = process.argv.slice(2);
 if (args.includes('--version')) { console.log('0.0.0 (fake claude for tests)'); process.exit(0); }
 const mcp = JSON.parse(args[args.indexOf('--mcp-config') + 1]).mcpServers.motion.url;
@@ -35,6 +36,9 @@ process.stdin.on('end', async () => {
   out({ type: 'system', subtype: 'init', session_id: session });
   if (/fail auth/.test(prompt)) { out({ type: 'result', subtype: 'success', is_error: true, result: 'Invalid API key · Please run /login', session_id: session }); return; }
   if (/\bslow\b/.test(prompt)) { say('Working slowly…'); await sleep(60000); }
+  if (/fail budget/.test(prompt)) { await rpc('initialize', {}); await tool('get_document', {}); out({ type: 'result', subtype: 'error_max_turns', is_error: true, num_turns: 1, session_id: session }); return; }
+  const wait = prompt.match(/\bwait (\d+)s\b/);
+  if (wait) { say('Taking a moment…'); await sleep(+wait[1] * 1000); }
   await rpc('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'fake-claude', version: '1' } });
   const ctxIds = [...prompt.matchAll(/id=(\S+)/g)].map((m) => m[1].replace(/[),;]$/, ''));
   if (/Ask mode|READ-ONLY/.test(prompt)) {

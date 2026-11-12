@@ -166,7 +166,7 @@ export function ExportDialog(props: { onClose: () => void }) {
               <option value="mp4" disabled={support !== null && !support.mp4}>MP4 (H.264){support && !support.mp4 ? ' – unavailable' : ''}</option>
               <option value="webm" disabled={support !== null && !support.webm}>WebM (VP9)</option>
             </select>
-            <label>Resolution</label>
+            <span class="xv-label" aria-hidden="true">Resolution</span>
             <Segmented class="xv-seg" label="Resolution" value={scale} disabled={busy} options={SCALES.map(s => ({ value: s, label: `${s}×` }))} onChange={setScale} />
             <label for="xv-fps">Frame rate</label>
             <select id="xv-fps" value={String(fps)} disabled={busy} onChange={e => setFps(Number((e.target as HTMLSelectElement).value))}>
@@ -174,7 +174,7 @@ export function ExportDialog(props: { onClose: () => void }) {
                 <option value={String(f)}>{f} fps{f === comp.fps ? ' (comp)' : ''}</option>
               ))}
             </select>
-            <label>Quality</label>
+            <span class="xv-label" aria-hidden="true">Quality</span>
             <Segmented class="xv-seg" label="Quality" value={quality} disabled={busy} options={(['low', 'medium', 'high'] as VideoQuality[]).map(q => ({ value: q, label: q[0].toUpperCase() + q.slice(1) }))} onChange={setQuality} />
           </div>
           <div class="xv-info muted">
@@ -183,7 +183,7 @@ export function ExportDialog(props: { onClose: () => void }) {
         </>}
         {kind === 'gif' && <>
           <div class="xv-grid">
-            <label>Size</label>
+            <span class="xv-label" aria-hidden="true">Size</span>
             <Segmented class="xv-seg" label="GIF size" value={gifSizeMax} options={[320, 480, 640, 960].map(v => ({ value: v, label: `${v}px` }))} onChange={setGifSize} />
             <label for="xv-gfps">Frame rate</label>
             <select id="xv-gfps" value={String(gifFps)} onChange={e => setGifFps(Number((e.target as HTMLSelectElement).value))}>
@@ -194,9 +194,9 @@ export function ExportDialog(props: { onClose: () => void }) {
         </>}
         {kind === 'image' && <>
           <div class="xv-grid">
-            <label>Frames</label>
+            <span class="xv-label" aria-hidden="true">Frames</span>
             <Segmented class="xv-seg" label="Frames" value={pngMode} options={[{ value: 'frame' as const, label: 'Current frame' }, { value: 'sequence' as const, label: 'Sequence' }]} onChange={setPngMode} />
-            <label>Scale</label>
+            <span class="xv-label" aria-hidden="true">Scale</span>
             <Segmented class="xv-seg" label="Scale" value={scale} options={[0.5, 1, 2, 4].map(s => ({ value: s, label: `${s}×` }))} onChange={setScale} />
           </div>
           <div class="xv-info muted">{pngMode === 'frame'

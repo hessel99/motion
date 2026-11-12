@@ -135,3 +135,26 @@
 .ag-sb-concept-name { font-weight: 600; display: flex; gap: 6px; align-items: center; }
 .ag-sb-concept-name .ag-tag { margin: 0; }
 .ag-sb-concept-idea { line-height: 1.35; }
+
+/* context sent with a message (keyframes, a time range) */
+.ag-msg-ctx { display: block; width: fit-content; max-width: 100%; margin-top: 4px; font-size: 11px; padding: 0 6px; border-radius: 4px; background: var(--surface-hover); color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* a message waiting for its turn (typed while the agent works, or an ask from ⌘K / a menu / Home) */
+.left-panel .msg.user.ag-queued { background: transparent; border: 1px dashed var(--ag-line); color: var(--text-secondary); }
+.ag-queued-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--ag-muted); margin-right: 6px; vertical-align: 1px; }
+.ag-queued-actions { float: right; display: inline-flex; gap: 6px; align-items: center; margin-left: 6px; font-size: 11px; }
+
+/* a window tab whose document an agent run is working in (the run keeps going in the background) */
+.tb-tab .tb-run { width: 8px; height: 8px; flex: none; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--accent) 30%, transparent); border-top-color: var(--accent); animation: ag-spin .8s linear infinite; }
+
+/* error toasts stay until dismissed (actions.ts toast): a close button, clickable */
+.toast.error { pointer-events: auto; display: flex; align-items: center; gap: 8px; }
+.toast-x { background: none; border: 0; padding: 0 2px; color: inherit; opacity: .7; cursor: pointer; font: inherit; line-height: 1; }
+.toast-x:hover { opacity: 1; }
+
+/* selection bar: the inline ask anchored to the layer (CanvasBars.tsx) */
+.sel-ask-pop { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); width: 280px; padding: 6px; border-radius: var(--radius-lg); background: var(--surface-2); border: 1px solid var(--border); box-shadow: var(--shadow-2); display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.sel-ask-pop input { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; padding: 5px 8px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--input-bg); color: var(--text); }
+
+/* the brief box (Home / empty canvas) says when the agent is not connected */
+.prompt-offline { display: inline-flex; align-items: center; gap: 6px; }

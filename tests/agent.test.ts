@@ -3,6 +3,7 @@ import { TOOLS, READ_ONLY_TOOLS, AGENT_SYSTEM_PROMPT } from '../src/agent/tools'
 import { toolManifest } from '../src/agent/client';
 import { editor } from '../src/app/editor';
 import { createProject } from '../src/core/model';
+import { Store } from '../src/core/store';
 import { addLayer, valueAt } from '../src/core/commands';
 import { snapshotDoc, diffDocs, summarizeDiff, diffIsEmpty } from '../src/agent/diff';
 import { describeTrack, easeName, fmtValue } from '../src/agent/describe';
@@ -318,10 +319,33 @@ describe('review card identity (undo entry ids)', () => {
   it('agentClient.forget lifts an Ask-mode lock left by a locally finished turn', async () => {
     fresh();
     (agentClient as any).readOnlyChats.add('c-test');
-    await expect(agentClient.runTool('add_layer', { type: 'rect' })).rejects.toThrow(/Ask/);
+    await expect(agentClient.runTool('add_layer', { type: 'rect' })).rejects.toThrow(/read-only/);
     agentClient.forget('c-test');
     expect(agentClient.readOnlyCount).toBe(0);
     await expect(agentClient.runTool('add_layer', { type: 'rect' })).resolves.toBeTruthy();
+  });
+
+  it('a chat\'s tool calls go to its own document store (a run in a background tab never edits the visible one)', async () => {
+    const { s } = fresh();
+    const bg = new Store(createProject('bg'));
+    const n0 = s.comp.root.length;
+    const c = agentClient as any;
+    c.chatHandlers.set('c-bg', () => {});
+    c.chatHandlers.set('c-fg', () => {});
+    agentClient.setTarget('c-bg', () => bg);
+    agentClient.setTarget('c-fg', () => s);
+    // interleaved calls of both chats: each lands in its own document
+    await Promise.all([
+      agentClient.runTool('add_layer', { type: 'rect', name: 'BG' }, 'c-bg'),
+      agentClient.runTool('add_layer', { type: 'rect', name: 'FG' }, 'c-fg'),
+      agentClient.runTool('add_layer', { type: 'ellipse', name: 'BG2' }, 'c-bg'),
+    ]);
+    expect(bg.comp.root.map(id => bg.layer(id)!.name)).toEqual(['BG', 'BG2']);
+    expect(s.comp.root.length).toBe(n0 + 1);
+    expect(bg.historyLength).toBe(2);
+    // rendering needs the canvas: a background document's render tools explain instead of drawing the wrong file
+    await expect(agentClient.runTool('screenshot', {}, 'c-bg')).rejects.toThrow(/background tab/);
+    agentClient.forget('c-bg'); agentClient.forget('c-fg');
   });
 });
 

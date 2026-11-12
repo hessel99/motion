@@ -23,7 +23,7 @@ import { GUIDE_TOOLS } from './tools-guides';
 import type { ToolDef } from './tool-kit';
 export type { ToolDef, ToolContent } from './tool-kit';
 
-import { enableTrim, st, text, colorSchema, propValueSchema, easeSchema, keyframeSchema, idsSchema, parseColor, toValue, checkProp, need, round, buildKeys, writeTrack, shiftLayerKeys, contactSheet, resolveEase, boundsOf } from './tool-kit';
+import { enableTrim, st, renderer, hasRenderer, inBackground, text, colorSchema, propValueSchema, easeSchema, keyframeSchema, idsSchema, parseColor, toValue, checkProp, need, round, buildKeys, writeTrack, shiftLayerKeys, contactSheet, resolveEase, boundsOf } from './tool-kit';
 export { parseColor, boundsOf } from './tool-kit';
 import { SCENE_TOOLS, textAnimFrom } from './tools-scene';
 import { TYPE_TOOLS } from './tools-type';
@@ -346,7 +346,7 @@ export const TOOLS: ToolDef[] = [
     description: 'Group sibling layers into a new group. Returns the group id.',
     inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, name: { type: 'string' } }, required: ['ids'] },
     run: ({ ids, name }) => {
-      const b = editor.renderer ? boundsOf(ids) : { x: 0, y: 0, w: 100, h: 100 };
+      const b = hasRenderer() ? boundsOf(ids) : { x: 0, y: 0, w: 100, h: 100 };
       const g = groupLayers(st(), ids, b);
       if (g && name) setLayerField(st(), [g.id], 'name', name);
       return text({ id: g?.id });
@@ -373,14 +373,14 @@ export const TOOLS: ToolDef[] = [
     readOnly: true,
     description: 'Move the playhead (seconds). Values set with update_layer on animated properties go to this time.',
     inputSchema: { type: 'object', properties: { t: { type: 'number' } }, required: ['t'] },
-    run: ({ t }) => { editor.pause(); st().setTime(t); return text('ok'); },
+    run: ({ t }) => { if (!inBackground()) editor.pause(); st().setTime(t); return text('ok'); },
   },
   {
     name: 'playback',
     readOnly: true,
     description: 'Play or pause the preview.',
     inputSchema: { type: 'object', properties: { play: { type: 'boolean' } }, required: ['play'] },
-    run: ({ play }) => { play ? editor.play() : editor.pause(); return text('ok'); },
+    run: ({ play }) => { if (inBackground()) return text('ok (this file is in a background tab: nothing to play)'); play ? editor.play() : editor.pause(); return text('ok'); },
   },
   {
     name: 'select_layers',
@@ -396,7 +396,7 @@ export const TOOLS: ToolDef[] = [
     inputSchema: { type: 'object', properties: { t: { type: 'number' }, times: { type: 'array', items: { type: 'number' } }, maxSize: { type: 'number', default: 768 } } },
     run: ({ t, times, maxSize = 768 }) => {
       const list: number[] = times?.length ? times.slice(0, 4) : [t ?? st().time];
-      return list.map(tt => ({ type: 'image' as const, data: editor.renderer.snapshot(tt, maxSize).split(',')[1], mimeType: 'image/png' }));
+      return list.map(tt => ({ type: 'image' as const, data: renderer().snapshot(tt, maxSize).split(',')[1], mimeType: 'image/png' }));
     },
   },
   {
@@ -461,6 +461,7 @@ export const TOOLS: ToolDef[] = [
     description: 'Render the active composition to a video file. Desktop app: saved to the Movies/Videos "Motion" folder (returns the path). Browser: downloaded. Takes a while for long comps.',
     inputSchema: { type: 'object', properties: { format: { enum: ['mp4', 'webm', 'gif'] }, scale: { type: 'number', description: '0.5, 1 or 2 (resolution multiplier)' }, quality: { enum: ['low', 'medium', 'high'] } } },
     run: async (a) => {
+      renderer(); // exports render the file on screen: not from a background tab
       if (a.format === 'gif') {
         const { exportGifFile } = await import('../app/actions');
         const blob = await exportGifFile();
