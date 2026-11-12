@@ -184,3 +184,5 @@ kbd { font: 11px ui-monospace, Menlo, monospace; background: #2a2a30; border: 1p
 .model-select { width: 78px; flex: none !important; }
 .tl-search { position: absolute; left: 6px; top: 4px; width: 130px; height: 20px; font-size: 11px; padding: 1px 6px; z-index: 2; background: #121214; }
 .panel-error { padding: 14px; display: flex; flex-direction: column; gap: 8px; color: #ffb3ad; }
+.welcome ol { padding-left: 18px; line-height: 1.6; margin: 0 0 14px; }
+.welcome li { margin-bottom: 6px; }

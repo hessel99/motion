@@ -34,6 +34,7 @@ export function App() {
       <aside class="right"><Guard name="Inspector"><Inspector /></Guard></aside>
       <section class="bottom"><TimelineHost /></section>
       <ShortcutHelp />
+      <Welcome />
       <Benchmark />
     </div>
   );
@@ -288,4 +289,26 @@ class Guard extends Component<{ name: string; children: ComponentChildren }, { e
     }
     return this.props.children as any;
   }
+}
+
+function Welcome() {
+  const [open, setOpen] = useState(() => {
+    try { return !localStorage.getItem('motion.welcomed') && !navigator.webdriver; } catch { return false; }
+  });
+  if (!open) return null;
+  const close = () => { try { localStorage.setItem('motion.welcomed', '1'); } catch { /* */ } setOpen(false); };
+  return (
+    <div class="help-backdrop" onClick={close}>
+      <div class="help welcome" onClick={e => e.stopPropagation()}>
+        <div class="help-title">Welcome to Motion <button class="ghost" onClick={close}>✕</button></div>
+        <ol>
+          <li><b>Paste from Figma</b>: select layers in Figma, ⌘C, then ⌘V here. A single frame becomes the composition.</li>
+          <li><b>Animate</b>: click a property's ◇ to add keyframes, or use <i>Animate</i> presets and <i>Text animation</i> in the right panel. Press F9 for easy ease.</li>
+          <li><b>AI agent</b> (left): describe an animation and Claude Code builds it in your file, with your own subscription. One click undoes everything it did.</li>
+          <li><b>Everything else</b>: press <kbd>?</kbd> for shortcuts. Export video or Lottie from the ◆ menu.</li>
+        </ol>
+        <button class="primary" onClick={close}>Start</button>
+      </div>
+    </div>
+  );
 }
