@@ -60,6 +60,8 @@ export class Timeline {
   private autoFit = true;
   graphMode = false;
   private graph: GraphView;
+  /** layer name filter (search box in the header) */
+  filter = '';
 
   constructor(private ed: Editor, private host: HTMLElement) {
     this.graph = new GraphView(ed.store);
@@ -93,6 +95,12 @@ export class Timeline {
     this.canvas.addEventListener('wheel', e => this.wheel(e), { passive: false });
     this.canvas.addEventListener('contextmenu', e => this.context(e));
     this.canvas.addEventListener('pointerleave', () => { this.hoverRow = -1; this.baseDirty = true; });
+    const search = document.createElement('input');
+    search.className = 'tl-search';
+    search.placeholder = 'Search layers';
+    search.addEventListener('input', () => { this.filter = search.value.trim().toLowerCase(); this.scrollY = 0; this.rowsDirty = true; this.baseDirty = true; });
+    search.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { search.value = ''; this.filter = ''; this.rowsDirty = true; search.blur(); } });
+    host.appendChild(search);
   }
 
   resize() {
@@ -131,13 +139,25 @@ export class Timeline {
     const st = this.ed.store;
     const L = st.project.layers;
     const rows: Row[] = [];
+    // search: keep matching layers + their ancestors (shown expanded)
+    const f = this.filter;
+    let keep: Set<string> | null = null;
+    if (f) {
+      keep = new Set();
+      for (const l of Object.values(L)) {
+        if (!l.name.toLowerCase().includes(f) && !l.text?.content.toLowerCase().includes(f)) continue;
+        let cur: string | null = l.id;
+        while (cur && !keep.has(cur)) { keep.add(cur); cur = L[cur]?.parent ?? null; }
+      }
+    }
     const walk = (ids: string[], depth: number) => {
       // list order: top-most first (reverse draw order)
       for (let i = ids.length - 1; i >= 0; i--) {
         const l = L[ids[i]];
         if (!l) continue;
+        if (keep && !keep.has(l.id)) continue;
         rows.push({ kind: 'layer', id: l.id, layer: l, depth, hasChildren: l.children.length > 0 });
-        if (this.expanded.has(l.id)) {
+        if (this.expanded.has(l.id) || (keep && l.children.some(c => keep!.has(c)))) {
           const keys = [...TRANSFORM_KEYS, ...TYPE_PROPS[l.type]];
           for (const k of keys) if (isAnimated(l, k) || l.props[k]?.expr) rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: k });
           walk(l.children, depth + 1);
@@ -258,7 +278,7 @@ export class Timeline {
     this.drawRuler(g);
     g.fillStyle = '#8a8a93';
     g.font = '11px system-ui, sans-serif';
-    g.fillText(`${this.rows.filter(r => r.kind === 'layer').length} layers`, 10, HEADER_H / 2);
+    // (layer count lives in the search box placeholder area)
     // keys / graph toggle
     const tx0 = this.leftW - 112;
     for (const [i, label] of ['Keys', 'Graph'].entries()) {
