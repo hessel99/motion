@@ -1,0 +1,22 @@
+import { chromium } from './pw.mjs';
+const browser = await chromium.launch({ args: ['--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
+const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('console', m => m.type() === 'error' && errs.push(m.text()));
+await page.goto((process.env.URL || 'http://localhost:5173/') + '?blank&nobridge');
+await page.waitForFunction(() => window.editor?.renderer);
+const shots = await page.evaluate(async () => {
+  const { addLayer } = await import('/src/core/commands.ts');
+  const { setTextAnim, TEXT_ANIM_PRESETS } = await import('/src/core/presets.ts');
+  const st = editor.store;
+  const t1 = addLayer(st, 'text', { x: 260, y: 300, w: 1400, h: 0, color: [1, 1, 1, 1], name: 'Title', text: { content: 'Motion design, made fast.', fontFamily: 'Inter', fontSize: 110, fontWeight: 800, lineHeight: 1.1, letterSpacing: -2, align: 'center' } });
+  const t2 = addLayer(st, 'text', { x: 260, y: 560, w: 1400, h: 0, color: [0.6, 0.75, 1, 1], name: 'Sub', text: { content: 'Every letter can move on its own.', fontFamily: 'Inter', fontSize: 56, fontWeight: 500, lineHeight: 1.2, letterSpacing: 0, align: 'center' } });
+  setTextAnim(st, [t1.id], { ...TEXT_ANIM_PRESETS.find(p => p.name === 'Spin letters').anim, start: 0 });
+  setTextAnim(st, [t2.id], { ...TEXT_ANIM_PRESETS.find(p => p.name === 'Fade up').anim, start: 0.8 });
+  const out = [];
+  for (const t of [0.35, 0.8, 1.3, 2.5]) out.push(editor.renderer.snapshot(t, 640));
+  return out;
+});
+const fs = await import('node:fs');
+shots.forEach((u, i) => fs.writeFileSync(`${process.argv[2]}-${i}.png`, Buffer.from(u.split(',')[1], 'base64')));
+console.log(errs.length ? errs : 'no errors');
+await browser.close();

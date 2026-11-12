@@ -93,6 +93,24 @@ export interface TextData {
   align: 'left' | 'center' | 'right';
 }
 
+/** parametric per-unit text animation (text reveal), evaluated in the renderer */
+export interface TextAnim {
+  by: 'char' | 'word' | 'line';
+  /** comp time the first unit starts (relative to the layer's own time) */
+  start: number;
+  /** seconds per unit */
+  duration: number;
+  /** delay between units */
+  stagger: number;
+  /** ease preset name or 'spring:<bounce>' */
+  ease: string;
+  /** 'in': animate from `from` to normal. 'out': from normal to `from` */
+  mode: 'in' | 'out';
+  /** unit order: forward, backward, center-out, random */
+  order?: 'forward' | 'backward' | 'center' | 'random';
+  from: { opacity: number; dx: number; dy: number; scale: number; rotation: number };
+}
+
 export interface Layer {
   id: string;
   name: string;
@@ -117,6 +135,7 @@ export interface Layer {
   geomSize?: [number, number];
   strokeGeometry?: PathGeometry[];
   text?: TextData;
+  textAnim?: TextAnim;
   imageRef?: string; // asset id
   /** precomp: referenced composition id and when it starts (comp time) */
   compRef?: string;

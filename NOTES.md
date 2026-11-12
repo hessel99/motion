@@ -28,6 +28,9 @@
   - SVG (by paste or drop), Lottie JSON, After Effects `.aep` (best effort, see below), images
 - **Export**: Lottie JSON and **video** (MP4 H.264 / WebM VP9 through WebCodecs + mediabunny; verified with ffprobe in Chromium and Electron)
 - **Graph editor**: value curves in the timeline. Drag keys (time/value) and bezier handles on the real curve, which Figma Motion doesn't have.
+- **Text animation** (per letter / word / line, like AE text animators): presets (Fade up, Typewriter, Pop letters, Spin letters, …), order (forward, backward, center, random), springs. Every unit is its own instance in the same single draw call.
+- **Precomps** (⇧⌘C to pre-compose, a comp switcher, start offset), **masks** (Figma-style), **group opacity** done right (offscreen isolation)
+- **Pen tool** + path point editing; **animation presets** (fade/slide/pop/…) with stagger; **align/distribute**
 - **Snapping + smart guides** in the viewport; timeline scrollbars; layers can be moved in time; keyframe copy/paste
 - **AI agent sidebar**: chat with **Claude Code**, Codex CLI or Gemini CLI using *your own subscription* (through the local bridge). The agent drives the editor with MCP tools: add/update layers, keyframes, easing, screenshots and more.
 - **Autosave** to local storage, plus `.motion` project files (JSON)

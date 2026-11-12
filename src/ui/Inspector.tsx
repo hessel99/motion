@@ -7,7 +7,7 @@ import {
 import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
 import { PROP_DEFS, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
 import { useChannels } from './hooks';
-import { ANIM_PRESETS, alignLayers, applyPreset, distributeLayers, type Align } from '../core/presets';
+import { ANIM_PRESETS, alignLayers, applyPreset, distributeLayers, setTextAnim, TEXT_ANIM_PRESETS, type Align } from '../core/presets';
 import { invert } from './viewport-controller';
 import { toast } from '../app/actions';
 
@@ -199,6 +199,7 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
         </Section>
       )}
       {layers.length === 1 && l.type === 'text' && <TextPanel layer={l} />}
+      {layers.every(x => x.type === 'text') && <TextAnimPanel layers={layers} />}
       {layers.length === 1 && l.type === 'group' && (
         <Section title="Frame">
           <label class="check"><input type="checkbox" checked={!!l.clip} onChange={e => setLayerField(store, ids, 'clip', (e.target as HTMLInputElement).checked, 'Clip content')} /> Clip content</label>
@@ -493,6 +494,54 @@ function AnimatePanel({ ids }: { ids: string[] }) {
         <NumField label="Dur" step={0.05} min={0.05} value={dur} suffix="s" onChange={setDur} />
         {ids.length > 1 && <NumField label="Stagger" step={0.01} min={0} value={stagger} suffix="s" onChange={setStagger} />}
       </div>
+    </Section>
+  );
+}
+
+function TextAnimPanel({ layers }: { layers: Layer[] }) {
+  const store = st();
+  const ids = layers.map(l => l.id);
+  const ta = layers[0].textAnim;
+  const upd = (patch: any) => setTextAnim(store, ids, { ...ta!, ...patch, from: { ...ta!.from, ...(patch.from ?? {}) } });
+  return (
+    <Section title="Text animation" right={ta && <button class="ghost" onClick={() => setTextAnim(store, ids, undefined)}>Remove</button>}>
+      <div class="preset-grid">
+        {TEXT_ANIM_PRESETS.map(p => <button class="preset in" onClick={() => setTextAnim(store, ids, { ...p.anim, start: store.time - layers[0].inPoint })}>{p.name}</button>)}
+      </div>
+      {ta && (
+        <>
+          <div class="row">
+            <select value={ta.by} onChange={e => upd({ by: (e.target as HTMLSelectElement).value })}>
+              <option value="char">by letter</option><option value="word">by word</option><option value="line">by line</option>
+            </select>
+            <select value={ta.order ?? 'forward'} onChange={e => upd({ order: (e.target as HTMLSelectElement).value })}>
+              <option value="forward">forward</option><option value="backward">backward</option><option value="center">from center</option><option value="random">random</option>
+            </select>
+            <select value={ta.mode} onChange={e => upd({ mode: (e.target as HTMLSelectElement).value })}>
+              <option value="in">in</option><option value="out">out</option>
+            </select>
+          </div>
+          <div class="row">
+            <NumField label="Start" step={0.05} value={ta.start} suffix="s" onChange={n => upd({ start: n })} />
+            <NumField label="Dur" step={0.05} min={0.01} value={ta.duration} suffix="s" onChange={n => upd({ duration: n })} />
+            <NumField label="Stag" step={0.01} min={0} value={ta.stagger} suffix="s" onChange={n => upd({ stagger: n })} />
+          </div>
+          <div class="row">
+            <NumField label="Op" min={0} max={100} value={ta.from.opacity} suffix="%" onChange={n => upd({ from: { opacity: n } })} />
+            <NumField label="X" value={ta.from.dx} onChange={n => upd({ from: { dx: n } })} />
+            <NumField label="Y" value={ta.from.dy} onChange={n => upd({ from: { dy: n } })} />
+          </div>
+          <div class="row">
+            <NumField label="Scale" value={ta.from.scale} suffix="%" onChange={n => upd({ from: { scale: n } })} />
+            <NumField label="Rot" value={ta.from.rotation} suffix="°" onChange={n => upd({ from: { rotation: n } })} />
+          </div>
+          <div class="row">
+            <select value={ta.ease} onChange={e => upd({ ease: (e.target as HTMLSelectElement).value })} style={{ flex: 1 }}>
+              {['spring:0.2', 'spring:0.5', ...EASE_PRESETS.map(p => p.name)].map(n => <option value={n}>{n.startsWith('spring') ? `Spring (bounce ${n.split(':')[1]})` : n}</option>)}
+            </select>
+          </div>
+        </>
+      )}
     </Section>
   );
 }

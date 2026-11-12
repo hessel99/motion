@@ -11,8 +11,9 @@ import { Track } from '../core/evaluate';
 import { TrackPool } from '../core/trackpool';
 import { PROP_DEFS, type Layer, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
-import { Atlas } from './atlas';
-import { layoutText, rasterImage, rasterPath, rasterShapePaint, rasterText, setImageLoadedHandler, type RasterResult } from './raster';
+import { Atlas, type AtlasEntry } from './atlas';
+import { cubicBezier, EASE_PRESETS, springAt } from '../core/easing';
+import { layoutText, textUnits, type TextUnit, rasterImage, rasterPath, rasterShapePaint, rasterText, setImageLoadedHandler, type RasterResult } from './raster';
 
 const F = 40; // floats per instance
 const KIND_RECT = 0, KIND_ELLIPSE = 1, KIND_MASK = 2, KIND_RGBA = 3, KIND_NONE = 4;
@@ -166,6 +167,8 @@ void main() {
 // command list for one frame (offscreen isolation for group opacity + masks)
 const CMD_DRAW = 0, CMD_PUSH = 1, CMD_POP = 2, CMD_MASK = 3;
 
+interface UnitState { unit: TextUnit; delay: number; ease: (p: number) => number; entry: AtlasEntry | null; raster: RasterResult | null; scale: number }
+
 interface Item {
   id: string;
   layer: Layer;
@@ -184,6 +187,8 @@ interface Item {
   tOff: number;
   /** index of the item in the active comp that owns this one (itself, or the precomp layer it is inside) */
   owner: number;
+  /** per-unit text animation state */
+  units: UnitState[] | null;
   hidden: boolean; // visible=false (self or ancestor)
   rasterBase: string | null;
   rasterKey: string | null; // last resolved atlas key
@@ -365,6 +370,7 @@ export class Renderer {
     walk(store.comp.root, -1, 0, true, -1, 0, [store.comp.id]);
     const n = entries.length;
     this.pool.reset();
+    this.unitCount = 0;
     this.items = new Array(n);
     this.index.clear();
     for (let i = 0; i < n; i++) if (entries[i].local) this.index.set(entries[i].layer.id, i);
@@ -384,7 +390,7 @@ export class Renderer {
         id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10), isoGroup: layer.children.length > 0 || layer.type === 'precomp',
         hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden),
         rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
-        tOff, owner,
+        tOff, owner, units: null,
       };
       if (parent >= 0) {
         const p = this.items[parent];
@@ -407,6 +413,7 @@ export class Renderer {
     this.evalAll = true;
   }
   private poolLive = 0;
+  private unitCount = 0;
 
   private compileItem(i: number) {
     const it = this.items[i];
@@ -436,6 +443,8 @@ export class Renderer {
     it.rasterKey = null;
     it.entry = null;
     this.evalItem(i, 0, true);
+    this.unitCount -= it.units?.length ?? 0;
+    it.units = null;
     // auto-size text (size 0): measure so hit testing, handles and snapping see the real box
     if (l.type === 'text' && l.text && !(l.props.size?.kf?.length)) {
       const sz = l.props.size?.v ?? [0, 0];
@@ -445,6 +454,22 @@ export class Renderer {
         if (sz[0] <= 0) this.style[os] = Math.ceil(Math.max(1, ...lines.map(x => x.width)));
         if (sz[1] <= 0) this.style[os + 1] = Math.ceil(lines.length * l.text.fontSize * l.text.lineHeight);
       }
+    }
+    if (l.type === 'text' && l.text && l.textAnim) {
+      const ta = l.textAnim;
+      const units = textUnits(l, (l.props.size?.v[0] ?? 0) > 0 ? this.style[i * ST] : 0, ta.by);
+      const n = units.length;
+      const order = units.map((_, j) => {
+        switch (ta.order) {
+          case 'backward': return n - 1 - j;
+          case 'center': return Math.abs(j - (n - 1) / 2);
+          case 'random': return ((j * 2654435761) >>> 0) % Math.max(1, n);
+          default: return j;
+        }
+      });
+      const ease = easeFn(ta.ease);
+      it.units = units.map((u, j) => ({ unit: u, delay: order[j] * ta.stagger, ease, entry: null, raster: null, scale: 0 }));
+      this.unitCount += n;
     }
   }
 
@@ -670,7 +695,7 @@ export class Renderer {
     const e1 = performance.now();
 
     const items = this.items, n = items.length;
-    const need = (n + 1) * F;
+    const need = (n + 1 + this.unitCount) * F;
     if (this.inst.length < need) this.inst = new Float32Array(Math.max(need, this.inst.length * 2));
     const I = this.inst, W = this.world, S = this.style, O = this.opa;
     const comp = store.comp;
@@ -723,6 +748,13 @@ export class Renderer {
         isolated++;
       }
       if (it.kind === KIND_NONE) continue;
+      if (it.units) {
+        const r0 = performance.now();
+        k = this.writeUnits(i, k, t, div !== 1 ? O[i] / div : O[i], budgetEnd);
+        rasterMs += performance.now() - r0;
+        mask[i] = 1;
+        continue;
+      }
       const os = i * ST, o6 = i * 6;
       if (it.kind === KIND_RECT || it.kind === KIND_ELLIPSE) {
         if (S[os + 9] <= 0 && (S[os + 14] <= 0 || S[os + 13] <= 0)) continue;
@@ -771,20 +803,7 @@ export class Renderer {
       I[o + 23] = it.kind;
       I[o + 24] = u0; I[o + 25] = v0; I[o + 26] = u1; I[o + 27] = v1;
       I[o + 28] = page;
-      if (it.clip >= 0) {
-        const ci = it.clip, q = ci * 6, cs = ci * ST;
-        const ca = W[q], cb = W[q + 1], cc = W[q + 2], cd = W[q + 3], ce = W[q + 4], cf = W[q + 5];
-        const det = ca * cd - cb * cc || 1e-12;
-        const ia = cd / det, ib = -cb / det, ic = -cc / det, id = ca / det;
-        I[o + 29] = S[cs + 2];
-        I[o + 30] = S[cs];
-        I[o + 31] = S[cs + 1];
-        I[o + 32] = ia; I[o + 33] = ib; I[o + 34] = ic; I[o + 35] = id;
-        I[o + 36] = -(ia * ce + ic * cf);
-        I[o + 37] = -(ib * ce + id * cf);
-      } else {
-        I[o + 29] = 0; I[o + 30] = -1; I[o + 31] = -1;
-      }
+      this.writeClip(I, o, it.clip);
       mask[i] = 1;
       k++;
     }
@@ -850,6 +869,86 @@ export class Renderer {
     st.drawCalls = 1;
     this.lastTime = t;
     this.dirty = this.pendingUpgrade;
+  }
+
+  private writeClip(I: Float32Array, o: number, clip: number) {
+    if (clip >= 0) {
+      const W = this.world, S = this.style;
+      const q = clip * 6, cs = clip * ST;
+      const ca = W[q], cb = W[q + 1], cc = W[q + 2], cd = W[q + 3], ce = W[q + 4], cf = W[q + 5];
+      const det = ca * cd - cb * cc || 1e-12;
+      const ia = cd / det, ib = -cb / det, ic = -cc / det, id = ca / det;
+      I[o + 29] = S[cs + 2];
+      I[o + 30] = S[cs];
+      I[o + 31] = S[cs + 1];
+      I[o + 32] = ia; I[o + 33] = ib; I[o + 34] = ic; I[o + 35] = id;
+      I[o + 36] = -(ia * ce + ic * cf);
+      I[o + 37] = -(ib * ce + id * cf);
+    } else {
+      I[o + 29] = 0; I[o + 30] = -1; I[o + 31] = -1;
+    }
+  }
+
+  /** per-unit text animation: one instance per char/word/line, each with its own timing + transform */
+  private writeUnits(i: number, k: number, t: number, opacity: number, budgetEnd: number): number {
+    const it = this.items[i];
+    const l = it.layer, ta = l.textAnim!, units = it.units!;
+    const I = this.inst, W = this.world, S = this.style, os = i * ST, o6 = i * 6;
+    const a0 = W[o6], b0 = W[o6 + 1], c0 = W[o6 + 2], d0 = W[o6 + 3], e0 = W[o6 + 4], f0 = W[o6 + 5];
+    const z = this.zoom * this.dpr;
+    const scale = Math.sqrt(Math.abs(a0 * d0 - b0 * c0)) * z * Math.max(1, ta.from.scale / 100);
+    const bucket = Math.min(16, Math.max(1 / 16, Math.pow(2, Math.ceil(Math.log2(Math.max(scale, 1e-3)) * 2) / 2)));
+    const lt = t - it.tOff;
+    for (const u of units) {
+      // raster per unit (cached in the atlas like any other raster)
+      if (!u.entry || u.entry.dead || u.scale < scale * 0.999 || u.scale > scale * 2.83) {
+        const key = `${it.rasterBase}#${u.unit.index}@${bucket}`;
+        let e = this.atlas.get(key);
+        let r = this.rasterMeta.get(key);
+        if (!e || !r) {
+          if (u.entry && !u.entry.dead && performance.now() > budgetEnd) { this.pendingUpgrade = true; }
+          else {
+            const fake = { ...l, text: { ...l.text!, content: u.unit.text, align: 'left' as const } };
+            r = rasterText(fake, bucket, [0, 0]);
+            e = this.atlas.alloc(key, r.pw, r.ph) ?? undefined;
+            if (e) { this.atlas.upload(e, r.data); r.data = undefined as any; this.rasterMeta.set(key, r); }
+          }
+        }
+        if (e && r) { u.entry = e; u.raster = r; u.scale = bucket; }
+      }
+      if (!u.entry || u.entry.dead || !u.raster) continue;
+      u.entry.lastUsed = this.atlas.frame;
+      // progress of this unit
+      let p = (lt - ta.start - u.delay) / Math.max(1e-3, ta.duration);
+      p = p <= 0 ? 0 : p >= 1 ? 1 : p;
+      const e = u.ease(p);
+      const f = ta.mode === 'in' ? 1 - e : e; // amount of the "from" state
+      const op = opacity * (1 + (ta.from.opacity / 100 - 1) * f);
+      if (op <= 0.0005) continue;
+      const sc = 1 + (ta.from.scale / 100 - 1) * f;
+      const rot = ta.from.rotation * f * Math.PI / 180;
+      const cs = Math.cos(rot) * sc, sn = Math.sin(rot) * sc;
+      const ux = u.unit.x, uy = u.unit.y, cx = ux + u.unit.w / 2, cy = uy + u.unit.h / 2;
+      // U = T(c + offset) R S T(-c), then place raster at unit origin + raster offset
+      const r = u.raster;
+      const px = ux + r.x - cx, py = uy + r.y - cy;
+      const ue = cx + ta.from.dx * f + cs * px - sn * py, uf = cy + ta.from.dy * f + sn * px + cs * py;
+      const a = a0 * cs + c0 * sn, b = b0 * cs + d0 * sn, c = -a0 * sn + c0 * cs, d = -b0 * sn + d0 * cs;
+      const o = k * F;
+      I[o] = a; I[o + 1] = b; I[o + 2] = c; I[o + 3] = d;
+      I[o + 4] = a0 * ue + c0 * uf + e0; I[o + 5] = b0 * ue + d0 * uf + f0;
+      I[o + 6] = r.w; I[o + 7] = r.h;
+      I[o + 8] = 0; I[o + 9] = 0; I[o + 10] = 0; I[o + 11] = 0;
+      I[o + 12] = S[os + 6]; I[o + 13] = S[os + 7]; I[o + 14] = S[os + 8]; I[o + 15] = S[os + 9];
+      I[o + 16] = 0; I[o + 17] = 0; I[o + 18] = 0; I[o + 19] = 0;
+      I[o + 20] = 0; I[o + 21] = 0; I[o + 22] = op; I[o + 23] = KIND_MASK;
+      const ent = u.entry;
+      I[o + 24] = ent.x / 2048; I[o + 25] = ent.y / 2048; I[o + 26] = (ent.x + r.pw) / 2048; I[o + 27] = (ent.y + r.ph) / 2048;
+      I[o + 28] = ent.page;
+      this.writeClip(I, o, it.clip);
+      k++;
+    }
+    return k;
   }
 
   /** draw instances [start, start+count) by pointing the attributes at that range (no baseInstance in webgl2) */
@@ -1040,4 +1139,12 @@ function writeRect(I: Float32Array, k: number, m: number[], w: number, h: number
   I[o + 22] = 1;
   I[o + 23] = KIND_RECT;
   I[o + 30] = -1; I[o + 31] = -1;
+}
+
+/** ease name ("Expo Out", "spring:0.4") -> function */
+export function easeFn(name: string): (p: number) => number {
+  const m = /^spring(?::|\s+)?([\d.]+)?/i.exec(name.trim());
+  if (m) { const b = m[1] ? +m[1] : 0.3; return p => springAt(b, p); }
+  const pr = EASE_PRESETS.find(p => p.name.toLowerCase() === name.toLowerCase()) ?? EASE_PRESETS[1];
+  return cubicBezier(pr.v[0], pr.v[1], pr.v[2], pr.v[3]);
 }

@@ -7,7 +7,7 @@ import {
   setPropTx, valueAt, setSpring, precompose,
 } from '../core/commands';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
-import { ANIM_PRESETS, applyPreset } from '../core/presets';
+import { ANIM_PRESETS, applyPreset, setTextAnim, TEXT_ANIM_PRESETS } from '../core/presets';
 import { parsePathD } from '../import/svg';
 import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
 
@@ -327,6 +327,28 @@ export const TOOLS: ToolDef[] = [
     run: ({ ids, preset, t, duration, stagger }) => {
       if (t !== undefined) st().setTime(t);
       applyPreset(st(), ids, preset, { duration, stagger });
+      return text('ok');
+    },
+  },
+  {
+    name: 'set_text_animation',
+    description: 'Per-letter / per-word / per-line text reveal on text layers (like After Effects text animators). Use a preset name (' + TEXT_ANIM_PRESETS.map(p => p.name).join(', ') + ') and/or explicit fields. start = seconds into the layer. from = the state units animate from (mode in) or to (mode out). Pass remove:true to remove.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        ids: { type: 'array', items: { type: 'string' } }, preset: { type: 'string' }, remove: { type: 'boolean' },
+        by: { enum: ['char', 'word', 'line'] }, start: { type: 'number' }, duration: { type: 'number' }, stagger: { type: 'number' },
+        ease: { type: 'string', description: 'ease preset name or "spring:<bounce>"' }, mode: { enum: ['in', 'out'] }, order: { enum: ['forward', 'backward', 'center', 'random'] },
+        from: { type: 'object', properties: { opacity: { type: 'number' }, dx: { type: 'number' }, dy: { type: 'number' }, scale: { type: 'number' }, rotation: { type: 'number' } } },
+      },
+      required: ['ids'],
+    },
+    run: (a) => {
+      if (a.remove) { setTextAnim(st(), a.ids, undefined); return text('removed'); }
+      const base = a.preset ? TEXT_ANIM_PRESETS.find(p => p.name.toLowerCase() === String(a.preset).toLowerCase())?.anim : TEXT_ANIM_PRESETS[0].anim;
+      if (!base) throw new Error('unknown preset; presets: ' + TEXT_ANIM_PRESETS.map(p => p.name).join(', '));
+      const anim = { ...base, start: 0, ...Object.fromEntries(['by', 'start', 'duration', 'stagger', 'ease', 'mode', 'order'].filter(k => a[k] !== undefined).map(k => [k, a[k]])), from: { ...base.from, ...(a.from ?? {}) } } as any;
+      setTextAnim(st(), a.ids, anim);
       return text('ok');
     },
   },

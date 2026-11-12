@@ -242,7 +242,7 @@ export function fontString(l: Layer) {
 }
 
 let measureCtx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D | null = null;
-function mctx() {
+export function mctx() {
   if (!measureCtx) {
     const cv = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(4, 4) : document.createElement('canvas');
     measureCtx = cv.getContext('2d') as any;
@@ -329,4 +329,34 @@ export function rasterImage(asset: Asset, scale: number, size: number[]): Raster
   c.imageSmoothingQuality = 'high';
   c.drawImage(bmp, 0, 0, pw, ph);
   return { kind: 'rgba', pw, ph, x: 0, y: 0, w, h, data: rgbaData(c, pw, ph) };
+}
+
+// ---------------- text units (per char / word / line animation) ----------------
+
+export interface TextUnit { text: string; x: number; y: number; w: number; h: number; index: number }
+
+/** split a text layer into animation units with their position in the layer box */
+export function textUnits(l: Layer, boxW: number, by: 'char' | 'word' | 'line'): TextUnit[] {
+  const t = l.text!;
+  const lines = layoutText(l, boxW > 0 ? boxW : null);
+  const c = mctx();
+  c.font = fontString(l);
+  (c as any).letterSpacing = `${t.letterSpacing || 0}px`;
+  const lh = t.fontSize * t.lineHeight;
+  const out: TextUnit[] = [];
+  const width = boxW > 0 ? boxW : Math.max(...lines.map(x => x.width));
+  lines.forEach((line, li) => {
+    const lx = t.align === 'center' ? (width - line.width) / 2 : t.align === 'right' ? width - line.width : 0;
+    const y = li * lh;
+    if (by === 'line') { if (line.text.trim()) out.push({ text: line.text, x: lx, y, w: line.width, h: lh, index: out.length }); return; }
+    const parts = by === 'char' ? [...line.text] : line.text.split(/(\s+)/);
+    let prefix = '';
+    for (const part of parts) {
+      const x = lx + (prefix ? c.measureText(prefix).width : 0);
+      prefix += part;
+      if (!part.trim()) continue;
+      out.push({ text: part, x, y, w: c.measureText(part).width, h: lh, index: out.length });
+    }
+  });
+  return out;
 }

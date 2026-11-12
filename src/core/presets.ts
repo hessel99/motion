@@ -140,3 +140,28 @@ export function distributeLayers(store: Store, ids: string[], axis: 'x' | 'y', b
     }
   });
 }
+
+// ---------------- text animation presets ----------------
+import type { TextAnim } from './model';
+
+export const TEXT_ANIM_PRESETS: { name: string; anim: Omit<TextAnim, 'start'> }[] = [
+  { name: 'Fade up', anim: { by: 'word', duration: 0.6, stagger: 0.08, ease: 'Expo Out', mode: 'in', from: { opacity: 0, dx: 0, dy: 40, scale: 100, rotation: 0 } } },
+  { name: 'Typewriter', anim: { by: 'char', duration: 0.01, stagger: 0.05, ease: 'Linear', mode: 'in', from: { opacity: 0, dx: 0, dy: 0, scale: 100, rotation: 0 } } },
+  { name: 'Pop letters', anim: { by: 'char', duration: 0.5, stagger: 0.03, ease: 'spring:0.5', mode: 'in', from: { opacity: 0, dx: 0, dy: 0, scale: 0, rotation: 0 } } },
+  { name: 'Slide words', anim: { by: 'word', duration: 0.7, stagger: 0.1, ease: 'Expo Out', mode: 'in', from: { opacity: 0, dx: -60, dy: 0, scale: 100, rotation: 0 } } },
+  { name: 'Drop lines', anim: { by: 'line', duration: 0.8, stagger: 0.15, ease: 'Back Out', mode: 'in', from: { opacity: 0, dx: 0, dy: -60, scale: 100, rotation: 0 } } },
+  { name: 'Spin letters', anim: { by: 'char', duration: 0.6, stagger: 0.04, ease: 'Back Out', mode: 'in', from: { opacity: 0, dx: 0, dy: 20, scale: 60, rotation: -90 } } },
+  { name: 'Center burst', anim: { by: 'char', duration: 0.5, stagger: 0.04, ease: 'Expo Out', mode: 'in', order: 'center', from: { opacity: 0, dx: 0, dy: 0, scale: 220, rotation: 0 } } },
+  { name: 'Fade out words', anim: { by: 'word', duration: 0.4, stagger: 0.06, ease: 'Ease In', mode: 'out', from: { opacity: 0, dx: 0, dy: -30, scale: 100, rotation: 0 } } },
+];
+
+export function setTextAnim(store: Store, ids: string[], anim: TextAnim | undefined) {
+  store.transact(anim ? 'Text animation' : 'Remove text animation', tx => {
+    for (const id of ids) {
+      const l = store.layer(id);
+      if (!l || l.type !== 'text') continue;
+      tx.set(l, 'textAnim', anim ? structuredClone(anim) : undefined);
+      tx.touch(id);
+    }
+  });
+}
