@@ -75,7 +75,10 @@ export function defaultWorkDir() {
  * Build the command for one turn. Pure (except gemini's settings file), exported for tests.
  * @returns {{bin:string, args:string[], stdin?:string, env?:object, parse:Function}}
  */
-export function buildCommand(provider, { message, sessionId, model, systemPrompt, mcpUrl, workDir, readOnlyTools }) {
+/** set once a claude CLI rejected the lean flags (older versions): later turns skip them */
+let claudeLeanUnsupported = false;
+
+export function buildCommand(provider, { message, sessionId, model, systemPrompt, mcpUrl, workDir, readOnlyTools, lean = !claudeLeanUnsupported }) {
   switch (provider) {
     case 'claude': {
       const mcpConfig = JSON.stringify({ mcpServers: { motion: { type: 'http', url: mcpUrl } } });
@@ -90,6 +93,9 @@ export function buildCommand(provider, { message, sessionId, model, systemPrompt
         '--allowedTools', Array.isArray(readOnlyTools) && readOnlyTools.length ? readOnlyTools.map((t) => `mcp__motion__${t}`).join(',') : 'mcp__motion',
         '--permission-mode', 'default',
       ];
+      // lean: no built-in tools (Bash, file edits, web...) and no skills/slash commands. The agent only
+      // needs the editor's MCP tools; this cuts ~10k tokens per request and keeps it away from the disk.
+      if (lean) args.push('--tools', '', '--disable-slash-commands');
       if (sessionId) args.push('--resume', sessionId);
       if (systemPrompt) args.push('--append-system-prompt', systemPrompt);
       if (model) args.push('--model', model);
@@ -207,6 +213,13 @@ export function runTurn(provider, opts, onEvent, log = () => {}) {
     }
     if (cancelled) return finishWithError('cancelled', { errorKind: 'cancelled' });
     if (timedOut) return;
+    // an older claude CLI that doesn't know the lean flags: retry the turn once without them
+    if (!terminal && provider === 'claude' && cmd.args.includes('--tools') && /unknown option|unrecognized|unexpected argument/i.test(stderrTail) && /--tools|--disable-slash-commands/.test(stderrTail)) {
+      claudeLeanUnsupported = true;
+      log('[bridge] claude CLI without --tools support: retrying without lean flags');
+      inner = runTurn(provider, { ...opts, lean: false }, onEvent, log);
+      return;
+    }
     if (!terminal) {
       if (code === 0 && provider !== 'claude') emit({ kind: 'done' });
       else finishWithError(`${cmd.bin} exited with ${signal ?? `code ${code}`}${stderrTail ? `: ${stderrTail.trim().slice(-800)}` : ''}`);
@@ -217,8 +230,10 @@ export function runTurn(provider, opts, onEvent, log = () => {}) {
     child.stdin.end(cmd.stdin);
   } else child.stdin.end();
 
+  let inner = null;
   return {
     cancel() {
+      if (inner) return inner.cancel();
       if (terminal || cancelled) return;
       cancelled = true;
       try { child.kill('SIGTERM'); } catch {}

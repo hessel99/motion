@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { agentClient, type ChatEvent, type ChatMode } from '../agent/client';
 import { editor } from '../app/editor';
 import { composeMessage, editorContext, resolveMentions } from '../agent/context';
@@ -48,17 +48,25 @@ export function AgentPanel() {
   useEffect(() => { if (!turn) return; const t = setInterval(() => tick(x => x + 1), 1000); return () => clearInterval(t); }, [!!turn]);
 
   // per-project persistence
-  useEffect(() => { const t = setTimeout(() => saveChat(key.current, msgs, session.current), 400); return () => clearTimeout(t); }, [msgs]);
-  useEffect(() => editor.on('loaded', () => {
-    const k = projectKey(editor.store.project);
-    if (k === key.current) return;
-    saveChat(key.current, msgs, session.current);
-    key.current = k;
-    const c = loadChat(k);
-    session.current = c?.sessions ?? {};
-    variations.clear();
-    setMsgs(c?.msgs ?? []);
-  }), [msgs]);
+  useEffect(() => { const k = key.current; const t = setTimeout(() => { if (k === key.current) saveChat(k, msgs, session.current); }, 400); return () => clearTimeout(t); }, [msgs]);
+  const msgsRef = useRef(msgs);
+  msgsRef.current = msgs;
+  // a different project was opened: switch to its conversation. subscribed in a layout effect and
+  // re-checked once mounted, because the startup project can load before passive effects run.
+  useLayoutEffect(() => {
+    const sync = () => {
+      const k = projectKey(editor.store.project);
+      if (k === key.current) return;
+      saveChat(key.current, msgsRef.current, session.current);
+      key.current = k;
+      const c = loadChat(k);
+      session.current = c?.sessions ?? {};
+      variations.clear();
+      setMsgs(c?.msgs ?? []);
+    };
+    sync();
+    return editor.on('loaded', sync);
+  }, []);
 
   // live change counter while the agent works
   useEffect(() => editor.store.on('history', () => {

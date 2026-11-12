@@ -12,7 +12,7 @@ export function installVariationThumbs() {
       seen.add(v.id);
       if (!editor.renderer) continue;
       const [a, b] = variations.range(v);
-      try { v.thumbs = [a, (a + b) / 2, b].map(t => editor.renderer.snapshot(Math.min(t, editor.store.comp.duration), 96)); } catch { /* no gl (tests) */ }
+      try { v.thumbs = [0.25, 0.6, 1].map(f => a + (b - a) * f).map(t => editor.renderer.snapshot(Math.min(t, editor.store.comp.duration), 96)); } catch { /* no gl (tests) */ }
     }
     if (!variations.list.length) seen = new Set();
   });

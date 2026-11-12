@@ -154,6 +154,20 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
   - spawns CLIs (`claude -p --output-format stream-json`, `codex exec --json`, `gemini`) with the MCP config pointing back at itself
 - The editor registers its tools (`src/agent/tools.ts`). Any MCP client can connect to `http://127.0.0.1:7823/mcp` while the app is open.
 - Verified with a real Claude Code run: it built a four-layer animation in 28 seconds, used screenshots to check its work, and fixed its own anchor mistake.
+- MCP endpoint reference for external clients: [docs/MCP.md](docs/MCP.md).
+
+### Directing the agent (sidebar)
+
+- **Context, automatically**: each message carries an `<editor_context>` block (comp, playhead, work area, markers, selected layers with what is animated, @-mentioned layers). The composer shows it as chips; type `@` to mention a layer.
+- **Review every turn**: the document is snapshotted before a turn and diffed after it (`src/agent/diff.ts`). The review card lists added/changed/removed layers and properties (click to select), *Hold to compare* (undo to the pre-turn state while held, redo on release), *Replay*, *Revert* (undo back to the turn start) and *Keep*.
+- **Quick actions** on the selection (`src/agent/quick.ts`): Animate in, Bouncier, Smoother, Snappier, Slower, Faster, Stagger, Anticipation, 3 variations, Critique, Explain.
+- **Ask mode** (Critique/Explain or the Edit/Ask toggle): read-only turns. The editor refuses editing tools, and Claude Code only pre-approves the read-only ones.
+- **Variations**: the agent builds versions and calls `save_variation`; the tray shows filmstrips, click to preview (applies + plays), scrub, *Use*.
+- **Tools for agents**: `get_animation` (compact text), `animate` (many tracks, one undo step), `retime`, `stagger`, `contact_sheet` (labeled frame grid, one JPEG). Tool results are compact JSON/text.
+- **Lean Claude runs**: `--tools "" --disable-slash-commands` (no built-in Bash/file tools, no skills), with automatic fallback for older CLIs. The same 3-card build went from 285k to 41k input tokens per turn (cost $0.089 → $0.078; most of the 285k were cache reads).
+- **Errors** are typed in the bridge (`bridge/errors.mjs`: not installed, auth, rate limit, overloaded, network, timeout, cancelled) and shown with the fix plus Retry. A turn whose CLI prints nothing for 5 min is killed (`MOTION_AGENT_IDLE_MS`). A bridge disconnect ends running turns cleanly.
+- **Persistence**: the conversation and CLI session ids are stored per project (keyed by the first composition id, which is saved in the file). Review cards from earlier sessions are marked stale, because the undo history is gone.
+- Checks: `tests/agent.test.ts` (schema validation, tools against a real store, diff/context), `tests/bridge-agent.test.mjs` (a fake `claude` replays recorded stream-json: success, auth, crash, timeout, cancel, lean fallback), `scripts/agent-ui-check.mjs` (Playwright, full panel against `tests/fixtures/fake-claude/claude`, which really calls the MCP tools), `scripts/agent-real-check.mjs` (real subscription runs: build, variations, critique).
 
 ## Quality process used
 

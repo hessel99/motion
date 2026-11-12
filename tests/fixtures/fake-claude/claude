@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+// A scripted stand-in for `claude -p --output-format stream-json` used by UI checks
+// (scripts/agent-ui-check.mjs). It really calls the editor's MCP tools through the bridge, and
+// prints the same stream-json lines Claude Code does, so the whole pipeline runs without
+// spending a subscription. Behaviour is picked from the prompt:
+//   "variations" → builds 3 variations;  "Ask mode"/"Critique" → read-only look + a refused edit;
+//   "fail auth" → auth error;  "slow" → waits (for cancel tests);  otherwise builds two shapes.
+const args = process.argv.slice(2);
+if (args.includes('--version')) { console.log('0.0.0 (fake claude for tests)'); process.exit(0); }
+const mcp = JSON.parse(args[args.indexOf('--mcp-config') + 1]).mcpServers.motion.url;
+const session = args.includes('--resume') ? args[args.indexOf('--resume') + 1] : 'fake-' + Math.random().toString(36).slice(2, 8);
+const out = (o) => process.stdout.write(JSON.stringify(o) + '\n');
+let n = 0;
+const rpc = async (method, params) => (await fetch(mcp, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' }, body: JSON.stringify({ jsonrpc: '2.0', id: ++n, method, params }) })).json();
+async function tool(name, input) {
+  const id = 'toolu_' + n + '_' + name;
+  out({ type: 'assistant', session_id: session, message: { content: [{ type: 'tool_use', id, name: 'mcp__motion__' + name, input }] } });
+  const r = await rpc('tools/call', { name, arguments: input });
+  const content = r.result?.content ?? [{ type: 'text', text: r.error?.message ?? 'error' }];
+  out({ type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: id, is_error: !!r.result?.isError, content }] } });
+  const t = content.find((c) => c.type === 'text')?.text ?? '';
+  return { text: t, isError: !!r.result?.isError };
+}
+function say(text) {
+  for (const part of text.match(/.{1,12}/gs)) out({ type: 'stream_event', event: { type: 'content_block_delta', delta: { type: 'text_delta', text: part } } });
+  out({ type: 'assistant', session_id: session, message: { content: [{ type: 'text', text }] } });
+}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+let prompt = '';
+process.stdin.on('data', (d) => (prompt += d));
+process.stdin.on('end', async () => {
+  const t0 = Date.now();
+  out({ type: 'system', subtype: 'init', session_id: session });
+  if (/fail auth/.test(prompt)) { out({ type: 'result', subtype: 'success', is_error: true, result: 'Invalid API key · Please run /login', session_id: session }); return; }
+  if (/\bslow\b/.test(prompt)) { say('Working slowly…'); await sleep(60000); }
+  await rpc('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'fake-claude', version: '1' } });
+  const ctxIds = [...prompt.matchAll(/id=(\S+)/g)].map((m) => m[1].replace(/[),;]$/, ''));
+  if (/Ask mode|READ-ONLY/.test(prompt)) {
+    await tool('get_animation', {});
+    await tool('contact_sheet', { frames: 6 });
+    const r = await tool('add_layer', { type: 'rect', name: 'Should be refused' });
+    say(`Critique:\n1. **Timing**: the entrance is a bit slow.\n2. Stagger the shapes by ~80ms.\n3. Use \`Back Out\` for the pop.\n(edit attempt refused: ${r.isError})`);
+  } else if (/variations/.test(prompt)) {
+    const ids = ctxIds.length ? ctxIds : [JSON.parse((await tool('add_layer', { type: 'rect', name: 'Card', x: 860, y: 440, w: 200, h: 200, fill: '#4c8dff', radius: 24 })).text).id];
+    const looks = [['A · Snappy', 'Expo Out', 0.4], ['B · Bouncy', 'spring Bouncy', 0.8], ['C · Elegant', 'Sine In Out', 1.2]];
+    for (const [label, ease, d] of looks) {
+      await tool('animate', { tracks: ids.flatMap((id) => [{ id, prop: 'scale', keyframes: [{ t: 0, v: 0, ease }, { t: d, v: 100 }] }, { id, prop: 'rotation', keyframes: [{ t: 0, v: label.startsWith('B') ? -45 : 0, ease }, { t: d, v: 0 }] }]) });
+      await tool('save_variation', { ids, label, note: `${ease}, ${d}s` });
+    }
+    await tool('contact_sheet', { frames: 4, end: 1.2 });
+    say('Made 3 variations:\n- **A · Snappy**: quick Expo Out\n- **B · Bouncy**: spring with a twist\n- **C · Elegant**: slow Sine');
+  } else {
+    say('Building two shapes that pop in.');
+    const a = JSON.parse((await tool('add_layer', { type: 'rect', name: 'Box', x: 700, y: 440, w: 200, h: 200, fill: '#4c8dff', radius: 30 })).text).id;
+    const b = JSON.parse((await tool('add_layer', { type: 'ellipse', name: 'Dot', x: 1020, y: 440, w: 200, h: 200, fill: '#ff5a6b' })).text).id;
+    await tool('animate', { stagger: 0.12, tracks: [{ id: a, prop: 'scale', keyframes: [{ t: 0.1, v: 0, ease: 'Back Out' }, { t: 0.6, v: 100 }] }, { id: b, prop: 'scale', keyframes: [{ t: 0.1, v: 0, ease: 'Back Out' }, { t: 0.6, v: 100 }] }] });
+    await tool('screenshot', { t: 0.4, maxSize: 384 });
+    say('Added **Box** and **Dot** popping in with Back Out, staggered 0.12s. Want them bouncier?');
+  }
+  out({ type: 'result', subtype: 'success', is_error: false, result: 'done', session_id: session, total_cost_usd: 0, duration_ms: Date.now() - t0, num_turns: 3, usage: { input_tokens: 1200, cache_read_input_tokens: 9000, output_tokens: 300 } });
+});

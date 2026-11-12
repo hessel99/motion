@@ -18,6 +18,7 @@ process.stdin.on('data', (d) => (input += d));
 process.stdin.on('end', () => {
   if (mode === 'hang') { out({ type: 'system', subtype: 'init', session_id: 's-h' }); setInterval(() => {}, 1000); return; }
   if (mode === 'auth') { out({ type: 'result', subtype: 'success', is_error: true, result: 'Invalid API key · Please run /login', session_id: 's-a' }); return; }
+  if (mode === 'old' && process.argv.includes('--tools')) { process.stderr.write("error: unknown option '--tools'\\n"); process.exit(1); }
   if (mode === 'crash') { process.stderr.write('Error: getaddrinfo ENOTFOUND api.anthropic.com\\n'); process.exit(1); }
   out({ type: 'system', subtype: 'init', session_id: 's-1' });
   out({ type: 'assistant', session_id: 's-1', message: { content: [{ type: 'tool_use', id: 'tu1', name: 'mcp__motion__animate', input: { tracks: [] } }] } });
@@ -91,6 +92,15 @@ describe.skipIf(process.platform === 'win32')('bridge agent turns (fake claude C
   it('cancel ends the turn with a "cancelled" error kind', async () => {
     const ev = await turn('hang', { onRun: (r) => setTimeout(() => r.cancel(), 150) });
     expect(ev.find((e) => e.kind === 'error')).toMatchObject({ errorKind: 'cancelled' });
+  });
+
+  it('uses lean flags (no built-in tools) and falls back for CLIs without --tools', async () => {
+    const lean = buildCommand('claude', { message: 'x', mcpUrl: 'http://127.0.0.1:1/mcp', workDir: dir }).args;
+    expect(lean.slice(lean.indexOf('--tools'), lean.indexOf('--tools') + 3)).toEqual(['--tools', '', '--disable-slash-commands']);
+    const ev = await turn('old');
+    expect(ev.map((e) => e.kind)).toEqual(['session', 'tool_use', 'tool_result', 'text', 'done']);
+    // remembered: later turns don't try the lean flags again
+    expect(buildCommand('claude', { message: 'x', mcpUrl: 'http://127.0.0.1:1/mcp', workDir: dir }).args).not.toContain('--tools');
   });
 
   it('a missing CLI is reported with install instructions', async () => {
