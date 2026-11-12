@@ -187,6 +187,8 @@ interface Item {
   isoGroup: boolean;
   /** time offset (precomp start times): local time = comp time - tOff */
   tOff: number;
+  /** comp time after which this item is hidden (end of the precomp it lives in) */
+  tEnd: number;
   /** index of the item in the active comp that owns this one (itself, or the precomp layer it is inside) */
   owner: number;
   /** per-unit text animation state */
@@ -371,17 +373,23 @@ export class Renderer {
     const L = store.project.layers;
     // flatten the layer tree depth-first; precomp layers expand the referenced comp inline
     // (each expanded item gets its own time offset). items outside the active comp are not indexed.
-    const entries: { layer: Layer; parent: number; tOff: number; local: boolean; owner: number }[] = [];
+    const entries: { layer: Layer; parent: number; tOff: number; local: boolean; owner: number; tEnd: number }[] = [];
+    let tEndCur = Infinity;
     const walk = (ids: string[], parent: number, tOff: number, local: boolean, owner: number, depth: number, stack: string[]) => {
       for (const id of ids) {
         const layer = L[id];
         if (!layer) continue;
         const idx = entries.length;
-        entries.push({ layer, parent, tOff, local, owner: local ? idx : owner });
+        entries.push({ layer, parent, tOff, local, owner: local ? idx : owner, tEnd: tEndCur });
         if (layer.children.length) walk(layer.children, idx, tOff, local, local ? idx : owner, depth, stack);
         if (layer.type === 'precomp' && layer.compRef && depth < 16 && !stack.includes(layer.compRef)) {
           const comp = store.project.comps[layer.compRef];
-          if (comp) walk(comp.root, idx, tOff + (layer.startTime ?? 0), false, local ? idx : owner, depth + 1, [...stack, layer.compRef]);
+          if (comp) {
+            const prevEnd = tEndCur;
+            tEndCur = Math.min(prevEnd, tOff + (layer.startTime ?? 0) + comp.duration);
+            walk(comp.root, idx, tOff + (layer.startTime ?? 0), false, local ? idx : owner, depth + 1, [...stack, layer.compRef]);
+            tEndCur = prevEnd;
+          }
         }
       }
     };
@@ -403,12 +411,12 @@ export class Renderer {
       this.drawnMask = new Uint8Array(cap);
     }
     for (let i = 0; i < n; i++) {
-      const { layer, parent, tOff, owner } = entries[i];
+      const { layer, parent, tOff, owner, tEnd } = entries[i];
       const it: Item = {
         id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10), isoGroup: layer.children.length > 0 || layer.type === 'precomp',
         hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden),
         rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
-        tOff, owner, units: null, exprMask: 0, exprs: null,
+        tOff, owner, units: null, exprMask: 0, exprs: null, tEnd,
       };
       if (parent >= 0) {
         const p = this.items[parent];
@@ -640,7 +648,7 @@ export class Renderer {
       const o = i * 6;
       const p = it.parent;
       const l = it.layer;
-      const vis = it.hidden || tl < l.inPoint || tl >= l.outPoint ? 0 : 1;
+      const vis = it.hidden || tl < l.inPoint || tl >= l.outPoint || t >= it.tEnd ? 0 : 1;
       if (p < 0) {
         W[o] = L[o]; W[o + 1] = L[o + 1]; W[o + 2] = L[o + 2]; W[o + 3] = L[o + 3]; W[o + 4] = L[o + 4]; W[o + 5] = L[o + 5];
         O[i] = LO[i] * vis;
@@ -869,7 +877,7 @@ export class Renderer {
         const end = it.parent >= 0 ? this.subEnd[it.parent] : n;
         stack.push({ end, opacity: 1, div, maskStart: k, maskCount: 0, maskEnd: this.subEnd[i] });
         isolated++;
-      } else if (it.isoGroup && this.lopa[i] < 0.999 && this.subEnd[i] > i + 1) {
+      } else if (it.isoGroup && this.lopa[i] < 0.999 && this.subEnd[i] > i + 1 && !stack.some(r => r.maskEnd > i)) {
         // group opacity: render the group into its own layer, then composite once with its opacity
         flush();
         cmds.push(CMD_PUSH, 0, 0);
@@ -1047,7 +1055,7 @@ export class Renderer {
     for (const u of units) {
       // raster per unit (cached in the atlas like any other raster)
       if (!u.entry || u.entry.dead || u.scale < scale * 0.999 || u.scale > scale * 2.83) {
-        const key = `${it.rasterBase}#${u.unit.index}@${bucket}`;
+        const key = `${it.rasterBase}#${ta.by}:${u.unit.index}:${u.unit.text}@${bucket}`;
         let e = this.atlas.get(key);
         let r = this.rasterMeta.get(key);
         if (!e || !r) {
@@ -1179,6 +1187,9 @@ export class Renderer {
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, src.tex);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        // unbind the layer textures: a later pass may render into these fbos (feedback loop otherwise)
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        if (maskTex) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, null); }
         gl.activeTexture(gl.TEXTURE0);
         gl.useProgram(this.prog);
       }

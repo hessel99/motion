@@ -244,3 +244,41 @@ describe('review regressions', () => {
     expect(Object.keys(s.project.layers).length).toBe(4);
   });
 });
+
+import { ownerRoot, setCompSettings as _setComp } from '../src/core/commands';
+describe('review 2 regressions', () => {
+  it('undoing "new composition" while it is open falls back to an existing comp', () => {
+    const s = new Store();
+    const main = s.comp.id;
+    const c = newComposition(s, { name: 'x' });
+    s.openComp(c.id);
+    s.undo();
+    expect(s.comp).toBeDefined();
+    expect(s.project.activeComp).toBe(main);
+  });
+  it('deleting a top-level layer of a non-active comp cleans that comp root', () => {
+    const s = new Store();
+    const a = addLayer(s, 'rect');
+    const { comp } = precompose(s, [a.id]);
+    expect(ownerRoot(s, a.id)?.comp.id).toBe(comp.id);
+    deleteLayers(s, [a.id]);
+    expect(s.project.comps[comp.id].root).toEqual([]);
+  });
+  it('precomp layers follow their source comp size', () => {
+    const s = new Store();
+    const a = addLayer(s, 'rect');
+    const { comp, layer } = precompose(s, [a.id]);
+    s.openComp(comp.id);
+    _setComp(s, { width: 3000 });
+    expect(s.layer(layer.id)!.props.size!.v[0]).toBe(3000);
+  });
+  it('"out" presets at time 0 keep distinct keyframes', () => {
+    const s = new Store();
+    const a = addLayer(s, 'rect');
+    s.setTime(0);
+    applyPreset(s, [a.id], 'Fade out', { duration: 0.5 });
+    const kf = s.layer(a.id)!.props.opacity!.kf!;
+    expect(kf.map(k => k.t)).toEqual([0, 0.5]);
+    expect(kf.map(k => k.v[0])).toEqual([100, 0]);
+  });
+});

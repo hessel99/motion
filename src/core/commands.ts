@@ -59,6 +59,12 @@ export function insertLayer(store: Store, tx: Tx, layer: Layer, parent: string |
   tx.touch(layer.id);
 }
 
+/** the comp whose root list contains this top-level layer (not always the active one) */
+export function ownerRoot(store: Store, id: string): { comp: import('./model').Composition } | null {
+  for (const c of Object.values(store.project.comps)) if (c.root.includes(id)) return { comp: c };
+  return null;
+}
+
 export function deleteLayers(store: Store, ids: string[]) {
   const P = store.project;
   // drop ids whose ancestor is also being deleted
@@ -72,7 +78,8 @@ export function deleteLayers(store: Store, ids: string[]) {
         const p = P.layers[l.parent];
         tx.set(p, 'children', p.children.filter(c => c !== id));
       } else {
-        tx.set(store.comp, 'root', store.comp.root.filter(c => c !== id));
+        const owner = ownerRoot(store, id)?.comp ?? store.comp;
+        tx.set(owner, 'root', owner.root.filter(c => c !== id));
       }
       for (const d of [id, ...store.descendants(id)]) tx.del(P.layers, d);
     }
@@ -104,8 +111,17 @@ export function cloneLayers(store: Store, ids: string[], offset = 0) {
       copy.name = src.name + ' copy';
       if (offset) offsetPosition(copy, offset, offset);
       const extra = [...map.values()].filter(l => l !== copy);
-      const sib = src.parent ? P.layers[src.parent].children : store.comp.root;
-      insertLayer(store, tx, copy, src.parent, sib.indexOf(id) + 1, extra);
+      const owner = src.parent ? null : ownerRoot(store, id)?.comp ?? store.comp;
+      const sib = src.parent ? P.layers[src.parent].children : owner!.root;
+      if (!src.parent && owner && owner !== store.comp) {
+        // duplicate inside the comp that owns the layer (agent tools can target non-active comps)
+        for (const l of extra) tx.set(P.layers, l.id, l);
+        tx.set(P.layers, copy.id, copy);
+        const root = owner.root.slice();
+        root.splice(sib.indexOf(id) + 1, 0, copy.id);
+        tx.set(owner, 'root', root);
+        tx.structure();
+      } else insertLayer(store, tx, copy, src.parent, sib.indexOf(id) + 1, extra);
       map.clear();
       created.push(copy.id);
     }
@@ -501,6 +517,18 @@ export function setCompSettings(store: Store, patch: Partial<{ width: number; he
   store.transact('Composition settings', tx => {
     for (const [k, v] of Object.entries(patch)) if (v !== undefined) tx.set(store.comp, k as any, v as any);
     tx.comp();
+    if (patch.width !== undefined || patch.height !== undefined) {
+      // precomp layers that show this comp follow its size (anchor stays proportional)
+      const c = store.comp;
+      for (const l of Object.values(store.project.layers)) {
+        if (l.type !== 'precomp' || l.compRef !== c.id || !l.props.size) continue;
+        const old = l.props.size.v, a = l.props.anchor?.v ?? [0, 0];
+        tx.set(l.props.size, 'v', [c.width, c.height]);
+        if (l.props.anchor && !l.props.anchor.kf?.length) tx.set(l.props.anchor, 'v', [old[0] ? a[0] / old[0] * c.width : 0, old[1] ? a[1] / old[1] * c.height : 0]);
+        tx.touch(l.id);
+      }
+      tx.structure();
+    }
   });
   if (store.time > store.comp.duration) store.setTime(store.comp.duration);
 }

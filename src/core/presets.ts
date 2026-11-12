@@ -71,9 +71,11 @@ export function applyPreset(store: Store, ids: string[], presetName: string, opt
       for (const [key, frames] of Object.entries(tracks) as [PropKey, { t: number; v: number[]; ease?: string; spring?: number }[]][]) {
         let p = l.props[key];
         if (!p) { p = { v: cur[key].slice() }; tx.set(l.props, key, p); }
+        // keep the whole preset window after 0 (e.g. "out" presets with the playhead at the start)
+        const shift = Math.max(0, -(base + Math.min(...frames.map(f => f.t))));
         const incoming: Keyframe[] = frames.map(f => {
           const e = f.ease ? ease(f.ease) : null;
-          const k: Keyframe = { t: Math.max(0, base + f.t), v: f.v.slice(), ...defaultEase() };
+          const k: Keyframe = { t: base + f.t + shift, v: f.v.slice(), ...defaultEase() };
           if (f.spring !== undefined) { k.interp = 'spring'; k.bounce = f.spring; }
           else if (e) { k.out = [e[0], e[1]]; }
           return k;
@@ -155,7 +157,7 @@ export const TEXT_ANIM_PRESETS: { name: string; anim: Omit<TextAnim, 'start'> }[
   { name: 'Fade out words', anim: { by: 'word', duration: 0.4, stagger: 0.06, ease: 'Ease In', mode: 'out', from: { opacity: 0, dx: 0, dy: -30, scale: 100, rotation: 0 } } },
 ];
 
-export function setTextAnim(store: Store, ids: string[], anim: TextAnim | undefined) {
+export function setTextAnim(store: Store, ids: string[], anim: TextAnim | undefined, mergeKey?: string) {
   store.transact(anim ? 'Text animation' : 'Remove text animation', tx => {
     for (const id of ids) {
       const l = store.layer(id);
@@ -163,5 +165,5 @@ export function setTextAnim(store: Store, ids: string[], anim: TextAnim | undefi
       tx.set(l, 'textAnim', anim ? structuredClone(anim) : undefined);
       tx.touch(id);
     }
-  });
+  }, mergeKey);
 }

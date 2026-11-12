@@ -3,7 +3,7 @@
 // so the ui and the ai agent tools share one code path and everything is undoable.
 
 import type { Composition, Layer, Project } from './model';
-import { createProject } from './model';
+import { createComp, createProject } from './model';
 
 export interface Change {
   structure: boolean; // layers added/removed/reordered/reparented
@@ -171,7 +171,19 @@ export class Store {
   get canRedo() { return this.redoStack.length > 0; }
   get undoLabel() { return this.undoStack[this.undoStack.length - 1]?.label; }
 
+  /** the active comp can disappear (undo of "new composition"/"pre-compose", broken files): fall back */
+  ensureActiveComp() {
+    const P = this.project;
+    if (P.comps[P.activeComp]) return false;
+    const first = Object.keys(P.comps)[0];
+    if (!first) { const c = createComp(); P.comps[c.id] = c; P.activeComp = c.id; }
+    else P.activeComp = first;
+    this.emit('comps');
+    return true;
+  }
+
   private afterHistory(_e: Entry) {
+    this.ensureActiveComp();
     // we don't know precisely what changed: invalidate everything (undo is rare, so this is fine)
     this.selection = this.selection.filter(id => this.project.layers[id]);
     this.keySelection.clear();
@@ -184,6 +196,7 @@ export class Store {
   /** replace the whole document (open file) */
   load(project: Project) {
     this.project = project;
+    this.ensureActiveComp();
     this.undoStack.length = 0;
     this.redoStack.length = 0;
     this.selection = [];

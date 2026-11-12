@@ -37,7 +37,7 @@ type Drag =
   | { kind: 'hscroll'; sx: number; s0: number }
   | { kind: 'compEnd' }
   | { kind: 'bar'; id: string; sx: number; in0: number; out0: number; mode: 'in' | 'out' }
-  | { kind: 'shift'; sx: number; moved: boolean; orig: Map<string, { inP: number; outP: number; kf: Partial<Record<PropKey, Keyframe[]>> }> };
+  | { kind: 'shift'; sx: number; moved: boolean; orig: Map<string, { inP: number; outP: number; start: number; kf: Partial<Record<PropKey, Keyframe[]>> }> };
 
 export class Timeline {
   canvas: HTMLCanvasElement;
@@ -612,13 +612,13 @@ export class Timeline {
       // drag the bar body: move the layer (and all its keyframes) in time. alt-drag: marquee instead
       if (x > inX && x < outX && !e.altKey) {
         if (!st.selection.includes(l.id)) st.select([l.id]);
-        const orig = new Map<string, { inP: number; outP: number; kf: Partial<Record<PropKey, Keyframe[]>> }>();
+        const orig = new Map<string, { inP: number; outP: number; start: number; kf: Partial<Record<PropKey, Keyframe[]>> }>();
         for (const id of st.selection) {
           const ll = st.layer(id);
           if (!ll) continue;
           const kf: Partial<Record<PropKey, Keyframe[]>> = {};
           for (const k in ll.props) { const p = ll.props[k as PropKey]; if (p?.kf?.length) kf[k as PropKey] = p.kf; }
-          orig.set(id, { inP: ll.inPoint, outP: ll.outPoint, kf });
+          orig.set(id, { inP: ll.inPoint, outP: ll.outPoint, start: ll.startTime ?? 0, kf });
         }
         this.drag = { kind: 'shift', sx: x, moved: false, orig };
         st.beginGesture('shift');
@@ -720,6 +720,7 @@ export class Timeline {
           tx.set(l, 'inPoint', o.inP + dt);
           if (o.outP < 1e8) tx.set(l, 'outPoint', o.outP + dt);
           for (const k in o.kf) tx.set(l.props[k as PropKey]!, 'kf', o.kf[k as PropKey]!.map(f => ({ ...f, t: f.t + dt })));
+          if (l.type === 'precomp') { tx.set(l, 'startTime', o.start + dt); tx.structure(); }
           tx.touch(id);
         }
       });

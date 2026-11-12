@@ -209,7 +209,7 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
       {layers.length === 1 && l.type === 'precomp' && l.compRef && (
         <Section title="Composition" right={<button class="ghost" onClick={() => store.openComp(l.compRef!)}>Open ↗</button>}>
           <div class="row">
-            <NumField label="Start" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={n => setLayerField(store, ids, 'startTime', n, 'Precomp start')} />
+            <NumField label="Start" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={(n, mk) => store.transact('Precomp start', tx => { for (const id of ids) { const x = store.layer(id); if (x) { tx.set(x, 'startTime', n); tx.touch(id); } } tx.structure(); }, mk)} />
           </div>
           <div class="muted small">{store.project.comps[l.compRef]?.name}</div>
         </Section>
@@ -504,7 +504,7 @@ function TextAnimPanel({ layers }: { layers: Layer[] }) {
   const store = st();
   const ids = layers.map(l => l.id);
   const ta = layers[0].textAnim;
-  const upd = (patch: any) => setTextAnim(store, ids, { ...ta!, ...patch, from: { ...ta!.from, ...(patch.from ?? {}) } });
+  const upd = (patch: any, mk?: string) => setTextAnim(store, ids, { ...ta!, ...patch, from: { ...ta!.from, ...(patch.from ?? {}) } }, mk);
   return (
     <Section title="Text animation" right={ta && <button class="ghost" onClick={() => setTextAnim(store, ids, undefined)}>Remove</button>}>
       <div class="preset-grid">
@@ -524,18 +524,18 @@ function TextAnimPanel({ layers }: { layers: Layer[] }) {
             </select>
           </div>
           <div class="row">
-            <NumField label="Start" step={0.05} value={ta.start} suffix="s" onChange={n => upd({ start: n })} />
-            <NumField label="Dur" step={0.05} min={0.01} value={ta.duration} suffix="s" onChange={n => upd({ duration: n })} />
-            <NumField label="Stag" step={0.01} min={0} value={ta.stagger} suffix="s" onChange={n => upd({ stagger: n })} />
+            <NumField label="Start" step={0.05} value={ta.start} suffix="s" onChange={(n, mk) => upd({ start: n }, mk)} />
+            <NumField label="Dur" step={0.05} min={0.01} value={ta.duration} suffix="s" onChange={(n, mk) => upd({ duration: n }, mk)} />
+            <NumField label="Stag" step={0.01} min={0} value={ta.stagger} suffix="s" onChange={(n, mk) => upd({ stagger: n }, mk)} />
           </div>
           <div class="row">
-            <NumField label="Op" min={0} max={100} value={ta.from.opacity} suffix="%" onChange={n => upd({ from: { opacity: n } })} />
-            <NumField label="X" value={ta.from.dx} onChange={n => upd({ from: { dx: n } })} />
-            <NumField label="Y" value={ta.from.dy} onChange={n => upd({ from: { dy: n } })} />
+            <NumField label="Op" min={0} max={100} value={ta.from.opacity} suffix="%" onChange={(n, mk) => upd({ from: { opacity: n } }, mk)} />
+            <NumField label="X" value={ta.from.dx} onChange={(n, mk) => upd({ from: { dx: n } }, mk)} />
+            <NumField label="Y" value={ta.from.dy} onChange={(n, mk) => upd({ from: { dy: n } }, mk)} />
           </div>
           <div class="row">
-            <NumField label="Scale" value={ta.from.scale} suffix="%" onChange={n => upd({ from: { scale: n } })} />
-            <NumField label="Rot" value={ta.from.rotation} suffix="°" onChange={n => upd({ from: { rotation: n } })} />
+            <NumField label="Scale" value={ta.from.scale} suffix="%" onChange={(n, mk) => upd({ from: { scale: n } }, mk)} />
+            <NumField label="Rot" value={ta.from.rotation} suffix="°" onChange={(n, mk) => upd({ from: { rotation: n } }, mk)} />
           </div>
           <div class="row">
             <select value={ta.ease} onChange={e => upd({ ease: (e.target as HTMLSelectElement).value })} style={{ flex: 1 }}>
