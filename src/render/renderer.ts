@@ -197,7 +197,7 @@ interface Item {
   units: UnitState[] | null;
   /** per-frame raster (animated path shape / trim paths) */
   prevEntry?: AtlasEntry | null; prevRaster?: RasterResult | null; prevScale?: number;
-  dyn: { base: string; trim: Track[] | null; pkf: PathKey[] | null; eases: ((p: number) => number)[]; frame: number; t: number } | null;
+  dyn: { base: string; stale?: boolean; trim: Track[] | null; pkf: PathKey[] | null; eases: ((p: number) => number)[]; frame: number; t: number } | null;
   /** properties driven by expressions (bit = TR_* index) + their compiled programs */
   exprMask: number;
   exprs: ({ node: any; track: Track; keyTimes: number[] } | null)[] | null;
@@ -286,6 +286,8 @@ export class Renderer {
   cssH = 1;
   editorBg: [number, number, number] = [0.1, 0.1, 0.11];
   clipToComp = true;
+  /** exports/snapshots: rasterize everything synchronously (no workers, no frame budget) */
+  syncRaster = false;
   /** skip layers fully outside the viewport (disabled for snapshots/exports which render the whole comp) */
   cullOffscreen = true;
 
@@ -421,6 +423,7 @@ export class Renderer {
     const n = entries.length;
     // solo: keep soloed layers, their ancestors (for transforms) and descendants
     let soloKeep: Set<string> | null = null;
+    for (const id of [...store.solo]) if (!L[id]) store.solo.delete(id); // deleted / other project
     if (store.solo.size) {
       soloKeep = new Set();
       for (const id of store.solo) {
@@ -475,6 +478,7 @@ export class Renderer {
   }
   private poolLive = 0;
   private unitCount = 0;
+  private dynRev = 0;
 
   private compileItem(i: number) {
     const it = this.items[i];
@@ -521,7 +525,7 @@ export class Renderer {
     if (l.type === 'path' && ((l.pathKf?.length ?? 0) >= 2 || l.trimOn)) {
       const pkf = l.pathKf && l.pathKf.length >= 2 ? l.pathKf : null;
       it.dyn = {
-        base: it.rasterBase!,
+        base: `${it.rasterBase}|r${this.dynRev++}`, // revision: trim/pathKf edits must never reuse old frames
         trim: l.trimOn ? [new Track(l.props.trimStart ?? { v: [0] }, 1), new Track(l.props.trimEnd ?? { v: [100] }, 1), new Track(l.props.trimOffset ?? { v: [0] }, 1)] : null,
         pkf,
         eases: pkf ? pkf.map((k, j) => (j < pkf.length - 1 && k.interp === 'bezier' ? cubicBezier(k.out[0], k.out[1], pkf[j + 1].in[0], pkf[j + 1].in[1]) : (x: number) => x)) : [],
@@ -562,7 +566,7 @@ export class Renderer {
 
   private rasterBase(l: Layer, complex: boolean): string | null {
     switch (l.type) {
-      case 'path': return `p${oid(l.geometry)}:${oid(l.strokeGeometry)}:${oid(l.paints)}:${l.strokeAlign}:${l.props.strokeWidth?.v[0] ?? 0}:${complex ? oid(l.props.stroke) : ''}`;
+      case 'path': return `p${oid(l.geometry)}:${oid(l.strokeGeometry)}:${oid(l.paints)}:${l.strokeAlign}:${l.props.strokeWidth?.v[0] ?? 0}:${complex ? (l.props.stroke?.v ?? []).join(',') : ''}`;
       case 'text': {
         const t = l.text!;
         const s = l.props.size?.v ?? [0, 0];
@@ -611,8 +615,9 @@ export class Renderer {
       if (m & (1 << TR_POS)) P.eval(h[TR_POS], t, X, o8 + 2);
       if (m & (1 << TR_SCALE)) P.eval(h[TR_SCALE], t, X, o8 + 4);
       if (m & (1 << TR_ROT)) { P.eval(h[TR_ROT], t, X, o8 + 6); X[o8 + 6] *= Math.PI / 180; }
-      this.composeLocal(i);
     }
+    // transform changed by keyframes and/or expressions
+    if ((m | it.exprMask) & 0x0f) this.composeLocal(i);
     if (m & (1 << TR_OPA)) { P.eval(h[TR_OPA], t, X, o8 + 7); this.lopa[i] = Math.min(1, Math.max(0, X[o8 + 7] / 100)); }
     if (m & (1 << TR_SIZE)) P.eval(h[TR_SIZE], t, S, os);
     if (m & (1 << TR_RAD)) P.eval(h[TR_RAD], t, S, os + 2);
@@ -742,7 +747,9 @@ export class Renderer {
     if (it.dyn) {
       // per-frame shape: draw now within budget, otherwise keep showing the previous frame
       if (performance.now() > budgetEnd + 8 && it.prevEntry && !it.prevEntry.dead) {
+        // show the previous frame this time only; force a real raster on the next render
         it.entry = it.prevEntry; it.raster = it.prevRaster!; it.rasterScale = it.prevScale!;
+        it.dyn.stale = true;
         this.pendingUpgrade = true;
         return true;
       }
@@ -761,7 +768,7 @@ export class Renderer {
     }
     // off the main thread: resolution upgrades, and anything beyond this frame's raster budget.
     // first-time rasters within budget stay synchronous so edits (typing, drawing) never flicker.
-    if (l.type !== 'image' && this.workersOk && (hasOld || performance.now() > budgetEnd)) {
+    if (l.type !== 'image' && this.workersOk && !this.syncRaster && (hasOld || performance.now() > budgetEnd)) {
       this.requestAsync(key, l, bucket, [S[os], S[os + 1]], [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], S[os + 14]);
       return hasOld;
     }
@@ -904,7 +911,7 @@ export class Renderer {
     const comp = store.comp;
     const z = this.zoom * this.dpr;
     let rasterMs = 0;
-    const budgetEnd = performance.now() + this.rasterBudgetMs;
+    const budgetEnd = this.syncRaster ? Infinity : performance.now() + this.rasterBudgetMs;
     this.pendingUpgrade = false;
 
     // composition background is a scissored clear (no fragment shader work)
@@ -989,6 +996,7 @@ export class Renderer {
       }
       if (it.dyn) {
         const fr = Math.round((t - it.tOff) * this.store.comp.fps);
+        if (it.dyn.stale) { it.dyn.stale = false; it.entry = null; }
         if (fr !== it.dyn.frame) {
           it.dyn.frame = fr;
           it.dyn.t = t - it.tOff;
@@ -1377,7 +1385,9 @@ export class Renderer {
     const s = Math.min(1, maxSize / Math.max(comp.width, comp.height));
     this.resize(Math.round(comp.width * s), Math.round(comp.height * s), 1);
     this.setView(s, 0, 0);
-    this.render(t);
+    const prevSync = this.syncRaster;
+    this.syncRaster = true;
+    try { this.render(t); } finally { this.syncRaster = prevSync; }
     const url = this.canvas.toDataURL('image/png');
     this.resize(prev.w, prev.h, prev.dpr);
     this.setView(prev.zoom, prev.panX, prev.panY);

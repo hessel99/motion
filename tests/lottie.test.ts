@@ -92,9 +92,10 @@ describe('lottie import', () => {
     expect(by['Box'].parent).toBe(ctrl.id);
     expect(ctrl.props.position!.v).toEqual([100, 50]);
     expect(ctrl.props.opacity!.v).toEqual([100]); // null opacity never hides children
-    // root order bottom -> top: Pre, Pic, Ctrl, Complex, Title
+    // root order bottom -> top follows the ae stacking order exactly: Box (index 1, inside the
+    // Ctrl wrapper) is above Complex (index 2) even though its parent null is below it
     const names = comp.root.map(id => p.layers[id].name);
-    expect(names).toEqual(['Pre', 'Pic', 'Ctrl', 'Complex', 'Title']);
+    expect(names).toEqual(['Pre', 'Pic', 'Complex', 'Ctrl', 'Title']);
   });
 
   it('builds complex shape layers as groups', () => {

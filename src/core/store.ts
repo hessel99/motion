@@ -205,6 +205,8 @@ export class Store {
   load(project: Project) {
     this.project = project;
     this.ensureActiveComp();
+    this.workArea = null;
+    this.solo.clear();
     this.undoStack.length = 0;
     this.redoStack.length = 0;
     this.selection = [];

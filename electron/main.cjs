@@ -106,12 +106,18 @@ ipcMain.handle('file:saveAs', async (_e, opts = {}) => {
 
 // crash-safe autosave of the open project (no size limit, unlike browser storage)
 const autosavePath = () => path.join(app.getPath('userData'), 'autosave.motion');
-ipcMain.handle('autosave:write', async (_e, text) => {
+let autosaveChain = Promise.resolve(true);
+let autosaveSeq = 0;
+ipcMain.handle('autosave:write', (_e, text) => {
   if (typeof text !== 'string' || text.length > 512 * 1024 * 1024) return false;
-  const tmp = autosavePath() + '.tmp';
-  await fs.writeFile(tmp, text, 'utf8');
-  await fs.rename(tmp, autosavePath()); // atomic replace: never leaves a half written file
-  return true;
+  // serialize writes; unique tmp name per write; atomic rename never leaves a half written file
+  autosaveChain = autosaveChain.catch(() => false).then(async () => {
+    const tmp = `${autosavePath()}.${process.pid}.${++autosaveSeq}.tmp`;
+    await fs.writeFile(tmp, text, 'utf8');
+    await fs.rename(tmp, autosavePath());
+    return true;
+  });
+  return autosaveChain.catch(() => false);
 });
 ipcMain.handle('autosave:read', async () => {
   try { return await fs.readFile(autosavePath(), 'utf8'); } catch { return null; }

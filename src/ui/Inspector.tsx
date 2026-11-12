@@ -4,7 +4,7 @@ import {
   addKeyframe, deleteKeyframes, isAnimated, keyId, parseKeyId, setCompSettings, setEase, setLayerField, setProp,
   setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr,
 } from '../core/commands';
-import { compileExpr } from '../core/expr';
+import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
 import { BLEND_MODES, PROP_DEFS, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
 import { useChannels } from './hooks';
@@ -590,7 +590,7 @@ function ExprPanel({ layers }: { layers: Layer[] }) {
   const store = st();
   const l = layers[0];
   const ids = layers.map(x => x.id);
-  const keys = [...TRANSFORM_KEYS_LOCAL, ...TYPE_PROPS[l.type]].filter((k, i, a) => a.indexOf(k) === i);
+  const keys = [...TRANSFORM_KEYS_LOCAL, ...TYPE_PROPS[l.type]].filter((k, i, a) => a.indexOf(k) === i && EXPR_PROPS.includes(k));
   const withExpr = keys.filter(k => l.props[k]?.expr !== undefined);
   const add = (e: Event) => {
     const k = (e.target as HTMLSelectElement).value as PropKey;
@@ -614,12 +614,14 @@ function ExprRow({ ids, k, src }: { ids: string[]; k: PropKey; src: string }) {
   const store = st();
   const [text, setText] = useState(src);
   useEffect(() => setText(src), [src]);
-  const err = compileExpr(text).error;
+  const err = checkExpr(text, PROP_DEFS[k].dim);
+  const mk = useRef('expr' + Math.random());
   return (
     <div class="expr-row">
       <div class="row small"><span>{PROP_DEFS[k].label}</span><span style={{ flex: 1 }} /><button class="ghost" title="Remove expression" onClick={() => setExpr(store, ids, k, undefined)}>✕</button></div>
       <textarea class={'expr-edit' + (err ? ' bad' : '')} rows={2} value={text} spellcheck={false}
-        onInput={e => { const v = (e.target as HTMLTextAreaElement).value; setText(v); if (!compileExpr(v).error) setExpr(store, ids, k, v); }}
+        onInput={e => { const v = (e.target as HTMLTextAreaElement).value; setText(v); if (!checkExpr(v, PROP_DEFS[k].dim)) setExpr(store, ids, k, v, mk.current); }}
+        onBlur={() => { mk.current = 'expr' + Math.random(); }}
         onKeyDown={e => e.stopPropagation()} />
       {err && <div class="expr-err">{err}</div>}
       <div class="expr-chips">{(EXPR_SUGGEST[k] ?? []).map(sug => <button class="ghost small" onClick={() => setExpr(store, ids, k, sug)}>{sug}</button>)}</div>

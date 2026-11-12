@@ -18,6 +18,7 @@ export async function exportGif(opts: GifOptions = {}, onProgress?: (done: numbe
   const prev = { zoom: r.zoom, panX: r.panX, panY: r.panY, w: r.cssW, h: r.cssH, dpr: r.dpr };
   editor.pause();
   editor.stop();
+  editor.renderer.syncRaster = true; // every frame complete and sharp (no async rasters)
   r.resize(w, h, 1);
   r.setView(scale, 0, 0);
   const px = new Uint8Array(w * h * 4);
@@ -52,6 +53,7 @@ export async function exportGif(opts: GifOptions = {}, onProgress?: (done: numbe
     r.resize(prev.w, prev.h, prev.dpr);
     r.setView(prev.zoom, prev.panX, prev.panY);
     r.dirty = true;
+    editor.renderer.syncRaster = false;
     editor.resume();
   }
 }

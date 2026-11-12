@@ -455,7 +455,7 @@ export function setupAutosave() {
   let timer = 0;
   const save = () => {
     const nat = native() as any;
-    if (nat?.autosaveWrite) { nat.autosaveWrite(serialize()); return; } // desktop: file in app data, any size
+    if (nat?.autosaveWrite) { Promise.resolve(nat.autosaveWrite(serialize())).catch(() => {}); return; } // desktop: file in app data, any size
     // big projects don't fit local storage anyway (~5MB): skip instead of serializing megabytes on the main thread
     if (Object.keys(st().project.layers).length > 1500) return;
     try {

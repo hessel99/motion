@@ -191,6 +191,7 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
   const wasPlaying = store.playing;
   editor.pause();
   editor.stop();
+  editor.renderer.syncRaster = true; // every frame complete and sharp (no async rasters)
   const prev = { zoom: r.zoom, panX: r.panX, panY: r.panY, w: r.cssW, h: r.cssH, dpr: r.dpr, bg: r.editorBg };
   // cover the output exactly (even-rounding may change the aspect by < 1px): scale to cover, center
   const zoom = Math.max(width / comp.width, height / comp.height);
@@ -272,6 +273,7 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
     r.setView(prev.zoom, prev.panX, prev.panY);
     r.dirty = true;
     exporting = false;
+    editor.renderer.syncRaster = false;
     editor.resume();
     if (wasPlaying) editor.play();
   }

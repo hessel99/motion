@@ -48,7 +48,7 @@ export class Editor {
   onFrame(fn: FrameHook) { this.hooks.add(fn); return () => { this.hooks.delete(fn); }; }
 
   play() {
-    const wa = this.store.workArea;
+    const wa = this.validWorkArea();
     if (wa && (this.store.time < wa[0] || this.store.time >= wa[1] - 1e-6)) this.store.setTime(wa[0]);
     else if (this.store.time >= this.store.comp.duration - 1e-6) this.store.setTime(0);
     this.lastNow = performance.now();
@@ -57,6 +57,14 @@ export class Editor {
   }
   pause() { this.store.setPlaying(false); }
   togglePlay() { this.store.playing ? this.pause() : this.play(); }
+
+  /** work area clamped to the comp; null when empty/out of range (e.g. after shortening the comp) */
+  validWorkArea(): [number, number] | null {
+    const wa = this.store.workArea, d = this.store.comp.duration;
+    if (!wa) return null;
+    const a = Math.max(0, wa[0]), b = Math.min(wa[1], d);
+    return b - a > 1e-3 ? [a, b] : null;
+  }
 
   stepFrames(n: number) {
     const fps = this.store.comp.fps;
@@ -91,8 +99,8 @@ export class Editor {
       // unsnapped playback clock (snapping it would freeze playback when dt < one frame)
       if (Math.abs(this.clock - store.time) > 1 / comp.fps) this.clock = store.time; // user moved the playhead
       let t = this.clock + Math.min(dt, 100) / 1000;
-      const wa = store.workArea;
-      const a = wa ? wa[0] : 0, b = wa ? Math.min(wa[1], comp.duration) : comp.duration;
+      const wa = this.validWorkArea();
+      const a = wa ? wa[0] : 0, b = wa ? wa[1] : comp.duration;
       if (t >= b) {
         if (store.loop) t = a + ((t - a) % Math.max(1e-3, b - a));
         else { t = b; store.setPlaying(false); }

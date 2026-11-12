@@ -613,7 +613,7 @@ export function renameComp(store: Store, id: string, name: string) {
 }
 
 /** set or clear (undefined / '') a property expression */
-export function setExpr(store: Store, ids: string[], key: PropKey, src: string | undefined) {
+export function setExpr(store: Store, ids: string[], key: PropKey, src: string | undefined, mergeKey?: string) {
   store.transact(src ? 'Set expression' : 'Remove expression', tx => {
     for (const id of ids) {
       const l = store.layer(id);
@@ -623,5 +623,5 @@ export function setExpr(store: Store, ids: string[], key: PropKey, src: string |
       tx.set(p, 'expr', src?.trim() ? src : undefined);
       tx.touch(id);
     }
-  });
+  }, mergeKey);
 }

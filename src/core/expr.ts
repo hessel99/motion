@@ -35,6 +35,8 @@ export interface ExprContext {
   keyTimes: number[];
   /** stable seed for random / wiggle */
   seed: number;
+  /** per-evaluation call counter (random) */
+  calls?: number;
 }
 
 export class ExprError extends Error {}
@@ -42,7 +44,7 @@ export class ExprError extends Error {}
 // ---------------- parser (pratt) ----------------
 function tokenize(src: string): string[] {
   const out: string[] = [];
-  const re = /\s*(?:(\d+\.?\d*(?:e[+-]?\d+)?|\.\d+(?:e[+-]?\d+)?)|([A-Za-z_]\w*)|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|(<=|>=|==|!=|&&|\|\||[-+*/%^()[\],?:<>!.]))/gy;
+  const re = /\s*(?:(\d+\.?\d*(?:[eE][+-]?\d+)?|\.\d+(?:[eE][+-]?\d+)?)|([A-Za-z_]\w*)|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|(<=|>=|==|!=|&&|\|\||[-+*/%^()[\],?:<>!.]))/gy;
   let m: RegExpExecArray | null;
   let pos = 0;
   while (pos < src.length) {
@@ -58,7 +60,7 @@ function tokenize(src: string): string[] {
   return out;
 }
 
-const PREC: Record<string, number> = { '?': 1, '||': 2, '&&': 3, '==': 4, '!=': 4, '<': 5, '>': 5, '<=': 5, '>=': 5, '+': 6, '-': 6, '*': 7, '/': 7, '%': 7, '^': 9 };
+const PREC: Record<string, number> = Object.assign(Object.create(null), { '?': 1, '||': 2, '&&': 3, '==': 4, '!=': 4, '<': 5, '>': 5, '<=': 5, '>=': 5, '+': 6, '-': 6, '*': 7, '/': 7, '%': 7, '^': 9 });
 
 export function parseExpr(src: string): Node {
   // allow a trailing statement form like "value + 10;" and AE-style "temp = ...; temp" is not supported
@@ -146,6 +148,7 @@ export function noise1(x: number, seed = 0): number {
 function lerpV(a: Val, b: Val, p: number): Val { return map2(a, b, (x, y) => x + (y - x) * p); }
 
 export function evalExpr(node: Node, ctx: ExprContext): Val {
+  ctx.calls = 0;
   const ev = (n: Node): Val => {
     switch (n.t) {
       case 'num': return n.v;
@@ -196,7 +199,7 @@ export function evalExpr(node: Node, ctx: ExprContext): Val {
   };
   const call = (name: string, args: Node[]): Val => {
     const A = () => args.map(ev);
-    const M1: Record<string, (x: number) => number> = { sin: Math.sin, cos: Math.cos, tan: Math.tan, asin: Math.asin, acos: Math.acos, atan: Math.atan, abs: Math.abs, floor: Math.floor, ceil: Math.ceil, round: Math.round, sqrt: Math.sqrt, exp: Math.exp, log: Math.log, degreesToRadians: x => x * Math.PI / 180, radiansToDegrees: x => x * 180 / Math.PI };
+    const M1: Record<string, (x: number) => number> = Object.assign(Object.create(null), { sin: Math.sin, cos: Math.cos, tan: Math.tan, asin: Math.asin, acos: Math.acos, atan: Math.atan, abs: Math.abs, floor: Math.floor, ceil: Math.ceil, round: Math.round, sqrt: Math.sqrt, exp: Math.exp, log: Math.log, degreesToRadians: (x: number) => x * Math.PI / 180, radiansToDegrees: (x: number) => x * 180 / Math.PI });
     if (M1[name]) return map1(ev(args[0]), M1[name]);
     switch (name) {
       case 'min': { const a = A(); return a.reduce((p, c) => map2(p, c, Math.min)); }
@@ -220,7 +223,10 @@ export function evalExpr(node: Node, ctx: ExprContext): Val {
       case 'random': {
         // deterministic per layer/property: random() 0..1, random(max), random(min, max)
         const a = A();
-        const r = ((Math.sin(ctx.seed * 12.9898 + (a.length ? 0 : 0)) * 43758.5453) % 1 + 1) % 1;
+        // after effects re-rolls every frame; each call in an expression gets its own number
+        const callN = ctx.calls = (ctx.calls ?? 0) + 1;
+        const frame = Math.floor(ctx.time * ctx.fps + 1e-6);
+        const r = ((Math.sin(ctx.seed * 12.9898 + callN * 78.233 + frame * 37.719) * 43758.5453) % 1 + 1) % 1;
         if (!a.length) return r;
         if (a.length === 1) return map1(a[0], m => m * r);
         return map2(a[0], a[1], (lo, hi) => lo + (hi - lo) * r);
@@ -288,3 +294,18 @@ export function runExpr(node: Node, ctx: ExprContext, dim: number, out: Float64A
     out[off + d] = Number.isFinite(x) ? x : 0;
   }
 }
+
+/** parse + trial-run with a neutral context: catches unknown functions / bad arguments, not only syntax */
+export function checkExpr(src: string, dim: number): string | null {
+  const c = compileExpr(src);
+  if (c.error) return c.error;
+  const value = dim === 1 ? 0 : new Array(dim).fill(0);
+  try {
+    const v = evalExpr(c.node!, { time: 1, value, index: 0, fps: 30, duration: 5, inPoint: 0, valueAt: () => value, keyTimes: [0, 1], seed: 1 });
+    if (typeof v !== 'number' && !Array.isArray(v)) return 'expression must produce a number or [x, y]';
+    return null;
+  } catch (e: any) { return String(e?.message ?? e); }
+}
+
+/** properties that support expressions (the renderer's evaluated transform/style set) */
+export const EXPR_PROPS = ['anchor', 'position', 'scale', 'rotation', 'opacity', 'size', 'radius', 'fill', 'stroke', 'strokeWidth'];

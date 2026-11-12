@@ -6,7 +6,7 @@ import {
   addLayer, cloneLayers, deleteLayers, groupLayers, isAnimated, keyId, setCompSettings, setEase, setLayerField, setProp,
   setPropTx, valueAt, setSpring, precompose, setExpr,
 } from '../core/commands';
-import { compileExpr } from '../core/expr';
+import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { ANIM_PRESETS, applyPreset, setTextAnim, TEXT_ANIM_PRESETS } from '../core/presets';
 import { parsePathD } from '../import/svg';
@@ -368,10 +368,11 @@ export const TOOLS: ToolDef[] = [
   {
     name: 'set_expression',
     description: 'Drive a property with an expression (After Effects style, safe subset). Variables: time, value (the keyframed value), index, fps, duration. Functions: wiggle(freq, amp), loopOut(\'cycle\'|\'pingpong\'|\'offset\'|\'continue\'), loopIn(...), linear(t,t0,t1,v0,v1), ease(...), sin/cos/abs/min/max/clamp/random/noise, valueAtTime(t). Vectors: [x, y] with element-wise math. Pass expr "" to remove.',
-    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, prop: { enum: PROP_KEYS }, expr: { type: 'string' } }, required: ['ids', 'prop', 'expr'] },
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, prop: { enum: EXPR_PROPS }, expr: { type: 'string' } }, required: ['ids', 'prop', 'expr'] },
     run: ({ ids, prop, expr }) => {
       const key = checkProp(prop);
-      if (expr) { const c = compileExpr(expr); if (c.error) throw new Error('expression error: ' + c.error); }
+      if (!EXPR_PROPS.includes(key)) throw new Error(`expressions are supported on: ${EXPR_PROPS.join(', ')}`);
+      if (expr) { const err = checkExpr(expr, PROP_DEFS[key].dim); if (err) throw new Error('expression error: ' + err); }
       setExpr(st(), ids, key, expr || undefined);
       return text('ok');
     },

@@ -106,27 +106,58 @@ function hasComplexPaint(l: Layer) {
 /** trim (0..1 start/end, offset in turns) for strokes, applied with a dash pattern */
 export interface TrimValues { start: number; end: number; offset: number }
 
-function pathLength(p: Path2D, g: PathGeometry): number {
-  // polyline approximation of the command list (only used for trim dash lengths)
-  let len = 0, x = 0, y = 0, sx = 0, sy = 0;
+/** split a geometry into subpaths (each starts with M) with their measured lengths */
+function subpaths(g: PathGeometry): { path: Path2D; len: number }[] {
+  const out: { path: Path2D; len: number }[] = [];
+  let cur: Path2D | null = null, len = 0, x = 0, y = 0, sx = 0, sy = 0;
+  const flush = () => { if (cur) out.push({ path: cur, len }); };
   for (const c of g.cmds) {
-    if (c[0] === 'M') { x = sx = c[1]; y = sy = c[2]; }
-    else if (c[0] === 'L') { len += Math.hypot(c[1] - x, c[2] - y); x = c[1]; y = c[2]; }
-    else if (c[0] === 'Z') { len += Math.hypot(sx - x, sy - y); x = sx; y = sy; }
+    if (c[0] === 'M') { flush(); cur = new Path2D(); len = 0; x = sx = c[1]; y = sy = c[2]; cur.moveTo(x, y); continue; }
+    if (!cur) { cur = new Path2D(); cur.moveTo(x, y); }
+    if (c[0] === 'L') { len += Math.hypot(c[1] - x, c[2] - y); x = c[1]; y = c[2]; cur.lineTo(x, y); }
+    else if (c[0] === 'Z') { len += Math.hypot(sx - x, sy - y); x = sx; y = sy; cur.closePath(); }
     else {
-      const pts = c[0] === 'C' ? [x, y, c[1], c[2], c[3], c[4], c[5], c[6]] : [x, y, c[1], c[2], c[1], c[2], c[3], c[4]];
+      const pts = c[0] === 'C' ? [x, y, c[1], c[2], c[3], c[4], c[5], c[6]] : [x, y, x + (2 / 3) * (c[1] - x), y + (2 / 3) * (c[2] - y), c[3] + (2 / 3) * (c[1] - c[3]), c[4] + (2 / 3) * (c[2] - c[4]), c[3], c[4]];
       let px = x, py = y;
-      for (let k = 1; k <= 12; k++) {
-        const t = k / 12, u = 1 - t;
+      for (let k = 1; k <= 48; k++) {
+        const t = k / 48, u = 1 - t;
         const qx = u * u * u * pts[0] + 3 * u * u * t * pts[2] + 3 * u * t * t * pts[4] + t * t * t * pts[6];
         const qy = u * u * u * pts[1] + 3 * u * u * t * pts[3] + 3 * u * t * t * pts[5] + t * t * t * pts[7];
         len += Math.hypot(qx - px, qy - py); px = qx; py = qy;
       }
+      cur.bezierCurveTo(pts[2], pts[3], pts[4], pts[5], pts[6], pts[7]);
       x = pts[6]; y = pts[7];
     }
   }
-  void p;
-  return len;
+  flush();
+  return out;
+}
+
+/** stroke only the trimmed part: visible range over the total length of all subpaths (wraps with offset) */
+function strokeTrimmed(c: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, g: PathGeometry, tr: TrimValues) {
+  const subs = subpaths(g);
+  const L = subs.reduce((a, b) => a + b.len, 0);
+  if (L <= 0) return;
+  const a = Math.min(tr.start, tr.end), b = Math.max(tr.start, tr.end);
+  const vis = Math.min(1, b - a) * L;
+  if (vis <= 0.01) return;
+  const s0 = ((((a + tr.offset) % 1) + 1) % 1) * L;
+  const ranges = s0 + vis <= L + 1e-6 ? [[s0, s0 + vis]] : [[s0, L], [0, s0 + vis - L]];
+  let p0 = 0;
+  for (const sp of subs) {
+    const p1 = p0 + sp.len;
+    for (const [r0, r1] of ranges) {
+      const o0 = Math.max(p0, r0), o1 = Math.min(p1, r1);
+      if (o1 - o0 <= 1e-4) continue;
+      // one dash of exactly the visible length, gap longer than the path (never repeats)
+      c.setLineDash([o1 - o0, sp.len + L + 1]);
+      c.lineDashOffset = -(o0 - p0);
+      c.stroke(sp.path);
+    }
+    p0 = p1;
+  }
+  c.setLineDash([]);
+  c.lineDashOffset = 0;
 }
 
 /** vector path: fill + stroke coverage masks in geometry space */
@@ -175,15 +206,7 @@ function strokeGeom(c: OffscreenCanvasRenderingContext2D | CanvasRenderingContex
   const align = l.strokeAlign ?? 'center';
   for (const g of geoms) {
     const p = toPath2D(g);
-    if (trim) {
-      const L = pathLength(p, g);
-      let a = Math.min(trim.start, trim.end), b = Math.max(trim.start, trim.end);
-      const vis = (b - a) * L;
-      if (vis <= 0.01) continue;
-      const off = (((a + trim.offset) % 1) + 1) % 1 * L;
-      c.setLineDash([vis, Math.max(0.0001, L - vis)]);
-      c.lineDashOffset = -off;
-    }
+    if (trim) { c.lineWidth = width; strokeTrimmed(c, g, trim); continue; }
     if (align === 'center') { c.lineWidth = width; c.stroke(p); continue; }
     c.save();
     c.lineWidth = width * 2;

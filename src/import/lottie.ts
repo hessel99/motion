@@ -628,6 +628,8 @@ export interface SrcLayerX extends SrcLayer {
   matteParent?: string | number;
   /** layer-space box used to invert a matte shape ([x, y, w, h]) */
   box?: [number, number, number, number];
+  /** blend mode of the built layer */
+  blend?: Layer['blend'];
 }
 
 export interface AssembleStats { mattes: number; invertedMattes: number; invertedApprox: number; lumaMattes: number }
@@ -741,6 +743,7 @@ export function assembleStacked(ctx: BuildCtx, src: SrcLayerX[], stats?: Assembl
   const finish = (s: SrcLayerX, l: Layer) => {
     l.inPoint = s.inPoint; l.outPoint = s.outPoint;
     if (!s.visible) l.visible = false;
+    if (s.blend && s.blend !== 'normal') l.blend = s.blend;
     return l;
   };
   const sorted = src.slice().sort((a, b) => b.index - a.index); // bottom -> top
@@ -1232,6 +1235,19 @@ function compBoxInLayer(tr: TR, cw: number, ch: number): [number, number, number
   return [x0 - px, y0 - py, x1 - x0 + 2 * px, y1 - y0 + 2 * py];
 }
 
+/** lottie layer blend mode (bm) -> ours; unsupported modes render normal and are counted */
+function blendMode(bm: any, note: (k: string) => void): Layer['blend'] {
+  switch (bm) {
+    case undefined: case null: case 0: return undefined;
+    case 1: return 'multiply';
+    case 2: return 'screen';
+    case 4: return 'darken';
+    case 5: return 'lighten';
+    case 16: return 'add';
+    default: note('blend mode ' + bm); return undefined;
+  }
+}
+
 // ---------------- precomp time ----------------
 
 /**
@@ -1390,6 +1406,7 @@ export function lottieToProject(json: any, name?: string, stats?: LottieImportSt
         matteSource: L.td === 1 || L.td === true,
         matteParent: L.tp ?? undefined,
         box: [0, 0, cw, ch],
+        blend: blendMode(L.bm, note),
         build: (t: TR) => {
           try {
             const regions = ty === 3 ? [] : maskRegions(masks, c, box);

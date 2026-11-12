@@ -48,3 +48,22 @@ describe('expressions', () => {
     expect(() => run('document')).toThrow(/unknown name/);
   });
 });
+
+import { checkExpr } from '../src/core/expr';
+describe('expression review fixes', () => {
+  it('random differs per call and per frame', () => {
+    const a = run('[random(1000), random(1000)]', ctx({ time: 1 })) as number[];
+    expect(a[0]).not.toBe(a[1]);
+    const b = run('random(1000)', ctx({ time: 1 })), c = run('random(1000)', ctx({ time: 2 }));
+    expect(b).not.toBe(c);
+  });
+  it('no prototype lookups, scientific notation', () => {
+    expect(() => run('constructor(5)')).toThrow(/unknown function/);
+    expect(compileExpr('value constructor 5').error).not.toBeNull();
+    expect(run('1E3')).toBe(1000);
+  });
+  it('checkExpr reports runtime errors, not only syntax', () => {
+    expect(checkExpr('wigle(2, 20)', 2)).toMatch(/unknown function/);
+    expect(checkExpr('wiggle(2, 20)', 2)).toBeNull();
+  });
+});
