@@ -4,6 +4,7 @@ import { editor } from '../app/editor';
 import { ViewportController } from './viewport-controller';
 import { Timeline } from './timeline';
 import { SyncReview, STYLE_MIME, applyStyle } from './LibraryPanel';
+import { LibraryReview } from './ComponentPanels';
 import { useChannels } from './hooks';
 import { menuFrom, showContextMenu } from './menu';
 import { agentMenuItems } from './agent-menu';
@@ -71,6 +72,7 @@ export function App() {
         {home && <div class="home-host"><Guard name="Home"><Home /></Guard></div>}
         {ui.settingsOpen && <SettingsModal />}
         <Guard name="Sync"><SyncReview /></Guard>
+        <Guard name="Library"><LibraryReview /></Guard>
         <AskBar />
         <ShortcutHelp />
         <Welcome />

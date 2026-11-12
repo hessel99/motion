@@ -118,7 +118,7 @@ describe('motion components: model', () => {
     expect(v.group).toBe('Format');
     // the background stretches to the new frame, content keeps its place around the center and fits
     expect(v.ov[bg.id].props!.size).toEqual([1080 - 1920, 1920 - 1080]);
-    expect(v.ov[title.id].props!.scale).toEqual([0.5625, 0.5625]);
+    expect(v.ov[title.id].props!.scale![0]).toBeCloseTo(0.9 * 1080 / 1400, 5); // the title box fits 90% of the width
     const dark = addVariant(s, comp.id, { name: 'Dark', group: 'Theme' });
     editVariant(s, comp.id, dark.id);
     setProp(s, bar.id, 'fill', [1, 1, 1, 1]);
@@ -131,7 +131,7 @@ describe('motion components: model', () => {
     const r = resolvedLayers(s.project, L(s, inst.id));
     expect(r.get(bg.id)!.props.size!.v).toEqual([1080, 1920]);
     expect(r.get(bar.id)!.props.fill!.v).toEqual([1, 1, 1, 1]);
-    expect(r.get(title.id)!.props.scale!.v).toEqual([56.25, 56.25]);
+    expect(r.get(title.id)!.props.scale!.v[0]).toBeCloseTo(90 * 1080 / 1400, 4);
   });
 
   it('editing a variant: layout edits stay in it, timing edits reach every variant', () => {

@@ -806,7 +806,17 @@ function isBackdrop(l: Layer, W: number, H: number) {
  *  the center and scales uniformly to fit */
 function layoutOv(P: Project, comp: Composition, W: number, H: number, W2: number, H2: number): Record<string, VariantLayerOv> {
   const out: Record<string, VariantLayerOv> = {};
-  const s = Math.min(W2 / W, H2 / H);
+  // content box (everything but backgrounds), around the frame center: as large as fits 90% of the
+  // new frame, never larger than filling it
+  let ex = 0, ey = 0;
+  for (const id of comp.root) {
+    const l = P.layers[id], pos = firstV(l?.props.position), sz = firstV(l?.props.size), sc = firstV(l?.props.scale) ?? [100, 100];
+    if (!l || !pos || !sz || isBackdrop(l, W, H)) continue;
+    ex = Math.max(ex, Math.abs(pos[0] - W / 2) + sz[0] * Math.abs(sc[0]) / 200);
+    ey = Math.max(ey, Math.abs(pos[1] - H / 2) + sz[1] * Math.abs(sc[1]) / 200);
+  }
+  const fill = Math.max(W2 / W, H2 / H);
+  const s = Math.min(fill, ex > 0 ? 0.9 * W2 / (2 * ex) : fill, ey > 0 ? 0.9 * H2 / (2 * ey) : fill);
   for (const id of comp.root) {
     const l = P.layers[id];
     const pos = firstV(l?.props.position);
