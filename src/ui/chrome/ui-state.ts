@@ -1,10 +1,11 @@
 // window chrome state: which tab of the tab strip is open (the document or Settings), the left
-// panel's tab and whether it is collapsed, the open Settings section. persisted per machine.
+// panel's tab (agent, library, components) and whether it is collapsed, the timeline's height,
+// the open Settings section. persisted per machine.
 // listeners: editor channel 'ui' (useChannels([], ['ui'])).
 
 import { editor } from '../../app/editor';
 
-export type LeftTab = 'agent' | 'file' | 'components' | 'library' | 'comments';
+export type LeftTab = 'agent' | 'library' | 'components';
 export type SettingsSection =
   | 'profile' | 'appearance' | 'notifications' | 'shortcuts'
   | 'models' | 'runs' | 'connections'
@@ -12,16 +13,24 @@ export type SettingsSection =
   | 'updates';
 
 const KEY = 'motion.ui';
-interface UiState { view: 'editor' | 'settings'; settingsOpen: boolean; leftTab: LeftTab; leftOpen: boolean; section: SettingsSection }
+interface UiState { view: 'editor' | 'settings'; settingsOpen: boolean; leftTab: LeftTab; leftOpen: boolean; section: SettingsSection; /** timeline height in css px (the transport's splitter) */ tlH: number }
+
+export const TL_MIN = 160;
+/** the timeline may grow until the canvas keeps this much height */
+export const STAGE_MIN = 200;
 
 function load(): UiState {
-  const d: UiState = { view: 'editor', settingsOpen: false, leftTab: 'file', leftOpen: true, section: 'appearance' };
+  const d: UiState = { view: 'editor', settingsOpen: false, leftTab: 'agent', leftOpen: true, section: 'appearance', tlH: 0 };
   try {
     const s = JSON.parse(localStorage.getItem(KEY) || '{}');
     // the old "agent sidebar closed" flag maps to a collapsed left panel
     if (localStorage.getItem('motion.agentOpen') === '0' && s.leftOpen === undefined) d.leftOpen = false;
     if (localStorage.getItem('motion.rightTab') === 'library' && !s.leftTab) d.leftTab = 'library';
-    return { ...d, ...s, view: 'editor' };
+    const out: UiState = { ...d, ...s, view: 'editor' };
+    // the layers tree and the comments stub left the left panel (layers live in the timeline)
+    if (!['agent', 'library', 'components'].includes(out.leftTab)) out.leftTab = 'agent';
+    if (typeof out.tlH !== 'number' || !isFinite(out.tlH)) out.tlH = 0;
+    return out;
   } catch { return d; }
 }
 

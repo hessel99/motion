@@ -123,6 +123,7 @@
 
   /* ---------- canvas: timeline ---------- */
   --tl-bg: #2c2c2c;
+  --transport-bg: #313131;        /* the transport bar between stage and timeline */
   --tl-bg-outside: #262626;       /* past the comp end */
   --tl-ruler-bg: #2c2c2c;
   --tl-divider: #383838;
@@ -309,6 +310,7 @@
   --focus-ring-color: #7c4ddb;
 
   --tl-bg: #ffffff;
+  --transport-bg: #f9f9f9;
   --tl-bg-outside: #f7f7f7;
   --tl-ruler-bg: #ffffff;
   --tl-divider: #ececec;
@@ -467,9 +469,10 @@
   /* app shell */
   --tabstrip-h: 38px;
   --left-w: 280px;
-  --right-w: 256px;
-  --timeline-h: 288px;
-  --transport-h: 36px;
+  --right-w: 308px;
+  --timeline-h: clamp(240px, 42vh, 560px);  /* the timeline: a first-class region, not a strip */
+  --stage-min: 180px;
+  --transport-h: 52px;
 
   /* motion (UI transitions only: never on surfaces that repaint during playback) */
   --dur-instant: 0ms;

@@ -667,24 +667,7 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (k === 'enter' && s.selection.length === 1 && s.layer(s.selection[0])?.type === 'text') return run(() => hooks.editText(s.selection[0]));
     if (e.key === 'F9') return run(() => setEase(s, [...s.keySelection], 'Easy Ease'));
     if (k === 'm' && !mod && !e.shiftKey && !e.altKey) return run(() => addMarker(s, s.time));
-    if (k === 'j' || k === 'k') {
-      // jump to previous / next keyframe of selection (after effects)
-      return run(() => {
-        const times = new Set<number>();
-        // selection, else every layer of the active comp (not other comps)
-        const all: string[] = [];
-        const walk = (ids: string[]) => { for (const id of ids) { all.push(id); walk(s.layer(id)?.children ?? []); } };
-        if (!s.selection.length) walk(s.comp.root);
-        for (const id of s.selection.length ? s.selection : all) {
-          const l = s.layer(id);
-          if (l) for (const p of Object.values(l.props)) p?.kf?.forEach(f => times.add(f.t));
-        }
-        for (const m of s.comp.markers ?? []) if (m.t <= s.comp.duration) times.add(m.t);
-        const sorted = [...times].sort((a, b) => a - b);
-        const t = k === 'j' ? [...sorted].reverse().find(x => x < s.time - 1e-6) : sorted.find(x => x > s.time + 1e-6);
-        if (t !== undefined) s.setTime(t);
-      });
-    }
+    if (k === 'j' || k === 'k') return run(() => jumpToKey(k === 'j' ? -1 : 1));
     // after effects-style property shortcuts: P S R T A add a keyframe on that property
     const propKeys: Record<string, any> = { p: 'position', s: 'scale', a: 'anchor' };
     if (e.shiftKey && propKeys[k] && s.selection.length) return run(() => toggleAnimated(s, s.selection, propKeys[k]));
@@ -722,4 +705,22 @@ function isTyping(e: Event) {
   // sliders, checkboxes and color swatches keep focus after a click but take no text: shortcuts work
   if (t?.tagName === 'INPUT' && ['range', 'checkbox', 'radio', 'color', 'button'].includes((t as HTMLInputElement).type)) return false;
   return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+}
+
+/** J / K: move the playhead to the previous / next keyframe of the selection (every layer of
+ *  the active comp when nothing is selected) or marker, like after effects */
+export function jumpToKey(dir: -1 | 1) {
+  const s = editor.store;
+  const times = new Set<number>();
+  const all: string[] = [];
+  const walk = (ids: string[]) => { for (const id of ids) { all.push(id); walk(s.layer(id)?.children ?? []); } };
+  if (!s.selection.length) walk(s.comp.root);
+  for (const id of s.selection.length ? s.selection : all) {
+    const l = s.layer(id);
+    if (l) for (const p of Object.values(l.props)) p?.kf?.forEach(f => times.add(f.t));
+  }
+  for (const m of s.comp.markers ?? []) if (m.t <= s.comp.duration) times.add(m.t);
+  const sorted = [...times].sort((a, b) => a - b);
+  const t = dir < 0 ? [...sorted].reverse().find(x => x < s.time - 1e-6) : sorted.find(x => x > s.time + 1e-6);
+  if (t !== undefined) s.setTime(t);
 }

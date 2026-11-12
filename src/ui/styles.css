@@ -275,7 +275,18 @@ kbd, .kbd {
 .ease-presets { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 .ease-chip { font-weight: var(--weight-regular); justify-content: flex-start; gap: var(--space-3); padding: 0 var(--space-3); text-align: left; font-size: var(--text-xs); color: var(--text-secondary); }
 .ease-chip svg { color: var(--accent); flex: none; }
-.align-bar { display: flex; gap: var(--space-1); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--border-subtle); }
+/* animatable property rows: ‹ ◆ › key navigation, the property's name, its fields */
+.prop-row { gap: var(--space-2); }
+.keynav { display: inline-flex; align-items: center; flex: none; }
+.keynav-step { width: 14px; height: 20px; min-height: 0; padding: 0; border: 0; background: transparent; color: var(--text-muted); border-radius: var(--radius-xs); visibility: hidden; display: inline-grid; place-items: center; }
+.keynav.animated .keynav-step { visibility: visible; }
+.keynav-step:hover:not(:disabled) { color: var(--text); background: var(--surface-hover); }
+.keynav-step:disabled { opacity: 0.35; }
+.prop-label { flex: 0 0 58px; color: var(--text-secondary); font-size: var(--text-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prop-row.animated .prop-label { color: var(--text); }
+.prop-fields { flex: 1; min-width: 0; display: flex; gap: var(--space-2); }
+.prop-fields > .num { flex: 1; min-width: 0; }
+.align-bar { display: flex; gap: var(--space-1); padding: 0; }
 .align-bar .icon { flex: 1; width: auto; min-width: 0; color: var(--text-secondary); }
 .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-bottom: var(--space-4); }
 .preset { justify-content: flex-start; font-size: var(--text-xs); font-weight: var(--weight-regular); text-align: left; padding: 0 var(--space-4); }

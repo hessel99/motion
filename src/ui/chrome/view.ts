@@ -11,3 +11,10 @@ export function fmtTimecode(t: number, fps: number) {
   const f = Math.floor((t - s) * fps + 1e-6);
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}:${String(f).padStart(2, '0')}`;
 }
+
+/** a composition duration for labels: 4s, 2.5s, 1:05 */
+export function fmtDuration(d: number) {
+  if (d < 60) return `${+d.toFixed(2)}s`;
+  const m = Math.floor(d / 60), s = d - m * 60;
+  return `${m}:${String(Math.round(s)).padStart(2, '0')}`;
+}

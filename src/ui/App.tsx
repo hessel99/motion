@@ -11,12 +11,12 @@ import {
 } from '../app/actions';
 import { deleteLayers } from '../core/commands';
 import { Button, Dialog, Kbd } from './ui';
-import { IconProvider, PanelLeft } from './chrome/icons';
+import { IconProvider, PanelLeftOpen } from './chrome/icons';
 import { TabStrip } from './chrome/TabStrip';
 import { LeftPanel } from './chrome/LeftPanel';
 import { RightPanel } from './chrome/RightPanel';
 import { Toolbar } from './chrome/Toolbar';
-import { Transport } from './chrome/Transport';
+import { Transport, tlHeightStyle } from './chrome/Transport';
 import { SettingsPage } from './settings/Settings';
 import { ui, openSettings, setUi, toggleAgent } from './chrome/ui-state';
 import { view } from './chrome/view';
@@ -42,18 +42,23 @@ export function App() {
   // the panels changed width: the canvases follow on the next frame (their ResizeObservers also
   // fire, this only avoids one frame at the old size)
   useEffect(() => { requestAnimationFrame(() => { vp?.resize(); tl?.resize(); }); }, [ui.leftOpen]);
+  // the window's layout, motion first: the canvas (stage) on top, the transport bar under it and
+  // a generous timeline (layer rows + keys) along the bottom, both as wide as the window minus
+  // the inspector. the agent (left) only sits beside the stage and collapses (⌘I); the
+  // inspector (right) runs the full height so the ease studio has room.
   const settings = ui.view === 'settings';
   return (
     <IconProvider>
-      <div class={'app' + (ui.leftOpen ? '' : ' no-left') + (settings ? ' show-settings' : '')}>
+      <div class={'app' + (ui.leftOpen ? '' : ' no-left') + (settings ? ' show-settings' : '')} style={tlHeightStyle()}>
         <Guard name="Tab strip"><TabStrip appMenu={appMenu} /></Guard>
         {/* the editor stays mounted under Settings: its canvases and WebGL context live for the session */}
-        <aside class="left" aria-label="Agent and layers" hidden={!ui.leftOpen}><Guard name="Left panel"><LeftPanel /></Guard></aside>
+        <aside class="left" aria-label="Agent and library" hidden={!ui.leftOpen}><Guard name="Left panel"><LeftPanel /></Guard></aside>
         <main class="center" aria-label="Canvas">
           <Viewport />
-          {!ui.leftOpen && <Button variant="ghost" icon class="lp-reopen" tip="Show panel" onClick={() => setUi({ leftOpen: true })}><PanelLeft /></Button>}
+          {!ui.leftOpen && <Button variant="ghost" icon size="sm" class="lp-reopen" tip="Show agent panel (⌘I)" onClick={() => setUi({ leftOpen: true })}><PanelLeftOpen /></Button>}
         </main>
-        <section class="bottom" aria-label="Timeline"><Guard name="Transport"><Transport /></Guard><TimelineHost /></section>
+        <div class="transport-host"><Guard name="Transport"><Transport /></Guard></div>
+        <section class="bottom" aria-label="Timeline"><TimelineHost /></section>
         <aside class="right" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
         {settings && <div class="settings-host"><Guard name="Settings"><SettingsPage /></Guard></div>}
         <Guard name="Sync"><SyncReview /></Guard>
@@ -139,9 +144,24 @@ function Viewport() {
         for (const f of e.dataTransfer?.files ?? []) await openBrowserFile(f);
       }}>
       <Toolbar />
+      <ZoomBadge />
       <Hud />
     </div>
   );
+}
+
+/** canvas zoom readout at the stage's bottom right (click: fit). touches the dom only when the
+ *  zoom changed */
+function ZoomBadge() {
+  const el = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    let lastZ = -1;
+    return editor.onFrame(() => {
+      const z = Math.round((vp?.zoom ?? 1) * 100);
+      if (z !== lastZ && el.current) { lastZ = z; el.current.textContent = z + '%'; }
+    });
+  }, []);
+  return <button type="button" ref={el} class="zoom-badge vp-ui" data-tooltip="Zoom to fit (⌘0)" data-tooltip-side="top" onClick={() => vp?.fit()}>100%</button>;
 }
 
 function Hud() {
@@ -279,7 +299,7 @@ function Welcome() {
         <ol>
           <li><b>Paste from Figma</b>: select layers in Figma, ⌘C, then ⌘V here. A single frame becomes the composition.</li>
           <li><b>Animate</b>: click a property's keyframe diamond to add keyframes, or use <i>Animate</i> presets and <i>Text animation</i> in the right panel. Press F9 for easy ease.</li>
-          <li><b>AI agent</b> (bottom left): describe an animation and Claude Code builds it in your file, with your own subscription. One click undoes everything it did.</li>
+          <li><b>AI agent</b> (left panel, ⌘I): describe an animation and Claude Code builds it in your file, with your own subscription. One click undoes everything it did.</li>
           <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video or Lottie from the Export button (top right) or the home menu.</li>
         </ol>
     </Dialog>

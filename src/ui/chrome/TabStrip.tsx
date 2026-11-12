@@ -1,26 +1,50 @@
-// window tab strip: home (app menu), the open document, Settings (when open), "+".
+// window top bar: home (app menu), the open document as a tab, Settings (when open), "+", then
+// the motion bar: the composition switcher with its format (size · fps · duration), undo / redo,
+// the Agent toggle and Export.
 // in the mac desktop app the window has no title bar (electron/main.cjs: hiddenInset): the
 // traffic lights sit at the strip's left and the empty strip drags the window.
 
 import { useRef, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
-import { confirmDiscard, isDirty, newProject } from '../../app/actions';
-import { setProjectName } from '../../core/commands';
+import { confirmDiscard, exportAeScript, exportFramePng, exportGifFile, exportLottie, isDirty, newProject, toast } from '../../app/actions';
+import { addPrecompLayer, newComposition, renameComp, setProjectName } from '../../core/commands';
 import { useChannels } from '../hooks';
-import { File, House, Plus, Settings, X } from './icons';
-import { closeSettings, openSettings, showEditor, ui } from './ui-state';
+import { showContextMenu, type MenuItem } from '../menu';
+import { Button } from '../ui';
+import { ChevronDown, Clapperboard, Download, File, House, Plus, Redo2, Settings, Sparkles, Undo2, X } from './icons';
+import { closeSettings, openSettings, showEditor, toggleAgent, ui } from './ui-state';
+import { fmtDuration } from './view';
 
 const native = (globalThis as any).motionNative as { platform?: string } | undefined;
 const MAC_APP = native?.platform === 'darwin';
 
+export function exportMenu(x: number, y: number) {
+  const items: MenuItem[] = [
+    { label: 'Video (MP4 / WebM)…', action: () => { import('../ExportDialog').then(m => m.openExportDialog()); } },
+    { label: 'GIF', action: () => { exportGifFile().catch(() => {}); } },
+    { label: 'Frame as PNG', action: () => { exportFramePng().catch(() => {}); } },
+    { separator: true },
+    { label: 'Lottie JSON', action: exportLottie },
+    { label: 'After Effects (.jsx)', action: exportAeScript },
+  ];
+  showContextMenu(x, y, items);
+}
+
 export function TabStrip(props: { appMenu: (x: number, y: number) => void }) {
-  useChannels(['doc', 'history'], ['ui']);
+  useChannels(['doc', 'history', 'comps'], ['ui']);
   const s = editor.store;
   const [renaming, setRenaming] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const editorOn = ui.view === 'editor';
   const commit = (v: string) => { setRenaming(false); const n = v.trim(); if (n && n !== s.project.name) setProjectName(s, n); };
   const tabKey = (e: KeyboardEvent, fn: () => void) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } };
+  const history = (e: MouseEvent) => {
+    e.preventDefault();
+    const labels = s.historyLabels;
+    const items: MenuItem[] = labels.map((label, i) => ({ label: `${label}`, shortcut: i === labels.length - 1 ? 'last' : `${labels.length - i}`, action: () => s.undoTo(i + s.historyLength - labels.length) })).reverse().slice(0, 25);
+    if (items.length) showContextMenu(e.clientX, e.clientY + 8, items);
+  };
+  const agentOn = ui.leftOpen && ui.leftTab === 'agent';
   return (
     <header class={'tabstrip' + (MAC_APP ? ' mac-app' : '')}>
       {MAC_APP && <div class="ts-traffic" aria-hidden="true" />}
@@ -52,7 +76,47 @@ export function TabStrip(props: { appMenu: (x: number, y: number) => void }) {
         <button type="button" class="ts-add" aria-label="New file" title="New file"
           onClick={() => { if (confirmDiscard()) { newProject(); showEditor(); } }}><Plus /></button>
       </div>
+      {editorOn && <div class="ts-motion">
+        <CompSwitcher />
+        <span class="ts-format" title="Composition size · frame rate · duration">
+          {s.comp.width}×{s.comp.height}<i aria-hidden="true">·</i>{s.comp.fps} fps<i aria-hidden="true">·</i>{fmtDuration(s.comp.duration)}
+        </span>
+      </div>}
       <div class="ts-drag" />
+      {editorOn && <div class="ts-actions">
+        <Button variant="ghost" icon size="sm" disabled={!s.canUndo} aria-label="Undo" title={`Undo ${s.undoLabel ?? ''} (⌘Z), right-click for history`} onClick={() => s.undo()} onContextMenu={history as any}><Undo2 /></Button>
+        <Button variant="ghost" icon size="sm" disabled={!s.canRedo} tip="Redo (⇧⌘Z)" onClick={() => s.redo()}><Redo2 /></Button>
+        <span class="ts-sep" aria-hidden="true" />
+        <Button variant="ghost" size="sm" class="ts-agent" active={agentOn} title="Agent (⌘I)" onClick={toggleAgent}><Sparkles />Agent</Button>
+        <button type="button" class="pill-btn ts-export" aria-haspopup="menu"
+          onClick={e => { const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); exportMenu(r.right - 200, r.bottom + 4); }}><Download size={14} />Export</button>
+      </div>}
     </header>
+  );
+}
+
+/** the active composition, as a menu: switch, new, rename, use as a layer */
+function CompSwitcher() {
+  const s = editor.store;
+  const open = (e: MouseEvent) => {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const comps = Object.values(s.project.comps);
+    const others = comps.filter(c => c.id !== s.comp.id);
+    const items: MenuItem[] = [
+      ...comps.map(c => ({ label: `${c.name}`, shortcut: `${c.width}×${c.height}`, checked: c.id === s.comp.id, action: () => { if (c.id !== s.comp.id) s.openComp(c.id); } })),
+      { separator: true },
+      { label: 'New composition', action: () => { const c = newComposition(s); s.openComp(c.id); } },
+      { label: 'Rename composition…', action: () => { const v = prompt('Composition name', s.comp.name); if (v) renameComp(s, s.comp.id, v); } },
+      { label: 'Add composition as layer', disabled: !others.length, submenu: others.map(c => ({ label: c.name, action: () => { try { addPrecompLayer(s, c.id); } catch (err: any) { toast(err.message, 'error'); } } })) },
+    ];
+    showContextMenu(r.left, r.bottom + 4, items);
+  };
+  const n = Object.keys(s.project.comps).length;
+  return (
+    <button type="button" class="ts-comp" aria-haspopup="menu" title={n > 1 ? `Composition (${n} in this file)` : 'Composition'} onClick={open}>
+      <Clapperboard size={15} />
+      <span class="ts-comp-name">{s.comp.name}</span>
+      <ChevronDown size={14} class="ts-chev" />
+    </button>
   );
 }

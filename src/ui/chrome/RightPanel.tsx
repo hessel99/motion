@@ -1,43 +1,21 @@
-// right panel: a top row (you, preview, Export), a title block for what is selected (the
-// composition when nothing is), then the inspector in sections.
+// right panel, the motion inspector: a title block for what is selected (the composition when
+// nothing is), then the inspector: the ease studio leads when keys are selected, then the
+// animated properties as rows with keyframe navigation, then the layer's look.
 
 import { editor } from '../../app/editor';
-import { exportAeScript, exportFramePng, exportGifFile, exportLottie } from '../../app/actions';
 import { cloneLayers, deleteLayers, layerKeyTimes, renameComp, renameLayer } from '../../core/commands';
 import { Inspector } from '../Inspector';
 import { useChannels } from '../hooks';
 import { showContextMenu, type MenuItem } from '../menu';
 import { Button } from '../ui';
-import { Ellipsis, Pause, Play, User } from './icons';
+import { Ellipsis } from './icons';
 
 const TYPE_NAME: Record<string, string> = { rect: 'Rectangle', ellipse: 'Ellipse', group: 'Group', text: 'Text', image: 'Image', path: 'Path', precomp: 'Composition layer', audio: 'Audio' };
 
-export function exportMenu(x: number, y: number) {
-  const items: MenuItem[] = [
-    { label: 'Video (MP4 / WebM)…', action: () => { import('../ExportDialog').then(m => m.openExportDialog()); } },
-    { label: 'GIF', action: () => { exportGifFile().catch(() => {}); } },
-    { label: 'Frame as PNG', action: () => { exportFramePng().catch(() => {}); } },
-    { separator: true },
-    { label: 'Lottie JSON', action: exportLottie },
-    { label: 'After Effects (.jsx)', action: exportAeScript },
-  ];
-  showContextMenu(x, y, items);
-}
-
 export function RightPanel() {
   useChannels(['selection', 'playing', 'comps'], []);
-  const s = editor.store;
   return (
     <div class="right-panel">
-      <div class="rp-top">
-        <span class="avatar" title="You (local)" aria-label="You"><User size={14} /></span>
-        <span class="grow" />
-        <Button variant="ghost" icon size="sm" tip={s.playing ? 'Pause (Space)' : 'Preview (Space)'} aria-label={s.playing ? 'Pause' : 'Play'} onClick={() => editor.togglePlay()}>
-          {s.playing ? <Pause /> : <Play />}
-        </Button>
-        <button type="button" class="pill-btn" aria-haspopup="menu"
-          onClick={e => { const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); exportMenu(r.right - 200, r.bottom + 4); }}>Export</button>
-      </div>
       <TitleBlock />
       <Inspector />
     </div>

@@ -17,13 +17,11 @@ import { RhythmPanel } from './patterns/RhythmPanel';
 import { Checkbox, ColorSwatch, NumField, Section, Segmented, Slider } from './ui';
 import { ComponentBox, LinkButton, LinkedChip, sharedLink } from './LinkControls';
 import { exportAeScript, exportFramePng, exportGifFile, exportLottie } from '../app/actions';
-import { tokenUsage } from '../core/tokens';
 import {
   AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignHorizontalDistributeCenter, AlignStartHorizontal,
-  AlignStartVertical, AlignVerticalDistributeCenter, ArrowRightLeft, ArrowUpRight, Blend, ChevronRight, Component as ComponentIcon, Hexagon, Minus,
-  RotateCw, SwatchBook, X,
+  AlignStartVertical, AlignVerticalDistributeCenter, ArrowRightLeft, ArrowUpRight, Blend, ChevronLeft, ChevronRight, Minus,
+  RotateCw, X,
 } from './chrome/icons';
-import { openLeft } from './chrome/ui-state';
 
 const st = () => editor.store;
 
@@ -63,6 +61,39 @@ function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
     <button type="button" tabIndex={-1} class={'keybtn' + (animated ? ' animated' : '') + (atKey ? ' at' : '')} title={animated ? 'Add/remove keyframe (alt: stop animating)' : 'Animate this property'} aria-label={(atKey ? 'Remove keyframe: ' : 'Add keyframe: ') + PROP_DEFS[props.prop].label} onClick={click}>
       <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0.8 L9.2 5 L5 9.2 L0.8 5 Z" /></svg>
     </button>
+  );
+}
+
+/** keyframe navigation of one property, after effects style: previous key, add / remove a key
+ *  at the playhead (the diamond), next key. the arrows show once the property is animated */
+function KeyNav(props: { layers: Layer[]; prop: PropKey }) {
+  const store = st();
+  const animated = props.layers.some(l => isAnimated(l, props.prop));
+  const t = store.time;
+  let prev = -Infinity, next = Infinity;
+  if (animated) for (const l of props.layers) for (const k of l.props[props.prop]?.kf ?? []) {
+    if (k.t < t - 1e-6 && k.t > prev) prev = k.t;
+    if (k.t > t + 1e-6 && k.t < next) next = k.t;
+  }
+  const label = PROP_DEFS[props.prop].label;
+  return (
+    <span class={'keynav' + (animated ? ' animated' : '')}>
+      <button type="button" tabIndex={-1} class="keynav-step" disabled={!animated || prev === -Infinity} aria-label={`Previous ${label} keyframe`} title="Previous keyframe" onClick={() => store.setTime(prev)}><ChevronLeft size={12} /></button>
+      <KeyButton layers={props.layers} prop={props.prop} />
+      <button type="button" tabIndex={-1} class="keynav-step" disabled={!animated || next === Infinity} aria-label={`Next ${label} keyframe`} title="Next keyframe" onClick={() => store.setTime(next)}><ChevronRight size={12} /></button>
+    </span>
+  );
+}
+
+/** one animatable property: key navigation, its name, its value fields */
+function PropRow(props: { layers: Layer[]; prop: PropKey; label: string; children: any }) {
+  const animated = props.layers.some(l => isAnimated(l, props.prop));
+  return (
+    <div class={'row prop-row' + (animated ? ' animated' : '')}>
+      <KeyNav layers={props.layers} prop={props.prop} />
+      <span class="prop-label">{props.label}</span>
+      <span class="prop-fields">{props.children}</span>
+    </div>
   );
 }
 
@@ -124,39 +155,43 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
   });
   return (
     <>
-      <AlignBar ids={ids} />
-      {layers.length === 1 && <ComponentBox layer={l} />}
-      <Section title="Transform" right={layers.length > 1 ? <span class="insp-type">{layers.length} layers</span> : undefined}>
-        <div class="row">
-          <KeyButton layers={layers} prop="position" />
+      <Section title="Transform" right={layers.length > 1 ? <span class="insp-type">{layers.length} layers</span> : <span class="insp-type">at {store.time.toFixed(2)}s</span>}>
+        <PropRow layers={layers} prop="position" label="Position">
           <NumField label="X" value={pos[0]} onChange={(n, mk) => vecMulti('position', 0, n, mk)} />
           <NumField label="Y" value={pos[1]} onChange={(n, mk) => vecMulti('position', 1, n, mk)} />
-        </div>
+        </PropRow>
+        <PropRow layers={layers} prop="scale" label="Scale">
+          <NumField label="X" title="Scale X" value={scale[0]} suffix="%" onChange={(n, mk) => vecMulti('scale', 0, n, mk)} />
+          <NumField label="Y" title="Scale Y" value={scale[1]} suffix="%" onChange={(n, mk) => vecMulti('scale', 1, n, mk)} />
+        </PropRow>
+        <PropRow layers={layers} prop="rotation" label="Rotation">
+          <NumField label={<RotateCw size={12} />} title="Rotation" value={rot} suffix="°" onChange={(n, mk) => set('rotation', [n], mk)} />
+        </PropRow>
+        <PropRow layers={layers} prop="opacity" label="Opacity">
+          <NumField label={<Blend size={12} />} title="Opacity" value={opa} min={0} max={100} suffix="%" onChange={(n, mk) => set('opacity', [n], mk)} />
+        </PropRow>
+        {sharedLink(layers, 'opacity') && <div class="row"><LinkedChip layers={layers} prop="opacity" /></div>}
         {common.includes('size') && (
-          <div class="row">
-            <KeyButton layers={layers} prop="size" />
+          <PropRow layers={layers} prop="size" label="Size">
             <NumField label="W" min={0} value={size[0]} onChange={(n, mk) => sizeChange(layers, 0, n, mk)} />
             <NumField label="H" min={0} value={size[1]} onChange={(n, mk) => sizeChange(layers, 1, n, mk)} />
-          </div>
+          </PropRow>
         )}
+        <PropRow layers={layers} prop="anchor" label="Anchor">
+          <NumField label="X" title="Anchor X" value={anchor[0]} onChange={(n, mk) => vec('anchor', 0, n, anchor, mk)} />
+          <NumField label="Y" title="Anchor Y" value={anchor[1]} onChange={(n, mk) => vec('anchor', 1, n, anchor, mk)} />
+        </PropRow>
+      </Section>
+      <AnimatePanel ids={ids} />
+      <RhythmPanel ids={ids} />
+      <Section title="Timing">
         <div class="row">
-          <KeyButton layers={layers} prop="scale" />
-          <NumField label="SX" value={scale[0]} suffix="%" onChange={(n, mk) => vecMulti('scale', 0, n, mk)} />
-          <NumField label="SY" value={scale[1]} suffix="%" onChange={(n, mk) => vecMulti('scale', 1, n, mk)} />
-        </div>
-        <div class="row">
-          <KeyButton layers={layers} prop="rotation" />
-          <NumField label={<RotateCw size={12} />} title="Rotation" value={rot} suffix="°" onChange={(n, mk) => set('rotation', [n], mk)} />
-          <KeyButton layers={layers} prop="opacity" />
-          <NumField label={<Blend size={12} />} title="Opacity" value={opa} min={0} max={100} suffix="%" onChange={(n, mk) => set('opacity', [n], mk)} />
-        </div>
-        {sharedLink(layers, 'opacity') && <div class="row"><LinkedChip layers={layers} prop="opacity" /></div>}
-        <div class="row">
-          <KeyButton layers={layers} prop="anchor" />
-          <NumField label="AX" title="Anchor X" value={anchor[0]} onChange={(n, mk) => vec('anchor', 0, n, anchor, mk)} />
-          <NumField label="AY" title="Anchor Y" value={anchor[1]} onChange={(n, mk) => vec('anchor', 1, n, anchor, mk)} />
+          <NumField label="In" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
+          <NumField label="Out" step={1 / store.comp.fps} min={0} value={Math.min(l.outPoint, store.comp.duration)} suffix="s" onChange={n => setLayerField(store, ids, 'outPoint', n >= store.comp.duration ? 1e9 : n)} />
         </div>
       </Section>
+      <ExprPanel layers={layers} />
+      {layers.length === 1 && <ComponentBox layer={l} />}
       {common.includes('radius') && (
         <Section title="Corner radius">
           <div class="row">
@@ -240,14 +275,8 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
           <Checkbox checked={!!l.mask} onChange={v => setLayerField(store, ids, 'mask', v, 'Use as mask')}>Use as mask (masks the layers above it in the same group)</Checkbox>
         </Section>
       )}
-      <AnimatePanel ids={ids} />
-      <RhythmPanel ids={ids} />
-      <ExprPanel layers={layers} />
-      <Section title="Timing">
-        <div class="row">
-          <NumField label="In" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
-          <NumField label="Out" step={1 / store.comp.fps} min={0} value={Math.min(l.outPoint, store.comp.duration)} suffix="s" onChange={n => setLayerField(store, ids, 'outPoint', n >= store.comp.duration ? 1e9 : n)} />
-        </div>
+      <Section title="Arrange">
+        <AlignBar ids={ids} />
       </Section>
     </>
   );
@@ -412,13 +441,6 @@ function DocPanel() {
   const [scale, setScale] = useState(() => { try { return localStorage.getItem('motion.export.scale') || '1'; } catch { return '1'; } });
   const [format, setFormat] = useState(() => { try { return localStorage.getItem('motion.export.format') || 'video'; } catch { return 'video'; } });
   const remember = (k: string, v: string) => { try { localStorage.setItem('motion.export.' + k, v); } catch { /* */ } };
-  const items = Object.values(store.project.tokens?.items ?? {});
-  const colors = items.filter(t => t.type === 'color').length;
-  const numbers = items.filter(t => t.type === 'number').length;
-  const comps = Object.keys(store.project.components ?? {}).length;
-  // walks every layer: only when the file has styles at all
-  let linked = 0;
-  if (items.length) for (const u of tokenUsage(store.project).values()) linked += u.props;
   const run = () => {
     if (format === 'video') import('./ExportDialog').then(m => m.openExportDialog());
     else if (format === 'gif') exportGifFile().catch(() => {});
@@ -441,12 +463,6 @@ function DocPanel() {
       </Section>
       <Section title="Background">
         <div class="row"><ColorField value={c.background} onChange={col => setCompSettings(store, { background: col as any })} /></div>
-      </Section>
-      <Section title="Styles and variables">
-        <button type="button" class="list-row" onClick={() => openLeft('library')}><Hexagon /><span class="grow">Numbers</span><span class="count">{numbers}</span></button>
-        <button type="button" class="list-row" onClick={() => openLeft('library')}><SwatchBook /><span class="grow">Color styles</span><span class="count">{colors}</span></button>
-        <button type="button" class="list-row" onClick={() => openLeft('components')}><ComponentIcon /><span class="grow">Components</span><span class="count">{comps}</span></button>
-        {items.length > 0 && <div class="muted small list-foot">{linked ? `${linked} linked use${linked === 1 ? '' : 's'} in this file` : 'Not used by any layer yet'}<ChevronRight size={12} /></div>}
       </Section>
       <Section title="Export">
         <div class="row">

@@ -222,6 +222,15 @@ export class Timeline {
     this.baseDirty = true;
   }
 
+  /** zoom the time scale by f around the playhead (transport − / +) */
+  zoomTime(f: number) {
+    const t = this.ed.store.time;
+    const x = Math.min(Math.max(this.tToX(t), this.leftW + 12), this.w - 20);
+    this.pxPerSec = Math.max(5, Math.min(5000, this.pxPerSec * f));
+    this.scrollT = Math.max(0, t - (x - this.leftW - 12) / this.pxPerSec);
+    this.baseDirty = true;
+  }
+
   // ---------- geometry ----------
   tToX(t: number) { return this.leftW + 12 + (t - this.scrollT) * this.pxPerSec; }
   xToT(x: number) { return (x - this.leftW - 12) / this.pxPerSec + this.scrollT; }
