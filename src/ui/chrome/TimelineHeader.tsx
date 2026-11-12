@@ -179,7 +179,7 @@ function TrackTools() {
         onClick={() => { editMode.autoKey = !editMode.autoKey; editor.emit('view'); }}>
         <span class="rec-dot" aria-hidden="true" /><span class="tt-label">Auto-key</span>
       </button>
-      <Segmented class="tt-mode" size="sm" label="Track view" value={tl?.mode ?? 'keys'} options={[{ value: 'keys', label: 'Keys' }, { value: 'graph', label: 'Graph', title: 'Value curves' }, { value: 'speed', label: 'Speed', title: 'Speed curves' }]}
+      <Segmented class="tt-mode" size="sm" label="Track view" value={tl?.mode ?? 'keys'} options={[{ value: 'keys', label: 'Keys' }, { value: 'graph', label: 'Graph', title: 'Value curves' }]}
         onChange={m => view.tl?.setMode(m as any)} />
       <input ref={zoom} type="range" class="tt-zoom slider" aria-label="Timeline zoom" title="Timeline zoom (⌘ wheel). Double-click: fit" min={0} max={4} step={0.01} defaultValue="0"
         onInput={e => view.tl?.setZoomLevel(Math.exp(+(e.target as HTMLInputElement).value))}

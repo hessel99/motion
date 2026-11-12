@@ -16,7 +16,7 @@ import { activeDoc, closeDoc, cycleDocs, documents, isDocDirty, newDocument, ope
 import { rememberRecent } from './recent';
 
 // importers are loaded lazily (keeps startup fast; missing modules are simply unavailable)
-const mods = import.meta.glob(['../import/figma/index.ts', '../import/svg.ts', '../import/lottie.ts', '../import/aep/index.ts', '../export/lottie.ts', '../export/aejsx.ts']);
+const mods = import.meta.glob(['../import/figma/index.ts', '../import/svg.ts', '../import/lottie.ts', '../import/aep/index.ts', '../export/lottie.ts']);
 async function mod(path: string): Promise<any | null> {
   const m = mods[path];
   return m ? m() : null;
@@ -222,7 +222,9 @@ export async function openData(name: string, data: string, path?: string) {
   const ext = name.split('.').pop()!.toLowerCase();
   try {
     if (ext === 'motion') {
-      const p = JSON.parse(data) as Project;
+      // older desktop shells hand .motion files over as base64: decode them as utf-8 json
+      const text = /^\s*[{[]/.test(data) ? data : new TextDecoder().decode(b64ToBuf(data.trim()));
+      const p = JSON.parse(text) as Project;
       if (!p.comps || !p.layers) throw new Error('not a motion project');
       p.name ||= name.replace(/\.motion$/i, '');
       openProject(p, path ?? null);
@@ -313,15 +315,6 @@ export async function exportFramePng(scale = 1) {
   const blob = await (await fetch(url)).blob();
   const frame = Math.round(s.time * c.fps);
   download(`${s.project.name || 'frame'}_${String(frame).padStart(4, '0')}.png`, blob, 'image/png');
-}
-
-/** extendscript that rebuilds the active comp in after effects (File > Scripts > Run Script File) */
-export async function exportAeScript() {
-  const m = await mod('../export/aejsx.ts');
-  if (!m) { toast('After Effects export not available', 'error'); return; }
-  download((st().project.name || 'animation') + '.jsx', m.projectToAeScript(st().project), 'text/javascript');
-  const hasAudio = Object.values(st().project.layers).some(l => l.type === 'audio');
-  toast('In After Effects: File › Scripts › Run Script File…' + (hasAudio ? ' (audio layers are not included)' : ''));
 }
 
 // ---------------- inserting layers (paste / import) ----------------
@@ -781,7 +774,6 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     else if (cmd === 'save') saveProject(false);
     else if (cmd === 'saveAs') saveProject(true);
     else if (cmd === 'export-lottie') exportLottie();
-    else if (cmd === 'export-ae') exportAeScript();
     else if (cmd === 'selectAll') {
       const a = document.activeElement as HTMLElement | null;
       if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) (a as HTMLInputElement).select();

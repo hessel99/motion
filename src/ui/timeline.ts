@@ -253,11 +253,10 @@ export class Timeline {
     this.baseDirty = true;
   }
 
-  /** what the track area shows: keyframes, value curves or speed curves */
-  get mode(): 'keys' | 'graph' | 'speed' { return !this.graphMode ? 'keys' : this.graph.speed ? 'speed' : 'graph'; }
-  setMode(m: 'keys' | 'graph' | 'speed') {
-    this.graphMode = m !== 'keys';
-    this.graph.speed = m === 'speed';
+  /** what the track area shows: keyframes or value curves */
+  get mode(): 'keys' | 'graph' { return this.graphMode ? 'graph' : 'keys'; }
+  setMode(m: 'keys' | 'graph') {
+    this.graphMode = m === 'graph';
     this.baseDirty = true;
     this.ed.emit('tlmode');
   }
@@ -487,7 +486,7 @@ export class Timeline {
     g.fillStyle = T.tlDivider;
     g.fillRect(0, HEADER_H - 1, this.w, 1);
     this.drawRuler(g);
-    // (keys / graph / speed is a segmented control in the timeline header: TimelineHeader.tsx)
+    // (keys / graph is a segmented control in the timeline header: TimelineHeader.tsx)
 
     // scrollbars
     const vs = this.vScroll(), hs = this.hScroll();

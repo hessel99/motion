@@ -24,8 +24,6 @@ export class GraphView {
   private curves: Curve[] = [];
   private drag: GDrag = null;
   private area: GraphArea | null = null;
-  /** speed graph (after effects): |d value / dt| per property instead of values */
-  speed = false;
 
   constructor(private store: Store) {}
 
@@ -107,32 +105,6 @@ export class GraphView {
       const dimN = c.key.startsWith('sh:') ? p.v.length : propDef(c.key).dim;
       const tr = new Track(p, dimN, c.key === 'position');
       const arr = new Float64Array(steps + 1);
-      if (this.speed) {
-        // one speed curve per property (vector speed), drawn on the "handles" dimension only
-        if (!c.handles) { arr.fill(NaN); samples.push(arr); continue; }
-        const dt = (t1 - t0) / steps;
-        const prev = new Float64Array(4);
-        tr.eval(t0 - dt, prev, 0);
-        let cmax = -Infinity;
-        for (let s = 0; s <= steps; s++) {
-          tr.eval(t0 + (t1 - t0) * (s / steps), tmp, 0);
-          let d2 = 0;
-          for (let d = 0; d < Math.min(dimN, 3); d++) d2 += (tmp[d] - prev[d]) ** 2;
-          arr[s] = Math.sqrt(d2) / dt;
-          prev.set(tmp);
-          if (arr[s] < lo) lo = arr[s];
-          if (arr[s] > cmax) cmax = arr[s];
-        }
-        lo = Math.min(lo, 0);
-        // hold keys make near-infinite one-sample spikes. per curve: when the peak is far above
-        // the 98th percentile it is such a spike, so scale to the percentile instead
-        const sorted = Array.from(arr).sort((x, y) => x - y);
-        const p98 = sorted[Math.floor(sorted.length * 0.98)];
-        if (p98 > 0 && cmax > p98 * 8) cmax = p98 * 1.15;
-        if (cmax > hi) hi = cmax;
-        samples.push(arr);
-        continue;
-      }
       for (let s = 0; s <= steps; s++) {
         tr.eval(t0 + (t1 - t0) * (s / steps), tmp, 0);
         arr[s] = tmp[c.dim];
@@ -160,10 +132,6 @@ export class GraphView {
       g.fillText(fmt(v), area.x0 + 4, y - 6);
     }
     // curves
-    if (this.speed) {
-      g.fillStyle = T.graphLabel;
-      g.fillText('speed (units / s)', area.x1 - 110, area.y0 + 12);
-    }
     curves.forEach((c, ci) => {
       const arr = samples[ci];
       if (Number.isNaN(arr[0])) return;
@@ -179,13 +147,6 @@ export class GraphView {
     });
     // keyframes + handles
     const st = this.store;
-    if (this.speed) {
-      // keyframe times as ticks (speed mode is for reading the easing; edit in value mode)
-      g.fillStyle = T.graphKeyTick;
-      for (const c of curves) if (c.handles) for (const k of c.layer.props[c.key]!.kf!) g.fillRect(Math.round(area.tToX(k.t)), area.y1 - 10, 1, 10);
-      g.restore();
-      return;
-    }
     for (const c of curves) {
       const kf = c.layer.props[c.key]!.kf!;
       for (let i = 0; i < kf.length; i++) {
@@ -241,7 +202,7 @@ export class GraphView {
 
   /** returns true if the pointer event was handled */
   down(x: number, y: number, shift: boolean): boolean {
-    if (!this.area || this.speed) return false;
+    if (!this.area) return false;
     const st = this.store;
     // handles first (only visible on selected keys)
     for (const c of this.curves) {

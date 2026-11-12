@@ -11,14 +11,16 @@ export interface Prefs {
   snapToPixels: boolean;
   /** fewer animations in panels and menus (also follows the OS setting) */
   reduceMotion: boolean;
-  /** stub: short ui sounds (not wired to audio yet) */
-  interfaceSounds: boolean;
-  /** a sound when an agent run finishes (stub) */
-  agentSound: boolean;
 }
 
 const KEY = 'motion.prefs';
-const DEFAULTS: Prefs = { pixelGrid: true, snapToPixels: false, reduceMotion: false, interfaceSounds: false, agentSound: false };
+
+/** developer tools (performance HUD, stress scenes, pixel grid / snapping toggles): the dev server,
+ *  `?dev` in the url, or localStorage motion.dev = 1 */
+export const DEV: boolean = (() => {
+  try { return !!(import.meta as any).env?.DEV || new URLSearchParams(location.search).has('dev') || localStorage.getItem('motion.dev') === '1'; } catch { return false; }
+})();
+const DEFAULTS: Prefs = { pixelGrid: true, snapToPixels: false, reduceMotion: false };
 
 function load(): Prefs {
   try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { return { ...DEFAULTS }; }

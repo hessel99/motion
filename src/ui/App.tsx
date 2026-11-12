@@ -3,15 +3,15 @@ import { Component, type ComponentChildren } from 'preact';
 import { editor } from '../app/editor';
 import { ViewportController } from './viewport-controller';
 import { Timeline } from './timeline';
-import { SyncReview, STYLE_MIME, applyStyle } from './LibraryPanel';
+import { STYLE_MIME, applyStyle } from './LibraryPanel';
 import { useChannels } from './hooks';
-import { menuFrom, showContextMenu } from './menu';
+import { menuFrom, showContextMenu, type MenuItem } from './menu';
 import { agentMenuItems } from './agent-menu';
 import { AskBar } from './chrome/AskBar';
 import { EmptyCanvas, ImportSuggestion } from './chrome/CanvasAgent';
 import { SelectionBar, stopPreview } from './chrome/CanvasBars';
 import { openBrowserFile, setupShortcuts, runBenchmark, toast } from '../app/actions';
-import { prefs, setPref } from '../app/prefs';
+import { DEV, prefs, setPref } from '../app/prefs';
 import { cloneLayers, deleteLayers } from '../core/commands';
 import { Button, Dialog, Kbd } from './ui';
 import { IconProvider, X } from './chrome/icons';
@@ -75,7 +75,6 @@ export function App() {
         <aside class="right sidebar" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
         {home && <div class="home-host"><Guard name="Home"><Home /></Guard></div>}
         {ui.settingsOpen && <SettingsModal />}
-        <Guard name="Sync"><SyncReview /></Guard>
         <AskBar />
         <ShortcutHelp />
         <Welcome />
@@ -176,11 +175,13 @@ function ZoomBadge() {
       { label: 'Zoom to 100%', action: () => vp?.setZoom(1) },
       { label: 'Zoom in', shortcut: '⌘+', action: () => vp?.setZoom(vp.zoom * 1.25) },
       { label: 'Zoom out', shortcut: '⌘−', action: () => vp?.setZoom(vp.zoom / 1.25) },
+      ...(!DEV ? [] : [
       { separator: true },
       { label: 'Pixel grid (400% and above)', checked: prefs.pixelGrid, action: () => setPref('pixelGrid', !prefs.pixelGrid) },
       { label: 'Snap to pixel grid', checked: prefs.snapToPixels, action: () => setPref('snapToPixels', !prefs.snapToPixels) },
       { label: 'Play at composition fps', checked: editor.snapPlaybackToFrames, action: () => { editor.snapPlaybackToFrames = !editor.snapPlaybackToFrames; toast(editor.snapPlaybackToFrames ? 'Playback snaps to composition frames' : 'Playback is smooth (every display frame)'); } },
       { label: 'Performance HUD', checked: editor.showHud, action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
+      ] as MenuItem[]),
     ], { align: 'right', above: true });
   };
   return <button type="button" ref={el} class="zoom-badge" aria-haspopup="menu" data-tooltip="Zoom and view options" data-tooltip-side="top" onClick={menu}>100%</button>;
@@ -322,7 +323,7 @@ function Welcome() {
           <li><b>Paste from Figma</b>: select layers in Figma, ⌘C, then ⌘V here. A single frame becomes the composition.</li>
           <li><b>Animate</b>: click a property's keyframe diamond to add keyframes, or use <i>Animate</i> presets and <i>Text animation</i> in the right panel. Press F9 for easy ease.</li>
           <li><b>AI agent</b> (left panel, ⌘I): describe an animation and Claude Code builds it in your file, with your own subscription. One click undoes everything it did.</li>
-          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video, GIF, Lottie or After Effects from the Export button (top right, ⌘E).</li>
+          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video, GIF or Lottie from the Export button (top right, ⌘E).</li>
         </ol>
     </Dialog>
   );

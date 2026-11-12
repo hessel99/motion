@@ -8,7 +8,7 @@
 // decomposed (translate/rotate/scale) transform unless the matrix has skew, in which case
 // rect/ellipse are converted to baked paths.
 
-import { createLayer, uid, type Asset, type Layer, type Paint, type PathCmd, type PathGeometry } from '../core/model';
+import { createLayer, uid, type TextRun, type Asset, type Layer, type Paint, type PathCmd, type PathGeometry } from '../core/model';
 
 type Mat = [number, number, number, number, number, number]; // a b c d e f (x' = a x + c y + e)
 type Color = [number, number, number, number];
@@ -311,15 +311,8 @@ export function numList(s: string | undefined | null): number[] {
   return out;
 }
 
-const NAMED: Record<string, string> = {
-  black: '#000000', white: '#ffffff', red: '#ff0000', green: '#008000', lime: '#00ff00', blue: '#0000ff', yellow: '#ffff00',
-  cyan: '#00ffff', aqua: '#00ffff', magenta: '#ff00ff', fuchsia: '#ff00ff', gray: '#808080', grey: '#808080', silver: '#c0c0c0',
-  maroon: '#800000', olive: '#808000', navy: '#000080', purple: '#800080', teal: '#008080', orange: '#ffa500', pink: '#ffc0cb',
-  brown: '#a52a2a', gold: '#ffd700', indigo: '#4b0082', violet: '#ee82ee', darkgray: '#a9a9a9', darkgrey: '#a9a9a9',
-  lightgray: '#d3d3d3', lightgrey: '#d3d3d3', dimgray: '#696969', whitesmoke: '#f5f5f5', crimson: '#dc143c', coral: '#ff7f50',
-  tomato: '#ff6347', salmon: '#fa8072', tan: '#d2b48c', beige: '#f5f5dc', skyblue: '#87ceeb', steelblue: '#4682b4',
-  royalblue: '#4169e1', dodgerblue: '#1e90ff', darkblue: '#00008b', darkgreen: '#006400', darkred: '#8b0000', forestgreen: '#228b22',
-};
+/** the 148 css named colors */
+const NAMED: Record<string, string> = {aliceblue: '#f0f8ff', antiquewhite: '#faebd7', aqua: '#00ffff', aquamarine: '#7fffd4', azure: '#f0ffff', beige: '#f5f5dc', bisque: '#ffe4c4', black: '#000000', blanchedalmond: '#ffebcd', blue: '#0000ff', blueviolet: '#8a2be2', brown: '#a52a2a', burlywood: '#deb887', cadetblue: '#5f9ea0', chartreuse: '#7fff00', chocolate: '#d2691e', coral: '#ff7f50', cornflowerblue: '#6495ed', cornsilk: '#fff8dc', crimson: '#dc143c', cyan: '#00ffff', darkblue: '#00008b', darkcyan: '#008b8b', darkgoldenrod: '#b8860b', darkgray: '#a9a9a9', darkgreen: '#006400', darkgrey: '#a9a9a9', darkkhaki: '#bdb76b', darkmagenta: '#8b008b', darkolivegreen: '#556b2f', darkorange: '#ff8c00', darkorchid: '#9932cc', darkred: '#8b0000', darksalmon: '#e9967a', darkseagreen: '#8fbc8f', darkslateblue: '#483d8b', darkslategray: '#2f4f4f', darkslategrey: '#2f4f4f', darkturquoise: '#00ced1', darkviolet: '#9400d3', deeppink: '#ff1493', deepskyblue: '#00bfff', dimgray: '#696969', dimgrey: '#696969', dodgerblue: '#1e90ff', firebrick: '#b22222', floralwhite: '#fffaf0', forestgreen: '#228b22', fuchsia: '#ff00ff', gainsboro: '#dcdcdc', ghostwhite: '#f8f8ff', gold: '#ffd700', goldenrod: '#daa520', gray: '#808080', green: '#008000', greenyellow: '#adff2f', grey: '#808080', honeydew: '#f0fff0', hotpink: '#ff69b4', indianred: '#cd5c5c', indigo: '#4b0082', ivory: '#fffff0', khaki: '#f0e68c', lavender: '#e6e6fa', lavenderblush: '#fff0f5', lawngreen: '#7cfc00', lemonchiffon: '#fffacd', lightblue: '#add8e6', lightcoral: '#f08080', lightcyan: '#e0ffff', lightgoldenrodyellow: '#fafad2', lightgray: '#d3d3d3', lightgreen: '#90ee90', lightgrey: '#d3d3d3', lightpink: '#ffb6c1', lightsalmon: '#ffa07a', lightseagreen: '#20b2aa', lightskyblue: '#87cefa', lightslategray: '#778899', lightslategrey: '#778899', lightsteelblue: '#b0c4de', lightyellow: '#ffffe0', lime: '#00ff00', limegreen: '#32cd32', linen: '#faf0e6', magenta: '#ff00ff', maroon: '#800000', mediumaquamarine: '#66cdaa', mediumblue: '#0000cd', mediumorchid: '#ba55d3', mediumpurple: '#9370db', mediumseagreen: '#3cb371', mediumslateblue: '#7b68ee', mediumspringgreen: '#00fa9a', mediumturquoise: '#48d1cc', mediumvioletred: '#c71585', midnightblue: '#191970', mintcream: '#f5fffa', mistyrose: '#ffe4e1', moccasin: '#ffe4b5', navajowhite: '#ffdead', navy: '#000080', oldlace: '#fdf5e6', olive: '#808000', olivedrab: '#6b8e23', orange: '#ffa500', orangered: '#ff4500', orchid: '#da70d6', palegoldenrod: '#eee8aa', palegreen: '#98fb98', paleturquoise: '#afeeee', palevioletred: '#db7093', papayawhip: '#ffefd5', peachpuff: '#ffdab9', peru: '#cd853f', pink: '#ffc0cb', plum: '#dda0dd', powderblue: '#b0e0e6', purple: '#800080', rebeccapurple: '#663399', red: '#ff0000', rosybrown: '#bc8f8f', royalblue: '#4169e1', saddlebrown: '#8b4513', salmon: '#fa8072', sandybrown: '#f4a460', seagreen: '#2e8b57', seashell: '#fff5ee', sienna: '#a0522d', silver: '#c0c0c0', skyblue: '#87ceeb', slateblue: '#6a5acd', slategray: '#708090', slategrey: '#708090', snow: '#fffafa', springgreen: '#00ff7f', steelblue: '#4682b4', tan: '#d2b48c', teal: '#008080', thistle: '#d8bfd8', tomato: '#ff6347', turquoise: '#40e0d0', violet: '#ee82ee', wheat: '#f5deb3', white: '#ffffff', whitesmoke: '#f5f5f5', yellow: '#ffff00', yellowgreen: '#9acd32'};
 
 /** parse a css color. returns null for none/transparent/unknown/url(...) */
 export function parseColor(s: string | undefined | null): Color | null {
@@ -470,11 +463,13 @@ interface Style {
   stroke: string; strokeOpacity: number; strokeWidth: number;
   fontFamily: string; fontSize: number; fontWeight: string; fontStyle: string; textAnchor: string; letterSpacing: number;
   visibility: string; color: string;
+  dash: number[] | null; dashOffset: number; cap: string; join: string; miter: number;
 }
 const DEFAULT_STYLE: Style = {
   fill: 'black', fillOpacity: 1, fillRule: 'nonzero', stroke: 'none', strokeOpacity: 1, strokeWidth: 1,
   fontFamily: 'Inter', fontSize: 16, fontWeight: '400', fontStyle: 'normal', textAnchor: 'start', letterSpacing: 0,
   visibility: 'visible', color: 'black',
+  dash: null, dashOffset: 0, cap: 'butt', join: 'miter', miter: 4,
 };
 const SKIP_TAGS = new Set(['defs', 'clipPath', 'mask', 'symbol', 'pattern', 'marker', 'title', 'desc', 'metadata', 'style', 'script', 'linearGradient', 'radialGradient', 'filter', 'foreignObject']);
 
@@ -525,12 +520,15 @@ class SvgConverter {
   private classRules = new Map<string, Record<string, string>>();
   private vw = 0;
   private vh = 0;
+  private nonScaling = false;
+  private parents = new Map<XmlNode, XmlNode>();
+  private rules: { sel: string; decl: Record<string, string>; imp: Record<string, string>; spec: number; order: number }[] = [];
 
   constructor(private root: XmlNode) {
     const walk = (n: XmlNode) => {
       if (n.attrs.id) this.ids.set(n.attrs.id, n);
       if (localName(n.tag) === 'style') this.parseCss(n.text);
-      for (const c of n.children) walk(c);
+      for (const c of n.children) { this.parents.set(c, n); walk(c); }
     };
     walk(root);
   }
@@ -540,24 +538,59 @@ class SvgConverter {
     const re = /([^{}]+)\{([^}]*)\}/g;
     let m: RegExpExecArray | null;
     while ((m = re.exec(css))) {
-      const decl: Record<string, string> = {};
-      parseStyleAttr(m[2], decl);
+      const decl: Record<string, string> = {}, imp: Record<string, string> = {};
+      for (const d of m[2].split(';')) {
+        const k = d.indexOf(':');
+        if (k < 0) continue;
+        const name = d.slice(0, k).trim().toLowerCase(), raw = d.slice(k + 1);
+        if (!name) continue;
+        if (/!important/i.test(raw)) imp[name] = raw.replace(/!important/i, '').trim(); else decl[name] = raw.trim();
+      }
       for (const sel of m[1].split(',')) {
-        const s = sel.trim();
-        if (/^\.[\w-]+$/.test(s)) {
-          const k = s.slice(1);
-          this.classRules.set(k, { ...(this.classRules.get(k) ?? {}), ...decl });
-        }
+        const s = sel.trim().replace(/\s*>\s*/g, ' > ');
+        if (!s || /[:\[*+~]/.test(s)) continue; // pseudo classes, attributes, siblings: not supported
+        let spec = 0;
+        for (const part of s.split(/\s+/)) { if (part === '>') continue; spec += (part.match(/#/g)?.length ?? 0) * 100 + (part.match(/\./g)?.length ?? 0) * 10 + (/^[a-zA-Z]/.test(part) ? 1 : 0); }
+        this.rules.push({ sel: s, decl, imp, spec, order: this.rules.length });
       }
     }
   }
 
-  /** presentation attrs < class rules < style attr */
+  /** one compound selector (tag, .class, #id, combined) */
+  private matchOne(n: XmlNode, part: string): boolean {
+    const m = /^([a-zA-Z][\w-]*)?((?:[.#][\w-]+)*)$/.exec(part);
+    if (!m) return false;
+    if (m[1] && localName(n.tag) !== m[1]) return false;
+    const cls = (n.attrs.class ?? '').split(/\s+/);
+    for (const t of m[2].match(/[.#][\w-]+/g) ?? []) {
+      if (t[0] === '#' ? n.attrs.id !== t.slice(1) : !cls.includes(t.slice(1))) return false;
+    }
+    return true;
+  }
+  /** descendant (space) and child (>) combinators, right to left */
+  private matches(n: XmlNode, sel: string): boolean {
+    const parts = sel.split(/\s+/);
+    if (!this.matchOne(n, parts[parts.length - 1])) return false;
+    let cur: XmlNode | undefined = n;
+    for (let k = parts.length - 2; k >= 0; k--) {
+      if (parts[k] === '>') { cur = cur && this.parents.get(cur); if (!cur || !this.matchOne(cur, parts[--k])) return false; continue; }
+      let found = false;
+      for (cur = cur && this.parents.get(cur); cur; cur = this.parents.get(cur)) if (this.matchOne(cur, parts[k])) { found = true; break; }
+      if (!found) return false;
+    }
+    return true;
+  }
+
+  /** presentation attrs < css rules (by specificity) < style attr < !important rules */
   private props(n: XmlNode): Record<string, string> {
     const p: Record<string, string> = {};
     for (const k in n.attrs) p[k] = n.attrs[k];
-    if (n.attrs.class) for (const c of n.attrs.class.split(/\s+/)) { const r = this.classRules.get(c); if (r) Object.assign(p, r); }
-    parseStyleAttr(n.attrs.style, p);
+    if (this.rules.length) {
+      const hits = this.rules.filter(r => this.matches(n, r.sel)).sort((a, b) => a.spec - b.spec || a.order - b.order);
+      for (const r of hits) Object.assign(p, r.decl);
+      parseStyleAttr(n.attrs.style, p);
+      for (const r of hits) Object.assign(p, r.imp);
+    } else parseStyleAttr(n.attrs.style, p);
     return p;
   }
 
@@ -577,6 +610,11 @@ class SvgConverter {
     if (p['text-anchor']) s.textAnchor = p['text-anchor'];
     if (p['letter-spacing']) s.letterSpacing = len(p['letter-spacing'], 0, 0);
     if (p.visibility) s.visibility = p.visibility;
+    if (p['stroke-dasharray']) { const d = numList(p['stroke-dasharray']); s.dash = d.length && d.some(x => x > 0) && p['stroke-dasharray'] !== 'none' ? d : null; }
+    if (p['stroke-dashoffset']) s.dashOffset = len(p['stroke-dashoffset'], 0, 0);
+    if (p['stroke-linecap']) s.cap = p['stroke-linecap'];
+    if (p['stroke-linejoin']) s.join = p['stroke-linejoin'];
+    if (p['stroke-miterlimit']) s.miter = parseFloat(p['stroke-miterlimit']) || 4;
     return s;
   }
 
@@ -623,12 +661,30 @@ class SvgConverter {
     if (p.display === 'none') return;
     const style = this.inherit(ps, p);
     const own = parseTransform(p.transform);
+    this.nonScaling = p['vector-effect'] === 'non-scaling-stroke';
     const opacity = p.opacity != null ? clamp01(parseFloat(p.opacity)) : 1;
     let layer: Layer | null = null;
     switch (tag) {
-      case 'g': case 'svg': case 'a': case 'switch': {
+      case 'svg': {
+        // nested viewport: x / y / width / height, its viewBox + preserveAspectRatio, clipped (overflow hidden by default)
+        const x = len(p.x, this.vw), y = len(p.y, this.vh), w = len(p.width, this.vw, this.vw), h = len(p.height, this.vh, this.vh);
+        const vb = numList(p.viewBox);
+        const g = createLayer('group', { w, h });
+        g.name = p.id || 'svg';
+        g.props.fill!.v = [1, 1, 1, 0]; g.props.strokeWidth!.v = [0];
+        g.clip = (p.overflow ?? 'hidden') === 'hidden' || p.overflow === 'clip';
+        this.setTransform(g, mul(pending, own), x, y, w, h);
+        g.props.opacity!.v = [opacity * 100];
+        this.add(g, this.clipHost(p, parent, mul(pending, own)));
+        const inner = vb.length === 4 && vb[2] > 0 && vb[3] > 0 ? viewBoxMatrix(vb, w, h, p.preserveAspectRatio) : I;
+        const pvw = this.vw, pvh = this.vh;
+        if (vb.length === 4) { this.vw = vb[2]; this.vh = vb[3]; }
+        for (const c of n.children) this.node(c, g, inner, style, depth + 1);
+        this.vw = pvw; this.vh = pvh;
+        return;
+      }
+      case 'g': case 'a': case 'switch': {
         let m = mul(pending, own);
-        if (tag === 'svg') m = mul(m, [1, 0, 0, 1, len(p.x, this.vw), len(p.y, this.vh)]);
         const dc = decompose(m);
         const g = createLayer('group', { w: 0, h: 0 });
         g.name = p.id || tag;
@@ -639,7 +695,8 @@ class SvgConverter {
         if (dc.skew) childM = m; // can't express skew on a group: push it down to the leaves
         else this.setTransform(g, m, 0, 0, 0, 0);
         g.props.opacity!.v = [opacity * 100];
-        this.add(g, parent);
+        this.filter(g, p);
+        this.add(g, this.clipHost(p, parent, m));
         for (const c of n.children) this.node(c, g, childM, style, depth + 1);
         return;
       }
@@ -649,8 +706,15 @@ class SvgConverter {
         if (!ref || ref === n) return;
         const m = mul(mul(pending, own), [1, 0, 0, 1, len(p.x, this.vw), len(p.y, this.vh)]);
         const wrapper: XmlNode = { tag: 'g', attrs: { opacity: p.opacity ?? '1' }, children: [], text: '', parts: [] };
-        // render the referenced element (symbols render their children)
-        const target: XmlNode = localName(ref.tag) === 'symbol' ? { ...ref, tag: 'g', attrs: { ...ref.attrs, id: '' } } : ref;
+        // render the referenced element (symbols render their children, in their viewBox scaled to the use's size)
+        let target: XmlNode = ref;
+        if (localName(ref.tag) === 'symbol') {
+          const vb = numList(ref.attrs.viewBox);
+          const sw = len(p.width ?? ref.attrs.width, this.vw, vb[2] ?? 0), sh = len(p.height ?? ref.attrs.height, this.vh, vb[3] ?? 0);
+          const vm = vb.length === 4 && vb[2] > 0 && vb[3] > 0 && sw > 0 && sh > 0 ? viewBoxMatrix(vb, sw, sh, ref.attrs.preserveAspectRatio) : I;
+          const [a, b, c2, d, e, f] = vm;
+          target = { ...ref, tag: 'g', attrs: { ...ref.attrs, id: '', transform: `matrix(${a} ${b} ${c2} ${d} ${e} ${f})` } };
+        }
         wrapper.children.push(target);
         this.node(wrapper, parent, m, style, depth + 1);
         return;
@@ -704,7 +768,80 @@ class SvgConverter {
     if (p.id) layer.name = p.id;
     layer.props.opacity!.v = [opacity * 100];
     if (style.visibility === 'hidden') layer.visible = false;
-    this.add(layer, parent);
+    this.filter(layer, p);
+    // paint-order: stroke drawn below the fill -> a stroke-only copy under the fill-only layer
+    if (/^\s*stroke/.test(p['paint-order'] ?? '') && layer.props.strokeWidth?.v[0] && (layer.props.fill?.v[3] ?? 0) > 0) {
+      const under: Layer = JSON.parse(JSON.stringify(layer));
+      under.id = uid(); under.props.fill!.v = [0, 0, 0, 0]; delete under.paints;
+      layer.props.strokeWidth!.v = [0];
+      const host = this.clipHost(p, parent, mul(pending, own));
+      this.add(under, host); this.add(layer, host);
+      return;
+    }
+    this.add(layer, this.clipHost(p, parent, mul(pending, own)));
+  }
+
+  /** clip-path / mask on an element: a group holding the mask (a figma-style mask layer) + the element */
+  private clipHost(p: Record<string, string>, parent: Layer, m: Mat, bbox?: number[]): Layer {
+    const ref = (v: string | undefined) => { const u = /url\(\s*['"]?#([^'")\s]+)/.exec(v ?? ''); return u ? this.ids.get(u[1]) : undefined; };
+    const cp = ref(p['clip-path']), mk = ref(p.mask);
+    if (!cp && !mk) return parent;
+    let host = parent;
+    for (const [def, kind] of [[cp, 'vector'], [mk, 'luminance']] as [XmlNode | undefined, 'vector' | 'luminance'][]) {
+      if (!def) continue;
+      // a clipPath clipped itself: both masks apply (nested hosts intersect)
+      if (def.attrs['clip-path'] && def.attrs['clip-path'] !== p['clip-path']) host = this.clipHost({ 'clip-path': def.attrs['clip-path'] }, host, m);
+      const g = createLayer('group', { w: 0, h: 0 });
+      g.name = kind === 'vector' ? 'clip-path' : 'mask';
+      g.props.fill!.v = [1, 1, 1, 0]; g.props.strokeWidth!.v = [0]; g.clip = false;
+      this.add(g, host);
+      const mg = createLayer('group', { w: 0, h: 0 });
+      mg.name = (def.attrs.id ?? kind) + ' (mask)';
+      mg.props.fill!.v = [1, 1, 1, 0]; mg.props.strokeWidth!.v = [0]; mg.clip = false;
+      mg.mask = true; mg.maskType = kind;
+      this.add(mg, g);
+      const units = kind === 'vector' ? def.attrs.clipPathUnits : def.attrs.maskContentUnits;
+      let mm = m;
+      if (units === 'objectBoundingBox') {
+        const b = bbox ?? this.bboxOf(p);
+        if (b) mm = mul(m, [b[2], 0, 0, b[3], b[0], b[1]]);
+      }
+      const st = this.inherit(DEFAULT_STYLE, kind === 'vector' ? { fill: 'black' } : {});
+      for (const c of def.children) this.node(c, mg, mm, st, 1);
+      host = g;
+    }
+    return host;
+  }
+
+  /** user-space bbox of a basic shape from its attributes (objectBoundingBox units) */
+  private bboxOf(p: Record<string, string>): number[] | null {
+    if (p.width != null && p.height != null) return [len(p.x, this.vw), len(p.y, this.vh), len(p.width, this.vw), len(p.height, this.vh)];
+    if (p.r != null) { const r = len(p.r, this.vw); return [len(p.cx, this.vw) - r, len(p.cy, this.vh) - r, 2 * r, 2 * r]; }
+    if (p.rx != null && p.ry != null) { const rx = len(p.rx, this.vw), ry = len(p.ry, this.vh); return [len(p.cx, this.vw) - rx, len(p.cy, this.vh) - ry, 2 * rx, 2 * ry]; }
+    if (p.d) { const b = cmdsBounds(parsePathD(p.d)); return b; }
+    if (p.points) { const a = numList(p.points); const xs = a.filter((_, k) => k % 2 === 0), ys = a.filter((_, k) => k % 2 === 1); return [Math.min(...xs), Math.min(...ys), Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)]; }
+    return null;
+  }
+
+  /** filter="url(#f)": gaussian blur -> layer blur, drop shadow -> shadow props (figma radius = 2 sigma) */
+  private filter(l: Layer, p: Record<string, string>) {
+    const u = /url\(\s*['"]?#([^'")\s]+)/.exec(p.filter ?? '');
+    const f = u ? this.ids.get(u[1]) : undefined;
+    if (!f) return;
+    for (const c of f.children) {
+      const t = localName(c.tag), a = this.props(c);
+      const sd = numList(a.stdDeviation)[0] ?? 0;
+      if (t === 'feGaussianBlur' && sd > 0) l.props.blur = { v: [sd * 2] };
+      if (t === 'feDropShadow') {
+        const col = parseColor(a['flood-color'] ?? 'black') ?? [0, 0, 0, 1];
+        const op = a['flood-opacity'] != null ? parseFloat(a['flood-opacity']) : 1;
+        l.props.shadowColor = { v: [col[0], col[1], col[2], col[3] * op] };
+        l.props.shadowOffset = { v: [parseFloat(a.dx ?? '2') || 0, parseFloat(a.dy ?? '2') || 0] };
+        l.props.shadowBlur = { v: [sd * 2] };
+        l.props.shadowSpread = { v: [0] };
+        l.effects = [{ type: 'dropShadow', showBehind: true }];
+      }
+    }
   }
 
   private add(l: Layer, parent: Layer) {
@@ -723,7 +860,7 @@ class SvgConverter {
   }
 
   private shape(type: 'rect' | 'ellipse', x: number, y: number, w: number, h: number, m: Mat, st: Style, fallback: PathCmd[]): Layer | null {
-    if (decompose(m).skew) return this.path(fallback, m, st);
+    if (decompose(m).skew || this.nonScaling) return this.path(fallback, m, st);
     const l = createLayer(type, { w, h });
     this.setTransform(l, m, x, y, w, h);
     // local box space (top-left origin) -> element user space
@@ -744,7 +881,7 @@ class SvgConverter {
     // geometry space -> element user space = inv(m) · translate(bx,by)
     this.applyPaint(l, st, mul(invert(m), [1, 0, 0, 1, bx, by]), w, h, local);
     const det = Math.abs(m[0] * m[3] - m[1] * m[2]);
-    this.applyStroke(l, st, Math.sqrt(det));
+    this.applyStroke(l, st, this.nonScaling ? 1 : Math.sqrt(det));
     return l;
   }
 
@@ -757,6 +894,8 @@ class SvgConverter {
     const fill = st.fill;
     const url = /^url\(\s*['"]?#([^'")\s]+)['"]?\s*\)/.exec(fill ?? '');
     if (url) {
+      const pat = this.pattern(url[1], boxToUser, bbox, st.fillOpacity);
+      if (pat) { l.paints = [pat]; l.props.fill!.v = [0.5, 0.5, 0.5, 1]; return; }
       const paint = this.gradient(url[1], boxToUser, w, h, bbox, st.fillOpacity);
       if (paint) {
         l.paints = [paint];
@@ -770,6 +909,29 @@ class SvgConverter {
     }
     const c = parseColor(fill);
     l.props.fill!.v = c ? [c[0], c[1], c[2], c[3] * st.fillOpacity] : [0, 0, 0, 0];
+  }
+
+  /** <pattern>: its tile as an svg image, repeated (image paint in tile mode with the pattern transform) */
+  private pattern(id: string, boxToUser: Mat, bbox: number[], opacity: number): Paint | null {
+    const n = this.ids.get(id);
+    if (!n || localName(n.tag) !== 'pattern') return null;
+    const a = this.gradAttrs(n);
+    const obb = (a.patternUnits ?? 'objectBoundingBox') !== 'userSpaceOnUse';
+    const L = (v: string | undefined, ref: number) => (v == null ? 0 : v.trim().endsWith('%') ? (parseFloat(v) / 100) * ref : parseFloat(v) * (obb ? ref : 1));
+    const tw = L(a.width, obb ? bbox[2] : this.vw), th = L(a.height, obb ? bbox[3] : this.vh);
+    if (!(tw > 0 && th > 0)) return null;
+    const tx = L(a.x, obb ? bbox[2] : this.vw) + (obb ? bbox[0] : 0), ty = L(a.y, obb ? bbox[3] : this.vh) + (obb ? bbox[1] : 0);
+    let kids = n.children;
+    for (let src: XmlNode | undefined = n, k = 0; !kids.length && src && k < 8; k++) { const h: string | undefined = src.attrs.href ?? src.attrs['xlink:href']; src = h?.startsWith('#') ? this.ids.get(h.slice(1)) : undefined; if (src) kids = src.children; }
+    const vb = numList(a.viewBox);
+    const ccu = a.patternContentUnits === 'objectBoundingBox' ? ` transform="matrix(${bbox[2]} 0 0 ${bbox[3]} 0 0)"` : '';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${tw}" height="${th}" viewBox="${vb.length === 4 ? vb.join(' ') : `0 0 ${tw} ${th}`}"${a.preserveAspectRatio ? ` preserveAspectRatio="${a.preserveAspectRatio}"` : ''}><g${ccu}>${kids.map(serializeXml).join('')}</g></svg>`;
+    const data = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+    const asset: Asset = { id: uid('a'), kind: 'image', mime: 'image/svg+xml', data, width: tw, height: th };
+    this.assets.push(asset);
+    // tile space -> user (patternTransform, origin) -> layer box
+    const m = mul(invert(boxToUser), mul(parseTransform(a.patternTransform), [1, 0, 0, 1, tx, ty]));
+    return { type: 'image', imageRef: asset.id, scaleMode: 'tile', tileScale: 1, transform: m, opacity };
   }
 
   private gradientStops(n: XmlNode, seen = 0): XmlNode[] {
@@ -826,8 +988,33 @@ class SvgConverter {
     let g = mul(parseTransform(a.gradientTransform), base);
     if (obb) g = mul([bbox[2] || 1, 0, 0, bbox[3] || 1, bbox[0], bbox[1]], g);
     // unit gradient space -> user -> layer box -> normalized box
-    const t = mul([1 / (w || 1), 0, 0, 1 / (h || 1), 0, 0], mul(invert(boxToUser), g));
-    return { type: tag === 'linearGradient' ? 'linear' : 'radial', stops, transform: t, opacity };
+    let t = mul([1 / (w || 1), 0, 0, 1 / (h || 1), 0, 0], mul(invert(boxToUser), g));
+    const spread = a.spreadMethod;
+    let st = stops;
+    if (spread === 'reflect' || spread === 'repeat') {
+      // the gradient parameter range the box covers -> whole periods k0..k1, stops repeated (or mirrored)
+      const inv = invert(t), lin = tag === 'linearGradient';
+      let lo = Infinity, hi = -Infinity;
+      for (const [x, y] of [[0, 0], [1, 0], [1, 1], [0, 1]]) {
+        const [gx, gy] = apply(inv, x, y);
+        const v = lin ? gx : Math.hypot(gx - 0.5, gy - 0.5) * 2;
+        lo = Math.min(lo, v); hi = Math.max(hi, v);
+      }
+      const k0 = lin ? Math.max(-32, Math.floor(lo)) : 0, k1 = Math.min(k0 + 64, Math.ceil(hi));
+      const n = Math.max(1, k1 - k0);
+      if (n > 1 || k0 !== 0) {
+        st = [];
+        for (let k = k0; k < k1; k++) {
+          const flip = spread === 'reflect' && ((k % 2) + 2) % 2 === 1;
+          const seq = flip ? stops.map(s => ({ pos: 1 - s.pos, color: s.color })).reverse() : stops;
+          for (const s of seq) st.push({ pos: (k - k0 + s.pos) / n, color: s.color });
+        }
+        // gradient space scaled so [0,1] spans the n periods
+        const sc: Mat = lin ? [n, 0, 0, 1, k0, 0] : [n, 0, 0, n, 0.5 - 0.5 * n, 0.5 - 0.5 * n];
+        t = mul(t, sc);
+      }
+    }
+    return { type: tag === 'linearGradient' ? 'linear' : 'radial', stops: st, transform: t, opacity };
   }
 
   private applyStroke(l: Layer, st: Style, scale: number) {
@@ -840,6 +1027,29 @@ class SvgConverter {
     l.props.stroke!.v = [c[0], c[1], c[2], c[3] * st.strokeOpacity];
     l.props.strokeWidth!.v = [st.strokeWidth * scale];
     l.strokeAlign = 'center';
+    l.strokeCap = st.cap === 'round' ? 'round' : st.cap === 'square' ? 'square' : 'butt';
+    l.strokeJoin = st.join === 'round' ? 'round' : st.join === 'bevel' ? 'bevel' : 'miter';
+    l.miterLimit = st.miter;
+    if (st.dash) {
+      let d = st.dash.map(x => x * scale);
+      if (d.length % 2) d = [...d, ...d];
+      // dash offset: rotate the pattern (the renderer has no offset)
+      const total = d.reduce((a, b) => a + b, 0);
+      let off = total > 0 ? (((st.dashOffset * scale) % total) + total) % total : 0;
+      if (off > 0) {
+        const out: number[] = [];
+        let k = 0;
+        while (off >= d[k % d.length] && off > 0) { off -= d[k % d.length]; k++; }
+        // start inside segment k: a partial segment, the rest, then an even fix-up keeps on/off parity
+        const rest = d.slice(k % d.length).concat(d.slice(0, k % d.length));
+        rest[0] -= off;
+        if (k % 2) out.push(0);
+        out.push(...rest);
+        if (out.length % 2) out.push(0);
+        d = out;
+      }
+      l.dash = d;
+    }
   }
 
   private gradientFallback(v: string): Color | null {
@@ -853,18 +1063,49 @@ class SvgConverter {
   private text(n: XmlNode, p: Record<string, string>, m: Mat, st: Style): Layer | null {
     // flatten tspans; each explicit line break (tspan with x/dy) becomes a newline
     let content = '';
-    const walk = (x: XmlNode) => {
+    const runs: TextRun[] = [];
+    const walk = (x: XmlNode, xs: Style) => {
       for (const part of x.parts) {
         if (typeof part === 'string') content += part;
         else if (localName(part.tag) === 'tspan') {
           // a tspan that repositions vertically starts a new line
           if (content.trim() && (part.attrs.dy != null || part.attrs.y != null)) content += '\n';
-          walk(part);
+          const ps = this.inherit(xs, this.props(part));
+          const start = content.length;
+          walk(part, ps);
+          const r: TextRun = { start, end: content.length };
+          const c = parseColor(ps.fill);
+          if (ps.fill !== st.fill && c) r.fill = [c[0], c[1], c[2], c[3] * ps.fillOpacity];
+          if (ps.fontWeight !== st.fontWeight) r.fontWeight = ps.fontWeight === 'bold' ? 700 : parseInt(ps.fontWeight, 10) || 400;
+          if (ps.fontStyle !== st.fontStyle) r.fontStyle = /italic|oblique/.test(ps.fontStyle) ? 'italic' : 'normal';
+          if (ps.fontSize !== st.fontSize) r.fontSize = ps.fontSize;
+          if (Object.keys(r).length > 2 && r.end > r.start) runs.push(r);
         }
       }
     };
-    walk(n);
-    content = content.replace(/[ \t\r]*\n[ \t\r]*/g, (s) => (s.includes('\n') ? '\n' : ' ')).replace(/[ \t]+/g, ' ').trim();
+    walk(n, st);
+    // per-glyph x / y lists: one text layer per character at its position
+    const xl = numList(p.x), yl = numList(p.y);
+    if ((xl.length > 1 || yl.length > 1) && !n.children.length) {
+      const g = createLayer('group', { w: 0, h: 0 });
+      g.name = content.trim().slice(0, 32);
+      g.props.fill!.v = [1, 1, 1, 0]; g.props.strokeWidth!.v = [0]; g.clip = false;
+      this.setTransform(g, m, 0, 0, 0, 0);
+      const chars = [...content.trim()];
+      let cx = xl[0] ?? 0, cy = yl[0] ?? 0;
+      chars.forEach((ch, k) => {
+        if (xl[k] != null) cx = xl[k];
+        if (yl[k] != null) cy = yl[k];
+        const one = this.text({ tag: 'text', attrs: {}, children: [], text: ch, parts: [ch] }, { x: String(cx), y: String(cy) }, I, st);
+        if (one) { one.name = ch; one.parent = g.id; g.children.push(one.id); this.layers.push(one); }
+        cx += st.fontSize * 0.6;
+      });
+      return g;
+    }
+    // whitespace collapse (run offsets are approximate when inner whitespace collapses)
+    content = content.replace(/[ \t\r]*\n[ \t\r]*/g, (s) => (s.includes('\n') ? '\n' : ' ')).replace(/[ \t]+/g, ' ');
+    const lead = content.length - content.trimStart().length;
+    content = content.trim();
     if (!content) return null;
     const first = n.children.find(c => localName(c.tag) === 'tspan');
     const x = len(p.x ?? first?.attrs.x, this.vw) + len(p.dx, this.vw);
@@ -876,12 +1117,14 @@ class SvgConverter {
     const h = lines.length * fs * lh;
     const align = st.textAnchor === 'middle' ? 'center' : st.textAnchor === 'end' ? 'right' : 'left';
     const bx = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
-    // renderer puts the first baseline at (lh - 1)/2 * fs + 0.8 fs from the top
-    const by = y - fs * ((lh - 1) / 2 + 0.8);
+    // the renderer puts the first baseline at half leading + ascender (inter: .969 / .242 em)
+    const by = y - fs * ((lh - 1.211) / 2 + 0.969);
     const l = createLayer('text', { w, h });
     this.setTransform(l, m, bx, by, w, h);
     const wt = st.fontWeight === 'bold' ? 700 : st.fontWeight === 'normal' ? 400 : parseInt(st.fontWeight, 10) || 400;
-    l.text = { content, fontFamily: st.fontFamily, fontSize: fs, fontWeight: wt, fontStyle: /italic|oblique/.test(st.fontStyle) ? 'italic' : 'normal', lineHeight: lh, letterSpacing: st.letterSpacing, align };
+    l.text = { content, fontFamily: st.fontFamily, fontSize: fs, fontWeight: wt, fontStyle: /italic|oblique/.test(st.fontStyle) ? 'italic' : 'normal', lineHeight: lh, letterSpacing: st.letterSpacing, align, autoResize: 'width' };
+    // run offsets refer to the untrimmed content: shift them by what trimming removed at the start
+    if (runs.length) l.text.runs = runs.map(r => ({ ...r, start: Math.max(0, r.start - lead), end: Math.max(0, r.end - lead) })).filter(r => r.end > r.start);
     const c = parseColor(st.fill) ?? this.gradientFallback(st.fill) ?? [0, 0, 0, 1];
     l.props.fill!.v = [c[0], c[1], c[2], c[3] * st.fillOpacity];
     l.name = content.slice(0, 32);
@@ -893,13 +1136,33 @@ class SvgConverter {
     const w = len(p.width, this.vw), h = len(p.height, this.vh);
     if (!href.startsWith('data:') || w <= 0 || h <= 0) return null;
     const mime = /^data:([^;,]+)/.exec(href)?.[1] ?? 'image/png';
-    const asset: Asset = { id: uid('a'), kind: 'image', mime, data: href, width: w, height: h };
+    const nat = dataImageSize(href) ?? [w, h];
+    const asset: Asset = { id: uid('a'), kind: 'image', mime, data: href, width: nat[0], height: nat[1] };
     this.assets.push(asset);
-    const l = createLayer('image', { w, h });
-    this.setTransform(l, m, len(p.x, this.vw), len(p.y, this.vh), w, h);
+    // preserveAspectRatio: the image's own aspect inside the x / y / width / height box
+    const [ix, iy, iw, ih] = (() => {
+      const vm = viewBoxMatrix([0, 0, nat[0], nat[1]], w, h, p.preserveAspectRatio);
+      return [vm[4], vm[5], nat[0] * vm[0], nat[1] * vm[3]];
+    })();
+    const l = createLayer('image', { w: iw, h: ih });
+    this.setTransform(l, m, len(p.x, this.vw) + ix, len(p.y, this.vh) + iy, iw, ih);
     l.imageRef = asset.id;
     return l;
   }
+}
+
+/** viewBox (x, y, w, h) -> viewport (0..w, 0..h) with preserveAspectRatio */
+function viewBoxMatrix(vb: number[], w: number, h: number, parAttr?: string): Mat {
+  const par = (parAttr ?? 'xMidYMid meet').trim();
+  let sx = w / vb[2], sy = h / vb[3], tx = 0, ty = 0;
+  if (!par.startsWith('none')) {
+    const s = par.includes('slice') ? Math.max(sx, sy) : Math.min(sx, sy);
+    sx = sy = s;
+    const ax = par.includes('xMin') ? 0 : par.includes('xMax') ? 1 : 0.5;
+    const ay = par.includes('YMin') ? 0 : par.includes('YMax') ? 1 : 0.5;
+    tx = (w - vb[2] * s) * ax; ty = (h - vb[3] * s) * ay;
+  }
+  return [sx, 0, 0, sy, tx - vb[0] * sx, ty - vb[1] * sy];
 }
 
 const K = 0.5522847498307936;
@@ -924,6 +1187,49 @@ function rectCmds(x: number, y: number, w: number, h: number, rx: number, ry: nu
     ['C', x + rx - kx, y + h, x, y + h - ry + ky, x, y + h - ry], ['L', x, y + ry],
     ['C', x, y + ry - ky, x + rx - kx, y, x + rx, y], ['Z'],
   ];
+}
+
+const xmlEsc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+/** back to markup (pattern tiles become standalone svg images) */
+function serializeXml(n: XmlNode): string {
+  const attrs = Object.entries(n.attrs).map(([k, v]) => ` ${k}="${xmlEsc(v)}"`).join('');
+  const inner = n.parts.map(p => (typeof p === 'string' ? xmlEsc(p) : serializeXml(p))).join('');
+  return `<${n.tag}${attrs}>${inner}</${n.tag}>`;
+}
+
+/** natural size of a data: uri image (png, jpeg, gif header; svg width / height / viewBox) */
+function dataImageSize(href: string): [number, number] | null {
+  const comma = href.indexOf(',');
+  if (comma < 0) return null;
+  const meta = href.slice(5, comma), body = href.slice(comma + 1);
+  let bytes: Uint8Array;
+  try {
+    if (/;base64/i.test(meta)) { const bin = atob(body.replace(/\s+/g, '')); bytes = new Uint8Array(bin.length); for (let k = 0; k < bin.length; k++) bytes[k] = bin.charCodeAt(k); }
+    else bytes = new TextEncoder().encode(decodeURIComponent(body));
+  } catch { return null; }
+  if (/svg/i.test(meta)) {
+    const root = parseXml(new TextDecoder().decode(bytes));
+    if (!root) return null;
+    const vb = numList(root.attrs.viewBox);
+    if (vb.length !== 4) return null; // no viewBox: no intrinsic aspect ratio, the image stretches
+    let w = len(root.attrs.width, 0, 0), h = len(root.attrs.height, 0, 0);
+    if (!w && vb.length === 4) w = vb[2];
+    if (!h && vb.length === 4) h = vb[3];
+    return w > 0 && h > 0 ? [w, h] : null;
+  }
+  const b = bytes;
+  if (b.length > 24 && b[0] === 0x89 && b[1] === 0x50) return [(b[16] << 24 | b[17] << 16 | b[18] << 8 | b[19]) >>> 0, (b[20] << 24 | b[21] << 16 | b[22] << 8 | b[23]) >>> 0];
+  if (b.length > 10 && b[0] === 0x47 && b[1] === 0x49) return [b[6] | (b[7] << 8), b[8] | (b[9] << 8)];
+  if (b.length > 4 && b[0] === 0xff && b[1] === 0xd8) {
+    let o = 2;
+    while (o + 9 < b.length) {
+      if (b[o] !== 0xff) { o++; continue; }
+      const mk = b[o + 1], ln = (b[o + 2] << 8) | b[o + 3];
+      if (mk >= 0xc0 && mk <= 0xcf && mk !== 0xc4 && mk !== 0xc8 && mk !== 0xcc) return [(b[o + 7] << 8) | b[o + 8], (b[o + 5] << 8) | b[o + 6]];
+      o += 2 + ln;
+    }
+  }
+  return null;
 }
 
 /** convert svg markup to layers. a single root group holds the svg content. */
