@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
 import {
   addKeyframe, deleteKeyframes, isAnimated, keyId, parseKeyId, setCompSettings, setEase, setLayerField, setProp,
-  setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, addMarker, deleteMarker, renameComp,
+  setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, renameComp,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { starGeometry } from '../core/shapes';
@@ -451,8 +451,8 @@ const SIZE_PRESETS: [string, number, number][] = [
   ['Feed · 1080×1350', 1080, 1350], ['HD · 1280×720', 1280, 720], ['4K · 3840×2160', 3840, 2160], ['Icon · 512×512', 512, 512],
 ];
 
-/** nothing selected: the composition's settings (name, size, frame rate, duration, background)
- *  and its markers. exporting lives in one place: the Export button (top right, ⌘E) */
+/** nothing selected: the composition's settings (name, size, frame rate, duration, background).
+ *  exporting lives in one place: the Export button (top right, ⌘E) */
 function CompPanel() {
   const store = st();
   const c = store.comp;
@@ -483,16 +483,6 @@ function CompPanel() {
       </Section>
       <Section title="Background">
         <FieldRow><ColorField value={c.background} onChange={col => setCompSettings(store, { background: col as any })} /></FieldRow>
-      </Section>
-      <Section title="Markers" onAdd={() => addMarker(store, store.time)} addLabel="Add a marker at the playhead (M)">
-        {(c.markers ?? []).length === 0 && <div class="muted small" title="From an audio layer's beats too. J / K and key drags snap to them.">Press M to mark a moment at the playhead.</div>}
-        {[...(c.markers ?? [])].sort((a, b) => a.t - b.t).map(m => (
-          <div class="marker-row list-row">
-            <button type="button" class="marker-time" title="Go to this marker" onClick={() => store.setTime(m.t)}>{m.t.toFixed(2)}s</button>
-            <span class="marker-label">{m.label || 'Marker'}</span>
-            <button type="button" class="ghost icon marker-x" aria-label="Delete marker" title="Delete marker" onClick={() => deleteMarker(store, m.id)}><X size={12} /></button>
-          </div>
-        ))}
       </Section>
     </>
   );

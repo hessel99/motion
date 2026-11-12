@@ -36,6 +36,10 @@ export class ViewportController {
   private spaceDown = false;
   private overlayDirty = true;
   private fitted = false;
+  /** the view is still the automatic fit (the user has not zoomed or panned): follow size changes.
+   * a file opened from Home is fitted while Home covers the stage at full width; without this
+   * the comp stayed too big (and off-centre) once the sidebars came back. */
+  private autoFit = false;
   private lastW = 0;
   private lastH = 0;
   private lastSelKey = '';
@@ -98,7 +102,7 @@ export class ViewportController {
     this.overlay.height = Math.round(r.height * dpr);
     this.overlay.style.width = r.width + 'px';
     this.overlay.style.height = r.height + 'px';
-    if (!this.fitted && r.width > 10) { this.fit(); this.fitted = true; }
+    if ((!this.fitted || this.autoFit) && r.width > 10) { this.fit(); this.fitted = true; }
     // a panel opened / closed: the view stays centred (keeps what was in the middle in the middle)
     else if (this.lastW > 10 && r.width > 10) { this.panX += (r.width - this.lastW) / 2; this.panY += (r.height - this.lastH) / 2; }
     this.lastW = r.width; this.lastH = r.height;
@@ -113,6 +117,7 @@ export class ViewportController {
     this.zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
     this.panX = (r.width - comp.width * this.zoom) / 2;
     this.panY = (r.height - comp.height * this.zoom) / 2;
+    this.autoFit = true;
     this.applyView();
   }
 
@@ -120,7 +125,7 @@ export class ViewportController {
   setView(zoom: number, panX: number, panY: number) {
     this.zoomAnim = null;
     this.zoom = zoom; this.panX = panX; this.panY = panY;
-    this.fitted = true;
+    this.fitted = true; this.autoFit = false;
     this.applyView();
   }
 
@@ -128,6 +133,7 @@ export class ViewportController {
     const r = this.host.getBoundingClientRect();
     cx ??= r.width / 2; cy ??= r.height / 2;
     z = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
+    this.autoFit = false;
     const wx = (cx - this.panX) / this.zoom, wy = (cy - this.panY) / this.zoom;
     this.zoom = z;
     this.panX = cx - wx * z;
@@ -192,6 +198,7 @@ export class ViewportController {
     } else {
       this.panX -= e.deltaX;
       this.panY -= e.deltaY;
+      this.autoFit = false;
       this.applyView();
     }
   }
@@ -468,6 +475,7 @@ export class ViewportController {
     if (d.kind === 'pan') {
       this.panX = d.px + (x - d.sx);
       this.panY = d.py + (y - d.sy);
+      this.autoFit = false;
       this.applyView();
     } else if (d.kind === 'move') {
       let dx = (x - d.sx) / this.zoom, dy = (y - d.sy) / this.zoom;

@@ -1,7 +1,7 @@
 // the timeline card's header row: the open compositions as small pill tabs ("+" makes a new one;
 // double-click a precomp layer to open its tab), the transport (start, frame step, play, loop, an
-// editable timecode, duration and fps), the preview range, markers, auto-key, the track view
-// (keys / graph / speed) and the time zoom. its top edge (in the gap above the card) is the
+// editable timecode, duration and fps), the preview range, auto-key, the track view
+// (keys / graph) and the time zoom. its top edge (in the gap above the card) is the
 // splitter that sizes the timeline.
 // the timecode is written straight into its input every frame while it is not being edited
 // (fixed width, tabular digits: no relayout during playback); the rest renders on its channels.
@@ -9,11 +9,11 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
 import { toast } from '../../app/actions';
-import { addMarker, addPrecompLayer, editMode, newComposition, renameComp, setCompSettings } from '../../core/commands';
+import { addPrecompLayer, editMode, newComposition, renameComp, setCompSettings } from '../../core/commands';
 import { useChannels } from '../hooks';
 import { menuFrom, showContextMenu, type MenuItem } from '../menu';
 import { Button, Segmented } from '../ui';
-import { Bookmark, Brackets, Maximize2, Pause, Play, Plus, Repeat, SkipBack, StepBack, StepForward, X } from './icons';
+import { Brackets, Maximize2, Pause, Play, Plus, Repeat, SkipBack, StepBack, StepForward, X } from './icons';
 import { startPreview } from './CanvasBars';
 import { fmtDuration, fmtTimecode, view } from './view';
 import { setUi, STAGE_MIN, TL_MIN, ui } from './ui-state';
@@ -174,7 +174,6 @@ function TrackTools() {
         onClick={() => { s.workArea = wa ? null : [s.time, s.comp.duration]; s.emit('workarea'); }}>
         <Brackets size={14} />{wa ? `${wa[0].toFixed(2)}–${wa[1].toFixed(2)}s` : <span class="tt-label">Range</span>}
       </button>
-      <Button variant="ghost" icon size="sm" tip="Add marker at playhead (M)" tipSide="top" onClick={() => addMarker(s, s.time)}><Bookmark /></Button>
       <button type="button" class={'tt-chip autokey' + (editMode.autoKey ? ' rec' : '')} aria-pressed={editMode.autoKey} aria-label="Auto-key"
         data-tooltip="Auto-key: every change creates a keyframe at the playhead" data-tooltip-side="top"
         onClick={() => { editMode.autoKey = !editMode.autoKey; editor.emit('view'); }}>

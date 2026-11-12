@@ -192,7 +192,7 @@ export function ExportDialog(props: { onClose: () => void }) {
           </div>
           <div class="xv-info muted">The frame under the playhead ({editor.store.time.toFixed(2)}s) as a PNG.</div>
         </>}
-        {kind === 'lottie' && <div class="xv-info muted">Lottie JSON for the web and apps (lottie-web, iOS, Android): shapes, text, gradients, precomps and markers.</div>}
+        {kind === 'lottie' && <div class="xv-info muted">Lottie JSON for the web and apps (lottie-web, iOS, Android): shapes, text, gradients and precomps.</div>}
         {kind === 'ae' && <div class="xv-info muted">A script (.jsx) that rebuilds this composition in After Effects: File › Scripts › Run Script File… Shape layers, text, precomps, keyframes with their easing.</div>}
         {prog && (
           <div class="xv-progress">
