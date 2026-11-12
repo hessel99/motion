@@ -12,7 +12,7 @@ import { TrackPool } from '../core/trackpool';
 import { PROP_DEFS, type Layer, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
 import { Atlas } from './atlas';
-import { rasterImage, rasterPath, rasterShapePaint, rasterText, setImageLoadedHandler, type RasterResult } from './raster';
+import { layoutText, rasterImage, rasterPath, rasterShapePaint, rasterText, setImageLoadedHandler, type RasterResult } from './raster';
 
 const F = 40; // floats per instance
 const KIND_RECT = 0, KIND_ELLIPSE = 1, KIND_MASK = 2, KIND_RGBA = 3, KIND_NONE = 4;
@@ -436,6 +436,16 @@ export class Renderer {
     it.rasterKey = null;
     it.entry = null;
     this.evalItem(i, 0, true);
+    // auto-size text (size 0): measure so hit testing, handles and snapping see the real box
+    if (l.type === 'text' && l.text && !(l.props.size?.kf?.length)) {
+      const sz = l.props.size?.v ?? [0, 0];
+      if (sz[0] <= 0 || sz[1] <= 0) {
+        const lines = layoutText(l, sz[0] > 0 ? sz[0] : null);
+        const os = i * ST;
+        if (sz[0] <= 0) this.style[os] = Math.ceil(Math.max(1, ...lines.map(x => x.width)));
+        if (sz[1] <= 0) this.style[os + 1] = Math.ceil(lines.length * l.text.fontSize * l.text.lineHeight);
+      }
+    }
   }
 
   private rasterBase(l: Layer, complex: boolean): string | null {
@@ -446,10 +456,12 @@ export class Renderer {
         const s = l.props.size?.v ?? [0, 0];
         return `t${t.content}|${t.fontFamily}|${t.fontWeight}|${t.fontStyle}|${t.fontSize}|${t.lineHeight}|${t.letterSpacing}|${t.align}|${Math.round(s[0])}x${Math.round(s[1])}`;
       }
-      case 'image': return `i${l.imageRef}`;
-      default:
+      case 'image': return `i${l.imageRef}`; // images stretch to the size box (see raster placement below)
+      default: {
         if (!complex) return null;
-        return `g${oid(l.paints)}:${oid(l.props.size)}:${oid(l.props.radius)}:${oid(l.props.stroke)}:${l.props.strokeWidth?.v[0] ?? 0}`;
+        const r2 = (v?: number[]) => (v ? v.map(x => Math.round(x * 10) / 10).join(',') : '');
+        return `g${oid(l.paints)}:${r2(l.props.size?.v)}:${r2(l.props.radius?.v)}:${r2(l.props.stroke?.v)}:${l.props.strokeWidth?.v[0] ?? 0}`;
+      }
     }
   }
 
@@ -679,6 +691,8 @@ export class Renderer {
     let isolated = 0;
     const flush = () => { if (k > pending) { cmds.push(CMD_DRAW, pending, k - pending); pending = k; } };
     for (let i = 0; i <= n; i++) {
+      // the mask shape's own subtree has been written: mark its range (it is not drawn in place)
+      for (const r of stack) if (r.maskEnd === i) { r.maskCount = k - r.maskStart; pending = k; r.maskEnd = -1; }
       // close finished regions
       while (stack.length && stack[stack.length - 1].end <= i) {
         const r = stack.pop()!;
@@ -687,9 +701,7 @@ export class Renderer {
         cmds.push(CMD_POP, 0, r.opacity);
         div = r.div;
       }
-      // the mask shape's own subtree has been written: mark its range (not drawn in place)
       const top = stack[stack.length - 1];
-      if (top && top.maskEnd === i) { top.maskCount = k - top.maskStart; pending = k; top.maskEnd = -1; }
       if (i === n) break;
       const it = items[i];
       mask[i] = 0;
@@ -741,7 +753,8 @@ export class Renderer {
         a *= gx; b *= gx; c *= gy; d *= gy;
         e += a * r.x + c * r.y;
         f += b * r.x + d * r.y;
-        w = r.w; h = r.h;
+        if (l.type === 'image') { w = S[os]; h = S[os + 1]; }
+        else { w = r.w; h = r.h; }
         u0 = ent.x / 2048; v0 = ent.y / 2048; u1 = (ent.x + r.pw) / 2048; v1 = (ent.y + r.ph) / 2048;
         page = ent.page;
       }

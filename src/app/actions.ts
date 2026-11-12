@@ -397,7 +397,12 @@ export function restoreAutosave(): boolean {
 // ---------------- keyboard ----------------
 export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; toggleAgent(): void; editText(id: string): void }) {
   window.addEventListener('copy', e => { if (!isTyping(e)) copySelection(e); });
-  window.addEventListener('cut', e => { if (!isTyping(e) && copySelection(e)) deleteLayers(st(), st().selection); });
+  window.addEventListener('cut', e => {
+    if (isTyping(e)) return;
+    const keys = [...st().keySelection];
+    if (copySelection(e)) deleteLayers(st(), st().selection);
+    else if (keys.length) deleteKeyframes(st(), keys);
+  });
   window.addEventListener('paste', e => handlePaste(e));
   window.addEventListener('keydown', e => {
     if (isTyping(e)) return;
@@ -412,7 +417,10 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (mod && k === 'd') return run(() => cloneLayers(s, s.selection, 10));
     if (mod && e.shiftKey && k === 'c') return run(() => { try { precompose(s, s.selection); } catch (err: any) { toast(err.message, 'error'); } });
     if (mod && k === 'a') return run(() => s.select(s.comp.root.slice()));
-    if (mod && k === 'g') return run(() => (e.shiftKey ? s.selection.forEach(id => ungroup(s, id)) : s.selection.length && groupLayers(s, s.selection, boundsOf(s.selection))));
+    if (mod && k === 'g') return run(() => {
+      try { e.shiftKey ? s.selection.forEach(id => ungroup(s, id)) : s.selection.length && groupLayers(s, s.selection, boundsOf(s.selection)); }
+      catch (err: any) { toast(err.message, 'error'); }
+    });
     if (mod && k === ']') return run(() => reorder(s, s.selection, e.altKey ? 'top' : 'up'));
     if (mod && k === '[') return run(() => reorder(s, s.selection, e.altKey ? 'bottom' : 'down'));
     if (mod && (k === '=' || k === '+')) return run(() => hooks.zoom(1.25));
@@ -460,7 +468,7 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
           const l = s.layer(id);
           if (!l || l.locked) continue;
           const p = valueAt(l, 'position', s.time);
-          setProp(s, id, 'position', [p[0] + dx, p[1] + dy], { mergeKey: 'nudge' });
+          setProp(s, id, 'position', [p[0] + dx, p[1] + dy], { mergeKey: 'nudge:' + s.selection.join(',') + ':' + s.time });
         }
       });
     }

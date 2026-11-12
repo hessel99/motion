@@ -48,6 +48,8 @@ export class Tx {
   }
 
   touch(layerId: string) { this.change.layers.add(layerId); }
+  /** set by commands that keep keyframe indices valid (easing edits, value edits of existing keys) */
+  keepKeys = false;
   structure() { this.change.structure = true; }
   comp() { this.change.comp = true; }
 }
@@ -102,8 +104,20 @@ export class Store {
   /** run a mutation. mergeKey: consecutive transactions with the same key collapse into one undo step (drags) */
   transact(label: string, fn: (tx: Tx) => void, mergeKey?: string): void {
     const tx = new Tx();
-    fn(tx);
+    try {
+      fn(tx);
+    } catch (e) {
+      // atomic: roll back whatever was applied before the error
+      for (let i = tx.undo.length - 1; i >= 0; i--) tx.undo[i]();
+      throw e;
+    }
     if (tx.undo.length === 0) return;
+    // keyframe selection stores indices: edits that may insert/remove keys invalidate it
+    if (!tx.keepKeys && this.keySelection.size && (tx.change.layers.size || tx.change.structure)) {
+      let touched = false;
+      for (const k of this.keySelection) if (tx.change.layers.has(k.slice(0, k.indexOf('|')))) { touched = true; break; }
+      if (touched || tx.change.structure) { this.keySelection = new Set(); this.emit('keys'); }
+    }
     this.redoStack.length = 0;
     const top = this.undoStack[this.undoStack.length - 1];
     const mk = mergeKey ?? this.gesture ?? undefined;
@@ -116,6 +130,13 @@ export class Store {
     }
     this.emitChange(tx.change);
     this.emit('history');
+  }
+
+  /** run several commands as ONE undo step */
+  batch<T>(key: string, fn: () => T): T {
+    const prev = this.gesture;
+    if (!prev) this.gesture = key + ':' + Math.random();
+    try { return fn(); } finally { if (!prev) this.gesture = null; }
   }
 
   /** while a gesture is active, all transactions merge into one undo step */
@@ -200,6 +221,11 @@ export class Store {
     }
     if (next.length === this.selection.length && next.every((v, i) => v === this.selection[i])) return;
     this.selection = next;
+    if (this.keySelection.size) {
+      const keep = new Set(next);
+      const filtered = new Set([...this.keySelection].filter(k => keep.has(k.slice(0, k.indexOf('|')))));
+      if (filtered.size !== this.keySelection.size) { this.keySelection = filtered; this.emit('keys'); }
+    }
     this.emit('selection');
   }
 

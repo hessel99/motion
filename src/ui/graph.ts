@@ -261,6 +261,7 @@ export class GraphView {
       nt = Math.min(hi, Math.max(lo, nt));
       const idx = d.i;
       st.transact('Edit keyframe', tx => {
+        tx.keepKeys = true;
         tx.set(p, 'kf', kf.map((k, j) => (j === idx ? { ...k, t: nt, v: nv } : k)));
         tx.touch(c.layer.id);
       });

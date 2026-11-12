@@ -46,6 +46,7 @@ export class ViewportController {
     host.addEventListener('pointerdown', e => this.down(e));
     host.addEventListener('pointermove', e => this.move(e));
     host.addEventListener('pointerup', e => this.up(e));
+    host.addEventListener('pointercancel', e => this.up(e));
     host.addEventListener('dblclick', e => this.dbl(e));
     host.addEventListener('wheel', e => this.wheel(e), { passive: false });
     window.addEventListener('keydown', e => { if (e.code === 'Space' && !isTyping(e)) { this.spaceDown = true; this.updateCursor(); } });

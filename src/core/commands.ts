@@ -95,6 +95,7 @@ export function cloneLayers(store: Store, ids: string[], offset = 0) {
     return copy;
   };
   const created: string[] = [];
+  ids = ids.filter(id => P.layers[id] && !ids.some(o => o !== id && store.isAncestor(o, id)));
   store.transact('Duplicate', tx => {
     for (const id of ids) {
       const src = P.layers[id];
@@ -142,6 +143,9 @@ export function setLayerField<K extends keyof Layer>(store: Store, ids: string[]
 export function moveLayers(store: Store, ids: string[], parent: string | null, index: number) {
   const P = store.project;
   ids = ids.filter(id => P.layers[id] && id !== parent && !(parent && store.isAncestor(id, parent)));
+  ids = ids.filter(id => !ids.some(o => o !== id && store.isAncestor(o, id)));
+  const order = new Map(store.drawOrder().map((id, i) => [id, i]));
+  ids.sort((a, b) => (order.get(a) ?? 0) - (order.get(b) ?? 0));
   if (!ids.length) return;
   store.transact('Move layers', tx => {
     const targetList = () => (parent ? P.layers[parent].children : store.comp.root);
@@ -189,6 +193,11 @@ export function groupLayers(store: Store, ids: string[], bounds: { x: number; y:
   if (!ids.length) return;
   const first = store.layer(ids[0])!;
   const parent = first.parent;
+  if (ids.some(id => store.layer(id)?.parent !== parent)) throw new Error('select layers with the same parent to group them');
+  return store.batch('group', () => groupLayersInner(store, ids, bounds, first, parent));
+}
+
+function groupLayersInner(store: Store, ids: string[], bounds: { x: number; y: number; w: number; h: number }, first: Layer, parent: string | null) {
   const siblings = store.siblings(first);
   const sameParent = ids.filter(id => store.layer(id)?.parent === parent);
   const index = Math.max(...sameParent.map(id => siblings.indexOf(id)));
@@ -207,6 +216,10 @@ export function groupLayers(store: Store, ids: string[], bounds: { x: number; y:
 }
 
 export function ungroup(store: Store, groupId: string) {
+  store.batch('ungroup', () => ungroupInner(store, groupId));
+}
+
+function ungroupInner(store: Store, groupId: string) {
   const g = store.layer(groupId);
   if (!g || !g.children.length) return;
   const kids = g.children.slice();
@@ -266,8 +279,8 @@ function upsertKey(kf: Keyframe[], t: number, v: number[]): Keyframe[] {
     return out;
   }
   const prev = [...out].reverse().find(k => k.t < t);
-  const ease = prev ? { interp: prev.interp, out: prev.out, in: prev.in } : defaultEase();
-  out.push({ t, v: v.slice(), interp: ease.interp, out: [...ease.out] as [number, number], in: [...ease.in] as [number, number] });
+  const ease = prev ? { interp: prev.interp, out: prev.out, in: prev.in, bounce: prev.bounce } : defaultEase();
+  out.push({ t, v: v.slice(), interp: ease.interp, out: [...ease.out] as [number, number], in: [...ease.in] as [number, number], ...((ease as any).bounce !== undefined ? { bounce: (ease as any).bounce } : {}) });
   out.sort((a, b) => a.t - b.t);
   return out;
 }
@@ -366,6 +379,38 @@ export function moveKeyframes(store: Store, keys: Iterable<string>, dt: number, 
   return newSel;
 }
 
+export interface KeySnapshot { groups: { layerId: string; key: PropKey; orig: Keyframe[]; sel: Set<number> }[]; minT: number }
+
+/** remember selected keys + their props at drag start (drags apply a TOTAL offset to this snapshot) */
+export function snapshotKeys(store: Store, keys: Iterable<string>): KeySnapshot {
+  const groups = groupKeySel(store, keys).map(g => ({ layerId: g.layer.id, key: g.key, orig: g.prop.kf!.map(k => ({ ...k })), sel: new Set(g.idx) }));
+  let minT = Infinity;
+  for (const g of groups) for (const i of g.sel) minT = Math.min(minT, g.orig[i].t);
+  return { groups, minT: isFinite(minT) ? minT : 0 };
+}
+
+/** move snapshot keys by dt (relative to the snapshot, so crossing other keys never deletes them mid-drag) */
+export function moveKeysFrom(store: Store, snap: KeySnapshot, dt: number, mergeKey?: string) {
+  dt = Math.max(-snap.minT, dt);
+  const newSel = new Set<string>();
+  store.transact('Move keyframes', tx => {
+    for (const g of snap.groups) {
+      const l = store.layer(g.layerId);
+      const p = l?.props[g.key];
+      if (!l || !p) continue;
+      const moved = g.orig.map((k, i) => ({ k: { ...k, t: g.sel.has(i) ? k.t + dt : k.t }, sel: g.sel.has(i) }));
+      const movedTimes = moved.filter(e => e.sel).map(e => e.k.t);
+      const kept = moved.filter(e => e.sel || !movedTimes.some(t => Math.abs(t - e.k.t) < EPS));
+      kept.sort((a, b) => a.k.t - b.k.t);
+      tx.set(p, 'kf', kept.map(e => e.k));
+      kept.forEach((e, i) => { if (e.sel) newSel.add(keyId(g.layerId, g.key, i)); });
+      tx.touch(g.layerId);
+    }
+  }, mergeKey);
+  store.keySelection = newSel;
+  store.emit('keys');
+}
+
 /** apply an ease to selected keyframes (affects the segment leaving each selected key and the arriving handle) */
 export function setEase(store: Store, keys: Iterable<string>, bez: [number, number, number, number] | string, interp: Interp = 'bezier') {
   let v: [number, number, number, number];
@@ -377,6 +422,7 @@ export function setEase(store: Store, keys: Iterable<string>, bez: [number, numb
   } else v = bez;
   const groups = groupKeySel(store, keys);
   store.transact('Set easing', tx => {
+    tx.keepKeys = true;
     for (const g of groups) {
       const kf = g.prop.kf!.map(k => ({ ...k }));
       const idx = [...g.idx].sort((a, b) => a - b);
@@ -402,6 +448,7 @@ export function setEase(store: Store, keys: Iterable<string>, bez: [number, numb
 export function setSpring(store: Store, keys: Iterable<string>, bounce: number) {
   const groups = groupKeySel(store, keys);
   store.transact('Set spring', tx => {
+    tx.keepKeys = true;
     for (const g of groups) {
       const kf = g.prop.kf!.map(k => ({ ...k }));
       for (const i of g.idx) {
@@ -418,6 +465,7 @@ export function setSpring(store: Store, keys: Iterable<string>, bounce: number) 
 export function setInterp(store: Store, keys: Iterable<string>, interp: Interp) {
   const groups = groupKeySel(store, keys);
   store.transact('Set interpolation', tx => {
+    tx.keepKeys = true;
     for (const g of groups) {
       const kf = g.prop.kf!.map((k, i) => (g.idx.has(i) ? { ...k, interp } : k));
       tx.set(g.prop, 'kf', kf);
@@ -432,6 +480,7 @@ export function setSegmentHandles(store: Store, layerId: string, key: PropKey, i
   const p = l?.props[key];
   if (!l || !p?.kf || i >= p.kf.length - 1) return;
   store.transact('Edit curve', tx => {
+    tx.keepKeys = true;
     const kf = p.kf!.map(k => ({ ...k }));
     kf[i].interp = 'bezier';
     kf[i].out = [Math.min(1, Math.max(0, out[0])), out[1]];
@@ -453,6 +502,7 @@ export function setCompSettings(store: Store, patch: Partial<{ width: number; he
     for (const [k, v] of Object.entries(patch)) if (v !== undefined) tx.set(store.comp, k as any, v as any);
     tx.comp();
   });
+  if (store.time > store.comp.duration) store.setTime(store.comp.duration);
 }
 
 export function setProjectName(store: Store, name: string) {

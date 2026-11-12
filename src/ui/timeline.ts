@@ -5,7 +5,7 @@
 import type { Editor } from '../app/editor';
 import {
   isAnimated, keyId, layerKeyTimes, moveKeyframes, moveLayers, parseKeyId, renameLayer, setLayerField, valueAt,
-  addKeyframe, deleteKeyframes, toggleAnimated, precompose,
+  addKeyframe, deleteKeyframes, toggleAnimated, precompose, snapshotKeys, moveKeysFrom, type KeySnapshot,
 } from '../core/commands';
 import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type PropKey } from '../core/model';
 import { showContextMenu, type MenuItem } from './menu';
@@ -28,7 +28,7 @@ interface Row {
 
 type Drag =
   | { kind: 'scrub' }
-  | { kind: 'keys'; sx: number; t0: number; moved: boolean; dt: number; key: string }
+  | { kind: 'keys'; sx: number; t0: number; moved: boolean; dt: number; key: string; snap: KeySnapshot }
   | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: Set<string> }
   | { kind: 'rows'; ids: string[]; sy: number; y: number; moved: boolean }
   | { kind: 'split'; sx: number; w0: number }
@@ -87,6 +87,7 @@ export class Timeline {
     this.canvas.addEventListener('pointerdown', e => this.down(e));
     this.canvas.addEventListener('pointermove', e => this.move(e));
     this.canvas.addEventListener('pointerup', e => this.up(e));
+    this.canvas.addEventListener('pointercancel', e => this.up(e));
     this.canvas.addEventListener('dblclick', e => this.dbl(e));
     this.canvas.addEventListener('wheel', e => this.wheel(e), { passive: false });
     this.canvas.addEventListener('contextmenu', e => this.context(e));
@@ -575,7 +576,7 @@ export class Timeline {
       st.emit('keys');
       const first = parseKeyId(keys[0]);
       const t0 = st.layer(first.layerId)!.props[first.key]!.kf![first.index].t;
-      this.drag = { kind: 'keys', sx: x, t0, moved: false, dt: 0, key: keys[0] };
+      this.drag = { kind: 'keys', sx: x, t0, moved: false, dt: 0, key: keys[0], snap: snapshotKeys(st, st.keySelection) };
       st.beginGesture('keys');
       return;
     }
@@ -665,11 +666,10 @@ export class Timeline {
       // snap the dragged key to frames (and playhead)
       let nt = st.snapTime(d.t0 + dt);
       if (Math.abs(this.tToX(st.time) - this.tToX(d.t0 + dt)) < 6) nt = st.time;
-      dt = Math.max(-d.t0, nt - d.t0);
-      const step = dt - d.dt;
-      if (Math.abs(step) < 1e-9) return;
+      dt = Math.max(-d.snap.minT, nt - d.t0);
+      if (Math.abs(dt - d.dt) < 1e-9) return;
       d.dt = dt;
-      moveKeyframes(st, st.keySelection, step);
+      moveKeysFrom(st, d.snap, dt);
     } else if (d.kind === 'marquee') {
       d.x = x; d.y = y;
       const t0 = this.xToT(Math.min(d.sx, x)), t1 = this.xToT(Math.max(d.sx, x));

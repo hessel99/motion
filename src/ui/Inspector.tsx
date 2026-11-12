@@ -121,7 +121,7 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
   const l = layers[0];
   const t = store.time;
   const ids = layers.map(x => x.id);
-  const set = (key: PropKey, v: number[], mk?: string) => { for (const x of layers) setProp(store, x.id, key, v, { mergeKey: mk }); };
+  const set = (key: PropKey, v: number[], mk?: string) => store.batch('insp', () => { for (const x of layers) setProp(store, x.id, key, v, { mergeKey: mk }); });
   const v = (key: PropKey) => valueAt(l, key, t);
   const pos = v('position'), size = v('size'), scale = v('scale'), anchor = v('anchor');
   const rot = v('rotation')[0], opa = v('opacity')[0];
@@ -129,9 +129,9 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
   const common = [...types].reduce<PropKey[]>((acc, ty, i) => (i === 0 ? TYPE_PROPS[ty] : acc.filter(p => TYPE_PROPS[ty].includes(p))), []);
   const vec = (key: PropKey, idx: number, val: number, cur: number[], mk?: string) => { const n = cur.slice(); n[idx] = val; set(key, n, mk); };
   // per-layer vector set keeps other layers' components
-  const vecMulti = (key: PropKey, idx: number, val: number, mk?: string) => {
+  const vecMulti = (key: PropKey, idx: number, val: number, mk?: string) => store.batch('insp', () => {
     for (const x of layers) { const n = valueAt(x, key, t); n[idx] = val; setProp(store, x.id, key, n, { mergeKey: mk }); }
-  };
+  });
   return (
     <>
       <AlignBar ids={ids} />
@@ -229,6 +229,10 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
 }
 
 function sizeChange(layers: Layer[], idx: number, n: number, mk?: string) {
+  const store = st();
+  store.batch('size', () => sizeChangeInner(layers, idx, n, mk));
+}
+function sizeChangeInner(layers: Layer[], idx: number, n: number, mk?: string) {
   const store = st();
   for (const l of layers) {
     const t = store.time;

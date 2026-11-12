@@ -17,6 +17,7 @@ export class Editor {
   private hooks = new Set<FrameHook>();
   private raf = 0;
   private lastNow = 0;
+  private clock = 0;
   /** play at comp fps instead of display refresh (off = smoothest) */
   snapPlaybackToFrames = false;
   /** frame timing ring buffer (ms between frames) for the perf hud */
@@ -49,6 +50,7 @@ export class Editor {
   play() {
     if (this.store.time >= this.store.comp.duration - 1e-6) this.store.setTime(0);
     this.lastNow = performance.now();
+    this.clock = this.store.time;
     this.store.setPlaying(true);
   }
   pause() { this.store.setPlaying(false); }
@@ -84,12 +86,15 @@ export class Editor {
     this.frameTimes[this.frameIdx++ % this.frameTimes.length] = dt;
     if (store.playing) {
       const comp = store.comp;
-      let t = store.time + Math.min(dt, 100) / 1000;
+      // unsnapped playback clock (snapping it would freeze playback when dt < one frame)
+      if (Math.abs(this.clock - store.time) > 1 / comp.fps) this.clock = store.time; // user moved the playhead
+      let t = this.clock + Math.min(dt, 100) / 1000;
       if (t >= comp.duration) {
         if (store.loop) t = t % comp.duration;
         else { t = comp.duration; store.setPlaying(false); }
       }
-      if (this.snapPlaybackToFrames) t = Math.floor(t * comp.fps) / comp.fps;
+      this.clock = t;
+      if (this.snapPlaybackToFrames) t = Math.floor(t * comp.fps + 1e-6) / comp.fps;
       store.time = t; // direct write: avoid per-frame ui fan-out, hooks read store.time
       store.emit('tick');
     }

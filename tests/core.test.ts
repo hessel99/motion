@@ -179,3 +179,68 @@ describe('presets + align', () => {
     expect(valueAt(s.layer(l.id)!, 'position', 0)).toEqual([25, 125]);
   });
 });
+
+import { snapshotKeys, moveKeysFrom, setPropTx as _setPropTx, setSpring as _setSpring } from '../src/core/commands';
+describe('review regressions', () => {
+  const keyed = (s: Store, times: number[]) => {
+    const l = addLayer(s, 'rect');
+    s.setTime(times[0]);
+    toggleAnimated(s, [l.id], 'rotation');
+    times.forEach((t, i) => { s.setTime(t); setProp(s, l.id, 'rotation', [i * 90]); });
+    return l;
+  };
+  it('group is a single undo step', () => {
+    const s = new Store();
+    const a = addLayer(s, 'rect', { x: 100, y: 100, w: 50, h: 50 });
+    groupLayers(s, [a.id], { x: 100, y: 100, w: 50, h: 50 });
+    s.undo();
+    expect(s.comp.root).toEqual([a.id]);
+    expect(s.layer(a.id)!.props.position!.v).toEqual([125, 125]);
+    expect(Object.keys(s.project.layers)).toEqual([a.id]);
+  });
+  it('dragging a key across another key does not delete it', () => {
+    const s = new Store();
+    const l = keyed(s, [0, 1, 2]);
+    const snap = snapshotKeys(s, [keyId(l.id, 'rotation', 0)]);
+    moveKeysFrom(s, snap, 1.5);
+    moveKeysFrom(s, snap, 0.5);
+    expect(s.layer(l.id)!.props.rotation!.kf!.map(k => k.t)).toEqual([0.5, 1, 2]);
+  });
+  it('multi-key drag toward 0 keeps spacing', () => {
+    const s = new Store();
+    s.setTime(0.2);
+    const l = keyed(s, [0.2, 0.5, 2]);
+    const snap = snapshotKeys(s, [keyId(l.id, 'rotation', 0), keyId(l.id, 'rotation', 1)]);
+    moveKeysFrom(s, snap, -0.4);
+    moveKeysFrom(s, snap, 0);
+    expect(s.layer(l.id)!.props.rotation!.kf!.map(k => +k.t.toFixed(6))).toEqual([0.2, 0.5, 2]);
+  });
+  it('transactions are atomic', () => {
+    const s = new Store();
+    const l = addLayer(s, 'rect');
+    const before = s.layer(l.id)!.props.position!.v.slice();
+    expect(() => s.transact('bad', tx => { _setPropTx(tx, s.layer(l.id)!, 'position', [999, 999], 0); throw new Error('boom'); })).toThrow();
+    expect(s.layer(l.id)!.props.position!.v).toEqual(before);
+  });
+  it('key selection is cleared when keys are inserted', () => {
+    const s = new Store();
+    const l = keyed(s, [0, 2]);
+    s.keySelection = new Set([keyId(l.id, 'rotation', 1)]);
+    s.setTime(1); setProp(s, l.id, 'rotation', [45]);
+    expect(s.keySelection.size).toBe(0);
+  });
+  it('inserting into a spring segment keeps the bounce', () => {
+    const s = new Store();
+    const l = keyed(s, [0, 2]);
+    _setSpring(s, [keyId(l.id, 'rotation', 0)], 0.8);
+    s.setTime(1); setProp(s, l.id, 'rotation', [10]);
+    expect(s.layer(l.id)!.props.rotation!.kf![1].bounce).toBe(0.8);
+  });
+  it('duplicating a group with its child copies the child once', () => {
+    const s = new Store();
+    const a = addLayer(s, 'rect');
+    const g = groupLayers(s, [a.id], { x: 0, y: 0, w: 200, h: 200 })!;
+    cloneLayers(s, [g.id, a.id]);
+    expect(Object.keys(s.project.layers).length).toBe(4);
+  });
+});
