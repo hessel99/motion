@@ -108,14 +108,14 @@ check('drag keyframe in timeline', newT > keyMoved.t + 0.2, `${keyMoved.t} -> ${
 {
   const lid = await ev(() => editor.store.selection[0]);
   await ev((id) => { editor.store.keySelection = new Set([id + '|position|0']); editor.store.emit('keys'); timeline.expand(id, true); }, lid);
-  await page.mouse.click(tl.x + timeline_leftW() - 30, tl.y + 14);
+  await page.mouse.click(tl.x + timeline_leftW() - 80, tl.y + 14);
   await page.waitForTimeout(150);
   const before = await ev((id) => editor.store.layer(id).props.position.kf[0].out.slice(), lid);
   const h = await ev(() => { const gv = timeline.graph; const c = gv.curves.find(c => c.handles); const kf = c.layer.props[c.key].kf; return gv.handlePos(c, kf, 0); });
   await page.mouse.move(tl.x + h.ox, tl.y + h.oy); await page.mouse.down(); await page.mouse.move(tl.x + h.ox + 40, tl.y + h.oy - 30, { steps: 5 }); await page.mouse.up();
   const after = await ev((id) => editor.store.layer(id).props.position.kf[0].out.slice(), lid);
   check('graph editor handle drag edits easing', after[0] !== before[0] || after[1] !== before[1], `${before} -> ${after}`);
-  await page.mouse.click(tl.x + timeline_leftW() - 90, tl.y + 14); // back to keys
+  await page.mouse.click(tl.x + timeline_leftW() - 128, tl.y + 14); // back to keys
 }
 
 // motion path: drag the 2nd position keyframe on the canvas, alt-click the 1st to curve it
