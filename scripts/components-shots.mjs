@@ -88,6 +88,21 @@ const r1 = await page.evaluate(({ title, bg }) => {
 check(r1.titles === 6, `six instances expanded (${r1.titles} title items)`);
 check(r1.texts.join() === 'Motion,Brand,Type,Social,Reels,Thanks', `each instance shows its own title: ${r1.texts.join(', ')}`);
 check(r1.bgsShared === 1, `the background (unchanged) is the same layer object in all instances (${r1.bgsShared})`);
+// editing the component from the showreel (its layers are not in this composition): occurrences
+// recompile in place, patched copies keep their values
+const r3 = await page.evaluate(async ({ title, bg }) => {
+  const C = await import('/src/core/commands.ts');
+  const ed = globalThis.editor, R = ed.renderer, s = ed.store;
+  C.setProp(s, bg, 'fill', [0.2, 0.1, 0.3, 1]);
+  C.setProp(s, title, 'rotation', [-2]);
+  R.render(1);
+  const bgs = R.items.filter(it => it.id === bg).map(it => it.layer.props.fill.v[0]);
+  const ts = R.items.filter(it => it.id === title);
+  const rot = [...new Set(ts.map(t => t.layer.props.rotation.v[0]))], texts = ts.map(t => t.layer.text.content).join();
+  C.setProp(s, bg, 'fill', [0.09, 0.09, 0.11, 1]); C.setProp(s, title, 'rotation', [0]); R.render(1);
+  return { bgs: [...new Set(bgs)], rot, texts };
+}, info);
+check(r3.bgs.join() === '0.2' && r3.rot.join() === '-2' && r3.texts.startsWith('Motion,Brand'), `a main edit reaches every instance, values kept (${JSON.stringify(r3)})`);
 // timing: at 3.2s card 1 (start 2, duration 2) is 60% through its pass = 1.8s of its 3s; card 0 is hidden
 const r2 = await page.evaluate(({ bg }) => {
   const R = globalThis.editor.renderer;

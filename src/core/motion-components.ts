@@ -435,8 +435,8 @@ export class InstanceResolver {
   /** copies made in the last pass (stats / tests) */
   patched = 0;
 
-  begin(changed?: Iterable<string>) {
-    this.seen.clear(); this.patched = 0;
+  begin(changed?: Iterable<string>, pass = true) {
+    if (pass) { this.seen.clear(); this.patched = 0; }
     // layers edited in place since the last pass (the renderer knows them): drop their copies
     if (changed) { const ids = new Set(changed); if (ids.size) for (const [k, e] of this.cache) if (ids.has(e.src.id)) this.cache.delete(k); }
   }

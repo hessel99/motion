@@ -254,6 +254,9 @@ interface Item {
   tOff: number;
   /** time map (Renderer.tmaps) of a precomp with its own timing it lives in; -1 = local time is t - tOff */
   tm: number;
+  /** component instance this occurrence belongs to: its resolver chain and plan (patched layers) */
+  chain?: string;
+  plan?: InstancePlan | null;
   /** comp time after which this item is hidden (end of the precomp it lives in) */
   tEnd: number;
   /** index of the item in the active comp that owns this one (itself, or the precomp layer it is inside) */
@@ -641,7 +644,7 @@ export class Renderer {
     const L = store.project.layers;
     // flatten the layer tree depth-first; precomp layers expand the referenced comp inline
     // (each expanded item gets its own time offset). items outside the active comp are not indexed.
-    const entries: { layer: Layer; parent: number; tOff: number; local: boolean; owner: number; tEnd: number; end: number; tm: number }[] = [];
+    const entries: { layer: Layer; parent: number; tOff: number; local: boolean; owner: number; tEnd: number; end: number; tm: number; chain: string; plan: InstancePlan | null }[] = [];
     let tEndCur = Infinity;
     // precomps with their own timing (speed, loop, ranges, hold: Layer.play) get a time map node;
     // everything inside one (also plain precomps nested in it) reads its local time from the chain.
@@ -655,7 +658,7 @@ export class Renderer {
         if (!layer) continue;
         if (plan) layer = R.resolve(chain, layer, plan);
         const idx = entries.length;
-        const e = { layer, parent, tOff, local, owner: local ? idx : owner, tEnd: tEndCur, end: 0, tm };
+        const e = { layer, parent, tOff, local, owner: local ? idx : owner, tEnd: tEndCur, end: 0, tm, chain, plan };
         entries.push(e);
         if (layer.children.length) walk(layer.children, idx, tOff, local, local ? idx : owner, depth, stack, tm, chain, plan);
         if (layer.type === 'precomp' && layer.compRef && depth < 16 && !stack.includes(layer.compRef)) {
@@ -706,17 +709,24 @@ export class Renderer {
     const prevItems = this.items, prevN = prevItems.length;
     const full = this.forceFull || !prevN || !this.incrementalCompile || (this.pool.used > 1_000_000 && this.pool.used > this.poolLive * 3);
     // old items per layer id, in order (several for layers inside precomps instanced more than once)
-    let head: Map<string, number> | null = null, nextOcc: Int32Array | null = null;
+    // keyed by the layer OBJECT: component instances show patched copies under the same id
+    let head: Map<Layer, number> | null = null, nextOcc: Int32Array | null = null;
     if (!full) {
       head = new Map();
       nextOcc = new Int32Array(prevN);
-      for (let j = prevN - 1; j >= 0; j--) { const id = prevItems[j].id; const h = head.get(id); nextOcc[j] = h ?? -1; head.set(id, j); }
+      for (let j = prevN - 1; j >= 0; j--) { const lo = prevItems[j].layer; const h = head.get(lo); nextOcc[j] = h ?? -1; head.set(lo, j); }
     }
     if (full) this.pool.reset();
     this.unitCount = 0;
     this.items = new Array(n);
     this.index.clear();
-    for (let i = 0; i < n; i++) if (entries[i].local) this.index.set(entries[i].layer.id, i);
+    this.occ.clear();
+    for (let i = 0; i < n; i++) {
+      const e = entries[i];
+      if (e.local) { this.index.set(e.layer.id, i); continue; }
+      const a = this.occ.get(e.layer.id);
+      if (a) a.push(i); else this.occ.set(e.layer.id, [i]);
+    }
     // the arrays compileItem / evalItem fill are double-buffered: reused items copy from the previous set
     const prev = this.soa();
     const cap = this.world.length < n * 6 ? Math.max(64, n * 2) : this.world.length / 6;
@@ -750,7 +760,7 @@ export class Renderer {
     let reused = 0;
     for (let i = 0; i < n; i++) {
       const en = entries[i];
-      const { layer, parent, tOff, owner, tEnd, tm } = en;
+      const { layer, parent, tOff, owner, tEnd, tm, chain, plan } = en;
       let src = -1;
       if (!en.local) {
         const f = first.get(layer.id);
@@ -763,18 +773,18 @@ export class Renderer {
       const isoGroup = layer.children.length > 0 || layer.type === 'precomp';
       let j = -1;
       if (head) {
-        const h = head.get(layer.id);
+        const h = head.get(layer);
         if (h !== undefined && prevItems[h].layer === layer && !changed.has(layer.id)) {
           let ok = okLayer.get(layer);
           if (ok === undefined) { ok = this.sigSame(layer); okLayer.set(layer, ok); }
-          if (ok) { j = h; const nx = nextOcc![h]; if (nx >= 0) head.set(layer.id, nx); else head.delete(layer.id); }
+          if (ok) { j = h; const nx = nextOcc![h]; if (nx >= 0) head.set(layer, nx); else head.delete(layer); }
         }
       }
       this.sPar[i] = parent; this.sTOff[i] = tOff; this.sEnd[i] = tEnd; this.sClip[i] = clip; this.sTM[i] = tm;
       EVT[i] = NaN;
       if (j >= 0) {
         const it = prevItems[j];
-        it.parent = parent; it.clip = clip; it.isoGroup = isoGroup; it.hidden = hidden; it.tOff = tOff; it.owner = owner; it.tEnd = tEnd; it.tm = tm;
+        it.parent = parent; it.clip = clip; it.isoGroup = isoGroup; it.hidden = hidden; it.tOff = tOff; it.owner = owner; it.tEnd = tEnd; it.tm = tm; it.chain = chain; it.plan = plan;
         this.items[i] = it;
         copySoa(prev, j, next, i);
         this.sIn[i] = layer.inPoint; this.sOut[i] = layer.outPoint;
@@ -788,7 +798,7 @@ export class Renderer {
         const it: Item = {
           id: layer.id, layer, parent, clip, kind: KIND_NONE, animated: false, animMask: 0, isoGroup, hidden,
           rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
-          tOff, tm, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null, fx: null, fxBlend: 0,
+          tOff, tm, chain, plan, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null, fx: null, fxBlend: 0,
         };
         this.items[i] = it;
         this.compileItem(i, src);
@@ -869,7 +879,7 @@ export class Renderer {
   private compileItem(i: number, src = -1) {
     const it = this.items[i];
     const l = it.layer;
-    if (src < 0) this.sigs.set(l, this.sigOf(l, []));
+    if (src < 0 || !this.sigs.has(l)) this.sigs.set(l, this.sigOf(l, []));
     this.sEvT[i] = NaN;
     let mask = 0;
     // animated props go into the track pool; static ones are written once below (no Track
@@ -1144,6 +1154,8 @@ export class Renderer {
   private tmT = new Float64Array(0);
   private tmAt = NaN;
   private resolver = new InstanceResolver();
+  /** item indices of each layer shown inside precomps (not in the active comp itself) */
+  private occ = new Map<string, number[]>();
   /** patched instance layers made by the last compile (stats / tests) */
   get patchedLayers() { return this.resolver.patched; }
   private evalMaps(t: number) {
@@ -1747,11 +1759,31 @@ export class Renderer {
       // incremental recompiles append to the pool; repack when it has grown a lot
       if (this.pool.used > 1_000_000 && this.pool.used > this.poolLive * 3) this.needsCompile = true;
       if (this.needsCompile) { this.compile(); }
-      for (const id of this.dirtyLayers) if (!this.index.has(id)) { this.needsCompile = true; break; }
+      // layers shown only inside precomps / component instances (an edit of a component seen from a
+      // composition that uses it): recompile their occurrences in place, no new walk. not while a
+      // component shows a variant (instance plans then depend on the edited values)
+      const editingVariant = this.occ.size > 0 && Object.values(store.project.comps).some(c => c.component?.editing);
+      for (const id of this.dirtyLayers) if (!this.index.has(id) && (editingVariant || !this.occ.has(id) || !store.project.layers[id])) { this.needsCompile = true; break; }
+      const compiled = this.needsCompile;
       if (this.needsCompile) this.compile();
       for (const id of this.dirtyLayers) {
         const i = this.index.get(id);
         if (i !== undefined) { this.items[i].layer = store.project.layers[id]; this.compileItem(i); this.dirtyIdx.push(i); }
+        const occ = compiled ? undefined : this.occ.get(id);
+        if (occ) {
+          const src = store.project.layers[id];
+          this.resolver.begin([id], false);
+          // the first occurrence compiles the tracks, the others share every unpatched one
+          let first = -1;
+          for (const k of occ) {
+            const it = this.items[k];
+            it.layer = it.plan ? this.resolver.resolve(it.chain!, src, it.plan) : src;
+            this.compileItem(k, first);
+            if (first < 0) first = k;
+            this.sSrc[k] = k !== first && !this.sExpr[k] && !this.sExpr[first] && this.items[first].layer === it.layer ? first : -1;
+            this.dirtyIdx.push(k);
+          }
+        }
       }
       for (const id of this.dirtyLayers) this.changedLayers.delete(id);
       this.dirtyLayers.clear();
