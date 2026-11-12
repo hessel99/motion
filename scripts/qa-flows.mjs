@@ -67,6 +67,18 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   const clipped = await ev(() => [...document.querySelectorAll('.inspector .num-label')].filter(e => e.offsetParent && e.scrollWidth > e.clientWidth + 1).map(e => e.textContent));
   check(`${w}: inspector field labels are not clipped`, clipped.length === 0, JSON.stringify(clipped));
 
+  // QA-4: reopening a recent file wiped its thumbnail (the open stored "no thumbnail")
+  if (w === 1440) {
+    await page.goto(`${base}?nobridge&theme=dark`);
+    await page.waitForFunction(() => window.editor?.renderer);
+    await page.click('text=Open the demo animation'); await page.waitForTimeout(600);
+    await ev(async () => { const D = await import('/src/app/documents.ts'); for (const d of [...D.documents()]) D.closeDoc(d.id, { force: true }); });
+    await page.waitForTimeout(2600); // the recent entry is written in idle time
+    await page.click('.recent-open >> nth=0'); await page.waitForTimeout(2600);
+    const thumb = await ev(async () => { const R = await import('/src/app/recent.ts'); return !!(await R.recentThumb(R.recentFiles()[0].key)); });
+    check('reopening a recent file keeps its thumbnail', thumb);
+  }
+
   // no horizontal page overflow
   const overflow = await ev(() => document.documentElement.scrollWidth - innerWidth);
   check(`${w}: no horizontal page overflow`, overflow <= 0, `${overflow}px`);

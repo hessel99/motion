@@ -79,7 +79,11 @@ export function rememberRecent(p: Project, path: string | null, thumb?: string) 
   const write = () => {
     let data: string | null = null;
     if (stored) { try { data = JSON.stringify(p); } catch { /* */ } }
-    void idb('readwrite', s => s.put({ data, thumb: thumb ?? null }, key));
+    // no new thumbnail (a file opened, a background tab closed): keep the one stored before,
+    // so reopening a recent file doesn't blank its card on Home
+    const put = (t: string | null) => idb('readwrite', s => s.put({ data, thumb: t }, key));
+    if (thumb !== undefined) void put(thumb);
+    else void idb<{ thumb: string | null } | undefined>('readonly', s => s.get(key)).then(old => put(old?.thumb ?? null));
     // entries that fell off the list leave the database too
     void idb<IDBValidKey[]>('readonly', s => s.getAllKeys()).then(keys => {
       const keep = new Set(list.map(x => x.key));

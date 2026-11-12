@@ -12,6 +12,7 @@ The existing `scripts/e2e.mjs`, `scripts/ui-check.mjs`, `scripts/audio-smoke.mjs
 | QA-1 | A file opened from Home (size preset, brief) was zoomed to fit against the full-width Home stage (the sidebars are hidden there). Once the editor showed, the comp was too big and hung off the left edge of the canvas (the "Main 1920×1080" label was cut to "20×1080" at 1280×800). Fix: the viewport keeps following size changes while the view is still the automatic fit, and stops once the user zooms or pans (`src/ui/viewport-controller.ts`). | fixed, `qa-flows` check | see `git log --grep QA-1` |
 | QA-2 | A Lottie pasted as text opened in a new tab called "clipboard". It is now named after the animation (`nm`), or "Pasted Lottie". | fixed, `qa-flows` check | see `git log --grep QA-2` |
 | QA-3 | Inspector number fields with a long label shrank the label so it ran into the value: "Spread0", "Density50%", "Background Blur" and the Timing "Out" clipped. The label no longer shrinks (`.num-label`, `src/ui/styles.css`). | fixed, `qa-flows` check | see `git log --grep QA-3` |
+| QA-4 | Reopening a recent file (or closing a background tab) stored "no thumbnail" over the one saved before, so its Home card went blank. The stored thumbnail is now kept unless a new one is given (`src/app/recent.ts`). | fixed, `qa-flows` check | see `git log --grep QA-4` |
 
 ## Handed off (layout / chrome: shell agent)
 
@@ -24,12 +25,14 @@ The existing `scripts/e2e.mjs`, `scripts/ui-check.mjs`, `scripts/audio-smoke.mjs
 | H-5 | Timeline: layer bars run past the end-of-comp line into the scrollbar gutter on the right. |
 | H-7 | At 800×600 both sidebars keep their full width and crush the stage to ~130px; the transport buttons overlap the play button. |
 | H-8 | The selection bar above a layer covers the blue size badge when the layer touches the top of the canvas (e.g. a pasted Figma frame, a precomp layer). |
+| H-9 | The rail's Home tooltip opens below the button and covers the next rail icon (it is declared `data-tooltip-side="right"`). |
 | H-6 | `electron/main.cjs` comment points to `src/ui/chrome/TabStrip.tsx`, which no longer exists (the tab strip is `TopBar.tsx`). |
 
 ## Handed off (other areas)
 
 | # | issue | owner |
 |---|---|---|
+| O-2 | Agent turn revert: Revert undoes the turn's N steps one by one, so ⌘⇧Z afterwards brings the turn back one step at a time (first just "Add rect", a half-built state) while the card still says "Reverted". Either squash the turn into one undo step at the end (`Store.squashSince`, as storyboard beats do; careful with edits the user makes during the turn) or make the card follow redo. Needs an owner decision. | agent |
 | O-1 | Export file names differ per format for the same comp: `Demo.mp4`, `Demo.json`, but `Demo - Logo reveal.gif` / `.html`, `Demo_0000.png`. | export-parity |
 
 ## Checked and working
