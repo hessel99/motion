@@ -369,14 +369,18 @@ export async function handlePaste(e: ClipboardEvent) {
 const AUTOSAVE_KEY = 'motion.autosave';
 export function setupAutosave() {
   let timer = 0;
+  const save = () => {
+    // big projects don't fit local storage anyway (~5MB): skip instead of serializing megabytes on the main thread
+    if (Object.keys(st().project.layers).length > 1500) return;
+    try {
+      const s = serialize();
+      if (s.length < 4_000_000) localStorage.setItem(AUTOSAVE_KEY, s);
+    } catch { /* quota */ }
+  };
   st().on('doc', () => {
     clearTimeout(timer);
-    timer = window.setTimeout(() => {
-      try {
-        const s = serialize();
-        if (s.length < 4_000_000) localStorage.setItem(AUTOSAVE_KEY, s);
-      } catch { /* quota */ }
-    }, 800);
+    // save when the user pauses editing, in idle time
+    timer = window.setTimeout(() => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(save, { timeout: 3000 }) : save()), 1200);
   });
 }
 export function restoreAutosave(): boolean {

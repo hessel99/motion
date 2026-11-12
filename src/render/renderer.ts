@@ -347,6 +347,14 @@ export class Renderer {
     this.needsCompile = false;
     this.dirtyLayers.clear();
     this.poolLive = this.pool.used;
+    this.subEnd = new Int32Array(n);
+    for (let i = n - 1; i >= 0; i--) {
+      // end of subtree: first following item whose parent chain doesn't include i
+      let e = i + 1;
+      while (e < n && this.isInside(e, i)) e = this.subEnd[e];
+      this.subEnd[i] = e;
+    }
+    this.evalAll = true;
   }
   private poolLive = 0;
 
@@ -450,10 +458,23 @@ export class Renderer {
     L[o6 + 5] = py - (b * ax + d * ay);
   }
 
+  private isInside(e: number, i: number) {
+    let p = this.items[e].parent;
+    while (p > i) p = this.items[p].parent;
+    return p === i;
+  }
+  private evalTime = NaN;
+  private evalAll = true;
+  private dirtyIdx: number[] = [];
+  /** subEnd[i] = index after the last descendant of i (depth-first order => subtrees are contiguous) */
+  private subEnd = new Int32Array(0);
+
   /** compute world matrices and opacities for all items at time t */
-  evaluate(t: number) {
-    const items = this.items, n = items.length, W = this.world, L = this.local, O = this.opa, LO = this.lopa;
-    for (let i = 0; i < n; i++) {
+  evaluate(t: number) { this.evaluateRange(t, 0, this.items.length); }
+
+  private evaluateRange(t: number, from: number, to: number) {
+    const items = this.items, W = this.world, L = this.local, O = this.opa, LO = this.lopa;
+    for (let i = from; i < to; i++) {
       const it = items[i];
       if (it.animated) this.evalItem(i, t);
       const o = i * 6;
@@ -565,13 +586,21 @@ export class Renderer {
       if (this.needsCompile) { this.compile(); }
       for (const id of this.dirtyLayers) {
         const i = this.index.get(id);
-        if (i !== undefined) { this.items[i].layer = store.project.layers[id]; this.compileItem(i); }
+        if (i !== undefined) { this.items[i].layer = store.project.layers[id]; this.compileItem(i); this.dirtyIdx.push(i); }
       }
       this.dirtyLayers.clear();
     }
     this.atlas.frame++;
     const e0 = performance.now();
-    this.evaluate(t);
+    // same time + only a few layers edited (dragging while paused): re-evaluate just their subtrees
+    if (t === this.evalTime && !this.evalAll && this.dirtyIdx.length && this.dirtyIdx.length < 64) {
+      for (const i of this.dirtyIdx) this.evaluateRange(t, i, this.subEnd[i]);
+    } else if (t !== this.evalTime || this.evalAll || this.dirtyIdx.length) {
+      this.evaluate(t);
+    }
+    this.evalTime = t;
+    this.evalAll = false;
+    this.dirtyIdx.length = 0;
     const e1 = performance.now();
 
     const items = this.items, n = items.length;

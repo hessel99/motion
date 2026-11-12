@@ -1,0 +1,21 @@
+import { chromium } from './pw.mjs';
+const n = +(process.argv[2] || 10000);
+const browser = await chromium.launch({ args: ['--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
+await page.goto(`${process.env.URL || 'http://localhost:4173/'}?nobridge&blank&stress=${n}`);
+await page.waitForFunction(() => (window.editor?.renderer?.stats?.layers ?? 0) > 0);
+await page.waitForTimeout(1500);
+const p = await page.evaluate(() => { const st = editor.store; const id = st.comp.root[st.comp.root.length - 1]; st.select([id]); const c = editor.renderer.corners(id); const r = document.querySelector('.viewport').getBoundingClientRect(); return { x: r.left + viewport.panX + ((c[0] + c[4]) / 2) * viewport.zoom, y: r.top + viewport.panY + ((c[1] + c[5]) / 2) * viewport.zoom }; });
+await page.waitForTimeout(500);
+const cdp = await page.context().newCDPSession(page);
+await cdp.send('Profiler.enable'); await cdp.send('Profiler.setSamplingInterval', { interval: 200 }); await cdp.send('Profiler.start');
+await page.mouse.move(p.x, p.y); await page.mouse.down();
+for (let i = 1; i <= 15; i++) await page.mouse.move(p.x + i * 4, p.y + i * 2);
+await page.mouse.up();
+const { profile } = await cdp.send('Profiler.stop');
+const self = new Map(); const byId = new Map(profile.nodes.map(nd => [nd.id, nd]));
+const dt = profile.timeDeltas; const counts = new Map();
+profile.samples.forEach((s, i) => counts.set(s, (counts.get(s) || 0) + (dt[i] || 0)));
+for (const [id, us] of counts) { const nd = byId.get(id); const k = `${nd.callFrame.functionName || '(anon)'} ${nd.callFrame.url.split('/').pop()}:${nd.callFrame.lineNumber + 1}`; self.set(k, (self.get(k) || 0) + us); }
+console.log([...self].sort((a, b) => b[1] - a[1]).slice(0, 15).map(([k, us]) => `${(us / 1000).toFixed(0).padStart(6)}ms  ${k}`).join('\n'));
+await browser.close();

@@ -196,6 +196,10 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
   const zoom = Math.max(width / comp.width, height / comp.height);
   const panX = (width - comp.width * zoom) / 2, panY = (height - comp.height * zoom) / 2;
   r.editorBg = [0, 0, 0]; // transparent comp backgrounds become black, as in other tools
+  // the canvas is drawn at export size during the export: hide it so the compositor doesn't have
+  // to present (and scale) every frame. VideoFrame capture reads the drawing buffer regardless.
+  const prevVisibility = r.canvas.style.visibility;
+  r.canvas.style.visibility = 'hidden';
 
   const output = new Output({
     format: picked.format === 'mp4' ? new Mp4OutputFormat({ fastStart: 'in-memory' }) : new WebMOutputFormat(),
@@ -263,6 +267,7 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
     try { if (encoder.state !== 'closed') encoder.close(); } catch { /* */ }
     if (!finished) { try { await output.cancel(); } catch { /* */ } }
     r.editorBg = prev.bg;
+    r.canvas.style.visibility = prevVisibility;
     r.resize(prev.w, prev.h, prev.dpr);
     r.setView(prev.zoom, prev.panX, prev.panY);
     r.dirty = true;
@@ -277,3 +282,6 @@ export function videoFileName(projectName: string, format: VideoFormat) {
   const base = (projectName || 'animation').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'animation';
   return `${base}.${format}`;
 }
+
+// handy for debugging and scripted checks (scripts/export-check.mjs --electron), like window.editor
+(globalThis as any).motionVideo = { exportVideo, exportVideoDetailed, probeVideoSupport };
