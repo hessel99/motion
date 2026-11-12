@@ -2,7 +2,7 @@
 // (tests/fixtures/fake-claude/claude), so no subscription is used:
 //   PATH=$PWD/tests/fixtures/fake-claude:$PATH MOTION_BRIDGE_PORT=7836 node bridge/server.mjs &
 //   npx vite --port 5185 & node scripts/agent-ui-check.mjs [outDir]
-// Covers: streaming tool steps + screenshot thumbnails, review card (diff, hold-to-compare, revert),
+// Covers: storyboard card (edit/approve/progress), style picker, result preview, streaming tool steps + screenshot thumbnails, review card (diff, hold-to-compare, revert),
 // @-mentions, context chips, quick actions, variations tray, Ask mode, typed errors, stop, persistence.
 import { chromium } from './pw.mjs';
 import fs from 'node:fs';
@@ -38,8 +38,10 @@ check(await page.locator('.ag-shots img').count() >= 1, 'screenshot the agent to
 check(/in · .* out/.test(await page.locator('.msg.info').last().innerText()), 'usage stats shown');
 await shot('1-review');
 
-// hold to compare
+// hold to compare (after the result preview arrived: it is part of the card's column)
+await page.waitForSelector('[data-testid=result-preview]', { timeout: 10000 });
 const cmp = page.locator('[data-testid=turn-review] button', { hasText: 'Hold to compare' });
+await cmp.scrollIntoViewIfNeeded();
 const box = await cmp.boundingBox();
 await page.mouse.move(box.x + 5, box.y + 5);
 await page.mouse.down();
@@ -113,7 +115,34 @@ await page.locator('.agent-input button[aria-label="Stop"]').click();
 await idle();
 check(/Stopped/.test(await page.locator('.msg.info').last().innerText()), 'stop ends the turn');
 
-// 7. persistence across reload
+// 7. style picker + storyboard card (director workflow): propose → edit a beat → approve → per-beat progress
+await page.locator('.ag-style', { hasText: 'Swiss' }).click();
+check(await page.locator('.ag-style.on').count() === 1, 'style chip picked');
+await send('Make a storyboard for a launch teaser');
+check(await page.locator('.ag-style.on').count() === 0, 'style chip resets after sending');
+check(/swiss/i.test(await page.locator('.msg.user').last().innerText()), 'user message tagged with the style');
+check(/style prefix: true; wait: true/.test(await page.locator('.msg.assistant').last().innerText()), 'brief carried the style prefix; agent told to wait for approval');
+const card = page.locator('[data-testid=storyboard]').last();
+check((await card.count()) === 1 && (await card.locator('[data-testid=storyboard-beat]').count()) === 3, 'storyboard card with 3 beats');
+check(await page.locator('.ag-step summary', { hasText: 'Read guide' }).count() >= 1, 'get_guide step labeled');
+await card.locator('input[aria-label="Beat 2 name"]').fill('Logo resolve');
+check(/Edited/.test(await card.innerText()), 'card shows it was edited');
+await shot('7-storyboard');
+await card.locator('button', { hasText: 'Approve' }).click();
+await page.waitForSelector('[data-testid=agent-working]');
+await idle();
+const cardText = await card.innerText();
+check(/built/i.test(cardText) && (await card.locator('.ag-sb-beat.done').count()) === 3, 'all beats done on the card: ' + cardText.split('\n')[0]);
+check(/Logo resolve/.test(cardText), 'edited beat name kept after approval');
+const labels = await page.evaluate(() => editor.store.historyLabels.slice(-3));
+check(labels.join('|') === 'Beat 1 · Hook|Beat 2 · Logo resolve|Beat 3 · End card', 'each beat is one undo step: ' + labels.join(' | '));
+check(/Approved storyboard \(edited\)/.test(await page.locator('.msg.user').last().innerText()), 'approval sent as a chip');
+await page.waitForSelector('[data-testid=result-preview]', { timeout: 10000 }).catch(() => {});
+check(await page.locator('[data-testid=result-preview]').count() >= 1, 'inline result preview (contact sheet) at the end of the turn');
+await page.evaluate(() => editor.pause());
+await shot('8-storyboard-built');
+
+// 8. persistence across reload
 const n = await page.locator('.agent-list .msg').count();
 await page.waitForTimeout(2500); // let the project autosave so the reload reopens the same document
 await page.goto(URL.replace('?blank&', '?'));

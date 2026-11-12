@@ -10,6 +10,16 @@ import { detectProviders, runTurn, PROVIDERS } from './providers.mjs';
 export const TOOL_TIMEOUT_MS = 120_000;
 const MAX_BODY = 4 * 1024 * 1024;
 const SUPPORTED_PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
+/** tool results go straight into the model context: a runaway text result is cut here (images pass) */
+export const MAX_TOOL_TEXT = Number(process.env.MOTION_MAX_TOOL_TEXT) || 24_000;
+
+/** cap each text block of a tool result; tells the model how much was cut and what to do */
+export function compactContent(content, max = MAX_TOOL_TEXT) {
+  if (!Array.isArray(content)) return content;
+  return content.map((c) => (c && c.type === 'text' && typeof c.text === 'string' && c.text.length > max
+    ? { ...c, text: `${c.text.slice(0, max)}\n… (${c.text.length - max} more characters cut: ask for less, e.g. pass ids, a section or deep:false)` }
+    : c));
+}
 
 /**
  * Origins allowed to open the editor WebSocket / call MCP from a browser context.
@@ -50,6 +60,8 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
   /** @type {import('ws').WebSocket | null} */
   let editor = null;
   let tools = [];
+  /** read-only documents the editor serves as MCP resources (motion guides): {uri, name, title, description, mimeType, text} */
+  let resources = [];
   /** id -> {resolve, timer} */
   const pending = new Map();
   /** chatId -> {run, ws} */
@@ -99,7 +111,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
         const requested = msg.params?.protocolVersion;
         return reply({
           protocolVersion: SUPPORTED_PROTOCOLS.includes(requested) ? requested : (typeof requested === 'string' ? requested : '2025-03-26'),
-          capabilities: { tools: { listChanged: false } },
+          capabilities: { tools: { listChanged: false }, resources: { listChanged: false, subscribe: false } },
           serverInfo: { name: 'motion', version: '0.1.0' },
           instructions: 'Tools that operate the Motion motion-design editor the user has open.',
         });
@@ -124,14 +136,22 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
         const r = await callEditorTool(name, msg.params?.arguments);
         if (r.ok) {
           const content = Array.isArray(r.content) && r.content.length ? r.content : [{ type: 'text', text: 'ok' }];
-          return reply({ content, isError: false });
+          return reply({ content: compactContent(content), isError: false });
         }
         const content = Array.isArray(r.content) && r.content.length ? r.content : [{ type: 'text', text: r.error ?? 'Tool failed' }];
         if (r.error && Array.isArray(r.content) && r.content.length) content.unshift({ type: 'text', text: r.error });
         return reply({ content, isError: true });
       }
       case 'resources/list':
-        return reply({ resources: [] });
+        return reply({ resources: resources.map(({ uri, name, title, description, mimeType }) => ({ uri, name, ...(title ? { title } : {}), ...(description ? { description } : {}), mimeType: mimeType ?? 'text/markdown' })) });
+      case 'resources/read': {
+        const uri = msg.params?.uri;
+        const r = resources.find((x) => x.uri === uri);
+        if (!r) return fail(-32002, `Resource not found: ${uri}${resources.length ? '' : ' (no editor connected)'}`);
+        return reply({ contents: [{ uri: r.uri, mimeType: r.mimeType ?? 'text/markdown', text: r.text }] });
+      }
+      case 'resources/templates/list':
+        return reply({ resourceTemplates: [] });
       case 'prompts/list':
         return reply({ prompts: [] });
       default:
@@ -224,7 +244,8 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
         case 'hello':
           editor = ws;
           tools = Array.isArray(msg.tools) ? msg.tools.filter((t) => t && typeof t.name === 'string') : [];
-          say(`[bridge] editor registered ${tools.length} tools`);
+          resources = Array.isArray(msg.resources) ? msg.resources.filter((r) => r && typeof r.uri === 'string' && typeof r.text === 'string') : [];
+          say(`[bridge] editor registered ${tools.length} tools, ${resources.length} resources`);
           break;
         case 'tool_result': {
           const p = pending.get(msg.id);
@@ -255,6 +276,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
               sessionId: typeof msg.sessionId === 'string' && msg.sessionId ? msg.sessionId : undefined,
               model: typeof msg.model === 'string' && msg.model ? msg.model : undefined,
               systemPrompt: typeof msg.systemPrompt === 'string' && msg.systemPrompt ? msg.systemPrompt : undefined,
+              maxTurns: Number.isInteger(msg.maxTurns) && msg.maxTurns > 0 ? Math.min(msg.maxTurns, 500) : undefined,
               readOnlyTools: Array.isArray(msg.readOnlyTools) ? msg.readOnlyTools.filter((t) => typeof t === 'string' && /^[\w-]+$/.test(t)) : undefined,
               mcpUrl: `http://127.0.0.1:${actualPort}/mcp`,
               workDir,

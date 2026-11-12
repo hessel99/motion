@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import WebSocket from 'ws';
-import { startBridge, isAllowedOrigin, isAuthorized } from '../bridge/server.mjs';
+import { startBridge, isAllowedOrigin, isAuthorized, compactContent, MAX_TOOL_TEXT } from '../bridge/server.mjs';
+import { classifyError } from '../bridge/errors.mjs';
 import { parseClaudeLine, parseCodexLine, parseGeminiLine, splitJsonLines } from '../bridge/parsers.mjs';
-import { buildCommand } from '../bridge/providers.mjs';
+import { buildCommand, DEFAULT_MAX_TURNS } from '../bridge/providers.mjs';
 
 let bridge;
 let base;
@@ -241,5 +242,51 @@ describe('buildCommand', () => {
     const cfg = JSON.parse(c.args[c.args.indexOf('--mcp-config') + 1]);
     expect(cfg).toEqual({ mcpServers: { motion: { type: 'http', url: 'http://127.0.0.1:1/mcp' } } });
     expect(c.args).toEqual(expect.arrayContaining(['-p', '--verbose', '--include-partial-messages', '--allowedTools', 'mcp__motion', '--resume', 's1', '--append-system-prompt', 'SP', '--model', 'sonnet']));
+  });
+});
+
+describe('bridge: guides as MCP resources, compact results, turn budget', () => {
+  it('serves the editor-registered resources (list + read) and caps huge text results', async () => {
+    const res = [{ uri: 'motion://guides/handbook', name: 'handbook', title: 'Motion handbook', description: 'craft rules', mimeType: 'text/markdown', text: '# Motion handbook\n...' }];
+    const big = 'x'.repeat(MAX_TOOL_TEXT + 500);
+    const ws = new WebSocket(`ws://127.0.0.1:${bridge.port}/ws`, { headers: { origin: 'http://localhost:5173' } });
+    ws.on('message', (d) => {
+      const m = JSON.parse(String(d));
+      if (m.type === 'tool_call') ws.send(JSON.stringify({ type: 'tool_result', id: m.id, ok: true, content: [{ type: 'text', text: big }] }));
+    });
+    await new Promise((r) => ws.on('open', r));
+    ws.send(JSON.stringify({ type: 'hello', tools: [{ name: 'dump', description: 'big output', inputSchema: { type: 'object', properties: {} } }], resources: res }));
+    await until(async () => (await (await fetch(`${base}/health`)).json()).tools === 1);
+
+    const init = await rpc({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {} } });
+    expect(init.body.result.capabilities.resources).toBeTruthy();
+    const list = await rpc({ jsonrpc: '2.0', id: 2, method: 'resources/list' });
+    expect(list.body.result.resources).toEqual([{ uri: 'motion://guides/handbook', name: 'handbook', title: 'Motion handbook', description: 'craft rules', mimeType: 'text/markdown' }]);
+    const read = await rpc({ jsonrpc: '2.0', id: 3, method: 'resources/read', params: { uri: 'motion://guides/handbook' } });
+    expect(read.body.result.contents[0]).toEqual({ uri: 'motion://guides/handbook', mimeType: 'text/markdown', text: '# Motion handbook\n...' });
+    const miss = await rpc({ jsonrpc: '2.0', id: 4, method: 'resources/read', params: { uri: 'motion://guides/nope' } });
+    expect(miss.body.error.message).toMatch(/not found/);
+
+    const call = await rpc({ jsonrpc: '2.0', id: 5, method: 'tools/call', params: { name: 'dump', arguments: {} } });
+    const t = call.body.result.content[0].text;
+    expect(t.length).toBeLessThan(MAX_TOOL_TEXT + 200);
+    expect(t).toMatch(/500 more characters cut/);
+    ws.close();
+  });
+
+  it('compactContent leaves small text and images alone', () => {
+    const c = [{ type: 'text', text: 'ok' }, { type: 'image', data: 'x'.repeat(100), mimeType: 'image/png' }];
+    expect(compactContent(c, 10)).toEqual(c);
+  });
+
+  it('claude gets a turn budget (default or per message); max-turns results are a typed error', () => {
+    const base = { message: 'x', mcpUrl: 'http://127.0.0.1:1/mcp', workDir: '/tmp' };
+    const a = buildCommand('claude', base).args;
+    expect(a[a.indexOf('--max-turns') + 1]).toBe(String(DEFAULT_MAX_TURNS));
+    const b = buildCommand('claude', { ...base, maxTurns: 12 }).args;
+    expect(b[b.indexOf('--max-turns') + 1]).toBe('12');
+    const ev = parseClaudeLine({ type: 'result', subtype: 'error_max_turns', is_error: true, num_turns: 12, session_id: 's' }, {});
+    expect(ev.find((e) => e.kind === 'error').message).toMatch(/turn budget/);
+    expect(classifyError('Reached the turn budget (error_max_turns, 12 turns).').errorKind).toBe('turn_budget');
   });
 });

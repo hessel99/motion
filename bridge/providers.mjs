@@ -13,6 +13,11 @@ export const IDLE_TIMEOUT_MS = Number(process.env.MOTION_AGENT_IDLE_MS) || 300_0
 
 const IS_WIN = process.platform === 'win32';
 
+/** default agentic turn budget per message (claude --max-turns). A full multi-beat piece with
+ *  critique needs ~40-70 tool round trips; the cap only stops runaway loops. The editor can send
+ *  its own (Settings → Models); MOTION_AGENT_MAX_TURNS overrides the default. */
+export const DEFAULT_MAX_TURNS = Number(process.env.MOTION_AGENT_MAX_TURNS) || 90;
+
 /** GUI-launched apps (Electron on macOS) don't inherit the shell PATH; add the usual CLI install dirs. */
 export function augmentedEnv(extra = {}) {
   const home = os.homedir();
@@ -78,7 +83,7 @@ export function defaultWorkDir() {
 /** set once a claude CLI rejected the lean flags (older versions): later turns skip them */
 let claudeLeanUnsupported = false;
 
-export function buildCommand(provider, { message, sessionId, model, systemPrompt, mcpUrl, workDir, readOnlyTools, lean = !claudeLeanUnsupported }) {
+export function buildCommand(provider, { message, sessionId, model, systemPrompt, mcpUrl, workDir, readOnlyTools, maxTurns, lean = !claudeLeanUnsupported }) {
   // these reach argv: only plain ids, never something a CLI could read as a flag
   const SAFE = /^[A-Za-z0-9][\w.:-]{0,127}$/;
   if (sessionId != null && !SAFE.test(String(sessionId))) sessionId = undefined;
@@ -101,8 +106,12 @@ export function buildCommand(provider, { message, sessionId, model, systemPrompt
       // needs the editor's MCP tools; this cuts ~10k tokens per request and keeps it away from the disk.
       if (lean) args.push('--tools', '', '--disable-slash-commands');
       if (sessionId) args.push('--resume', sessionId);
+      // the system prompt is a constant (per app version): together with the fixed tool list it is the
+      // cached prefix of every request. per-turn context (selection, style, ask mode) goes in the message.
       if (systemPrompt) args.push('--append-system-prompt', systemPrompt);
       if (model) args.push('--model', model);
+      const turns = Number.isInteger(maxTurns) && maxTurns > 0 ? maxTurns : DEFAULT_MAX_TURNS;
+      args.push('--max-turns', String(turns));
       // Load the editor's MCP tools up front instead of via deferred ToolSearch (one less round trip).
       return { bin: 'claude', args, stdin: message, env: { ENABLE_TOOL_SEARCH: 'false' }, parse: parseClaudeLine };
     }

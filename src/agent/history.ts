@@ -4,6 +4,7 @@
 
 import type { Project } from '../core/model';
 import type { TurnDiff } from './diff';
+import type { Storyboard } from './storyboard';
 
 export interface ToolInfo { id: string; name: string; input: any; result?: string; isError?: boolean; image?: string; startedAt?: number; ms?: number }
 /** startId / endId: the store's top undo entry id before / after the turn (Store.topEntryId). the
@@ -18,7 +19,7 @@ export function reviewAtEnd(r: ReviewInfo, topEntryId: number) {
 }
 
 export interface Msg {
-  role: 'user' | 'assistant' | 'tool' | 'error' | 'info' | 'review';
+  role: 'user' | 'assistant' | 'tool' | 'error' | 'info' | 'review' | 'storyboard';
   text: string;
   mode?: 'edit' | 'ask';
   tool?: ToolInfo;
@@ -29,6 +30,12 @@ export interface Msg {
   chip?: string;
   /** user text to resend for "Retry" */
   retry?: string;
+  /** role 'storyboard': the plan card (a snapshot, updated in place as progress arrives) */
+  storyboard?: Storyboard;
+  /** role 'review': contact sheet of the result (data url; not persisted) */
+  preview?: string;
+  /** user message: the style picked with the style picker (guide name) */
+  style?: string;
 }
 
 export interface SavedChat { v: 1; msgs: Msg[]; sessions: Record<string, string | undefined>; savedAt: number }
@@ -48,7 +55,7 @@ const trimJson = (v: any, max = 1500) => {
 export function serializeChat(msgs: Msg[], sessions: Record<string, string | undefined>): SavedChat {
   const out = msgs.slice(-MAX_MSGS).map(m => {
     if (m.tool) return { ...m, tool: { ...m.tool, image: undefined, input: trimJson(m.tool.input), result: m.tool.result?.slice(0, 600) } };
-    if (m.review) return { ...m, review: { ...m.review, state: m.review.state === 'pending' ? 'stale' as const : m.review.state } };
+    if (m.review) return { ...m, preview: undefined, review: { ...m.review, state: m.review.state === 'pending' ? 'stale' as const : m.review.state } };
     return m;
   });
   return { v: 1, msgs: out, sessions, savedAt: Date.now() };

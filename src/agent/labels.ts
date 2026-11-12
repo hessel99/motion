@@ -50,6 +50,9 @@ export function toolLabel(rawName: string, input: any, layerName: (id: string) =
     case 'open_composition': return 'Open composition';
     case 'export_video': return `Export ${a.format ?? 'mp4'}`;
     case 'undo': return 'Undo';
+    case 'get_guide': return a.name ? `Read guide ${q(a.name + (a.section ? ' › ' + a.section : ''))}` : 'List guides';
+    case 'propose_storyboard': return `Storyboard ${q(a.title ?? '')}${Array.isArray(a.beats) ? ` · ${plural(a.beats.length, 'beat')}` : ''}`;
+    case 'update_progress': return `Beat ${a.beat} ${a.status === 'active' ? 'started' : a.status ?? ''}`;
     default: return name.replace(/_/g, ' ');
   }
 }

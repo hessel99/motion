@@ -1,6 +1,6 @@
 // Turn raw CLI failures into actionable, typed errors for the editor UI.
 //   {kind:'error', message, errorKind, hint}
-// errorKind: not_installed | auth | rate_limit | overloaded | network | timeout | cancelled | bridge | unknown
+// errorKind: turn_budget | not_installed | auth | rate_limit | overloaded | network | timeout | cancelled | bridge | unknown
 
 const LOGIN = {
   claude: 'Open a terminal, run `claude` and log in (or `/login` inside it), then retry.',
@@ -17,6 +17,7 @@ const INSTALL = {
 export function classifyError(message, provider = 'claude') {
   const m = String(message ?? '');
   if (/^cancell?ed$/i.test(m.trim())) return { errorKind: 'cancelled' };
+  if (/error_max_turns|max(imum)?[ _-]?turns/i.test(m)) return { errorKind: 'turn_budget', hint: 'The agent used its turn budget for this message (Settings → Models → Turn budget). Say **continue** to let it finish.' };
   if (/not found on PATH|ENOENT|command not found|is not recognized as an internal/i.test(m)) return { errorKind: 'not_installed', hint: INSTALL[provider] ?? INSTALL.claude };
   if (/inactive for|timed out|timeout/i.test(m) && !/ETIMEDOUT/.test(m)) return { errorKind: 'timeout', hint: 'The agent stopped responding. Retry, or try a smaller request.' };
   if (/rate.?limit|usage limit|limit reached|quota|\b429\b|too many requests/i.test(m)) return { errorKind: 'rate_limit', hint: 'Your subscription limit was reached. Wait for it to reset or switch the model/provider.' };
