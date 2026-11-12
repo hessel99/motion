@@ -11,6 +11,8 @@ import {
   exportLottie, exportAeScript, exportFramePng, confirmDiscard, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, toast, runBenchmark, exportGifFile,
 } from '../app/actions';
 import { setProjectName, editMode, newComposition, addPrecompLayer, renameComp, deleteLayers } from '../core/commands';
+import { Button, Dialog, Kbd } from './ui';
+import { getTheme, setTheme } from './theme';
 
 let vp: ViewportController | null = null;
 let tl: Timeline | null = null;
@@ -78,6 +80,7 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
       { label: 'Run performance benchmark', action: () => editor.emit('benchmark') },
       { separator: true },
       { label: editor.showHud ? 'Hide performance HUD' : 'Show performance HUD', action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
+      { label: getTheme() === 'light' ? 'Dark theme' : 'Light theme', action: () => setTheme(getTheme() === 'light' ? 'dark' : 'light') },
       { label: editor.snapPlaybackToFrames ? 'Play smooth (display refresh)' : 'Play at composition fps', action: () => { editor.snapPlaybackToFrames = !editor.snapPlaybackToFrames; toast(editor.snapPlaybackToFrames ? 'Playback snaps to composition frames' : 'Playback is smooth (every display frame)'); } },
     ];
     showContextMenu(r.left, r.bottom + 4, items);
@@ -85,10 +88,10 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
   return (
     <header class="topbar">
       <div class="tb-left">
-        <button class="ghost logo" onClick={fileMenu as any} title="Menu">◆ Motion ▾</button>
-        <input class="filename" value={s.project.name} onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+        <Button variant="ghost" class="logo" onClick={fileMenu as any} aria-haspopup="menu" tip="Menu">◆ Motion ▾</Button>
+        <input class="filename" aria-label="Project name" value={s.project.name} onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
           onChange={e => setProjectName(s, (e.target as HTMLInputElement).value || 'Untitled')} spellcheck={false} />
-        <button class="ghost comp-switch" title="Compositions" onClick={(e: MouseEvent) => {
+        <Button variant="ghost" class="comp-switch" tip="Compositions" aria-haspopup="menu" onClick={(e: MouseEvent) => {
           const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
           const comps = Object.values(s.project.comps);
           showContextMenu(r.left, r.bottom + 4, [
@@ -98,28 +101,28 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
             ...(comps.length > 1 ? [{ label: 'Add composition as layer', submenu: comps.filter(c => c.id !== s.comp.id).map(c => ({ label: c.name, action: () => { try { addPrecompLayer(s, c.id); } catch (err: any) { toast(err.message, 'error'); } } })) }] : []),
             { label: 'Rename composition…', action: () => { const n = prompt('Composition name', s.comp.name); if (n) renameComp(s, s.comp.id, n); } },
           ]);
-        }}>▣ {s.comp.name} ▾</button>
-        <span class="muted small">{s.comp.width}×{s.comp.height} · {s.comp.fps}fps · {s.comp.duration}s</span>
+        }}>▣ {s.comp.name} ▾</Button>
+        <span class="muted small tb-meta">{s.comp.width}×{s.comp.height} · {s.comp.fps}fps · {s.comp.duration}s</span>
       </div>
       <div class="tb-center">
-        <button class="ghost" title="Go to start (Home)" onClick={() => s.setTime(0)}>⏮</button>
-        <button class="ghost" title="Previous frame (,)" onClick={() => editor.stepFrames(-1)}>◂</button>
-        <button class="play" title="Play / pause (Space)" onClick={() => editor.togglePlay()}>{s.playing ? '❚❚' : '▶'}</button>
-        <button class="ghost" title="Next frame (.)" onClick={() => editor.stepFrames(1)}>▸</button>
-        <span class="timecode" ref={time}>00:00</span>
-        <button class={'ghost autokey' + (editMode.autoKey ? ' rec' : '')} title="Auto-keyframe: every change creates a keyframe at the playhead" onClick={() => { editMode.autoKey = !editMode.autoKey; editor.emit('view'); }}>● Auto-key</button>
+        <Button variant="ghost" icon tip="Go to start (Home)" onClick={() => s.setTime(0)}>⏮</Button>
+        <Button variant="ghost" icon tip="Previous frame (,)" onClick={() => editor.stepFrames(-1)}>◂</Button>
+        <Button class="play" tip={s.playing ? 'Pause (Space)' : 'Play (Space)'} aria-label={s.playing ? 'Pause' : 'Play'} onClick={() => editor.togglePlay()}>{s.playing ? '❚❚' : '▶'}</Button>
+        <Button variant="ghost" icon tip="Next frame (.)" onClick={() => editor.stepFrames(1)}>▸</Button>
+        <span class="timecode" ref={time} aria-label="Current time">00:00</span>
+        <button type="button" class={'ghost autokey' + (editMode.autoKey ? ' rec' : '')} aria-pressed={editMode.autoKey} title="Auto-keyframe: every change creates a keyframe at the playhead" onClick={() => { editMode.autoKey = !editMode.autoKey; editor.emit('view'); }}>● Auto-key</button>
       </div>
       <div class="tb-right">
-        <button class="ghost" disabled={!s.canUndo} title={`Undo ${s.undoLabel ?? ''} (⌘Z) — right-click for history`} onClick={() => s.undo()} onContextMenu={e => {
+        <Button variant="ghost" icon disabled={!s.canUndo} aria-label="Undo" title={`Undo ${s.undoLabel ?? ''} (⌘Z) — right-click for history`} onClick={() => s.undo()} onContextMenu={e => {
           // history: jump back several steps at once (newest first)
           e.preventDefault();
           const labels = s.historyLabels;
           const items: MenuItem[] = labels.map((label, i) => ({ label: `${label}`, shortcut: i === labels.length - 1 ? 'last' : `${labels.length - i}`, action: () => s.undoTo(i) })).reverse().slice(0, 25);
           if (items.length) showContextMenu(e.clientX, e.clientY + 8, items);
-        }}>↶</button>
-        <button class="ghost" disabled={!s.canRedo} title="Redo (⇧⌘Z)" onClick={() => s.redo()}>↷</button>
-        <button class="ghost zoom" title="Zoom to fit (⌘0)" onClick={() => vp?.fit()}>{Math.round((vp?.zoom ?? 1) * 100)}%</button>
-        <button class={'ghost' + (props.agentOpen ? ' on' : '')} title="AI agent (⌘I)" onClick={props.toggleAgent}>✦ Agent</button>
+        }}>↶</Button>
+        <Button variant="ghost" icon disabled={!s.canRedo} tip="Redo (⇧⌘Z)" onClick={() => s.redo()}>↷</Button>
+        <Button variant="ghost" class="zoom" tip="Zoom to fit (⌘0)" onClick={() => vp?.fit()}>{Math.round((vp?.zoom ?? 1) * 100)}%</Button>
+        <Button variant="ghost" active={props.agentOpen} tip="AI agent (⌘I)" onClick={props.toggleAgent}>✦ Agent</Button>
       </div>
     </header>
   );
@@ -169,9 +172,9 @@ const TOOLS: { id: Tool; label: string; key: string; icon: string }[] = [
 function Toolbar() {
   useChannels([], ['tool']);
   return (
-    <div class="toolbar vp-ui">
+    <div class="toolbar vp-ui" role="toolbar" aria-label="Tools">
       {TOOLS.map(t => (
-        <button class={editor.tool === t.id ? 'on' : ''} title={`${t.label} (${t.key})`} onClick={() => editor.setTool(t.id)}>{t.icon}</button>
+        <Button variant="ghost" active={editor.tool === t.id} tip={t.key ? `${t.label} (${t.key})` : t.label} tipSide="top" aria-label={t.label} onClick={() => editor.setTool(t.id)}>{t.icon}</Button>
       ))}
     </div>
   );
@@ -262,12 +265,9 @@ function ShortcutHelp() {
   useEffect(() => editor.on('help', () => setOpen(o => !o)), []);
   if (!open) return null;
   return (
-    <div class="help-backdrop" onClick={() => setOpen(false)}>
-      <div class="help" onClick={e => e.stopPropagation()}>
-        <div class="help-title">Keyboard shortcuts <button class="ghost" onClick={() => setOpen(false)}>✕</button></div>
-        <div class="help-grid">{SHORTCUTS.map(([k, d]) => <><kbd>{k}</kbd><span>{d}</span></>)}</div>
-      </div>
-    </div>
+    <Dialog title="Keyboard shortcuts" class="help" onClose={() => setOpen(false)}>
+      <div class="help-grid">{SHORTCUTS.map(([k, d]) => <><Kbd>{k}</Kbd><span>{d}</span></>)}</div>
+    </Dialog>
   );
 }
 
@@ -280,16 +280,14 @@ function Benchmark() {
   }), []);
   if (!rows) return null;
   return (
-    <div class="help-backdrop" onClick={() => !running && setRows(null)}>
-      <div class="help" onClick={e => e.stopPropagation()}>
-        <div class="help-title">Performance benchmark {running ? <span class="muted small">running… (every layer animates position, rotation, scale, opacity, color). your project is restored afterwards; undo history is reset.</span> : <button class="ghost" onClick={() => setRows(null)}>✕</button>}</div>
+    <Dialog title="Performance benchmark" class="help" onClose={running ? undefined : () => setRows(null)}>
+        {running && <div class="muted small" style={{ marginBottom: 'var(--space-4)' }}>running… (every layer animates position, rotation, scale, opacity, color). your project is restored afterwards; undo history is reset.</div>}
         <table class="bench">
           <thead><tr><th>layers</th><th>fps</th><th>p95 frame</th><th>cpu / frame</th></tr></thead>
           <tbody>{rows.map(r => <tr><td>{(r.layers as number).toLocaleString()}</td><td>{r.fps}</td><td>{r['p95 frame ms']} ms</td><td>{r['cpu ms/frame']} ms</td></tr>)}</tbody>
         </table>
-        {rows[0] && <div class="muted small" style={{ marginTop: '10px' }}>GPU: {rows[0].gpu}. fps is capped by your display refresh rate; cpu/frame is the editor's own work per frame.</div>}
-      </div>
-    </div>
+        {rows[0] && <div class="muted small" style={{ marginTop: 'var(--space-5)' }}>GPU: {rows[0].gpu}. fps is capped by your display refresh rate; cpu/frame is the editor's own work per frame.</div>}
+    </Dialog>
   );
 }
 
@@ -306,7 +304,7 @@ class Guard extends Component<{ name: string; children: ComponentChildren }, { e
         <div class="panel-error">
           <b>{this.props.name} crashed</b>
           <div class="muted small">{this.state.error}</div>
-          <button onClick={() => this.setState({ error: null })}>Retry</button>
+          <Button onClick={() => this.setState({ error: null })}>Retry</Button>
         </div>
       );
     }
@@ -321,17 +319,13 @@ function Welcome() {
   if (!open) return null;
   const close = () => { try { localStorage.setItem('motion.welcomed', '1'); } catch { /* */ } setOpen(false); };
   return (
-    <div class="help-backdrop" onClick={close}>
-      <div class="help welcome" onClick={e => e.stopPropagation()}>
-        <div class="help-title">Welcome to Motion <button class="ghost" onClick={close}>✕</button></div>
+    <Dialog title="Welcome to Motion" class="help welcome" onClose={close} actions={<Button variant="primary" autofocus onClick={close}>Start</Button>}>
         <ol>
           <li><b>Paste from Figma</b>: select layers in Figma, ⌘C, then ⌘V here. A single frame becomes the composition.</li>
           <li><b>Animate</b>: click a property's ◇ to add keyframes, or use <i>Animate</i> presets and <i>Text animation</i> in the right panel. Press F9 for easy ease.</li>
           <li><b>AI agent</b> (left): describe an animation and Claude Code builds it in your file, with your own subscription. One click undoes everything it did.</li>
-          <li><b>Everything else</b>: press <kbd>?</kbd> for shortcuts. Export video or Lottie from the ◆ menu.</li>
+          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video or Lottie from the ◆ menu.</li>
         </ol>
-        <button class="primary" onClick={close}>Start</button>
-      </div>
-    </div>
+    </Dialog>
   );
 }

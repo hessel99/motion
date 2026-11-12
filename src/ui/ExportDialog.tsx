@@ -6,6 +6,7 @@ import { render } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
 import { download, toast } from '../app/actions';
+import { Button, Dialog, Segmented } from './ui';
 import {
   evenDimensions, computeBitrate, frameCount, exportVideoDetailed, probeVideoSupport, videoFileName,
   type VideoFormat, type VideoQuality, type ExportProgress,
@@ -120,51 +121,40 @@ export function ExportDialog(props: { onClose: () => void }) {
   }, []);
 
   return (
-    <div class="xv-backdrop" onPointerDown={e => { if (e.target === e.currentTarget && !busy) props.onClose(); }}>
-      <div class="xv-dialog" role="dialog" aria-label="Export video">
-        <div class="xv-title">Export video</div>
+    <Dialog title="Export video" class="xv-dialog" actionsClass="xv-actions" onClose={() => cancelRef.current()} dismissable={!busy}
+      actions={<>
+        <Button onClick={cancel}>Cancel</Button>
+        <Button variant="primary" disabled={busy || (support !== null && !support[format])} onClick={start}>{busy ? 'Exporting…' : 'Export'}</Button>
+      </>}>
         <div class="xv-grid">
-          <label>Format</label>
-          <select value={format} disabled={busy} onChange={e => setFormat((e.target as HTMLSelectElement).value as VideoFormat)}>
+          <label for="xv-format">Format</label>
+          <select id="xv-format" value={format} disabled={busy} onChange={e => setFormat((e.target as HTMLSelectElement).value as VideoFormat)}>
             <option value="mp4" disabled={support !== null && !support.mp4}>MP4 (H.264){support && !support.mp4 ? ' – unavailable' : ''}</option>
             <option value="webm" disabled={support !== null && !support.webm}>WebM (VP9)</option>
           </select>
           <label>Resolution</label>
-          <div class="xv-seg">
-            {SCALES.map(s => (
-              <button class={scale === s ? 'on' : ''} disabled={busy} onClick={() => setScale(s)}>{s}×</button>
-            ))}
-          </div>
-          <label>Frame rate</label>
-          <select value={String(fps)} disabled={busy} onChange={e => setFps(Number((e.target as HTMLSelectElement).value))}>
+          <Segmented class="xv-seg" label="Resolution" value={scale} disabled={busy} options={SCALES.map(s => ({ value: s, label: `${s}×` }))} onChange={setScale} />
+          <label for="xv-fps">Frame rate</label>
+          <select id="xv-fps" value={String(fps)} disabled={busy} onChange={e => setFps(Number((e.target as HTMLSelectElement).value))}>
             {[...new Set([comp.fps, 24, 25, 30, 50, 60])].sort((a, b) => a - b).map(f => (
               <option value={String(f)}>{f} fps{f === comp.fps ? ' (comp)' : ''}</option>
             ))}
           </select>
           <label>Quality</label>
-          <div class="xv-seg">
-            {(['low', 'medium', 'high'] as VideoQuality[]).map(q => (
-              <button class={quality === q ? 'on' : ''} disabled={busy} onClick={() => setQuality(q)}>{q[0].toUpperCase() + q.slice(1)}</button>
-            ))}
-          </div>
+          <Segmented class="xv-seg" label="Quality" value={quality} disabled={busy} options={(['low', 'medium', 'high'] as VideoQuality[]).map(q => ({ value: q, label: q[0].toUpperCase() + q.slice(1) }))} onChange={setQuality} />
         </div>
         <div class="xv-info muted">
           {dims.width}×{dims.height} · {frames} frames · {(bitrate / 1e6).toFixed(1)} Mbit/s · ~{fmtBytes(estBytes)}
         </div>
         {prog && (
           <div class="xv-progress">
-            <div class="xv-bar"><div style={{ width: `${(prog.progress * 100).toFixed(1)}%` }} /></div>
+            <div class="xv-bar progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(prog.progress * 100)}><div style={{ width: `${(prog.progress * 100).toFixed(1)}%` }} /></div>
             <div class="xv-stat muted">
               <span>{prog.frame} / {prog.total}{prog.fps ? ` · ${prog.fps.toFixed(0)} fps` : ''}</span>
               <span>{prog.progress >= 1 ? 'Finishing…' : `ETA ${fmtDuration(prog.etaMs)}`}</span>
             </div>
           </div>
         )}
-        <div class="xv-actions">
-          <button onClick={cancel}>Cancel</button>
-          <button class="primary" disabled={busy || (support !== null && !support[format])} onClick={start}>{busy ? 'Exporting…' : 'Export'}</button>
-        </div>
-      </div>
-    </div>
+    </Dialog>
   );
 }

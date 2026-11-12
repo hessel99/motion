@@ -1,6 +1,6 @@
 # Motion — engineering notes
 
-> **Design note:** the visual design is intentionally basic right now. A dedicated design pass is planned later.
+> **Design note:** the visual design is intentionally basic right now. A dedicated design pass is planned later; the token-based design system it will build on is described under "Design system" below.
 > The focus so far is performance, correctness and the core workflow.
 
 ## What exists
@@ -163,6 +163,25 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
   - 11 Lottie files from lottie-web, compared against the official player
   - real `.aep` files
 - `scripts/` holds the browser and Electron checks: e2e interactions, perf, drag-and-drop, agent loop, precomps, masks, text animation, Lottie comparison, video/GIF export, context loss, desktop autosave.
+
+## Design system (`src/ui/`)
+
+The look is token driven, so a visual pass should only need to edit `tokens.css`.
+
+- **`tokens.css`**:
+  - semantic colors: surfaces, text levels, accent and selection, status, keyframes
+  - canvas tokens for the timeline (`--tl-*`), the graph editor (`--graph-*`, `--axis-*`) and the viewport overlay (`--vp-*`)
+  - spacing, radii, type scale, control sizes, shadows, motion durations and easings, z layers, focus ring
+  - dark is the default. Light is `data-theme="light"` on `<html>`: File menu → Light theme, or `?theme=light`. A theme can also be set on a subtree.
+- **`theme.ts`**: canvas parity. It resolves the canvas tokens into `T` once at startup and again on each theme change (a MutationObserver on `data-theme`). Draw code reads `T.tlBg` and `T.font.ui`. Nothing calls `getComputedStyle` per frame (measured: 0 calls during playback; a theme switch costs about 13ms once).
+- **`ui.tsx`**: the primitives Button, NumField, Select, Checkbox, Toggle, Slider, Segmented, Section, Dialog (focus trap, Escape, focus restore), ColorSwatch and Kbd.
+- **`styles.css`**: the component classes.
+  - `.btn` with `.btn-primary`, `.btn-ghost`, `.btn-danger`, `.btn-icon`, `.btn-sm` and `.btn-lg`. The legacy `.primary` and `.ghost` classes still work.
+  - `.seg`, `.section`, `.ctx-menu`, `.toast`, `.dialog`, `.swatch`, `.kbd` and `.progress`.
+  - CSS-only tooltips through `data-tooltip`.
+  - Menus (`menu.ts`) support arrow keys, Home/End, →/← for submenus, type-ahead, and Enter/Space.
+- **Style guide**: `?styleguide` shows every token and component in both themes. It also runs live WCAG contrast checks (all text pairs reach AA) and draws a timeline and graph sample through `theme.ts`.
+- **Performance rules**: no backdrop-filter or blur, and transitions only on the color and opacity of small controls. Panels use `contain`. The per-frame timecode uses tabular digits in a fixed-width box.
 
 ## Known limitations / next
 

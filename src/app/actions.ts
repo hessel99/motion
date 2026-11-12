@@ -63,7 +63,7 @@ export function confirmDiscard(what = 'This replaces the current project.'): boo
 
 export function toast(msg: string, kind: 'info' | 'error' = 'info') {
   let host = document.querySelector('.toasts') as HTMLElement | null;
-  if (!host) { host = document.createElement('div'); host.className = 'toasts'; document.body.appendChild(host); }
+  if (!host) { host = document.createElement('div'); host.className = 'toasts'; host.setAttribute('role', 'status'); host.setAttribute('aria-live', 'polite'); document.body.appendChild(host); }
   const el = document.createElement('div');
   el.className = 'toast ' + kind;
   el.textContent = msg;

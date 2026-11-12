@@ -12,6 +12,7 @@ import { useChannels } from './hooks';
 import { ANIM_PRESETS, alignLayers, applyPreset, distributeLayers, setTextAnim, TEXT_ANIM_PRESETS, type Align } from '../core/presets';
 import { invert } from './viewport-controller';
 import { toast } from '../app/actions';
+import { Checkbox, ColorSwatch, NumField, Section, Segmented, Slider } from './ui';
 
 const st = () => editor.store;
 
@@ -29,79 +30,8 @@ export function Inspector() {
   );
 }
 
-function Section(props: { title: string; children: any; right?: any }) {
-  return (
-    <div class="insp-section">
-      <div class="insp-title"><span>{props.title}</span>{props.right}</div>
-      {props.children}
-    </div>
-  );
-}
-
-// ---------------- number field (scrub label + input) ----------------
-export function NumField(props: { label: string; value: number; step?: number; min?: number; max?: number; onChange: (v: number, mergeKey?: string) => void; suffix?: string; title?: string }) {
-  const [text, setText] = useState<string | null>(null);
-  // the text being edited, readable synchronously (enter commits and then blurs in the same tick:
-  // the state closure would still hold the old text and commit twice)
-  const editing = useRef<string | null>(null);
-  const fmt = (v: number) => (Math.round(v * 100) / 100).toString();
-  const clamp = (v: number) => Math.min(props.max ?? Infinity, Math.max(props.min ?? -Infinity, v));
-  const onScrub = (e: PointerEvent) => {
-    e.preventDefault();
-    const startX = e.clientX, v0 = props.value;
-    const key = 'scrub' + Math.random();
-    const el = e.currentTarget as HTMLElement;
-    el.setPointerCapture(e.pointerId);
-    const move = (ev: PointerEvent) => {
-      const mult = ev.shiftKey ? 10 : ev.altKey ? 0.1 : 1;
-      props.onChange(clamp(v0 + Math.round((ev.clientX - startX) * (props.step ?? 1) * mult * 100) / 100), key);
-    };
-    const up = () => { el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); };
-    el.addEventListener('pointermove', move);
-    el.addEventListener('pointerup', up);
-  };
-  const commit = () => {
-    const text = editing.current;
-    if (text == null) return;
-    editing.current = null;
-    setText(null);
-    // focus + blur without editing must not touch the document (no rounding, no stray keyframe)
-    if (text.trim() === fmt(props.value)) return;
-    const v = evalExpr(text, props.value);
-    if (v != null && isFinite(v)) props.onChange(clamp(v));
-  };
-  return (
-    <div class="num" title={props.title}>
-      <span class="num-label" onPointerDown={onScrub as any}>{props.label}</span>
-      <input
-        value={text ?? fmt(props.value) + (props.suffix ?? '')}
-        onFocus={e => { editing.current = fmt(props.value); setText(editing.current); requestAnimationFrame(() => (e.target as HTMLInputElement).select()); }}
-        onInput={e => { editing.current = (e.target as HTMLInputElement).value; setText(editing.current); }}
-        onBlur={commit}
-        onKeyDown={e => {
-          e.stopPropagation();
-          if (e.key === 'Enter') { commit(); (e.target as HTMLInputElement).blur(); }
-          if (e.key === 'Escape') { editing.current = null; setText(null); (e.target as HTMLInputElement).blur(); }
-          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-            e.preventDefault();
-            const d = (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 10 : 1);
-            props.onChange(clamp(props.value + d));
-            editing.current = fmt(clamp(props.value + d));
-            setText(editing.current);
-          }
-        }}
-      />
-    </div>
-  );
-}
-
-/** allows simple math in fields: "100+20", "*2", "/2" */
-function evalExpr(s: string, cur: number): number | null {
-  s = s.trim().replace(/[^0-9+\-*/(). e]/gi, '');
-  if (!s) return null;
-  if (/^[*/+]/.test(s)) s = cur + s;
-  try { return Function(`"use strict";return (${s})`)() as number; } catch { return null; }
-}
+// NumField lives in ./ui with the other primitives; re-exported for existing imports
+export { NumField };
 
 // ---------------- keyframe toggle ----------------
 function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
@@ -119,8 +49,8 @@ function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
     (globalThis as any).timeline?.expand(ids[0], true);
   };
   return (
-    <button tabIndex={-1} class={'keybtn' + (animated ? ' animated' : '') + (atKey ? ' at' : '')} title={animated ? 'Add/remove keyframe (alt: stop animating)' : 'Animate this property'} onClick={click}>
-      <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0.8 L9.2 5 L5 9.2 L0.8 5 Z" /></svg>
+    <button type="button" tabIndex={-1} class={'keybtn' + (animated ? ' animated' : '') + (atKey ? ' at' : '')} title={animated ? 'Add/remove keyframe (alt: stop animating)' : 'Animate this property'} aria-label={(atKey ? 'Remove keyframe: ' : 'Add keyframe: ') + PROP_DEFS[props.prop].label} onClick={click}>
+      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0.8 L9.2 5 L5 9.2 L0.8 5 Z" /></svg>
     </button>
   );
 }
@@ -154,12 +84,12 @@ function AudioPanel({ layers }: { layers: Layer[] }) {
   return (
     <Section title={layers.length > 1 ? `${layers.length} audio layers` : l.name} right={<span class="insp-type">audio</span>}>
       <div class="row">
-        <span class="muted small">Volume</span>
-        <input type="range" min="0" max="1" step="0.01" value={l.volume ?? 1} style={{ flex: 1 }} onChange={e => setLayerField(store, ids, 'volume', +(e.target as HTMLInputElement).value, 'Volume')} />
+        <span class="field-label">Volume</span>
+        <Slider label="Volume" min={0} max={1} step={0.01} value={l.volume ?? 1} style={{ flex: 1 }} onChange={v => setLayerField(store, ids, 'volume', v, 'Volume')} />
         <span class="small">{Math.round((l.volume ?? 1) * 100)}%</span>
       </div>
       <div class="row"><NumField label="Start" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={(n, mk) => store.transact('Audio start', tx => { for (const id of ids) { const x = store.layer(id); if (x) { tx.set(x, 'startTime', n); tx.touch(id); } } }, mk)} /></div>
-      <div class="row"><button class="btn" title="Detect beats/onsets in this clip and add a timeline marker on each" onClick={() => markBeats(l)}>Add markers on beats</button></div>
+      <div class="row"><button type="button" class="btn" title="Detect beats/onsets in this clip and add a timeline marker on each" onClick={() => markBeats(l)}>Add markers on beats</button></div>
       <div class="muted small">Drag the waveform in the timeline to move it. Exported videos include audio.</div>
     </Section>
   );
@@ -250,7 +180,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
       )}
       {layers.length === 1 && l.type === 'text' && <TextPanel layer={l} />}
       {layers.every(x => x.type === 'path') && (
-        <Section title="Trim paths" right={<label class="check small"><input type="checkbox" checked={!!l.trimOn} onChange={e => setLayerField(store, ids, 'trimOn', (e.target as HTMLInputElement).checked, 'Trim paths')} /> on</label>}>
+        <Section title="Trim paths" right={<Checkbox class="small" checked={!!l.trimOn} onChange={v => setLayerField(store, ids, 'trimOn', v, 'Trim paths')}>on</Checkbox>}>
           {l.trimOn && (
             <>
               <div class="row">
@@ -270,7 +200,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
       {layers.every(x => x.type === 'text') && <TextAnimPanel layers={layers} />}
       {layers.length === 1 && l.type === 'group' && (
         <Section title="Frame">
-          <label class="check"><input type="checkbox" checked={!!l.clip} onChange={e => setLayerField(store, ids, 'clip', (e.target as HTMLInputElement).checked, 'Clip content')} /> Clip content</label>
+          <Checkbox checked={!!l.clip} onChange={v => setLayerField(store, ids, 'clip', v, 'Clip content')}>Clip content</Checkbox>
         </Section>
       )}
       {layers.length === 1 && l.type === 'precomp' && l.compRef && (
@@ -290,7 +220,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
       </Section>
       {layers.length === 1 && (
         <Section title="Mask">
-          <label class="check"><input type="checkbox" checked={!!l.mask} onChange={e => setLayerField(store, ids, 'mask', (e.target as HTMLInputElement).checked, 'Use as mask')} /> Use as mask (masks the layers above it in the same group)</label>
+          <Checkbox checked={!!l.mask} onChange={v => setLayerField(store, ids, 'mask', v, 'Use as mask')}>Use as mask (masks the layers above it in the same group)</Checkbox>
         </Section>
       )}
       <AnimatePanel ids={ids} />
@@ -341,9 +271,7 @@ function TextPanel({ layer }: { layer: Layer }) {
         <NumField label="LH" step={0.01} min={0.5} value={t.lineHeight} onChange={n => set({ lineHeight: n })} />
         <NumField label="LS" step={0.1} value={t.letterSpacing} onChange={n => set({ letterSpacing: n })} />
       </div>
-      <div class="row seg">
-        {(['left', 'center', 'right'] as const).map(a => <button class={t.align === a ? 'on' : ''} onClick={() => set({ align: a })}>{a}</button>)}
-      </div>
+      <Segmented class="row" label="Text align" value={t.align} options={(['left', 'center', 'right'] as const).map(a => ({ value: a, label: a }))} onChange={a => set({ align: a })} />
     </Section>
   );
 }
@@ -417,10 +345,10 @@ function GradientEditor({ layer }: { layer: Layer }) {
             <div class="row grad-stop">
               <NumField label="%" min={0} max={100} value={Math.round(s3.pos * 1000) / 10} onChange={(n, mk) => setStop(i, { pos: n / 100 }, mk)} />
               <ColorField value={s3.color} onChange={(c, mk) => setStop(i, { color: c as any }, mk)} />
-              <button class="ghost" title="Remove stop" disabled={g.stops.length <= 2} onClick={() => write({ ...g, stops: g.stops.filter((_, j) => j !== i) })}>−</button>
+              <button type="button" class="ghost icon" title="Remove stop" aria-label="Remove stop" disabled={g.stops.length <= 2} onClick={() => write({ ...g, stops: g.stops.filter((_, j) => j !== i) })}>−</button>
             </div>
           ))}
-          <div class="row"><button class="ghost" onClick={() => {
+          <div class="row"><button type="button" class="ghost" onClick={() => {
             // new stop in the middle of the widest gap, with the blended color
             const st2 = g.stops.slice().sort((a, b) => a.pos - b.pos);
             let k = 0; for (let j = 1; j < st2.length - 1; j++) if (st2[j + 1].pos - st2[j].pos > st2[k + 1].pos - st2[k].pos) k = j;
@@ -438,11 +366,10 @@ function ColorField({ value, onChange }: { value: number[]; onChange: (c: number
   const mk = useRef('color' + Math.random());
   return (
     <div class="color-field">
-      <input type="color" value={hex} onInput={e => {
-        const h = (e.target as HTMLInputElement).value;
+      <ColorSwatch value={hex} alpha={value[3]} onInput={h => {
         onChange([parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255, value[3]], mk.current);
       }} onChange={() => (mk.current = 'color' + Math.random())} />
-      <input class="hex" value={hex.slice(1).toUpperCase()} onKeyDown={e => e.stopPropagation()} onChange={e => {
+      <input class="hex" aria-label="Hex color" spellcheck={false} value={hex.slice(1).toUpperCase()} onKeyDown={e => e.stopPropagation()} onChange={e => {
         const inp = e.target as HTMLInputElement;
         let h = inp.value.trim().replace('#', '');
         if (/^[0-9a-f]{3}$/i.test(h)) h = h.replace(/./g, c => c + c); // css shorthand f00 -> ff0000
@@ -469,7 +396,7 @@ function CompPanel() {
         <NumField label="Dur" min={0.1} step={0.1} value={c.duration} suffix="s" onChange={n => setCompSettings(store, { duration: n })} />
       </div>
       <div class="row">
-        <span class="muted small" style={{ width: '70px' }}>Background</span>
+        <span class="field-label" style={{ width: '70px' }}>Background</span>
         <ColorField value={c.background} onChange={col => setCompSettings(store, { background: col as any })} />
       </div>
       <div class="muted small hint">
@@ -508,7 +435,7 @@ function EasePanel() {
         </div>
       )}
       {a?.interp === 'hold' && <div class="muted small">Hold keyframe (no interpolation)</div>}
-      <div class="ease-group">Springs</div>
+      <div class="ease-group label-xs">Springs</div>
       <div class="ease-presets">
         {SPRING_PRESETS.map(p => (
           <button class={'ease-chip' + (a?.interp === 'spring' && Math.abs((a.bounce ?? 0.3) - p.bounce) < 1e-3 ? ' on' : '')} onClick={() => setSpring(store, keys, p.bounce)}>
@@ -517,7 +444,7 @@ function EasePanel() {
           </button>
         ))}
       </div>
-      <div class="ease-group">Curves</div>
+      <div class="ease-group label-xs">Curves</div>
       <div class="ease-presets">
         {EASE_PRESETS.map(p => (
           <button class={'ease-chip' + (a?.interp !== 'spring' && active?.name === p.name ? ' on' : '')} title={p.v.join(', ')} onClick={() => setEase(store, keys, p.name)}>
@@ -555,8 +482,8 @@ function SpringView({ bounce, onChange }: { bounce: number; onChange: (b: number
         <path d={d} class="curve-path" />
       </svg>
       <div class="row">
-        <span class="muted small">Bounce</span>
-        <input type="range" min="0" max="0.9" step="0.01" value={bounce} style={{ flex: 1 }} onChange={e => onChange(+(e.target as HTMLInputElement).value)} />
+        <span class="field-label">Bounce</span>
+        <Slider label="Bounce" min={0} max={0.9} step={0.01} value={bounce} style={{ flex: 1 }} onChange={onChange} />
         <span class="small">{Math.round(bounce * 100)}%</span>
       </div>
     </div>
@@ -694,7 +621,7 @@ function SmartRow({ ids, dur }: { ids: string[]; dur: number }) {
   return (
     <div class="row" title="Matches layers by name inside the two selected layers and animates every difference from the start to the end state. The end layer is removed.">
       <button class="btn" style={{ flex: 1 }} onClick={run}>Smart animate {name(a)} → {name(b)}</button>
-      <button class="ghost" title="Swap start and end" onClick={() => setSwap(!swap)}>⇄</button>
+      <button type="button" class="ghost icon" title="Swap start and end" aria-label="Swap start and end" onClick={() => setSwap(!swap)}>⇄</button>
     </div>
   );
 }
@@ -786,7 +713,7 @@ function ExprRow({ ids, k, src }: { ids: string[]; k: PropKey; src: string }) {
   const mk = useRef('expr' + Math.random());
   return (
     <div class="expr-row">
-      <div class="row small"><span>{PROP_DEFS[k].label}</span><span style={{ flex: 1 }} /><button class="ghost" title="Remove expression" onClick={() => setExpr(store, ids, k, undefined)}>✕</button></div>
+      <div class="row small"><span>{PROP_DEFS[k].label}</span><span style={{ flex: 1 }} /><button type="button" class="ghost icon btn-sm" title="Remove expression" aria-label="Remove expression" onClick={() => setExpr(store, ids, k, undefined)}>✕</button></div>
       <textarea class={'expr-edit' + (err ? ' bad' : '')} rows={2} value={text} spellcheck={false}
         onInput={e => { const v = (e.target as HTMLTextAreaElement).value; setText(v); if (!checkExpr(v, PROP_DEFS[k].dim)) setExpr(store, ids, k, v, mk.current); }}
         onBlur={() => { mk.current = 'expr' + Math.random(); }}
