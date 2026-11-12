@@ -100,6 +100,9 @@ export interface ShaderRef {
   /** import only: the asset travels with the ref until the paste is inserted (see
    *  import/figma/shaders.ts hoistShaderAssets); lookups fall back to it */
   asset?: ShaderAsset;
+  /** the param values as figma stored them, kept until the shader's source arrives (its schema can
+   *  differ from the one guessed from figma's metadata: the props are rebuilt from these) */
+  init?: Record<string, unknown>;
 }
 
 /** the library entry of a ref */
@@ -386,6 +389,15 @@ class LitParser {
   }
 }
 
+/** mouse-driven shaders (features.usesMouse) get a keyframable pointer: % of the layer box. the
+ *  editor feeds the canvas cursor while hovering; exports use this prop, so they're deterministic.
+ *  it is a param of the asset (inspector / timeline / agent see it) but never reaches the module */
+export const MOUSE_PARAM = '__mouse';
+export const MOUSE_DEF: ShaderParamDef = {
+  key: MOUSE_PARAM, type: 'point', label: 'Mouse', control: 'point', positionUnit: '%', defaultValue: { x: 50, y: 50 },
+  description: 'Where the shader sees the mouse (% of the layer). While you hover the canvas it follows the cursor; renders and exports use this value.',
+};
+
 export function parseFeatures(json: string | undefined): ShaderFeatures {
   if (!json) return {};
   try { const f = JSON.parse(json); return f && typeof f === 'object' ? f : {}; } catch { return {}; }
@@ -394,7 +406,8 @@ export function parseFeatures(json: string | undefined): ShaderFeatures {
 /** build a library entry from shader files (figma clipboard, mcp, or a file the user adds) */
 export function makeShaderAsset(init: { id: string; name?: string; kind: ShaderKind; version?: string; description?: string; owner?: string; files: Record<string, string>; params?: ShaderParamDef[] }): ShaderAsset {
   const features = parseFeatures(init.files['features.json']);
-  const params = init.params ?? parseShaderSchema(init.files[SHADER_MAIN] ?? '') ?? [];
+  let params = init.params ?? parseShaderSchema(init.files[SHADER_MAIN] ?? '') ?? [];
+  if (features.usesMouse && !params.some(p => p.key === MOUSE_PARAM)) params = [...params, MOUSE_DEF];
   return {
     id: init.id,
     name: init.name ?? features.name ?? 'Shader',

@@ -38,6 +38,16 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   check(`${w}: untouched view stays fitted after a window resize`, fit2);
   await page.setViewportSize({ width: w, height: h });
 
+  // QA-2: a pasted Lottie opened in a tab called "clipboard"
+  await ev(() => {
+    const j = { v: '5.7.0', nm: 'Bounce', fr: 30, ip: 0, op: 30, w: 200, h: 200, layers: [{ ty: 4, ind: 1, ip: 0, op: 30, st: 0, ks: { p: { a: 0, k: [100, 100] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }, shapes: [{ ty: 'gr', it: [{ ty: 'rc', p: { a: 0, k: [0, 0] }, s: { a: 0, k: [40, 40] }, r: { a: 0, k: 0 } }, { ty: 'fl', c: { a: 0, k: [1, 0.5, 0, 1] }, o: { a: 0, k: 100 } }, { ty: 'tr', p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }] }] }] };
+    const dt = new DataTransfer(); dt.setData('text/plain', JSON.stringify(j));
+    document.body.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+  });
+  await page.waitForTimeout(600);
+  const lot = await ev(() => ({ name: editor.store.project.name, n: editor.store.comp.root.length, tabs: document.querySelectorAll('.tb-tab').length }));
+  check(`${w}: pasted Lottie opens in a tab named after it`, lot.name === 'Bounce' && lot.n === 1, JSON.stringify(lot));
+
   // no horizontal page overflow
   const overflow = await ev(() => document.documentElement.scrollWidth - innerWidth);
   check(`${w}: no horizontal page overflow`, overflow <= 0, `${overflow}px`);

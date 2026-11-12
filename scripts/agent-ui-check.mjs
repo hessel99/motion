@@ -3,7 +3,7 @@
 //   PATH=$PWD/tests/fixtures/fake-claude:$PATH MOTION_BRIDGE_PORT=7836 node bridge/server.mjs &
 //   npx vite --port 5185 & node scripts/agent-ui-check.mjs [outDir]
 // Covers: storyboard card (edit/approve/progress), style picker, result preview, streaming tool steps + screenshot thumbnails, review card (diff, hold-to-compare, revert),
-// @-mentions, context chips, quick actions, variations tray, Ask mode, typed errors, stop, persistence.
+// @-mentions, context chips, quick actions, Ask mode, typed errors, stop, persistence.
 import { chromium } from './pw.mjs';
 import fs from 'node:fs';
 
@@ -75,20 +75,6 @@ const ctx = await page.locator('.ag-context').innerText();
 check(/Dot/.test(ctx) && /@Box/.test(ctx), 'context chips show selection + mention: ' + ctx.replace(/\s+/g, ' '));
 await shot('3-mention');
 await page.fill('.agent-input textarea', '');
-
-// 3. variations via quick action (selection = Dot)
-await page.locator('.ag-qchip', { hasText: '3 variations' }).click();
-await idle();
-check(await page.locator('.ag-var').count() === 3, 'variations tray shows 3 variations');
-check(await page.locator('.ag-var-strip img').count() === 9, 'variation filmstrips rendered');
-await page.locator('.ag-var', { hasText: 'A · Snappy' }).click();
-await page.waitForTimeout(200);
-const dur = await page.evaluate(() => { const l = Object.values(editor.store.project.layers).find((x) => x.name === 'Dot'); return l.props.scale.kf.at(-1).t; });
-check(Math.abs(dur - 0.4) < 1e-6, 'picking variation A applies its timing');
-await page.evaluate(() => editor.pause());
-await shot('4-variations');
-await page.locator('.ag-var-foot button', { hasText: 'Use' }).click();
-check(await page.locator('[data-testid=variations]').count() === 0, 'Use closes the tray');
 
 // 4. Ask mode (critique chip): read-only
 const before = await rootCount();

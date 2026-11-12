@@ -33,6 +33,8 @@ export interface FxRegion {
   inv: number[];
   texture: { size: number; amp: number; seed: number } | null;
   glass: { refraction: number; depth: number; light: number; angle: number; dispersion: number } | null;
+  /** clip the composite to a rounded box: device px -> clip box space (a..f), box size, corner radius */
+  clip?: { inv: number[]; w: number; h: number; r: number } | null;
 }
 
 /** shader ids of the blend modes (model BlendMode -> int) */
@@ -137,6 +139,9 @@ uniform vec4 uN1[4];
 uniform vec4 uTex; // size, amp (device px), seed, 0
 uniform vec4 uGl;  // refraction, depth, light, angle
 uniform float uGlD;
+uniform int uClipOn;
+uniform vec4 uClipA; uniform vec2 uClipB; uniform vec3 uClipBox;
+float sdBox(vec2 p, vec2 b, float r) { r = min(r, min(b.x, b.y)); vec2 q = abs(p) - b + r; return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r; }
 
 uint hash(uvec3 v) {
   v = v * 1664525u + 1013904223u;
@@ -160,15 +165,25 @@ vec4 noiseAt(int i, vec2 local) {
   vec4 c1 = i == 0 ? uN0[1] : uN1[1];
   vec4 c2 = i == 0 ? uN0[2] : uN1[2];
   float op = i == 0 ? uN0[3].x : uN1[3].x;
-  vec2 cell = local / max(p.y, 0.05);
+  // fitted to figma's renders: grain cells of noiseSize / 2 px, a cell gets grain with probability
+  // density^2 and a random strength (1 - r / D)^2; duo picks color 1 or 2 per grain (the rest of the
+  // surface stays as it was), multi uses a random color at opacity
+  vec2 cell = local / max(p.y * 0.5, 0.05);
   float r = rnd(cell, p.w, 0.0);
+  float D = p.z * p.z;
   if (p.x > 1.5) { // multi
-    if (r >= p.z) return vec4(0.0);
+    if (r >= D) return vec4(0.0);
+    float t = (1.0 - r / D); t *= t;
     vec3 c = vec3(rnd(cell, p.w, 1.0), rnd(cell, p.w, 2.0), rnd(cell, p.w, 3.0));
-    return vec4(c * op, op);
+    return vec4(c, 1.0) * op * t;
   }
-  if (r < p.z) return vec4(c1.rgb * c1.a, c1.a);
-  if (p.x > 0.5) return vec4(c2.rgb * c2.a, c2.a); // duo
+  if (p.x > 0.5) { // duo
+    D = min(D, 0.5);
+    if (r < D) { float t = 1.0 - r / D; t *= t; return vec4(c1.rgb * c1.a, c1.a) * t; }
+    if (r > 1.0 - D) { float t = 1.0 - (1.0 - r) / D; t *= t; return vec4(c2.rgb * c2.a, c2.a) * t; }
+    return vec4(0.0);
+  }
+  if (r < D) { float t = 1.0 - r / D; t *= t; return vec4(c1.rgb * c1.a, c1.a) * t; }
   return vec4(0.0);
 }
 
@@ -184,11 +199,8 @@ vec3 setSat(vec3 c, float s) {
   float mn = min(c.r, min(c.g, c.b)), mx = max(c.r, max(c.g, c.b));
   return mx > mn ? (c - mn) * s / (mx - mn) : vec3(0.0);
 }
-float softL(float b, float s) {
-  if (s <= 0.5) return b - (1.0 - 2.0 * s) * b * (1.0 - b);
-  float d = b <= 0.25 ? ((16.0 * b - 12.0) * b + 4.0) * b : sqrt(b);
-  return b + (2.0 * s - 1.0) * (d - b);
-}
+// soft light: figma's renders match the "pegtop" curve far better than the w3c one (measured)
+float softL(float b, float s) { return (1.0 - 2.0 * s) * b * b + 2.0 * s * b; }
 float hardL(float b, float s) { return s <= 0.5 ? b * 2.0 * s : b + (2.0 * s - 1.0) - b * (2.0 * s - 1.0); }
 float dodge(float b, float s) { return b <= 0.0 ? 0.0 : s >= 1.0 ? 1.0 : min(1.0, b / (1.0 - s)); }
 float burn(float b, float s) { return b >= 1.0 ? 1.0 : s <= 0.0 ? 0.0 : 1.0 - min(1.0, (1.0 - b) / s); }
@@ -260,6 +272,15 @@ void main() {
     under = hl + under * (1.0 - hl.a);
   }
   vec4 x = (s + under * (1.0 - s.a)) * uOpacity;
+  if (uClipOn == 1) {
+    // nested clip: the region is clipped by its own clipping ancestor (the instances inside are
+    // clipped by the inner one)
+    vec2 cp = mat2(uClipA.xy, uClipA.zw) * dev + uClipB;
+    vec2 ch = uClipBox.xy * 0.5;
+    float d = sdBox(cp - ch, ch, uClipBox.z);
+    float w = max(fwidth(d), 1e-4);
+    x *= clamp(0.5 - d / w, 0.0, 1.0);
+  }
   if (uBlend > 0) {
     vec4 B = texture(uBack, uv);
     vec3 cb = B.a > 0.0 ? B.rgb / B.a : vec3(0.0), cs = x.a > 0.0 ? x.rgb / x.a : vec3(0.0);
@@ -322,6 +343,7 @@ export class FxPipeline {
       f1: (n: string, v: number) => gl.uniform1f(loc(n), v),
       i1: (n: string, v: number) => gl.uniform1i(loc(n), v),
       f2: (n: string, a: number, b: number) => gl.uniform2f(loc(n), a, b),
+      f3: (n: string, a: number, b: number, c: number) => gl.uniform3f(loc(n), a, b, c),
       f4: (n: string, a: number, b: number, c: number, d: number) => gl.uniform4f(loc(n), a, b, c, d),
       f4v: (n: string, v: Float32Array) => gl.uniform4fv(loc(n), v),
       tex: (n: string, unit: number, t: WebGLTexture | null) => { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t); gl.uniform1i(loc(n), unit); },
@@ -517,13 +539,16 @@ export class FxPipeline {
     let B: WebGLTexture[] = [];
     if (R.bg || R.glass || R.blend > 0) {
       const bk = this.tgt('back', R.w, R.h);
-      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, R.parentFb);
-      gl.bindTexture(gl.TEXTURE_2D, bk.tex);
+      // blit, not copyTexSubImage2D: the canvas framebuffer has no alpha channel (alpha: false), and
+      // copying RGB into an RGBA texture is an error (the backdrop came out black)
       const [x0, y0, x1, y1] = R.box;
       const gx0 = Math.max(0, Math.floor(x0)), gx1 = Math.min(R.w, Math.ceil(x1));
       const gy0 = Math.max(0, Math.floor(R.h - y1)), gy1 = Math.min(R.h, Math.ceil(R.h - y0));
-      if (gx1 > gx0 && gy1 > gy0) gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, gx0, gy0, gx0, gy0, gx1 - gx0, gy1 - gy0);
-      gl.bindTexture(gl.TEXTURE_2D, null);
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, R.parentFb);
+      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, bk.fb);
+      gl.disable(gl.SCISSOR_TEST);
+      if (gx1 > gx0 && gy1 > gy0) gl.blitFramebuffer(gx0, gy0, gx1, gy1, gx0, gy0, gx1, gy1, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       back = bk.tex;
       if (R.bg || R.glass) B = this.blurLevels(back, R, R.bg ?? { sigma: 0 }, 'bb');
     }
@@ -567,6 +592,8 @@ export class FxPipeline {
     }
     u.i1('uTexOn', R.texture ? 1 : 0);
     if (R.texture) u.f4('uTex', R.texture.size, R.texture.amp, R.texture.seed, 0);
+    u.i1('uClipOn', R.clip ? 1 : 0);
+    if (R.clip) { u.f4('uClipA', R.clip.inv[0], R.clip.inv[1], R.clip.inv[2], R.clip.inv[3]); u.f2('uClipB', R.clip.inv[4], R.clip.inv[5]); u.f3('uClipBox', R.clip.w, R.clip.h, R.clip.r); }
     u.i1('uGlass', R.glass ? 1 : 0);
     if (R.glass) { u.f4('uGl', R.glass.refraction, R.glass.depth, R.glass.light, R.glass.angle); u.f1('uGlD', R.glass.dispersion); }
     this.draw();

@@ -328,6 +328,7 @@ class Converter {
   private instanceDepth = 0;
   private defStack: string[] = [];
   warnings = new Map<string, number>();
+  private byId = new Map<string, Layer>();
 
   constructor(private message: any, private opts: FigmaConvertOptions = {}) {
     this.blobs = Array.isArray(message?.blobs) ? message.blobs : [];
@@ -480,6 +481,7 @@ class Converter {
     if (!layer) return null;
     layer.parent = parentId;
     this.layers.push(layer);
+    this.byId.set(layer.id, layer);
 
     if (n.type === 'BOOLEAN_OPERATION') return layer.id; // operands are baked into fillGeometry
 
@@ -522,7 +524,14 @@ class Converter {
       }
     }
     if (isInstance) this.instanceDepth--;
+    // a NORMAL (not pass-through) group isolates its children's blend modes
+    if (n.blendMode === 'NORMAL' && layer.type === 'group' && this.hasBlendBelow(layer)) layer.isolate = true;
     return layer.id;
+  }
+
+  private hasBlendBelow(l: Layer): boolean {
+    for (const c of l.children) { const k = this.byId.get(c); if (k && ((k.blend && k.blend !== 'normal') || this.hasBlendBelow(k))) return true; }
+    return false;
   }
 
   warn(msg: string) { this.warnings.set(msg, (this.warnings.get(msg) ?? 0) + 1); }
@@ -691,10 +700,6 @@ class Converter {
 
   private applyStroke(layer: Layer, n: any, isPath: boolean) {
     const weight = num(n.strokeWeight, 0);
-    if (layer.type === 'text') {
-      if (weight > 0 && (n.strokePaints ?? []).some(visiblePaint)) this.warn('text stroke: not drawn yet');
-      return;
-    }
     const vis = (n.strokePaints ?? []).filter(visiblePaint);
     const paints: Paint[] = [];
     for (const p of vis) { const x = this.paint(p, n, layer); if (x) paints.push(x); }
@@ -867,6 +872,7 @@ class Converter {
           if (f) r.fill = f;
           if (s.textDecoration === 'UNDERLINE') r.decoration = 'underline';
           else if (s.textDecoration === 'STRIKETHROUGH') r.decoration = 'strike';
+          else if (s.textDecoration === 'NONE' && n.textDecoration && n.textDecoration !== 'NONE') r.decoration = 'none';
           if (s.letterSpacing && typeof s.letterSpacing.value === 'number') r.letterSpacing = s.letterSpacing.units === 'PIXELS' ? s.letterSpacing.value : (s.letterSpacing.value / 100) * (r.fontSize ?? t.fontSize);
           if (Object.keys(r).length > 2) runs.push(r);
         }
@@ -1044,14 +1050,14 @@ function firstGradientColor(paints: any[] | undefined): Color | null {
 function textData(n: any): TextData {
   const fontSize = num(n.fontSize, 12);
   const style: string = n.fontName?.style ?? 'Regular';
-  let lineHeight = 1.2;
+  let lineHeight = 1.2, auto = !n.lineHeight;
   const lh = n.lineHeight;
   if (lh && typeof lh.value === 'number') {
     // units: PIXELS (px), PERCENT (100 = figma "auto"), RAW (multiplier). unverified: we treat
     // PERCENT 100 as auto (~1.2 for typical fonts).
     if (lh.units === 'PIXELS') lineHeight = fontSize > 0 ? lh.value / fontSize : 1.2;
     else if (lh.units === 'RAW') lineHeight = lh.value;
-    else if (lh.units === 'PERCENT') lineHeight = lh.value === 100 ? 1.2 : lh.value / 100;
+    else if (lh.units === 'PERCENT') { lineHeight = lh.value === 100 ? 1.21 : lh.value / 100; auto = lh.value === 100; }
   }
   let letterSpacing = 0;
   const ls = n.letterSpacing;
@@ -1065,6 +1071,7 @@ function textData(n: any): TextData {
     fontWeight: weightFromStyle(style),
     fontStyle: /italic|oblique/i.test(style) ? 'italic' : 'normal',
     lineHeight: lineHeight > 0 ? lineHeight : 1.2,
+    ...(auto ? { lineHeightAuto: true } : {}),
     letterSpacing,
     align: ah === 'CENTER' ? 'center' : ah === 'RIGHT' ? 'right' : ah === 'JUSTIFIED' ? 'justify' : 'left',
   };

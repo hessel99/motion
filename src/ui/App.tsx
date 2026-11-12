@@ -3,7 +3,7 @@ import { Component, type ComponentChildren } from 'preact';
 import { editor } from '../app/editor';
 import { ViewportController } from './viewport-controller';
 import { Timeline } from './timeline';
-import { SyncReview, STYLE_MIME, applyStyle } from './LibraryPanel';
+import { STYLE_MIME, applyStyle } from './LibraryPanel';
 import { useChannels } from './hooks';
 import { menuFrom, showContextMenu } from './menu';
 import { agentMenuItems } from './agent-menu';
@@ -75,7 +75,6 @@ export function App() {
         <aside class="right sidebar" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
         {home && <div class="home-host"><Guard name="Home"><Home /></Guard></div>}
         {ui.settingsOpen && <SettingsModal />}
-        <Guard name="Sync"><SyncReview /></Guard>
         <AskBar />
         <ShortcutHelp />
         <Welcome />
@@ -322,7 +321,7 @@ function Welcome() {
           <li><b>Paste from Figma</b>: select layers in Figma, ⌘C, then ⌘V here. A single frame becomes the composition.</li>
           <li><b>Animate</b>: click a property's keyframe diamond to add keyframes, or use <i>Animate</i> presets and <i>Text animation</i> in the right panel. Press F9 for easy ease.</li>
           <li><b>AI agent</b> (left panel, ⌘I): describe an animation and Claude Code builds it in your file, with your own subscription. One click undoes everything it did.</li>
-          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video, GIF, Lottie or After Effects from the Export button (top right, ⌘E).</li>
+          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video, GIF or Lottie from the Export button (top right, ⌘E).</li>
         </ol>
     </Dialog>
   );

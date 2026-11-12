@@ -44,8 +44,6 @@ export function toolLabel(rawName: string, input: any, layerName: (id: string) =
     case 'select_layers': return `Select ${lns(a.ids)}`;
     case 'screenshot': return a.times?.length ? `Look at ${plural(Math.min(4, a.times.length), 'frame')}` : `Look at frame${a.t !== undefined ? ' ' + a.t + 's' : ''}`;
     case 'contact_sheet': return `Contact sheet${a.times?.length ? ` (${a.times.length} frames)` : a.frames ? ` (${a.frames} frames)` : ''}`;
-    case 'save_variation': return `Save variation ${q(a.label ?? '')}`;
-    case 'apply_variation': return 'Apply a variation';
     case 'open_composition': return 'Open composition';
     case 'export_video': return `Export ${a.format ?? 'mp4'}`;
     case 'undo': return 'Undo';

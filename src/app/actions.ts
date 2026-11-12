@@ -16,7 +16,7 @@ import { activeDoc, closeDoc, cycleDocs, documents, isDocDirty, newDocument, ope
 import { rememberRecent } from './recent';
 
 // importers are loaded lazily (keeps startup fast; missing modules are simply unavailable)
-const mods = import.meta.glob(['../import/figma/index.ts', '../import/svg.ts', '../import/lottie.ts', '../import/aep/index.ts', '../export/lottie.ts', '../export/aejsx.ts']);
+const mods = import.meta.glob(['../import/figma/index.ts', '../import/svg.ts', '../import/lottie.ts', '../import/aep/index.ts', '../export/lottie.ts']);
 async function mod(path: string): Promise<any | null> {
   const m = mods[path];
   return m ? m() : null;
@@ -315,15 +315,6 @@ export async function exportFramePng(scale = 1) {
   download(`${s.project.name || 'frame'}_${String(frame).padStart(4, '0')}.png`, blob, 'image/png');
 }
 
-/** extendscript that rebuilds the active comp in after effects (File > Scripts > Run Script File) */
-export async function exportAeScript() {
-  const m = await mod('../export/aejsx.ts');
-  if (!m) { toast('After Effects export not available', 'error'); return; }
-  download((st().project.name || 'animation') + '.jsx', m.projectToAeScript(st().project), 'text/javascript');
-  const hasAudio = Object.values(st().project.layers).some(l => l.type === 'audio');
-  toast('In After Effects: File › Scripts › Run Script File…' + (hasAudio ? ' (audio layers are not included)' : ''));
-}
-
 // ---------------- inserting layers (paste / import) ----------------
 export function insertLayers(res: { layers: Layer[]; roots: string[]; assets: Asset[]; design?: FigmaDesignData }, opts: { label: string; fitCompIfEmpty?: boolean }): DesignImportResult | null {
   const s = st();
@@ -570,7 +561,8 @@ export async function handlePaste(e: ClipboardEvent) {
     for (const it of cd.items ?? []) { const f = it.kind === 'file' ? it.getAsFile() : null; if (f && (f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name))) return openBrowserFile(f); }
     if (textData.trim().startsWith('{')) {
       const json = JSON.parse(textData);
-      if (json.layers && (json.v || json.fr)) return openData('clipboard.json', textData);
+      // the new tab is named after the animation (lottie "nm"), not "clipboard"
+      if (json.layers && (json.v || json.fr)) return openData(`${String(json.nm || 'Pasted Lottie').replace(/[\\/]/g, ' ')}.json`, textData);
     }
     if (memClipboard && !textData) return memClipboard.startsWith(KEYS_PREFIX) ? pasteKeys(memClipboard) : pasteMotion(memClipboard);
     if (html && /figma/i.test(html)) toast('Figma data found but could not be decoded', 'error');
@@ -749,7 +741,6 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     else if (cmd === 'save') saveProject(false);
     else if (cmd === 'saveAs') saveProject(true);
     else if (cmd === 'export-lottie') exportLottie();
-    else if (cmd === 'export-ae') exportAeScript();
     else if (cmd === 'selectAll') {
       const a = document.activeElement as HTMLElement | null;
       if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) (a as HTMLInputElement).select();

@@ -48,7 +48,7 @@ export const BLEND_MODES: BlendMode[] = [
   'overlay', 'softLight', 'hardLight', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity',
 ];
 /** modes the gpu blend unit does on its own (everything else composites through a shader) */
-export const SIMPLE_BLENDS: ReadonlySet<BlendMode> = new Set<BlendMode>(['normal', 'multiply', 'screen', 'add', 'darken', 'lighten']);
+export const SIMPLE_BLENDS: ReadonlySet<BlendMode> = new Set<BlendMode>(['normal', 'multiply', 'screen', 'add', 'lighten']); // darken: MIN on a quad's transparent pixels draws a black box
 
 export type LayerType = 'group' | 'rect' | 'ellipse' | 'path' | 'text' | 'image' | 'precomp' | 'audio';
 
@@ -103,7 +103,7 @@ export const TYPE_PROPS: Record<LayerType, PropKey[]> = {
   rect: ['size', 'radius', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
   ellipse: ['size', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
   path: ['size', 'fill', 'stroke', 'strokeWidth', 'trimStart', 'trimEnd', 'trimOffset', ...EFFECT_KEYS],
-  text: ['size', 'fill', ...EFFECT_KEYS],
+  text: ['size', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
   image: ['size', ...EFFECT_KEYS],
   audio: ['volume'],
   precomp: ['size', ...EFFECT_KEYS],
@@ -205,7 +205,7 @@ export interface TextRun {
   fontStyle?: 'normal' | 'italic';
   fontSize?: number;
   fill?: number[];
-  decoration?: 'underline' | 'strike';
+  decoration?: 'underline' | 'strike' | 'none';
   letterSpacing?: number;
 }
 
@@ -224,6 +224,8 @@ export interface TextData {
   fontWeight: number;
   fontStyle?: 'normal' | 'italic';
   lineHeight: number; // multiplier
+  /** figma "auto" line height: the font's ascender + descender (lineHeight is then only a fallback) */
+  lineHeightAuto?: boolean;
   letterSpacing: number; // px
   align: 'left' | 'center' | 'right' | 'justify';
   valign?: 'top' | 'center' | 'bottom';
@@ -301,6 +303,9 @@ export interface Layer {
   blend?: BlendMode;
   /** effects (shadows, blurs, noise...), figma order */
   effects?: Effect[];
+  /** group composites as one image (figma NORMAL group, vs pass-through): its children's blend
+   *  modes only see the group's own content */
+  isolate?: boolean;
   /** in/out points in seconds; layer is hidden outside */
   inPoint: number;
   outPoint: number;

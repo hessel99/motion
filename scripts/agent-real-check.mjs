@@ -1,6 +1,6 @@
 // REAL agent session through the sidebar (uses the owner's Claude subscription — keep runs few).
 //   node scripts/agent-real-check.mjs <outDir> [step ...]
-// steps: build | bouncier | variations | critique   (default: build critique)
+// steps: build | bouncier | critique   (default: build critique)
 // env: URL (vite, default http://localhost:5185/), BRIDGE (port, default 7823), MODEL (default sonnet)
 import { chromium } from './pw.mjs';
 import fs from 'node:fs';
@@ -43,7 +43,6 @@ const selectAll = () => page.evaluate(() => editor.store.select(editor.store.com
 for (const s of steps) {
   if (s === 'build') await turn('build', typeSend('Three small cards in a row that slide up and fade in one after another. Under 2 seconds.'));
   if (s === 'bouncier') { await selectAll(); await turn('bouncier', chip('Bouncier')); }
-  if (s === 'variations') { await selectAll(); await turn('variations', chip('3 variations')); console.log('variations:', await page.locator('.ag-var-label').allTextContents()); }
   if (s === 'critique') { await page.evaluate(() => editor.store.select([])); await turn('critique', chip('Critique')); }
 }
 console.log('\nlayers:', await page.evaluate(() => Object.values(editor.store.project.layers).map((l) => `${l.name}:${Object.keys(l.props).filter((k) => l.props[k].kf?.length).join('+')}`).join(', ')));

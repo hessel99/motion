@@ -93,8 +93,8 @@ check('preview file: one html page with an embedded video and a player', /^<!doc
 await click('.tb-share');
 await click('.ctx-item:has-text("Export a file")');
 await page.waitForSelector('.xv-dialog');
-for (const i of [2, 3, 4, 5, 1]) await click(`.xv-kinds button:nth-child(${i})`);
-check('export dialog with five formats', await page.locator('.xv-kinds button').count() === 5);
+for (const i of [2, 3, 4, 1]) await click(`.xv-kinds button:nth-child(${i})`);
+check('export dialog with four formats', await page.locator('.xv-kinds button').count() === 4);
 await press('Escape');
 // ask bar runs a command
 await press('Control+k');
