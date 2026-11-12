@@ -14,6 +14,8 @@ import { useChannels } from './hooks';
 import { showContextMenu } from './menu';
 import { Button, ColorSwatch, Section, Segmented } from './ui';
 import { Component, Plus } from './chrome/icons';
+import { MotionComponentRows } from './ComponentPanels';
+import { makeComponent } from '../core/motion-components';
 
 const st = () => editor.store;
 export const STYLE_MIME = 'application/x-motion-style';
@@ -171,15 +173,23 @@ export function ComponentsSection() {
   const comps = Object.entries(P.components ?? {}).filter(([id]) => P.layers[id]);
   const sel = s.selection.length === 1 ? s.layer(s.selection[0]) : undefined;
   const canMake = !!sel && !P.components?.[sel.id] && !sel.link;
+  // top-level layers of a composition become an animated component (its own timeline, instances
+  // with properties / variants / timing); a nested layer becomes a linked-copy component
+  const top = s.selection.filter(id => s.comp.root.includes(id));
   const make = () => {
+    if (top.length && top.length === s.selection.length && !s.comp.component) {
+      try { const { comp } = makeComponent(s, top); toast(`${comp.name} is a component: expose its text or colors, then add instances`); } catch (e: any) { toast(e.message, 'error'); }
+      return;
+    }
     if (!sel) { toast('Select a layer or group first'); return; }
     try { createComponent(s, sel.id); toast(`${sel.name} is now a component: add instances from here, edit or animate it and they follow`); } catch (e: any) { toast(e.message, 'error'); }
   };
   const compOf = (id: string) => Object.values(P.comps).find(c => { let cur: string | null = id; while (cur) { const l: import("../core/model").Layer | undefined = P.layers[cur]; if (!l?.parent) return c.root.includes(cur); cur = l.parent; } return false; });
   const goMain = (id: string) => { const c = compOf(id); if (c) s.openComp(c.id); s.select([id]); };
   return (
-    <Section title="Components" right={<Button variant="ghost" size="sm" disabled={!canMake} tip="Make the selected layer a reusable component (⌥⌘K)" onClick={make}><Plus size={14} /> Make</Button>}>
-      {!comps.length && <p class="muted small lib-hint">A component is a layer you can reuse: animate it once, add instances anywhere, and changes to the main show up in every instance. Select a layer and press Make, or paste components from Figma.</p>}
+    <Section title="Components" right={<Button variant="ghost" size="sm" disabled={!canMake && !top.length} tip="Make the selected layers a reusable animated component" onClick={make}><Plus size={14} /> Make</Button>}>
+      <MotionComponentRows />
+      {!comps.length && !Object.values(P.comps).some(c => c.component) && <p class="muted small lib-hint">A component is a layer you can reuse: animate it once, add instances anywhere, and changes to the main show up in every instance. Select a layer and press Make, or paste components from Figma.</p>}
       {comps.map(([id, c]) => {
         const n = instancesOf(P, id).length;
         return (

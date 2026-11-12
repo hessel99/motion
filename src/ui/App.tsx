@@ -4,6 +4,7 @@ import { editor } from '../app/editor';
 import { ViewportController } from './viewport-controller';
 import { Timeline } from './timeline';
 import { STYLE_MIME, applyStyle } from './LibraryPanel';
+import { LibraryReview } from './ComponentPanels';
 import { useChannels } from './hooks';
 import { menuFrom, showContextMenu, type MenuItem } from './menu';
 import { agentMenuItems } from './agent-menu';
@@ -75,6 +76,7 @@ export function App() {
         <aside class="right sidebar" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
         {home && <div class="home-host"><Guard name="Home"><Home /></Guard></div>}
         {ui.settingsOpen && <SettingsModal />}
+        <Guard name="Library"><LibraryReview /></Guard>
         <AskBar />
         <ShortcutHelp />
         <Welcome />

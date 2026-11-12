@@ -30,3 +30,4 @@ bench/results/figma-fidelity/
 bench/results/figma-fidelity-*/
 bench/results/svg-fidelity/
 fixtures/figma-paste/
+tests/layout-baselines/.out/
