@@ -19,6 +19,7 @@ import { Button } from './ui';
 import { ArrowUp, Check, ChevronDown, CircleX, File, LAYER_ICON, Layers, LoaderCircle, Plus, Sparkle, Square, SquarePen, X } from './chrome/icons';
 import type { ComponentChildren } from 'preact';
 import './agent/agent.css';
+import { setAgentProgress, takeAsk } from './agent-bridge';
 
 interface Turn { chatId: string; startedAt: number; activity: string; stopping: boolean; live: number; snap: DocSnapshot; startId: number }
 
@@ -197,6 +198,21 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
 
   const runQuick = (a: QuickAction) => send(a.prompt(targetPhrase(editor.store)), { mode: a.mode, chip: a.label });
 
+  // asks from elsewhere (Home prompt, ⌘K, context menus, import suggestions: ./agent-bridge.ts).
+  // offline or busy: the text lands in the composer instead of getting lost
+  const sendRef = useRef(send);
+  sendRef.current = send;
+  useEffect(() => editor.on('agent-ask', () => {
+    const a = takeAsk();
+    if (!a) return;
+    const text = a.context ? `${a.text}
+
+(This refers to ${a.context}.)` : a.text;
+    if (agentClient.status === 'connected' && !turnRef.current) sendRef.current(text, { mode: a.mode, chip: a.chip });
+    else setInput(a.text);
+  }), []);
+  useEffect(() => { setAgentProgress(turn ? { activity: turn.activity, live: turn.live, startedAt: turn.startedAt } : null); }, [turn?.activity, turn?.live, !!turn]);
+
   const setReview = (i: number, state: ReviewInfo['state'], note?: string) => setMsgs(all => all.map((x, j) => (j === i && x.review ? { ...x, review: { ...x.review, state }, text: note ?? x.text } : x)));
 
   const providers = agentClient.providers;
@@ -263,9 +279,8 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
           </div>
           <div class="agent-list" ref={list} onScroll={e => { const el = e.currentTarget as HTMLDivElement; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40; }}>
             {status !== 'connected' && (
-              <div class="agent-note">
-                <b>Agent bridge offline.</b> The desktop app starts it automatically. In the browser run <code>npm run bridge</code>.
-                The bridge uses the Claude Code / Codex / Gemini CLI on your computer, so your own subscription is used.
+              <div class="agent-note agent-offline" title="The desktop app starts the bridge automatically; in the browser run npm run bridge. It uses the Claude Code / Codex / Gemini CLI on your computer (your own subscription).">
+                <span class="dot" aria-hidden="true" />Agent offline · <button class="link" onClick={() => openSettings('connections')}>How to connect</button>
               </div>
             )}
             {status === 'connected' && providers.length > 0 && !avail && (

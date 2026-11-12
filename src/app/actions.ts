@@ -6,12 +6,14 @@ import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
   setCompSettings, toggleAnimated, parseKeyId, precompose, addMarker, keyId,
 } from '../core/commands';
-import { createProject, uid, type Asset, type Layer, type Project } from '../core/model';
+import { uid, type Asset, type Layer, type Project } from '../core/model';
 import { boundsOf } from '../agent/tools';
 import { demoProject, stressProject } from './demo';
 import { importFigmaDesign, type DesignImportResult } from '../core/design-import';
 import { createComponent } from '../core/components';
 import type { FigmaDesignData } from '../import/figma/convert';
+import { activeDoc, closeDoc, cycleDocs, documents, isDocDirty, newDocument, openProject, restoreSession, serializeSession } from './documents';
+import { rememberRecent } from './recent';
 
 // importers are loaded lazily (keeps startup fast; missing modules are simply unavailable)
 const mods = import.meta.glob(['../import/figma/index.ts', '../import/svg.ts', '../import/lottie.ts', '../import/aep/index.ts', '../export/lottie.ts', '../export/aejsx.ts']);
@@ -33,12 +35,11 @@ const native = () => (globalThis as any).motionNative as undefined | {
   onMenu(cb: (cmd: string) => void): void;
 };
 
-let currentPath: string | null = null;
-
 // ---------------- dirty state + window title ----------------
-let savedAt = 0; // id of the top undo entry at the last save/open (a count would match after undo + new edits)
-export function markSaved() { savedAt = st().topEntryId; updateTitle(); }
-export function isDirty() { return st().topEntryId !== savedAt; }
+// per document (src/app/documents.ts): the id of the top undo entry at the last save/open (a count
+// would match after undo + new edits)
+export function markSaved() { const d = activeDoc(); if (d) d.savedAt = st().topEntryId; updateTitle(); editor.emit('docs'); }
+export function isDirty() { return isDocDirty(); }
 function updateTitle() {
   const name = st().project.name || 'Untitled';
   const t = `${isDirty() ? '● ' : ''}${name} — Motion`;
@@ -47,12 +48,14 @@ function updateTitle() {
 export function setupTitle() {
   st().on('history', updateTitle);
   st().on('doc', updateTitle);
-  editor.on('loaded', () => { savedAt = st().topEntryId; updateTitle(); });
-  window.addEventListener('beforeunload', e => { if (isDirty() && !(window as any).__noUnloadGuard) { e.preventDefault(); e.returnValue = ''; } });
+  editor.on('docs', updateTitle);
+  window.addEventListener('beforeunload', e => { if (anyDirty() && !(window as any).__noUnloadGuard) { e.preventDefault(); e.returnValue = ''; } });
   updateTitle();
 }
 
-/** true when there is nothing unsaved or the user agrees to discard it */
+/** some open tab has unsaved changes */
+function anyDirty() { return documents().some(d => isDocDirty(d)); }
+
 /** pending space tap (cleared when the space-hand pans the viewport) */
 let spaceTap: { panned: boolean } | null = null;
 export function markSpacePanned() { if (spaceTap) spaceTap.panned = true; }
@@ -80,17 +83,15 @@ export function toast(msg: string, kind: 'info' | 'error' = 'info') {
 }
 
 // ---------------- files ----------------
-export function newProject() {
-  editor.load(createProject('Untitled'));
-  currentPath = null;
-}
+/** a new empty document in its own tab */
+export function newProject() { newDocument(); }
 
-export function loadDemo() { editor.load(demoProject()); currentPath = null; }
+/** the demo animation, in its own tab */
+export function loadDemo() { openProject(demoProject()); }
 
 export function loadStress(count: number, kinds?: any[], nested = false, animated?: number) {
   const t0 = performance.now();
-  editor.load(stressProject({ count, kinds, nested, animated }));
-  currentPath = null;
+  editor.load(stressProject({ count, kinds, nested, animated })); // replaces the active tab's content
   toast(`${count} animated layers generated in ${Math.round(performance.now() - t0)}ms`);
 }
 
@@ -136,13 +137,23 @@ export async function saveProject(saveAs = false) {
   const data = serialize();
   const name = (st().project.name || 'Untitled') + '.motion';
   const n = native();
+  const doc = activeDoc();
+  const currentPath = doc?.path ?? null;
   if (n) {
     const p = await n.saveFile({ defaultPath: saveAs || !currentPath ? name : currentPath, path: saveAs ? undefined : currentPath, data, filters: [{ name: 'Motion project', extensions: ['motion'] }] });
-    if (p) { currentPath = p; markSaved(); toast('Saved'); }
+    if (p) { if (doc) doc.path = p; markSaved(); toast('Saved'); rememberSaved(); }
     return;
   }
   download(name, data, 'application/json');
   markSaved();
+  rememberSaved();
+}
+
+/** the saved project goes to the top of the recent files, with a thumbnail of the current frame */
+function rememberSaved() {
+  let thumb: string | undefined;
+  try { thumb = editor.renderer.snapshot(st().time, 360); } catch { /* */ }
+  rememberRecent(st().project, activeDoc()?.path ?? null, thumb);
 }
 
 export function download(name: string, data: string | Blob, mime: string) {
@@ -154,28 +165,46 @@ export function download(name: string, data: string | Blob, mime: string) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-export async function openFileDialog() {
+/** what an open dialog offers: everything, or one kind of file (Home's import cards) */
+export type OpenKind = 'any' | 'lottie' | 'svg' | 'aep' | 'media';
+const OPEN_KINDS: Record<OpenKind, { accept: string; filters?: { name: string; extensions: string[] }[] }> = {
+  any: { accept: '.motion,.json,.aep,.svg,image/*,audio/*' },
+  lottie: { accept: '.json', filters: [{ name: 'Lottie JSON', extensions: ['json'] }] },
+  svg: { accept: '.svg', filters: [{ name: 'SVG', extensions: ['svg'] }] },
+  aep: { accept: '.aep', filters: [{ name: 'After Effects project', extensions: ['aep'] }] },
+  media: { accept: 'image/*,audio/*', filters: [{ name: 'Images and audio', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'mp3', 'wav', 'm4a', 'ogg'] }] },
+};
+
+export async function openFileDialog(kind: OpenKind = 'any') {
   const n = native();
+  const k = OPEN_KINDS[kind] ?? OPEN_KINDS.any;
   if (n) {
-    const f = await n.openFile({});
+    const f = await n.openFile(k.filters ? { filters: k.filters } : {});
     if (f) await openData(f.name, f.data, f.path);
     return;
   }
   const inp = document.createElement('input');
   inp.type = 'file';
-  inp.accept = '.motion,.json,.aep,.svg,image/*,audio/*';
+  inp.accept = k.accept;
   inp.onchange = async () => { for (const f of inp.files ?? []) await openBrowserFile(f); };
   inp.click();
 }
 
+/** files that become layers go into the open document (a new one from the Home view) */
+function intoDocument() {
+  if (!activeDoc()) newProject();
+  editor.emit('doc-open');
+}
+
 export async function openBrowserFile(f: File) {
   const ext = f.name.split('.').pop()!.toLowerCase();
-  if (f.type.startsWith('audio/') || ['mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac'].includes(ext)) return importAudio(f);
+  if (f.type.startsWith('audio/') || ['mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac'].includes(ext)) { intoDocument(); return importAudio(f); }
   // svg is "image/svg+xml" but must go to the vector importer, not the bitmap path
-  if (ext === 'svg' || f.type === 'image/svg+xml') return importSvgText(await f.text());
+  if (ext === 'svg' || f.type === 'image/svg+xml') { intoDocument(); return importSvgText(await f.text()); }
   if (ext === 'aep' || f.type.startsWith('image/')) {
     const buf = await f.arrayBuffer();
     if (ext === 'aep') return importAep(buf, f.name);
+    intoDocument();
     return importImage(f);
   }
   return openData(f.name, await f.text());
@@ -195,25 +224,24 @@ export async function openData(name: string, data: string, path?: string) {
     if (ext === 'motion') {
       const p = JSON.parse(data) as Project;
       if (!p.comps || !p.layers) throw new Error('not a motion project');
-      if (!confirmDiscard(`Open "${name}"?`)) return;
-      editor.load(p);
-      currentPath = path ?? null;
+      p.name ||= name.replace(/\.motion$/i, '');
+      openProject(p, path ?? null);
       return;
     }
     if (ext === 'json') {
       const json = JSON.parse(data);
-      if (json.layers && json.comps) { if (!confirmDiscard(`Open "${name}"?`)) return; editor.load(json); currentPath = path ?? null; return; }
+      if (json.layers && json.comps) { openProject(json, path ?? null); return; }
       const m = await mod('../import/lottie.ts');
       if (!m) throw new Error('lottie import not available');
-      if (!confirmDiscard(`Open "${name}"?`)) return;
       const t0 = performance.now();
-      editor.load(m.lottieToProject(json, name.replace(/\.json$/i, '')));
+      openProject(m.lottieToProject(json, name.replace(/\.json$/i, '')));
       toast(`Lottie imported in ${Math.round(performance.now() - t0)}ms`);
       return;
     }
     if (ext === 'aep') return importAep(b64ToBuf(data), name);
-    if (ext === 'svg') return importSvgText(data);
+    if (ext === 'svg') { intoDocument(); return importSvgText(data); }
     if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
+      intoDocument();
       const blob = new Blob([b64ToBuf(data)], { type: 'image/' + (ext === 'jpg' ? 'jpeg' : ext) });
       return importImage(new File([blob], name, { type: blob.type }));
     }
@@ -231,8 +259,7 @@ async function importAep(buf: ArrayBuffer, name: string) {
     const t0 = performance.now();
     const p: Project = m.aepToProject(buf);
     p.name ||= name.replace(/\.aep$/i, '');
-    if (!confirmDiscard(`Open "${name}"?`)) return;
-    editor.load(p);
+    openProject(p);
     toast(`After Effects project imported in ${Math.round(performance.now() - t0)}ms`);
   } catch (e: any) {
     console.error(e);
@@ -241,7 +268,7 @@ async function importAep(buf: ArrayBuffer, name: string) {
 }
 
 /** gif export with a progress toast; desktop saves into the Motion export folder */
-export async function exportGifFile() {
+export async function exportGifFile(opts: import('../export/gif').GifOptions = {}) {
   const { exportGif } = await import('../export/gif');
   const el = document.createElement('div');
   el.className = 'toast';
@@ -249,7 +276,7 @@ export async function exportGifFile() {
   setBusy('export-gif', true); // no update restarts mid-export
   document.body.appendChild(el);
   try {
-    const blob = await exportGif({}, (d, n) => { el.textContent = `Exporting GIF… ${Math.round((d / n) * 100)}%`; });
+    const blob = await exportGif(opts, (d, n) => { el.textContent = `Exporting GIF… ${Math.round((d / n) * 100)}%`; });
     const name = `${(st().project.name || 'motion').replace(/[^\w\- ]+/g, '_')} - ${st().comp.name}.gif`;
     const nat = native() as any;
     if (nat?.saveExport) {
@@ -358,11 +385,20 @@ function collect(byId: Map<string, Layer>, id: string): Layer[] {
   return out;
 }
 
+/** the last artwork / audio that came in (paste, drop, open): the ui offers "Animate this" /
+ *  "Sync to music" next to it (opt-in, never automatic). listeners: editor channel 'imported' */
+export let lastImport: { kind: 'artwork' | 'audio'; ids: string[]; name: string } | null = null;
+function imported(kind: 'artwork' | 'audio', ids: string[], name: string) {
+  lastImport = { kind, ids, name };
+  editor.emit('imported');
+}
+
 async function importSvgText(text: string) {
   const m = await mod('../import/svg.ts');
   if (!m) { toast('SVG import not available yet', 'error'); return; }
   const res = m.svgToLayers(text);
   insertLayers(res, { label: 'Import SVG', fitCompIfEmpty: true });
+  imported('artwork', res.roots, 'the SVG');
   toast(`Imported ${res.layers.length} layers from SVG`);
 }
 
@@ -375,6 +411,7 @@ async function importAudio(f: File) {
   l.startTime = st().time;
   l.volume = 1;
   insertLayers({ layers: [l], roots: [l.id], assets: [asset] }, { label: 'Import audio' });
+  imported('audio', [l.id], l.name);
   toast(`Audio added at ${st().time.toFixed(2)}s`);
 }
 
@@ -389,6 +426,7 @@ async function importImage(f: File) {
   const l = createLayer('image', { x: (comp.width - w) / 2, y: (comp.height - h) / 2, w, h, name: f.name.replace(/\.[^.]+$/, '') });
   l.imageRef = asset.id;
   insertLayers({ layers: [l], roots: [l.id], assets: [asset] }, { label: 'Import image' });
+  imported('artwork', [l.id], l.name);
 }
 
 // ---------------- clipboard ----------------
@@ -501,6 +539,8 @@ export async function handlePaste(e: ClipboardEvent) {
   const cd = e.clipboardData;
   if (!cd) return;
   e.preventDefault();
+  // pasting on the Home view: into the open document, or a new one when none is open
+  if (document.documentElement.dataset.view === 'home') { if (!activeDoc()) newProject(); editor.emit('doc-open'); }
   const html = cd.getData('text/html');
   const textData = cd.getData('text/plain');
   try {
@@ -510,6 +550,7 @@ export async function handlePaste(e: ClipboardEvent) {
       const res = m?.parseFigmaClipboard(html);
       if (res && res.roots.length) {
         const d = insertLayers(res, { label: 'Paste from Figma', fitCompIfEmpty: true });
+        imported('artwork', res.roots, 'the Figma design');
         const extra = [
           d?.linked ? `${d.linked} linked to styles` : '',
           d?.components ? `${d.components} component${d.components > 1 ? 's' : ''} added` : '',
@@ -546,13 +587,14 @@ function warnAutosave() {
 
 export function setupAutosave() {
   let timer = 0;
+  // every open tab is saved (background tabs reuse their serialized json: they don't change)
   const save = () => {
     const nat = native() as any;
-    if (nat?.autosaveWrite) { Promise.resolve(nat.autosaveWrite(serialize())).catch(() => {}); return; } // desktop: file in app data, any size
+    if (nat?.autosaveWrite) { Promise.resolve(nat.autosaveWrite(serializeSession(serialize))).catch(() => {}); return; } // desktop: file in app data, any size
     // big projects don't fit local storage anyway (~5MB): skip instead of serializing megabytes on the main thread
     if (Object.keys(st().project.layers).length > 1500) { warnAutosave(); return; }
     try {
-      const s = serialize();
+      const s = serializeSession(serialize);
       if (s.length < 4_000_000) { localStorage.setItem(AUTOSAVE_KEY, s); autosaveWarned = false; }
       else warnAutosave();
     } catch { warnAutosave(); /* quota */ }
@@ -568,15 +610,17 @@ export function setupAutosave() {
     timer = 0;
     'requestIdleCallback' in window ? (window as any).requestIdleCallback(save, { timeout: 3000 }) : save();
   };
-  st().on('doc', () => {
+  const edited = () => {
     lastEdit = performance.now();
     if (!timer) timer = window.setTimeout(due, QUIET);
-  });
+  };
+  st().on('doc', edited);
+  editor.on('docs', edited); // tabs opened / closed / switched
 }
 /** write the autosave copy now (before an update restart reloads the window) */
 export async function flushAutosave() {
   const nat = native() as any;
-  if (nat?.autosaveWrite) await nat.autosaveWrite(serialize());
+  if (nat?.autosaveWrite) await nat.autosaveWrite(serializeSession(serialize));
 }
 export async function restoreAutosaveNative(): Promise<boolean> {
   const nat = native() as any;
@@ -584,10 +628,7 @@ export async function restoreAutosaveNative(): Promise<boolean> {
   try {
     const s = await nat.autosaveRead();
     if (!s) return false;
-    const p = JSON.parse(s);
-    if (!p.comps || !p.layers) return false;
-    editor.load(p);
-    return true;
+    return restoreSession(JSON.parse(s));
   } catch { return false; }
 }
 
@@ -595,10 +636,7 @@ export function restoreAutosave(): boolean {
   try {
     const s = localStorage.getItem(AUTOSAVE_KEY);
     if (!s) return false;
-    const p = JSON.parse(s);
-    if (!p.comps || !p.layers) return false;
-    editor.load(p);
-    return true;
+    return restoreSession(JSON.parse(s));
   } catch { return false; }
 }
 
@@ -626,6 +664,8 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     const mod = e.metaKey || e.ctrlKey;
     const k = e.key.toLowerCase();
     const run = (fn: () => void) => { e.preventDefault(); fn(); };
+    // the Home view covers the editor: only file shortcuts work there
+    if (document.documentElement.dataset.view === 'home' && !(mod && ['o', 'n', 't', 'w', ','].includes(k)) && !(e.ctrlKey && e.key === 'Tab')) return;
     if (mod && e.altKey && e.code === 'KeyK') return run(() => {
       // figma: create component (⌥⌘K); on an instance: detach (⌥⌘B in figma)
       const id = s.selection[0];
@@ -635,6 +675,11 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (mod && k === 'z') return run(() => (e.shiftKey ? s.redo() : s.undo()));
     if (mod && k === 'y') return run(() => s.redo());
     if (mod && k === 's') return run(() => saveProject(e.shiftKey));
+    // window tabs (in a browser tab some of these stay with the browser)
+    if (mod && (k === 't' || k === 'n') && !e.shiftKey) return run(() => newProject());
+    if (mod && k === 'w') return run(() => { const d = activeDoc(); if (d) closeDoc(d.id); });
+    if (e.ctrlKey && e.key === 'Tab') return run(() => cycleDocs(e.shiftKey ? -1 : 1));
+    if (mod && k === 'e') return run(() => openExport());
     if (mod && k === 'o') return run(() => openFileDialog());
     if (mod && k === 'd') return run(() => cloneLayers(s, s.selection, 10));
     if (mod && e.shiftKey && k === 'c') return run(() => { try { precompose(s, s.selection); } catch (err: any) { toast(err.message, 'error'); } });
@@ -693,7 +738,10 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     }
   });
   native()?.onMenu(cmd => {
-    if (cmd === 'new') { if (confirmDiscard()) newProject(); }
+    if (cmd === 'new' || cmd === 'newTab') newProject();
+    else if (cmd === 'closeTab') { const d = activeDoc(); if (d) closeDoc(d.id); }
+    else if (cmd === 'nextTab' || cmd === 'prevTab') cycleDocs(cmd === 'nextTab' ? 1 : -1);
+    else if (cmd === 'export') openExport();
     else if (cmd === 'open' || cmd === 'import') openFileDialog();
     else if (cmd === 'save') saveProject(false);
     else if (cmd === 'saveAs') saveProject(true);
@@ -706,6 +754,9 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     }
   });
 }
+
+/** the export dialog (every format): the one way to export */
+export function openExport() { import('../ui/ExportDialog').then(m => m.openExportDialog()); }
 
 function isTyping(e: Event) {
   const t = e.target as HTMLElement;

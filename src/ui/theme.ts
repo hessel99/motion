@@ -143,7 +143,7 @@ function fonts(ui: string, mono: string): CanvasFonts {
 /** the live canvas theme. read fields at draw time (never cache them across theme changes). */
 export const T: CanvasTheme = Object.assign(
   Object.fromEntries(Object.keys(COLOR_TOKENS).map(k => [k, '#888'])) as Record<ColorToken, string>,
-  { name: 'dark' as ThemeName, font: fonts(FALLBACK_FONT_UI, FALLBACK_FONT_MONO), vpBgRgb: [0.1, 0.1, 0.11] as [number, number, number], axes: ['#f66', '#4c6', '#48f', '#fc0'] as [string, string, string, string], labels: ['#4a90e2', '#e8619d', '#3fa66a', '#e8833a'] },
+  { name: 'light' as ThemeName, font: fonts(FALLBACK_FONT_UI, FALLBACK_FONT_MONO), vpBgRgb: [0.1, 0.1, 0.11] as [number, number, number], axes: ['#f66', '#4c6', '#48f', '#fc0'] as [string, string, string, string], labels: ['#4a90e2', '#e8619d', '#3fa66a', '#e8833a'] },
 );
 
 const listeners = new Set<() => void>();
@@ -187,7 +187,7 @@ export function readCanvasTheme(scope: Element = document.documentElement): Canv
       if (raw) out[k] = /^#[0-9a-f]{3,8}$/i.test(raw) ? raw : r.resolve(raw);
     }
     out.font = fonts(cs.getPropertyValue('--font-ui').trim() || FALLBACK_FONT_UI, cs.getPropertyValue('--font-mono').trim() || FALLBACK_FONT_MONO);
-    out.name = scope.closest('[data-theme]')?.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    out.name = scope.closest('[data-theme]')?.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
     out.vpBgRgb = parseRgb(r.resolve(out.vpBg));
     out.axes = [out.axisX, out.axisY, out.axisZ, out.axisW];
     out.labels = [out.tlLabel1, out.tlLabel2, out.tlLabel3, out.tlLabel4, out.tlLabel5, out.tlLabel6, out.tlLabel7, out.tlLabel8];
@@ -211,30 +211,30 @@ export function onThemeChange(fn: () => void) {
 }
 
 export function getTheme(): ThemeName {
-  return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 }
 
 /** the user's choice: a fixed theme or follow the OS (Settings > Appearance) */
 export type ThemePref = ThemeName | 'system';
 
 const STORAGE = 'motion.theme';
-let pref: ThemePref = 'dark';
+let pref: ThemePref = 'light';
 let mql: MediaQueryList | null = null;
 
 export function getThemePref(): ThemePref { return pref; }
 
 function apply(name: ThemeName) {
   const root = document.documentElement;
-  if (name === 'dark') delete root.dataset.theme; else root.dataset.theme = name;
+  root.dataset.theme = name;
   // the mutation observer refreshes asynchronously; refresh now so callers can draw immediately
   refreshTheme();
 }
 
 function systemTheme(): ThemeName {
-  try { return matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; } catch { return 'dark'; }
+  try { return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { return 'light'; }
 }
 
-/** switch the whole app's theme (persisted). dark is the default; 'system' follows the OS. */
+/** switch the whole app's theme (persisted). light is the default; 'system' follows the OS. */
 export function setTheme(name: ThemePref) {
   pref = name;
   try { localStorage.setItem(STORAGE, name); } catch { /* private mode */ }
@@ -250,9 +250,9 @@ export function initTheme() {
   observing = true;
   let wanted: string | null = null;
   try { wanted = new URLSearchParams(location.search).get('theme') ?? localStorage.getItem(STORAGE); } catch { /* */ }
-  pref = wanted === 'light' || wanted === 'system' ? wanted : 'dark';
+  pref = wanted === 'dark' || wanted === 'system' ? wanted : 'light';
   const initial = pref === 'system' ? systemTheme() : pref;
-  if (initial === 'light') document.documentElement.dataset.theme = 'light';
+  document.documentElement.dataset.theme = initial;
   refreshTheme();
   new MutationObserver(() => {
     if (document.documentElement.dataset.theme !== resolvedFor) refreshTheme();

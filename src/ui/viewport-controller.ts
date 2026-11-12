@@ -111,6 +111,14 @@ export class ViewportController {
     this.applyView();
   }
 
+  /** restore a saved view (window tab switch) */
+  setView(zoom: number, panX: number, panY: number) {
+    this.zoomAnim = null;
+    this.zoom = zoom; this.panX = panX; this.panY = panY;
+    this.fitted = true;
+    this.applyView();
+  }
+
   setZoom(z: number, cx?: number, cy?: number) {
     const r = this.host.getBoundingClientRect();
     cx ??= r.width / 2; cy ??= r.height / 2;

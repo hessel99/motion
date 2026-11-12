@@ -1,22 +1,25 @@
-// right panel, the motion inspector: a title block for what is selected (the composition when
-// nothing is), then the inspector: the ease studio leads when keys are selected, then the
-// animated properties as rows with keyframe navigation, then the layer's look.
+// right card, the inspector: a header with what is selected (its name, a grey "Rectangle · in
+// Group 14" line and a "…" menu), the alignment buttons for layers, then the inspector sections.
+// with nothing selected it is the composition's settings.
 
 import { editor } from '../../app/editor';
 import { cloneLayers, deleteLayers, layerKeyTimes, renameComp, renameLayer } from '../../core/commands';
-import { Inspector } from '../Inspector';
+import { AlignBar, Inspector } from '../Inspector';
 import { useChannels } from '../hooks';
-import { showContextMenu, type MenuItem } from '../menu';
+import { menuFrom, type MenuItem } from '../menu';
 import { Button } from '../ui';
 import { Ellipsis } from './icons';
 
-const TYPE_NAME: Record<string, string> = { rect: 'Rectangle', ellipse: 'Ellipse', group: 'Group', text: 'Text', image: 'Image', path: 'Path', precomp: 'Composition layer', audio: 'Audio' };
+const TYPE_NAME: Record<string, string> = { rect: 'Rectangle', ellipse: 'Ellipse', group: 'Group', text: 'Text', image: 'Image', path: 'Path', precomp: 'Composition', audio: 'Audio' };
 
 export function RightPanel() {
   useChannels(['selection', 'playing', 'comps'], []);
+  const s = editor.store;
+  const sel = s.selection.filter(id => s.layer(id));
   return (
     <div class="right-panel">
       <TitleBlock />
+      {sel.length > 0 && !s.playing && !sel.every(id => s.layer(id)!.type === 'audio') && <div class="rp-align"><AlignBar ids={sel} /></div>}
       <Inspector />
     </div>
   );
@@ -30,8 +33,13 @@ function TitleBlock() {
   if (sel.length === 1) {
     const l = sel[0]!;
     const keys = layerKeyTimes(l).length;
+    const parent = l.parent ? s.layer(l.parent) : null;
     title = l.name;
-    sub = `${TYPE_NAME[l.type] ?? l.type}${keys ? ` · ${keys} key${keys === 1 ? '' : 's'}` : ''}${l.children.length ? ` · ${l.children.length} layers` : ''}`;
+    sub = [
+      l.shape ? (l.shape.kind === 'star' ? 'Star' : 'Polygon') : (TYPE_NAME[l.type] ?? l.type),
+      parent ? `in ${parent.name}` : null,
+      keys ? `${keys} key${keys === 1 ? '' : 's'}` : null,
+    ].filter(Boolean).join(' · ');
     menu = [
       { label: 'Rename…', action: () => { const n = prompt('Layer name', l.name); if (n) renameLayer(s, l.id, n); } },
       { label: 'Duplicate', shortcut: '⌘D', action: () => { const ids = cloneLayers(s, [l.id]); if (ids?.length) s.select(ids); } },
@@ -46,9 +54,8 @@ function TitleBlock() {
     ];
   } else {
     const c = s.comp;
-    const n = Object.keys(s.project.layers).length;
     title = c.name;
-    sub = `Composition · ${c.root.length} layer${c.root.length === 1 ? '' : 's'}${n > c.root.length && Object.keys(s.project.comps).length === 1 ? ` (${n} in all)` : ''}`;
+    sub = `Composition · ${c.root.length} layer${c.root.length === 1 ? '' : 's'}`;
     menu = [
       { label: 'Rename composition…', action: () => { const v = prompt('Composition name', c.name); if (v) renameComp(s, c.id, v); } },
     ];
@@ -59,7 +66,7 @@ function TitleBlock() {
         <div class="rp-name" title={title}>{title}</div>
         <div class="rp-sub">{sub}</div>
       </div>
-      <Button variant="ghost" icon size="sm" tip="More" aria-haspopup="menu" onClick={(e: MouseEvent) => { const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); showContextMenu(r.left - 150, r.bottom + 4, menu); }}><Ellipsis /></Button>
+      <Button variant="ghost" icon size="sm" tip="More" aria-haspopup="menu" onClick={(e: MouseEvent) => menuFrom(e.currentTarget as Element, menu, { align: 'right' })}><Ellipsis /></Button>
     </div>
   );
 }
