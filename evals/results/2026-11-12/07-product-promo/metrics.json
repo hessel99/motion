@@ -1,0 +1,136 @@
+{
+ "run": {
+  "id": "07-product-promo",
+  "name": "07-product-promo",
+  "model": "sonnet",
+  "seed": 1,
+  "wallMs": 40984,
+  "timedOut": false,
+  "turns": 15,
+  "costUsd": 0.1054379,
+  "durationMs": 39795,
+  "usage": {
+   "input": 93585,
+   "cached": 84039,
+   "output": 5887
+  },
+  "errors": [],
+  "toolCalls": 14,
+  "toolErrors": 0,
+  "toolsAvailable": 37,
+  "finalText": "The Pulse 2 title sequence is built on the 120 BPM grid (one beat is 0.5s), and the comp is now 7s. I checked it on a contact sheet and two close-up frames. I didn't play it back or export it.\n\n- **0.5s, 1.0s, 1.5s:** \"40h battery\", \"Spatial audio\" and \"Pure silence\" each land on a beat. Each one hits with a different move: scale-down punch, slide-and-zoom, then a big punch. Each also gets an orange flash on its beat. \"Pure silence\" is orange and holds an extra beat.\n- **2.5s:** \"PULSE 2\" slams in from 280% scale under a full-screen orange flash. A shockwave ring (the `Shockwave` layer) expands out from the centre.\n- **4.0s:** The title lifts up and the `CTA Pill` pops in with an overshoot, followed by the \"Available now\" text.\n- **Markers:** I added markers at each beat hit so you can retime against them.\n\nI set the ring's fill to transparent after the first check showed a blue disc inside it.\n\nTwo tweaks I could make: a quick screen shake on the slam, or a pulsing glow on the pill during the last 2 seconds. Which would you like?"
+ },
+ "metrics": {
+  "layers": 8,
+  "drawableLayers": 8,
+  "layerTypes": {
+   "text": 5,
+   "ellipse": 1,
+   "rect": 2
+  },
+  "groups": 0,
+  "animatedLayers": 8,
+  "keys": 48,
+  "segments": 30,
+  "easesUsed": {
+   "Expo Out": 11,
+   "Linear": 3,
+   "Hold": 9,
+   "Quad Out": 2,
+   "Easy Ease": 3,
+   "Back Out": 2
+  },
+  "distinctEases": 6,
+  "easeFamilies": 6,
+  "overshootSegments": 2,
+  "keyedOvershoots": 2,
+  "springSegments": 0,
+  "holdKeys": 9,
+  "linearSegments": 3,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 5,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#ffffff",
+   "#ff5a1f",
+   "#0a0a0c"
+  ],
+  "keyCoverage": 0.629,
+  "visualActivity": 0.459,
+  "firstMotion": 0.467,
+  "lastMotion": 4.4,
+  "endHold": 2.6,
+  "longestHold": 0.67,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 5,
+  "beats": 4,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.203,
+  "midLuma": 0.108,
+  "toolErrors": 0,
+  "toolCalls": 14
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "3 feature words present",
+    "type": "textAllOf",
+    "pass": true
+   },
+   {
+    "text": "product name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "\"Available now\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 beats",
+    "type": "beatsMin",
+    "pass": false
+   },
+   {
+    "text": "shockwave ring (stroked ellipse scaling up)",
+    "type": "ring",
+    "pass": true
+   },
+   {
+    "text": "feature words exit (transitions, not stacking)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "beat-aligned timing (markers or keys on a 0.5s grid)",
+    "type": "beatGrid",
+    "pass": true
+   },
+   {
+    "text": "dark background",
+    "type": "darkBackground",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": {
+  "frames": 210,
+  "sourceCodec": "avc1.64001f",
+  "bytes": 90609
+ }
+}

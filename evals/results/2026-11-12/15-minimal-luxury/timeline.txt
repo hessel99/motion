@@ -1,0 +1,13 @@
+- ÉCLAT [text] box 26,928,1028,134 #d9c08f "ÉCLAT" Cormorant Garamond, Georgia, serif 104px w300
+- Subtitle [text] box 40,1090,1000,50 #b8a27a "EAU DE PARFUM" Cormorant Garamond, Georgia, serif 28px w400
+- Gold Line [rect] box 539,262,2,484 #d4b886
+
+comp 1080x1920 7s @30fps, background #0a0908
+"ÉCLAT" (text l_03jm2)
+  scale: 2.2s 105 ─Sine Out→ 6.8s 100
+  text animator: in by char, start 2.2s, 1.6s each, stagger 0.45s, ease Sine Out
+"Subtitle" (text l_03jm3)
+  opacity: 4.6s 0 ─Sine Out→ 6.2s 100
+"Gold Line" (rect l_03jm4)
+  position: 0.5s [540,300] ─Sine In Out→ 4.5s [540,580]
+  size: 0.5s [2,0] ─Sine In Out→ 4.5s [2,560]

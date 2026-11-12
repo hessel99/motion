@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 5,
+  "style_match": 6,
+  "timing_easing": 5,
+  "composition": 6,
+  "richness": 4,
+  "polish": 4
+ },
+ "overall": 5,
+ "critique": [
+  "The comp is 7s instead of the briefed 10s, and all motion ends at 4.4s. That leaves a 2.6s dead hold on a static end card, plus a near-static 2.85–4s stretch after the slam, so the '120 BPM' energy dies halfway. On top of that, Flash Wipe holds at 35% orange from 0–0.5s, so the piece opens on a muddy brown frame instead of black.",
+  "Extend to 10s and keep cutting on the 0.5s grid through the back half. Add a beat-synced secondary hit after the slam (e.g. a second ring or a letter-spaced pulse on PULSE 2 at 3s/3.5s), stagger the pill and its label onto separate beats with a glint or underline sweep, and add a final out-beat. Also key Flash Wipe to 0 at 0s and give each feature word a real directional exit (whip, mask or scale-through) instead of just a hold-cut on opacity."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0564678,
+ "ms": 10661,
+ "raw": "```json\n{\"brief_fit\": 5, \"style_match\": 6, \"timing_easing\": 5, \"composition\": 6, \"richness\": 4, \"polish\": 4,\n \"critique\": [\"The comp is 7s instead of the briefed 10s, and all motion ends at 4.4s. That leaves a 2.6s dead hold on a static end card, plus a near-static 2.85–4s stretch after the slam, so the '120 BPM' energy dies halfway. On top of that, Flash Wipe holds at 35% orange from 0–0.5s, so the piece opens on a muddy brown frame instead of black.\", \"Extend to 10s and keep cutting on the 0.5s grid through the back half. Add a beat-synced secondary hit after the slam (e.g. a second ring or a letter-spaced pulse on PULSE 2 at 3s/3.5s), stagger the pill and its label onto separate beats with a glint or underline sweep, and add a final out-beat. Also key Flash Wipe to 0 at 0s and give each feature word a real directional exit (whip, mask or scale-through) instead of just a hold-cut on opacity.\"]}\n```"
+}

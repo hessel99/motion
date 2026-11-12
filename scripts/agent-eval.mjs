@@ -15,7 +15,9 @@
 //     --no-judge             skip the judge; --judge-model opus (default)
 //     --no-video             skip the mp4
 //     --judge-only DIR       re-judge saved runs in DIR (with --judge-repeat N, --only): calibration
+//     --rejudge              with --judge-only: replace judge.json instead of adding to it
 //     --summarize DIR        rebuild summary.md/json of DIR
+//     --rescore DIR          recompute metrics + checklist of saved runs (reloads document.json; no model)
 //     --dry                  no model: a scripted tool sequence (tests the pipeline for free)
 //
 // Needs: the dev server running (npx vite --port 5271 --strictPort), the `claude` CLI logged in, ffmpeg for mp4.
@@ -53,6 +55,8 @@ const O = {
   judgeRepeat: Math.max(1, +opt('judge-repeat', 1)),
   summarize: opt('summarize', null),
   dry: flag('dry'),
+  rescore: opt('rescore', null),
+  rejudge: flag('rejudge'),
 };
 
 const briefs = fs.readdirSync(path.join(ROOT, 'evals', 'briefs')).filter((f) => f.endsWith('.json')).sort()
@@ -78,6 +82,7 @@ function judgeInput(brief, rec) {
     `expressions ${m.expressions}, text animators ${m.textAnimators}, precomps ${m.precomps}, paths ${m.pathLayers}, gradients ${m.gradientLayers}, markers ${m.markers}`,
     `palette (${m.paletteSize}): ${m.palette.join(' ')}`,
     `motion from ${m.firstMotion}s to ${m.lastMotion}s (end hold ${m.endHold}s, longest still ${m.longestHold}s), visual activity ${Math.round(m.visualActivity * 100)}% of the comp`,
+    `fonts that did not load (rendered in a fallback): ${m.missingFonts?.join(', ') || 'none'}; trim keys that cannot render: ${m.deadTrimLayers?.join(', ') || 'none'}`,
     `partially off-canvas ${m.offCanvasTime}s${m.clippedAtEnd.length ? `, clipped in the last frame: ${m.clippedAtEnd.join(', ')}` : ''}; text-on-text overlap ${m.textOverlapTime}s; layers never visible: ${m.neverVisible.join(', ') || 'none'}`,
   ].join('\n');
   const fill = { id: brief.id, comp: `${brief.comp.width}x${brief.comp.height}, ${brief.comp.duration}s @${brief.comp.fps}fps`, prompt: brief.prompt, checklist: ck, layers: rec.layerList, timeline: rec.timeline.slice(0, 9000), metrics };
@@ -192,8 +197,19 @@ async function probe(page) {
     }).filter(Boolean).join('\n');
     const timeline = [`comp ${c.width}x${c.height} ${D}s @${c.fps}fps, background ${hex(c.background)}${(c.markers ?? []).length ? `, markers ${c.markers.map((m) => m.t + (m.label ? ' ' + m.label : '')).join(', ')}` : ''}`,
       ...order.map((id) => { const l = st.layer(id); return l ? describeLayerAnimation(l) : ''; }).filter(Boolean)].join('\n');
+    // which requested font families actually render (else the text silently falls back to Inter/system)
+    const fonts = {};
+    const cv2 = document.createElement('canvas').getContext('2d');
+    const w = (f) => { cv2.font = `40px ${f}`; return cv2.measureText('Hamburgefonstiv 0123 ÉÀ').width; };
+    for (const l of Object.values(st.project.layers)) {
+      if (!l.text) continue;
+      for (const fam of String(l.text.fontFamily).split(',').map((x) => x.trim().replace(/^["']|["']$/g, '')).filter(Boolean)) {
+        if (fam in fonts || /^(serif|sans-serif|monospace|system-ui|cursive|fantasy)$/i.test(fam)) continue;
+        fonts[fam] = fam === 'Inter' || w(`"${fam}", monospace`) !== w('monospace') || w(`"${fam}", serif`) !== w('serif');
+      }
+    }
     r.dirty = true; r.render(st.time);
-    return { comp: { width: c.width, height: c.height, fps: c.fps, duration: D, background: c.background }, samples, vals, loopDiff: diff / (px * 3 * 255), midLuma: luma / (px * 255), layerList, timeline, comps: Object.keys(st.project.comps).length };
+    return { fonts, comp: { width: c.width, height: c.height, fps: c.fps, duration: D, background: c.background }, samples, vals, loopDiff: diff / (px * 3 * 255), midLuma: luma / (px * 255), layerList, timeline, comps: Object.keys(st.project.comps).length };
   });
 }
 
@@ -320,6 +336,7 @@ async function runBrief(worker, brief, rep) {
   const doc = await page.evaluate(() => JSON.parse(JSON.stringify(window.editor.store.project)));
   fs.writeFileSync(path.join(dir, 'document.json'), JSON.stringify(doc));
   const pr = await probe(page);
+  fs.writeFileSync(path.join(dir, 'probe.json'), JSON.stringify({ comp: pr.comp, samples: pr.samples, vals: pr.vals, loopDiff: pr.loopDiff, midLuma: pr.midLuma, fonts: pr.fonts }));
   const { metrics, derived } = computeMetrics(doc, pr);
   const checklist = runChecklist(brief, metrics, derived);
   const sheet = await contactSheet(page);
@@ -396,13 +413,13 @@ async function judgeOnly(dir) {
     const text = judgeInput(r.brief, { checklist: r.checklist, metrics: r.metrics, layerList: tl.slice(0, cut), timeline: tl.slice(cut + 2) });
     fs.writeFileSync(path.join(d, 'judge-input.txt'), text);
     const img = fs.readFileSync(path.join(d, 'contact.jpg'));
-    const scores = r.judge ? [r.judge] : [];
+    const scores = r.judge && !O.rejudge ? [r.judge] : [];
     for (let i = 0; i < O.judgeRepeat; i++) {
       const res = await runClaudeOnce({ text, image: img, model: O.judgeModel });
       totalCost += res.cost;
       const p = parseJudge(res.text);
       if (p) scores.push({ ...p, cost: res.cost });
-      if (p && !r.judge && !fs.existsSync(path.join(d, 'judge.json'))) fs.writeFileSync(path.join(d, 'judge.json'), JSON.stringify({ ...p, model: res.models[0] ?? O.judgeModel, cost: res.cost, ms: res.ms, raw: res.text }, null, 1));
+      if (p && scores.length === 1 && (O.rejudge || !r.judge)) fs.writeFileSync(path.join(d, 'judge.json'), JSON.stringify({ ...p, model: res.models[0] ?? O.judgeModel, cost: res.cost, ms: res.ms, raw: res.text }, null, 1));
       log(`${r.name}: judge #${scores.length} ${p?.overall ?? 'parse failed: ' + (res.error ?? res.text.slice(0, 300))}`);
     }
     const spread = Object.fromEntries([...JUDGE_KEYS, 'overall'].map((k) => {
@@ -416,14 +433,43 @@ async function judgeOnly(dir) {
   const exact = cal.length ? Math.round((cal.reduce((a, c) => a + JUDGE_KEYS.filter((k) => c.spread[k].range === 0).length, 0) / (cal.length * JUDGE_KEYS.length)) * 100) : 0;
   const within1 = cal.length ? Math.round((cal.reduce((a, c) => a + JUDGE_KEYS.filter((k) => c.spread[k].range <= 1).length, 0) / (cal.length * JUDGE_KEYS.length)) * 100) : 0;
   const out = { judgeModel: O.judgeModel, briefs: cal, meanRange, exactAgreementPct: exact, within1Pct: within1, costUsd: Math.round(totalCost * 1000) / 1000 };
-  fs.writeFileSync(path.join(dir, 'calibration.json'), JSON.stringify(out, null, 1));
+  if (cal.some((c) => c.runs >= 2)) fs.writeFileSync(path.join(dir, 'calibration.json'), JSON.stringify(out, null, 1));
+  summarize(dir);
   console.log(JSON.stringify({ meanRange, exactAgreementPct: exact, within1Pct: within1 }, null, 1));
   for (const c of cal) console.log(c.name, crit.map((k) => `${k}:${c.spread[k].values.join('/')}`).join(' '));
+}
+
+// ---------------------------------------------------------------- rescore (metrics/checklist only, no model)
+async function rescore(dir) {
+  const runs = loadRuns(dir).filter((r) => !O.only.length || O.only.some((p) => r.name.startsWith(p)));
+  const browser = await chromium.launch({ args: ['--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
+  const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
+  await ctx.addInitScript(SEED_SCRIPT, O.seed);
+  const page = await ctx.newPage();
+  for (const r of runs) {
+    const d = path.join(dir, r.name);
+    const doc = JSON.parse(fs.readFileSync(path.join(d, 'document.json'), 'utf8'));
+    await page.goto(`${O.url}?blank&nobridge`);
+    await page.waitForFunction(() => window.editor?.store && window.editor.renderer);
+    await page.evaluate((p) => { window.editor.load(p); window.editor.store.setTime(0); }, doc);
+    const brief = JSON.parse(fs.readFileSync(path.join(ROOT, 'evals', 'briefs', r.brief.id + '.json'), 'utf8'));
+    const pr = await probe(page);
+    fs.writeFileSync(path.join(d, 'probe.json'), JSON.stringify({ comp: pr.comp, samples: pr.samples, vals: pr.vals, loopDiff: pr.loopDiff, midLuma: pr.midLuma, fonts: pr.fonts }));
+    const { metrics, derived } = computeMetrics(doc, pr);
+    const checklist = runChecklist(brief, metrics, derived);
+    fs.writeFileSync(path.join(d, 'brief.json'), JSON.stringify(brief, null, 2));
+    fs.writeFileSync(path.join(d, 'timeline.txt'), `${pr.layerList}\n\n${pr.timeline}\n`);
+    fs.writeFileSync(path.join(d, 'metrics.json'), JSON.stringify({ run: r.run, metrics: { ...metrics, toolErrors: r.run.toolErrors, toolCalls: r.run.toolCalls }, checklist, video: r.video }, null, 1));
+    log(`${r.name}: checklist ${checklist.hits}/${checklist.checkable}, off-canvas ${metrics.offCanvasTime}s`);
+  }
+  await browser.close();
+  summarize(dir);
 }
 
 // ---------------------------------------------------------------- main
 async function main() {
   if (O.summarize) { const s = summarize(path.resolve(O.summarize)); console.log(s.totals); return; }
+  if (O.rescore) { await rescore(path.resolve(O.rescore)); return; }
   if (O.judgeOnly) { await judgeOnly(path.resolve(O.judgeOnly)); return; }
   fs.mkdirSync(O.out, { recursive: true });
   log(`${briefs.length} briefs × ${O.repeat}, model ${O.model}, concurrency ${O.concurrency}, out ${path.relative(ROOT, O.out)}`);

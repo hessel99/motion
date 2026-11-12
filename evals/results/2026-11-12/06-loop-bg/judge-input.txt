@@ -1,0 +1,119 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (06-loop-bg, 1920x1080, 6s @30fps):
+A seamless looping ambient background for a conference stage screen: soft blurred-looking blobs/orbs in a purple-to-teal palette drifting slowly, plus a subtle grid of small dots that gently pulses. It must loop perfectly at 6 seconds (frame 0 == last frame), no visible jump. Calm, not busy.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- loops seamlessly (first frame ≈ frame at the loop point) [yes]
+- everything moves (animated coverage ≥90%) [yes]
+- ≥3 blobs/orbs (ellipses) [yes]
+- dot grid (≥15 layers) [yes]
+- uses loop expressions or matching first/last keys [yes]
+- purple/teal palette [yes]
+- calm: no fast motion [?]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- Blob Purple [group] #ffffff a0
+  - Ellipse [ellipse] box -140,-120,900,900 #7c3aed
+  - Ellipse [ellipse] box -30,-10,680,680 #7c3aed
+  - Ellipse [ellipse] box 75,95,470,470 #8b5cf6
+  - Ellipse [ellipse] box 170,190,280,280 #a78bfa
+  - Ellipse [ellipse] box -85,-65,790,790 #7c3aed
+  - Ellipse [ellipse] box 25,45,570,570 #7c3aed
+  - Ellipse [ellipse] box 122,142,376,376 #8b5cf6
+- Blob Teal [group] #ffffff a0
+  - Ellipse [ellipse] box 1170,330,900,900 #0d9488
+  - Ellipse [ellipse] box 1280,440,680,680 #0d9488
+  - Ellipse [ellipse] box 1385,545,470,470 #14b8a6
+  - Ellipse [ellipse] box 1480,640,280,280 #5eead4
+  - Ellipse [ellipse] box 1225,385,790,790 #0d9488
+  - Ellipse [ellipse] box 1335,495,570,570 #0d9488
+  - Ellipse [ellipse] box 1432,592,376,376 #14b8a6
+- Blob Violet [group] #ffffff a0
+  - Ellipse [ellipse] box 1018,-162,765,765 #c026d3
+  - Ellipse [ellipse] box 1111,-68,578,578 #a855f7
+  - Ellipse [ellipse] box 1200,21,400,400 #a855f7
+  - Ellipse [ellipse] box 1281,102,238,238 #d8b4fe
+  - Ellipse [ellipse] box 1064,-115,672,672 #a855f7
+  - Ellipse [ellipse] box 1158,-22,485,485 #a855f7
+- Blob Cyan [group] #ffffff a0
+  - Ellipse [ellipse] box 272,365,765,765 #0891b2
+  - Ellipse [ellipse] box 365,458,578,578 #0891b2
+  - Ellipse [ellipse] box 454,548,399,400 #06b6d4
+  - Ellipse [ellipse] box 535,628,238,238 #67e8f9
+  - Ellipse [ellipse] box 318,412,671,672 #0891b2
+  - Ellipse [ellipse] box 412,505,484,485 #0891b2
+- Dots Row 1 [path] box 0,57,1920,6 #c4b5fd
+- Dots Row 1 copy 8 [path] box 0,1017,1920,6 #c4b5fd
+- Dots Row 1 copy 7 [path] box 0,897,1920,6 #c4b5fd
+- Dots Row 1 copy 6 [path] box 0,777,1920,6 #c4b5fd
+- Dots Row 1 copy 5 [path] box 0,657,1920,6 #c4b5fd
+- Dots Row 1 copy 4 [path] box 0,537,1920,6 #c4b5fd
+- Dots Row 1 copy 3 [path] box 0,417,1920,6 #c4b5fd
+- Dots Row 1 copy 2 [path] box 0,297,1920,6 #c4b5fd
+- Dots Row 1 copy [path] box 0,177,1920,6 #c4b5fd
+
+TIMELINE:
+comp 1920x1080 6s @30fps, background #0b0720
+"Blob Purple" (group l_03jm1)
+  position: expr "[450 + 140*cos(6.2832*time/6), 330 + 90*sin(6.2832*time/6)]"
+"Blob Teal" (group l_03jm2)
+  position: expr "[1500 + 120*cos(6.2832*time/6 + 3.1416), 780 + 100*sin(6.2832*time/6 + 3.1416)]"
+"Blob Violet" (group l_03jm3)
+  position: expr "[1400 + 100*sin(6.2832*time/6), 280 + 110*cos(6.2832*time/6 + 1)]"
+  scale: expr "[85 + 8*sin(6.2832*time/6), 85 + 8*sin(6.2832*time/6)]"
+"Blob Cyan" (group l_03jm4)
+  position: expr "[600 + 130*cos(6.2832*time/6 + 2), 820 + 80*sin(6.2832*time/6 + 2)]"
+  scale: expr "[85 + 8*sin(6.2832*time/6), 85 + 8*sin(6.2832*time/6)]"
+"Dots Row 1" (path l_03jml)
+  opacity: expr "30 + 22*sin(6.2832*time/6 - 0*0.7)"
+"Dots Row 1 copy 8" (path l_03jmt)
+  opacity: expr "30 + 22*sin(6.2832*time/6 - 5.6)"
+"Dots Row 1 copy 7" (path l_03jms)
+  opacity: expr "30 + 22*sin(6.2832*time/6 - 4.9)"
+"Dots Row 1 copy 6" (path l_03jmr)
+  opacity: expr "30 + 22*sin(6.2832*time/6 - 4.2)"
+"Dots Row 1 copy 5" (path l_03jmq)
+  opacity: expr "30 + 22*sin(6.2832*time/6 - 3.5)"
+"Dots Row 1 copy 4" (path l_03jmp)
+  opacity: expr "30 + 22*sin(6.2832*time/6 - 2.8)"
+"Dots Row 1 copy 3" (path l_03jmo)
+  opacity: expr "30 + 22*sin(6.2832*time/6 - 2.1)"
+"Dots Row 1 copy 2" (path l_03jmn)
+  opacity: expr "30 + 22*sin(6.2832*time/6 - 1.4)"
+"Dots Row 1 copy" (path l_03jmm)
+  opacity: expr "30 + 22*sin(6.2832*time/6 - 0.7)"
+
+
+AUTOMATIC METRICS:
+layers 35 drawable (group 4, ellipse 26, path 9), 0 keys, 0 moving segments
+eases: none; springs 0, overshooting 0, hold 0
+expressions 15, text animators 0, precomps 0, paths 9, gradients 0, markers 0
+palette (12): #7c3aed #8b5cf6 #a78bfa #0d9488 #14b8a6 #5eead4 #c026d3 #d8b4fe #0891b2 #06b6d4 #67e8f9 #0b0720
+motion from 0s to 6s (end hold 0s, longest still 0s), visual activity 100% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 6.097s, clipped in the last frame: Ellipse, Ellipse, Ellipse; text-on-text overlap 0s; layers never visible: Ellipse, Ellipse, Ellipse, Ellipse, Ellipse, Ellipse, Ellipse, Ellipse, Ellipse, Ellipse
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

@@ -125,7 +125,8 @@ export function computeMetrics(doc, probe) {
     let off = false;
     for (const [id, x0, y0, x1, y1] of vis) {
       const w = x1 - x0, h = y1 - y0, a = w * h;
-      if (a <= 1 || a > 0.9 * area) continue;
+      // backgrounds / strips as wide or tall as the frame (parallax planes, full-bleed bands) are meant to overhang
+      if (a <= 1 || a > 0.9 * area || w >= 0.95 * W || h >= 0.95 * H) continue;
       const ix = Math.max(0, Math.min(x1, W) - Math.max(x0, 0)), iy = Math.max(0, Math.min(y1, H) - Math.max(y0, 0));
       const outside = 1 - (ix * iy) / a;
       if (outside > 0.15 && outside < 0.97) { off = true; offLayers[id] = (offLayers[id] ?? 0) + dt; }
@@ -140,7 +141,7 @@ export function computeMetrics(doc, probe) {
       const inter = ix * iy, small = Math.min(aA, aB);
       if (inter < 0.15 * small || inter > 0.95 * small) continue; // no overlap, or one contains the other (intended layering)
       const tA = byId[A[0]]?.type === 'text', tB = byId[B[0]]?.type === 'text';
-      if (tA && tB) { ovT = true; const k = `${byId[A[0]]?.name} × ${byId[B[0]]?.name}`; overlapPairs[k] = (overlapPairs[k] ?? 0) + dt; }
+      if (tA && tB && byId[A[0]].text?.content !== byId[B[0]].text?.content) { /* identical copies (shadows, rgb split) are intended */ ovT = true; const k = `${byId[A[0]]?.name} × ${byId[B[0]]?.name}`; overlapPairs[k] = (overlapPairs[k] ?? 0) + dt; }
       ovA = true;
     }
     if (ovT) overlapText += dt;
@@ -168,7 +169,7 @@ export function computeMetrics(doc, probe) {
   const lastVisSet = new Set(last.items.filter((it) => it[5] > 0.05).map((it) => it[0]));
   const exits = Object.keys(firstVis).filter((id) => !lastVisSet.has(id) && byId[id]).length;
   const clippedAtEnd = last.items.filter(([id, x0, y0, x1, y1, o]) => {
-    const a = (x1 - x0) * (y1 - y0); if (o < 0.05 || a <= 1 || a > 0.9 * area) return false;
+    const a = (x1 - x0) * (y1 - y0); if (o < 0.05 || a <= 1 || a > 0.9 * area || x1 - x0 >= 0.95 * W || y1 - y0 >= 0.95 * H) return false;
     const ix = Math.max(0, Math.min(x1, W) - Math.max(x0, 0)), iy = Math.max(0, Math.min(y1, H) - Math.max(y0, 0));
     const out = 1 - (ix * iy) / a; return out > 0.15;
   }).map((it) => byId[it[0]]?.name ?? it[0]);
@@ -200,16 +201,19 @@ export function computeMetrics(doc, probe) {
     offCanvasTime: r3(offCanvas), offCanvasLayers: Object.fromEntries(Object.entries(offLayers).map(([id, t]) => [byId[id]?.name ?? id, r3(t)])),
     clippedAtEnd, textOverlapTime: r3(overlapText), textOverlapPairs: Object.fromEntries(Object.entries(overlapPairs).map(([k, v]) => [k, r3(v)])),
     partialOverlapTime: r3(overlapAny), exits, beats,
-    neverVisible: drawables.filter((l) => !firstVis[l.id] && l.type !== 'audio').map((l) => l.name),
+    missingFonts: Object.entries(probe.fonts ?? {}).filter(([, ok]) => !ok).map(([f]) => f),
+    deadTrimLayers: layers.filter((l) => ['trimStart', 'trimEnd', 'trimOffset'].some((p) => (l.props?.[p]?.kf?.length ?? 0) >= 2) && !(l.type === 'path' && l.trimOn)).map((l) => l.name),
+    neverVisible: drawables.filter((l) => firstVis[l.id] == null).map((l) => l.name),
     loopDiff: probe.loopDiff != null ? r3(probe.loopDiff) : null, midLuma: probe.midLuma != null ? r3(probe.midLuma) : null,
   };
-  return { metrics, derived: { comp, layers, byId, segs, exprs, textAnims, palette, firstVis, lastVis, S, vals: probe.vals ?? {}, starts } };
+  return { metrics, derived: { comp, layers, byId, segs, exprs, textAnims, palette, firstVis, lastVis, S, vals: probe.vals ?? {}, starts, fonts: probe.fonts ?? {} } };
 }
 const r3 = (x) => Math.round(x * 1000) / 1000;
 
 const textLayers = (d) => d.layers.filter((l) => l.type === 'text' && l.text);
-const has = (s, sub) => String(s ?? '').toLowerCase().includes(String(sub).toLowerCase());
-const anyText = (d, t) => textLayers(d).some((l) => has(l.text.content, t)) || has(lettersInOrder(d), t);
+const norm = (s) => String(s ?? '').toLowerCase().replace(/\s+/g, ' ').trim();
+const has = (s, sub) => norm(s).includes(norm(sub));
+const anyText = (d, t) => textLayers(d).some((l) => has(l.text.content, t)) || has(lettersInOrder(d), t) || has(textLayers(d).map((l) => l.text.content).join(' '), t); // also split across line layers
 function lettersInOrder(d) {
   const ls = textLayers(d).filter((l) => l.text.content.trim().length <= 2);
   const mid = (l) => d.vals[l.id]?.end?.position?.[0] ?? staticV(l, 'position')?.[0] ?? 0;
@@ -220,6 +224,7 @@ const sizeOf = (d, l) => d.vals[l.id]?.mid?.size ?? staticV(l, 'size') ?? [0, 0]
 const endRot = (d, l) => d.vals[l.id]?.end?.rotation?.[0] ?? staticV(l, 'rotation')?.[0] ?? 0;
 const allRot = (l) => [staticV(l, 'rotation')?.[0] ?? 0, ...kfOf(l, 'rotation').map((k) => k.v[0])];
 const isBlackish = (c) => c && lum(c) < 0.12 && (c[3] ?? 1) > 0.5;
+const trimWorks = (l) => l.type === 'path' && !!l.trimOn && ['trimStart', 'trimEnd', 'trimOffset'].some((p) => propAnimated(l, p));
 const nonGroup = (d) => d.layers.filter((l) => DRAWABLE.has(l.type));
 
 /** one checklist item → true/false (null = not machine-checkable) */
@@ -271,7 +276,8 @@ export function runCheck(check, m, d) {
     case 'holdKeysMin': return m.holdKeys >= check.min;
     case 'loops': return m.loopDiff != null && m.loopDiff < 0.01;
     case 'loopTechnique': return d.exprs.some((e) => /loop|sin|cos/i.test(e.expr)) || L.filter((l) => animatedProps(l).length).every((l) => Object.keys(l.props).every((k) => { const kf = kfOf(l, k); return kf.length < 2 || kf[0].v.every((x, i) => Math.abs(x - kf[kf.length - 1].v[i]) < 0.01); }));
-    case 'trimAnimated': return L.some((l) => ['trimStart', 'trimEnd', 'trimOffset'].some((p) => propAnimated(l, p)));
+    // trim keys only render on paths with trim enabled (layer.trimOn); anything else is a silent no-op
+    case 'trimAnimated': return L.some((l) => trimWorks(l));
     case 'starShape': return L.some((l) => l.shape?.kind === 'star' || (l.type === 'path' && /star|burst|badge/i.test(l.name)));
     case 'ring': return L.some((l) => l.type === 'ellipse' && (staticV(l, 'strokeWidth')?.[0] ?? 0) > 0 && (staticV(l, 'stroke')?.[3] ?? 0) > 0.1 && (propAnimated(l, 'scale') || propAnimated(l, 'size')));
     case 'thinRectsMin': return L.filter((l) => l.type === 'rect' && (() => { const [w, h] = sizeOf(d, l); return h > 0 && h <= 16 && w >= 8 * h; })()).length >= check.min;
@@ -289,7 +295,7 @@ export function runCheck(check, m, d) {
     case 'rotated90': return L.some((l) => { const r = ((Math.abs(endRot(d, l)) % 180)); return Math.abs(r - 90) < 5; });
     case 'rotatedAbout': return L.some((l) => allRot(l).some((r) => Math.abs(Math.abs(r) - Math.abs(check.deg)) <= check.tol));
     case 'fontSizeMin': return textLayers(d).some((l) => l.text.fontSize >= check.size);
-    case 'serifFont': return textLayers(d).some((l) => /serif|garamond|playfair|didot|bodoni|times|georgia|cormorant|baskerville|cinzel|lora|merriweather/i.test(l.text.fontFamily) && !/sans/i.test(l.text.fontFamily));
+    case 'serifFont': return textLayers(d).some((l) => (d.fonts[String(l.text.fontFamily).split(',')[0].trim().replace(/^["']|["']$/g, '')] ?? true) && /serif|garamond|playfair|didot|bodoni|times|georgia|cormorant|baskerville|cinzel|lora|merriweather/i.test(l.text.fontFamily) && !/sans/i.test(l.text.fontFamily));
     case 'textEmphasis': {
       const t = textLayers(d);
       if (t.length < 2) return false;
@@ -327,7 +333,7 @@ export function runCheck(check, m, d) {
       return t.length > 0 && t.every((it) => (it[2] + it[4]) / 2 > 0.6 * H);
     }
     case 'translucent': return nonGroup(d).some((l) => l.type !== 'text' && ((d.vals[l.id]?.mid?.opacity?.[0] ?? staticV(l, 'opacity')?.[0] ?? 100) < 98 || ((d.vals[l.id]?.mid?.fill ?? staticV(l, 'fill'))?.[3] ?? 1) < 0.98));
-    case 'thinLineDraw': return nonGroup(d).some((l) => { const [w, h] = sizeOf(d, l); return Math.min(w || 1e9, h || 1e9) <= 6 && (propAnimated(l, 'size') || propAnimated(l, 'scale') || propAnimated(l, 'trimEnd') || propAnimated(l, 'trimStart')) || (l.type === 'path' && (propAnimated(l, 'trimEnd') || propAnimated(l, 'trimStart'))); });
+    case 'thinLineDraw': return nonGroup(d).some((l) => { const [w, h] = sizeOf(d, l); return Math.min(w || 1e9, h || 1e9) <= 6 && (propAnimated(l, 'size') || propAnimated(l, 'scale')) || trimWorks(l); });
     case 'gradientPaint': return m.gradientLayers > 0;
     case 'gradientOrHaze': return m.gradientLayers > 0 || nonGroup(d).filter((l) => l.type !== 'text' && ((staticV(l, 'opacity')?.[0] ?? 100) < 98 || (staticV(l, 'fill')?.[3] ?? 1) < 0.98)).length >= 2;
     case 'parallax': {

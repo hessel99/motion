@@ -1,0 +1,46 @@
+- ZÜRICH rotated [text] box 60,60,300,1000 #000000 "ZÜRICH" Helvetica Neue, Arial, sans-serif 250px w900
+- TYPE [text] box 376,380,650,200 #000000 "TYPE" Helvetica Neue, Arial, sans-serif 200px w900
+- WEEK [text] box 376,590,650,200 #000000 "WEEK" Helvetica Neue, Arial, sans-serif 200px w900
+- Red block [rect] box 380,60,640,300 #ff2a1a
+- 2027 [text] box 396,100,620,240 #000000 "2027" Helvetica Neue, Arial, sans-serif 240px w900
+- Black block [rect] box 380,820,640,240 #000000
+- Red blinker [rect] box 400,840,80,80 #ff2a1a
+- Rule [rect] box 60,1086,960,12 #000000
+- Dates [text] box 60,1130,300,60 #000000 "03—07 MAR" Helvetica Neue, Arial, sans-serif 40px w700
+- Info [text] box 380,1130,640,120 #000000 "ZÜRICH TYPE WEEK
+INTERNATIONAL TYPOGRAPHY / CH" Helvetica Neue, Arial, sans-serif 28px w700
+- Cover ZÜRICH [rect] box 60,-460,310,0 #ffffff
+- Cover TYPE [rect] box 705,370,0,220 #ffffff
+- Cover WEEK [rect] box 705,590,0,220 #ffffff
+- Cover Dates [rect] box 210,1110,0,100 #ffffff
+- Cover Info [rect] box 700,1110,0,140 #ffffff
+
+comp 1080x1350 6s @30fps, background #ffffff
+"Red block" (rect l_03jm4)
+  position: 0s [380,210] ─Easy Ease→ 0.2s [380,210] ─linear→ 0.7s [700,210]
+  size: 0s [0,300] ─Easy Ease→ 0.2s [0,300] ─linear→ 0.7s [640,300]
+"2027" (text l_03jm5)
+  opacity: 0s 0 ─hold→ 0.7s 100
+"Black block" (rect l_03jm6)
+  position: 0s [700,820] ─Easy Ease→ 1.4s [700,820] ─linear→ 1.8s [700,940]
+  size: 0s [640,0] ─Easy Ease→ 1.4s [640,0] ─linear→ 1.8s [640,240]
+"Red blinker" (rect l_03jm7)
+  opacity: 0s 0 ─hold→ 1.8s 100 ─hold→ 2.3s 0 ─hold→ 2.8s 100 ─hold→ 3.3s 0 ─hold→ 3.8s 100 ─hold→ 4.3s 0 ─hold→ 4.8s 100 ─hold→ 5.3s 0
+"Rule" (rect l_03jm8)
+  position: 0s [60,1092] ─linear→ 0.4s [540,1092]
+  size: 0s [0,12] ─linear→ 0.4s [960,12]
+"Cover ZÜRICH" (rect l_03jmb)
+  position: 0.4s [215,560] ─linear→ 1s [215,50]
+  size: 0.4s [310,1020] ─linear→ 1s [310,0]
+"Cover TYPE" (rect l_03jmc)
+  position: 0.8s [705,480] ─linear→ 1.2s [1030,480]
+  size: 0.8s [650,220] ─linear→ 1.2s [0,220]
+"Cover WEEK" (rect l_03jmd)
+  position: 1s [705,700] ─linear→ 1.4s [1030,700]
+  size: 1s [650,220] ─linear→ 1.4s [0,220]
+"Cover Dates" (rect l_03jme)
+  position: 1.8s [210,1160] ─linear→ 2.1s [360,1160]
+  size: 1.8s [300,100] ─linear→ 2.1s [0,100]
+"Cover Info" (rect l_03jmf)
+  position: 2s [700,1180] ─linear→ 2.4s [1020,1180]
+  size: 2s [640,140] ─linear→ 2.4s [0,140]

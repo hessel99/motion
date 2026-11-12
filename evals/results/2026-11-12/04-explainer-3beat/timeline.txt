@@ -1,0 +1,75 @@
+- Glow [ellipse] box 805,345,310,310 #8fe3ff
+- Shield [path] box 808,318,304,365 #4f7cff
+- Check [path] box 890,453,140,105 #6b8cff stroke #ffffff 26px
+- Headline [text] box 210,880,1500,120 #2d2a55 "One key. Every login." Inter 96px w800
+- Note 1 [group] #ffffff a0
+  - Paper 1 [rect] box 939,479,41,41 #ffd84d
+  - Pw 1 [text] box 946,489,28,22 #3b3355 "hunter2" Inter 30px w700
+- Note 2 [group] #ffffff a0
+  - Paper 2 [rect] box 939,479,42,42 #ff9eb5
+  - Pw 2 [text] box 947,487,25,26 #3b3355 "Pa$$w0rd!" Inter 30px w700
+- Note 3 [group] #ffffff a0
+  - Paper 3 [rect] box 939,479,42,42 #8fe0b8
+  - Pw 3 [text] box 946,488,27,23 #3b3355 "qwerty123" Inter 30px w700
+- Note 4 [group] #ffffff a0
+  - Paper 4 [rect] box 939,479,42,42 #ffb36b
+  - Pw 4 [text] box 948,487,24,26 #3b3355 "fluffy1987" Inter 30px w700
+- Note 5 [group] #ffffff a0
+  - Paper 5 [rect] box 940,480,41,41 #a9c7ff
+  - Pw 5 [text] box 946,489,28,21 #3b3355 "admin/admin" Inter 28px w700
+- Note 6 [group] #ffffff a0
+  - Paper 6 [rect] box 939,479,42,42 #c9b2ff
+  - Pw 6 [text] box 948,487,25,26 #3b3355 "P@ssw0rd" Inter 30px w700
+
+comp 1920x1080 12s @30fps, background #fff4e2
+"Glow" (ellipse l_03jm1)
+  position: 7s [960,500] ─Easy Ease→ 7.8s [960,420]
+  scale: 6.4s 50 ─Easy Ease→ 7.4s 100
+  opacity: 0s 0 ─Easy Ease→ 6.4s 0 ─Easy Ease→ 7.2s 70 ─Cubic Out→ 9s 45 ─Easy Ease→ 10.5s 70 ─Easy Ease→ 12s 55
+"Shield" (path l_03jm2)
+  position: 7s [960,500] ─Easy Ease→ 7.8s [960,420]
+  scale: 0s 70 ─Easy Ease→ 3.2s 70 ─Easy Ease→ 3.8s 100 ─Back Out→ 4.85s 100 ─Easy Ease→ 4.95s 106 ─Quad Out→ 5.09s 100 ─Easy Ease→ 5.13s 106 ─Quad Out→ 5.27s 100 ─Easy Ease→ 5.31s 106 ─Quad Out→ 5.45s 100 ─Easy Ease→ 5.49s 106 ─Quad Out→ 5.63s 100 ─Easy Ease→ 5.67s 106 ─Quad Out→ 5.81s 100 ─Easy Ease→ 5.85s 108 ─Quad Out→ 6.1s 100 ─Easy Ease→ 6.4s 100 ─Easy Ease→ 6.55s 93 ─Quad Out→ 6.85s 106 ─Back Out→ 7.1s 100
+  opacity: 3.2s 0 ─Easy Ease→ 3.8s 100
+"Check" (path l_03jm3)
+  position: 7s [960,505] ─Easy Ease→ 7.8s [960,425]
+  opacity: 0s 0 ─Easy Ease→ 8.2s 0 ─Easy Ease→ 8.21s 100
+  trimEnd: 0s 0 ─Easy Ease→ 8.2s 0 ─Easy Ease→ 8.8s 100
+"Headline" (text l_03jm4)
+  position: 7.5s [960,940] ─Easy Ease→ 8.3s [960,880]
+  opacity: 0s 0 ─Easy Ease→ 7.5s 0 ─Easy Ease→ 7.9s 100
+"Note 1" (group l_03jm5)
+  position: 0s [700,420] ─Easy Ease→ 4s [700,420] ─Easy Ease→ 4.9s [960,500]
+  scale: 0s 0 ─Easy Ease→ 0.2s 0 ─Easy Ease→ 0.7s 100 ─Back Out→ 4s 100 ─Easy Ease→ 4.9s 15
+  rotation: 0s -8 ─Easy Ease→ 4s -8 ─Easy Ease→ 4.9s 212
+  rotation: expr "value + (time < 4.0 ? wiggle(9, 5) - value : 0)"
+  opacity: 4.8s 100 ─Easy Ease→ 4.9s 0
+"Note 2" (group l_03jm6)
+  position: 0s [880,360] ─Easy Ease→ 4.18s [880,360] ─Easy Ease→ 5.08s [960,500]
+  scale: 0s 0 ─Easy Ease→ 0.35s 0 ─Easy Ease→ 0.85s 100 ─Back Out→ 4.18s 100 ─Easy Ease→ 5.08s 15
+  rotation: 0s 6 ─Easy Ease→ 4.18s 6 ─Easy Ease→ 5.08s 226
+  rotation: expr "value + (time < 4.0 ? wiggle(9, 5) - value : 0)"
+  opacity: 4.98s 100 ─Easy Ease→ 5.08s 0
+"Note 3" (group l_03jm7)
+  position: 0s [1070,430] ─Easy Ease→ 4.36s [1070,430] ─Easy Ease→ 5.26s [960,500]
+  scale: 0s 0 ─Easy Ease→ 0.5s 0 ─Easy Ease→ 1s 100 ─Back Out→ 4.36s 100 ─Easy Ease→ 5.26s 15
+  rotation: 0s -4 ─Easy Ease→ 4.36s -4 ─Easy Ease→ 5.26s 216
+  rotation: expr "value + (time < 4.0 ? wiggle(9, 5) - value : 0)"
+  opacity: 5.16s 100 ─Easy Ease→ 5.26s 0
+"Note 4" (group l_03jm8)
+  position: 0s [780,620] ─Easy Ease→ 4.54s [780,620] ─Easy Ease→ 5.44s [960,500]
+  scale: 0s 0 ─Easy Ease→ 0.65s 0 ─Easy Ease→ 1.15s 100 ─Back Out→ 4.54s 100 ─Easy Ease→ 5.44s 15
+  rotation: 0s 10 ─Easy Ease→ 4.54s 10 ─Easy Ease→ 5.44s 230
+  rotation: expr "value + (time < 4.0 ? wiggle(9, 5) - value : 0)"
+  opacity: 5.34s 100 ─Easy Ease→ 5.44s 0
+"Note 5" (group l_03jm9)
+  position: 0s [980,640] ─Easy Ease→ 4.72s [980,640] ─Easy Ease→ 5.62s [960,500]
+  scale: 0s 0 ─Easy Ease→ 0.8s 0 ─Easy Ease→ 1.3s 100 ─Back Out→ 4.72s 100 ─Easy Ease→ 5.62s 15
+  rotation: 0s -10 ─Easy Ease→ 4.72s -10 ─Easy Ease→ 5.62s 210
+  rotation: expr "value + (time < 4.0 ? wiggle(9, 5) - value : 0)"
+  opacity: 5.52s 100 ─Easy Ease→ 5.62s 0
+"Note 6" (group l_03jma)
+  position: 0s [1190,580] ─Easy Ease→ 4.9s [1190,580] ─Easy Ease→ 5.8s [960,500]
+  scale: 0s 0 ─Easy Ease→ 0.95s 0 ─Easy Ease→ 1.45s 100 ─Back Out→ 4.9s 100 ─Easy Ease→ 5.8s 15
+  rotation: 0s 7 ─Easy Ease→ 4.9s 7 ─Easy Ease→ 5.8s 227
+  rotation: expr "value + (time < 4.0 ? wiggle(9, 5) - value : 0)"
+  opacity: 5.7s 100 ─Easy Ease→ 5.8s 0

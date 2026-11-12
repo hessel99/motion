@@ -1,0 +1,277 @@
+[
+ {
+  "name": "set_composition",
+  "argsBytes": 24,
+  "ok": true,
+  "ms": 25,
+  "editorMs": 1,
+  "input": {
+   "background": "#f2f2f7"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 95,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Track Off",
+   "x": 280,
+   "y": 235,
+   "w": 240,
+   "h": 130,
+   "radius": 65,
+   "fill": "#d1d1d6"
+  },
+  "result": "{\"id\":\"l_03jm1\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 106,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 2,
+  "input": {
+   "type": "rect",
+   "name": "Track On",
+   "x": 280,
+   "y": 235,
+   "w": 240,
+   "h": 130,
+   "radius": 65,
+   "fill": "#34c759",
+   "opacity": 0
+  },
+  "result": "{\"id\":\"l_03jm2\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 81,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 1,
+  "input": {
+   "type": "ellipse",
+   "name": "Knob",
+   "x": 292,
+   "y": 247,
+   "w": 106,
+   "h": 106,
+   "fill": "#ffffff"
+  },
+  "result": "{\"id\":\"l_03jm3\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 132,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Check",
+   "d": "M0 18 L14 32 L38 4",
+   "x": 436,
+   "y": 283,
+   "w": 38,
+   "h": 34,
+   "stroke": "#34c759",
+   "strokeWidth": 8,
+   "opacity": 0
+  },
+  "result": "{\"id\":\"l_03jm4\"}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 772,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm3",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0.4,
+       "v": [
+        345,
+        300
+       ],
+       "ease": "Quad In"
+      },
+      {
+       "t": 0.62,
+       "v": [
+        464,
+        300
+       ],
+       "ease": "Quad Out"
+      },
+      {
+       "t": 0.9,
+       "v": [
+        455,
+        300
+       ],
+       "ease": "Easy Ease"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.34,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Quad Out"
+      },
+      {
+       "t": 0.4,
+       "v": [
+        94,
+        106
+       ],
+       "ease": "Quad Out"
+      },
+      {
+       "t": 0.52,
+       "v": [
+        126,
+        88
+       ],
+       "ease": "Quad In Out"
+      },
+      {
+       "t": 0.64,
+       "v": [
+        92,
+        108
+       ],
+       "ease": "Quad Out"
+      },
+      {
+       "t": 0.8,
+       "v": [
+        102,
+        98
+       ],
+       "ease": "Easy Ease"
+      },
+      {
+       "t": 1,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0.4,
+       "v": 0,
+       "ease": "Easy Ease"
+      },
+      {
+       "t": 0.8,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0.62,
+       "v": 0,
+       "ease": "Ease Out"
+      },
+      {
+       "t": 0.85,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 0.62,
+       "v": 0,
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 1,
+       "v": 100
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 5 tracks on 3 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 80,
+  "editorMs": 60,
+  "input": {
+   "times": [
+    0.2,
+    0.46,
+    0.56,
+    0.7,
+    0.9,
+    1.2
+   ],
+   "cell": 260
+  },
+  "result": "6 frames left→right, top→bottom at 0.2s, 0.47s, 0.57s, 0.7s, 0.9s, 1.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/926c9d57-4e1e-4fce-81b9-f2b22fa405a7/tool-results/mcp-motion-blob-1794501696588-4j4kj5.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "props": {
+    "fill": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 12,
+  "input": {
+   "t": 1.2,
+   "maxSize": 400
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/926c9d57-4e1e-4fce-81b9-f2b22fa405a7/tool-results/mcp-motion-blob-1794501698339-bguddu.png]"
+ }
+]

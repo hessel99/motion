@@ -1,0 +1,35 @@
+- Sun [ellipse] box 660,190,600,600 #ff5e7e
+- Stripe 1 [rect] box 0,800,1920,40 #ffd23f
+- Stripe 2 [rect] box 0,850,1920,40 #ff8a3d
+- Stripe 3 [rect] box 0,900,1920,40 #ff3d8b
+- Stripe 4 [rect] box 0,950,1920,40 #8a2be2
+- Title Magenta [text] box 154,380,1600,220 #ff2bd6 "NIGHT SIGNAL" Arial Black 160px w900
+- Title Cyan [text] box 166,380,1600,220 #00f0ff "NIGHT SIGNAL" Arial Black 160px w900
+- Title Main [text] box 160,380,1600,220 #ffffff "NIGHT SIGNAL" Arial Black 160px w900
+- Subtitle [text] box 360,650,1200,70 #ffd23f "A SYNTHWAVE PODCAST" Courier New 52px w600
+- Tear A [rect] box 0,682,1920,36 #00f0ff
+- Tear B [rect] box 0,550,1920,20 #ff2bd6
+- Tear C [rect] box 0,612,1920,56 #ffffff
+- Flicker [rect] box 0,0,1920,1080 #ffffff
+
+comp 1920x1080 5s @30fps, background #140826
+"Sun" (ellipse l_03jm1)
+  opacity: 0s 85 ─hold→ 1.27s 50 ─hold→ 1.33s 85 ─hold→ 3s 55 ─hold→ 3.07s 85
+"Title Magenta" (text l_03jm6)
+  position: 0s [954,490] ─hold→ 1s [915,484] ─hold→ 1.07s [992,496] ─hold→ 1.13s [930,490] ─hold→ 1.2s [975,478] ─hold→ 1.27s [905,492] ─hold→ 1.33s [960,490] ─hold→ 1.4s [954,490] ─hold→ 2.8s [985,488] ─hold→ 2.87s [925,494] ─hold→ 2.93s [968,486] ─hold→ 3s [912,490] ─hold→ 3.1s [954,490] ─hold→ 4.3s [920,490] ─hold→ 4.37s [990,482] ─hold→ 4.43s [940,496] ─hold→ 4.5s [978,490] ─hold→ 4.6s [954,490]
+"Title Cyan" (text l_03jm7)
+  position: 0s [966,490] ─hold→ 1s [1004,496] ─hold→ 1.07s [930,484] ─hold→ 1.13s [995,492] ─hold→ 1.2s [948,502] ─hold→ 1.27s [1016,488] ─hold→ 1.33s [958,490] ─hold→ 1.4s [966,490] ─hold→ 2.8s [940,492] ─hold→ 2.87s [1000,486] ─hold→ 2.93s [955,494] ─hold→ 3s [1010,490] ─hold→ 3.1s [966,490] ─hold→ 4.3s [1002,490] ─hold→ 4.37s [935,498] ─hold→ 4.43s [985,484] ─hold→ 4.5s [945,490] ─hold→ 4.6s [966,490]
+"Title Main" (text l_03jm8)
+  position: 0s [960,490] ─hold→ 1.07s [968,490] ─hold→ 1.2s [952,488] ─hold→ 1.33s [960,490] ─hold→ 2.87s [966,490] ─hold→ 3s [954,490] ─hold→ 3.1s [960,490] ─hold→ 4.37s [970,490] ─hold→ 4.5s [952,490] ─hold→ 4.6s [960,490]
+  opacity: 0s 100 ─hold→ 1.13s 40 ─hold→ 1.17s 100 ─hold→ 2.93s 30 ─hold→ 2.97s 100 ─hold→ 4.43s 40 ─hold→ 4.47s 100
+"Tear A" (rect l_03jma)
+  position: 0s [960,318] ─hold→ 1s [960,318] ─hold→ 1.07s [960,450] ─hold→ 1.13s [960,610] ─hold→ 1.2s [960,260] ─hold→ 1.27s [960,400] ─hold→ 1.33s [960,700] ─hold→ 2.8s [960,540] ─hold→ 2.87s [960,300] ─hold→ 2.93s [960,300] ─hold→ 3s [960,680] ─hold→ 4.3s [960,420] ─hold→ 4.37s [960,590] ─hold→ 4.43s [960,240] ─hold→ 4.5s [960,500]
+  opacity: 0s 0 ─hold→ 1s 80 ─hold→ 1.07s 0 ─hold→ 1.13s 90 ─hold→ 1.2s 80 ─hold→ 1.27s 0 ─hold→ 1.33s 70 ─hold→ 1.4s 0 ─hold→ 2.8s 80 ─hold→ 2.87s 80 ─hold→ 2.93s 0 ─hold→ 3s 80 ─hold→ 3.07s 0 ─hold→ 4.3s 80 ─hold→ 4.37s 0 ─hold→ 4.43s 85 ─hold→ 4.5s 70 ─hold→ 4.57s 0
+"Tear B" (rect l_03jmb)
+  position: 0s [960,530] ─hold→ 1s [960,700] ─hold→ 1.07s [960,350] ─hold→ 1.13s [960,480] ─hold→ 1.2s [960,820] ─hold→ 1.27s [960,560] ─hold→ 2.8s [960,420] ─hold→ 2.87s [960,600] ─hold→ 2.93s [960,200] ─hold→ 3s [960,510] ─hold→ 4.3s [960,650] ─hold→ 4.37s [960,330] ─hold→ 4.43s [960,720] ─hold→ 4.5s [960,470]
+  opacity: 0s 0 ─hold→ 1s 0 ─hold→ 1.07s 85 ─hold→ 1.13s 0 ─hold→ 1.2s 80 ─hold→ 1.27s 85 ─hold→ 1.33s 0 ─hold→ 2.8s 0 ─hold→ 2.87s 85 ─hold→ 2.93s 80 ─hold→ 3s 0 ─hold→ 3.07s 70 ─hold→ 3.13s 0 ─hold→ 4.3s 85 ─hold→ 4.37s 85 ─hold→ 4.43s 0 ─hold→ 4.5s 80 ─hold→ 4.6s 0
+"Tear C" (rect l_03jmc)
+  position: 0s [960,748] ─hold→ 1.13s [960,380] ─hold→ 1.27s [960,640] ─hold→ 2.87s [960,460] ─hold→ 3s [960,250] ─hold→ 4.37s [960,560] ─hold→ 4.5s [960,350]
+  opacity: 0s 0 ─hold→ 1.13s 45 ─hold→ 1.2s 0 ─hold→ 1.27s 40 ─hold→ 1.33s 0 ─hold→ 2.87s 45 ─hold→ 2.93s 0 ─hold→ 3s 40 ─hold→ 3.07s 0 ─hold→ 4.37s 45 ─hold→ 4.43s 0 ─hold→ 4.5s 40 ─hold→ 4.57s 0
+"Flicker" (rect l_03jmd)
+  opacity: 0s 0 ─hold→ 1.2s 35 ─hold→ 1.23s 0 ─hold→ 1.33s 55 ─hold→ 1.37s 0 ─hold→ 2.93s 40 ─hold→ 2.97s 0 ─hold→ 4.43s 60 ─hold→ 4.47s 0 ─hold→ 4.53s 30 ─hold→ 4.57s 0

@@ -1,0 +1,276 @@
+[
+ {
+  "name": "set_composition",
+  "argsBytes": 24,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 2,
+  "input": {
+   "background": "#FFF1D6"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 88,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 1,
+  "input": {
+   "type": "ellipse",
+   "name": "Pink Circle",
+   "x": 170,
+   "y": 200,
+   "w": 170,
+   "h": 170,
+   "fill": "#FF5FA2"
+  },
+  "result": "{\"id\":\"l_03jm1\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 196,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Yellow Star",
+   "d": "M80 0 L101.2 50.9 L156.1 55.3 L114.2 91.1 L127 144.7 L80 116 L33 144.7 L45.8 91.1 L3.9 55.3 L58.8 50.9 Z",
+   "x": 450,
+   "y": 170,
+   "w": 160,
+   "h": 160,
+   "fill": "#FFC800"
+  },
+  "result": "{\"id\":\"l_03jm2\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 97,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Blue Square",
+   "x": 800,
+   "y": 210,
+   "w": 160,
+   "h": 160,
+   "radius": 40,
+   "fill": "#3DB5FF"
+  },
+  "result": "{\"id\":\"l_03jm3\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 98,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Green Square",
+   "x": 220,
+   "y": 870,
+   "w": 150,
+   "h": 150,
+   "radius": 38,
+   "fill": "#4CD97B"
+  },
+  "result": "{\"id\":\"l_03jm4\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 196,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Purple Star",
+   "d": "M80 0 L101.2 50.9 L156.1 55.3 L114.2 91.1 L127 144.7 L80 116 L33 144.7 L45.8 91.1 L3.9 55.3 L58.8 50.9 Z",
+   "x": 560,
+   "y": 880,
+   "w": 150,
+   "h": 150,
+   "fill": "#9B6BFF"
+  },
+  "result": "{\"id\":\"l_03jm5\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 90,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 1,
+  "input": {
+   "type": "ellipse",
+   "name": "Orange Circle",
+   "x": 880,
+   "y": 860,
+   "w": 150,
+   "h": 150,
+   "fill": "#FF8A3D"
+  },
+  "result": "{\"id\":\"l_03jm6\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 184,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "B",
+   "x": 240,
+   "y": 540,
+   "w": 150,
+   "h": 260,
+   "fill": "#FF5FA2",
+   "text": {
+    "content": "B",
+    "fontSize": 230,
+    "fontWeight": 900,
+    "align": "center",
+    "fontFamily": "Arial Rounded MT Bold"
+   }
+  },
+  "result": "{\"id\":\"l_03jm7\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 185,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "o1",
+   "x": 390,
+   "y": 540,
+   "w": 150,
+   "h": 260,
+   "fill": "#FF8A3D",
+   "text": {
+    "content": "o",
+    "fontSize": 230,
+    "fontWeight": 900,
+    "align": "center",
+    "fontFamily": "Arial Rounded MT Bold"
+   }
+  },
+  "result": "{\"id\":\"l_03jm8\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 185,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "o2",
+   "x": 540,
+   "y": 540,
+   "w": 150,
+   "h": 260,
+   "fill": "#E8A900",
+   "text": {
+    "content": "o",
+    "fontSize": 230,
+    "fontWeight": 900,
+    "align": "center",
+    "fontFamily": "Arial Rounded MT Bold"
+   }
+  },
+  "result": "{\"id\":\"l_03jm9\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 184,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "p",
+   "x": 690,
+   "y": 540,
+   "w": 150,
+   "h": 260,
+   "fill": "#2DBE62",
+   "text": {
+    "content": "p",
+    "fontSize": 230,
+    "fontWeight": 900,
+    "align": "center",
+    "fontFamily": "Arial Rounded MT Bold"
+   }
+  },
+  "result": "{\"id\":\"l_03jma\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 184,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "!",
+   "x": 840,
+   "y": 540,
+   "w": 150,
+   "h": 260,
+   "fill": "#3DB5FF",
+   "text": {
+    "content": "!",
+    "fontSize": 230,
+    "fontWeight": 900,
+    "align": "center",
+    "fontFamily": "Arial Rounded MT Bold"
+   }
+  },
+  "result": "{\"id\":\"l_03jmb\"}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 8674,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 3,
+  "input": "{\"tracks\":[{\"id\":\"l_03jm1\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[170,-200],\"ease\":\"Quad In\"},{\"t\":0.55,\"v\":[170,200],\"ease\":\"Quad Out\"},{\"t\":0.85,\"v\":[170,80],\"ease\":\"Quad In\"},{\"t\":1.1,\"v\":[170,200],\"ease\":\"Quad Out\"},{\"t\":1.3,\"v\":[170,160],\"ease\":\"Quad In\"},{\"t\":1.48,\"v\":[170,200],\"ease\":\"Easy Ease\"},{\"t\":2.5,\"v\":[200,200],\"ease\":\"spring Bouncy\"},{\"t\":2.85,\"v\":[170,200],\"ease\":\"Easy Ease\"},{\"t\":3.4,\"v\":[170,200],\"ease\":\"Sine In Out\"},{\"t\":3.85,\"v\":[170,188],\"ease\":\"Sine In Out\"},{\"t\":4.3,\"v\":[170,200],\"ease\":\"Sine In Out\"},{\"t\":4.75,\"v\":[170,188],\"ease\":\"Sine In Out\"},{\"t\":5,\"v\":[170,200]}]},{\"id\":\"l_03jm1\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0,\"v\":[88,115],\"ease\":\"Linear\"},{\"t\":0.55,\"v\":[130,72],\"ease\":\"Quad Out\"},{\"t\":0.7,\"v\":[90,112],\"ease\":\"Quad Out\"},{\"t\":0.85,\"v\":[95,108],\"ease\":\"Quad In\"},{\"t\":1.1,\"v\":[125,80],\"ease\":\"Quad Out\"},{\"t\":1.25,\"v\":[95,105],\"ease\":\"Quad In\"},{\"t\":1.48,\"v\":[115,85],\"ease\":\"Quad Out\"},{\"t\":1.7,\"v\":[100,100],\"ease\":\"spring Bouncy\"}]},{\"id\":\"l_03jm1\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":0,\"v\":0,\"ease\":\"Easy Ease\"},{\"t\":0.85,\"v\":15,\"ease\":\"Easy Ease\"},{\"t\":1.48,\"v\":-8,\"ease\":\"Easy Ease\"},{\"t\":2.3,\"v\":0,\"ease\":\"Easy Ease\"},{\"t\":2.5,\"v\":-12,\"ease\":\"spring Bouncy\"},{\"t\":2.85,\"v\":0,\"ease\":\"Easy Ease\"},{\"t\":3.4,\"v\":0,\"ease\":\"Sine In Out\"},{\"t\":3.7,\"v\":6,\"ease\":\"Sine In Out\"},{\"t\":4,\"v\":-6,\"ease\":\"Sine In Out\"},{\"t\":4.3,\"v\":6,\"ease\":\"Sine In Out\"},{\"t\":4.6,\"v\":-6,\"ease\":\"Sine In Out\"},{\"t\":5,\"v\":0}]},{\"id\":\"l_03jm2\",\"prop\":\"position\",\"keyframes\":[{\"t\":0.15,\"v\":[450,-200],\"ease\":\"Quad In\"},{\"t\":0.7,\"v\":[450,170],\"ease\":\"Quad Out\"},{\"t\":1,\"v\":[450,50],\"ease\":\"Quad In\"},{\"t\":1.25,\"v\":[450,170],\"ease\":\"Quad Out\"},{\"t\":1.45,\"v\":[450,130],\"ease\":\"Quad In\"},{\"t\":1.63,\"v\":[450,170],\"ease\":\"Easy Ease\"},{\"t\":2.5,\"v\":[420,170],\"ease\":\"spring Bouncy\"},{\"t\":2.85,\"v\":[450,170],\"ease\":\"Easy Ease\"},{\"t\":3.4,\"v\":[450,170],\"ease\":\"Sine In Out\"},{\"t\":3.85,\"v\":[450,158],\"ease\":\"Sine In Out\"},{\"t\":4.3,\"v\":[450,170],\"ease\":\"Sine In Out\"},{\"t\":4.75,\"v\":[450,158],\"ease\":\"Sine In Out\"},{\"t\":5,\"v\":[450,170]}]},{\"id\":\"l_03jm2\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.15,\"v\":[88,115],\"ease\":\"Linear\"},{\"t\":0.7,\"v\":[130,72],\"ease\":\"Quad Out\"},{\"t\":0.85,\"v\":[90,112],\"ease\":\"Quad Out\"},{\"t\":1,\"v\":[95,108],\"ease\":\"Quad In\"},{\"t\":1.25,\"v\":[125,80],\"ease\":\"Quad Out\"},{\"t\":1.4,\"v\":[95,105],\"ease\":\"Quad In\"},{\"t\":1.63,\"v\":[115,85],\"ease\":\"Quad Out\"},{\"t\":1.85,\"v\":[100,100],\"ease\":\"spring Bouncy\"}]},{\"id\":\"l_03jm2\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":0.15,\"v\":0,\"ease\":\"Easy Ease\"},{\"t\":1,\"v\":-20,\"ease\":\"Easy Ease\"},{\"t\":1.63,\"v\":10,\"ease\":\"Easy Ease\"},{\"t\":2.3,\"v\":0,\"ease\":\"Easy Ease\"},{\"t\":2.5,\"v\":14,\"ease\":\"spring Bouncy\"},{\"t\":2.85,\"v\":0,\"ease\":\"Easy Ease\"},{\"t\":3.4,\"v\":0,\"ease\":\"Sine In Out\"},{\"t\":3.7,\"v\":-8,\"ease\":\"Sine In Out\"},{\"t\":4,\"v\":8,\"ease\":\"Sine In Out\"},{\"t\":4.3,\"v\":-8,\"ease\":\"Sine In Out\"},{\"t\":4.6,\"v\":8,\"ease\":\"Sine In Out\"},{\"t\":5,\"v\":0}]},{\"id\":\"l_03jm3\",\"prop\":\"position\",\"keyframes\":[{\"t\":0.3,\"v\":[800,-200],\"ease\":\"Quad In\"},{\"t\":0.85,\"v\":[800…",
+  "result": "ok: 18 tracks on 6 layers"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 4455,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": "{\"tracks\":[{\"id\":\"l_03jm7\",\"prop\":\"position\",\"keyframes\":[{\"t\":2.3,\"v\":[240,760],\"ease\":\"Quad Out\"},{\"t\":2.6,\"v\":[240,390],\"ease\":\"Quad In\"},{\"t\":2.85,\"v\":[240,560],\"ease\":\"Quad Out\"},{\"t\":3.02,\"v\":[240,480],\"ease\":\"Quad In\"},{\"t\":3.18,\"v\":[240,540]}]},{\"id\":\"l_03jm7\",\"prop\":\"scale\",\"keyframes\":[{\"t\":2.3,\"v\":[70,130],\"ease\":\"Quad Out\"},{\"t\":2.6,\"v\":[88,118],\"ease\":\"Quad Out\"},{\"t\":2.85,\"v\":[125,78],\"ease\":\"Quad Out\"},{\"t\":3.02,\"v\":[95,106],\"ease\":\"Quad Out\"},{\"t\":3.18,\"v\":[100,100]}]},{\"id\":\"l_03jm7\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":2.3,\"v\":0,\"ease\":\"Linear\"},{\"t\":2.4,\"v\":100}]},{\"id\":\"l_03jm7\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":2.3,\"v\":-10,\"ease\":\"Easy Ease\"},{\"t\":2.6,\"v\":8,\"ease\":\"Easy Ease\"},{\"t\":3.18,\"v\":0,\"ease\":\"Easy Ease\"},{\"t\":4,\"v\":0,\"ease\":\"Sine In Out\"},{\"t\":4.25,\"v\":5,\"ease\":\"Sine In Out\"},{\"t\":4.5,\"v\":-5,\"ease\":\"Sine In Out\"},{\"t\":4.75,\"v\":5,\"ease\":\"Sine In Out\"},{\"t\":5,\"v\":0}]},{\"id\":\"l_03jm8\",\"prop\":\"position\",\"keyframes\":[{\"t\":2.5,\"v\":[390,760],\"ease\":\"Quad Out\"},{\"t\":2.8,\"v\":[390,390],\"ease\":\"Quad In\"},{\"t\":3.05,\"v\":[390,560],\"ease\":\"Quad Out\"},{\"t\":3.22,\"v\":[390,480],\"ease\":\"Quad In\"},{\"t\":3.38,\"v\":[390,540]}]},{\"id\":\"l_03jm8\",\"prop\":\"scale\",\"keyframes\":[{\"t\":2.5,\"v\":[70,130],\"ease\":\"Quad Out\"},{\"t\":2.8,\"v\":[88,118],\"ease\":\"Quad Out\"},{\"t\":3.05,\"v\":[125,78],\"ease\":\"Quad Out\"},{\"t\":3.22,\"v\":[95,106],\"ease\":\"Quad Out\"},{\"t\":3.38,\"v\":[100,100]}]},{\"id\":\"l_03jm8\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":2.5,\"v\":0,\"ease\":\"Linear\"},{\"t\":2.6,\"v\":100}]},{\"id\":\"l_03jm8\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":2.5,\"v\":10,\"ease\":\"Easy Ease\"},{\"t\":2.8,\"v\":-8,\"ease\":\"Easy Ease\"},{\"t\":3.38,\"v\":0,\"ease\":\"Easy Ease\"},{\"t\":4,\"v\":0,\"ease\":\"Sine In Out\"},{\"t\":4.25,\"v\":-5,\"ease\":\"Sine In Out\"},{\"t\":4.5,\"v\":5,\"ease\":\"Sine In Out\"},{\"t\":4.75,\"v\":-5,\"ease\":\"Sine In Out\"},{\"t\":5,\"v\":0}]},{\"id\":\"l_03jm9\",\"prop\":\"position\",\"keyframes\":[{\"t\":2.7,\"v\":[540,760],\"ease\":\"Quad Out\"},{\"t\":3,\"v\":[540,390],\"ease\":\"Quad In\"},{\"t\":3.25,\"v\":[540,560],\"ease\":\"Quad Out\"},{\"t\":3.42,\"v\":[540,480],\"ease\":\"Quad In\"},{\"t\":3.58,\"v\":[540,540]}]},{\"id\":\"l_03jm9\",\"prop\":\"scale\",\"keyframes\":[{\"t\":2.7,\"v\":[70,130],\"ease\":\"Quad Out\"},{\"t\":3,\"v\":[88,118],\"ease\":\"Quad Out\"},{\"t\":3.25,\"v\":[125,78],\"ease\":\"Quad Out\"},{\"t\":3.42,\"v\":[95,106],\"ease\":\"Quad Out\"},{\"t\":3.58,\"v\":[100,100]}]},{\"id\":\"l_03jm9\",\"prop\":\"opacity\",\"keyframes\":[{\"t\":2.7,\"v\":0,\"ease\":\"Linear\"},{\"t\":2.8,\"v\":100}]},{\"id\":\"l_03jm9\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":2.7,\"v\":-10,\"ease\":\"Easy Ease\"},{\"t\":3,\"v\":8,\"ease\":\"Easy Ease\"},{\"t\":3.58,\"v\":0,\"ease\":\"Easy Ease\"},{\"t\":4,\"v\":0,\"ease\":\"Sine In Out\"},{\"t\":4.25,\"v\":5,\"ease\":\"Sine In Out\"},{\"t\":4.5,\"v\":-5,\"ease\":\"Sine In Out\"},{\"t\":4.75,\"v\":5,\"ease\":\"Sine In Out\"},{\"t\":5,\"v\":0}]},{\"id\":\"l_03jma\",\"prop\":\"position\",\"keyframes\":[{\"t\":2.9,\"v\":[690,760],\"ease\":\"Quad Out\"},{\"t\":3.2,\"v\":[690,390],\"ease\":\"Quad In\"},{\"t\":3.45,\"v\":[690,560],\"ease\":\"Quad Out\"},{\"t\":3.62,\"v\":[690,480],\"ease\":\"Quad In\"},{\"t\":3.78,\"v\":[690,540]}]},{\"id\":\"l_03jma\",\"prop\":\"scale\",\"keyframes\":[{\"t\":2.9,\"v\":[70,…",
+  "result": "ok: 20 tracks on 5 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 131,
+  "editorMs": 111,
+  "input": {
+   "times": [
+    0.6,
+    1.2,
+    2,
+    2.8,
+    3.5,
+    4.4
+   ],
+   "cell": 300
+  },
+  "result": "6 frames left→right, top→bottom at 0.6s, 1.2s, 2s, 2.8s, 3.5s, 4.4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b22d04cf-1a61-4401-814b-01a9e01b4a29/tool-results/mcp-motion-blob-1794501930592-nhedcv.jpg]"
+ }
+]
