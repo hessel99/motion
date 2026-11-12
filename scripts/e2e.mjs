@@ -164,7 +164,7 @@ check('ungroup', ung === 2, String(ung));
 // text tool
 await page.keyboard.press('t');
 await page.mouse.click(cx - 300, cy - 200);
-await page.waitForTimeout(100);
+await page.waitForSelector('.text-overlay', { timeout: 5000 });
 await page.keyboard.type('Hello');
 await page.mouse.click(cx + 300, cy + 200);
 const txt = await ev(() => Object.values(editor.store.project.layers).find(l => l.type === 'text')?.text.content);
