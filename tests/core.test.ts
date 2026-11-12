@@ -180,7 +180,7 @@ describe('presets + align', () => {
   });
 });
 
-import { snapshotKeys, moveKeysFrom, setPropTx as _setPropTx, setSpring as _setSpring } from '../src/core/commands';
+import { snapshotKeys, moveKeysFrom, setPropTx as _setPropTx, setSpring as _setSpring, setLayerField as _setLayerField } from '../src/core/commands';
 describe('review regressions', () => {
   const keyed = (s: Store, times: number[]) => {
     const l = addLayer(s, 'rect');
@@ -244,6 +244,24 @@ describe('review regressions', () => {
     s.redo();
     expect(s.layer(l.id)!.props.rotation!.v).toEqual([40]);
     expect(s.layer(l.id)!.name).toBe('n4');
+  });
+  it('visibility is a structural change that keeps the layer tree (sameTree), undo included', () => {
+    const s = new Store();
+    const a = addLayer(s, 'rect');
+    const seen: { structure: boolean; sameTree?: boolean }[] = [];
+    s.onChange(c => seen.push({ structure: c.structure, sameTree: c.sameTree }));
+    _setLayerField(s, [a.id], 'visible', false);
+    s.undo();
+    s.transact('both', tx => { tx.recompile(); tx.structure(); tx.set(s.layer(a.id)!, 'name', 'x'); });
+    s.transact('m', tx => { tx.recompile(); tx.set(s.layer(a.id)!, 'visible', true); }, 'mk');
+    s.transact('m', tx => { tx.structure(); tx.set(s.layer(a.id)!, 'visible', false); }, 'mk');
+    s.undo();
+    expect(seen).toEqual([
+      { structure: true, sameTree: true }, { structure: true, sameTree: true },
+      { structure: true, sameTree: false },
+      { structure: true, sameTree: true }, { structure: true, sameTree: false },
+      { structure: true, sameTree: false },
+    ]);
   });
   it('multi-key drag toward 0 keeps spacing', () => {
     const s = new Store();

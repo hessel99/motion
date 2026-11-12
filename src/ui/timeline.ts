@@ -136,7 +136,8 @@ export class Timeline {
     let lastDur = st.comp.duration;
     st.onChange(c => {
       if ((c.structure || c.comp || c.layers.size) && this.matchCache.size) this.matchCache.clear();
-      if (c.structure || c.comp) { this.rowsDirty = true; this.keyTimesCache.clear(); return; }
+      // visibility / clip / start time recompile the renderer but keep the row list: per-layer path
+      if (c.comp || (c.structure && !c.sameTree)) { this.rowsDirty = true; this.keyTimesCache.clear(); return; }
       for (const id of c.layers) this.keyTimesCache.delete(id);
       if (!this.rowsDirty) this.rowsDirty = this.rowsChanged(c.layers);
     });
@@ -932,7 +933,7 @@ export class Timeline {
           tx.set(l, 'inPoint', o.inP + dt);
           if (o.outP < 1e8) tx.set(l, 'outPoint', o.outP + dt);
           for (const k in o.kf) tx.set(l.props[k as PropKey]!, 'kf', o.kf[k as PropKey]!.map(f => ({ ...f, t: f.t + dt })));
-          if (l.type === 'precomp' || l.type === 'audio') { tx.set(l, 'startTime', o.start + dt); tx.structure(); }
+          if (l.type === 'precomp' || l.type === 'audio') { tx.set(l, 'startTime', o.start + dt); tx.recompile(); }
           tx.touch(id);
         }
       });
