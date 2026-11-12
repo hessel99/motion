@@ -1,6 +1,6 @@
 // the slim icon rail at the far left: Home, new file, ask (⌘K), the side panel's two views (Agent,
 // Assets: clicking the active one collapses the sidebar), updates, and Settings at the bottom.
-// in the mac desktop app the traffic lights sit above it (it starts lower).
+// it sits under the title bar (chrome/TopBar.tsx), so the mac traffic lights never reach it.
 
 import { useEffect, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
@@ -10,8 +10,6 @@ import { useChannels } from '../hooks';
 import { Bell, House, Plus, Search, Settings, Shapes, Sparkles, type LucideIcon } from './icons';
 import { openSettings, setUi, showHome, ui, type LeftTab } from './ui-state';
 
-const native = (globalThis as any).motionNative as { platform?: string } | undefined;
-const MAC_APP = native?.platform === 'darwin';
 
 function RailBtn(props: { Icon: LucideIcon; tip: string; on?: boolean; dot?: boolean; onClick: () => void; label?: string }) {
   return (
@@ -34,7 +32,7 @@ export function Rail() {
   };
   const sideOn = (tab: LeftTab) => ui.leftOpen && ui.leftTab === tab && !home;
   return (
-    <nav class={'rail' + (MAC_APP ? ' mac-app' : '')} aria-label="App">
+    <nav class="rail" aria-label="App">
       <RailBtn Icon={House} tip="Home" on={home} onClick={showHome} />
       <RailBtn Icon={Plus} tip="New file (⌘N)" onClick={() => newProject()} />
       <RailBtn Icon={Search} tip="Ask or run a command (⌘K)" onClick={() => editor.emit('ask-bar')} />

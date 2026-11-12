@@ -15,7 +15,7 @@
 import { Track } from '../core/evaluate';
 import { compileExpr, compileProgram, runProgram, type ExprFrame, type ExprProgram } from '../core/expr';
 import type { Layer, Prop } from '../core/model';
-import { activeShaderEffects, activeShaderFill, hashFloats, propsOf, SHADER_MAIN, shaderPropKey, unflattenValue, type ShaderAsset, type ShaderParamDef, type ShaderRef } from '../core/shaders';
+import { activeShaderEffects, activeShaderFill, hashFloats, MOUSE_PARAM, propsOf, SHADER_MAIN, shaderPropKey, unflattenValue, type ShaderAsset, type ShaderParamDef, type ShaderRef } from '../core/shaders';
 import type { Store } from '../core/store';
 import type { FromWorker, ShaderJob, ShaderPass, ToWorker } from './shader-protocol';
 
@@ -34,11 +34,18 @@ export class SlotRT {
   readonly modKey: string;
   /** hash of the module identity (results of another shader never match) */
   readonly modHash: number;
+  /** false: the source isn't here yet (figma data never carries it): placeholder / bypass */
+  readonly hasCode: boolean;
   readonly animated: boolean;
   readonly text: Record<string, string> | undefined;
+  /** offset of the mouse prop in vals (usesMouse shaders), -1 none */
+  readonly mouseOff: number = -1;
   constructor(readonly ref: ShaderRef, readonly asset: ShaderAsset, layer: Layer, readonly inst: string, seed: number) {
-    this.modKey = ref.shader;
-    this.modHash = hashId(ref.shader + '|' + ref.slot) || 1;
+    const code = asset.files[SHADER_MAIN] ?? '';
+    this.hasCode = code.length > 0;
+    // the module key changes with the source (a source fetched later replaces a missing one)
+    this.modKey = `${ref.shader}#${hashId(code).toString(36)}${code.length.toString(36)}`;
+    this.modHash = hashId(this.modKey + '|' + ref.slot) || 1;
     this.text = ref.text;
     const props = propsOf(layer);
     let off = 0;
@@ -55,6 +62,7 @@ export class SlotRT {
           expr = { prog: compileProgram(c.node, dim), fr };
         }
       }
+      if (def.key === MOUSE_PARAM) this.mouseOff = off;
       this.params.push({ def, key, dim, off, track, expr });
       off += dim;
     }
@@ -79,7 +87,7 @@ export class SlotRT {
   /** frame.params for the module (built only when a job is sent) */
   toParams(): Record<string, unknown> {
     const out: Record<string, unknown> = {};
-    for (const q of this.params) out[q.def.key] = unflattenValue(q.def, this.vals, q.off, this.text?.[q.def.key]);
+    for (const q of this.params) if (q.off !== this.mouseOff) out[q.def.key] = unflattenValue(q.def, this.vals, q.off, this.text?.[q.def.key]);
     return out;
   }
 }
@@ -97,6 +105,8 @@ export interface ItemShaders {
   frame: FxFrame | null;
   contentGen: number;
   childSig: number;
+  /** local-space effect target */
+  lt?: { fb: WebGLFramebuffer; tex: WebGLTexture; w: number; h: number };
 }
 
 interface ResultState {
@@ -106,9 +116,10 @@ interface ResultState {
   /** key of the job in flight (-1 none) */
   req: number;
   job: number;
-  /** effects: comp-space rect the result covers (x0, y0, x1, y1) */
-  rect: Float64Array;
-  reqRect: Float64Array;
+  /** effects: the comp-space parallelogram the result covers: origin (top-left of the image),
+   *  then the vectors along its width and its height (ox, oy, ux, uy, vx, vy). an axis-aligned
+   *  rect for screen-space captures, the layer's rotated box for local-space ones */
+  xf: Float64Array;
   w: number;
   h: number;
   failed: string | null;
@@ -116,7 +127,7 @@ interface ResultState {
   failedKey: number;
 }
 
-function newResult(): ResultState { return { tex: null, shown: -1, req: -1, job: 0, rect: new Float64Array(4), reqRect: new Float64Array(4), w: 0, h: 0, failed: null, failedKey: -1 }; }
+function newResult(): ResultState { return { tex: null, shown: -1, req: -1, job: 0, xf: new Float64Array(6), w: 0, h: 0, failed: null, failedKey: -1 }; }
 
 /** frame-level request of an effect capture (filled by the renderer's instance pass) */
 export interface FxFrame {
@@ -128,18 +139,41 @@ export interface FxFrame {
   sx0: number; sy0: number; sx1: number; sy1: number;
   /** capture size (after the pixel budget) and render scale */
   cw: number; ch: number; rs: number;
-  /** comp-space rect */
-  rect: [number, number, number, number];
+  /** comp-space parallelogram of the capture (see ResultState.xf) */
+  xf: Float64Array;
+  /** local space: the layer (and its subtree) renders unrotated into its own target of lw x lh
+   *  (its full box, whatever the viewport shows) with this view: comp -> target px is
+   *  p' = S * R * p + T, R = [rot0 rot2; rot1 rot3] (view = S, Tx, Ty, rot0..rot3) */
+  local: boolean;
+  lw: number; lh: number;
+  view: Float64Array;
+  /** comp-space corners of the layer (mouse props: % of the layer box -> comp) */
+  box: Float64Array;
+  /** frame.mousePosition for the chain (output px), null = no mouse-driven effect */
+  mouse: { x: number; y: number } | null;
   time: number;
+}
+
+/** an empty effect frame (the renderer keeps one per layer) */
+export function newFxFrame(i: number, shaders: ItemShaders): FxFrame {
+  return { item: i, shaders, key: 0, capture: false, sx0: 0, sy0: 0, sx1: 0, sy1: 0, cw: 0, ch: 0, rs: 1, xf: new Float64Array(6), local: false, lw: 0, lh: 0, view: new Float64Array(7), box: new Float64Array(6), mouse: null, time: 0 };
+}
+
+/** comp point -> output px of a capture covering xf at cw x ch (inverse of the parallelogram) */
+function toOutput(xf: Float64Array, cw: number, ch: number, px: number, py: number): { x: number; y: number } {
+  const ux = xf[2], uy = xf[3], vx = xf[4], vy = xf[5], det = ux * vy - uy * vx || 1e-12;
+  const dx = px - xf[0], dy = py - xf[1];
+  return { x: ((dx * vy - dy * vx) / det) * cw, y: ((ux * dy - uy * dx) / det) * ch };
 }
 
 interface PendingCapture { pbo: WebGLBuffer; fence: WebGLSync; w: number; h: number; st: ResultState; build: (input: ArrayBuffer) => ShaderJob; frames: number }
 
 const CVS = `#version 300 es
 layout(location=0) in vec2 q;
-uniform vec4 uRect;
+uniform vec2 uO;
+uniform vec4 uUV;
 out vec2 vUV;
-void main() { vUV = vec2(q.x, 1.0 - q.y); gl_Position = vec4(mix(uRect.xy, uRect.zw, q), 0.0, 1.0); }`;
+void main() { vUV = q; gl_Position = vec4(uO + q.x * uUV.xy + q.y * uUV.zw, 0.0, 1.0); }`;
 const CFS = `#version 300 es
 precision highp float;
 uniform sampler2D uSrc;
@@ -157,7 +191,7 @@ export class ShaderHost {
   adapter = '';
   error = '';
   private jobSeq = 1;
-  private jobs = new Map<number, { st: ResultState; key: number; rect?: Float64Array; t0: number; insts: string[] }>();
+  private jobs = new Map<number, { st: ResultState; key: number; xf?: Float64Array; t0: number; insts: string[] }>();
   private waiters: (() => void)[] = [];
   /** shown result != wanted result for this many drawn layers in the last frame (exports wait for 0) */
   unsettled = 0;
@@ -165,7 +199,8 @@ export class ShaderHost {
   onResult: (() => void) | null = null;
   private placeholder: WebGLTexture | null = null;
   private cprog: WebGLProgram | null = null;
-  private uRect: WebGLUniformLocation | null = null;
+  private uO: WebGLUniformLocation | null = null;
+  private uUV: WebGLUniformLocation | null = null;
   private uOpacity: WebGLUniformLocation | null = null;
   private capFb: WebGLFramebuffer | null = null;
   private capTex: WebGLTexture | null = null;
@@ -253,7 +288,7 @@ export class ShaderHost {
         if (m.bitmap) { this.upload(st, m.bitmap, m.w, m.h); m.bitmap.close(); }
         else this.upload(st, new Uint8Array(m.pixels!), m.w, m.h);
         st.shown = j.key;
-        if (j.rect) st.rect.set(j.rect);
+        if (j.xf) st.xf.set(j.xf);
       }
     }
     this.wake();
@@ -315,6 +350,7 @@ export class ShaderHost {
     if (s.f.tex) gl.deleteTexture(s.f.tex);
     if (s.e.tex) gl.deleteTexture(s.e.tex);
     s.f.tex = s.e.tex = null;
+    if (s.lt) { gl.deleteFramebuffer(s.lt.fb); gl.deleteTexture(s.lt.tex); s.lt = undefined; }
     for (const r of [s.fill, ...s.fx]) if (r && this.live.delete(r.inst)) this.post({ type: 'dispose', inst: r.inst });
   }
 
@@ -333,11 +369,11 @@ export class ShaderHost {
     if (this.outMode === 'bitmap' && this.stats.uploads > 0) { this.outMode = 'pixels'; console.warn('[shaders] gl context lost after shader frames: switching to pixel readback'); }
   }
 
-  private send(job: ShaderJob, st: ResultState, key: number, rect?: Float64Array) {
+  private send(job: ShaderJob, st: ResultState, key: number, xf?: Float64Array) {
     job.out = this.outMode;
     st.req = key;
     st.job = job.job;
-    this.jobs.set(job.job, { st, key, rect, t0: performance.now(), insts: job.passes.map(p => p.inst) });
+    this.jobs.set(job.job, { st, key, xf, t0: performance.now(), insts: job.passes.map(p => p.inst) });
     this.lastJobT = performance.now();
     this.post(job, job.input ? [job.input.data] : []);
   }
@@ -352,21 +388,29 @@ export class ShaderHost {
   }
 
   /** fill of item: request the frame (if the shown one is stale), return the texture to draw */
-  fill(s: ItemShaders, w: number, h: number, rs: number, tLocal: number, comp: { fps: number; duration: number }, inPoint: number): WebGLTexture {
+  fill(s: ItemShaders, w: number, h: number, rs: number, tLocal: number, comp: { fps: number; duration: number }, inPoint: number, hoverX = NaN, hoverY = NaN): WebGLTexture {
     const r = s.fill!;
     r.eval(tLocal, comp.fps, comp.duration, inPoint);
     const q = ShaderHost.budget(w, h, rs);
     const pw = Math.max(1, Math.round(w * q)), ph = Math.max(1, Math.round(h * q));
     const st = s.f;
-    if (this.available !== false && this.ensureWorker()) {
+    if (r.hasCode && this.available !== false && this.ensureWorker()) {
       let key = hashFloats(r.modHash, r.vals);
       const k = this.keyScratch;
       k[0] = pw; k[1] = ph; k[2] = q; k[3] = r.asset.features.isAnimated ? tLocal : 0;
-      key = hashFloats(key, k, 4);
+      // mouse-driven: the hovering cursor (fraction of the layer box) or the keyframable prop (%)
+      let mx = NaN, my = NaN;
+      if (r.mouseOff >= 0) {
+        const hov = hoverX === hoverX;
+        mx = (hov ? hoverX : r.vals[r.mouseOff] / 100) * pw;
+        my = (hov ? hoverY : r.vals[r.mouseOff + 1] / 100) * ph;
+      }
+      k[4] = mx; k[5] = my;
+      key = hashFloats(key, k, 6);
       if (key !== st.shown) {
         // (no jobs before the worker reported its adapter: the result transport depends on it)
         if (st.req === -1 && st.failedKey !== key && this.available === true) {
-          const job: ShaderJob = { type: 'render', job: this.jobSeq++, w: pw, h: ph, renderScale: q, time: tLocal * 1000, deltaTime: 1000 / comp.fps, mouse: null, passes: [this.pass(r)] };
+          const job: ShaderJob = { type: 'render', job: this.jobSeq++, w: pw, h: ph, renderScale: q, time: tLocal * 1000, deltaTime: 1000 / comp.fps, mouse: mx === mx ? { x: mx, y: my } : null, passes: [this.pass(r)] };
           this.send(job, st, key);
         }
         if (st.failedKey !== key) this.unsettled++;
@@ -397,12 +441,25 @@ export class ShaderHost {
 
   /** effect of item: decide whether the content must be captured this frame. returns false when
    *  effects can't run (no webgpu): the renderer then composites the content unchanged */
-  fxPlan(f: FxFrame, s: ItemShaders, tLocal: number, contentGen: number, comp: { fps: number; duration: number }, inPoint: number): boolean {
-    if (this.available === false || !this.ensureWorker()) return false;
+  fxPlan(f: FxFrame, s: ItemShaders, tLocal: number, contentGen: number, comp: { fps: number; duration: number }, inPoint: number, hoverX = NaN, hoverY = NaN): boolean {
+    if (this.available === false || s.fx.some(r => !r.hasCode) || !this.ensureWorker()) return false;
     let key = 0x811c9dc5, anim = false;
     for (const r of s.fx) { key = Math.imul(key ^ r.modHash, 16777619); r.eval(tLocal, comp.fps, comp.duration, inPoint); key = hashFloats(key, r.vals); if (r.asset.features.isAnimated) anim = true; }
-    const k = this.keyScratch;
-    k[0] = f.cw; k[1] = f.ch; k[2] = f.rs; k[3] = f.rect[0]; k[4] = f.rect[1]; k[5] = f.rect[2]; k[6] = f.rect[3]; k[7] = anim ? tLocal : 0; k[8] = contentGen; k[9] = s.fx.length;
+    // mouse-driven effects: hover cursor (comp) or the first mouse prop (% of the layer box), in output px
+    f.mouse = null;
+    let mr: SlotRT | null = null;
+    for (let i = 0; i < s.fx.length && !mr; i++) if (s.fx[i].mouseOff >= 0) mr = s.fx[i];
+    if (mr) {
+      let px = hoverX, py = hoverY;
+      if (px !== px) {
+        const B = f.box, u = mr.vals[mr.mouseOff] / 100, v = mr.vals[mr.mouseOff + 1] / 100;
+        px = B[0] + u * B[2] + v * B[4]; py = B[1] + u * B[3] + v * B[5];
+      }
+      f.mouse = toOutput(f.xf, f.cw, f.ch, px, py);
+    }
+    const k = this.keyScratch, X = f.xf;
+    k[0] = f.cw; k[1] = f.ch; k[2] = f.rs; k[3] = X[0]; k[4] = X[1]; k[5] = X[2]; k[6] = X[3]; k[7] = anim ? tLocal : 0; k[8] = contentGen; k[9] = s.fx.length;
+    k[10] = X[4]; k[11] = X[5]; k[12] = f.mouse ? f.mouse.x : -1; k[13] = f.mouse ? f.mouse.y : -1;
     key = hashFloats(key, k);
     f.key = key;
     f.time = tLocal;
@@ -411,7 +468,7 @@ export class ShaderHost {
     if (key !== st.shown && st.failedKey !== key) this.unsettled++;
     return true;
   }
-  private keyScratch = new Float64Array(10);
+  private keyScratch = new Float64Array(14);
 
   // ------------------------------------------------------------------ effects (gl side, called from runCommands)
 
@@ -429,7 +486,8 @@ export class ShaderHost {
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.disable(gl.BLEND);
     gl.useProgram(this.copyProgram());
-    gl.uniform4f(this.uSrc, f.sx0 / targetW, 1 - f.sy0 / targetH, f.sx1 / targetW, 1 - f.sy1 / targetH);
+    if (f.local) gl.uniform4f(this.uSrc, 0, 1, 1, 0); // the whole local target
+    else gl.uniform4f(this.uSrc, f.sx0 / targetW, 1 - f.sy0 / targetH, f.sx1 / targetW, 1 - f.sy1 / targetH);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, srcTex);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -438,9 +496,10 @@ export class ShaderHost {
     gl.enable(gl.BLEND);
     gl.viewport(0, 0, targetW, targetH);
     const s = f.shaders, st = s.e;
-    const rect = Float64Array.from(f.rect);
+    const rect = Float64Array.from(f.xf);
     const passes = s.fx.map(r => this.pass(r));
-    const build = (input: ArrayBuffer): ShaderJob => ({ type: 'render', job: this.jobSeq++, w: cw, h: ch, renderScale: f.rs, time: f.time * 1000, deltaTime: 0, mouse: null, passes, input: { w: cw, h: ch, data: input } });
+    const mouse = f.mouse ? { x: f.mouse.x, y: f.mouse.y } : null;
+    const build = (input: ArrayBuffer): ShaderJob => ({ type: 'render', job: this.jobSeq++, w: cw, h: ch, renderScale: f.rs, time: f.time * 1000, deltaTime: 0, mouse, passes, input: { w: cw, h: ch, data: input } });
     const bytes = cw * ch * 4;
     st.req = f.key; // reserved: no second capture while this one is in flight
     st.job = -1;
@@ -458,8 +517,8 @@ export class ShaderHost {
       const fence = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0)!;
       const key = f.key;
       this.captures.push({ pbo, fence, w: cw, h: ch, st, build: input => { const j = build(input); st.req = key; return j; }, frames: 0 });
-      (this.captures[this.captures.length - 1] as PendingCapture & { key: number; rect: Float64Array }).key = key;
-      (this.captures[this.captures.length - 1] as PendingCapture & { key: number; rect: Float64Array }).rect = rect;
+      (this.captures[this.captures.length - 1] as PendingCapture & { key: number; xf: Float64Array }).key = key;
+      (this.captures[this.captures.length - 1] as PendingCapture & { key: number; xf: Float64Array }).xf = rect;
     }
   }
 
@@ -468,7 +527,7 @@ export class ShaderHost {
     if (!this.captures.length) { this.watchdog(); return; }
     const gl = this.gl;
     for (let i = 0; i < this.captures.length; i++) {
-      const c = this.captures[i] as PendingCapture & { key: number; rect: Float64Array };
+      const c = this.captures[i] as PendingCapture & { key: number; xf: Float64Array };
       const s = gl.clientWaitSync(c.fence, 0, 0);
       if (s === gl.TIMEOUT_EXPIRED && c.frames++ < 30) continue;
       gl.deleteSync(c.fence);
@@ -479,7 +538,7 @@ export class ShaderHost {
       gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
       this.pboPool.push(c.pbo);
       this.captures.splice(i--, 1);
-      if (this.worker) this.send(c.build(buf), c.st, c.key, c.rect); else c.st.req = -1;
+      if (this.worker) this.send(c.build(buf), c.st, c.key, c.xf); else c.st.req = -1;
     }
     this.watchdog();
   }
@@ -523,20 +582,46 @@ export class ShaderHost {
   composite(s: ItemShaders, view: { z: number; px: number; py: number; w: number; h: number }, opacity: number): boolean {
     const st = s.e;
     if (!st.tex || st.shown === -1) return false;
+    this.drawTex(st.tex, st.xf, view, opacity);
+    return true;
+  }
+
+  /** draw tex over the comp-space parallelogram xf (current framebuffer, premultiplied) */
+  drawTex(tex: WebGLTexture, xf: Float64Array, view: { z: number; px: number; py: number; w: number; h: number }, opacity: number) {
     const gl = this.gl;
     const p = this.program();
     gl.useProgram(p);
-    const r = st.rect;
-    const x0 = ((r[0] * view.z + view.px) / view.w) * 2 - 1, x1 = ((r[2] * view.z + view.px) / view.w) * 2 - 1;
-    const y0 = 1 - ((r[3] * view.z + view.py) / view.h) * 2, y1 = 1 - ((r[1] * view.z + view.py) / view.h) * 2;
-    gl.uniform4f(this.uRect, x0, y0, x1, y1);
+    const sx = 2 * view.z / view.w, sy = -2 * view.z / view.h;
+    gl.uniform2f(this.uO, (xf[0] * view.z + view.px) / view.w * 2 - 1, 1 - (xf[1] * view.z + view.py) / view.h * 2);
+    gl.uniform4f(this.uUV, xf[2] * sx, xf[3] * sy, xf[4] * sx, xf[5] * sy);
     gl.uniform1f(this.uOpacity, opacity);
     gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, st.tex);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.activeTexture(gl.TEXTURE0);
-    return true;
+  }
+
+  /** the local-space target of an effect layer (its own size; kept between frames) */
+  localTarget(s: ItemShaders, w: number, h: number): { fb: WebGLFramebuffer; tex: WebGLTexture } {
+    const gl = this.gl;
+    let L = s.lt;
+    if (!L || L.w !== w || L.h !== h) {
+      if (L) { gl.deleteFramebuffer(L.fb); gl.deleteTexture(L.tex); }
+      const tex = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, w, h);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      const fb = gl.createFramebuffer()!;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+      L = s.lt = { fb, tex, w, h };
+    }
+    return L;
   }
 
   private copy: WebGLProgram | null = null;
@@ -574,7 +659,8 @@ void main() { o = texture(uSrc, vUV); }`));
     gl.attachShader(p, sh(gl.FRAGMENT_SHADER, CFS));
     gl.linkProgram(p);
     this.cprog = p;
-    this.uRect = gl.getUniformLocation(p, 'uRect');
+    this.uO = gl.getUniformLocation(p, 'uO');
+    this.uUV = gl.getUniformLocation(p, 'uUV');
     this.uOpacity = gl.getUniformLocation(p, 'uOpacity');
     gl.useProgram(p);
     gl.uniform1i(gl.getUniformLocation(p, 'uSrc'), 1);

@@ -55,8 +55,6 @@ const COLOR_TOKENS = {
   tlValue: '--tl-value',
   tlHint: '--tl-hint',
   tlPlayhead: '--tl-playhead',
-  tlMarker: '--tl-marker',
-  tlMarkerLine: '--tl-marker-line',
   tlWorkArea: '--tl-work-area',
   tlWorkAreaDim: '--tl-work-area-dim',
   tlCompEnd: '--tl-comp-end',

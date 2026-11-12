@@ -5,7 +5,7 @@
 import { render } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
-import { download, exportAeScript, exportFramePng, exportGifFile, exportLottie, exportPngSequence, toast } from '../app/actions';
+import { download, exportFramePng, exportGifFile, exportLottie, exportPngSequence, toast } from '../app/actions';
 import { lottiePreflight, lottieFeatureLabel, type LottieIssue } from '../export/lottie';
 import { gifFrameCount, gifSize } from '../export/gif';
 import { Button, Dialog, Segmented } from './ui';
@@ -63,14 +63,14 @@ async function saveVideo(blob: Blob, name: string, format: VideoFormat): Promise
   return 'downloaded';
 }
 
-type Kind = 'video' | 'gif' | 'image' | 'lottie' | 'ae';
+type Kind = 'video' | 'gif' | 'image' | 'lottie';
 const KINDS: { value: Kind; label: string }[] = [
-  { value: 'video', label: 'Video' }, { value: 'gif', label: 'GIF' }, { value: 'image', label: 'Image' }, { value: 'lottie', label: 'Lottie' }, { value: 'ae', label: 'After Effects' },
+  { value: 'video', label: 'Video' }, { value: 'gif', label: 'GIF' }, { value: 'image', label: 'Image' }, { value: 'lottie', label: 'Lottie' },
 ];
 const remembered = (): Kind => { try { const v = localStorage.getItem('motion.export.kind') as Kind; return KINDS.some(k => k.value === v) ? v : 'video'; } catch { return 'video'; } };
 
 /** the export dialog: the one place to export (top bar Export, ⌘E). video (MP4 / WebM with
- *  progress, eta, cancel), GIF, the current frame as PNG, Lottie JSON, an After Effects script */
+ *  progress, eta, cancel), GIF, the current frame as PNG, Lottie JSON */
 export function ExportDialog(props: { onClose: () => void }) {
   const comp = editor.store.comp;
   const [kind, setKindState] = useState<Kind>(remembered);
@@ -132,7 +132,6 @@ export function ExportDialog(props: { onClose: () => void }) {
     if (kind === 'gif') exportGifFile({ maxSize: gifSizeMax, fps: gifFps }).catch(() => {});
     else if (kind === 'image') (pngMode === 'sequence' ? exportPngSequence(scale) : exportFramePng(scale)).catch(() => {});
     else if (kind === 'lottie') exportLottie([...ignored, ...issues.filter(i => !i.bakeable).map(i => i.id)]);
-    else if (kind === 'ae') exportAeScript();
   };
 
   const cancel = () => { if (busy) abort.current?.abort(); else props.onClose(); };
@@ -151,7 +150,7 @@ export function ExportDialog(props: { onClose: () => void }) {
 
   const gifDims = gifSize(comp.width, comp.height, gifSizeMax);
   const pngFrames = frameCount(comp.duration, comp.fps);
-  const label: Record<Kind, string> = { video: busy ? 'Exporting…' : 'Export video', gif: 'Export GIF', image: 'Export PNG', lottie: 'Export Lottie', ae: 'Export script' };
+  const label: Record<Kind, string> = { video: busy ? 'Exporting…' : 'Export video', gif: 'Export GIF', image: 'Export PNG', lottie: 'Export Lottie' };
   return (
     <Dialog title="Export" class="xv-dialog" actionsClass="xv-actions" onClose={() => cancelRef.current()} dismissable={!busy}
       actions={<>
@@ -229,7 +228,6 @@ export function ExportDialog(props: { onClose: () => void }) {
               <div class="xv-info muted">Bake renders the layer into images that move with its real animation, so it looks exactly like here (bigger file, not editable as shapes).</div>
             </div>}
         </>}
-        {kind === 'ae' && <div class="xv-info muted">A script (.jsx) that rebuilds this composition in After Effects: File › Scripts › Run Script File… Shape layers, text, precomps, keyframes with their easing.</div>}
         {prog && (
           <div class="xv-progress">
             <div class="xv-bar progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(prog.progress * 100)}><div style={{ width: `${(prog.progress * 100).toFixed(1)}%` }} /></div>

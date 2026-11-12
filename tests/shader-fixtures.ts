@@ -92,3 +92,74 @@ defineProperties(Effect, {
 `;
 
 export const TEST_EFFECT_FEATURES = JSON.stringify({ name: 'Test invert', version: 3, isAnimated: false, usesMouse: false, renderScaleAware: true });
+
+/** a mouse-driven fill: opaque black, a white disc (radius 12 device px) at frame.mousePosition */
+export const TEST_MOUSE_MAIN = `import { defineProperties } from "figma:shaders";
+export default function Effect() {}
+export function setup(device, frame) {
+  frame.state.module = device.createShaderModule({ code: \`
+@group(0) @binding(0) var<uniform> u: vec4f;
+struct VsOut { @builtin(position) p: vec4f, }
+@vertex fn vs(@builtin(vertex_index) i: u32) -> VsOut {
+  let q = array<vec2f, 3>(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+  var o: VsOut; o.p = vec4f(q[i], 0.0, 1.0); return o;
+}
+@fragment fn fs(in: VsOut) -> @location(0) vec4f {
+  let d = distance(in.p.xy, u.xy);
+  if (u.z > 0.5 && d < 12.0) { return vec4f(1.0); }
+  return vec4f(0.0, 0.0, 0.0, 1.0);
+}\` });
+  frame.state.ubuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+}
+export function render(device, frame) {
+  const s = frame.state, m = frame.mousePosition;
+  if (!s.pipeline) s.pipeline = device.createRenderPipeline({ layout: "auto", vertex: { module: s.module, entryPoint: "vs" }, fragment: { module: s.module, entryPoint: "fs", targets: [{ format: frame.output.format }] }, primitive: { topology: "triangle-list" } });
+  device.queue.writeBuffer(s.ubuf, 0, new Float32Array([m ? m.x : 0, m ? m.y : 0, m ? 1 : 0, 0]));
+  const bind = device.createBindGroup({ layout: s.pipeline.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: s.ubuf } }] });
+  const enc = device.createCommandEncoder();
+  const pass = enc.beginRenderPass({ colorAttachments: [{ view: frame.output.createView(), loadOp: "clear", clearValue: { r: 0, g: 0, b: 0, a: 0 }, storeOp: "store" }] });
+  pass.setPipeline(s.pipeline); pass.setBindGroup(0, bind); pass.draw(3); pass.end();
+  device.queue.submit([enc.finish()]);
+}
+defineProperties(Effect, {
+  size: { type: "number", label: "Size", defaultValue: 1, control: "slider", min: 0, max: 4, step: 0.1 },
+});
+`;
+export const TEST_MOUSE_FEATURES = JSON.stringify({ name: 'Test mouse', version: 3, isAnimated: false, usesMouse: true, renderScaleAware: true });
+
+/** a direction-dependent effect: the left half of its input (output px) turns green. under a
+ *  rotated layer it shows whether the effect ran in the layer's local space */
+export const TEST_HALF_MAIN = `import { defineProperties } from "figma:shaders";
+export default function Effect() {}
+export function setup(device, frame) {
+  frame.state.module = device.createShaderModule({ code: \`
+@group(0) @binding(0) var<uniform> u: vec4f;
+@group(0) @binding(1) var src: texture_2d<f32>;
+struct VsOut { @builtin(position) p: vec4f, }
+@vertex fn vs(@builtin(vertex_index) i: u32) -> VsOut {
+  let q = array<vec2f, 3>(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+  var o: VsOut; o.p = vec4f(q[i], 0.0, 1.0); return o;
+}
+@fragment fn fs(in: VsOut) -> @location(0) vec4f {
+  let c = textureLoad(src, vec2i(in.p.xy), 0);
+  if (in.p.x < u.x * 0.5) { return vec4f(0.0, c.a, 0.0, c.a); }
+  return c;
+}\` });
+  frame.state.ubuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+}
+export function render(device, frame) {
+  if (frame.input == null) return;
+  const s = frame.state;
+  if (!s.pipeline) s.pipeline = device.createRenderPipeline({ layout: "auto", vertex: { module: s.module, entryPoint: "vs" }, fragment: { module: s.module, entryPoint: "fs", targets: [{ format: frame.output.format }] }, primitive: { topology: "triangle-list" } });
+  device.queue.writeBuffer(s.ubuf, 0, new Float32Array([frame.output.width, frame.output.height, 0, 0]));
+  const bind = device.createBindGroup({ layout: s.pipeline.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: s.ubuf } }, { binding: 1, resource: frame.input.createView() }] });
+  const enc = device.createCommandEncoder();
+  const pass = enc.beginRenderPass({ colorAttachments: [{ view: frame.output.createView(), loadOp: "clear", clearValue: { r: 0, g: 0, b: 0, a: 0 }, storeOp: "store" }] });
+  pass.setPipeline(s.pipeline); pass.setBindGroup(0, bind); pass.draw(3); pass.end();
+  device.queue.submit([enc.finish()]);
+}
+defineProperties(Effect, {
+  strength: { type: "number", label: "Strength", defaultValue: 1, control: "slider", min: 0, max: 1, step: 0.01 },
+});
+`;
+export const TEST_HALF_FEATURES = JSON.stringify({ name: 'Test half', version: 3, isAnimated: false, usesMouse: false, renderScaleAware: true });

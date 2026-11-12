@@ -1,0 +1,75 @@
+{
+  "id": "18-music-kinetic-type",
+  "title": "Kinetic type to the beat",
+  "complexity": "large",
+  "style": [
+    "typographic",
+    "music"
+  ],
+  "comp": {
+    "width": 1080,
+    "height": 1080,
+    "fps": 30,
+    "duration": 24
+  },
+  "audio": {
+    "track": "music120",
+    "name": "Build and drop 120 BPM",
+    "bpm": 120,
+    "offset": 0,
+    "drop": 16
+  },
+  "prompt": "Kinetic typography to the music in the timeline (an 8-bar build into a drop). Words: \"FEEL IT BUILD\" during the build, getting faster toward the drop, then \"DROP\" as the biggest moment exactly on the drop, then \"MOVE / WITH / THE / BEAT\" grooving through the drop section. Words must hit on beats; don't hit every beat; end on a held final frame.",
+  "checklist": [
+    {
+      "text": "the words are present",
+      "check": {
+        "type": "textContains",
+        "text": "DROP"
+      }
+    },
+    {
+      "text": "several text layers (phrases / words)",
+      "check": {
+        "type": "textLayersMin",
+        "min": 4
+      }
+    },
+    {
+      "text": "the music is kept",
+      "check": {
+        "type": "audioKept"
+      }
+    },
+    {
+      "text": "the biggest move lands on the drop (16.0 s, ±1 frame)",
+      "check": {
+        "type": "hitAt",
+        "t": 16,
+        "frames": 1,
+        "starts": true
+      }
+    },
+    {
+      "text": "words hit on beats (≥70% of landings within ±1 frame of the 120 BPM grid)",
+      "check": {
+        "type": "onBeats",
+        "bpm": 120,
+        "offset": 0,
+        "frames": 1,
+        "min": 0.7,
+        "minMoves": 6
+      }
+    },
+    {
+      "text": "restraint in the build: some beats are left empty",
+      "check": {
+        "type": "notEveryBeat",
+        "bpm": 120,
+        "from": 0,
+        "to": 16,
+        "min": 0.25
+      }
+    }
+  ]
+}

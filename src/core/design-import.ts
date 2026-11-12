@@ -10,6 +10,7 @@ import type { FigmaDesignData } from '../import/figma/convert';
 import { applySyncTx, planSync, planIsEmpty, summarizePlan } from './token-sync';
 import { refreshLinked, tokenValue, valueForProp } from './tokens';
 import { linkAsInstance } from './components';
+import { pasteAsMotionInstance } from './figma-components';
 
 export const COMPONENTS_COMP = 'Components';
 
@@ -50,11 +51,14 @@ export function importFigmaDesign(store: Store, tx: Tx, layers: Map<string, Laye
   if (design.instances.length) {
     const mainByKey = new Map<string, string>();
     for (const [id, c] of Object.entries(P.components ?? {})) if (c.figmaKey && P.layers[id]) mainByKey.set(c.figmaKey, id);
+    // figma components already made animated components here: pasted instances become their instances
+    const motionByKey = new Map<string, Composition>();
+    for (const c of Object.values(P.comps)) if (c.component?.figmaKey) motionByKey.set(c.component.figmaKey, c);
     const defLayers = new Map(design.defLayers.map(l => [l.id, l]));
     let comp: Composition | undefined;
     let cursor = 40;
     for (const d of design.defs) {
-      if (mainByKey.has(d.key)) continue;
+      if (mainByKey.has(d.key) || motionByKey.has(d.key)) continue;
       const root = defLayers.get(d.root);
       if (!root) continue;
       if (!comp) {
@@ -77,13 +81,15 @@ export function importFigmaDesign(store: Store, tx: Tx, layers: Map<string, Laye
       tx.set(comp, 'root', [...comp.root, root.id]);
       if (cursor > comp.width) tx.set(comp, 'width', Math.ceil(cursor));
       if (!P.components) tx.set(P, 'components', {});
-      tx.set(P.components!, root.id, { name: d.name, figmaKey: d.key });
+      tx.set(P.components!, root.id, { name: d.name, figmaKey: d.key, ...(d.meta?.props.length ? { figmaProps: d.meta.props } : {}), ...(d.meta?.set ? { figmaSet: d.meta.set } : {}) });
       mainByKey.set(d.key, root.id);
       out.components++;
       tx.structure();
     }
     // nested components first (instances inside definitions), then the pasted ones
     for (const inst of design.instances) {
+      const mc = motionByKey.get(inst.key);
+      if (mc && P.layers[inst.layer]) { pasteAsMotionInstance(tx, P, mc, P.layers[inst.layer], inst.values); out.instances++; continue; }
       const mainId = mainByKey.get(inst.key);
       if (!mainId || !P.layers[inst.layer] || mainId === inst.layer) continue;
       linkAsInstance(tx, P, mainId, inst.layer);

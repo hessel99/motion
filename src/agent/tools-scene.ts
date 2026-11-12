@@ -429,12 +429,6 @@ export async function buildScene(a: any) {
       if (a.comp.background !== undefined) tx.set(comp, 'background', parseColor(a.comp.background) as any);
       tx.comp();
     }
-    if (a.markers) {
-      const ms = (a.markers as any[]).map((m, i) => ({ id: `m_scene${i}_${Math.round(+m.t * 1000)}`, t: num(m.t, 'marker t'), label: String(m.label ?? '') }));
-      const keep = (comp.markers ?? []).filter(m => !ms.some(n => Math.abs(n.t - m.t) < 1e-3));
-      tx.set(comp, 'markers', [...keep, ...ms].sort((x, y) => x.t - y.t));
-      tx.comp();
-    }
     const top = a.layers.map((spec: any) => buildLayer(ctx, spec, a.parent ?? null, comp.id, 0));
     reorder(tx, a.parent ?? null, comp.id, top);
     if (a.prune) {
@@ -526,7 +520,6 @@ export const SCENE_TOOLS: ToolDef[] = [
       properties: {
         layers: { type: 'array', items: layerSpec, description: 'top-level layer specs, bottom → top in draw order' },
         comp: { type: 'object', description: 'composition settings to set first', properties: { width: { type: 'number' }, height: { type: 'number' }, fps: { type: 'number' }, duration: { type: 'number' }, background: colorSchema, name: { type: 'string' } } },
-        markers: { type: 'array', items: { type: 'object', properties: { t: { type: 'number' }, label: { type: 'string' } }, required: ['t'] }, description: 'beats to add (same time = replaced)' },
         stagger: { type: 'array', description: 'delays applied to whole layers\' animations by key', items: { type: 'object', properties: { keys: { type: 'array', items: { type: 'string' } }, step: { type: 'number', description: 'seconds between layers (default 0.08)' }, start: { type: 'number', description: 'extra delay for the whole block' }, order: { enum: ['sequential', 'reverse', 'center-out', 'edges-in', 'random'] }, seed: { type: 'number' } }, required: ['keys'] } },
         parent: { type: 'string', description: 'existing group layer id to build inside' },
         prune: { type: 'boolean', description: 'delete keyed layers from earlier build_scene calls that are not in this spec' },

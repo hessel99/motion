@@ -586,25 +586,22 @@ function filteredImage(asset: Asset, bmp: ImageBitmap, f: ImageFilters | undefin
   return cv;
 }
 
-/** figma-style image adjustments on straight rgba bytes (approximation of figma's curves; each
- *  slider is -1..1). exposure: stops of light; contrast / saturation: around mid grey / luma;
- *  temperature: warm (+) / cool (-); tint: magenta (+) / green (-); highlights / shadows: tone curve
- *  on the bright / dark range */
+/** figma-style image adjustments on straight rgba bytes (each slider -1..1). the curves were fitted
+ *  to figma's own render of a filtered image (rmse 0.04): exposure in linear light (2.5 stops per
+ *  unit), temperature / tint as channel offsets, highlights / shadows as luma-weighted lifts, then
+ *  contrast around mid grey and saturation around luma */
 export function applyImageFilters(d: Uint8ClampedArray | Uint8Array, f: ImageFilters) {
-  const ex = Math.pow(2, (f.exposure ?? 0) * 2), ct = 1 + (f.contrast ?? 0), sat = 1 + (f.saturation ?? 0);
-  const temp = (f.temperature ?? 0) * 0.18, tint = (f.tint ?? 0) * 0.12, hi = f.highlights ?? 0, sh = f.shadows ?? 0;
+  const ex = Math.pow(2, (f.exposure ?? 0) * 2.5), ct = 1 + (f.contrast ?? 0) * 0.188, sat = Math.max(0, 1 + (f.saturation ?? 0) * 1.3);
+  const temp = (f.temperature ?? 0) * 0.244, tint = (f.tint ?? 0) * 0.425, hi = (f.highlights ?? 0) * 0.125, sh = (f.shadows ?? 0) * 0.825;
   const lut = new Float32Array(256);
-  for (let i = 0; i < 256; i++) lut[i] = Math.pow(i / 255, 2.2); // srgb -> ~linear
+  for (let i = 0; i < 256; i++) lut[i] = Math.pow(Math.min(1, Math.pow(i / 255, 2.2) * ex), 1 / 2.2);
   for (let i = 0; i < d.length; i += 4) {
-    let r = lut[d[i]] * ex, g = lut[d[i + 1]] * ex, b = lut[d[i + 2]] * ex;
-    r = Math.pow(Math.min(1, r), 1 / 2.2); g = Math.pow(Math.min(1, g), 1 / 2.2); b = Math.pow(Math.min(1, b), 1 / 2.2);
-    r += temp; b -= temp; g -= tint; r += tint * 0.5; b += tint * 0.5;
+    let r = lut[d[i]], g = lut[d[i + 1]], b = lut[d[i + 2]];
+    r += temp + tint * 0.5; g -= tint; b += tint * 0.5 - temp;
     const y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    if (hi || sh) {
-      const hw = Math.max(0, (y - 0.5) * 2), sw = Math.max(0, (0.5 - y) * 2);
-      const dl = hi * 0.25 * hw * hw + sh * 0.25 * sw * sw;
-      r += dl; g += dl; b += dl;
-    }
+    const yc = y < 0 ? 0 : y > 1 ? 1 : y;
+    const dl = hi * Math.pow(yc, 7.8) + sh * (1 - yc);
+    r += dl; g += dl; b += dl;
     r = (r - 0.5) * ct + 0.5; g = (g - 0.5) * ct + 0.5; b = (b - 0.5) * ct + 0.5;
     const y2 = 0.2126 * r + 0.7152 * g + 0.0722 * b;
     r = y2 + (r - y2) * sat; g = y2 + (g - y2) * sat; b = y2 + (b - y2) * sat;
@@ -618,6 +615,8 @@ function drawImagePaint(c: Ctx, p: Paint, bw: number, bh: number) {
   if (!asset || !bmp) { c.fillStyle = 'rgba(204,204,204,1)'; c.fillRect(-1e4, -1e4, 2e4, 2e4); return; }
   const img = filteredImage(asset, bmp, p.filters);
   const iw = bmp.width, ih = bmp.height;
+  // figma upsamples images with nearest neighbour (blocky small images); downsampling stays smooth
+  const up = (k: number) => { c.imageSmoothingEnabled = !(k * Math.hypot(c.getTransform().a, c.getTransform().b) > 1.01); };
   const rot = ((Math.round((p.rotation ?? 0) / 90) % 4) + 4) % 4;
   c.imageSmoothingQuality = 'high';
   const mode = p.scaleMode ?? 'fill';
@@ -625,7 +624,9 @@ function drawImagePaint(c: Ctx, p: Paint, bw: number, bh: number) {
     const m = p.transform ?? [1, 0, 0, 1, 0, 0];
     c.transform(bw, 0, 0, bh, 0, 0);
     c.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+    up(1 / Math.max(1, Math.max(iw, ih)));
     c.drawImage(img, 0, 0, 1, 1);
+    c.imageSmoothingEnabled = true;
     return;
   }
   // rotation about the box center; a quarter turn swaps the image's sides for fitting
@@ -634,8 +635,10 @@ function drawImagePaint(c: Ctx, p: Paint, bw: number, bh: number) {
     const s = p.tileScale ?? 1;
     const pat = c.createPattern(img, 'repeat');
     if (!pat) return;
-    const k = iw / ((img as any).width || iw);
-    pat.setTransform(new DOMMatrix([s * k, 0, 0, s * k, 0, 0]).rotate(rot * 90));
+    // tile units = the asset's natural size (svg bitmaps are decoded larger than that)
+    const k = (asset.width || iw) / ((img as any).width || iw);
+    const m = p.transform; // svg patterns: tile space -> box (patternTransform, origin)
+    pat.setTransform(m ? new DOMMatrix([m[0], m[1], m[2], m[3], m[4], m[5]]).scale(s * k) : new DOMMatrix([s * k, 0, 0, s * k, 0, 0]).rotate(rot * 90));
     c.fillStyle = pat;
     c.fillRect(-1e4, -1e4, 2e4, 2e4);
     return;
@@ -643,7 +646,9 @@ function drawImagePaint(c: Ctx, p: Paint, bw: number, bh: number) {
   const s = mode === 'fit' ? Math.min(bw / rw, bh / rh) : Math.max(bw / rw, bh / rh);
   c.translate(bw / 2, bh / 2);
   c.rotate(rot * Math.PI / 2);
+  up(s);
   c.drawImage(img, -iw * s / 2, -ih * s / 2, iw * s, ih * s);
+  c.imageSmoothingEnabled = true;
 }
 
 /** deterministic hash of a grain cell -> 0..1 */
@@ -656,8 +661,9 @@ export function cellHash(x: number, y: number, seed: number): number {
 
 /** noise grain over the box: cells of `size` px; `density` of them get the grain color */
 function drawNoise(c: Ctx, n: NoiseParams, bw: number, bh: number, T: number[]) {
-  const size = Math.max(0.25, n.size || 1);
-  // cells at most ~1 per device pixel
+  // same model as the noise effect (fx.ts, fitted to figma): cells of size / 2, grain with probability
+  // density^2 and strength (1 - r / D)^2, duo picks one of two colors per grain
+  const size = Math.max(0.25, (n.size || 1) / 2);
   const dev = Math.hypot(T[0], T[1]);
   const cell = Math.max(size, 1 / Math.max(dev, 1e-6));
   const cw = Math.min(2048, Math.ceil(bw / cell)), ch = Math.min(2048, Math.ceil(bh / cell));
@@ -665,15 +671,19 @@ function drawNoise(c: Ctx, n: NoiseParams, bw: number, bh: number, T: number[]) 
   const cv = newCanvas(cw, ch);
   const nc = cv.getContext('2d') as Ctx;
   const img = nc.createImageData(cw, ch);
-  const d = img.data, seed = n.seed ?? 0, dens = n.density;
+  const d = img.data, seed = n.seed ?? 0;
+  let D = n.density * n.density;
+  if (n.mode === 'duo') D = Math.min(D, 0.5);
   const c1 = n.color ?? [0, 0, 0, 1], c2 = n.secondary ?? [1, 1, 1, 1], op = n.opacity ?? 1;
+  const put = (o: number, c: number[], a: number) => { d[o] = c[0] * 255; d[o + 1] = c[1] * 255; d[o + 2] = c[2] * 255; d[o + 3] = a * 255; };
   for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {
     const o = (y * cw + x) * 4, r = cellHash(x, y, seed);
     if (n.mode === 'multi') {
-      if (r >= dens) continue;
-      d[o] = cellHash(x, y, seed + 1) * 255; d[o + 1] = cellHash(x, y, seed + 2) * 255; d[o + 2] = cellHash(x, y, seed + 3) * 255; d[o + 3] = op * 255;
-    } else if (r < dens) { d[o] = c1[0] * 255; d[o + 1] = c1[1] * 255; d[o + 2] = c1[2] * 255; d[o + 3] = (c1[3] ?? 1) * 255; }
-    else if (n.mode === 'duo') { d[o] = c2[0] * 255; d[o + 1] = c2[1] * 255; d[o + 2] = c2[2] * 255; d[o + 3] = (c2[3] ?? 1) * 255; }
+      if (r >= D) continue;
+      const t = (1 - r / D) ** 2;
+      put(o, [cellHash(x, y, seed + 1), cellHash(x, y, seed + 2), cellHash(x, y, seed + 3)], op * t);
+    } else if (r < D) put(o, c1, (c1[3] ?? 1) * (1 - r / D) ** 2);
+    else if (n.mode === 'duo' && r > 1 - D) put(o, c2, (c2[3] ?? 1) * (1 - (1 - r) / D) ** 2);
   }
   nc.putImageData(img, 0, 0);
   c.imageSmoothingEnabled = false;
@@ -726,6 +736,12 @@ export interface TextLine {
   paraEnd: boolean;
   /** first line of its paragraph */
   paraStart: boolean;
+  /** list indent (px) and the marker drawn before the first line of a list paragraph */
+  indent?: number;
+  marker?: string;
+  /** line box height and the baseline's offset in it (px) */
+  lh?: number;
+  base?: number;
 }
 
 export function fontString(l: Layer, run?: { fontFamily?: string; fontWeight?: number; fontStyle?: string; fontSize?: number }) {
@@ -764,51 +780,110 @@ function setFont(c: Ctx, l: Layer) {
   if ('fontKerning' in c) (c as any).fontKerning = t.features?.includes('-kern') ? 'none' : 'normal';
 }
 
+/** the font's ascender / descender (em), from the canvas font metrics (hhea / OS/2) */
+const metricsCache = new Map<string, { asc: number; desc: number }>();
+export function fontMetrics(l: Layer): { asc: number; desc: number } {
+  // measured at 1000 px: font metrics come back rounded to whole pixels
+  const key = fontString(l, { fontSize: 1000 });
+  let m = metricsCache.get(key);
+  if (!m) {
+    const c = mctx();
+    c.font = key;
+    const mt = c.measureText('Hg') as TextMetrics & { fontBoundingBoxAscent?: number; fontBoundingBoxDescent?: number };
+    const fs = 1000;
+    m = mt.fontBoundingBoxAscent ? { asc: mt.fontBoundingBoxAscent / fs, desc: (mt.fontBoundingBoxDescent ?? 0) / fs } : { asc: 0.9, desc: 0.25 };
+    if (metricsCache.size > 256) metricsCache.clear();
+    if (mt.fontBoundingBoxAscent) metricsCache.set(key, m);
+  }
+  return m;
+}
+/** line height in px: figma "auto" = the font's ascender + descender */
+export function lineHeightPx(l: Layer): number {
+  const t = l.text!;
+  if (t.lineHeightAuto) { const m = fontMetrics(l); return (m.asc + m.desc) * t.fontSize; }
+  return t.fontSize * t.lineHeight;
+}
+
 export function layoutText(l: Layer, boxWidth: number | null): TextLine[] {
   const t = l.text!;
   const c = mctx();
   setFont(c, l);
   const wrapW = t.autoResize === 'width' ? null : boxWidth;
-  const lines: TextLine[] = [];
+  const runs = t.runs ?? [];
   const text = displayText(t);
-  let pos = 0, n = 0, ol = 0;
+  // width of text[a, b) with each run's own font (wrapping must see mixed sizes / weights)
+  const runAt = (i: number) => (runs.length ? runs.find(r => i >= r.start && i < r.end) ?? null : null);
+  const measure = (a: number, b: number) => {
+    if (!runs.length) return c.measureText(text.slice(a, b)).width;
+    let w = 0, i = a;
+    while (i < b) {
+      const r = runAt(i);
+      let j = i + 1;
+      while (j < b && runAt(j) === r) j++;
+      c.font = r ? fontString(l, r) : fontString(l);
+      (c as any).letterSpacing = `${r?.letterSpacing ?? t.letterSpacing ?? 0}px`;
+      w += c.measureText(text.slice(i, j)).width;
+      i = j;
+    }
+    setFont(c, l);
+    return w;
+  };
+  // per line: the tallest run sets the line box (auto line height) and the baseline
+  const fm = fontMetrics(l);
+  const lineBox = (a: number, b: number) => {
+    let A = fm.asc * t.fontSize, Dd = fm.desc * t.fontSize, lh = lineHeightPx(l);
+    for (const r of runs) {
+      if (!r.fontSize || r.end <= a || r.start >= b || !text.slice(Math.max(a, r.start), Math.min(b, r.end)).trim()) continue;
+      const k = r.fontSize / t.fontSize;
+      A = Math.max(A, fm.asc * r.fontSize); Dd = Math.max(Dd, fm.desc * r.fontSize);
+      if (t.lineHeightAuto) lh = Math.max(lh, lineHeightPx(l) * k);
+    }
+    return { lh, base: (lh - (A + Dd)) / 2 + A };
+  };
+  const lines: TextLine[] = [];
+  let pos = 0, ol = 0;
   const paras = text.split('\n');
+  // lists: marker right-aligned at 1em, text from 1.64em (measured on figma's renders)
+  const indentW = t.fontSize * 1.64;
   for (let pi = 0; pi < paras.length; pi++) {
     const para = paras[pi];
     const list = t.lists?.[pi] ?? null;
     ol = list === 'ol' ? ol + 1 : 0;
-    const marker = list === 'ul' ? '•  ' : list === 'ol' ? `${ol}.  ` : '';
+    const marker = list === 'ul' ? '•' : list === 'ol' ? `${ol}.` : '';
+    const indent = marker ? indentW : 0;
     const first = lines.length;
-    if (wrapW == null) lines.push({ text: marker + para, width: c.measureText(marker + para).width, start: pos, prefix: marker.length, paraEnd: true, paraStart: true });
+    const push = (a: number, b: number, paraEnd: boolean) => {
+      while (b > a && /\s/.test(text[b - 1]) && !paraEnd) b--;
+      const lb = lineBox(a, b);
+      lines.push({ text: text.slice(a, b), width: measure(a, b), start: a, prefix: 0, paraEnd, paraStart: lines.length === first, indent, marker: lines.length === first && marker ? marker : undefined, lh: lb.lh, base: lb.base });
+    };
+    if (wrapW == null) push(pos, pos + para.length, true);
     else {
-      const words = para.split(/(\s+)/);
-      let cur = marker, curStart = pos, idx = pos;
-      for (const w of words) {
-        const next = cur + w;
-        if (cur.length > marker.length && c.measureText(next).width > wrapW + 0.5 && w.trim()) {
-          const tr = cur.trimEnd();
-          lines.push({ text: tr, width: c.measureText(tr).width, start: curStart, prefix: lines.length === first ? marker.length : 0, paraEnd: false, paraStart: lines.length === first });
-          cur = w.trimStart();
-          curStart = idx + (w.length - w.trimStart().length);
-        } else cur = next;
+      const avail = wrapW - indent - (t.paragraphIndent ?? 0) * 0;
+      const tokens = para.split(/(\s+)/);
+      let a = pos, idx = pos;
+      for (const w of tokens) {
+        if (w && w.trim() && idx > a && measure(a, idx + w.length) - (t.letterSpacing || 0) > avail + 0.5 + t.fontSize * 0.02) {
+          push(a, idx, false);
+          a = idx;
+        }
         idx += w.length;
+        if (!w.trim() && a === idx - w.length && idx > pos) a = idx; // a line never starts with the break's spaces
       }
-      lines.push({ text: cur, width: c.measureText(cur).width, start: curStart, prefix: lines.length === first ? marker.length : 0, paraEnd: true, paraStart: lines.length === first });
+      push(a, pos + para.length, true);
     }
     pos += para.length + 1;
-    n++;
   }
-  void n;
   // truncation: keep maxLines (or what fits the box height) and end the last one with an ellipsis
   if (t.truncate) {
-    const lh = t.fontSize * t.lineHeight;
+    const lh = lineHeightPx(l);
     const hMax = (l.props.size?.v[1] ?? 0) > 0 && t.autoResize !== 'height' && t.autoResize !== 'width' ? Math.max(1, Math.floor(((l.props.size!.v[1]) + 0.5) / lh)) : Infinity;
     const max = Math.min(t.maxLines && t.maxLines > 0 ? t.maxLines : Infinity, hMax);
     if (lines.length > max) {
       lines.length = max;
       const last = lines[max - 1];
       let s = last.text;
-      const limit = (wrapW ?? Infinity);
+      const limit = (wrapW ?? Infinity) - (last.indent ?? 0);
       while (s.length && c.measureText(s + '…').width > limit) s = s.slice(0, -1);
       last.text = s.trimEnd() + '…';
       last.width = c.measureText(last.text).width;
@@ -836,9 +911,10 @@ export function outlineValid(l: Layer): boolean {
 function textMetrics(l: Layer, size: number[]) {
   const t = l.text!;
   const lines = layoutText(l, size[0] > 0 ? size[0] : null);
-  const lh = t.fontSize * t.lineHeight;
+  const lh = lineHeightPx(l);
   const ps = t.paragraphSpacing ?? 0;
-  let textH = lines.length * lh;
+  let textH = 0;
+  for (const ln of lines) textH += ln.lh ?? lh;
   for (let i = 0; i < lines.length - 1; i++) if (lines[i].paraEnd) textH += ps;
   const boxH = size[1] > 0 ? size[1] : textH;
   const y0 = t.valign === 'center' ? (boxH - textH) / 2 : t.valign === 'bottom' ? boxH - textH : 0;
@@ -847,16 +923,17 @@ function textMetrics(l: Layer, size: number[]) {
 
 function textBox(l: Layer, size: number[]): { x: number; y: number; w: number; h: number } {
   const t = l.text!;
-  const pad = t.fontSize * 0.5;
+  const pad = t.fontSize * 0.5 + 2 * (l.props.strokeWidth?.v[0] ?? 0);
   if (outlineValid(l)) {
     const all: PathGeometry[] = [];
     for (const g of t.outline!.groups) all.push(...g.geometry);
     const [bx, by, bw, bh] = geometryBounds(all);
     const x0 = Math.min(0, bx), y0 = Math.min(0, by), x1 = Math.max(size[0], bx + bw), y1 = Math.max(size[1], by + bh);
-    return { x: x0 - 2, y: y0 - 2, w: x1 - x0 + 4, h: y1 - y0 + 4 };
+    const e = 2 + 2 * (l.props.strokeWidth?.v[0] ?? 0);
+    return { x: x0 - e, y: y0 - e, w: x1 - x0 + 2 * e, h: y1 - y0 + 2 * e };
   }
   const m = textMetrics(l, size);
-  const maxW = Math.max(size[0], ...m.lines.map(x => x.width));
+  const maxW = Math.max(size[0], ...m.lines.map(x => x.width + (x.indent ?? 0)));
   return { x: -pad, y: Math.min(0, m.y0) - pad, w: maxW + pad * 2, h: Math.max(size[1], m.textH) + pad * 2 + Math.max(0, -m.y0) };
 }
 
@@ -888,61 +965,91 @@ export function rasterText(l: Layer, scale: number, size: number[], clip?: Raste
     paintFill(c, T, l.paints!, [full], ['nonzero'], size[0] > 0 ? size : [box.w, box.h], pw, ph, 1);
     c.globalCompositeOperation = 'source-over';
   }
-  if (rgba) return { kind: 'rgba', pw, ph, ...place, w: pw / s, h: ph / s, data: rgbaData(c, pw, ph) };
+  // text stroke (align: centered on the outline, or doubled and cut against the glyphs)
+  const sw = l.props.strokeWidth?.v[0] ?? 0, sv = l.props.stroke?.v;
+  const stroked = sw > 0 && !!sv && sv[3] > 0;
+  const strokeGlyphs = (cx: Ctx, style: string) => {
+    const align = l.strokeAlign ?? 'center';
+    const w = align === 'center' ? sw : sw * 2;
+    cx.strokeStyle = style; cx.lineWidth = w; cx.lineJoin = l.strokeJoin ?? 'miter'; cx.miterLimit = l.miterLimit ?? 4;
+    if (outlineValid(l)) { for (const g of t.outline!.groups) for (const geo of g.geometry) cx.stroke(toPath2D(geo)); }
+    else drawLiveText(cx, l, size, null, w);
+    if (align === 'center') return;
+    // cut with the glyphs' fill coverage
+    cx.globalCompositeOperation = align === 'outside' ? 'destination-out' : 'destination-in';
+    cx.fillStyle = '#fff';
+    if (outlineValid(l)) { for (const g of t.outline!.groups) for (const geo of g.geometry) cx.fill(toPath2D(geo), geo.fillRule); }
+    else drawLiveText(cx, l, size, null);
+    cx.globalCompositeOperation = 'source-over';
+  };
+  if (rgba) {
+    if (stroked) {
+      const sc = scratchCtx(0, pw, ph);
+      sc.setTransform(T[0], T[1], T[2], T[3], T[4], T[5]);
+      strokeGlyphs(sc, cssColor(sv!));
+      c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(sc.canvas as CanvasImageSource, 0, 0, pw, ph, 0, 0, pw, ph); c.restore();
+    }
+    return { kind: 'rgba', pw, ph, ...place, w: pw / s, h: ph / s, data: rgbaData(c, pw, ph) };
+  }
   const out = new Uint8Array(pw * ph * 4);
   alphaInto(c, pw, ph, out, 0);
+  if (stroked) {
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.clearRect(0, 0, pw, ph);
+    c.setTransform(T[0], T[1], T[2], T[3], T[4], T[5]);
+    strokeGlyphs(c, '#fff');
+    alphaInto(c, pw, ph, out, 1);
+  }
   finishMask(out);
   return { kind: 'mask', pw, ph, ...place, w: pw / s, h: ph / s, data: out };
 }
 
 /** live layout: lines, alignment (incl. justify), runs (font / color / decoration), paragraph spacing */
-function drawLiveText(c: Ctx, l: Layer, size: number[], color: number[] | null) {
+function drawLiveText(c: Ctx, l: Layer, size: number[], color: number[] | null, strokeW = 0) {
   const t = l.text!;
-  const { lines, lh, ps, y0 } = textMetrics(l, size);
+  const { lines, ps, y0 } = textMetrics(l, size);
   setFont(c, l);
   c.textBaseline = 'alphabetic';
-  const ascent = t.fontSize * 0.8;
-  const half = (lh - t.fontSize) / 2;
   const runs = t.runs ?? [];
-  const width = size[0] > 0 ? size[0] : Math.max(0, ...lines.map(x => x.width));
+  const runAt = (i: number) => (runs.length ? runs.find(r => i >= r.start && i < r.end) ?? null : null);
+  const width = size[0] > 0 && t.autoResize !== 'width' ? size[0] : Math.max(0, ...lines.map(x => x.width + (x.indent ?? 0)));
   let y = y0;
   for (const line of lines) {
-    const by = y + half + ascent;
-    let x = t.align === 'center' ? (width - line.width) / 2 : t.align === 'right' ? width - line.width : 0;
+    const by = y + (line.base ?? 0);
+    const ind = line.indent ?? 0;
+    const lw = width - ind;
+    let x = ind + (t.align === 'center' ? (lw - line.width) / 2 : t.align === 'right' ? lw - line.width : 0);
     if (line.paraStart && t.paragraphIndent && t.align !== 'center' && t.align !== 'right') x += t.paragraphIndent;
-    const justify = t.align === 'justify' && !line.paraEnd ? (width - line.width) / Math.max(1, (line.text.match(/ /g) ?? []).length) : 0;
-    // segments: [from, to) in line.text with one style each
-    const segs: { a: number; b: number; run: (typeof runs)[number] | null }[] = [];
+    if (line.marker && !strokeW) {
+      setFont(c, l);
+      c.fillStyle = color ? cssColor(runAt(line.start)?.fill ?? color) : '#fff';
+      c.textAlign = 'right';
+      c.fillText(line.marker, t.fontSize, by);
+      c.textAlign = 'left';
+    }
+    const spaces = (line.text.match(/ /g) ?? []).length;
+    const justify = t.align === 'justify' && !line.paraEnd && spaces ? (lw - line.width) / spaces : 0;
+    // segments [a, b) of one style; with justify every space is its own segment
     let a = 0;
     while (a < line.text.length) {
-      const ci = line.start + Math.max(0, a - line.prefix);
-      const run = a < line.prefix ? null : runs.find(r => ci >= r.start && ci < r.end) ?? null;
+      const run = runAt(line.start + a);
       let b = a + 1;
-      while (b < line.text.length) {
-        const cj = line.start + Math.max(0, b - line.prefix);
-        const rj = b < line.prefix ? null : runs.find(r => cj >= r.start && cj < r.end) ?? null;
-        if (rj !== run || (justify && line.text[b] === ' ')) break;
-        b++;
-      }
-      segs.push({ a, b, run });
-      a = b;
-    }
-    for (const sg of segs) {
-      const str = line.text.slice(sg.a, sg.b);
-      const r = sg.run;
-      c.font = r ? fontString(l, r) : fontString(l);
-      (c as any).letterSpacing = `${r?.letterSpacing ?? t.letterSpacing ?? 0}px`;
-      c.fillStyle = color ? cssColor(r?.fill ?? color) : '#fff';
-      c.fillText(str, x, by);
+      if (!(justify && line.text[a] === ' ')) while (b < line.text.length && runAt(line.start + b) === run && !(justify && line.text[b] === ' ')) b++;
+      const str = line.text.slice(a, b);
+      c.font = run ? fontString(l, run) : fontString(l);
+      (c as any).letterSpacing = `${run?.letterSpacing ?? t.letterSpacing ?? 0}px`;
+      if (strokeW) c.strokeText(str, x, by);
+      else { c.fillStyle = color ? cssColor(run?.fill ?? color) : '#fff'; c.fillText(str, x, by); }
       const w = c.measureText(str).width;
-      const dec = r?.decoration ?? t.decoration;
-      if (dec) {
-        const fs = r?.fontSize ?? t.fontSize, th = Math.max(1, fs / 14);
-        c.fillRect(x, dec === 'underline' ? by + fs * 0.1 : by - fs * 0.3, w, th);
+      const dec = run?.decoration ?? t.decoration;
+      if (dec && dec !== 'none' && !strokeW) {
+        const fs = run?.fontSize ?? t.fontSize, th = Math.max(1, fs / 14);
+        c.fillRect(x, dec === 'underline' ? by + fs * 0.1 : by - fs * 0.3, w + (justify && str === ' ' ? justify : 0), th);
       }
       x += w + (justify && str === ' ' ? justify : 0);
+      a = b;
     }
-    y += lh + (line.paraEnd ? ps : 0);
+    y += (line.lh ?? lineHeightPx(l)) + (line.paraEnd ? ps : 0);
   }
 }
 
@@ -964,9 +1071,17 @@ export function getBitmap(asset: Asset): ImageBitmap | null {
   if (b === 'loading' || b === 'error') return null;
   if (b) return b;
   bitmaps.set(asset.id, 'loading');
-  fetch(asset.data)
-    .then(r => r.blob())
-    .then(blob => createImageBitmap(blob))
+  // svg images: createImageBitmap can't decode an svg blob; draw it through an <img> at a large size
+  // (it is vector: a big bitmap stays sharp when the layer is scaled up)
+  const isSvg = /svg/i.test(asset.mime) && typeof Image !== 'undefined';
+  (isSvg
+    ? new Promise<ImageBitmap>((res, rej) => {
+      const im = new Image();
+      im.onload = () => { const k = 2048 / Math.max(1, asset.width || im.naturalWidth, asset.height || im.naturalHeight); createImageBitmap(im, { resizeWidth: Math.max(1, Math.round((asset.width || im.naturalWidth || 300) * k)), resizeHeight: Math.max(1, Math.round((asset.height || im.naturalHeight || 150) * k)) }).then(res, rej); };
+      im.onerror = rej;
+      im.src = asset.data;
+    })
+    : fetch(asset.data).then(r => r.blob()).then(blob => createImageBitmap(blob)))
     .then(bmp => { bitmaps.set(asset.id, bmp); onImageLoaded?.(); })
     .catch(() => bitmaps.set(asset.id, 'error'));
   return null;
@@ -997,7 +1112,9 @@ export function rasterImage(asset: Asset, scale: number, size: number[], clip?: 
   const pw = Math.max(1, Math.round(w * s)), ph = Math.max(1, Math.round(h * s));
   const c = getCtx(pw, ph);
   c.imageSmoothingQuality = 'high';
+  c.imageSmoothingEnabled = !(pw > bmp.width * 1.01 || ph > bmp.height * 1.01); // nearest when upsampling, like figma
   c.drawImage(bmp, 0, 0, pw, ph);
+  c.imageSmoothingEnabled = true;
   return { kind: 'rgba', pw, ph, x: 0, y: 0, w, h, data: rgbaData(c, pw, ph) };
 }
 
@@ -1020,7 +1137,7 @@ export function textUnits(l: Layer, boxW: number, by: 'char' | 'word' | 'line'):
   const lines = layoutText(l, boxW > 0 ? boxW : null);
   const c = mctx();
   setFont(c, l);
-  const lh = t.fontSize * t.lineHeight;
+  const lh = lineHeightPx(l);
   const out: TextUnit[] = [];
   const width = boxW > 0 ? boxW : Math.max(...lines.map(x => x.width));
   let y = 0;
@@ -1037,7 +1154,7 @@ export function textUnits(l: Layer, boxW: number, by: 'char' | 'word' | 'line'):
         out.push({ text: part, x, y, w: c.measureText(part).width, h: lh, index: out.length });
       }
     }
-    y += lh + (line.paraEnd ? t.paragraphSpacing ?? 0 : 0);
+    y += (line.lh ?? lh) + (line.paraEnd ? t.paragraphSpacing ?? 0 : 0);
   });
   return out;
 }

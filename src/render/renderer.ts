@@ -12,14 +12,16 @@ import { TrackPool } from '../core/trackpool';
 import { compileExpr, compileProgram, runProgram, type ExprFrame, type ExprProgram } from '../core/expr';
 import { PROP_DEFS, type Layer, type Paint, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
+import { effectivePlay, instancePlan, instanceTime, InstanceResolver, type InstancePlan } from '../core/motion-components';
+import type { Composition, PlaySpec } from '../core/model';
 import { Atlas, type AtlasEntry } from './atlas';
-import { ShaderHost, type FxFrame, type ItemShaders } from './shader-host';
+import { newFxFrame, ShaderHost, type FxFrame, type ItemShaders } from './shader-host';
 import type { PathGeometry, PathKey } from '../core/model';
-import { loadBundledFonts } from './fonts';
+import { ensureFont, fontsPending, loadBundledFonts } from './fonts';
 import { EffectEval, hasEffects, needsBlendShader, type ResolvedEffect } from './effects';
 import { FxPipeline, BLEND_SHADER, type FxRegion } from './fx';
 import { cubicBezier, EASE_PRESETS, springAt } from '../core/easing';
-import { layoutText, textUnits, type TextUnit, rasterPath, rasterText, setImageLoadedHandler, drawPathMask, pathPlacement, rasterBox, imageMaxScale, rasterLayer, needsMainThread, needsShapeRaster, hasComplexPaint, setAssetLookup, type RasterClip, type RasterResult } from './raster';
+import { lineHeightPx, layoutText, textUnits, type TextUnit, rasterPath, rasterText, setImageLoadedHandler, drawPathMask, pathPlacement, rasterBox, imageMaxScale, rasterLayer, needsMainThread, needsShapeRaster, hasComplexPaint, setAssetLookup, type RasterClip, type RasterResult } from './raster';
 
 const F = 40; // floats per instance
 const KIND_RECT = 0, KIND_ELLIPSE = 1, KIND_MASK = 2, KIND_RGBA = 3, KIND_NONE = 4;
@@ -62,6 +64,8 @@ layout(location=9) in vec4 iI;
 layout(location=10) in vec4 iJ;
 uniform vec3 uView;
 uniform vec2 uRes;
+// view rotation: identity, except while drawing a layer into its local-space effect target
+uniform vec4 uRot;
 out vec2 vLocal;
 out vec2 vWorld;
 out vec2 vUV;
@@ -92,7 +96,7 @@ void main() {
     vUV = kind > 4.5 && kind < 6.5 ? mat2(iFill.xy, iFill.zw) * lp + iUV.xy : vec2(0.0);
   }
   vec2 w = mat2(iA.xy, iA.zw) * lp + iB.xy;
-  vec2 s = w * uView.x + uView.yz;
+  vec2 s = (mat2(uRot.xy, uRot.zw) * w) * uView.x + uView.yz;
   vec2 ndc = s / uRes * 2.0 - 1.0;
   gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
   vLocal = lp;
@@ -176,7 +180,12 @@ void main() {
     if (sw > 0.0) {
       float inner = vF.y < -0.5 ? -sw : (vF.y > 0.5 ? 0.0 : -sw * 0.5);
       float outer = inner + sw;
-      sc = clamp(0.5 - (d - outer) / w, 0.0, 1.0) - clamp(0.5 - (d - inner) / w, 0.0, 1.0);
+      if (kind < 0.5 || (kind > 4.5 && kind < 5.5)) {
+        // boxes: offset the box itself (miter joins: square corners stay square, round ones grow)
+        vec4 ro = max(vRadii + outer, 0.0) * step(0.001, vRadii), ri = max(vRadii + inner, 0.0) * step(0.001, vRadii);
+        float dO = sdRoundBox(p, h + outer, ro), dI = sdRoundBox(p, max(h + inner, vec2(0.0)), ri);
+        sc = clamp(0.5 - dO / w, 0.0, 1.0) - clamp(0.5 - dI / w, 0.0, 1.0);
+      } else sc = clamp(0.5 - (d - outer) / w, 0.0, 1.0) - clamp(0.5 - (d - inner) / w, 0.0, 1.0);
     }
     col = stroke * sc + fill * fc * (1.0 - stroke.a * sc);
     cv = max(fill.a > 0.0 || kind > 4.5 ? fc : 0.0, stroke.a > 0.0 ? sc : 0.0);
@@ -229,8 +238,11 @@ void main() {
 const CMD_DRAW = 0, CMD_PUSH = 1, CMD_POP = 2, CMD_MASK = 3, CMD_BLEND = 4, CMD_FXPOP = 5, CMD_MASKMODE = 6;
 const MASK_MODE: Record<string, number> = { alpha: 0, luminance: 1, vector: 2 };
 // figma shader fills / effects (render/shader-host.ts)
-const CMD_SHD = 7, CMD_SFXPOP = 8;
+const CMD_SHD = 7, CMD_SFXPOP = 8, CMD_LPUSH = 9;
 const BLEND_IDS: Record<string, number> = { normal: 0, multiply: 1, screen: 2, add: 3, darken: 4, lighten: 5 };
+
+/** a precomp with its own timing: local time = instanceTime(comp, play, parent local time - start) */
+interface TimeMapNode { parent: number; tOff: number; start: number; comp: Composition; play: PlaySpec | undefined }
 
 interface UnitState { unit: TextUnit; delay: number; ease: (p: number) => number; entry: AtlasEntry | null; raster: RasterResult | null; scale: number }
 
@@ -247,6 +259,11 @@ interface Item {
   isoGroup: boolean;
   /** time offset (precomp start times): local time = comp time - tOff */
   tOff: number;
+  /** time map (Renderer.tmaps) of a precomp with its own timing it lives in; -1 = local time is t - tOff */
+  tm: number;
+  /** component instance this occurrence belongs to: its resolver chain and plan (patched layers) */
+  chain?: string;
+  plan?: InstancePlan | null;
   /** comp time after which this item is hidden (end of the precomp it lives in) */
   tEnd: number;
   /** index of the item in the active comp that owns this one (itself, or the precomp layer it is inside) */
@@ -355,6 +372,12 @@ export class Renderer {
   private inst = new Float32Array(0);
   private uView!: WebGLUniformLocation;
   private uRes!: WebGLUniformLocation;
+  private uRot!: WebGLUniformLocation;
+  /** the canvas cursor in comp coords while it hovers the viewport (editor only): mouse-driven
+   *  shaders follow it. null = use their keyframable mouse prop (renders, exports) */
+  pointer: { x: number; y: number } | null = null;
+  /** any mouse-driven shader drawn last frame (the viewport redraws on pointer moves only then) */
+  usesPointer = false;
   atlas: Atlas;
 
   items: Item[] = [];
@@ -472,12 +495,15 @@ export class Renderer {
   }
   contextLost = false;
   contextRestores = 0;
+  /** bundled font families still loading (exports / tests wait for 0) */
+  get fontsPending() { return fontsPending; }
 
   private initGL() {
     const gl = this.gl;
     this.prog = this.buildProgram();
     this.uView = gl.getUniformLocation(this.prog, 'uView')!;
     this.uRes = gl.getUniformLocation(this.prog, 'uRes')!;
+    this.uRot = gl.getUniformLocation(this.prog, 'uRot')!;
     this.vao = gl.createVertexArray()!;
     gl.bindVertexArray(this.vao);
     const qb = gl.createBuffer();
@@ -637,23 +663,39 @@ export class Renderer {
     const L = store.project.layers;
     // flatten the layer tree depth-first; precomp layers expand the referenced comp inline
     // (each expanded item gets its own time offset). items outside the active comp are not indexed.
-    const entries: { layer: Layer; parent: number; tOff: number; local: boolean; owner: number; tEnd: number; end: number }[] = [];
+    const entries: { layer: Layer; parent: number; tOff: number; local: boolean; owner: number; tEnd: number; end: number; tm: number; chain: string; plan: InstancePlan | null }[] = [];
     let tEndCur = Infinity;
-    const walk = (ids: string[], parent: number, tOff: number, local: boolean, owner: number, depth: number, stack: string[]) => {
+    // precomps with their own timing (speed, loop, ranges, hold: Layer.play) get a time map node;
+    // everything inside one (also plain precomps nested in it) reads its local time from the chain.
+    // component instances hand their patched layers (exposed values, variants) to the walk.
+    const tmaps: TimeMapNode[] = [];
+    const R = this.resolver;
+    R.begin(this.changedLayers);
+    const walk = (ids: string[], parent: number, tOff: number, local: boolean, owner: number, depth: number, stack: string[], tm = -1, chain = '', plan: InstancePlan | null = null) => {
       for (const id of ids) {
-        const layer = L[id];
+        let layer = L[id];
         if (!layer) continue;
+        if (plan) layer = R.resolve(chain, layer, plan);
         const idx = entries.length;
-        const e = { layer, parent, tOff, local, owner: local ? idx : owner, tEnd: tEndCur, end: 0 };
+        const e = { layer, parent, tOff, local, owner: local ? idx : owner, tEnd: tEndCur, end: 0, tm, chain, plan };
         entries.push(e);
-        if (layer.children.length) walk(layer.children, idx, tOff, local, local ? idx : owner, depth, stack);
+        if (layer.children.length) walk(layer.children, idx, tOff, local, local ? idx : owner, depth, stack, tm, chain, plan);
         if (layer.type === 'precomp' && layer.compRef && depth < 16 && !stack.includes(layer.compRef)) {
           const comp = store.project.comps[layer.compRef];
           if (comp) {
             const prevEnd = tEndCur;
-            tEndCur = Math.min(prevEnd, tOff + (layer.startTime ?? 0) + comp.duration);
+            const play = comp.component ? effectivePlay(store.project, layer) : layer.play;
+            const nplan = comp.component ? instancePlan(store.project, layer, comp) : null;
+            const nchain = nplan ? chain + '>' + layer.id : chain;
             stack.push(layer.compRef);
-            walk(comp.root, idx, tOff + (layer.startTime ?? 0), false, local ? idx : owner, depth + 1, stack);
+            if (tm >= 0 || play) {
+              tmaps.push({ parent: tm, tOff, start: layer.startTime ?? 0, comp, play });
+              tEndCur = Infinity;
+              walk(comp.root, idx, tOff + (layer.startTime ?? 0), false, local ? idx : owner, depth + 1, stack, tmaps.length - 1, nchain, nplan);
+            } else {
+              tEndCur = Math.min(prevEnd, tOff + (layer.startTime ?? 0) + comp.duration);
+              walk(comp.root, idx, tOff + (layer.startTime ?? 0), false, local ? idx : owner, depth + 1, stack, -1, nchain, nplan);
+            }
             stack.pop();
             tEndCur = prevEnd;
           }
@@ -662,6 +704,10 @@ export class Renderer {
       }
     };
     walk(store.comp.root, -1, 0, true, -1, 0, [store.comp.id]);
+    R.end();
+    this.tmaps = tmaps;
+    this.tmT = new Float64Array(tmaps.length);
+    this.tmAt = NaN;
     const n = entries.length;
     // solo: keep soloed layers, their ancestors (for transforms) and descendants
     let soloKeep: Set<string> | null = null;
@@ -682,17 +728,24 @@ export class Renderer {
     const prevItems = this.items, prevN = prevItems.length;
     const full = this.forceFull || !prevN || !this.incrementalCompile || (this.pool.used > 1_000_000 && this.pool.used > this.poolLive * 3);
     // old items per layer id, in order (several for layers inside precomps instanced more than once)
-    let head: Map<string, number> | null = null, nextOcc: Int32Array | null = null;
+    // keyed by the layer OBJECT: component instances show patched copies under the same id
+    let head: Map<Layer, number> | null = null, nextOcc: Int32Array | null = null;
     if (!full) {
       head = new Map();
       nextOcc = new Int32Array(prevN);
-      for (let j = prevN - 1; j >= 0; j--) { const id = prevItems[j].id; const h = head.get(id); nextOcc[j] = h ?? -1; head.set(id, j); }
+      for (let j = prevN - 1; j >= 0; j--) { const lo = prevItems[j].layer; const h = head.get(lo); nextOcc[j] = h ?? -1; head.set(lo, j); }
     }
     if (full) this.pool.reset();
     this.unitCount = 0;
     this.items = new Array(n);
     this.index.clear();
-    for (let i = 0; i < n; i++) if (entries[i].local) this.index.set(entries[i].layer.id, i);
+    this.occ.clear();
+    for (let i = 0; i < n; i++) {
+      const e = entries[i];
+      if (e.local) { this.index.set(e.layer.id, i); continue; }
+      const a = this.occ.get(e.layer.id);
+      if (a) a.push(i); else this.occ.set(e.layer.id, [i]);
+    }
     // the arrays compileItem / evalItem fill are double-buffered: reused items copy from the previous set
     const prev = this.soa();
     const cap = this.world.length < n * 6 ? Math.max(64, n * 2) : this.world.length / 6;
@@ -702,6 +755,7 @@ export class Renderer {
       this.drawnMask = new Uint8Array(cap);
       this.sPar = new Int32Array(cap);
       this.sTOff = new Float64Array(cap);
+      this.sTM = new Int32Array(cap);
       this.sEnd = new Float64Array(cap);
       this.sFlags = new Uint8Array(cap);
       this.chg = new Uint8Array(cap);
@@ -717,18 +771,19 @@ export class Renderer {
     this.setSoa(next);
     // first item of each layer that lives inside a precomp: later instances share its pool tracks
     // and, when they sample the same local time, its evaluated values
-    const first = new Map<Layer, number>();
+    // keyed by id: patched instance copies share the tracks of every prop they did not change
+    const first = new Map<string, number>();
     const okLayer = new Map<Layer, boolean>();
     const changed = this.changedLayers;
     const SRC = this.sSrc, EVT = this.sEvT;
     let reused = 0;
     for (let i = 0; i < n; i++) {
       const en = entries[i];
-      const { layer, parent, tOff, owner, tEnd } = en;
+      const { layer, parent, tOff, owner, tEnd, tm, chain, plan } = en;
       let src = -1;
       if (!en.local) {
-        const f = first.get(layer);
-        if (f === undefined) first.set(layer, i); else src = f;
+        const f = first.get(layer.id);
+        if (f === undefined) first.set(layer.id, i); else src = f;
       }
       const pit = parent >= 0 ? this.items[parent] : null;
       const hidden = !layer.visible || (!!pit && pit.hidden) || (!!soloKeep && en.local && !soloKeep.has(layer.id));
@@ -737,18 +792,18 @@ export class Renderer {
       const isoGroup = layer.children.length > 0 || layer.type === 'precomp';
       let j = -1;
       if (head) {
-        const h = head.get(layer.id);
+        const h = head.get(layer);
         if (h !== undefined && prevItems[h].layer === layer && !changed.has(layer.id)) {
           let ok = okLayer.get(layer);
           if (ok === undefined) { ok = this.sigSame(layer); okLayer.set(layer, ok); }
-          if (ok) { j = h; const nx = nextOcc![h]; if (nx >= 0) head.set(layer.id, nx); else head.delete(layer.id); }
+          if (ok) { j = h; const nx = nextOcc![h]; if (nx >= 0) head.set(layer, nx); else head.delete(layer); }
         }
       }
-      this.sPar[i] = parent; this.sTOff[i] = tOff; this.sEnd[i] = tEnd; this.sClip[i] = clip;
+      this.sPar[i] = parent; this.sTOff[i] = tOff; this.sEnd[i] = tEnd; this.sClip[i] = clip; this.sTM[i] = tm;
       EVT[i] = NaN;
       if (j >= 0) {
         const it = prevItems[j];
-        it.parent = parent; it.clip = clip; it.isoGroup = isoGroup; it.hidden = hidden; it.tOff = tOff; it.owner = owner; it.tEnd = tEnd;
+        it.parent = parent; it.clip = clip; it.isoGroup = isoGroup; it.hidden = hidden; it.tOff = tOff; it.owner = owner; it.tEnd = tEnd; it.tm = tm; it.chain = chain; it.plan = plan;
         this.items[i] = it;
         copySoa(prev, j, next, i);
         this.sIn[i] = layer.inPoint; this.sOut[i] = layer.outPoint;
@@ -762,19 +817,20 @@ export class Renderer {
         const it: Item = {
           id: layer.id, layer, parent, clip, kind: KIND_NONE, animated: false, animMask: 0, isoGroup, hidden,
           rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
-          tOff, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null, fx: null, fxBlend: 0,
+          tOff, tm, chain, plan, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null, fx: null, fxBlend: 0,
         };
         this.items[i] = it;
         this.compileItem(i, src);
       }
       // shared evaluation only for items without expressions (they read their own item index)
-      SRC[i] = src >= 0 && !this.sExpr[i] && !this.sExpr[src] ? src : -1;
+      // (and only for the very same layer object: a patched instance copy differs from the main)
+      SRC[i] = src >= 0 && !this.sExpr[i] && !this.sExpr[src] && this.items[src].layer === layer ? src : -1;
     }
     this.lastReused = reused;
     if (this.shdMap.size) {
       // re-key by the items' current occurrence (reused items may have moved) and free the rest
       const next = new Map<string, ItemShaders>(), live = new Set<ItemShaders>();
-      for (const it of this.items) if (it.shd) { next.set(`${it.id}@${it.tOff}`, it.shd); live.add(it.shd); }
+      for (const it of this.items) if (it.shd) { next.set(`${it.id}@${it.tOff}@${it.tm}`, it.shd); live.add(it.shd); }
       for (const sd of this.shdMap.values()) if (!live.has(sd)) this.shaders.detach(sd);
       this.shdMap = next;
     }
@@ -816,7 +872,7 @@ export class Renderer {
     out.length = 0;
     const pv = this.store.previewProps.get(l.id);
     out.push(l.type, l.props, pv, l.paints, l.geometry, l.strokeGeometry, l.strokeAlign, l.text, l.textAnim, l.pathKf, l.trimOn, l.imageRef, l.mask, l.blend, this.fontGen,
-      l.strokePaints, l.dash, l.strokeCap, l.strokeJoin, l.miterLimit, l.strokeSides, l.smoothing, l.effects, l.maskType);
+      l.strokePaints, l.dash, l.strokeCap, l.strokeJoin, l.miterLimit, l.strokeSides, l.smoothing, l.effects, l.maskType, l.isolate);
     for (const key of SIG_KEYS) { const p = pv?.[key] ?? l.props[key]; out.push(p, p?.v, p?.kf, p?.expr); }
     if (l.shaderEffects || l.paints) {
       // shaders: their refs, the library entries and every param prop
@@ -842,7 +898,7 @@ export class Renderer {
   private compileItem(i: number, src = -1) {
     const it = this.items[i];
     const l = it.layer;
-    if (src < 0) this.sigs.set(l, this.sigOf(l, []));
+    if (src < 0 || !this.sigs.has(l)) this.sigs.set(l, this.sigOf(l, []));
     this.sEvT[i] = NaN;
     let mask = 0;
     // animated props go into the track pool; static ones are written once below (no Track
@@ -850,7 +906,7 @@ export class Renderer {
     for (let k = 0; k < TR_KEYS.length; k++) {
       const key = TR_KEYS[k];
       const p = this.store.renderProp(l, key); // preview overrides (hover swatch, Perform) win
-      if (p?.kf && p.kf.length > 1) { mask |= 1 << k; this.sH[i * 10 + k] = src >= 0 ? this.sH[src * 10 + k] : this.pool.add(p, PROP_DEFS[key].dim, key === 'position'); }
+      if (p?.kf && p.kf.length > 1) { mask |= 1 << k; this.sH[i * 10 + k] = src >= 0 && this.store.renderProp(this.items[src].layer, key) === p ? this.sH[src * 10 + k] : this.pool.add(p, PROP_DEFS[key].dim, key === 'position'); }
     }
     // expressions: evaluated every frame on top of the keyframed/static value
     let emask = 0;
@@ -863,7 +919,7 @@ export class Renderer {
       if (!it.exprs) it.exprs = new Array(TR_KEYS.length).fill(null);
       const dim = PROP_DEFS[TR_KEYS[k]].dim, track = new Track(p, dim, k === TR_POS);
       // the frame object, seed and valueAt are made once here, not per frame
-      const fr: ExprFrame = { time: 0, index: i, fps: 30, duration: 1, inPoint: 0, seed: (hashStr(it.id) + k * 31) % 9973, keyTimes: (p.kf ?? []).map(f => f.t), value: new Float64Array(4), valueAt: (tt, o) => track.eval(tt, o, 0), calls: 0 };
+      const fr: ExprFrame = { time: 0, index: i, fps: 30, duration: 1, inPoint: 0, seed: (hashStr(it.id) + k * 31) % 9973, keyTimes: (p.kf ?? []).map(f => f.t), value: new Float64Array(4), valueAt: (tt, o) => track.eval(tt, o, 0), calls: 0, tOff: 0 };
       it.exprs[k] = { prog: compileProgram(c.node, dim), track, fr };
       emask |= 1 << k;
     }
@@ -926,8 +982,12 @@ export class Renderer {
         const lines = layoutText(l, sz[0] > 0 ? sz[0] : null);
         const os = i * ST;
         if (sz[0] <= 0) this.style[os] = Math.ceil(Math.max(1, ...lines.map(x => x.width)));
-        if (sz[1] <= 0) this.style[os + 1] = Math.ceil(lines.length * l.text.fontSize * l.text.lineHeight);
+        if (sz[1] <= 0) this.style[os + 1] = Math.ceil(lines.length * lineHeightPx(l));
       }
+    }
+    if (l.type === 'text' && l.text) {
+      // bundled families load on first use; text drawn meanwhile with a fallback is redrawn
+      for (const fam of [l.text.fontFamily, ...(l.text.runs ?? []).map(r => r.fontFamily ?? '')]) ensureFont(fam).then(now => { if (now) { this.invalidateText(); this.dirty = true; } });
     }
     if (l.type === 'text' && l.text && l.textAnim) {
       const ta = l.textAnim;
@@ -952,16 +1012,19 @@ export class Renderer {
     it.fx = fxOn ? new EffectEval(l, key => this.store.renderProp(l, key)) : null;
     if (it.fx && !it.fx.list.length) it.fx = null;
     // a group's blend mode applies to its composite (figma, after effects): isolate it too
-    it.fxBlend = !l.mask && (needsBlendShader(l.blend) || ((it.fx || it.isoGroup) && l.blend && l.blend !== 'normal')) ? BLEND_SHADER[l.blend!] ?? 0 : 0;
+    // inside an isolated group the gpu multiply / lighten would see a transparent backdrop: shader
+    let inIso = false;
+    if (l.blend === 'multiply' || l.blend === 'lighten') for (let p = it.parent; p >= 0; p = this.items[p].parent) { const pl = this.items[p].layer; if (pl.isolate || this.items[p].fx) { inIso = true; break; } }
+    it.fxBlend = !l.mask && (needsBlendShader(l.blend) || inIso || ((it.fx || it.isoGroup) && l.blend && l.blend !== 'normal')) ? BLEND_SHADER[l.blend!] ?? 0 : 0;
     if (it.fx?.animated) it.animated = true;
     // shaders (fill and/or effects): results survive recompiles of the same layer occurrence
-    const sk = `${l.id}@${it.tOff}`;
+    const sk = `${l.id}@${it.tOff}@${it.tm}`;
     const shd = (l.paints || l.shaderEffects) ? this.shaders.attach(l, i, this.shdMap.get(sk) ?? null) : null;
     if (!shd) { const old = this.shdMap.get(sk); if (old) { this.shaders.detach(old); this.shdMap.delete(sk); } }
     else this.shdMap.set(sk, shd);
     it.shd = shd;
     const shdFill = !!shd?.fill && (it.kind === KIND_RECT || it.kind === KIND_ELLIPSE || it.kind === KIND_MASK);
-    this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0) | (it.fx || it.fxBlend ? 16 : 0) | (shdFill ? SB_SHD : 0) | (shd?.fx.length && !l.mask ? SB_FX : 0);
+    this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0) | (it.fx || it.fxBlend || (l.isolate && it.isoGroup) ? 16 : 0) | (l.clip && it.clip >= 0 && l.children.length ? 32 : 0) | (shdFill ? SB_SHD : 0) | (shd?.fx.length && !l.mask ? SB_FX : 0);
     this.sBlend[i] = it.fx || it.fxBlend ? 0 : l.blend ? BLEND_IDS[l.blend] ?? 0 : 0;
     this.sAlign[i] = l.strokeAlign === 'inside' ? -1 : l.strokeAlign === 'outside' ? 1 : 0;
   }
@@ -972,7 +1035,7 @@ export class Renderer {
       case 'text': {
         const t = l.text!;
         const s = l.props.size?.v ?? [0, 0];
-        return `t${this.fontGen}|${t.content}|${t.fontFamily}|${t.fontWeight}|${t.fontStyle}|${t.fontSize}|${t.lineHeight}|${t.letterSpacing}|${t.align}|${Math.round(s[0])}x${Math.round(s[1])}|${oid(t)}|${oid(l.paints)}|${complex ? (l.props.fill?.v ?? []).join(',') : ''}`;
+        return `t${this.fontGen}|${t.content}|${t.fontFamily}|${t.fontWeight}|${t.fontStyle}|${t.fontSize}|${t.lineHeight}${t.lineHeightAuto ? 'a' : ''}|${t.letterSpacing}|${t.align}|${Math.round(s[0])}x${Math.round(s[1])}|${oid(t)}|${oid(l.paints)}|${l.props.strokeWidth?.v[0] ?? 0}${l.strokeAlign ?? ''}|${complex ? (l.props.fill?.v ?? []).join(',') + (l.props.stroke?.v ?? []).join(',') : ''}`;
       }
       case 'image': return `i${l.imageRef}`; // images stretch to the size box (see raster placement below)
       default: {
@@ -1052,6 +1115,7 @@ export class Renderer {
       c.fps = comp.fps;
       c.duration = comp.duration;
       c.inPoint = it.layer.inPoint;
+      c.tOff = it.tOff;
       switch (k) {
         case TR_ANCHOR: runProgram(P, c, X, o8); break;
         case TR_POS: runProgram(P, c, X, o8 + 2); break;
@@ -1109,6 +1173,33 @@ export class Renderer {
   // struct-of-arrays copies of the item fields the per-frame loops need
   private sPar = new Int32Array(0);
   private sTOff = new Float64Array(0);
+  /** time map of item i (-1 = none) */
+  private sTM = new Int32Array(0);
+  private tmaps: TimeMapNode[] = [];
+  /** local time of each time map at tmAt */
+  private tmT = new Float64Array(0);
+  private tmAt = NaN;
+  private resolver = new InstanceResolver();
+  /** item indices of each layer shown inside precomps (not in the active comp itself) */
+  private occ = new Map<string, number[]>();
+  /** patched instance layers made by the last compile (stats / tests) */
+  get patchedLayers() { return this.resolver.patched; }
+  private evalMaps(t: number) {
+    const M = this.tmT, maps = this.tmaps;
+    for (let k = 0; k < maps.length; k++) {
+      const m = maps[k];
+      const pt = m.parent >= 0 ? M[m.parent] : t - m.tOff;
+      M[k] = pt !== pt ? NaN : instanceTime(m.comp, m.play, pt - m.start);
+    }
+    this.tmAt = t;
+  }
+  /** local time of item i at comp time t (NaN: its precomp is not showing) */
+  private itemT(i: number, t: number) {
+    const m = this.sTM[i];
+    if (m < 0) return t - this.sTOff[i];
+    if (this.tmAt !== t) this.evalMaps(t);
+    return this.tmT[m];
+  }
   private sIn = new Float64Array(0);
   private sOut = new Float64Array(0);
   private sEnd = new Float64Array(0);
@@ -1138,18 +1229,21 @@ export class Renderer {
   private evaluateRange(t: number, from: number, to: number, all: boolean) {
     const W = this.world, L = this.local, O = this.opa, LO = this.lopa;
     const PAR = this.sPar, TOFF = this.sTOff, IN = this.sIn, OUT = this.sOut, END = this.sEnd, FL = this.sFlags, CHG = this.chg, VIS = this.vis, SRC = this.sharedEval ? this.sSrc : null, EVT = this.sEvT;
+    const TM = this.sTM, MT = this.tmT;
+    if (this.tmaps.length && this.tmAt !== t) this.evalMaps(t);
     for (let i = from; i < to; i++) {
-      const tl = t - TOFF[i];
+      const m = TM[i];
+      const tl = m < 0 ? t - TOFF[i] : MT[m];
       const fl = FL[i];
       let c = all;
-      if (fl & 1) {
+      if (fl & 1 && tl === tl) {
         // precomp instances sampling the same local time as an earlier instance copy its values
         const s = SRC ? SRC[i] : -1;
         if (s >= 0 && EVT[s] === tl) this.copyEval(s, i); else this.evalItem(i, tl);
         EVT[i] = tl;
         c = true;
       }
-      const vis = (fl & 2) || tl < IN[i] || tl >= OUT[i] || t >= END[i] ? 0 : 1;
+      const vis = (fl & 2) || tl !== tl || tl < IN[i] || tl >= OUT[i] || t >= END[i] ? 0 : 1;
       if (vis !== VIS[i]) { VIS[i] = vis; c = true; }
       const p = PAR[i];
       if (p >= 0 && CHG[p]) c = true;
@@ -1693,11 +1787,31 @@ export class Renderer {
       // incremental recompiles append to the pool; repack when it has grown a lot
       if (this.pool.used > 1_000_000 && this.pool.used > this.poolLive * 3) this.needsCompile = true;
       if (this.needsCompile) { this.compile(); }
-      for (const id of this.dirtyLayers) if (!this.index.has(id)) { this.needsCompile = true; break; }
+      // layers shown only inside precomps / component instances (an edit of a component seen from a
+      // composition that uses it): recompile their occurrences in place, no new walk. not while a
+      // component shows a variant (instance plans then depend on the edited values)
+      const editingVariant = this.occ.size > 0 && Object.values(store.project.comps).some(c => c.component?.editing);
+      for (const id of this.dirtyLayers) if (!this.index.has(id) && (editingVariant || !this.occ.has(id) || !store.project.layers[id])) { this.needsCompile = true; break; }
+      const compiled = this.needsCompile;
       if (this.needsCompile) this.compile();
       for (const id of this.dirtyLayers) {
         const i = this.index.get(id);
         if (i !== undefined) { this.items[i].layer = store.project.layers[id]; this.compileItem(i); this.dirtyIdx.push(i); }
+        const occ = compiled ? undefined : this.occ.get(id);
+        if (occ) {
+          const src = store.project.layers[id];
+          this.resolver.begin([id], false);
+          // the first occurrence compiles the tracks, the others share every unpatched one
+          let first = -1;
+          for (const k of occ) {
+            const it = this.items[k];
+            it.layer = it.plan ? this.resolver.resolve(it.chain!, src, it.plan) : src;
+            this.compileItem(k, first);
+            if (first < 0) first = k;
+            this.sSrc[k] = k !== first && !this.sExpr[k] && !this.sExpr[first] && this.items[first].layer === it.layer ? first : -1;
+            this.dirtyIdx.push(k);
+          }
+        }
       }
       for (const id of this.dirtyLayers) this.changedLayers.delete(id);
       this.dirtyLayers.clear();
@@ -1749,13 +1863,16 @@ export class Renderer {
     let k = 0;
     let culled = 0;
     const cullOn = this.cullOffscreen;
+    this.usesPointer = false;
+    // inside a local-space effect region the whole layer renders, on screen or not (no culling)
+    let localDepth = 0;
     const px0 = this.panX * this.dpr, py0 = this.panY * this.dpr, cw0 = this.targetW(), ch0 = this.targetH();
     const mask = this.drawnMask;
     const cmds = this.cmds;
     cmds.length = 0;
     let pending = 0; // first instance not yet covered by a DRAW command
     // open isolation regions: end index, composite opacity, divisor to restore, optional mask range
-    const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number; box: number; fx: number; kStart: number; mode: number; sfx?: boolean }[] = [];
+    const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number; box: number; fx: number; kStart: number; mode: number; sfx?: FxFrame; cmdStart?: number }[] = [];
     const fxFrame = this.fxFrame;
     fxFrame.length = 0;
     // screen bounds (device px) of what each isolated region draws: its offscreen clear and its
@@ -1792,6 +1909,12 @@ export class Renderer {
           R.kStart = r.kStart; R.kCount = k - r.kStart;
           if (boxes[bi] <= boxes[bi + 2]) { boxes[bi] -= R.pad; boxes[bi + 1] -= R.pad; boxes[bi + 2] += R.pad; boxes[bi + 3] += R.pad; }
           cmds.push(CMD_FXPOP, r.box, r.fx);
+        } else if (r.sfx?.local) {
+          localDepth--;
+          // the result is current (or in flight with one to show): the layer's own draws aren't needed
+          const st = r.sfx.shaders.e;
+          if (!r.sfx.capture && st.tex && st.shown !== -1) { cmds.length = r.cmdStart!; cmds.push(CMD_BLEND, 0, 0); }
+          cmds.push(CMD_SFXPOP, r.box, r.opacity);
         } else cmds.push(r.sfx ? CMD_SFXPOP : CMD_POP, r.box, r.opacity);
         if (stack.length) {
           // the composite lands inside the parent region
@@ -1815,7 +1938,7 @@ export class Renderer {
         const end = par >= 0 ? this.subEnd[par] : n;
         stack.push({ end, opacity: 1, div, maskStart: k, maskCount: 0, maskEnd: this.subEnd[i], box, fx: -1, kStart: k, mode: MASK_MODE[items[i].layer.maskType ?? 'alpha'] ?? 0 });
         isolated++;
-      } else if ((bits & 16) && !stack.some(r => r.maskEnd > i)) {
+      } else if (((bits & 16) || ((bits & 32) && !this.clipContained(i))) && !stack.some(r => r.maskEnd > i)) {
         // effects / backdrop blend: the layer (and its subtree) into its own target, composited by FxPipeline
         flush();
         const box = newBox();
@@ -1843,8 +1966,9 @@ export class Renderer {
         const box = newBox();
         boxes[box] = fxf.sx0; boxes[box + 1] = fxf.sy0; boxes[box + 2] = fxf.sx1; boxes[box + 3] = fxf.sy1;
         this.fxOf.set(box, fxf);
-        cmds.push(CMD_PUSH, box, 0);
-        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box, fx: -1, kStart: k, mode: 0, sfx: true });
+        cmds.push(fxf.local ? CMD_LPUSH : CMD_PUSH, box, 0);
+        if (fxf.local) localDepth++;
+        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box, fx: -1, kStart: k, mode: 0, sfx: fxf, cmdStart: cmds.length });
         div = O[i];
         isolated++;
       }
@@ -1853,7 +1977,7 @@ export class Renderer {
       const bm = BLEND[i];
       if (bm !== curBlend) { flush(); cmds.push(CMD_BLEND, bm, 0); curBlend = bm; }
       if ((bits & SB_SHD) && !(bits & 4)) {
-        const tex = this.shaderFill(i, t, z, px0, py0, cw0, ch0, cullOn);
+        const tex = this.shaderFill(i, t, z, px0, py0, cw0, ch0, cullOn && !localDepth);
         if (!tex) { lastK[i] = -1; culled++; continue; }
         flush();
         cmds.push(CMD_SHD, this.shdTex.length, 0);
@@ -1897,7 +2021,7 @@ export class Renderer {
       let shA = 0, shB = 0, shC = 0, shD = 0;
       // viewport culling: skip layers whose (padded) box is completely off-screen.
       // saves rasterization + atlas space for raster layers and fill work for everything.
-      if (cullOn && !(bits & 1)) {
+      if (cullOn && !(bits & 1) && !localDepth) {
         const pad = Math.max(w, h) * 0.25 + (S[os + 14] || 0) + 4 / z;
         // screen aabb of the padded box: center +- the absolute extents (same as its 4 corners)
         const hx = w / 2 + pad, hy = h / 2 + pad, mx = w / 2, my = h / 2;
@@ -1907,11 +2031,12 @@ export class Renderer {
       }
       if (bits & 8 && items[i].dyn) {
         const it = items[i] as Item & { dyn: NonNullable<Item['dyn']> };
-        const fr = Math.round((t - it.tOff) * this.store.comp.fps);
+        const lt = this.itemT(i, t);
+        const fr = Math.round(lt * this.store.comp.fps);
         if (fr !== it.dyn.frame) {
           // same slot every frame (no per-frame atlas keys): just mark it for a redraw
           it.dyn.frame = fr;
-          it.dyn.t = t - it.tOff;
+          it.dyn.t = lt;
           it.dyn.need = true;
         }
       }
@@ -2051,6 +2176,7 @@ export class Renderer {
     gl.useProgram(this.prog);
     gl.uniform3f(this.uView, z, this.panX * this.dpr, this.panY * this.dpr);
     gl.uniform2f(this.uRes, cw, ch);
+    gl.uniform4f(this.uRot, 1, 0, 0, 1);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.atlas.tex);
     this.bindRamps();
@@ -2117,7 +2243,32 @@ export class Renderer {
       if (cx + ex < 0 || cy + ey < 0 || cx - ex > cw || cy - ey > ch) return null;
     }
     const rs = Math.sqrt(Math.abs(a * d - b * c)) * z;
-    return this.shaders.fill(sd, w, h, rs, t - this.sTOff[i], this.store.comp, this.sIn[i]);
+    // mouse-driven: the hovering cursor as a fraction of the layer box (inverse of its world matrix)
+    let hx = NaN, hy = NaN;
+    if (sd.fill!.mouseOff >= 0) {
+      this.usesPointer = true;
+      const P = this.livePointer();
+      if (P) {
+        const det = a * d - b * c || 1e-12, dx = P.x - e, dy = P.y - f;
+        hx = (d * dx - c * dy) / det / (w || 1); hy = (a * dy - b * dx) / det / (h || 1);
+      }
+    }
+    return this.shaders.fill(sd, w, h, rs, t - this.sTOff[i], this.store.comp, this.sIn[i], hx, hy);
+  }
+
+  /** the hover pointer, only while editing (renders for export / settle use the mouse props) */
+  private livePointer() { return this.syncRaster || this.settling ? null : this.pointer; }
+
+  /** may item i's shader effects run in its local space? not when its subtree has isolated
+   *  regions of its own (masks, effects, group opacity): those draw in screen space */
+  private localFxOk(i: number): boolean {
+    const BITS = this.sBits, end = this.subEnd[i];
+    for (let j = i + 1; j < end; j++) {
+      const bj = BITS[j];
+      if (bj & (1 | 16 | SB_FX)) return false;
+      if ((bj & 2) && this.lopa[j] < 0.999 && this.subEnd[j] > j + 1) return false;
+    }
+    return true;
   }
 
   /** shader effects of item i: its screen region and whether it must be captured this frame.
@@ -2131,25 +2282,61 @@ export class Renderer {
     const W = this.world, S = this.style, o6 = i * 6, os = i * ST;
     const a = W[o6], b = W[o6 + 1], c = W[o6 + 2], d = W[o6 + 3], e = W[o6 + 4], f = W[o6 + 5];
     const w = S[os], h = S[os + 1];
-    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    for (let k = 0; k < 4; k++) {
-      const X = k & 1 ? w : 0, Y = k & 2 ? h : 0;
-      const sx = (a * X + c * Y + e) * z + px0, sy = (b * X + d * Y + f) * z + py0;
-      if (sx < x0) x0 = sx; if (sx > x1) x1 = sx; if (sy < y0) y0 = sy; if (sy > y1) y1 = sy;
-    }
+    const fr = sd.frame ?? (sd.frame = newFxFrame(i, sd));
+    fr.item = i; fr.shaders = sd;
+    const B = fr.box;
+    B[0] = e; B[1] = f; B[2] = a * w; B[3] = b * w; B[4] = c * h; B[5] = d * h;
     // clamp to the target (and to the comp when it clips: the offscreen target is only cleared there)
     let lx = 0, ly = 0, hx = cw, hy = ch;
     if (this.clipToComp) { const comp = this.store.comp; lx = Math.max(0, Math.round(px0)); ly = Math.max(0, Math.round(py0)); hx = Math.min(cw, Math.round(px0 + comp.width * z)); hy = Math.min(ch, Math.round(py0 + comp.height * z)); }
-    const sx0 = Math.max(lx, Math.floor(x0)), sy0 = Math.max(ly, Math.floor(y0)), sx1 = Math.min(hx, Math.ceil(x1)), sy1 = Math.min(hy, Math.ceil(y1));
-    if (sx1 - sx0 < 1 || sy1 - sy0 < 1) return null;
-    const fr = sd.frame ?? (sd.frame = { item: i, shaders: sd, key: 0, capture: false, sx0: 0, sy0: 0, sx1: 0, sy1: 0, cw: 0, ch: 0, rs: 1, rect: [0, 0, 0, 0], time: 0 });
-    fr.item = i; fr.shaders = sd;
-    fr.sx0 = sx0; fr.sy0 = sy0; fr.sx1 = sx1; fr.sy1 = sy1;
-    const pw = sx1 - sx0, ph = sy1 - sy0;
-    const q = Math.min(1, Math.sqrt(2048 * 2048 / (pw * ph)));
-    fr.cw = Math.max(1, Math.round(pw * q)); fr.ch = Math.max(1, Math.round(ph * q));
-    fr.rs = Math.sqrt(Math.abs(a * d - b * c)) * z * q;
-    fr.rect[0] = (sx0 - px0) / z; fr.rect[1] = (sy0 - py0) / z; fr.rect[2] = (sx1 - px0) / z; fr.rect[3] = (sy1 - py0) / z;
+    const X = fr.xf;
+    fr.local = this.localFxOk(i);
+    if (fr.local) {
+      // local space (as figma): the layer renders unrotated into its own target, its whole box
+      // whatever part of it the viewport shows (capped), the effect runs there, the result is
+      // drawn back rotated. comp -> target: S * R(-θ) * p + T
+      const th = Math.atan2(b, a), co = Math.cos(th), si = Math.sin(th);
+      let u0 = Infinity, v0 = Infinity, u1 = -Infinity, v1 = -Infinity;
+      for (let k = 0; k < 4; k++) {
+        const Xl = k & 1 ? w : 0, Yl = k & 2 ? h : 0;
+        const wx = a * Xl + c * Yl + e, wy = b * Xl + d * Yl + f;
+        const ru = co * wx + si * wy, rv = -si * wx + co * wy;
+        if (ru < u0) u0 = ru; if (ru > u1) u1 = ru; if (rv < v0) v0 = rv; if (rv > v1) v1 = rv;
+      }
+      const sw = (u1 - u0) * z, sh = (v1 - v0) * z;
+      if (!(sw >= 0.5 && sh >= 0.5)) return null;
+      const q = Math.min(1, Math.sqrt(2048 * 2048 / (sw * sh)), 4096 / Math.max(sw, sh));
+      const Sc = z * q;
+      fr.lw = fr.cw = Math.max(1, Math.ceil(sw * q)); fr.lh = fr.ch = Math.max(1, Math.ceil(sh * q));
+      const V = fr.view;
+      V[0] = Sc; V[1] = -u0 * Sc; V[2] = -v0 * Sc; V[3] = co; V[4] = -si; V[5] = si; V[6] = co;
+      const du = fr.lw / Sc, dv = fr.lh / Sc; // (the target's extent: whole pixels)
+      X[0] = co * u0 - si * v0; X[1] = si * u0 + co * v0; X[2] = du * co; X[3] = du * si; X[4] = -dv * si; X[5] = dv * co;
+      fr.rs = Math.sqrt(Math.abs(a * d - b * c)) * Sc;
+      // screen bounds of the drawn-back result (the region's box for the parent's scissor)
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (let k = 0; k < 4; k++) {
+        const sx = (X[0] + (k & 1 ? X[2] : 0) + (k & 2 ? X[4] : 0)) * z + px0, sy = (X[1] + (k & 1 ? X[3] : 0) + (k & 2 ? X[5] : 0)) * z + py0;
+        if (sx < x0) x0 = sx; if (sx > x1) x1 = sx; if (sy < y0) y0 = sy; if (sy > y1) y1 = sy;
+      }
+      fr.sx0 = Math.max(lx, Math.floor(x0)); fr.sy0 = Math.max(ly, Math.floor(y0)); fr.sx1 = Math.min(hx, Math.ceil(x1)); fr.sy1 = Math.min(hy, Math.ceil(y1));
+      if (fr.sx1 - fr.sx0 < 1 || fr.sy1 - fr.sy0 < 1) return null; // off-screen: nothing to show
+    } else {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (let k = 0; k < 4; k++) {
+        const Xl = k & 1 ? w : 0, Yl = k & 2 ? h : 0;
+        const sx = (a * Xl + c * Yl + e) * z + px0, sy = (b * Xl + d * Yl + f) * z + py0;
+        if (sx < x0) x0 = sx; if (sx > x1) x1 = sx; if (sy < y0) y0 = sy; if (sy > y1) y1 = sy;
+      }
+      const sx0 = Math.max(lx, Math.floor(x0)), sy0 = Math.max(ly, Math.floor(y0)), sx1 = Math.min(hx, Math.ceil(x1)), sy1 = Math.min(hy, Math.ceil(y1));
+      if (sx1 - sx0 < 1 || sy1 - sy0 < 1) return null;
+      fr.sx0 = sx0; fr.sy0 = sy0; fr.sx1 = sx1; fr.sy1 = sy1;
+      const pw = sx1 - sx0, ph = sy1 - sy0;
+      const q = Math.min(1, Math.sqrt(2048 * 2048 / (pw * ph)));
+      fr.cw = Math.max(1, Math.round(pw * q)); fr.ch = Math.max(1, Math.round(ph * q));
+      fr.rs = Math.sqrt(Math.abs(a * d - b * c)) * z * q;
+      X[0] = (sx0 - px0) / z; X[1] = (sy0 - py0) / z; X[2] = pw / z; X[3] = 0; X[4] = 0; X[5] = ph / z;
+    }
     // what the effect input depends on: edits / animation below it (changed flags), async rasters
     // (dirty frames) and the shader results of the layers inside
     let changed = this.fxDirty, sig = 0;
@@ -2161,7 +2348,11 @@ export class Renderer {
     }
     if (sig !== sd.childSig) { sd.childSig = sig; changed = true; }
     if (changed) sd.contentGen++;
-    if (!this.shaders.fxPlan(fr, sd, t - this.sTOff[i], sd.contentGen, this.store.comp, this.sIn[i])) return null;
+    let mx = NaN, my = NaN;
+    let mouseFx = false;
+    for (let r = 0; r < sd.fx.length; r++) if (sd.fx[r].mouseOff >= 0) mouseFx = true;
+    if (mouseFx) { this.usesPointer = true; const P = this.livePointer(); if (P) { mx = P.x; my = P.y; } }
+    if (!this.shaders.fxPlan(fr, sd, t - this.sTOff[i], sd.contentGen, this.store.comp, this.sIn[i], mx, my)) return null;
     return fr;
   }
 
@@ -2171,6 +2362,8 @@ export class Renderer {
     const end = performance.now() + timeoutMs;
     this.settling = true;
     try {
+      // (render once in settle mode: what a frame wants can differ from the editor's, e.g. the mouse)
+      this.render(t);
       while ((this.shaders.unsettled > 0 || this.shaders.inflight > 0) && performance.now() < end) {
         await this.shaders.nextResult(250);
         this.render(t);
@@ -2205,7 +2398,7 @@ export class Renderer {
     const z = this.zoom * this.dpr;
     const scale = Math.sqrt(Math.abs(a0 * d0 - b0 * c0)) * z * Math.max(1, ta.from.scale / 100);
     const bucket = this.bucketOf(scale);
-    const lt = t - it.tOff;
+    const lt = this.itemT(i, t);
     for (const u of units) {
       // raster per unit (cached in the atlas like any other raster)
       if (!u.entry || u.entry.dead || u.scale < scale * 0.999 || u.scale > scale * 2.83) {
@@ -2276,12 +2469,19 @@ export class Renderer {
     const det = a * d - b * c, sc = Math.sqrt(Math.abs(det)) || 1e-9;
     const inv = Math.abs(det) > 1e-12 ? [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det] : [1, 0, 0, 1, 0, 0];
     const S = this.style, os = i * ST, w = S[os], h = S[os + 1];
-    const list: ResolvedEffect[] = it.fx ? it.fx.at(t - it.tOff) : [];
+    const list: ResolvedEffect[] = it.fx ? it.fx.at(this.itemT(i, t)) : [];
     const dev = (x: number, y: number): [number, number] => [a * x + c * y + e, b * x + d * y + f];
     const R: (typeof this.fxFrame)[number] = {
       opacity, blend: it.fxBlend, shadows: [], inner: [], blur: null, bg: null, noise: [], inv, texture: null, glass: null,
-      pad: (it.fx ? it.fx.padding(list) : 0) * sc + 2, kStart: 0, kCount: 0,
+      pad: (it.fx ? it.fx.padding(list) : 0) * sc + 2, kStart: 0, kCount: 0, clip: null,
     };
+    const ci = this.sClip[i];
+    if (it.layer.clip && ci >= 0) {
+      const q = ci * 6;
+      const A = W[q] * z, B = W[q + 1] * z, C = W[q + 2] * z, D = W[q + 3] * z, E = W[q + 4] * z + this.panX * this.dpr, Fy = W[q + 5] * z + this.panY * this.dpr;
+      const dt = A * D - B * C || 1e-12;
+      R.clip = { inv: [D / dt, -B / dt, -C / dt, A / dt, (C * Fy - D * E) / dt, (B * E - A * Fy) / dt], w: S[ci * ST], h: S[ci * ST + 1], r: S[ci * ST + 2] };
+    }
     let seed = 0;
     for (const fx of list) {
       const sigma = (fx.radius / 2) * sc;
@@ -2325,6 +2525,24 @@ export class Renderer {
       }
     }
     return R;
+  }
+
+  /** clipping group i lies inside its own clipping ancestor (then the nearest clip is enough) */
+  private clipContained(i: number): boolean {
+    const c = this.sClip[i];
+    if (c < 0) return true;
+    const W = this.world, S = this.style, o = i * 6, q = c * 6;
+    const w = S[i * ST], h = S[i * ST + 1], cw = S[c * ST], ch = S[c * ST + 1], r = S[c * ST + 2];
+    const det = W[q] * W[q + 3] - W[q + 1] * W[q + 2] || 1e-12;
+    const ia = W[q + 3] / det, ib = -W[q + 1] / det, ic = -W[q + 2] / det, id = W[q] / det;
+    for (const [x, y] of [[0, 0], [w, 0], [w, h], [0, h]]) {
+      const X = W[o] * x + W[o + 2] * y + W[o + 4] - W[q + 4], Y = W[o + 1] * x + W[o + 3] * y + W[o + 5] - W[q + 5];
+      const u = ia * X + ic * Y, v = ib * X + id * Y;
+      if (u < -0.5 || v < -0.5 || u > cw + 0.5 || v > ch + 0.5) return false;
+      // inside the box but in a rounded corner
+      if (r > 0) { const dx = Math.max(r - u, u - (cw - r), 0), dy = Math.max(r - v, v - (ch - r), 0); if (dx > 0 && dy > 0 && Math.hypot(dx, dy) > r + 0.5) return false; }
+    }
+    return true;
   }
 
   /** run the effect pipeline for frame region fi (screen box at boxes[bi]) into the parent target */
@@ -2463,6 +2681,22 @@ export class Renderer {
         gl.bindTexture(gl.TEXTURE_2D, this.shdTex[a]);
         gl.activeTexture(gl.TEXTURE0);
       }
+      else if (type === CMD_LPUSH) {
+        // local-space effect region: its own target, the layer unrotated (see planFx)
+        const fr = this.fxOf.get(a)!, V = fr.view;
+        const L = this.shaders.localTarget(fr.shaders, fr.lw, fr.lh);
+        targets.push(L.fb);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, L.fb);
+        gl.viewport(0, 0, fr.lw, fr.lh);
+        const r = [0, 0, fr.lw, fr.lh];
+        sc.push(r);
+        setSc(r);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform3f(this.uView, V[0], V[1], V[2]);
+        gl.uniform2f(this.uRes, fr.lw, fr.lh);
+        gl.uniform4f(this.uRot, V[3], V[4], V[5], V[6]);
+      }
       else if (type === CMD_PUSH) {
         const f = this.fbo(depth);
         depth++;
@@ -2505,25 +2739,32 @@ export class Renderer {
         maskMode = 0;
       } else if (type === CMD_SFXPOP) {
         // shader effects: capture the isolated layer for the worker, draw the last result over it
-        const src = this.fbos[depth - 1];
-        depth--;
+        const fr = this.fxOf.get(a)!;
+        const view = { z: this.zoom * this.dpr, px: this.panX * this.dpr, py: this.panY * this.dpr, w: cw, h: ch };
+        let srcTex: WebGLTexture;
+        if (fr.local) {
+          srcTex = fr.shaders.lt!.tex;
+          gl.uniform3f(this.uView, view.z, view.px, view.py);
+          gl.uniform2f(this.uRes, cw, ch);
+          gl.uniform4f(this.uRot, 1, 0, 0, 1);
+        } else { srcTex = this.fbos[depth - 1].tex; depth--; }
         targets.pop();
         const parentFb = targets[targets.length - 1];
         sc.pop();
-        const fr = this.fxOf.get(a)!;
-        if (fr.capture) {
-          this.shaders.capture(fr, src.tex, cw, ch, this.syncRaster);
-          gl.bindFramebuffer(gl.FRAMEBUFFER, parentFb);
-        }
+        if (fr.capture) this.shaders.capture(fr, srcTex, fr.local ? fr.lw : cw, fr.local ? fr.lh : ch, this.syncRaster);
         gl.bindFramebuffer(gl.FRAMEBUFFER, parentFb);
+        gl.viewport(0, 0, cw, ch);
         setSc(sc[sc.length - 1]);
-        if (!this.shaders.composite(fr.shaders, { z: this.zoom * this.dpr, px: this.panX * this.dpr, py: this.panY * this.dpr, w: cw, h: ch }, b)) {
+        if (fr.local) {
+          // the layer's own pixels until a result exists (drawn back in place, rotated)
+          if (!this.shaders.composite(fr.shaders, view, b)) this.shaders.drawTex(srcTex, fr.xf, view, b);
+        } else if (!this.shaders.composite(fr.shaders, view, b)) {
           // no result yet (or no webgpu): the layer as it is
           gl.useProgram(this.compositeProgram());
           gl.uniform1f(this.cuOpacity, b);
           gl.uniform1f(this.cuUseMask, 0);
           gl.activeTexture(gl.TEXTURE1);
-          gl.bindTexture(gl.TEXTURE_2D, src.tex);
+          gl.bindTexture(gl.TEXTURE_2D, srcTex);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
           gl.bindTexture(gl.TEXTURE_2D, null);
           gl.activeTexture(gl.TEXTURE0);

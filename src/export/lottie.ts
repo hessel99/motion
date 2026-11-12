@@ -25,6 +25,7 @@
 // a preflight item has a stable id (`${feature}:${layerId}`): the export dialog lists them with
 // [Bake] [Ignore], and passes the ignored ids back here.
 
+import { effectivePlay, instancePlan, instanceSpan, resolvedLayers, timeRemapKeys } from '../core/motion-components';
 import { springAt } from '../core/easing';
 import { evalProp } from '../core/evaluate';
 import { BLEND_MODES, type BlendMode, type Composition, type Keyframe, type Layer, type Paint, type PathCmd, type PathGeometry, type Project, type Prop, type PropKey, PROP_DEFS } from '../core/model';
@@ -198,7 +199,7 @@ export interface LayerSample { anchor: number[]; position: number[]; scale: numb
 
 /** a layer to render into images: its subtree, in its own local space, box [x, y, w, h] (layer px),
  *  at `scale` px per layer px, at local times `times` of the comp `compId` it lives in */
-export interface BakeRequest { layerId: string; compId: string; box: [number, number, number, number]; scale: number; times: number[] }
+export interface BakeRequest { layerId: string; compId: string; box: [number, number, number, number]; scale: number; times: number[]; /** the layers as seen there (component instance values), when they differ from the project's */ layers?: Record<string, Layer> }
 /** one image index per requested time + the (deduplicated) png data urls */
 export interface BakeResult { frames: number[]; images: string[] }
 
@@ -450,6 +451,8 @@ function layerPad(l: Layer): number {
 
 interface Ctx {
   project: Project;
+  /** layers as seen in the comp being built (a component instance's own values / variants applied) */
+  L: Record<string, Layer>;
   fr: number;
   ignore: Set<string>;
   issues: Map<string, LottieIssue[]>;
@@ -483,7 +486,7 @@ function subtreeBounds(c: Ctx, ids: string[], comp: Composition, tOff: number, b
   const times = frameTimes(comp, c.fr);
   const step = Math.max(1, Math.floor(times.length / 48));
   const walk = (id: string, t: number, M: Mat) => {
-    const l = c.project.layers[id];
+    const l = c.L[id];
     if (!l || l.type === 'audio') return;
     const s = sampler(c, l, tOff)(t);
     const W = mul(M, localMat(s));
@@ -514,7 +517,7 @@ function contentAnimated(c: Ctx, l: Layer, root = true): boolean {
     const a = c.project.shaders?.[r.shader] ?? r.asset;
     if (a?.features.isAnimated) return true;
   }
-  if (l.children.some(id => c.project.layers[id] && contentAnimated(c, c.project.layers[id], false))) return true;
+  if (l.children.some(id => c.L[id] && contentAnimated(c, c.L[id], false))) return true;
   if (l.type === 'precomp' && l.compRef && c.project.comps[l.compRef]) return true;
   return false;
 }
@@ -577,11 +580,11 @@ function buildList(c: Ctx, ids: string[], comp: Composition, tOff: number, stack
   // masks: a mask layer masks the siblings above it (until the next mask)
   let i = 0;
   while (i < ids.length) {
-    const l = c.project.layers[ids[i]];
+    const l = c.L[ids[i]];
     if (!l) { i++; continue; }
     if (l.mask && i + 1 < ids.length) {
       let j = i + 1;
-      while (j < ids.length && !c.project.layers[ids[j]]?.mask) j++;
+      while (j < ids.length && !c.L[ids[j]]?.mask) j++;
       const masked = ids.slice(i + 1, j);
       // the masked siblings, as one precomp (in the parent's space, shifted to fit), under the matte
       const [bx, by, bw, bh] = subtreeBounds(c, masked, comp, tOff);
@@ -629,12 +632,12 @@ function emitLayer(c: Ctx, l: Layer, comp: Composition, tOff: number, stack: str
     const times = frameTimes(comp, fr);
     let maxS = 1;
     for (let k = 0; k < times.length; k += Math.max(1, Math.floor(times.length / 24))) { const s = smp(times[k]); maxS = Math.max(maxS, Math.abs(s.scale[0]) / 100, Math.abs(s.scale[1]) / 100); }
-    for (let p = l.parent ? c.project.layers[l.parent] : undefined; p; p = p.parent ? c.project.layers[p.parent] : undefined) {
+    for (let p = l.parent ? c.L[l.parent] : undefined; p; p = p.parent ? c.L[p.parent] : undefined) {
       const ps = p.props.scale; if (ps) maxS *= Math.max(1, ...[ps.v, ...(ps.kf ?? []).map(k => k.v)].map(v => Math.max(Math.abs(v[0]), Math.abs(v[1])) / 100));
     }
     const scale = Math.min(4, Math.ceil(maxS * 4) / 4);
     const animated = contentAnimated(c, l);
-    const req: BakeRequest = { layerId: l.id, compId: comp.id, box: [bx, by, bw, bh], scale, times: animated ? times.slice(0, nFrames) : [Math.max(0, Math.min(l.inPoint, comp.duration))] };
+    const req: BakeRequest = { layerId: l.id, compId: comp.id, box: [bx, by, bw, bh], scale, times: animated ? times.slice(0, nFrames) : [Math.max(0, Math.min(l.inPoint, comp.duration))], layers: c.L !== c.project.layers ? c.L : undefined };
     c.bakes.push({ req, assetId: id });
     c.assets.push({ id, nm: `${l.name} (baked)`, fr, w: bw, h: bh, layers: [] });
     out.push({ ...base, ty: 0, refId: id, w: bw, h: bh, ks: transformOf(c, l, tOff, comp, [-bx, -by]) });
@@ -737,14 +740,27 @@ function emitLayer(c: Ctx, l: Layer, comp: Composition, tOff: number, stack: str
     case 'precomp': {
       const inner = l.compRef ? c.project.comps[l.compRef] : undefined;
       if (inner && !stack.includes(inner.id)) {
-        const refId = 'comp_' + inner.id;
+        // component instances that change something get their own asset; timing becomes a time remap
+        const plan = inner.component ? instancePlan(c.project, l, inner) : null;
+        const refId = 'comp_' + inner.id + (plan ? '_' + l.id : '');
         if (!c.assets.some(a => a.id === refId)) {
           const sub: any[] = [];
-          buildList(c, inner.root, inner, tOff + (l.startTime ?? 0), [...stack, inner.id], undefined, sub, { n: 0 });
+          const prevL = c.L;
+          if (plan) c.L = { ...c.L, ...Object.fromEntries(resolvedLayers(c.project, l)) };
+          try { buildList(c, inner.root, inner, tOff + (l.startTime ?? 0), [...stack, inner.id], undefined, sub, { n: 0 }); } finally { c.L = prevL; }
           c.assets.push({ id: refId, nm: inner.name, fr, layers: sub.reverse() });
         }
         // we clip a precomp to its layer box (like after effects to its comp size)
-        out.push({ ...base, ty: 0, ks, refId, w: R(size[0]), h: R(size[1]), st: R((l.startTime ?? 0) * fr) });
+        const pl: any = { ...base, ty: 0, ks, refId, w: R(size[0]), h: R(size[1]), st: R((l.startTime ?? 0) * fr) };
+        const play = inner.component ? effectivePlay(c.project, l) : l.play;
+        if (play) {
+          const st0 = l.startTime ?? 0, span = instanceSpan(inner, play);
+          const keys = timeRemapKeys(inner, play, Math.min(span, comp.duration - st0 + 1));
+          pl.tm = { a: 1, k: keys.map(([t, v], i) => (i < keys.length - 1 ? { t: R((st0 + t) * fr), s: [v], i: { x: [1], y: [1] }, o: { x: [0], y: [0] } } : { t: R((st0 + t) * fr), s: [v] })) };
+          if (play.hold !== 'first' && play.hold !== 'both') pl.ip = Math.max(pl.ip, R(st0 * fr));
+          if (Number.isFinite(span)) pl.op = Math.min(pl.op, Math.max(pl.ip + 1, R((st0 + span) * fr)));
+        }
+        out.push(pl);
       } else out.push({ ...base, ty: 3, ks });
       break;
     }
@@ -789,7 +805,7 @@ function build(project: Project, opts: LottieOptions) {
   const op = Math.max(1, Math.ceil(comp.duration * fr - 1e-6));
   const issues = new Map<string, LottieIssue[]>();
   for (const l of reachable(project)) { const x = layerIssues(project, l); if (x.length) issues.set(l.id, x); }
-  const c: Ctx = { project, fr, ignore: new Set(opts.ignore ?? []), issues, sample: opts.sample, assets: [], fonts: new Map(), bakes: [], imageIds: new Map(), seq: 0 };
+  const c: Ctx = { project, L: project.layers, fr, ignore: new Set(opts.ignore ?? []), issues, sample: opts.sample, assets: [], fonts: new Map(), bakes: [], imageIds: new Map(), seq: 0 };
   // without a baker nothing can be baked: export natively
   if (!opts.bake) for (const list of issues.values()) for (const i of list) c.ignore.add(i.id);
   const layers: any[] = [];
@@ -801,7 +817,6 @@ function build(project: Project, opts: LottieOptions) {
   buildList(c, comp.root, comp, 0, [comp.id], undefined, layers, ind);
   const out: any = {
     v: '5.7.4', fr, ip: 0, op, w: comp.width, h: comp.height, nm: comp.name, ddd: 0, assets: c.assets, layers: layers.reverse(),
-    markers: (comp.markers ?? []).filter(m => m.t <= comp.duration).map(m => ({ tm: R(m.t * fr), cm: m.label, dr: 0 })),
   };
   if (c.fonts.size) out.fonts = { list: Array.from(c.fonts.values()) };
   return { lottie: out, ctx: c };

@@ -5,6 +5,7 @@
 // rows are rebuilt lazily (once per frame at most) and incrementally: edits that don't change
 // the row structure (key drags, value edits) don't walk the layer tree at all.
 
+import { effectivePlay, instanceComp, instanceSpan } from '../core/motion-components';
 import type { Editor } from '../app/editor';
 import {
   isAnimated, keyId, layerKeyTimes, moveKeyframes, moveLayers, parseKeyId, renameLayer, setLayerField, valueAt,
@@ -19,9 +20,10 @@ import { agentMenuItems } from './agent-menu';
 import { agentProgress } from './agent-bridge';
 import { T, onThemeChange } from './theme';
 import { Eye, EyeOff, LAYER_ICON, Lock, LockOpen, Square, strokeIcon } from './chrome/icons';
-import { audioDuration, audioFailed, audioPeaks } from '../audio/engine';
+import { audioFailed } from '../audio/engine';
+import { drawWaveform, drawMusicRuler, snapMusicTime, onMusicSnap, type TlView } from './audio/timeline-audio';
 import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
-import { setEase, setInterp, setSpring, updateMarker, deleteMarker, cloneLayers, deleteLayers } from '../core/commands';
+import { setEase, setInterp, setSpring, cloneLayers, deleteLayers } from '../core/commands';
 
 export const HEADER_H = 28;
 export const ROW_H = 28;
@@ -31,7 +33,8 @@ const INDENT = 14;
 const ROW_KEYS = new Map<LayerType, PropKey[]>();
 function rowKeys(type: LayerType) {
   let k = ROW_KEYS.get(type);
-  if (!k) ROW_KEYS.set(type, (k = [...TRANSFORM_KEYS, ...TYPE_PROPS[type]]));
+  // audio layers have no transform: just their volume
+  if (!k) ROW_KEYS.set(type, (k = type === 'audio' ? [...TYPE_PROPS[type]] : [...TRANSFORM_KEYS, ...TYPE_PROPS[type]]));
   return k;
 }
 /** which prop rows an expanded layer shows, as a bit mask over rowKeys(type) */
@@ -91,7 +94,6 @@ type Drag =
   | { kind: 'vscroll'; sy: number; s0: number }
   | { kind: 'hscroll'; sx: number; s0: number }
   | { kind: 'compEnd' }
-  | { kind: 'marker'; id: string; sx: number; moved: boolean }
   | { kind: 'bar'; id: string; sx: number; in0: number; out0: number; mode: 'in' | 'out' }
   | { kind: 'shift'; sx: number; moved: boolean; orig: Map<string, { inP: number; outP: number; start: number; kf: Partial<Record<PropKey, Keyframe[]>> }> };
 
@@ -195,6 +197,26 @@ export class Timeline {
     search.addEventListener('input', () => { this.filter = search.value.trim().toLowerCase(); this.scrollY = 0; this.rowsDirty = true; this.baseDirty = true; });
     search.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { search.value = ''; this.filter = ''; this.rowsDirty = true; search.blur(); } });
     host.appendChild(search);
+    onMusicSnap(() => { this.baseDirty = true; });
+    // audio (and other files) dropped onto the timeline: audio starts where it was dropped
+    host.addEventListener('dragover', e => { if (e.dataTransfer?.types.includes('Files')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
+    host.addEventListener('drop', async e => {
+      const files = [...(e.dataTransfer?.files ?? [])];
+      if (!files.length) return;
+      e.preventDefault();
+      const [x] = this.local(e);
+      const { isAudioFile, importAudioFile } = await import('../audio/import');
+      const { openBrowserFile } = await import('../app/actions');
+      for (const f of files) {
+        if (isAudioFile(f)) await importAudioFile(f, x > this.leftW ? { at: Math.max(0, this.ed.store.snapTime(this.xToT(x))) } : {});
+        else await openBrowserFile(f);
+      }
+    });
+  }
+
+  /** the geometry the audio drawing helpers need */
+  private view(): TlView {
+    return { leftW: this.leftW, w: this.w, h: this.h, headerH: HEADER_H, pxPerSec: this.pxPerSec, dpr: this.dpr, tToX: t => this.tToX(t), xToT: x => this.xToT(x) };
   }
 
   resize() {
@@ -232,11 +254,10 @@ export class Timeline {
     this.baseDirty = true;
   }
 
-  /** what the track area shows: keyframes, value curves or speed curves */
-  get mode(): 'keys' | 'graph' | 'speed' { return !this.graphMode ? 'keys' : this.graph.speed ? 'speed' : 'graph'; }
-  setMode(m: 'keys' | 'graph' | 'speed') {
-    this.graphMode = m !== 'keys';
-    this.graph.speed = m === 'speed';
+  /** what the track area shows: keyframes or value curves */
+  get mode(): 'keys' | 'graph' { return this.graphMode ? 'graph' : 'keys'; }
+  setMode(m: 'keys' | 'graph') {
+    this.graphMode = m === 'graph';
     this.baseDirty = true;
     this.ed.emit('tlmode');
   }
@@ -466,7 +487,7 @@ export class Timeline {
     g.fillStyle = T.tlDivider;
     g.fillRect(0, HEADER_H - 1, this.w, 1);
     this.drawRuler(g);
-    // (keys / graph / speed is a segmented control in the timeline header: TimelineHeader.tsx)
+    // (keys / graph is a segmented control in the timeline header: TimelineHeader.tsx)
 
     // scrollbars
     const vs = this.vScroll(), hs = this.hScroll();
@@ -541,16 +562,8 @@ export class Timeline {
         g.fillRect(bx, HEADER_H, Math.max(0, this.w - bx), this.h);
       }
     }
-    // markers: a small flag in the ruler, a faint line through the rows, label next to it
-    for (const m of comp.markers ?? []) {
-      const mx = Math.round(this.tToX(m.t)) + 0.5;
-      if (mx < this.leftW - 2 || mx > this.w + 2) continue;
-      g.fillStyle = T.tlMarkerLine;
-      g.fillRect(mx - 0.5, HEADER_H, 1, this.h);
-      g.fillStyle = T.tlMarker;
-      g.beginPath(); g.moveTo(mx - 4, HEADER_H - 13); g.lineTo(mx + 4, HEADER_H - 13); g.lineTo(mx + 4, HEADER_H - 6); g.lineTo(mx, HEADER_H - 2); g.lineTo(mx - 4, HEADER_H - 6); g.closePath(); g.fill();
-      if (m.label) { g.font = T.font.uiXs; g.fillText(m.label, mx + 6, HEADER_H - 7); }
-    }
+    // music: beat / bar ticks, section bands
+    drawMusicRuler(g, this.view(), this.ed.store);
     const endX = this.tToX(comp.duration);
     if (endX > this.leftW && endX < this.w) {
       g.fillStyle = T.tlCompEnd;
@@ -622,22 +635,19 @@ export class Timeline {
       g.roundRect(inX, y + 4, outX - inX, ROW_H - 8, 3);
       g.fill();
     }
-    // audio waveform
+    // component instance: where it actually plays (start .. start + its timed span)
+    const ic = instanceComp(st.project, l);
+    if (ic) {
+      const t0 = Math.max(l.inPoint, l.startTime ?? 0), t1 = Math.min(l.outPoint, comp.duration, (l.startTime ?? 0) + instanceSpan(ic, effectivePlay(st.project, l)));
+      const x0 = Math.max(this.leftW, this.tToX(t0)), x1 = Math.min(this.w, this.tToX(t1));
+      if (x1 > x0) { g.fillStyle = T.tlKeySelected; g.globalAlpha = 0.7; g.beginPath(); g.roundRect(x0, y + ROW_H - 9, x1 - x0, 3, 1.5); g.fill(); g.globalAlpha = 1; }
+    }
+    // audio waveform (cached tiles, see ui/audio/timeline-audio.ts)
     if (l.type === 'audio' && l.imageRef) {
       const asset = st.project.assets[l.imageRef];
-      const peaks = asset ? audioPeaks(asset) : null;
-      const dur = asset ? audioDuration(asset) : null;
-      if (peaks && dur) {
-        const start = l.startTime ?? 0;
-        const x0 = this.tToX(start), x1 = this.tToX(start + dur);
-        g.fillStyle = isSel ? T.tlAudioSelected : T.tlAudio;
-        const h = (ROW_H - 8) / 2;
-        for (let x = Math.max(this.leftW, Math.floor(x0)); x < Math.min(this.w, x1); x += 2) {
-          const p = peaks[Math.min(peaks.length - 1, Math.floor(((x - x0) / (x1 - x0)) * peaks.length))];
-          const ph = Math.max(0.5, p * h);
-          g.fillRect(x, cy - ph, 1.5, ph * 2);
-        }
-      } else { g.fillStyle = T.tlHint; g.font = T.font.uiXs; g.fillText(asset && audioFailed(asset) ? 'audio could not be decoded' : 'decoding audio…', Math.max(this.leftW + 6, this.tToX(l.startTime ?? 0)), cy); }
+      if (!asset || !drawWaveform(g, this.view(), l, asset, cy, ROW_H - 8, isSel ? T.tlAudioSelected : T.tlAudio)) {
+        g.fillStyle = T.tlHint; g.font = T.font.uiXs; g.fillText(asset && audioFailed(asset) ? 'audio could not be decoded' : 'decoding audio…', Math.max(this.leftW + 6, this.tToX(l.startTime ?? 0)), cy);
+      }
     }
     // text animation range (per-unit reveal) as a bar
     if (l.textAnim && l.text) {
@@ -898,8 +908,6 @@ export class Timeline {
     const hs = this.hScroll();
     if (hs && y > this.h - 10 && x > this.leftW) { this.drag = { kind: 'hscroll', sx: x, s0: this.scrollT }; return; }
     if (y < HEADER_H && Math.abs(x - this.tToX(st.comp.duration)) < 5) { this.drag = { kind: 'compEnd' }; st.beginGesture('duration'); return; }
-    const mk = this.markerAt(x, y);
-    if (mk) { this.drag = { kind: 'marker', id: mk.id, sx: x, moved: false }; st.beginGesture('marker'); return; }
     if (this.graphMode && x > this.leftW && y > HEADER_H) {
       if (this.graph.down(x, y, e.shiftKey)) { this.drag = { kind: 'graph' }; this.baseDirty = true; }
       else if (!e.shiftKey) { st.keySelection = new Set(); st.emit('keys'); }
@@ -1022,14 +1030,18 @@ export class Timeline {
     if (!free) {
       t = st.snapTime(t);
       // snap to nearby keyframes of selected layers
+      let snapped = false;
       for (const id of st.selection) {
         const l = st.layer(id);
         if (!l) continue;
-        for (const kt of layerKeyTimes(l)) if (Math.abs(this.tToX(kt) - x) < 6) t = kt;
+        for (const kt of layerKeyTimes(l)) if (Math.abs(this.tToX(kt) - x) < 6) { t = kt; snapped = true; }
       }
+      // beats / bars / onsets of the music (shift scrubs freely)
+      if (!snapped) { const m = snapMusicTime(st, this.xToT(x), this.pxPerSec); if (m !== null) t = m; }
     }
     if (st.playing) this.ed.pause();
     st.setTime(t);
+    this.ed.audio?.scrub(t);
   }
 
   private move(e: PointerEvent) {
@@ -1053,12 +1065,6 @@ export class Timeline {
       if (hs) { this.scrollT = Math.max(0, d.s0 + (x - d.sx) * ((hs.total - hs.visible) / Math.max(1, (this.w - this.leftW) - hs.w))); this.baseDirty = true; }
       return;
     }
-    if (d.kind === 'marker') {
-      if (!d.moved && Math.abs(x - d.sx) < 3) return;
-      d.moved = true;
-      updateMarker(st, d.id, { t: st.snapTime(this.xToT(x)) });
-      return;
-    }
     if (d.kind === 'compEnd') {
       const dur = Math.max(1 / st.comp.fps, st.snapTime(this.xToT(x)));
       if (dur !== st.comp.duration) st.transact('Composition duration', tx => { tx.set(st.comp, 'duration', dur); tx.comp(); });
@@ -1071,15 +1077,14 @@ export class Timeline {
       let dt = (x - d.sx) / this.pxPerSec;
       if (!d.moved && Math.abs(x - d.sx) < 3) return;
       d.moved = true;
-      // snap the dragged key to frames (and the playhead / markers within 6px; alt: frames only)
+      // snap the dragged key to frames (and the playhead within 6px, then the music grid; alt: frames only)
       let nt = st.snapTime(d.t0 + dt);
       if (!e.altKey) {
         const rawX = this.tToX(d.t0 + dt);
         let best = 6;
-        for (const t of [st.time, ...(st.comp.markers ?? []).map(m => m.t)]) {
-          const dd = Math.abs(this.tToX(t) - rawX);
-          if (dd < best) { best = dd; nt = t; }
-        }
+        const dd = Math.abs(this.tToX(st.time) - rawX);
+        if (dd < best) { best = dd; nt = st.time; }
+        if (best >= 6) { const m = snapMusicTime(st, d.t0 + dt, this.pxPerSec); if (m !== null) nt = m; }
       }
       dt = Math.max(-d.snap.minT, nt - d.t0);
       if (Math.abs(dt - d.dt) < 1e-9) return;
@@ -1116,6 +1121,17 @@ export class Timeline {
       d.moved = true;
       let dt = st.snapTime((x - d.sx) / this.pxPerSec);
       if (e.shiftKey) dt = (x - d.sx) / this.pxPerSec;
+      else {
+        // the dragged layer's start (in point, or its clip start for audio / precomps) snaps to the music
+        const o0 = d.orig.values().next().value;
+        if (o0) {
+          let k0 = Infinity;
+          for (const k in o0.kf) for (const f of o0.kf[k as PropKey] ?? []) k0 = Math.min(k0, f.t);
+          const ref = o0.inP > 0 ? o0.inP : o0.start || !isFinite(k0) ? o0.start : k0;
+          const m = snapMusicTime(st, ref + dt, this.pxPerSec, 6, e.altKey || [...d.orig.keys()].some(id => st.layer(id)?.type === 'audio' && !st.layer(id)?.sfx));
+          if (m !== null) dt = m - ref;
+        }
+      }
       st.transact('Move layer in time', tx => {
         for (const [id, o] of d.orig) {
           const l = st.layer(id);
@@ -1129,7 +1145,10 @@ export class Timeline {
       });
     } else if (d.kind === 'bar') {
       const comp = st.comp;
-      const dt = st.snapTime((x - d.sx) / this.pxPerSec);
+      let dt = st.snapTime((x - d.sx) / this.pxPerSec);
+      const edge = d.mode === 'in' ? d.in0 : d.out0;
+      const m = edge < 1e8 ? snapMusicTime(st, edge + dt, this.pxPerSec, 6, e.altKey) : null;
+      if (m !== null) dt = m - edge;
       const id = d.id;
       st.transact('Trim layer', tx => {
         const l = st.layer(id)!;
@@ -1147,7 +1166,6 @@ export class Timeline {
     const st = this.ed.store;
     if (d?.kind === 'graph') this.graph.up();
     st.endGesture();
-    if (d?.kind === 'marker' && !d.moved) { const m = st.comp.markers?.find(q => q.id === d.id); if (m) st.setTime(m.t); }
     if (d?.kind === 'rows' && d.moved) {
       const tgt = this.dropTarget(d.y);
       if (tgt) { moveLayers(st, d.ids, tgt.parent, tgt.index, { keepWorld: true }); if (tgt.parent) this.expand(tgt.parent); }
@@ -1188,8 +1206,6 @@ export class Timeline {
 
   private dbl(e: MouseEvent) {
     const [x, y] = this.local(e);
-    const mk = this.markerAt(x, y);
-    if (mk) { this.renameMarker(mk.id); return; }
     if (y < HEADER_H && x > this.leftW) {
       // double click on the work area bar clears it, elsewhere fits the time
       if (this.ed.store.workArea && y > HEADER_H - 8) { this.ed.store.workArea = null; this.ed.store.emit('workarea'); return; }
@@ -1206,43 +1222,6 @@ export class Timeline {
       const st = this.ed.store;
       addKeyframe(st, [r.id], r.prop!, st.snapTime(this.xToT(x)));
     }
-  }
-
-  /** marker flag under the pointer (ruler only) */
-  private markerAt(x: number, y: number) {
-    // only the flag strip at the bottom of the ruler: the playhead knob above it stays draggable
-    if (y >= HEADER_H || y < HEADER_H - 14 || x < this.leftW) return null;
-    let best: { id: string; t: number } | null = null, bd = 6;
-    for (const m of this.ed.store.comp.markers ?? []) {
-      const d = Math.abs(this.tToX(m.t) - x);
-      if (d < bd) { bd = d; best = m; }
-    }
-    return best;
-  }
-
-  private renameMarker(id: string) {
-    const st = this.ed.store;
-    const m = st.comp.markers?.find(q => q.id === id);
-    if (!m) return;
-    this.input?.remove();
-    const inp = document.createElement('input');
-    inp.className = 'tl-rename';
-    inp.value = m.label;
-    inp.placeholder = 'Marker name';
-    const x = Math.min(this.w - 160, Math.max(this.leftW, this.tToX(m.t) + 6));
-    Object.assign(inp.style, { left: x + 'px', top: '3px', width: '150px', height: HEADER_H - 8 + 'px' });
-    this.host.appendChild(inp);
-    inp.focus();
-    inp.select();
-    const done = (ok: boolean) => {
-      if (!this.input) return;
-      this.input = null;
-      if (ok && inp.value !== m.label) updateMarker(st, id, { label: inp.value.trim() });
-      inp.remove();
-    };
-    inp.addEventListener('keydown', ev => { ev.stopPropagation(); if (ev.key === 'Enter') done(true); if (ev.key === 'Escape') done(false); });
-    inp.addEventListener('blur', () => done(true));
-    this.input = inp;
   }
 
   private startRename(r: Row, i: number) {
@@ -1291,14 +1270,6 @@ export class Timeline {
     const k = this.keyAt(x, y);
     if (k && !st.keySelection.has(k)) { st.keySelection = new Set([k]); st.emit('keys'); }
     const items: MenuItem[] = [];
-    const mk = this.markerAt(x, y);
-    if (mk) {
-      showContextMenu(e.clientX, e.clientY, [
-        { label: 'Rename marker', action: () => this.renameMarker(mk.id) },
-        { label: 'Delete marker', action: () => deleteMarker(st, mk.id) },
-      ]);
-      return;
-    }
     if (st.keySelection.size) {
       const keys = [...st.keySelection];
       items.push({ label: 'Easy Ease', shortcut: 'F9', action: () => setEase(st, keys, 'Easy Ease') });
@@ -1317,7 +1288,7 @@ export class Timeline {
       const r = i >= 0 ? this.rows[i] : null;
       if (r) {
         if (!st.selection.includes(r.id)) st.select([r.id]);
-        const props = [...TRANSFORM_KEYS, ...TYPE_PROPS[r.layer.type]];
+        const props = rowKeys(r.layer.type);
         items.push({ label: 'Animate', submenu: props.map(p => ({ label: PROP_DEFS[p].label, checked: isAnimated(r.layer, p), action: () => { toggleAnimated(st, st.selection, p); this.expand(r.id); } })) });
         items.push({ label: r.layer.visible ? 'Hide' : 'Show', action: () => setLayerField(st, st.selection, 'visible', !r.layer.visible) });
         items.push({ label: 'Rename', action: () => this.startRename(r, i) });

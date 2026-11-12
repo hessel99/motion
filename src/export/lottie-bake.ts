@@ -46,7 +46,8 @@ export function createBaker(project: Project) {
   const bake = async (req: BakeRequest): Promise<BakeResult> => {
     const r = ensure();
     setAssetLookup(id => store!.project.assets[id]);
-    const src = project.layers[req.layerId];
+    const layers = req.layers ?? project.layers;
+    const src = layers[req.layerId];
     const comp = project.comps[req.compId];
     const [bx, by, bw, bh] = req.box;
     // the layer alone, at its own origin: anchor 0, position = -box origin, no rotation / scale / opacity
@@ -57,7 +58,7 @@ export function createBaker(project: Project) {
     clone.props.rotation = { v: [0] };
     clone.props.opacity = { v: [100] };
     const tmp = createComp({ name: 'bake', width: bw, height: bh, fps: comp.fps, duration: comp.duration, background: [0, 0, 0, 0], root: [clone.id] });
-    const p: Project = { ...project, comps: { ...project.comps, [tmp.id]: tmp }, activeComp: tmp.id, layers: { ...project.layers, [clone.id]: clone } };
+    const p: Project = { ...project, comps: { ...project.comps, [tmp.id]: tmp }, activeComp: tmp.id, layers: { ...layers, [clone.id]: clone } };
     store!.load(p);
     const until = performance.now() + 5000;
     for (const a of Object.values(p.assets)) while (a.kind === 'image' && !getBitmap(a) && performance.now() < until) await new Promise(z => setTimeout(z, 20));

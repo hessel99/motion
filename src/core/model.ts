@@ -84,6 +84,8 @@ export const PROP_DEFS = {
   noiseColor: { label: 'Noise Color', dim: 4, default: [0, 0, 0, 0.25], unit: 'color' },
   noiseSize: { label: 'Noise Size', dim: 1, default: [1], unit: 'px', min: 0 },
   noiseDensity: { label: 'Noise Density', dim: 1, default: [50], unit: '%', min: 0, max: 100 },
+  /** audio layers: gain in percent (keyframable) */
+  volume: { label: 'Volume', dim: 1, default: [100], unit: '%', min: 0, max: 200 },
 } as const;
 
 export type PropKey = keyof typeof PROP_DEFS;
@@ -103,9 +105,9 @@ export const TYPE_PROPS: Record<LayerType, PropKey[]> = {
   rect: ['size', 'radius', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
   ellipse: ['size', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
   path: ['size', 'fill', 'stroke', 'strokeWidth', 'trimStart', 'trimEnd', 'trimOffset', ...EFFECT_KEYS],
-  text: ['size', 'fill', ...EFFECT_KEYS],
+  text: ['size', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
   image: ['size', ...EFFECT_KEYS],
-  audio: [],
+  audio: ['volume'],
   precomp: ['size', ...EFFECT_KEYS],
 };
 
@@ -205,7 +207,7 @@ export interface TextRun {
   fontStyle?: 'normal' | 'italic';
   fontSize?: number;
   fill?: number[];
-  decoration?: 'underline' | 'strike';
+  decoration?: 'underline' | 'strike' | 'none';
   letterSpacing?: number;
 }
 
@@ -224,6 +226,8 @@ export interface TextData {
   fontWeight: number;
   fontStyle?: 'normal' | 'italic';
   lineHeight: number; // multiplier
+  /** figma "auto" line height: the font's ascender + descender (lineHeight is then only a fallback) */
+  lineHeightAuto?: boolean;
   letterSpacing: number; // px
   align: 'left' | 'center' | 'right' | 'justify';
   valign?: 'top' | 'center' | 'bottom';
@@ -301,6 +305,9 @@ export interface Layer {
   blend?: BlendMode;
   /** effects (shadows, blurs, noise...), figma order */
   effects?: Effect[];
+  /** group composites as one image (figma NORMAL group, vs pass-through): its children's blend
+   *  modes only see the group's own content */
+  isolate?: boolean;
   /** in/out points in seconds; layer is hidden outside */
   inPoint: number;
   outPoint: number;
@@ -336,15 +343,50 @@ export interface Layer {
   imageRef?: string; // asset id
   /** audio: volume 0..1 (startTime = when the clip starts, in comp time) */
   volume?: number;
+  /** audio: fades, mute, tempo overrides (see src/audio/) */
+  audio?: AudioSettings;
+  /** a synthesized sound effect: what it was made from and the motion event it follows */
+  sfx?: SfxLink;
   /** precomp: referenced composition id and when it starts (comp time) */
   compRef?: string;
   startTime?: number;
   /** component instance link (see core/components.ts): this layer mirrors main-component layer `main` */
   link?: InstanceLink;
+  /** precomp: how its composition's time plays here (speed, stretch, loop, range between markers,
+   *  reverse, hold). absent = plays once from startTime at 1x (see core/motion-components.ts) */
+  play?: PlaySpec;
+  /** precomp showing a component composition: its exposed property values and chosen variants */
+  inst?: InstanceValues;
   /** stable key the agent's build_scene gave this layer (re-building with the same key updates it) */
   sceneKey?: string;
   /** ui state */
   collapsed?: boolean;
+}
+
+export interface AudioSettings {
+  /** seconds */
+  fadeIn?: number;
+  fadeOut?: number;
+  mute?: boolean;
+  /** tempo override (bpm): the beat grid is re-fitted at this tempo */
+  bpm?: number;
+  /** shifts the detected beat grid (seconds) */
+  gridOffset?: number;
+  /** shifts which beat starts a bar */
+  barOffset?: number;
+}
+
+export interface SfxLink {
+  /** sound type (whoosh, pop, ...) and family (character) */
+  type: string;
+  family: string;
+  /** recipe variation 0..1 (e.g. scaled with the move's speed) */
+  intensity: number;
+  /** the layer whose motion triggered it and which event: the sound follows retimes */
+  src?: string;
+  event?: string;
+  /** offset of the sound from the event (s): whooshes start before a landing */
+  lead?: number;
 }
 
 /** an instance layer mirrors one layer of a main component. fields listed in `ov` were changed on the
@@ -364,6 +406,10 @@ export interface ComponentInfo {
   /** figma component key (or symbol guid) it was pasted from: later pastes link to it */
   figmaKey?: string;
   description?: string;
+  /** figma component properties (text, boolean, instance swap) and the layers bound to them */
+  figmaProps?: { id: string; name: string; type: string; targets: { layer: string; field: string }[]; default?: ExposedValue }[];
+  /** figma component set this main is a variant of, with its variant values ("Theme" -> "Dark") */
+  figmaSet?: { key: string; name: string; values: Record<string, string> };
 }
 
 /** a named color or number ("style"/"variable"/"design token") that layer properties can link to */
@@ -408,11 +454,93 @@ export interface Composition {
   duration: number;
   background: [number, number, number, number];
   root: string[]; // top-level layers, first = bottom
-  /** timeline markers (comp time, sorted) */
-  markers?: Marker[];
+  /** this composition is a reusable motion component (instances are precomp layers of it) */
+  component?: ComponentDef;
 }
 
-export interface Marker { id: string; t: number; label: string }
+// ---------------- motion components (core/motion-components.ts, docs/components-design.md) ----------------
+
+/** how a precomp layer plays its composition. `range` names one of the component's ranges
+ *  ("in", "hold", "out"); from / to are seconds inside the component (or range names: from = its
+ *  start, to = its end) */
+export interface PlaySpec {
+  /** playback rate (1 = as authored, 2 = twice as fast). ignored when `duration` is set */
+  speed?: number;
+  /** stretch the played range to last this many seconds (one pass) */
+  duration?: number;
+  /** a named range of the component (ComponentDef.ranges) */
+  range?: string;
+  /** start / end of the played range inside the component: seconds or a range name */
+  from?: string | number;
+  to?: string | number;
+  loop?: 'none' | 'loop' | 'pingpong';
+  /** how many passes when looping (default: until the layer's out point) */
+  loops?: number;
+  reverse?: boolean;
+  /** show the first frame before the start and / or the last frame after the end */
+  hold?: 'none' | 'first' | 'last' | 'both';
+}
+
+/** values an instance gives its component: exposed property values (by property id) and the
+ *  variant chosen per variant group ("Format" -> variant id) */
+export interface InstanceValues {
+  props?: Record<string, ExposedValue>;
+  variants?: Record<string, string>;
+}
+export type ExposedValue = string | number | boolean | number[];
+
+export type ExposedKind = 'text' | 'color' | 'image' | 'number' | 'toggle';
+/** one knob of a component: drives fields of layers inside it */
+export interface ExposedProp {
+  id: string;
+  name: string;
+  kind: ExposedKind;
+  /** layer field it drives: 'text', 'fill' / 'stroke' (colors), 'image', 'visible', a numeric prop
+   *  key ('opacity', 'rotation', 'scale', ...), 'delay' (shifts that layer's keys, seconds) or
+   *  'prop:<id>' (an exposed property of a nested instance) */
+  targets: { layer: string; field: string }[];
+  min?: number;
+  max?: number;
+  step?: number;
+  description?: string;
+}
+
+/** a variant: a named set of differences from the base, over the same layers and the same
+ *  animation. layout fields add (position, anchor, size, rotation) or multiply (scale); colors,
+ *  opacity, text and visibility replace */
+export interface Variant {
+  id: string;
+  name: string;
+  /** variants of different groups combine (Format x Theme x Language); one per group */
+  group: string;
+  width?: number;
+  height?: number;
+  ov: Record<string, VariantLayerOv>;
+  /** default timing for instances of this variant (e.g. a "Short" cut plays in -> out) */
+  play?: PlaySpec;
+}
+export interface VariantLayerOv {
+  props?: Partial<Record<PropKey, number[]>>;
+  text?: string;
+  fontSize?: number;
+  visible?: boolean;
+}
+
+/** a composition that is a component (Composition.component) */
+export interface ComponentDef {
+  /** named parts of the component's timeline instances can play ("in", "hold", "out") */
+  ranges?: { name: string; from: number; to: number }[];
+  props?: ExposedProp[];
+  variants?: Variant[];
+  /** the variant being edited: its differences are applied to the real layers; `base` keeps the
+   *  base values they were measured against */
+  editing?: { variant: string; base: Record<string, BaseSnap>; size: [number, number] };
+  /** library it comes from (update review), see core/component-library.ts */
+  lib?: { id: string; name: string; key: string; rev: string; from?: string; at?: number };
+  figmaKey?: string;
+  description?: string;
+}
+export interface BaseSnap { props?: Partial<Record<PropKey, number[]>>; text?: string; fontSize?: number; visible?: boolean }
 
 export interface Asset {
   id: string;

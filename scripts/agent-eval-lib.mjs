@@ -93,7 +93,6 @@ export function computeMetrics(doc, probe) {
   const exprs = layers.flatMap((l) => Object.entries(l.props ?? {}).filter(([, p]) => p.expr).map(([k, p]) => ({ id: l.id, prop: k, expr: p.expr })));
   const textAnims = layers.filter((l) => l.textAnim).map((l) => ({ id: l.id, ...l.textAnim }));
   const precomps = layers.filter((l) => l.type === 'precomp').length;
-  const markers = Object.values(doc.comps).reduce((n, c) => n + (c.markers?.length ?? 0), 0);
   const paths = layers.filter((l) => l.type === 'path').length;
   const gradients = layers.filter((l) => (l.paints ?? []).some((p) => p.type === 'linear' || p.type === 'radial')).length;
   // ---- palette (fills/strokes of drawable layers + gradient stops + comp background)
@@ -194,7 +193,7 @@ export function computeMetrics(doc, probe) {
     animatedLayers: layers.filter((l) => animatedProps(l).length || l.textAnim).length,
     keys, segments, easesUsed: easeCount, distinctEases: Object.keys(easeCount).length, easeFamilies: easeFamilies.size,
     overshootSegments: overshootSegs, keyedOvershoots, springSegments: springSegs, holdKeys, linearSegments: linearSegs,
-    expressions: exprs.length, textAnimators: textAnims.length, precomps, markers, pathLayers: paths, gradientLayers: gradients,
+    expressions: exprs.length, textAnimators: textAnims.length, precomps, pathLayers: paths, gradientLayers: gradients,
     paletteSize: palette.length, palette: palette.map(hex),
     keyCoverage: r3(keyCoverage), visualActivity: r3(D ? active / D : 0),
     firstMotion: r3(firstChange ?? 0), lastMotion: r3(lastChange), endHold: r3(Math.max(0, D - lastChange)), longestHold: r3(longestHold),
@@ -322,8 +321,36 @@ export function runCheck(check, m, d) {
       return n >= 3;
     }
     case 'wipes': return L.some((l) => l.type === 'rect' && (propAnimated(l, 'size') || kfOf(l, 'scale').some((k) => Math.abs(k.v[0] - k.v[1]) > 5)));
+    // music briefs (brief.audio): moves land within ±frames of the generated track's beat grid
+    case 'onBeats': {
+      // per move (a run of consecutive changing segments of one property): it lands on the music when
+      // any of its keys after the first (the contact, the overshoot peak or the settle) is on the grid
+      const fps = d.comp.fps, tol = (check.frames ?? 1) / fps + 1e-6, step = 60 / check.bpm, off = check.offset ?? 0;
+      const near = (t) => Math.abs((t - off) / step - Math.round((t - off) / step)) * step <= tol;
+      const by = {};
+      for (const s of d.segs) if (d.byId[s.id]?.type !== 'audio') (by[s.id + '|' + s.prop] ??= []).push(s);
+      const runs = [];
+      for (const list of Object.values(by)) {
+        list.sort((a, b) => a.t0 - b.t0);
+        let cur = null;
+        for (const s of list) { if (cur && Math.abs(s.t0 - cur[cur.length - 1]) < 1e-6) cur.push(s.t1); else runs.push((cur = [s.t1])); }
+      }
+      return runs.length >= (check.minMoves ?? 4) && runs.filter((r) => r.some(near)).length / runs.length >= (check.min ?? 0.6);
+    }
+    case 'hitAt': {
+      const tol = (check.frames ?? 1) / d.comp.fps + 1e-6;
+      return d.segs.some((s) => d.byId[s.id]?.type !== 'audio' && (Math.abs(s.t1 - check.t) <= tol || (check.starts && Math.abs(s.t0 - check.t) <= tol)));
+    }
+    case 'notEveryBeat': {
+      // restraint: some beats in the range carry no landing
+      const step = 60 / check.bpm, tol = 1 / d.comp.fps + 1e-6;
+      const ends = d.segs.filter((s) => d.byId[s.id]?.type !== 'audio').map((s) => s.t1);
+      let empty = 0, n = 0;
+      for (let t = check.from ?? 0; t <= (check.to ?? d.comp.duration) + 1e-6; t += step) { n++; if (!ends.some((e) => Math.abs(e - t) <= tol)) empty++; }
+      return n > 0 && empty / n >= (check.min ?? 0.25);
+    }
+    case 'audioKept': return d.layers.some((l) => l.type === 'audio' && !l.sfx);
     case 'beatGrid': {
-      if (m.markers >= 3) return true;
       const step = 60 / check.bpm, ts = d.segs.map((s) => s.t0);
       return ts.length >= 4 && ts.filter((t) => Math.abs(t / step - Math.round(t / step)) * step < 0.04).length / ts.length >= 0.6;
     }

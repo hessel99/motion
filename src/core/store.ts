@@ -157,6 +157,12 @@ export class Store {
     for (const fn of this.listeners) fn(c);
   }
 
+  /** content that is not undoable changed (e.g. a shader source fetched for the library): the
+   *  renderer recompiles these layers, the ui refreshes, the undo history is untouched */
+  notifyExternal(layerIds: Iterable<string>) {
+    this.emitChange({ structure: true, sameTree: true, comp: false, layers: new Set(layerIds), meta: false, assets: true });
+  }
+
   private emitChange(c: Change) {
     for (const fn of this.listeners) fn(c);
     this.emit('doc');
@@ -356,6 +362,8 @@ export class Store {
   /** replace the whole document (open file) */
   load(project: Project) {
     this.project = project;
+    // fields of removed features (0.4: timeline markers) are dropped from older files
+    for (const c of Object.values(project.comps)) delete (c as { markers?: unknown }).markers;
     for (const id in project.components ?? {}) rememberTree(project, id);
     this.ensureActiveComp();
     this.workArea = null;

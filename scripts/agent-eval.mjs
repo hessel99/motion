@@ -79,7 +79,7 @@ function judgeInput(brief, rec) {
   const metrics = [
     `layers ${m.drawableLayers} drawable (${Object.entries(m.layerTypes).map(([k, v]) => `${k} ${v}`).join(', ')}), ${m.keys} keys, ${m.segments} moving segments`,
     `eases: ${Object.entries(m.easesUsed).map(([k, v]) => `${k}×${v}`).join(', ') || 'none'}; springs ${m.springSegments}, overshooting ${m.overshootSegments}, hold ${m.holdKeys}`,
-    `expressions ${m.expressions}, text animators ${m.textAnimators}, precomps ${m.precomps}, paths ${m.pathLayers}, gradients ${m.gradientLayers}, markers ${m.markers}`,
+    `expressions ${m.expressions}, text animators ${m.textAnimators}, precomps ${m.precomps}, paths ${m.pathLayers}, gradients ${m.gradientLayers}`,
     `palette (${m.paletteSize}): ${m.palette.join(' ')}`,
     `motion from ${m.firstMotion}s to ${m.lastMotion}s (end hold ${m.endHold}s, longest still ${m.longestHold}s), visual activity ${Math.round(m.visualActivity * 100)}% of the comp`,
     `fonts that did not load (rendered in a fallback): ${m.missingFonts?.join(', ') || 'none'}; trim keys that cannot render: ${m.deadTrimLayers?.join(', ') || 'none'}`,
@@ -195,7 +195,7 @@ async function probe(page) {
       const extra = [l.text ? `"${l.text.content.slice(0, 60)}" ${l.text.fontFamily} ${l.text.fontSize}px w${l.text.fontWeight}` : '', l.shape ? l.shape.kind : '', l.props.strokeWidth && valueAt(l, 'strokeWidth', 0)[0] > 0 ? `stroke ${hex(valueAt(l, 'stroke', 0))} ${valueAt(l, 'strokeWidth', 0)[0]}px` : ''].filter(Boolean).join(' ');
       return `${'  '.repeat(depth)}- ${l.name} [${l.type}]${box ? ` box ${Math.round(box[1])},${Math.round(box[2])},${Math.round(box[3] - box[1])},${Math.round(box[4] - box[2])}` : ''} ${fill} ${extra}`.trimEnd();
     }).filter(Boolean).join('\n');
-    const timeline = [`comp ${c.width}x${c.height} ${D}s @${c.fps}fps, background ${hex(c.background)}${(c.markers ?? []).length ? `, markers ${c.markers.map((m) => m.t + (m.label ? ' ' + m.label : '')).join(', ')}` : ''}`,
+    const timeline = [`comp ${c.width}x${c.height} ${D}s @${c.fps}fps, background ${hex(c.background)}`,
       ...order.map((id) => { const l = st.layer(id); return l ? describeLayerAnimation(l) : ''; }).filter(Boolean)].join('\n');
     // which requested font families actually render (else the text silently falls back to Inter/system)
     const fonts = {};
@@ -263,7 +263,7 @@ async function runBrief(worker, brief, rep) {
   const finished = new Promise((r) => { done = r; });
   worker.onEvent = (ev) => { if (ev.kind !== 'text_delta') events.push(ev); if (ev.kind === 'done') done(); };
   const t0 = Date.now();
-  const setup = await page.evaluate(async ({ comp, prompt, model, dry }) => {
+  const setup = await page.evaluate(async ({ comp, prompt, model, dry, audio }) => {
     const { agentClient } = await import('/src/agent/client.ts');
     const { composeMessage } = await import('/src/agent/context.ts');
     const { setCompSettings } = await import('/src/core/commands.ts');
@@ -279,6 +279,18 @@ async function runBrief(worker, brief, rep) {
         window.__evalLog.push({ name, argsBytes: JSON.stringify(a ?? {}).length, ok, ms: Math.round(performance.now() - s), error, at: Date.now() });
       }
     };
+    if (audio) {
+      // a procedurally generated, royalty-free track (src/audio/synth-track.ts), analysed before the turn
+      const { synthTrack, TRACKS } = await import('/src/audio/synth-track.ts');
+      const { wavDataUrl } = await import('/src/audio/wav.ts');
+      const { addAudioLayer } = await import('/src/audio/import.ts');
+      const { ensureAnalysis } = await import('/src/audio/analysis-store.ts');
+      const tr = synthTrack(TRACKS[audio.track] ?? audio.spec);
+      const l = addAudioLayer(audio.name ?? audio.track, wavDataUrl([tr.samples], tr.sr), 'audio/wav', { at: 0 });
+      await ensureAnalysis(st.project.assets[l.imageRef]);
+      (await import('/src/audio/timing.ts')).refreshAudioEnv(st);
+      st.select([]);
+    }
     const message = composeMessage(st, prompt);
     if (dry) {
       // pipeline self-test without a model: a scripted "agent" through the same tool path
@@ -298,7 +310,7 @@ async function runBrief(worker, brief, rep) {
       window.__chatId = 'dry';
     } else window.__chatId = agentClient.chat({ provider: 'claude', message, model }, (ev) => window.__evalEvent({ ...ev, at: Date.now() }));
     return { message, tools: TOOLS.map((t) => t.name) };
-  }, { comp: brief.comp, prompt: brief.prompt, model: O.model, dry: O.dry });
+  }, { comp: brief.comp, prompt: brief.prompt, model: O.model, dry: O.dry, audio: brief.audio ?? null });
   log(`[w${worker.i}] ${name}: turn started (${setup.tools.length} tools)`);
   let timedOut = false;
   await Promise.race([finished, new Promise((r) => setTimeout(r, O.timeoutMin * 60_000)).then(() => { timedOut = true; })]);
