@@ -39,7 +39,8 @@ for (const n of counts) for (const mode of modes) {
     };
     const out = {};
     const W = tl.w, H = tl.h;
-    const trackX = tl.leftW + (W - tl.leftW) * 0.5, rowsY = 28 + 5 * 24 + 12;
+    const RH = tl.rowY(1) - tl.rowY(0); // row height of the build under test
+    const trackX = tl.leftW + (W - tl.leftW) * 0.5, rowsY = 28 + 5 * RH + RH / 2;
     out.size = `${W}x${H}, rows ${tl.rows.length}`;
 
     // ---- playback with the timeline visible: per-frame cost of the frame hook
@@ -81,11 +82,11 @@ for (const n of counts) for (const mode of modes) {
     await run('searchType', word.length * 2, i => { search.value = i < word.length ? word.slice(0, i + 1) : word.slice(0, word.length * 2 - i - 1); search.dispatchEvent(new Event('input')); });
     search.value = ''; search.dispatchEvent(new Event('input')); tl.frame();
     // ---- click a row (selection change -> reveal)
-    await run('clickRow', 40, i => { const y = 28 + (i % 10) * 24 + 12; pe('pointerdown', 120, y); pe('pointerup', 120, y); });
+    await run('clickRow', 40, i => { const y = 28 + (i % 10) * RH + RH / 2; pe('pointerdown', 120, y); pe('pointerup', 120, y); });
     // ---- edit: toggle visibility via the eye (doc -> rows rebuild)
     await run('toggleVisible', 20, () => { pe('pointerdown', tl.leftW - 40, rowsY); pe('pointerup', tl.leftW - 40, rowsY); });
     // ---- hover across rows (row hover redraws the base)
-    await run('hoverRows', 100, i => pe('pointermove', 150, 28 + (i % 20) * 24 + 5, { buttons: 0 }));
+    await run('hoverRows', 100, i => pe('pointermove', 150, 28 + (i % 20) * RH + 5, { buttons: 0 }));
     // ---- marquee over expanded rows (alt-drag on track)
     { tl.frame(); const top = tl.rows.filter(r => r.kind === 'layer').slice(0, 2000).map(r => r.id); for (const id of top) tl.expand(id, true); }
     tl.scrollY = 0; tl.frame();

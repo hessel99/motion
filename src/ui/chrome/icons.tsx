@@ -18,10 +18,10 @@ export {
   AlignHorizontalDistributeCenter, AlignStartHorizontal, AlignStartVertical, AlignVerticalDistributeCenter,
   ArrowRightLeft, ArrowUp, ArrowUpRight, AudioLines, Bell, Clock, Bookmark, Brackets, ChevronsLeft, ChevronsRight, Maximize2, SkipForward, ZoomIn, ZoomOut, Blend, Bot, Box, Check, ChevronDown, ChevronLeft,
   ChevronRight, ChevronUp, Circle, CircleCheck, CircleUser, CircleX, Clapperboard, Code, Component, Copy, Cpu, Diamond,
-  Download, Upload, Ellipsis, ExternalLink, Eye, EyeOff, File, FileText, Film, Folder, Frame, Gauge, Hand, Hash, Hexagon,
+  Download, Upload, Palette, Ellipsis, ExternalLink, Eye, EyeOff, File, FileText, Film, Folder, Frame, Gauge, Hand, Hash, Hexagon,
   House, Image, Info, Keyboard, Plug, Layers, Link, Link2, LoaderCircle, Lock, LockOpen, Magnet, MessageSquare, Minus, Monitor,
-  Moon, MousePointer2, PanelLeft, PanelLeftClose, PanelLeftOpen, Pause, PenTool, Pentagon, Play, Plus, Redo2, RefreshCw, Repeat,
-  RotateCcw, RotateCw, Search, Settings, SkipBack, SlidersHorizontal, Sparkle, Sparkles, Spline, Square, SquareTerminal, Star,
+  Moon, MousePointer2, MousePointerClick, ArrowDown, PanelLeft, PanelLeftClose, PanelLeftOpen, Pause, PenTool, Pentagon, Play, Plus, Redo2, RefreshCw, Repeat,
+  RotateCcw, RotateCw, Rows3, Search, Settings, SkipBack, SlidersHorizontal, Sparkle, Sparkles, Spline, Square, SquareTerminal, Star,
   SquarePen, SquareRoundCorner, StepBack, StepForward, Sun, SwatchBook, Terminal, Type, Undo2, Unlink, User, Users, Variable, Workflow, X, Zap,
 } from 'lucide-preact';
 export type { LucideIcon };

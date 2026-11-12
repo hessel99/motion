@@ -9,6 +9,7 @@ import { menuFrom, showContextMenu } from './menu';
 import { agentMenuItems } from './agent-menu';
 import { AskBar } from './chrome/AskBar';
 import { EmptyCanvas, ImportSuggestion } from './chrome/CanvasAgent';
+import { PlaybackPill, SelectionBar, stopPreview } from './chrome/CanvasBars';
 import { openBrowserFile, setupShortcuts, runBenchmark, toast } from '../app/actions';
 import { prefs, setPref } from '../app/prefs';
 import { cloneLayers, deleteLayers } from '../core/commands';
@@ -52,12 +53,13 @@ export function App() {
   const home = ui.view === 'home';
   return (
     <IconProvider>
-      <div class={'app' + (ui.leftOpen ? '' : ' no-left') + (home ? ' show-home' : '')} style={tlHeightStyle()}>
+      <div class={'app' + (ui.leftOpen ? '' : ' no-left') + (home ? ' show-home' : '') + (ui.previewing ? ' previewing' : '')} style={tlHeightStyle()}>
         <Guard name="Top bar"><TopBar /></Guard>
         {/* the editor stays mounted under Home: its canvases and WebGL context live for the session */}
         <aside class="left card" aria-label="Agent and assets" hidden={!ui.leftOpen}><Guard name="Side panel"><LeftPanel /></Guard></aside>
         <main class="center card" aria-label="Canvas">
           <Viewport />
+          {ui.previewing && <button type="button" class="preview-exit" onClick={stopPreview}>Esc · leave preview</button>}
         </main>
         <section class="bottom card" aria-label="Timeline">
           <Guard name="Timeline header"><TimelineHeader /></Guard>
@@ -142,8 +144,9 @@ function Viewport() {
       }}>
       <EmptyCanvas />
       <ImportSuggestion />
-      <Toolbar />
-      <ZoomBadge />
+      <SelectionBar />
+      <Toolbar><ZoomBadge /></Toolbar>
+      <PlaybackPill />
       <Hud />
     </div>
   );
@@ -174,7 +177,7 @@ function ZoomBadge() {
       { label: 'Performance HUD', checked: editor.showHud, action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
     ], { align: 'right', above: true });
   };
-  return <button type="button" ref={el} class="zoom-badge vp-ui" aria-haspopup="menu" data-tooltip="Zoom and view options" data-tooltip-side="top" onClick={menu}>100%</button>;
+  return <button type="button" ref={el} class="zoom-badge" aria-haspopup="menu" data-tooltip="Zoom and view options" data-tooltip-side="top" onClick={menu}>100%</button>;
 }
 
 function Hud() {

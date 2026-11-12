@@ -36,6 +36,8 @@ export class ViewportController {
   private spaceDown = false;
   private overlayDirty = true;
   private fitted = false;
+  private lastW = 0;
+  private lastH = 0;
   private lastSelKey = '';
   private mouse = { x: 0, y: 0 };
   onTextEdit: ((id: string, fresh?: boolean) => void) | null = null;
@@ -97,6 +99,9 @@ export class ViewportController {
     this.overlay.style.width = r.width + 'px';
     this.overlay.style.height = r.height + 'px';
     if (!this.fitted && r.width > 10) { this.fit(); this.fitted = true; }
+    // a panel opened / closed: the view stays centred (keeps what was in the middle in the middle)
+    else if (this.lastW > 10 && r.width > 10) { this.panX += (r.width - this.lastW) / 2; this.panY += (r.height - this.lastH) / 2; }
+    this.lastW = r.width; this.lastH = r.height;
     this.applyView();
   }
 

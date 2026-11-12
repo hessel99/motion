@@ -15,6 +15,7 @@ import { showContextMenu, type MenuItem } from './menu';
 import { createComponent, createInstance, detachInstance, instanceRootOf, overridesOf, resetOverrides } from '../core/components';
 import { GraphView } from './graph';
 import { agentMenuItems } from './agent-menu';
+import { agentProgress } from './agent-bridge';
 import { T, onThemeChange } from './theme';
 import { Eye, EyeOff, LAYER_ICON, Lock, LockOpen, Square, strokeIcon } from './chrome/icons';
 import { audioDuration, audioFailed, audioPeaks } from '../audio/engine';
@@ -171,6 +172,7 @@ export class Timeline {
       lastDur = st.comp.duration; this.expanded.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
     ed.onFrame(() => this.frame());
     ed.on('audio', () => { this.baseDirty = true; });
+    ed.on('agent-turn', () => { this.baseDirty = true; });
     onThemeChange(() => { this.baseDirty = true; this.lastPlayheadX = -1; });
     this.canvas.addEventListener('pointerdown', e => this.down(e));
     this.canvas.addEventListener('pointermove', e => this.move(e));
@@ -504,6 +506,12 @@ export class Timeline {
         g.fillStyle = T.tlTickMinor;
         g.fillRect(mx, HEADER_H - 4, 1, 4);
       }
+    }
+    // the storyboard beat the agent is building right now: a soft band over the tracks + the ruler
+    const ar = agentProgress()?.range;
+    if (ar) {
+      const ax = Math.max(this.leftW, this.tToX(ar[0])), bx = Math.min(this.w, this.tToX(ar[1]));
+      if (bx > ax) { g.fillStyle = T.tlMarqueeFill; g.fillRect(ax, 0, bx - ax, this.h); g.fillStyle = T.tlHot; g.fillRect(ax, HEADER_H - 3, bx - ax, 2); }
     }
     // work area (preview range)
     const wa = this.ed.store.workArea;

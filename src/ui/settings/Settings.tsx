@@ -138,8 +138,8 @@ function Appearance() {
   const [theme, setT] = useState<ThemePref>(getThemePref());
   useEffect(() => onThemeChange(() => setT(getThemePref())), []);
   const cards: { id: ThemePref; label: string; sub: string; Icon: LucideIcon; note?: string }[] = [
-    { id: 'light', label: 'Light', sub: 'Default', Icon: Sun },
-    { id: 'dark', label: 'Dark', sub: 'Calm dark greys', Icon: Moon },
+    { id: 'dark', label: 'Dark', sub: 'Default', Icon: Moon },
+    { id: 'light', label: 'Light', sub: 'Light greys', Icon: Sun },
     { id: 'system', label: 'System', sub: 'Follows your OS', Icon: Monitor, note: 'Switches with your computer.' },
   ];
   const gpu = gpuName();

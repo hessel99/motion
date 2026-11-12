@@ -1,5 +1,5 @@
 // screenshots of the window structure (docs/shots/ui-v3/): Home, a selected shape, a text layer,
-// comp settings, two documents, two comp tabs, the export dialog, the ask bar, dark mode.
+// comp settings, two documents, two comp tabs, the export dialog, the ask bar (dark), light mode.
 // usage: URL=http://localhost:5391/ node scripts/ui-shots.mjs [outDir] [scale]
 import { chromium } from './pw.mjs';
 import { mkdirSync } from 'node:fs';
@@ -9,7 +9,7 @@ const scale = +(process.argv[3] || 2);
 mkdirSync(out, { recursive: true });
 const browser = await chromium.launch({ args: ['--ignore-gpu-blocklist'] });
 const errors = [];
-async function page(q, theme = 'light') {
+async function page(q, theme = 'dark') {
   const p = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: scale });
   p.on('pageerror', e => errors.push(e.message));
   p.on('console', m => { if (m.type() === 'error' && !/bridge|WebSocket|ERR_CONNECTION/i.test(m.text())) errors.push(m.text()); });
@@ -51,11 +51,11 @@ await shot(p, '09-ask-bar');
 await p.keyboard.press('Escape');
 await p.close();
 
-p = await page('&demo', 'dark');
+p = await page('&demo', 'light');
 await selectByName(p, 'Pill');
-await shot(p, '10-dark-shape-selected');
+await shot(p, '10-light-shape-selected');
 await p.evaluate(() => editor.emit('home'));
-await shot(p, '11-dark-home');
+await shot(p, '11-light-home');
 await p.close();
 
 await browser.close();

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
 import { lastImport } from '../../app/actions';
 import { activeDoc } from '../../app/documents';
-import { askAgent } from '../agent-bridge';
+import { agentProgress, askAgent, chatStarted } from '../agent-bridge';
 import { useChannels } from '../hooks';
 import { PromptBox } from './PromptBox';
 import { AudioLines, Sparkles, X } from './icons';
@@ -15,11 +15,11 @@ const dismissed = new Set<string>();
 
 /** an empty composition shows the brief box instead of a blank grey area */
 export function EmptyCanvas() {
-  useChannels(['doc', 'comps', 'playing'], ['tool', 'docs', 'ui']);
+  useChannels(['doc', 'comps', 'playing'], ['tool', 'docs', 'ui', 'agent-turn']);
   const s = editor.store;
   const d = activeDoc();
   const key = (d?.id ?? '') + ':' + s.comp.id;
-  if (!d || s.comp.root.length || s.playing || (editor.tool !== 'select' && editor.tool !== 'hand') || dismissed.has(key)) return null;
+  if (!d || s.comp.root.length || chatStarted || agentProgress() || s.playing || (editor.tool !== 'select' && editor.tool !== 'hand') || dismissed.has(key)) return null;
   return (
     <div class="vp-empty">
       <div class="vp-empty-card">

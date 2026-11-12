@@ -13,7 +13,6 @@ export interface AgentAsk {
   chip?: string;
   /** what the ask refers to beyond the layer selection (keys, a time range), added to the message */
   context?: string;
-  mode?: 'edit' | 'ask';
 }
 
 let pending: AgentAsk | null = null;
@@ -27,11 +26,14 @@ export function askAgent(text: string, opts: Omit<AgentAsk, 'text'> = {}) {
 /** the AgentPanel takes the pending ask (once) */
 export function takeAsk(): AgentAsk | null { const a = pending; pending = null; return a; }
 
-export interface AgentProgress { activity: string; live: number; startedAt: number }
+export interface AgentProgress { activity: string; live: number; startedAt: number; /** the storyboard beat being built (the timeline highlights it) */ range?: [number, number] }
 let progress: AgentProgress | null = null;
 export function agentProgress() { return progress; }
+/** the open document's conversation has messages (the empty-canvas brief box steps aside) */
+export let chatStarted = false;
+export function setChatStarted(v: boolean) { if (v !== chatStarted) { chatStarted = v; editor.emit('agent-turn'); } }
 export function setAgentProgress(p: AgentProgress | null) {
-  if (p === progress || (p && progress && p.activity === progress.activity && p.live === progress.live)) return;
+  if (p === progress || (p && progress && p.activity === progress.activity && p.live === progress.live && p.range?.[0] === progress.range?.[0] && p.range?.[1] === progress.range?.[1])) return;
   progress = p;
   editor.emit('agent-turn');
 }

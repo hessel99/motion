@@ -1,8 +1,9 @@
 // the floating tool pill at the bottom centre of the canvas: select, hand, the shape family (one
 // button: its corner caret, a right-click or a second click on it picks rectangle / ellipse /
-// polygon / star), pen and text. canvas view options live in the zoom menu (bottom right).
+// polygon / star), pen and text, then the zoom (its menu holds the canvas view options).
 
 import { useState } from 'preact/hooks';
+import type { ComponentChildren } from 'preact';
 import { editor, type Tool } from '../../app/editor';
 import { useChannels } from '../hooks';
 import { menuFrom, type MenuItem } from '../menu';
@@ -24,7 +25,7 @@ const GROUPS: Tool[][] = [['select'], ['hand'], ['rect', 'ellipse', 'polygon', '
 
 const lastUsed = new Map<number, Tool>();
 
-export function Toolbar() {
+export function Toolbar(props: { children?: ComponentChildren }) {
   useChannels([], ['tool']);
   const [, force] = useState(0);
   const cur = editor.tool;
@@ -58,6 +59,8 @@ export function Toolbar() {
           </button>
         );
       })}
+      {props.children && <span class="toolbar-sep" aria-hidden="true" />}
+      {props.children}
     </div>
   );
 }

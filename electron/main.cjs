@@ -193,16 +193,19 @@ function buildMenu() {
       label: 'File',
       submenu: [
         { label: 'New', accelerator: 'CmdOrCtrl+N', click: () => sendMenu('new') },
+        { label: 'New Tab', accelerator: 'CmdOrCtrl+T', click: () => sendMenu('newTab') },
         { label: 'Open…', accelerator: 'CmdOrCtrl+O', click: () => sendMenu('open') },
+        { label: 'Close Tab', accelerator: 'CmdOrCtrl+W', click: () => sendMenu('closeTab') },
+        { label: 'Next Tab', accelerator: 'Ctrl+Tab', click: () => sendMenu('nextTab') },
+        { label: 'Previous Tab', accelerator: 'Ctrl+Shift+Tab', click: () => sendMenu('prevTab') },
         { type: 'separator' },
         { label: 'Save', accelerator: 'CmdOrCtrl+S', click: () => sendMenu('save') },
         { label: 'Save As…', accelerator: 'CmdOrCtrl+Shift+S', click: () => sendMenu('saveAs') },
         { type: 'separator' },
         { label: 'Import…', click: () => sendMenu('import') }, // ⌘I is the agent sidebar toggle in the app; ⌘O opens + imports
-        { label: 'Export Lottie…', accelerator: 'CmdOrCtrl+E', click: () => sendMenu('export-lottie') },
-        { label: 'Export for After Effects (.jsx)…', click: () => sendMenu('export-ae') },
+        { label: 'Export…', accelerator: 'CmdOrCtrl+E', click: () => sendMenu('export') },
         { type: 'separator' },
-        isMac ? { role: 'close' } : { role: 'quit' },
+        isMac ? { label: 'Close Window', accelerator: 'CmdOrCtrl+Shift+W', role: 'close' } : { role: 'quit' },
       ],
     },
     {

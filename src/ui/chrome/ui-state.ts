@@ -22,6 +22,8 @@ interface UiState {
   section: SettingsSection;
   /** timeline height in css px (the splitter on its top edge); 0 = default */
   tlH: number;
+  /** full-screen preview: only the canvas (not persisted) */
+  previewing: boolean;
 }
 
 export const TL_MIN = 160;
@@ -29,11 +31,11 @@ export const TL_MIN = 160;
 export const STAGE_MIN = 200;
 
 function load(): UiState {
-  const d: UiState = { view: 'editor', settingsOpen: false, leftTab: 'agent', leftOpen: true, section: 'appearance', tlH: 0 };
+  const d: UiState = { view: 'editor', settingsOpen: false, leftTab: 'agent', leftOpen: true, section: 'appearance', tlH: 0, previewing: false };
   try {
     const s = JSON.parse(localStorage.getItem(KEY) || '{}');
     if (localStorage.getItem('motion.agentOpen') === '0' && s.leftOpen === undefined) d.leftOpen = false;
-    const out: UiState = { ...d, ...s, view: 'editor', settingsOpen: false };
+    const out: UiState = { ...d, ...s, view: 'editor', settingsOpen: false, previewing: false };
     // older tabs (library, components) live in Assets now
     if (!['agent', 'assets'].includes(out.leftTab)) out.leftTab = out.leftTab ? 'assets' : 'agent';
     if (typeof out.tlH !== 'number' || !isFinite(out.tlH)) out.tlH = 0;
@@ -48,7 +50,7 @@ export function setUi(patch: Partial<UiState>) {
   // the Home view turns editor shortcuts off (src/app/actions.ts reads this)
   if (typeof document !== 'undefined') document.documentElement.dataset.view = ui.view;
   try {
-    const { view: _v, settingsOpen: _s, ...rest } = ui;
+    const { view: _v, settingsOpen: _s, previewing: _p, ...rest } = ui;
     localStorage.setItem(KEY, JSON.stringify(rest));
     localStorage.setItem('motion.agentOpen', ui.leftOpen ? '1' : '0');
   } catch { /* private mode */ }

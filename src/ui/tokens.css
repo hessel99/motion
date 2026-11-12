@@ -10,13 +10,13 @@
    - Canvas tokens (--tl-*, --graph-*, --vp-*, --axis-*) are read once per theme change by
      src/ui/theme.ts. They may be any CSS color (var() and color-mix() are fine: theme.ts resolves
      them to rgb through a probe element).
-   - Themes: <html data-theme="light|dark"> (always set by theme.ts). Light is the default; any
+   - Themes: <html data-theme="light|dark"> (always set by theme.ts). Dark is the default; any
      subtree can carry its own data-theme (the style guide renders both side by side). Every
      theme defines every color token; space, radius, type, motion and z are theme independent.
    - Contrast: --text, --text-secondary and --text-muted reach WCAG AA (4.5:1) on --surface-1
      and --input-bg (checked in ?styleguide).
 
-   Look: calm. A light grey window, white cards with a generous radius floating on it (gaps of
+   Look (dark is the designed theme; light follows the same tokens): calm. A dark window, lighter cards with a generous radius floating on it (gaps of
    the window color between them, no borders, no heavy shadows), borderless soft grey fields,
    small 13px type, labels in mid grey, values near black. One accent (a calm blue) for
    selection, focus, the playhead and selected keys: color only where it means something. The
@@ -48,6 +48,11 @@
   --inverse-bg: #161616;      /* the primary action (Export), play */
   --inverse-bg-hover: #333333;
   --inverse-text: #ffffff;
+  --primary-bg: #161616;      /* the one primary action per surface (Export, send, dialog OK) */
+  --primary-bg-hover: #333333;
+  --primary-text: #ffffff;
+  --tooltip-bg: #161616;
+  --tooltip-text: #ffffff;
   --toggle-on: #161616;
   --toggle-off: #e2e2e2;
   --toggle-knob: #ffffff;
@@ -230,10 +235,10 @@
 [data-theme='dark'] {
   color-scheme: dark;
 
-  --bg-app: #161616;
+  --bg-app: #141414;
   --surface-0: #1c1c1c;
-  --surface-1: #232323;
-  --surface-2: #2c2c2c;
+  --surface-1: #1f1f1f;
+  --surface-2: #292929;
   --surface-3: #2c2c2c;
   --surface-overlay: #2a2a2a;
   --surface-code: #1c1c1c;
@@ -242,22 +247,27 @@
   --surface-selected: #303030;
   --backdrop: rgba(0, 0, 0, 0.5);
 
-  --input-bg: #2c2c2c;
-  --input-bg-hover: #323232;
+  --input-bg: #292929;
+  --input-bg-hover: #303030;
   --btn-bg: #2e2e2e;
   --btn-bg-hover: #363636;
   --inverse-bg: #f1f1f1;
   --inverse-bg-hover: #ffffff;
   --inverse-text: #161616;
-  --toggle-on: #f1f1f1;
+  --primary-bg: #ececec;      /* dark: near-white, neutral (blue stays for selection / playhead / keys) */
+  --primary-bg-hover: #ffffff;
+  --primary-text: #161616;
+  --tooltip-bg: #3a3a3a;
+  --tooltip-text: #f1f1f1;
+  --toggle-on: #e6e6e6;
   --toggle-off: #3a3a3a;
   --toggle-knob: #161616;
   --avatar-bg: #333333;
   --avatar-text: #f1f1f1;
   --composer-bg: #2a2a2a;
   --composer-border: #333333;
-  --tool-active: #f1f1f1;
-  --tool-active-text: #161616;
+  --tool-active: #3b3b3b;
+  --tool-active-text: #ffffff;
   --seg-track: #1c1c1c;
   --seg-on: #333333;
   --seg-on-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -323,10 +333,10 @@
 
   --focus-ring-color: rgba(91, 143, 249, 0.6);
 
-  --tl-bg: #232323;
-  --transport-bg: #232323;
-  --tl-bg-outside: #1f1f1f;
-  --tl-ruler-bg: #232323;
+  --tl-bg: #1f1f1f;
+  --transport-bg: #1f1f1f;
+  --tl-bg-outside: #1b1b1b;
+  --tl-ruler-bg: #1f1f1f;
   --tl-divider: #2c2c2c;
   --tl-row-line: rgba(255, 255, 255, 0);
   --tl-row-hover: rgba(255, 255, 255, 0.03);
@@ -347,8 +357,8 @@
   --tl-solo: #ffcc00;
   --tl-component: #a98bf3;
   --tl-bar: rgba(255, 255, 255, 0.05);
-  --tl-key-stroke: #232323;
-  --tl-key-selected-stroke: #232323;
+  --tl-key-stroke: #1f1f1f;
+  --tl-key-selected-stroke: #1f1f1f;
   --tl-key-off-stroke: #707070;
   --tl-key-summary: #9a9a9a;
   --tl-key-summary-selected: #ffffff;
@@ -396,7 +406,7 @@
   --axis-w: #ffcc00;
   --axis-scalar: #a98bf3;
 
-  --vp-bg: #1b1b1b;
+  --vp-bg: #111111;
   --vp-comp-outline: rgba(255, 255, 255, 0.08);
   --vp-label: rgba(255, 255, 255, 0.5);
   --vp-handle: #ffffff;

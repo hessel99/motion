@@ -94,7 +94,8 @@ export function newDocument(init?: { name?: string; width?: number; height?: num
   if (init?.height) c.height = init.height;
   if (init?.fps) c.fps = init.fps;
   if (init?.duration) c.duration = init.duration;
-  if (active && !pristine(active)) { park(); active = null; }
+  // always its own tab (opening a file may take the place of an untouched one: openProject)
+  if (active) { park(); active = null; }
   pendingPath = null;
   editor.load(p);
 }

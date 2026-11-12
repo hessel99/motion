@@ -218,7 +218,7 @@ export function getTheme(): ThemeName {
 export type ThemePref = ThemeName | 'system';
 
 const STORAGE = 'motion.theme';
-let pref: ThemePref = 'light';
+let pref: ThemePref = 'dark';
 let mql: MediaQueryList | null = null;
 
 export function getThemePref(): ThemePref { return pref; }
@@ -234,7 +234,7 @@ function systemTheme(): ThemeName {
   try { return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { return 'light'; }
 }
 
-/** switch the whole app's theme (persisted). light is the default; 'system' follows the OS. */
+/** switch the whole app's theme (persisted). dark is the default; 'system' follows the OS. */
 export function setTheme(name: ThemePref) {
   pref = name;
   try { localStorage.setItem(STORAGE, name); } catch { /* private mode */ }
@@ -250,7 +250,7 @@ export function initTheme() {
   observing = true;
   let wanted: string | null = null;
   try { wanted = new URLSearchParams(location.search).get('theme') ?? localStorage.getItem(STORAGE); } catch { /* */ }
-  pref = wanted === 'dark' || wanted === 'system' ? wanted : 'light';
+  pref = wanted === 'light' || wanted === 'system' ? wanted : 'dark';
   const initial = pref === 'system' ? systemTheme() : pref;
   document.documentElement.dataset.theme = initial;
   refreshTheme();
