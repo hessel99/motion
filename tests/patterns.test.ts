@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { bezierToFeel, bezierY, feelName, feelToBezier, type Bez } from '../src/ui/patterns/feel';
+import { bezierToFeel, bezierY, curveExcursion, feelName, feelToBezier, type Bez } from '../src/ui/patterns/feel';
 import { detectStagger, grooveShape, retime, snapTo, staggerOffsets, layerSpan } from '../src/ui/patterns/timing';
 import { applyStagger, applyTempo, easedKeys, EasePreview, snapshotTiming } from '../src/ui/patterns/ops';
 import { cubicBezier } from '../src/core/easing';
@@ -132,10 +132,34 @@ describe('pattern operations on the document', () => {
     store.undo();
     expect(ids.map(id => layerSpan(store.layer(id)!)![0])).toEqual([0.5, 0.5, 0.5, 0.5]);
   });
-  it('stagger snaps to markers', () => {
+  it('stagger snaps the cascade as a whole to markers (spacing / groove stay intact)', () => {
     const { store, ids } = scene();
-    applyStagger(store, snapshotTiming(store, ids)!, 0.1, 0, { targets: [0.65], radius: 0.06 });
-    expect(layerSpan(store.layer(ids[1])!)![0]).toBeCloseTo(0.65, 9);
+    // 4 layers from 0.5, stagger 0.1: the last starts at 0.8, the marker at 0.9 pulls it there
+    applyStagger(store, snapshotTiming(store, ids)!, 0.1, 0, { targets: [0.9], radius: 0.12, mergeKey: 's' });
+    const starts = ids.map(id => layerSpan(store.layer(id)!)![0]);
+    expect(starts[3]).toBeCloseTo(0.9, 9);
+    const det = detectStagger(starts);
+    expect(det.groove).toBe(0); // per-layer snapping used to bend the cascade into a "groove"
+    expect(det.stagger).toBeCloseTo(0.4 / 3, 2);
+  });
+  it('with the magnet on, a stagger nudge changes stagger, not groove', () => {
+    const { store, ids } = scene();
+    const markers = [0.6, 0.75, 1.0];
+    for (const st of [0.05, 0.07, 0.09, 0.11]) {
+      applyStagger(store, snapshotTiming(store, ids)!, st, 0, { targets: markers, radius: 0.08, mergeKey: 'n' + st });
+      expect(detectStagger(ids.map(id => layerSpan(store.layer(id)!)![0])).groove).toBe(0);
+    }
+  });
+  it('tempo never pushes keys past the composition end', () => {
+    const { store, ids } = scene();
+    store.transact('dur', tx => tx.set(store.comp, 'duration', 4));
+    const snap = snapshotTiming(store, ids)!;
+    const got = applyTempo(store, snap, 6.23, { mergeKey: 't' });
+    expect(got).toBeCloseTo(3.5, 9); // starts at 0.5, ends at the comp end
+    for (const id of ids) expect(layerSpan(store.layer(id)!)![1]).toBeLessThanOrEqual(4 + 1e-9);
+    // a marker past the end does not pull it out either
+    applyTempo(store, snap, 3.4, { targets: [4.05], radius: 0.2, mergeKey: 't' });
+    for (const id of ids) expect(layerSpan(store.layer(id)!)![1]).toBeLessThanOrEqual(4 + 1e-9);
   });
   it('tempo stretches around the first key and snaps the end', () => {
     const { store, ids } = scene();
@@ -237,5 +261,40 @@ describe('gesture recording', () => {
     expect(keys.length).toBeLessThan(14);
     expect(keys.slice(1, -1).every(k => k.sOut && k.sIn)).toBe(true);
     expect(simplify(s, 6, 400)[0]).toBe(0);
+  });
+  it('pickup lag and the hold before release add no identical-value keys', () => {
+    const lag = 0.25, hold = 0.4, hz = 120;
+    const s: Sample[] = [];
+    for (let i = 0; i <= (lag + 1 + hold) * hz; i++) {
+      const t = i / hz, u = Math.min(1, Math.max(0, (t - lag) / 1));
+      s.push({ t, x: 100 + bezierY([0.42, 0, 0.58, 1], u) * 400, y: 50 });
+    }
+    const keys = buildKeys(s, { fps: 60 });
+    expect(keys.length).toBe(2);
+    expect(keys[0].t).toBe(0); // re-based: the motion starts where the playhead was
+    expect(keys[1].t).toBeCloseTo(1, 6);
+    for (let k = 1; k < keys.length; k++) expect(keys[k].v).not.toEqual(keys[k - 1].v);
+  });
+});
+
+describe('overshoot knob', () => {
+  it('overshoot above a small amount always leaves the 0..1 band, anywhere on the pad', () => {
+    for (let a = 0; a <= 1.0001; a += 0.1) for (let k = 0.1; k <= 1.0001; k += 0.15) for (const o of [0.15, 0.3, 0.5, 1]) {
+      const [under, over] = curveExcursion(feelToBezier({ attack: a, smooth: k, overshoot: o }));
+      expect(Math.max(under, over)).toBeGreaterThan(o >= 0.5 ? 0.02 : o >= 0.3 ? 0.01 : 0.0025);
+    }
+  });
+  it('the reported case: mid attack/smoothness, overshoot 50% visibly overshoots and is named from the curve', () => {
+    const f = { attack: 0.5, smooth: 0.5, overshoot: 0.5 };
+    const [under, over] = curveExcursion(feelToBezier(f));
+    expect(Math.max(under, over)).toBeGreaterThan(0.02);
+    expect(feelName(f)).toBe(under > 0.02 && over > 0.02 ? 'Elastic' : under > 0.02 ? 'Wind-up' : 'Overshoot');
+    // no overshoot -> never an overshoot name
+    for (let a = 0; a <= 1.0001; a += 0.25) expect(['Wind-up', 'Overshoot', 'Elastic']).not.toContain(feelName({ attack: a, smooth: 0.6, overshoot: 0 }));
+  });
+  it('stays continuous at overshoot 0 (no jump when the knob leaves zero)', () => {
+    const a = feelToBezier({ attack: 0.5, smooth: 0.5, overshoot: 0 });
+    const b = feelToBezier({ attack: 0.5, smooth: 0.5, overshoot: 0.005 });
+    for (let i = 0; i < 4; i++) expect(Math.abs(a[i] - b[i])).toBeLessThan(0.02);
   });
 });

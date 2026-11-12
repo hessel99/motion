@@ -445,6 +445,8 @@ function EasePanel() {
         </div>
       )}
       {a?.interp === 'hold' && <div class="muted small">Hold keyframe (no interpolation)</div>}
+      {/* the studio has its own swatches: the preset chips are the classic editor's (studio off) */}
+      {!studioEnabled() && <>
       <div class="ease-group label-xs">Springs</div>
       <div class="ease-presets">
         {SPRING_PRESETS.map(p => (
@@ -464,7 +466,11 @@ function EasePanel() {
         ))}
       </div>
       </>}
-      <div class="row small muted">cubic-bezier({cur.map(x => Math.round(x * 100) / 100).join(', ')})</div>
+      </>}
+      {/* footer: what the segment really is (a spring's handles are meaningless) */}
+      {a?.interp === 'spring' ? <div class="row small muted">spring · bounce {Math.round((a.bounce ?? 0.3) * 100)}%</div>
+        : a?.interp === 'hold' ? null
+        : <div class="row small muted">cubic-bezier({cur.map(x => Math.round(x * 100) / 100).join(', ')})</div>}
     </Section>
   );
 }

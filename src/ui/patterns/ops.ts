@@ -162,14 +162,23 @@ export function snapshotTiming(store: Store, ids: string[]): TimingSnap | null {
 
 export interface SnapOpts { targets?: readonly number[]; radius?: number; mergeKey?: string }
 
+/** the longest tempo duration that keeps the selection inside the composition */
+export function maxTempo(store: Store, snap: TimingSnap) {
+  return Math.max(1 / store.comp.fps, store.comp.duration - snap.span[0]);
+}
+
 /** stretch the whole selection so it lasts `duration` seconds (pivot = first key). magnetic:
- *  the end lands on a marker/beat when close. returns the duration actually applied. */
+ *  the end lands on a marker/beat when close. the end never goes past the composition end.
+ *  returns the duration actually applied. */
 export function applyTempo(store: Store, snap: TimingSnap, duration: number, o: SnapOpts = {}): number {
   const [a, b] = snap.span;
   const len = b - a;
   if (len < 1e-6) return 0;
-  let end = a + Math.max(1 / store.comp.fps, duration);
+  const maxEnd = a + maxTempo(store, snap);
+  let end = a + Math.max(1 / store.comp.fps, Math.min(duration, maxEnd - a));
   if (o.targets?.length) end = snapTo(end, o.targets, o.radius ?? 0.1);
+  end = Math.min(end, maxEnd);
+  if (end - a < 1e-6) return 0;
   const f = (end - a) / len;
   store.transact('Tempo', tx => {
     tx.keepKeys = true;
@@ -189,16 +198,24 @@ export function applyTempo(store: Store, snap: TimingSnap, duration: number, o: 
 export function applyStagger(store: Store, snap: TimingSnap, stagger: number, groove: number, o: SnapOpts = {}) {
   const n = snap.layers.length;
   if (n < 2) return;
-  const offs = staggerOffsets(n, Math.max(0, stagger), groove);
   const base = snap.layers[0].span[0];
   const fps = store.comp.fps;
+  // magnet: snap the cascade as a whole (its last start lands on a marker), never each layer on
+  // its own. per-layer snapping bent the spacing, so the knobs read it back as a groove change
+  // (with the magnet on, ArrowUp on Stagger changed Groove instead)
+  let st = Math.max(0, stagger);
+  const unit = staggerOffsets(n, 1, groove)[n - 1];
+  if (o.targets?.length && st > 0 && unit > 1e-9) {
+    const last = snapTo(base + st * unit, o.targets, o.radius ?? 0.1);
+    if (last > base) st = (last - base) / unit;
+  }
+  const offs = staggerOffsets(n, st, groove);
   store.transact('Stagger', tx => {
     tx.keepKeys = true;
     snap.layers.forEach((s, i) => {
       const l = store.layer(s.id);
       if (!l) return;
       let start = base + offs[i];
-      if (o.targets?.length) start = snapTo(start, o.targets, o.radius ?? 0.1);
       start = Math.round(start * fps) / fps;
       const dt = start - s.span[0];
       for (const [k, kf] of s.props) { const p = l.props[k]; if (p) tx.set(p, 'kf', shift(kf, dt)); }

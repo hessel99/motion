@@ -172,7 +172,7 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
 ### Directing the agent (sidebar)
 
 - **Context, automatically**: each message carries an `<editor_context>` block (comp, playhead, work area, markers, selected layers with what is animated, @-mentioned layers). The composer shows it as chips; type `@` to mention a layer.
-- **Review every turn**: the document is snapshotted before a turn and diffed after it (`src/agent/diff.ts`). The review card lists added/changed/removed layers and properties (click to select), *Hold to compare* (undo to the pre-turn state while held, redo on release), *Replay*, *Revert* (undo back to the turn start) and *Keep*.
+- **Review every turn**: the document is snapshotted before a turn and diffed after it (`src/agent/diff.ts`). The review card lists added/changed/removed layers and properties (click to select), *Hold to compare* (undo to the pre-turn state while held, redo on release), *Replay*, *Revert* (undo back to the turn start) and *Keep*. Cards are tied to undo entry ids (`Store.topEntryId`), not step counts: they act only while the turn's last entry is on top, so they can never undo your own later edits.
 - **Quick actions** on the selection (`src/agent/quick.ts`): Animate in, Bouncier, Smoother, Snappier, Slower, Faster, Stagger, Anticipation, 3 variations, Critique, Explain.
 - **Ask mode** (Critique/Explain or the Edit/Ask toggle): read-only turns. The editor refuses editing tools, and Claude Code only pre-approves the read-only ones.
 - **Variations**: the agent builds versions and calls `save_variation`; the tray shows filmstrips, click to preview (applies + plays), scrub, *Use*.

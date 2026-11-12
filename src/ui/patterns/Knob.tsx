@@ -27,6 +27,8 @@ export interface KnobProps {
   title?: string;
   /** accent color override (css color) */
   hue?: string;
+  /** pointer travel in px for the full range (default 180; shift = 5x finer) */
+  travel?: number;
 }
 
 const SWEEP = 270; // degrees of travel
@@ -88,7 +90,8 @@ export function Knob(p: KnobProps) {
       const d = (ev.clientX - lx) - (ev.clientY - ly);
       lx = ev.clientX; ly = ev.clientY;
       s.last = performance.now();
-      emit(s.raw + d / (ev.shiftKey ? 900 : 180));
+      const travel = p.travel ?? 180;
+      emit(s.raw + d / (ev.shiftKey ? travel * 5 : travel));
     };
     const up = () => {
       el.removeEventListener('pointermove', move);

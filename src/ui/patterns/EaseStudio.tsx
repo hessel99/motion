@@ -13,8 +13,8 @@ import type { PropKey } from '../../core/model';
 import { bezierToFeel, feelName, feelToBezier, type Feel } from './feel';
 import { Knob } from './Knob';
 import { applyEase, EasePreview, type EaseSpec } from './ops';
-import { cssVar, onTick, setupCanvas } from './ticker';
-import { onThemeChange, T } from '../theme';
+import { onTick, setupCanvas } from './ticker';
+import { ptPalette } from './palette';
 import { drawLane, easeAt as easeY, loopPhase, sameSpec, strokeEase } from './draw';
 import { FeelPad } from './FeelPad';
 import './patterns.css';
@@ -162,11 +162,7 @@ export function EaseStudio() {
     <div class="pt-studio">
       <div class="pt-tabs" role="tablist" aria-label="Easing mode">
         {(['feel', 'spring', 'curve'] as StudioTab[]).map(t => (
-          <button role="tab" aria-selected={tab === t} class={'pt-tab' + (tab === t ? ' on' : '')} onClick={() => {
-            setTab(t);
-            if (t === 'spring' && !isSpring) applyEase(store, keys, { kind: 'spring', bounce: lastBounce.current });
-            if (t === 'feel' && isSpring) setFeel(feel, 'tab' + Math.random());
-          }}>{t === 'feel' ? 'Feel' : t === 'spring' ? 'Spring' : 'Curve'}</button>
+          <button role="tab" aria-selected={tab === t} class={'pt-tab' + (tab === t ? ' on' : '')} onClick={() => setTab(t) /* view only: never edits the document */}>{t === 'feel' ? 'Feel' : t === 'spring' ? 'Spring' : 'Curve'}</button>
         ))}
         <span class="pt-feel-name">{hoverName ? <span class="pt-b">B · {hoverName.replace(' spring', '')}</span> : isSpring ? `Spring ${Math.round(lastBounce.current * 100)}%` : spec?.kind === 'linear' ? 'Linear' : feelName(feel)}</span>
       </div>
@@ -208,14 +204,6 @@ export function EaseStudio() {
 
 // ---------------- A/B spacing lane ----------------
 
-/** canvas colors, read once per theme (not per frame: getComputedStyle forces a style recalc) */
-let colors: { accent: string; warm: string } | null = null;
-let themeHooked = false;
-function ptColors() {
-  if (!themeHooked) { themeHooked = true; onThemeChange(() => { colors = null; }); }
-  return (colors ??= { accent: cssVar(document.documentElement, '--accent', T.accent), warm: cssVar(document.documentElement, '--pt-b', '#ffb54c') });
-}
-
 /** how long the lane keeps animating after a change before it settles into a still frame */
 const LANE_LIVE_MS = 2 * (220 + 900 + 520);
 
@@ -234,28 +222,29 @@ function Lane({ spec, b, hoverName, tall, wide }: { spec: EaseSpec | null; b: { 
     const c = cv.current!;
     const paint = (ph: number) => {
       const ctx = setupCanvas(c, W, H);
-      const { accent, warm } = ptColors();
-      const dim = 'rgba(255,255,255,0.4)';
+      const P = ptPalette();
+      const { accent, warm } = P;
+      const dim = P.ink(0.4);
       ctx.clearRect(0, 0, W, H);
       const A = specRef.current, B = b.current?.spec ?? null;
       const x0 = 14, x1 = W - 26;
       // faint curve of A behind the lanes
       if (A) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.strokeStyle = P.ink(0.1);
         ctx.lineWidth = 1.5;
         strokeEase(ctx, A, x0, 6, x1 - x0, H - 12, -0.25, A.kind === 'spring' ? 1.6 : 1.3, 48);
       }
       if (B) {
         if (A) drawLane(ctx, A, x0, x1, H * 0.32, ph, accent, dim);
-        drawLane(ctx, B, x0, x1, H * 0.7, ph, warm, 'rgba(255,181,76,0.35)');
+        drawLane(ctx, B, x0, x1, H * 0.7, ph, warm, P.warmA(0.35));
         ctx.font = '600 8px Inter, system-ui, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.fillStyle = P.ink(0.5);
         ctx.fillText('A', 2, H * 0.32 + 3);
         ctx.fillStyle = warm;
         ctx.fillText('B', 2, H * 0.7 + 3);
       } else if (A) drawLane(ctx, A, x0, x1, H / 2, ph, accent, dim);
       // end marks
-      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.fillStyle = P.ink(0.2);
       ctx.fillRect(x0 - 0.5, 8, 1, H - 16); ctx.fillRect(x1 - 0.5, 8, 1, H - 16);
     };
     const a = anim.current;
@@ -283,13 +272,13 @@ function SwatchTile({ s, on, hovered, onEnter, onLeave, onApply }: { s: Swatch; 
     ctx.clearRect(0, 0, W, H);
     const spring = s.spec.kind === 'spring';
     const lo = spring ? -0.1 : -0.35, hi = spring ? 1.6 : 1.35;
-    const col = ptColors();
-    ctx.strokeStyle = hovered ? col.warm : on ? col.accent : 'rgba(255,255,255,0.55)';
+    const P = ptPalette();
+    ctx.strokeStyle = hovered ? P.warm : on ? P.accent : P.ink(0.55);
     ctx.lineWidth = 1.4;
     strokeEase(ctx, s.spec, 3, 2, W - 6, H - 4, lo, hi, 30);
     if (ph >= 0) {
       const y = 2 + (H - 4) - ((easeY(s.spec, ph) - lo) / (hi - lo)) * (H - 4);
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = P.ink(1);
       ctx.beginPath(); ctx.arc(3 + ph * (W - 6), y, 2.2, 0, Math.PI * 2); ctx.fill();
     }
   };

@@ -4,7 +4,8 @@
 
 import { useEffect, useRef } from 'preact/hooks';
 import { feelToBezier, type Bez, type Feel } from './feel';
-import { cssVar, setupCanvas } from './ticker';
+import { setupCanvas } from './ticker';
+import { ptPalette, type PtPalette } from './palette';
 import { roundRect } from './draw';
 import './patterns.css';
 
@@ -36,17 +37,18 @@ export function FeelPad(p: FeelPadProps) {
     if (!c) return;
     const ctx = setupCanvas(c, W, H);
     const f = live.current ?? p.feel;
-    const accent = cssVar(c, '--accent', '#4c8dff');
+    const P = ptPalette();
+    const accent = P.accent;
     // cached background: gradient + grain of mini curves (rebuilt only when overshoot changes)
     const o = Math.round(f.overshoot * 20) / 20;
-    const key = `${W}x${H}:${o}:${accent}:${devicePixelRatio}`;
-    if (!bg.current || bg.current.key !== key) bg.current = { canvas: buildBackground(c, W, H, o, accent), key };
+    const key = `${W}x${H}:${o}:${accent}:${P.padBg}:${P.name}:${devicePixelRatio}`;
+    if (!bg.current || bg.current.key !== key) bg.current = { canvas: buildBackground(W, H, o, P), key };
     ctx.clearRect(0, 0, W, H);
     ctx.drawImage(bg.current.canvas, 0, 0, W, H);
 
     const [px, py] = toPx(f);
     // crosshair
-    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.strokeStyle = P.ink(0.09);
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(px + 0.5, PAD); ctx.lineTo(px + 0.5, H - PAD); ctx.moveTo(PAD, py + 0.5); ctx.lineTo(W - PAD, py + 0.5); ctx.stroke();
     // the current curve, big and soft behind the puck
@@ -65,16 +67,16 @@ export function FeelPad(p: FeelPadProps) {
     // drag trail
     const tr = trail.current;
     for (let i = 0; i < trailN.current; i++) {
-      ctx.fillStyle = `rgba(255,255,255,${0.04 + 0.12 * (i / 12)})`;
+      ctx.fillStyle = P.ink(0.04 + 0.12 * (i / 12));
       ctx.beginPath(); ctx.arc(tr[i * 2], tr[i * 2 + 1], 2 + i * 0.25, 0, Math.PI * 2); ctx.fill();
     }
     // puck: halo + body
     const g = ctx.createRadialGradient(px, py, 2, px, py, 22);
-    g.addColorStop(0, hexA(accent, p.inactive ? 0.15 : 0.55));
-    g.addColorStop(1, hexA(accent, 0));
+    g.addColorStop(0, P.accentA(p.inactive ? 0.15 : 0.55));
+    g.addColorStop(1, P.accentA(0));
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(px, py, 22, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = p.inactive ? '#8a8a93' : '#fff';
+    ctx.fillStyle = p.inactive ? P.ink(0.45) : P.name === 'light' ? '#ffffff' : P.ink(1);
     ctx.beginPath(); ctx.arc(px, py, 6.5, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = accent; ctx.lineWidth = 2.5;
     ctx.beginPath(); ctx.arc(px, py, 6.5, 0, Math.PI * 2); ctx.stroke();
@@ -151,21 +153,15 @@ export function FeelPad(p: FeelPadProps) {
   );
 }
 
-function hexA(c: string, a: number) {
-  const m = /^#([0-9a-f]{6})$/i.exec(c.trim());
-  if (!m) return `rgba(76,141,255,${a})`;
-  const n = parseInt(m[1], 16);
-  return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
-}
-
 /** gradient field + grain of tiny curves + region names, drawn once into an offscreen canvas */
-function buildBackground(ref: HTMLCanvasElement, W: number, H: number, overshoot: number, accent: string) {
+function buildBackground(W: number, H: number, overshoot: number, P: PtPalette) {
   const dpr = Math.min(3, window.devicePixelRatio || 1);
   const c = document.createElement('canvas');
   c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
   const ctx = c.getContext('2d')!;
   ctx.scale(dpr, dpr);
-  const base = cssVar(ref, '--pt-pad-bg', '#141418');
+  const light = P.name === 'light';
+  const base = P.padBg;
   roundRect(ctx, 0, 0, W, H, 10);
   ctx.fillStyle = base;
   ctx.fill();
@@ -173,19 +169,20 @@ function buildBackground(ref: HTMLCanvasElement, W: number, H: number, overshoot
   ctx.clip();
   // cool (lazy) -> warm (punchy), brighter towards silky
   const gx = ctx.createLinearGradient(0, 0, W, 0);
-  gx.addColorStop(0, 'rgba(90,120,255,0.20)');
-  gx.addColorStop(0.5, 'rgba(160,110,255,0.10)');
-  gx.addColorStop(1, 'rgba(255,120,90,0.20)');
+  const tint = light ? 0.12 : 0.2;
+  gx.addColorStop(0, `rgba(90,120,255,${tint})`);
+  gx.addColorStop(0.5, `rgba(160,110,255,${tint / 2})`);
+  gx.addColorStop(1, `rgba(255,120,90,${tint})`);
   ctx.fillStyle = gx; ctx.fillRect(0, 0, W, H);
   const gy = ctx.createLinearGradient(0, 0, 0, H);
-  gy.addColorStop(0, 'rgba(255,255,255,0.05)');
-  gy.addColorStop(1, 'rgba(0,0,0,0.25)');
+  gy.addColorStop(0, light ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.05)');
+  gy.addColorStop(1, light ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.25)');
   ctx.fillStyle = gy; ctx.fillRect(0, 0, W, H);
   // grain
   const cw = (W - 2 * PAD) / GX, ch = (H - 2 * PAD) / GY;
   const v: Bez = [0, 0, 0, 0];
   ctx.lineWidth = 1.1;
-  ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+  ctx.strokeStyle = P.ink(light ? 0.22 : 0.16);
   for (let i = 0; i < GX; i++) for (let j = 0; j < GY; j++) {
     const f = { attack: (i + 0.5) / GX, smooth: 1 - (j + 0.5) / GY, overshoot };
     feelToBezier(f, v);
@@ -199,15 +196,14 @@ function buildBackground(ref: HTMLCanvasElement, W: number, H: number, overshoot
   ctx.restore();
   // region names
   ctx.font = '600 9px Inter, system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.42)';
+  ctx.fillStyle = P.ink(light ? 0.6 : 0.42);
   ctx.textBaseline = 'top';
   ctx.textAlign = 'left'; ctx.fillText('LAZY', 8, 4);
   ctx.textAlign = 'center'; ctx.fillText('SILKY', W / 2, 4);
   ctx.textAlign = 'right'; ctx.fillText('SNAPPY', W - 8, 4);
   ctx.textBaseline = 'bottom';
   ctx.textAlign = 'center'; ctx.fillText('LINEAR', W / 2, H - 3);
-  ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(255,255,255,0.26)'; ctx.fillText('← slow start', 8, H - 3);
+  ctx.textAlign = 'left'; ctx.fillStyle = P.ink(light ? 0.45 : 0.26); ctx.fillText('← slow start', 8, H - 3);
   ctx.textAlign = 'right'; ctx.fillText('fast start →', W - 8, H - 3);
-  void accent;
   return c;
 }

@@ -139,7 +139,7 @@ export function armPerform(layerId: string) {
     cx = last.clientX - r.left; cy = last.clientY - r.top;
   });
   ov.addEventListener('pointerup', finish);
-  ov.addEventListener('contextmenu', e => { e.preventDefault(); rec = false; cleanup(); });
+  ov.addEventListener('contextmenu', e => { e.preventDefault(); rec = false; cleanup(); toast('Performance cancelled'); });
   window.addEventListener('keydown', onKey, true);
   active = () => { rec = false; cleanup(); };
 }
