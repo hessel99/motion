@@ -2,7 +2,8 @@
 // relays chat with cli agents (claude code / codex / gemini) using the user's subscription.
 
 import { TOOLS, READ_ONLY_TOOLS } from './tools';
-import { AGENT_SYSTEM_PROMPT, ASK_MODE_PROMPT } from './prompt';
+import { AGENT_SYSTEM_PROMPT, AGENT_SYSTEM_PROMPT_PLAIN, ASK_MODE_PROMPT } from './prompt';
+import { tasteOn, TASTE_TOOLS, TASTE_GUIDE_HINT } from './taste';
 import { GUIDES } from './guides';
 import { withToolStore } from './tool-kit';
 import type { Store } from '../core/store';
@@ -15,9 +16,11 @@ type Status = 'connecting' | 'connected' | 'offline';
 
 /** the tool list as sent to the bridge (and served over MCP) */
 export function toolManifest() {
-  return TOOLS.map(t => ({
+  // taste layer off: no critic tool and no gold examples (the plain agent; Settings → Polish automatically)
+  const taste = tasteOn();
+  return TOOLS.filter(t => taste || !TASTE_TOOLS.includes(t.name)).map(t => ({
     name: t.name,
-    description: t.description,
+    description: taste ? t.description : t.description.replace(TASTE_GUIDE_HINT, ''),
     inputSchema: t.inputSchema,
     annotations: { readOnlyHint: !!t.readOnly, destructiveHint: t.name === 'delete_layers' || t.name === 'undo', openWorldHint: false },
   }));
@@ -169,7 +172,7 @@ class AgentClient {
     this.send({
       // the ask-mode note goes into the message (codex/gemini only get the system prompt on the first turn)
       type: 'chat', chatId, provider: opts.provider, message: ask ? `${ASK_MODE_PROMPT}\n\n${opts.message}` : opts.message, sessionId: opts.sessionId, model: opts.model, maxTurns: opts.maxTurns,
-      systemPrompt: AGENT_SYSTEM_PROMPT,
+      systemPrompt: tasteOn() ? AGENT_SYSTEM_PROMPT : AGENT_SYSTEM_PROMPT_PLAIN,
       readOnlyTools: ask ? READ_ONLY_TOOLS() : undefined,
     });
     return chatId;

@@ -1,0 +1,197 @@
+{
+ "run": {
+  "id": "06-loop-bg",
+  "name": "06-loop-bg",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 51,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 51,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 0,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 108,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:off-canvas",
+     "high:off-canvas",
+     "high:off-canvas"
+    ],
+    "ms": 11.1
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 3.6
+   }
+  },
+  "wallMs": 65617,
+  "timedOut": false,
+  "turns": 9,
+  "costUsd": 0.29658260000000003,
+  "durationMs": 62500,
+  "usage": {
+   "input": 99608,
+   "cached": 89876,
+   "output": 8389
+  },
+  "errors": [],
+  "toolCalls": 7,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the 6-second background on a 1920×1080, 30 fps comp. I checked it on a contact sheet at 0, 1.5, 3, 4.5 and 5.97 s. The contact sheet shows frame 0 and the last frame (179) looking the same, with soft purple and teal blobs and a faint dot grid. I haven't played it back, so the loop is checked on stills only.\n\n- **Background:** **BG Gradient** is a dark indigo-to-deep-teal wash.\n- **Orbs:** Five soft radial-gradient orbs (**Blob Purple**, **Blob Teal**, **Blob Indigo**, **Blob Magenta**, **Blob Cyan**) drift on slow, small circular paths. Two of them also breathe in scale by about 5%.\n- **Dot grid:** **Dots A** and **Dots B** are a 16×9 grid of small white dots, split into a checkerboard. The two halves pulse gently in opposite phase, so the pulse ripples across the grid instead of the whole grid flashing.\n- **Loop:** All motion is driven by sine and cosine expressions over exactly one 6 s cycle, so the loop has no seam and no easing pauses. I didn't use keyframes.\n\nThe orbs are gradient fades rather than true blur effects. They render soft, and are cheaper to play back.\n\nI can make the drift slower, push the colors toward more teal, or make the dots finer and denser if you want.\nI moved Blob Purple, Indigo and Magenta inside the frame, which raised the critic score from 51 to 80. It then flagged Blob Cyan, so I moved that in too, and I haven't re-run the critique since."
+ },
+ "metrics": {
+  "layers": 8,
+  "drawableLayers": 8,
+  "layerTypes": {
+   "rect": 1,
+   "ellipse": 5,
+   "path": 2
+  },
+  "groups": 0,
+  "animatedLayers": 7,
+  "keys": 0,
+  "segments": 0,
+  "easesUsed": {},
+  "distinctEases": 0,
+  "easeFamilies": 0,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 9,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 6,
+  "paletteSize": 7,
+  "palette": [
+   "#0d0726",
+   "#8b45f0",
+   "#14c4b0",
+   "#5b5ff0",
+   "#c04ff0",
+   "#22d3e6",
+   "#ffffff"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 0,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.187,
+  "toolErrors": 0,
+  "toolCalls": 7
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "loops seamlessly (first frame ≈ frame at the loop point)",
+    "type": "loops",
+    "pass": true
+   },
+   {
+    "text": "everything moves (animated coverage ≥90%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 blobs/orbs (ellipses)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "dot grid (≥15 layers)",
+    "type": "layersMin",
+    "pass": false
+   },
+   {
+    "text": "uses loop expressions or matching first/last keys",
+    "type": "loopTechnique",
+    "pass": true
+   },
+   {
+    "text": "purple/teal palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "calm: no fast motion",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 5,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

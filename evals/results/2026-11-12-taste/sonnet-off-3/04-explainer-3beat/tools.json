@@ -1,0 +1,700 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1086,
+  "ok": true,
+  "ms": 132,
+  "editorMs": 1,
+  "input": {
+   "title": "One key. Every login.",
+   "duration": 12,
+   "style": "Flat illustration, friendly pastels",
+   "styleReason": "Flat shapes, soft palette and springy easing keep a security topic approachable.",
+   "beats": [
+    {
+     "name": "Mess",
+     "start": 0,
+     "end": 4,
+     "description": "Cream background. ~9 tilted sticky notes with scribbled passwords pop in with staggered springs, then jitter anxiously (small rotation/position wiggle). A faint shield outline fades in at center near the end.",
+     "style": "spring Bouncy entrances, wiggle expressions; yellow/pink/mint/blue notes"
+    },
+    {
+     "name": "Suck-in",
+     "start": 4,
+     "end": 8,
+     "description": "Notes wind up slightly (anticipation), then spiral into the shield, shrinking and rotating, staggered by distance; shield fills in navy and squashes on each swallow, pulsing.",
+     "style": "Cubic In for suction, Back Out for shield pulse"
+    },
+    {
+     "name": "Glow + headline",
+     "start": 8,
+     "end": 12,
+     "description": "Shield glows (halo ring expands), check mark draws on in it, shield shifts up while headline 'One key. Every login.' lands below with a fade-up.",
+     "style": "Expo Out, draw-on check, soft glow pulse"
+    }
+   ]
+  },
+  "result": "storyboard \"One key. Every login.\" shown to the user (3 beats, 12s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1250,
+  "ok": true,
+  "ms": 281,
+  "editorMs": 13,
+  "input": {
+   "comp": {
+    "background": "#FFF6E5"
+   },
+   "layers": [
+    {
+     "key": "halo",
+     "type": "ellipse",
+     "x": 750,
+     "y": 210,
+     "w": 420,
+     "h": 420,
+     "fill": "#8FA2FF",
+     "opacity": 0,
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 60
+       },
+       {
+        "t": 8,
+        "v": 60,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 9.2,
+        "v": 170
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 8,
+        "v": 0
+       },
+       {
+        "t": 8.1,
+        "v": 55,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 9.4,
+        "v": 18
+       }
+      ]
+     }
+    },
+    {
+     "key": "shield",
+     "type": "path",
+     "d": "M130 0 L260 45 V150 C260 230 200 275 130 300 C60 275 0 230 0 150 V45 Z",
+     "x": 830,
+     "y": 270,
+     "w": 260,
+     "h": 300,
+     "fill": "#D9DDF5",
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 2.8,
+        "v": 0
+       },
+       {
+        "t": 3.8,
+        "v": 60
+       }
+      ],
+      "fill": [
+       {
+        "t": 4,
+        "v": "#D9DDF5"
+       },
+       {
+        "t": 5.5,
+        "v": "#3B4BA8"
+       }
+      ],
+      "scale": [
+       {
+        "t": 4.8,
+        "v": 100,
+        "ease": "Back Out"
+       },
+       {
+        "t": 5,
+        "v": 106
+       },
+       {
+        "t": 5.3,
+        "v": 100
+       },
+       {
+        "t": 5.8,
+        "v": 107
+       },
+       {
+        "t": 6.1,
+        "v": 100
+       },
+       {
+        "t": 6.6,
+        "v": 109
+       },
+       {
+        "t": 7,
+        "v": 100
+       },
+       {
+        "t": 7.5,
+        "v": 112
+       },
+       {
+        "t": 8,
+        "v": 100
+       },
+       {
+        "t": 8.3,
+        "v": 112,
+        "ease": "Back Out"
+       },
+       {
+        "t": 9,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "check",
+     "type": "path",
+     "d": "M0 55 L45 100 L130 0",
+     "x": 895,
+     "y": 370,
+     "w": 130,
+     "h": 100,
+     "stroke": "#FFFFFF",
+     "strokeWidth": 20,
+     "fill": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "drawOn": {
+      "t": 8.4,
+      "duration": 0.6,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "headline",
+     "type": "text",
+     "text": {
+      "content": "One key. Every login.",
+      "fontSize": 112,
+      "fontWeight": 800,
+      "align": "center"
+     },
+     "fill": "#2B2F6B",
+     "x": 260,
+     "y": 700,
+     "w": 1400,
+     "h": 150,
+     "textAnim": {
+      "preset": "Fade up",
+      "start": 9.3
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 7 keyframe tracks; animation ends 9.4s\",\"ids\":{\"halo\":\"l_03jm2\",\"shield\":\"l_03jm3\",\"check\":\"l_03jm4\",\"headline\":\"l_03jm5\"}}"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2796,
+  "ok": true,
+  "ms": 30,
+  "editorMs": 3,
+  "input": {
+   "layers": [
+    {
+     "key": "n1",
+     "x": 465,
+     "y": 205,
+     "w": 190,
+     "h": 190,
+     "rotation": -8,
+     "children": [
+      {
+       "key": "n1r",
+       "type": "rect",
+       "x": 0,
+       "y": 0,
+       "w": 190,
+       "h": 190,
+       "radius": 8,
+       "fill": "#FFD95A"
+      },
+      {
+       "key": "n1t",
+       "type": "text",
+       "text": {
+        "content": "P@ss123!",
+        "fontSize": 30,
+        "fontWeight": 700,
+        "align": "center"
+       },
+       "fill": "#5A4A1A",
+       "x": 10,
+       "y": 75,
+       "w": 170,
+       "h": 44
+      }
+     ]
+    },
+    {
+     "key": "n2",
+     "x": 665,
+     "y": 545,
+     "w": 190,
+     "h": 190,
+     "rotation": 6,
+     "children": [
+      {
+       "key": "n2r",
+       "type": "rect",
+       "x": 0,
+       "y": 0,
+       "w": 190,
+       "h": 190,
+       "radius": 8,
+       "fill": "#FF9EB5"
+      },
+      {
+       "key": "n2t",
+       "type": "text",
+       "text": {
+        "content": "fluffy2019",
+        "fontSize": 30,
+        "fontWeight": 700,
+        "align": "center"
+       },
+       "fill": "#6B2437",
+       "x": 10,
+       "y": 75,
+       "w": 170,
+       "h": 44
+      }
+     ]
+    },
+    {
+     "key": "n3",
+     "x": 1085,
+     "y": 185,
+     "w": 190,
+     "h": 190,
+     "rotation": 10,
+     "children": [
+      {
+       "key": "n3r",
+       "type": "rect",
+       "x": 0,
+       "y": 0,
+       "w": 190,
+       "h": 190,
+       "radius": 8,
+       "fill": "#8EE3C2"
+      },
+      {
+       "key": "n3t",
+       "type": "text",
+       "text": {
+        "content": "bank_pw?",
+        "fontSize": 30,
+        "fontWeight": 700,
+        "align": "center"
+       },
+       "fill": "#14513B",
+       "x": 10,
+       "y": 75,
+       "w": 170,
+       "h": 44
+      }
+     ]
+    },
+    {
+     "key": "n4",
+     "x": 1285,
+     "y": 525,
+     "w": 190,
+     "h": 190,
+     "rotation": -5,
+     "children": [
+      {
+       "key": "n4r",
+       "type": "rect",
+       "x": 0,
+       "y": 0,
+       "w": 190,
+       "h": 190,
+       "radius": 8,
+       "fill": "#8CC8FF"
+      },
+      {
+       "key": "n4t",
+       "type": "text",
+       "text": {
+        "content": "qwerty99",
+        "fontSize": 30,
+        "fontWeight": 700,
+        "align": "center"
+       },
+       "fill": "#163E6B",
+       "x": 10,
+       "y": 75,
+       "w": 170,
+       "h": 44
+      }
+     ]
+    },
+    {
+     "key": "n5",
+     "x": 305,
+     "y": 505,
+     "w": 190,
+     "h": 190,
+     "rotation": 9,
+     "children": [
+      {
+       "key": "n5r",
+       "type": "rect",
+       "x": 0,
+       "y": 0,
+       "w": 190,
+       "h": 190,
+       "radius": 8,
+       "fill": "#8EE3C2"
+      },
+      {
+       "key": "n5t",
+       "type": "text",
+       "text": {
+        "content": "Netflix: ??",
+        "fontSize": 30,
+        "fontWeight": 700,
+        "align": "center"
+       },
+       "fill": "#14513B",
+       "x": 10,
+       "y": 75,
+       "w": 170,
+       "h": 44
+      }
+     ]
+    },
+    {
+     "key": "n6",
+     "x": 1405,
+     "y": 285,
+     "w": 190,
+     "h": 190,
+     "rotation": -11,
+     "children": [
+      {
+       "key": "n6r",
+       "type": "rect",
+       "x": 0,
+       "y": 0,
+       "w": 190,
+       "h": 190,
+       "radius": 8,
+       "fill": "#FFD95A"
+      },
+      {
+       "key": "n6t",
+       "type": "text",
+       "text": {
+        "content": "Ilove<3you",
+        "fontSize": 30,
+        "fontWeight": 700,
+        "align": "center"
+       },
+       "fill": "#5A4A1A",
+       "x": 10,
+       "y": 75,
+       "w": 170,
+       "h": 44
+      }
+     ]
+    },
+    {
+     "key": "n7",
+     "x": 865,
+     "y": 705,
+     "w": 190,
+     "h": 190,
+     "rotation": 4,
+     "children": [
+      {
+       "key": "n7r",
+       "type": "rect",
+       "x": 0,
+       "y": 0,
+       "w": 190,
+       "h": 190,
+       "radius": 8,
+       "fill": "#FF9EB5"
+      },
+      {
+       "key": "n7t",
+       "type": "text",
+       "text": {
+        "content": "admin1234",
+        "fontSize": 30,
+        "fontWeight": 700,
+        "align": "center"
+       },
+       "fill": "#6B2437",
+       "x": 10,
+       "y": 75,
+       "w": 170,
+       "h": 44
+      }
+     ]
+    },
+    {
+     "key": "n8",
+     "x": 605,
+     "y": 125,
+     "w": 190,
+     "h": 190,
+     "rotation": -4,
+     "children": [
+      {
+       "key": "n8r",
+       "type": "rect",
+       "x": 0,
+       "y": 0,
+       "w": 190,
+       "h": 190,
+       "radius": 8,
+       "fill": "#8CC8FF"
+      },
+      {
+       "key": "n8t",
+       "type": "text",
+       "text": {
+        "content": "work-VPN-7",
+        "fontSize": 30,
+        "fontWeight": 700,
+        "align": "center"
+       },
+       "fill": "#163E6B",
+       "x": 10,
+       "y": 75,
+       "w": 170,
+       "h": 44
+      }
+     ]
+    },
+    {
+     "key": "n9",
+     "x": 1145,
+     "y": 705,
+     "w": 190,
+     "h": 190,
+     "rotation": -9,
+     "children": [
+      {
+       "key": "n9r",
+       "type": "rect",
+       "x": 0,
+       "y": 0,
+       "w": 190,
+       "h": 190,
+       "radius": 8,
+       "fill": "#FFD95A"
+      },
+      {
+       "key": "n9t",
+       "type": "text",
+       "text": {
+        "content": "letmein!",
+        "fontSize": 30,
+        "fontWeight": 700,
+        "align": "center"
+       },
+       "fill": "#5A4A1A",
+       "x": 10,
+       "y": 75,
+       "w": 170,
+       "h": 44
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"27 created, 0 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"n1r\":\"l_03jm7\",\"n1t\":\"l_03jm8\",\"n1\":\"l_03jm6\",\"n2r\":\"l_03jma\",\"n2t\":\"l_03jmb\",\"n2\":\"l_03jm9\",\"n3r\":\"l_03jmd\",\"n3t\":\"l_03jme\",\"n3\":\"l_03jmc\",\"n4r\":\"l_03jmg\",\"n4t\":\"l_03jmh\",\"n4\":\"l_03jmf\",\"n5r\":\"l_03jmj\",\"n5t\":\"l_03jmk\",\"n5\":\"l_03jmi\",\"n6r\":\"l_03jmm\",\"n6t\":\"l_03jmn\",\"n6\":\"l_03jml\",\"n7r\":\"l_03jmp\",\"n7t\":\"l_03jmq\",\"n7\":\"…"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 3134,
+  "ok": true,
+  "ms": 92,
+  "editorMs": 3,
+  "input": "{\"tracks\":[{\"id\":\"l_03jm6\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[560,300]},{\"t\":4.3,\"v\":[560,300]},{\"t\":5.2,\"v\":[960,420],\"ease\":\"Cubic In\",\"sOut\":[-150,150]}]},{\"id\":\"l_03jm6\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.2,\"v\":0},{\"t\":0.8,\"v\":100,\"ease\":\"spring Bouncy\"},{\"t\":4,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":4.3,\"v\":110,\"ease\":\"Cubic In\"},{\"t\":5.2,\"v\":0}]},{\"id\":\"l_03jm9\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[760,640]},{\"t\":4.6,\"v\":[760,640]},{\"t\":5.5,\"v\":[960,420],\"ease\":\"Cubic In\",\"sOut\":[-120,-100]}]},{\"id\":\"l_03jm9\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.45,\"v\":0},{\"t\":1.05,\"v\":100,\"ease\":\"spring Bouncy\"},{\"t\":4.3,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":4.6,\"v\":110,\"ease\":\"Cubic In\"},{\"t\":5.5,\"v\":0}]},{\"id\":\"l_03jmc\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[1180,280]},{\"t\":4.9,\"v\":[1180,280]},{\"t\":5.8,\"v\":[960,420],\"ease\":\"Cubic In\",\"sOut\":[100,-120]}]},{\"id\":\"l_03jmc\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.7,\"v\":0},{\"t\":1.3,\"v\":100,\"ease\":\"spring Bouncy\"},{\"t\":4.6,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":4.9,\"v\":110,\"ease\":\"Cubic In\"},{\"t\":5.8,\"v\":0}]},{\"id\":\"l_03jmf\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[1380,620]},{\"t\":5.2,\"v\":[1380,620]},{\"t\":6.1,\"v\":[960,420],\"ease\":\"Cubic In\",\"sOut\":[100,150]}]},{\"id\":\"l_03jmf\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.95,\"v\":0},{\"t\":1.55,\"v\":100,\"ease\":\"spring Bouncy\"},{\"t\":4.9,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":5.2,\"v\":110,\"ease\":\"Cubic In\"},{\"t\":6.1,\"v\":0}]},{\"id\":\"l_03jmi\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[400,600]},{\"t\":5.5,\"v\":[400,600]},{\"t\":6.4,\"v\":[960,420],\"ease\":\"Cubic In\",\"sOut\":[-100,150]}]},{\"id\":\"l_03jmi\",\"prop\":\"scale\",\"keyframes\":[{\"t\":1.2,\"v\":0},{\"t\":1.8,\"v\":100,\"ease\":\"spring Bouncy\"},{\"t\":5.2,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":5.5,\"v\":110,\"ease\":\"Cubic In\"},{\"t\":6.4,\"v\":0}]},{\"id\":\"l_03jml\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[1500,380]},{\"t\":5.8,\"v\":[1500,380]},{\"t\":6.7,\"v\":[960,420],\"ease\":\"Cubic In\",\"sOut\":[100,-150]}]},{\"id\":\"l_03jml\",\"prop\":\"scale\",\"keyframes\":[{\"t\":1.45,\"v\":0},{\"t\":2.05,\"v\":100,\"ease\":\"spring Bouncy\"},{\"t\":5.5,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":5.8,\"v\":110,\"ease\":\"Cubic In\"},{\"t\":6.7,\"v\":0}]},{\"id\":\"l_03jmo\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[960,800]},{\"t\":6.1,\"v\":[960,800]},{\"t\":7,\"v\":[960,420],\"ease\":\"Cubic In\",\"sOut\":[-150,-50]}]},{\"id\":\"l_03jmo\",\"prop\":\"scale\",\"keyframes\":[{\"t\":1.7,\"v\":0},{\"t\":2.3,\"v\":100,\"ease\":\"spring Bouncy\"},{\"t\":5.8,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":6.1,\"v\":110,\"ease\":\"Cubic In\"},{\"t\":7,\"v\":0}]},{\"id\":\"l_03jmr\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[700,220]},{\"t\":6.4,\"v\":[700,220]},{\"t\":7.3,\"v\":[960,420],\"ease\":\"Cubic In\",\"sOut\":[-80,100]}]},{\"id\":\"l_03jmr\",\"prop\":\"scale\",\"keyframes\":[{\"t\":1.95,\"v\":0},{\"t\":2.55,\"v\":100,\"ease\":\"spring Bouncy\"},{\"t\":6.1,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":6.4,\"v\":110,\"ease\":\"Cubic In\"},{\"t\":7.3,\"v\":0}]},{\"id\":\"l_03jmu\",\"prop\":\"position\",\"keyframes\":[{\"t\":0,\"v\":[1240,800]},{\"t\":6.7,\"v\":[1240,800]},{\"t\":7.6,\"v\":[960,420],\"ease\":\"Cubic In\",\"sOut\":[100,-50]}]},{\"id\":\"l_03jmu\",\"prop\":\"scale\",\"keyframes\":[{\"t\":2.2,\"v\":0…",
+  "result": "ok: 18 tracks on 9 layers"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 139,
+  "ok": true,
+  "ms": 90,
+  "editorMs": 14,
+  "input": {
+   "ids": [
+    "l_03jm6",
+    "l_03jm9",
+    "l_03jmc",
+    "l_03jmf",
+    "l_03jmi",
+    "l_03jml",
+    "l_03jmo",
+    "l_03jmr",
+    "l_03jmu"
+   ],
+   "prop": "rotation",
+   "expr": "wiggle(6, 4)"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 51,
+  "ok": true,
+  "ms": 388,
+  "editorMs": 228,
+  "input": {
+   "times": [
+    0.6,
+    2.5,
+    4.5,
+    5.5,
+    6.8,
+    8.2,
+    9,
+    11
+   ],
+   "cell": 400
+  },
+  "result": "8 frames left→right, top→bottom at 0.6s, 2.5s, 4.5s, 5.5s, 6.8s, 8.2s, 9s, 11s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/15ff3158-7639-42f4-ad7e-0615b2782203/tool-results/mcp-motion-blob-1794513919248-d514pz.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 382,
+  "ok": true,
+  "ms": 63,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm3",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 2.8,
+       "v": 0
+      },
+      {
+       "t": 3.8,
+       "v": 60
+      },
+      {
+       "t": 4.8,
+       "v": 60
+      },
+      {
+       "t": 5.5,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 60
+      },
+      {
+       "t": 8,
+       "v": 60,
+       "ease": "Expo Out"
+      },
+      {
+       "t": 9.2,
+       "v": 135
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 8,
+       "v": 0
+      },
+      {
+       "t": 8.1,
+       "v": 55,
+       "ease": "Quad Out"
+      },
+      {
+       "t": 9.4,
+       "v": 14
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 3 tracks on 2 layers"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 68,
+  "editorMs": 22,
+  "input": {
+   "times": [
+    7,
+    11
+   ],
+   "maxSize": 500
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/15ff3158-7639-42f4-ad7e-0615b2782203/tool-results/mcp-motion-blob-1794513923784-yoep91.png]\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/15ff3158-7639-42f4-ad7e-0615b2782203/tool-results/mcp-motion-blob-1794513923784-yngj4h.png]"
+ }
+]

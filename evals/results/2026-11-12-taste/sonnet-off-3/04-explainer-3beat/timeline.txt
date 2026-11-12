@@ -1,0 +1,81 @@
+- halo [ellipse] box 834,294,252,252 #8fa2ff
+- shield [path] box 828,267,265,305 #3b4ba8
+- check [path] box 895,370,130,100 #000000 a0 stroke #ffffff 20px
+- headline [text] box 260,700,1400,150 #2b2f6b "One key. Every login." Inter 112px w800
+- n1 [group] #ffffff a0
+  - n1r [rect] box 960,420,0,0 #ffd95a
+  - n1t [text] box 960,420,0,0 #5a4a1a "P@ss123!" Inter 30px w700
+- n2 [group] #ffffff a0
+  - n2r [rect] box 960,420,0,0 #ff9eb5
+  - n2t [text] box 960,420,0,0 #6b2437 "fluffy2019" Inter 30px w700
+- n3 [group] #ffffff a0
+  - n3r [rect] box 960,420,0,0 #8ee3c2
+  - n3t [text] box 960,420,0,0 #14513b "bank_pw?" Inter 30px w700
+- n4 [group] #ffffff a0
+  - n4r [rect] box 939,392,71,71 #8cc8ff
+  - n4t [text] box 946,416,57,22 #163e6b "qwerty99" Inter 30px w700
+- n5 [group] #ffffff a0
+  - n5r [rect] box 627,395,200,200 #8ee3c2
+  - n5t [text] box 647,464,159,66 #14513b "Netflix: ??" Inter 30px w700
+- n6 [group] #ffffff a0
+  - n6r [rect] box 1308,261,247,247 #ffd95a
+  - n6t [text] box 1337,343,191,88 #5a4a1a "Ilove<3you" Inter 30px w700
+- n7 [group] #ffffff a0
+  - n7r [rect] box 844,684,232,232 #ff9eb5
+  - n7t [text] box 865,766,190,72 #6b2437 "admin1234" Inter 30px w700
+- n8 [group] #ffffff a0
+  - n8r [rect] box 594,114,213,213 #8cc8ff
+  - n8t [text] box 613,189,174,66 #163e6b "work-VPN-7" Inter 30px w700
+- n9 [group] #ffffff a0
+  - n9r [rect] box 1127,687,227,227 #ffd95a
+  - n9t [text] box 1153,762,176,80 #5a4a1a "letmein!" Inter 30px w700
+
+comp 1920x1080 12s @30fps, background #fff6e5
+"halo" (ellipse l_03jm2)
+  scale: 0s 60 ─Easy Ease→ 8s 60 ─Expo Out→ 9.2s 135
+  opacity: 0s 0 ─Easy Ease→ 8s 0 ─Easy Ease→ 8.1s 55 ─Quad Out→ 9.4s 14
+"shield" (path l_03jm3)
+  scale: 4.8s 100 ─Back Out→ 5s 106 ─Easy Ease→ 5.3s 100 ─Easy Ease→ 5.8s 107 ─Easy Ease→ 6.1s 100 ─Easy Ease→ 6.6s 109 ─Easy Ease→ 7s 100 ─Easy Ease→ 7.5s 112 ─Easy Ease→ 8s 100 ─Easy Ease→ 8.3s 112 ─Back Out→ 9s 100
+  opacity: 0s 0 ─Easy Ease→ 2.8s 0 ─Easy Ease→ 3.8s 60 ─Easy Ease→ 4.8s 60 ─Easy Ease→ 5.5s 100
+  fill: 4s #d9ddf5 ─Easy Ease→ 5.5s #3b4ba8
+"check" (path l_03jm4)
+  trimStart: 8.4s 0
+  trimEnd: 8.4s 0 ─Cubic Out→ 9s 100
+"headline" (text l_03jm5)
+  text animator: in by word, start 9.3s, 0.6s each, stagger 0.08s, ease Expo Out
+"n1" (group l_03jm6)
+  position: 0s [560,300] ─Easy Ease→ 4.3s [560,300] ─Easy Ease→ 5.2s [960,420]
+  scale: 0.2s 0 ─Easy Ease→ 0.8s 100 ─spring Bouncy→ 4s 100 ─Quad Out→ 4.3s 110 ─Cubic In→ 5.2s 0
+  rotation: expr "wiggle(6, 4)"
+"n2" (group l_03jm9)
+  position: 0s [760,640] ─Easy Ease→ 4.6s [760,640] ─Easy Ease→ 5.5s [960,420]
+  scale: 0.45s 0 ─Easy Ease→ 1.05s 100 ─spring Bouncy→ 4.3s 100 ─Quad Out→ 4.6s 110 ─Cubic In→ 5.5s 0
+  rotation: expr "wiggle(6, 4)"
+"n3" (group l_03jmc)
+  position: 0s [1180,280] ─Easy Ease→ 4.9s [1180,280] ─Easy Ease→ 5.8s [960,420]
+  scale: 0.7s 0 ─Easy Ease→ 1.3s 100 ─spring Bouncy→ 4.6s 100 ─Quad Out→ 4.9s 110 ─Cubic In→ 5.8s 0
+  rotation: expr "wiggle(6, 4)"
+"n4" (group l_03jmf)
+  position: 0s [1380,620] ─Easy Ease→ 5.2s [1380,620] ─Easy Ease→ 6.1s [960,420]
+  scale: 0.95s 0 ─Easy Ease→ 1.55s 100 ─spring Bouncy→ 4.9s 100 ─Quad Out→ 5.2s 110 ─Cubic In→ 6.1s 0
+  rotation: expr "wiggle(6, 4)"
+"n5" (group l_03jmi)
+  position: 0s [400,600] ─Easy Ease→ 5.5s [400,600] ─Easy Ease→ 6.4s [960,420]
+  scale: 1.2s 0 ─Easy Ease→ 1.8s 100 ─spring Bouncy→ 5.2s 100 ─Quad Out→ 5.5s 110 ─Cubic In→ 6.4s 0
+  rotation: expr "wiggle(6, 4)"
+"n6" (group l_03jml)
+  position: 0s [1500,380] ─Easy Ease→ 5.8s [1500,380] ─Easy Ease→ 6.7s [960,420]
+  scale: 1.45s 0 ─Easy Ease→ 2.05s 100 ─spring Bouncy→ 5.5s 100 ─Quad Out→ 5.8s 110 ─Cubic In→ 6.7s 0
+  rotation: expr "wiggle(6, 4)"
+"n7" (group l_03jmo)
+  position: 0s [960,800] ─Easy Ease→ 6.1s [960,800] ─Easy Ease→ 7s [960,420]
+  scale: 1.7s 0 ─Easy Ease→ 2.3s 100 ─spring Bouncy→ 5.8s 100 ─Quad Out→ 6.1s 110 ─Cubic In→ 7s 0
+  rotation: expr "wiggle(6, 4)"
+"n8" (group l_03jmr)
+  position: 0s [700,220] ─Easy Ease→ 6.4s [700,220] ─Easy Ease→ 7.3s [960,420]
+  scale: 1.95s 0 ─Easy Ease→ 2.55s 100 ─spring Bouncy→ 6.1s 100 ─Quad Out→ 6.4s 110 ─Cubic In→ 7.3s 0
+  rotation: expr "wiggle(6, 4)"
+"n9" (group l_03jmu)
+  position: 0s [1240,800] ─Easy Ease→ 6.7s [1240,800] ─Easy Ease→ 7.6s [960,420]
+  scale: 2.2s 0 ─Easy Ease→ 2.8s 100 ─spring Bouncy→ 6.4s 100 ─Quad Out→ 6.7s 110 ─Cubic In→ 7.6s 0
+  rotation: expr "wiggle(6, 4)"

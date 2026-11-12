@@ -1,0 +1,67 @@
+{
+  "id": "17-music-logo-sting",
+  "title": "Logo sting synced to a track",
+  "complexity": "medium",
+  "style": [
+    "brand",
+    "music"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration": 8
+  },
+  "audio": {
+    "track": "sting120",
+    "name": "Sting 120 BPM",
+    "bpm": 120,
+    "offset": 0,
+    "drop": 4
+  },
+  "prompt": "Make a logo sting for the brand \"Pulse\" (a round mark — a circle with a smaller dot inside — plus the wordmark \"Pulse\") synced to the music already in the timeline. Build anticipation during the build, land the logo exactly on the drop, punctuate the next beats with secondary hits, and settle on a clean lockup before the end.",
+  "checklist": [
+    {
+      "text": "wordmark present",
+      "check": {
+        "type": "textContains",
+        "text": "Pulse"
+      }
+    },
+    {
+      "text": "the music is kept",
+      "check": {
+        "type": "audioKept"
+      }
+    },
+    {
+      "text": "a hero landing on the drop (4.0 s, ±1 frame)",
+      "check": {
+        "type": "hitAt",
+        "t": 4,
+        "frames": 1
+      }
+    },
+    {
+      "text": "moves land on beats (≥60% of landings within ±1 frame of the 120 BPM grid)",
+      "check": {
+        "type": "onBeats",
+        "bpm": 120,
+        "offset": 0,
+        "frames": 1,
+        "min": 0.6,
+        "minMoves": 4
+      }
+    },
+    {
+      "text": "restraint: not every beat carries a landing",
+      "check": {
+        "type": "notEveryBeat",
+        "bpm": 120,
+        "from": 0,
+        "to": 8,
+        "min": 0.25
+      }
+    }
+  ]
+}

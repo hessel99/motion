@@ -1,0 +1,226 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 129,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "explainer password manager sticky notes sucked into shield, headline, check mark, flat illustration"
+  },
+  "result": "# Example: Explainer beat, problem to solution with a match transition\n> tags: explainer, explain, how it works, steps, problem, solution, story, beat, icons, onboarding, flat, illustration, product, app, saas\n\n## Brief\n\"One explainer beat: messy notes everywhere (problem) become one tidy secure app (solution). Friendly flat style, 6 s, with a caption for each half.\"\n\n## Tool calls\n```json\n[\n  {\"t…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 17,
+  "ok": true,
+  "ms": 45,
+  "editorMs": 0,
+  "input": {
+   "name": "styles"
+  },
+  "result": "Style recipes (get_guide {name: \"styles/<name>\"}):\n- styles/corporate-smooth: Clean, trustworthy and calm: brand blue, soft cards, gentle fades and long decelerating eases, no surprises.\n- styles/cyber-neon: Night-city neon: glowing strokes on near-black, magenta/cyan, grids receding to the horizon, flicker-on lights and smooth synth motion.\n- styles/data-viz: Precise, honest charts that build in …"
+ },
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1273,
+  "ok": true,
+  "ms": 56,
+  "editorMs": 1,
+  "input": {
+   "title": "One key. Every login.",
+   "duration": 12,
+   "style": "flat-explainer",
+   "styleReason": "Friendly flat shapes, one idea per beat, match transitions between beats.",
+   "beats": [
+    {
+     "name": "Anxious pile",
+     "start": 0,
+     "end": 4,
+     "description": "Cream background. Eight sticky notes with scribbled passwords pop in staggered into a messy pile, then jitter nervously with small rotation wobbles. A faint shield outline fades in behind the pile near the end as the cue.",
+     "style": "Back Out pops, wobble expressions with different periods; pink/yellow/teal notes, navy ink."
+    },
+    {
+     "name": "Suck-in",
+     "start": 4,
+     "end": 8,
+     "description": "Notes anticipate (swell slightly), then spiral in with Expo In, shrinking into the shield centre, staggered by distance; the shield solidifies, squashes on each gulp and settles. Jitter ends as the pull starts.",
+     "style": "Expo In, 0.06s stagger, shield spring squash; shared centre point is the match transition."
+    },
+    {
+     "name": "Glow & headline",
+     "start": 8,
+     "end": 12,
+     "description": "The last note disappears into the shield, which glows with a soft pulse ring; a check mark draws on in the shield, then the headline 'One key. Every login.' slides up and lands beneath, shield nudges up to make room.",
+     "style": "Cubic Out, draw-on check, soft radial glow; calm breathing hold."
+    }
+   ]
+  },
+  "result": "storyboard \"One key. Every login.\" shown to the user (3 beats, 12s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 51,
+  "editorMs": 0,
+  "input": {
+   "beat": 1,
+   "status": "active"
+  },
+  "result": "beat 1 \"Anxious pile\" active; 0/3 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3410,
+  "ok": true,
+  "ms": 241,
+  "editorMs": 6,
+  "input": "{\"comp\":{\"duration\":12,\"background\":\"#FEF6E4\",\"fps\":30},\"layers\":[{\"key\":\"glow\",\"type\":\"ellipse\",\"x\":610,\"y\":30,\"w\":700,\"h\":700,\"fill\":{\"type\":\"radial\",\"stops\":[{\"pos\":0,\"color\":\"#FFD803CC\"},{\"pos\":1,\"color\":\"#FFD80300\"}]},\"opacity\":0},{\"key\":\"ring\",\"type\":\"ellipse\",\"x\":790,\"y\":210,\"w\":340,\"h\":340,\"fill\":\"#00000000\",\"stroke\":\"#FFD803\",\"strokeWidth\":8,\"opacity\":0},{\"key\":\"shield\",\"type\":\"path\",\"d\":\"M150 0 L290 50 V170 C290 260 230 315 150 340 C70 315 10 260 10 170 V50 Z\",\"x\":810,\"y\":260,\"w\":300,\"h\":340,\"fill\":\"#8BD3DD\",\"stroke\":\"#172C66\",\"strokeWidth\":10,\"opacity\":0},{\"key\":\"check\",\"shape\":\"check\",\"x\":895,\"y\":330,\"w\":130,\"h\":100,\"stroke\":\"#FFFFFF\",\"strokeWidth\":20,\"fill\":\"#00000000\"},{\"key\":\"n1\",\"type\":\"group\",\"x\":615,\"y\":275,\"w\":170,\"h\":170,\"rotation\":-12,\"children\":[{\"key\":\"n1r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":170,\"h\":170,\"radius\":10,\"fill\":\"#F582AE\"},{\"key\":\"n1t\",\"text\":{\"content\":\"hunter2\",\"fontSize\":28,\"fontWeight\":700,\"align\":\"center\"},\"x\":0,\"y\":65,\"w\":170,\"h\":40,\"fill\":\"#172C66\"}]},{\"key\":\"n2\",\"type\":\"group\",\"x\":795,\"y\":215,\"w\":170,\"h\":170,\"rotation\":8,\"children\":[{\"key\":\"n2r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":170,\"h\":170,\"radius\":10,\"fill\":\"#FFD803\"},{\"key\":\"n2t\",\"text\":{\"content\":\"Pa$$w0rd!\",\"fontSize\":28,\"fontWeight\":700,\"align\":\"center\"},\"x\":0,\"y\":65,\"w\":170,\"h\":40,\"fill\":\"#172C66\"}]},{\"key\":\"n3\",\"type\":\"group\",\"x\":975,\"y\":245,\"w\":170,\"h\":170,\"rotation\":-6,\"children\":[{\"key\":\"n3r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":170,\"h\":170,\"radius\":10,\"fill\":\"#8BD3DD\"},{\"key\":\"n3t\",\"text\":{\"content\":\"qwerty123\",\"fontSize\":28,\"fontWeight\":700,\"align\":\"center\"},\"x\":0,\"y\":65,\"w\":170,\"h\":40,\"fill\":\"#172C66\"}]},{\"key\":\"n4\",\"type\":\"group\",\"x\":1145,\"y\":335,\"w\":170,\"h\":170,\"rotation\":12,\"children\":[{\"key\":\"n4r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":170,\"h\":170,\"radius\":10,\"fill\":\"#F582AE\"},{\"key\":\"n4t\",\"text\":{\"content\":\"bank_2019\",\"fontSize\":28,\"fontWeight\":700,\"align\":\"center\"},\"x\":0,\"y\":65,\"w\":170,\"h\":40,\"fill\":\"#172C66\"}]},{\"key\":\"n5\",\"type\":\"group\",\"x\":1065,\"y\":475,\"w\":170,\"h\":170,\"rotation\":-10,\"children\":[{\"key\":\"n5r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":170,\"h\":170,\"radius\":10,\"fill\":\"#FFD803\"},{\"key\":\"n5t\",\"text\":{\"content\":\"mom'sBday\",\"fontSize\":28,\"fontWeight\":700,\"align\":\"center\"},\"x\":0,\"y\":65,\"w\":170,\"h\":40,\"fill\":\"#172C66\"}]},{\"key\":\"n6\",\"type\":\"group\",\"x\":875,\"y\":495,\"w\":170,\"h\":170,\"rotation\":6,\"children\":[{\"key\":\"n6r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":170,\"h\":170,\"radius\":10,\"fill\":\"#8BD3DD\"},{\"key\":\"n6t\",\"text\":{\"content\":\"letmein\",\"fontSize\":28,\"fontWeight\":700,\"align\":\"center\"},\"x\":0,\"y\":65,\"w\":170,\"h\":40,\"fill\":\"#172C66\"}]},{\"key\":\"n7\",\"type\":\"group\",\"x\":685,\"y\":455,\"w\":170,\"h\":170,\"rotation\":-14,\"children\":[{\"key\":\"n7r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":170,\"h\":170,\"radius\":10,\"fill\":\"#FFD803\"},{\"key\":\"n7t\",\"text\":{\"content\":\"Winter#4\",\"fontSize\":28,\"fontWeight\":700,\"align\":\"center\"},\"x\":0,\"y\":65,\"w\":170,\"h\":40,\"fill\":\"#172C66\"}]},{\"key\":\"n8\",\"type\":\"group\",\"x\":535,\"y\":385,\"w\":170,\"h\":170,\"rotation\":9,\"children\":[{\"key\":\"n8r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":170,\"h\":170,\"…",
+  "result": "{\"summary\":\"29 created, 0 updated, 2 keyframe tracks; animation ends 8.7s\",\"ids\":{\"glow\":\"l_03jm2\",\"ring\":\"l_03jm3\",\"shield\":\"l_03jm4\",\"check\":\"l_03jm5\",\"n1r\":\"l_03jm7\",\"n1t\":\"l_03jm8\",\"n1\":\"l_03jm6\",\"n2r\":\"l_03jma\",\"n2t\":\"l_03jmb\",\"n2\":\"l_03jm9\",\"n3r\":\"l_03jmd\",\"n3t\":\"l_03jme\",\"n3\":\"l_03jmc\",\"n4r\":\"l_03jmg\",\"n4t\":\"l_03jmh\",\"n4\":\"l_03jmf\",\"n5r\":\"l_03jmj\",\"n5t\":\"l_03jmk\",\"n5\":\"l_03jmi\",\"n6r\":\"l_03j…"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 4147,
+  "ok": true,
+  "ms": 36,
+  "editorMs": 2,
+  "input": "{\"tracks\":[{\"id\":\"l_03jm6\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.2,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.8,\"v\":100},{\"t\":3.6,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":3.8,\"v\":112,\"ease\":\"Expo In\"},{\"t\":4.4,\"v\":0}]},{\"id\":\"l_03jm6\",\"prop\":\"position\",\"keyframes\":[{\"t\":3.8,\"v\":[700,360],\"ease\":\"Expo In\"},{\"t\":4.4,\"v\":[960,430]}]},{\"id\":\"l_03jm6\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":3.8,\"v\":-12,\"ease\":\"Expo In\"},{\"t\":4.4,\"v\":-282}]},{\"id\":\"l_03jm9\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.3,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.9,\"v\":100},{\"t\":3.66,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":3.86,\"v\":112,\"ease\":\"Expo In\"},{\"t\":4.46,\"v\":0}]},{\"id\":\"l_03jm9\",\"prop\":\"position\",\"keyframes\":[{\"t\":3.86,\"v\":[880,300],\"ease\":\"Expo In\"},{\"t\":4.46,\"v\":[960,430]}]},{\"id\":\"l_03jm9\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":3.86,\"v\":8,\"ease\":\"Expo In\"},{\"t\":4.46,\"v\":278}]},{\"id\":\"l_03jmc\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.4,\"v\":0,\"ease\":\"Back Out\"},{\"t\":1,\"v\":100},{\"t\":3.72,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":3.92,\"v\":112,\"ease\":\"Expo In\"},{\"t\":4.52,\"v\":0}]},{\"id\":\"l_03jmc\",\"prop\":\"position\",\"keyframes\":[{\"t\":3.92,\"v\":[1060,330],\"ease\":\"Expo In\"},{\"t\":4.52,\"v\":[960,430]}]},{\"id\":\"l_03jmc\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":3.92,\"v\":-6,\"ease\":\"Expo In\"},{\"t\":4.52,\"v\":-276}]},{\"id\":\"l_03jmf\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.5,\"v\":0,\"ease\":\"Back Out\"},{\"t\":1.1,\"v\":100},{\"t\":3.78,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":3.98,\"v\":112,\"ease\":\"Expo In\"},{\"t\":4.58,\"v\":0}]},{\"id\":\"l_03jmf\",\"prop\":\"position\",\"keyframes\":[{\"t\":3.98,\"v\":[1230,420],\"ease\":\"Expo In\"},{\"t\":4.58,\"v\":[960,430]}]},{\"id\":\"l_03jmf\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":3.98,\"v\":12,\"ease\":\"Expo In\"},{\"t\":4.58,\"v\":282}]},{\"id\":\"l_03jmi\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.6,\"v\":0,\"ease\":\"Back Out\"},{\"t\":1.2,\"v\":100},{\"t\":3.84,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":4.04,\"v\":112,\"ease\":\"Expo In\"},{\"t\":4.64,\"v\":0}]},{\"id\":\"l_03jmi\",\"prop\":\"position\",\"keyframes\":[{\"t\":4.04,\"v\":[1150,560],\"ease\":\"Expo In\"},{\"t\":4.64,\"v\":[960,430]}]},{\"id\":\"l_03jmi\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":4.04,\"v\":-10,\"ease\":\"Expo In\"},{\"t\":4.64,\"v\":-280}]},{\"id\":\"l_03jml\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.7,\"v\":0,\"ease\":\"Back Out\"},{\"t\":1.3,\"v\":100},{\"t\":3.9,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":4.1,\"v\":112,\"ease\":\"Expo In\"},{\"t\":4.7,\"v\":0}]},{\"id\":\"l_03jml\",\"prop\":\"position\",\"keyframes\":[{\"t\":4.1,\"v\":[960,580],\"ease\":\"Expo In\"},{\"t\":4.7,\"v\":[960,430]}]},{\"id\":\"l_03jml\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":4.1,\"v\":6,\"ease\":\"Expo In\"},{\"t\":4.7,\"v\":276}]},{\"id\":\"l_03jmo\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.8,\"v\":0,\"ease\":\"Back Out\"},{\"t\":1.4,\"v\":100},{\"t\":3.96,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":4.16,\"v\":112,\"ease\":\"Expo In\"},{\"t\":4.76,\"v\":0}]},{\"id\":\"l_03jmo\",\"prop\":\"position\",\"keyframes\":[{\"t\":4.16,\"v\":[770,540],\"ease\":\"Expo In\"},{\"t\":4.76,\"v\":[960,430]}]},{\"id\":\"l_03jmo\",\"prop\":\"rotation\",\"keyframes\":[{\"t\":4.16,\"v\":-14,\"ease\":\"Expo In\"},{\"t\":4.76,\"v\":-284}]},{\"id\":\"l_03jmr\",\"prop\":\"scale\",\"keyframes\":[{\"t\":0.9,\"v\":0,\"ease\":\"Back Out\"},{\"t\":1.5,\"v\":100},{\"t\":4.02,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":4.22,\"v\":1…",
+  "result": "ok: 31 tracks on 11 layers"
+ },
+ {
+  "name": "draw_on",
+  "argsBytes": 75,
+  "ok": true,
+  "ms": 149,
+  "editorMs": 6,
+  "input": {
+   "ids": [
+    "l_03jm5"
+   ],
+   "t": 6.9,
+   "duration": 0.5,
+   "ease": "Cubic Out",
+   "fill": "hide"
+  },
+  "result": "draw on: 1 path(s) 6.9s–7.4s"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 608,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 5,
+  "input": {
+   "layers": [
+    {
+     "key": "n1",
+     "expr": {
+      "rotation": "value + 4*Math.sin(time*2*Math.PI/0.5)"
+     }
+    },
+    {
+     "key": "n2",
+     "expr": {
+      "rotation": "value - 4*Math.sin(time*2*Math.PI/0.4)"
+     }
+    },
+    {
+     "key": "n3",
+     "expr": {
+      "rotation": "value + 5*Math.sin(time*2*Math.PI/0.6)"
+     }
+    },
+    {
+     "key": "n4",
+     "expr": {
+      "rotation": "value - 4*Math.sin(time*2*Math.PI/0.45)"
+     }
+    },
+    {
+     "key": "n5",
+     "expr": {
+      "rotation": "value + 4*Math.sin(time*2*Math.PI/0.55)"
+     }
+    },
+    {
+     "key": "n6",
+     "expr": {
+      "rotation": "value - 5*Math.sin(time*2*Math.PI/0.5)"
+     }
+    },
+    {
+     "key": "n7",
+     "expr": {
+      "rotation": "value + 4*Math.sin(time*2*Math.PI/0.42)"
+     }
+    },
+    {
+     "key": "n8",
+     "expr": {
+      "rotation": "value - 4*Math.sin(time*2*Math.PI/0.58)"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 8 updated, 0 keyframe tracks; animation ends 4.82s\",\"ids\":{\"n1\":\"l_03jm6\",\"n2\":\"l_03jm9\",\"n3\":\"l_03jmc\",\"n4\":\"l_03jmf\",\"n5\":\"l_03jmi\",\"n6\":\"l_03jml\",\"n7\":\"l_03jmo\",\"n8\":\"l_03jmr\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 49,
+  "ok": true,
+  "ms": 222,
+  "editorMs": 166,
+  "input": {
+   "times": [
+    0.5,
+    2,
+    3.9,
+    4.4,
+    5.5,
+    7,
+    8.5,
+    11
+   ],
+   "cell": 400
+  },
+  "result": "8 frames left→right, top→bottom at 0.5s, 2s, 3.9s, 4.4s, 5.5s, 7s, 8.5s, 11s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/49635e8c-678e-4400-b5cd-59833cf20a4a/tool-results/mcp-motion-blob-1794512605334-sq80qp.jpg]"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 111,
+  "editorMs": 95,
+  "input": {
+   "beat": 1,
+   "status": "done"
+  },
+  "result": "beat 1 \"Anxious pile\" done; 1/3 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 107,
+  "editorMs": 46,
+  "input": {
+   "beat": 2,
+   "status": "done"
+  },
+  "result": "beat 2 \"Suck-in\" done; 2/3 beats finished\ncritic on this beat (4–8s): [medium] \"n4t\" and \"n5t\" overlap for 0.1 s (4.5s–4.5s): let the outgoing text clear (or move apart) before the next arrives → retime {\"ids\":[\"l_03jmk\"],\"offset\":0.15}. Fix before the next beat if it is quick."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 94,
+  "editorMs": 44,
+  "input": {
+   "beat": 3,
+   "status": "done"
+  },
+  "result": "beat 3 \"Glow & headline\" done; 3/3 beats finished — now critique (the critique tool, then contact_sheet; rubric: get_guide handbook, section \"Critique\")"
+ }
+]

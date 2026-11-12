@@ -1,0 +1,13 @@
+- line [path] box 540,380,1,460 #000000 a0 stroke #d9c08e 1.5px
+- name [text] box 81,888,917,173 #d9c08e "ÉCLAT" Cormorant Garamond 132px w300
+- sub [text] box 140,1090,800,50 #b8a27a "EAU DE PARFUM" Inter 26px w300
+
+comp 1080x1920 7s @30fps, background #0b0a09
+"line" (path l_03jm2)
+  trimStart: 0.4s 0
+  trimEnd: 0.4s 0 ─Sine In Out→ 4.9s 100
+"name" (text l_03jm3)
+  scale: 2.2s 104 ─Sine Out→ 6s 100
+  text animator: in by char, start 2.2s, 1.6s each, stagger 0.35s, ease Sine Out
+"sub" (text l_03jm4)
+  opacity: 4.6s 0 ─Easy Ease→ 6.2s 100

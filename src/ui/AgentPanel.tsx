@@ -8,6 +8,7 @@ import { loadChat, projectKey, saveChat, type Msg, type ReviewInfo } from '../ag
 import { toolLabel } from '../agent/labels';
 import { briefScope } from '../agent/quick';
 import { approvalMessage, storyboards, type Storyboard } from '../agent/storyboard';
+import { polishPlan, tasteOn } from '../agent/taste';
 import { TOOLS } from '../agent/tools';
 import { animRange } from '../agent/describe';
 import { MentionInput, mentionToken, type Mention } from './agent/MentionInput';
@@ -35,7 +36,9 @@ interface Queued { id: number; text: string; chip?: string; context?: string; mo
 /** one document's conversation (keyed by projectKey). background documents keep theirs here
  *  while a run works in them */
 interface Conv { msgs: Msg[]; sessions: Record<string, string | undefined>; turn: Turn | null; queue: Queued[] }
-interface SendOpts { mode?: ChatMode; chip?: string; style?: string; context?: string; mentions?: Mention[]; fromComposer?: boolean }
+interface SendOpts { mode?: ChatMode; chip?: string; style?: string; context?: string; mentions?: Mention[]; fromComposer?: boolean; polish?: Polish }
+/** an automatic polishing follow-up (taste layer, src/agent/taste.ts): its round and the turn it continues */
+interface Polish { round: number; snap: DocSnapshot; startId: number; marker: number; model?: string }
 
 let queueSeq = 0;
 
@@ -222,10 +225,15 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
       if (st) setStyle('');
     }
     stick.current = true;
-    setMsgsFor(k, x => [...x, { role: 'user', text, mode: m, chip: opts.chip, ...(opts.context ? { context: opts.context } : {}), ...(st ? { style: st } : {}) }]);
-    const snap = snapshotDoc(s.project);
-    const marker = s.historyLength; // only for the step count shown on the card
-    const startId = s.topEntryId; // identifies the exact pre-turn state (revert / compare)
+    const pol = opts.polish;
+    // a polishing follow-up shows as its quiet "Polishing" row and takes over the build's review card
+    if (pol) setMsgsFor(k, x => x.filter(y => !(y.role === 'review' && y.review?.startId === pol.startId && y.review.state === 'pending')));
+    else setMsgsFor(k, x => [...x, { role: 'user', text, mode: m, chip: opts.chip, ...(opts.context ? { context: opts.context } : {}), ...(st ? { style: st } : {}) }]);
+    const snap = pol?.snap ?? snapshotDoc(s.project);
+    const marker = pol?.marker ?? s.historyLength; // only for the step count shown on the card
+    const startId = pol?.startId ?? s.topEntryId; // identifies the exact pre-turn state (revert / compare)
+    const usedModel = pol ? pol.model : provider === 'claude' ? resolveModel(scope, model) : undefined;
+    let failed = false;
     let assistantIdx = -1;
     let finished = false;
     const append = (fn: (m: Msg[]) => Msg[]) => setMsgsFor(k, fn);
@@ -257,13 +265,20 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
         }
         // show the result on the canvas (a background document: its playhead waits at the end state)
         if (review.range) playResult(ds, review.range, visible);
+        // taste layer: the critic checks the result and feeds its worst fixes back (max 2 rounds)
+        const plan = !failed && m === 'edit' && visible && k === key.current && tasteOn() && storyboards.current?.state !== 'proposed' ? polishPlan(ds, (pol?.round ?? 0) + 1) : null;
+        if (plan) {
+          append(x => [...x, { role: 'info', text: `Polishing: ${plan.count} fix${plan.count > 1 ? 'es' : ''}` }]);
+          const next: Polish = { round: (pol?.round ?? 0) + 1, snap, startId, marker, model: usedModel };
+          setTimeout(() => send(plan.message, { polish: next, chip: opts.chip ?? shortLabel(text) }), 0);
+        }
       }
       const bits = [e.durationMs ? `${(e.durationMs / 1000).toFixed(1)}s` : '', e.costUsd ? `$${e.costUsd.toFixed(3)}` : '', e.usage ? `${fmtTok(e.usage.input)} in · ${fmtTok(e.usage.output)} out` : ''].filter(Boolean);
       // run stats (time, cost, tokens) are developer detail: the console, not the thread
       if (bits.length) console.info('[agent turn]', bits.join(' · '));
     };
 
-    const chatId = agentClient.chat({ provider, message, sessionId: c.sessions[provider], model: provider === 'claude' ? resolveModel(scope, model) : undefined, mode: m, maxTurns: turnBudget(), store: storeOf }, (e: ChatEvent) => {
+    const chatId = agentClient.chat({ provider, message: pol ? text : message, sessionId: c.sessions[provider], model: usedModel, mode: m, maxTurns: turnBudget(), store: storeOf }, (e: ChatEvent) => {
       switch (e.kind) {
         case 'session': conv(k).sessions[provider] = e.sessionId; persist(k); break;
         case 'text_delta':
@@ -295,6 +310,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
           append(m => m.map(x => (x.tool?.id === e.id ? { ...x, tool: { ...x.tool!, result: e.summary, isError: e.isError, ms: x.tool!.startedAt ? Date.now() - x.tool!.startedAt : undefined } } : x)));
           break;
         case 'error':
+          failed = true;
           if (e.errorKind === 'cancelled') append(m => [...m, { role: 'info', text: 'Stopped.' }]);
           else append(x => [...x, { role: 'error', text: e.message, errorKind: e.errorKind, hint: e.hint, retry: text, mode: m }]);
           break;

@@ -1,0 +1,264 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 297,
+  "ok": true,
+  "ms": 229,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Logo reveal for \"NOVA\", a small fintech. Geometric mark (circle and diagonal slash) draws/assembles first, wordmark slides out from behind the mark, tagline \"Money, made simple\" fades in underneath. Navy background, one accent color. Hold full lockup at least 1s."
+  },
+  "result": "# Example: Elegant logo reveal, the line draws the mark and the wordmark slides out from behind it\n> tags: logo, reveal, elegant, minimal, luxury, corporate, line, stroke, draw, draw-on, trim, wordmark, mask, behind, monogram, calm\n\n## Brief\n\"Logo reveal for NOVA (a circle monogram with a slash). Calm and premium, dark background, 4 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 141,
+  "editorMs": 0,
+  "input": {},
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":60,\"duration\":4,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":0,\"layers\":[]}"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1104,
+  "ok": true,
+  "ms": 116,
+  "editorMs": 7,
+  "input": {
+   "comp": {
+    "duration": 4,
+    "background": "#0B1D3A",
+    "fps": 60
+   },
+   "layers": [
+    {
+     "key": "mark-ring",
+     "type": "path",
+     "shape": "circle",
+     "name": "Mark ring",
+     "x": 590,
+     "y": 430,
+     "w": 220,
+     "h": 220,
+     "fill": "#00000000",
+     "stroke": "#F4F7FB",
+     "strokeWidth": 14,
+     "drawOn": {
+      "t": 0.2,
+      "duration": 0.9,
+      "ease": "Cubic In Out"
+     }
+    },
+    {
+     "key": "mark-slash",
+     "type": "path",
+     "name": "Mark slash",
+     "d": "M604 636 L796 444",
+     "fill": "#00000000",
+     "stroke": "#2EE6A6",
+     "strokeWidth": 16,
+     "drawOn": {
+      "t": 0.9,
+      "duration": 0.45,
+      "ease": "Expo Out"
+     }
+    },
+    {
+     "key": "wordmark-reveal",
+     "name": "Wordmark reveal",
+     "clip": true,
+     "x": 850,
+     "y": 430,
+     "w": 640,
+     "h": 220,
+     "children": [
+      {
+       "key": "wordmark",
+       "name": "Wordmark NOVA",
+       "text": {
+        "content": "NOVA",
+        "fontSize": 170,
+        "fontWeight": 700,
+        "letterSpacing": 14,
+        "align": "left"
+       },
+       "x": 0,
+       "y": 0,
+       "w": 640,
+       "h": 220,
+       "fill": "#F4F7FB",
+       "enter": {
+        "t": 1.25,
+        "duration": 0.9,
+        "from": {
+         "dx": -330
+        },
+        "ease": "Quart Out"
+       }
+      }
+     ]
+    },
+    {
+     "key": "tagline",
+     "type": "text",
+     "name": "Tagline",
+     "text": {
+      "content": "Money, made simple",
+      "fontSize": 38,
+      "fontWeight": 500,
+      "letterSpacing": 2,
+      "align": "left"
+     },
+     "x": 854,
+     "y": 668,
+     "w": 600,
+     "h": 60,
+     "fill": "#8FA3BF",
+     "enter": {
+      "t": 2,
+      "duration": 0.7,
+      "from": {
+       "opacity": 0,
+       "dy": 14
+      },
+      "ease": "Sine Out"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 7 keyframe tracks; animation ends 2.7s\",\"ids\":{\"mark-ring\":\"l_03jm2\",\"mark-slash\":\"l_03jm3\",\"wordmark\":\"l_03jm5\",\"wordmark-reveal\":\"l_03jm4\",\"tagline\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 208,
+  "editorMs": 188,
+  "input": {
+   "times": [
+    0.3,
+    0.9,
+    1.4,
+    1.9,
+    2.4,
+    3.6
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.3s, 0.9s, 1.4s, 1.9s, 2.4s, 3.6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/1f0d7e1d-a783-40ae-bb2b-85a170d99916/tool-results/mcp-motion-blob-1794512862457-bv46bp.jpg]"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 29,
+  "ok": true,
+  "ms": 75,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm4",
+    "l_03jm5"
+   ]
+  },
+  "result": "comp 4s @60fps\n\"Wordmark reveal\" (group l_03jm4)\n  (static)\n\"Wordmark NOVA\" (text l_03jm5)\n  position: 1.25s [-10,110] ─Quart Out→ 2.15s [320,110]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 154,
+  "ok": true,
+  "ms": 120,
+  "editorMs": 3,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm5",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        -300,
+        110
+       ]
+      },
+      {
+       "t": 1.25,
+       "v": [
+        -300,
+        110
+       ],
+       "ease": "Quart Out"
+      },
+      {
+       "t": 2.15,
+       "v": [
+        320,
+        110
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 176,
+  "editorMs": 145,
+  "input": {
+   "times": [
+    0.3,
+    1,
+    1.4,
+    1.7,
+    2.2,
+    3.6
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.3s, 1s, 1.4s, 1.7s, 2.2s, 3.6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/1f0d7e1d-a783-40ae-bb2b-85a170d99916/tool-results/mcp-motion-blob-1794512880722-nax1n0.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 51,
+  "editorMs": 11,
+  "input": {},
+  "result": "score 82/100 (polish 84, richness 84)\n1. [medium] no follow-through, overshoot, settle or idle motion anywhere in 4s: everything stops dead\n   → secondary_motion {\"ids\":[\"l_03jm5\",\"l_03jm6\"],\"overshoot\":0.08,\"segments\":\"first\"}\n2. [medium] 4 elements and 4 moves for 4s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch\n   → seconda…"
+ },
+ {
+  "name": "secondary_motion",
+  "argsBytes": 57,
+  "ok": true,
+  "ms": 412,
+  "editorMs": 3,
+  "input": {
+   "ids": [
+    "l_03jm5"
+   ],
+   "overshoot": 0.05,
+   "props": [
+    "position"
+   ]
+  },
+  "result": "added overshoot 5% to Wordmark NOVA (1 moves)"
+ },
+ {
+  "name": "check_frame",
+  "argsBytes": 21,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 2,
+  "input": {
+   "times": [
+    1,
+    2.5,
+    3.6
+   ]
+  },
+  "result": "1s:\n  Mark ring ↔ Mark slash: overlap 100%\n2.5s:\n  Mark ring ↔ Mark slash: overlap 100%\n3.6s:\n  Mark ring ↔ Mark slash: overlap 100%"
+ }
+]

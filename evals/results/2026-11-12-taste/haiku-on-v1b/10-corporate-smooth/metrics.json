@@ -1,0 +1,204 @@
+{
+ "run": {
+  "id": "10-corporate-smooth",
+  "name": "10-corporate-smooth",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 73,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 84,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 16,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:entrance-ease",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 6.8
+   },
+   "after": {
+    "score": 73,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 84,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 16,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:entrance-ease",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 6.8
+   }
+  },
+  "wallMs": 42447,
+  "timedOut": false,
+  "turns": 7,
+  "costUsd": 0.00835318,
+  "durationMs": 41184,
+  "usage": {
+   "input": 261086,
+   "cached": 250658,
+   "output": 7524
+  },
+  "errors": [],
+  "toolCalls": 6,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The first pass reads correctly, but the name and title sit outside the 10% title-safe margin. I'll shift the whole lower third in by 72px.\nI built the lower third in the Main comp: a translucent blue-grey panel, a thin accent line, and the name and title on two clipped reveals. It holds from about 2s to 4.5s and is fully gone by 5.4s, inside the 6s comp.\n\n- **Panel**: slides in 60px from the left while fading up (0.1–1.1s, Quart In Out). It exits left and fades by 5.4s.\n- **Accent line**: grows out from its left end (0.6–1.5s), then retracts back into the left end as the exit starts.\n- **Name, \"Dr. Amelia Hart\"**: rises 40px out of a clip mask and fades in (0.9–1.8s).\n- **Title, \"Head of Research, Larkspur Labs\"**: rises 30px out of its own clip mask (1.2–2.1s), exiting before the name.\n\nThe whole block sits inside the title-safe area at the lower left. Colours are panel `#1f2c38` at about 72% opacity, name `#f3f6f8`, title `#b9c8d4`, accent `#8fa9bd`.\n\nThe critic gave 73/100 and flagged the entrances as too slow for their distance. I kept the long Quart In Out ease-ins you asked for, since that is the calm, premium feel you described. If you want it snappier, I can switch the entrances to Quart Out and shorten the slides.\n\nI left the comp background as it was, so the panel's translucency won't show much until you place it over footage."
+ },
+ "metrics": {
+  "layers": 6,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "rect": 2,
+   "group": 2,
+   "text": 2
+  },
+  "groups": 2,
+  "animatedLayers": 4,
+  "keys": 28,
+  "segments": 14,
+  "easesUsed": {
+   "Quart In Out": 7,
+   "Cubic In": 7
+  },
+  "distinctEases": 2,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#1f2c38",
+   "#8fa9bd",
+   "#f3f6f8",
+   "#b9c8d4",
+   "#121214"
+  ],
+  "keyCoverage": 0.55,
+  "visualActivity": 0.514,
+  "firstMotion": 0.133,
+  "lastMotion": 5.4,
+  "endHold": 0.6,
+  "longestHold": 2.211,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.402,
+  "exits": 3,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.077,
+  "toolErrors": 0,
+  "toolCalls": 6
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "placed in the lower third",
+    "type": "lowerThird",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "animates out by the end",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "hold in the middle (≥1.5s without key motion)",
+    "type": "holdMin",
+    "pass": true
+   },
+   {
+    "text": "translucent panel (opacity < 100 or alpha)",
+    "type": "translucent",
+    "pass": true
+   },
+   {
+    "text": "accent line extends",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 8
+ },
+ "video": null
+}

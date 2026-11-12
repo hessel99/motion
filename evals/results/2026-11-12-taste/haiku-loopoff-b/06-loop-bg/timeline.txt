@@ -1,0 +1,29 @@
+- Blob purple [ellipse] box -20,-240,1000,1000 #7c3aed
+- Blob teal [ellipse] box 820,118,900,900 #2dd4bf
+- Blob violet [ellipse] box 1002,110,560,560 #a855f7
+- Blob mint [ellipse] box 220,564,640,640 #14b8a6
+- Blob deep [ellipse] box 1118,420,760,760 #4c1d95
+- Dots band 1 [path] box 76,86,328,908 #ffffff
+- Dots band 2 [path] box 556,86,328,908 #ffffff
+- Dots band 3 [path] box 1036,86,328,908 #ffffff
+- Dots band 4 [path] box 1516,86,328,908 #ffffff
+
+comp 1920x1080 6s @30fps, background #0b0a1f
+"Blob purple" (ellipse l_03jm2)
+  position: expr "[480+180*sin(1.0471976*time), 380+120*cos(1.0471976*time)]"
+"Blob teal" (ellipse l_03jm3)
+  position: expr "[1340+130*cos(1.0471976*time+1), 640+150*sin(1.0471976*time+0.5)]"
+"Blob violet" (ellipse l_03jm4)
+  position: expr "[1100+200*sin(2.0943951*time+2), 300+90*cos(2.0943951*time)]"
+"Blob mint" (ellipse l_03jm5)
+  position: expr "[400+140*cos(2.0943951*time), 800-100*sin(1.0471976*time+1)]"
+"Blob deep" (ellipse l_03jm6)
+  position: expr "[1420-130*sin(1.0471976*time+2.5), 880-100*cos(1.0471976*time+2.5)]"
+"Dots band 1" (path l_03jm7)
+  opacity: expr "24+14*sin(2.0943951*time+0)"
+"Dots band 2" (path l_03jm8)
+  opacity: expr "24+14*sin(2.0943951*time+1.2)"
+"Dots band 3" (path l_03jm9)
+  opacity: expr "24+14*sin(2.0943951*time+2.4)"
+"Dots band 4" (path l_03jma)
+  opacity: expr "24+14*sin(2.0943951*time+3.6)"

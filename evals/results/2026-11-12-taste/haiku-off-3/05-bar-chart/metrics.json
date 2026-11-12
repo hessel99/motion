@@ -1,0 +1,205 @@
+{
+ "run": {
+  "id": "05-bar-chart",
+  "name": "05-bar-chart",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 54,
+    "sub": {
+     "timing": 64,
+     "easing": 80.8,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 64,
+     "polish": 84,
+     "richness": 70,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 36,
+     "easing": 19.2,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 36,
+     "polish": 16,
+     "richness": 30,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:end-hold",
+     "high:text-collision",
+     "high:one-move",
+     "medium:monotone-ease",
+     "medium:default-fill"
+    ],
+    "ms": 13.7
+   },
+   "after": {
+    "score": 54,
+    "sub": {
+     "timing": 64,
+     "easing": 80.8,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 64,
+     "polish": 84,
+     "richness": 70,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 36,
+     "easing": 19.2,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 36,
+     "polish": 16,
+     "richness": 30,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:end-hold",
+     "high:text-collision",
+     "high:one-move",
+     "medium:monotone-ease",
+     "medium:default-fill"
+    ],
+    "ms": 13.7
+   }
+  },
+  "wallMs": 34100,
+  "timedOut": false,
+  "turns": 3,
+  "costUsd": 0.00612383,
+  "durationMs": 33238,
+  "usage": {
+   "input": 98965,
+   "cached": 89883,
+   "output": 6818
+  },
+  "errors": [],
+  "toolCalls": 2,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the \"Revenue by quarter\" bar chart: a 6 s, 1920×1080 composition on a light background, with the title top-left.\n\n- **Axis:** **Baseline axis** draws on from left to right first (0.3–0.9 s).\n- **Bars:** **Bar Q1–Q4** grow up from the baseline one after another, starting at 1.0, 1.2, 1.4 and 1.6 s, with an Expo Out ease.\n- **Values:** **Value $12M–$27M** fade in and rise slightly above each bar, starting about 0.4 s into each bar's growth.\n- **Q4 highlight:** **Bar Q4** and its label use orange (#F97316 bar, #C2410C text). After it lands, it gets a small pop (to 104% wide, 102% tall) that settles by 2.9 s.\n- **Labels:** **Quarter labels** Q1–Q4 sit under the baseline and fade in at 0.9 s.\n\nI checked the frames at 0.5, 1.2, 1.9, 2.5 and 3.5 s and the sequence reads correctly; the chart holds from about 2.9 s to the end.\n\nOne deviation: the value labels fade and rise in rather than counting up. Animating the number itself needs an expression, which I didn't add. I can add a count-up if you want it."
+ },
+ "metrics": {
+  "layers": 15,
+  "drawableLayers": 15,
+  "layerTypes": {
+   "text": 10,
+   "path": 1,
+   "rect": 4
+  },
+  "groups": 0,
+  "animatedLayers": 15,
+  "keys": 53,
+  "segments": 27,
+  "easesUsed": {
+   "Expo Out": 24,
+   "Ease In Out": 2,
+   "Ease Out": 1
+  },
+  "distinctEases": 3,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 8,
+  "palette": [
+   "#0f172a",
+   "#64748b",
+   "#6b8cff",
+   "#334155",
+   "#94a3b8",
+   "#f97316",
+   "#c2410c",
+   "#f8fafc"
+  ],
+  "keyCoverage": 0.483,
+  "visualActivity": 0.391,
+  "firstMotion": 0,
+  "lastMotion": 2.867,
+  "endHold": 3.133,
+  "longestHold": 0.536,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 5.963,
+  "textOverlapPairs": {
+   "title × subtitle": 5.963
+  },
+  "partialOverlapTime": 5.963,
+  "exits": 0,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.077,
+  "midLuma": 0.903,
+  "toolErrors": 0,
+  "toolCalls": 2
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "4 bars (rects)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "bars grow from the baseline (size/scale animated, bottom edge fixed)",
+    "type": "barsGrow",
+    "pass": true
+   },
+   {
+    "text": "staggered bar entrances",
+    "type": "staggered",
+    "pass": true
+   },
+   {
+    "text": "value labels present (≥4 numeric text layers)",
+    "type": "numericTextMin",
+    "pass": true
+   },
+   {
+    "text": "accent highlight on Q4 (≥2 bar colors)",
+    "type": "paletteMin",
+    "pass": true
+   },
+   {
+    "text": "bar heights proportional to data",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

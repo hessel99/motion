@@ -1,0 +1,31 @@
+- rule [path] box 410,900,260,2 #000000 a0 stroke #c8a96a 1.5px
+- name [group] #ffffff a0
+  - É [text] box 194,885,136,180 #efe6d2 "É" serif 150px w300
+  - C [text] box 329,885,145,180 #efe6d2 "C" serif 150px w300
+  - L [text] box 483,885,136,180 #efe6d2 "L" serif 150px w300
+  - A [text] box 613,885,153,180 #efe6d2 "A" serif 150px w300
+  - T [text] box 759,885,136,180 #efe6d2 "T" serif 150px w300
+- sub [text] box 315,1057,493,44 #c8a96a "EAU DE PARFUM" serif 36px w400
+
+comp 1080x1920 7s @30fps, background #0b0b0c
+"rule" (path l_03jm2)
+  trimStart: 0.4s 50 ─Sine In Out→ 3s 0
+  trimEnd: 0.4s 50 ─Sine In Out→ 3s 100
+"name" (group l_03jm5)
+  opacity: 0s 100
+"É" (text l_03jm6)
+  position: expr "value + [ease(time, 1.2, 4.4, -12, 0), 0]"
+  opacity: 1.2s 0 ─Ease Out→ 2.6s 100
+"C" (text l_03jm7)
+  position: expr "value + [ease(time, 1.2, 4.4, -6, 0), 0]"
+  opacity: 1.4s 0 ─Ease Out→ 2.8s 100
+"L" (text l_03jm8)
+  opacity: 1.6s 0 ─Ease Out→ 3s 100
+"A" (text l_03jm9)
+  position: expr "value + [ease(time, 1.2, 4.4, 6, 0), 0]"
+  opacity: 1.8s 0 ─Ease Out→ 3.2s 100
+"T" (text l_03jma)
+  position: expr "value + [ease(time, 1.2, 4.4, 12, 0), 0]"
+  opacity: 2s 0 ─Ease Out→ 3.4s 100
+"sub" (text l_03jm4)
+  opacity: 3.6s 0 ─Ease Out→ 4.8s 100

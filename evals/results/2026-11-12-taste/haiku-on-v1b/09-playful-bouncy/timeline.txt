@@ -1,0 +1,72 @@
+- Candy pink circle [ellipse] box 265,305,150,150 #ff4f79
+- Candy orange star [path] box 475,215,170,170 #ffb020
+- Candy mint square [rect] box 670,320,140,140 #3bd0a0
+- Candy blue circle [ellipse] box 415,415,110,110 #4c8dff
+- Candy purple star [path] box 600,440,120,120 #b26bff
+- Candy yellow square [rect] box 140,420,120,120 #ffd43b
+- Candy soft pink circle [ellipse] box 815,255,90,90 #ff8fb1
+- Candy teal star [path] box 835,425,90,90 #00c2d1
+- Letter B [text] box 146,438,148,286 #ff4f79 "B" Inter 230px w900 stroke #2b1b4d 10px
+- Letter o 1 [text] box 312,472,137,290 #ffb020 "o" Inter 230px w900 stroke #2b1b4d 10px
+- Letter o 2 [text] box 474,633,132,306 #3bd0a0 "o" Inter 230px w900 stroke #2b1b4d 10px
+- Letter p [text] box 634,780,131,320 #4c8dff "p" Inter 230px w900 stroke #2b1b4d 10px
+- Letter exclamation [text] box 821,780,77,320 #b26bff "!" Inter 230px w900 stroke #2b1b4d 10px
+
+comp 1080x1080 5s @60fps, background #fff4e6
+"Candy pink circle" (ellipse l_03jm2)
+  position: 0.1s [300,-320] ─Quad In→ 0.46s [340,380] ─Quad Out→ 0.62s [340,320] ─Quad Out→ 0.8s [340,380] ─Quad In→ 1.55s [340,380] ─Quad Out→ 1.73s [370,380] ─Back Out→ 2.15s [340,380]
+  scale: 0.1s [84,118] ─Quad In→ 0.46s [130,74] ─spring Bouncy→ 0.62s [96,106] ─Quad Out→ 0.8s 100 ─Quad In→ 1.55s 100 ─Quad Out→ 1.64s [112,90] ─spring Bouncy→ 2.05s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+0)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+"Candy orange star" (path l_03jm3)
+  position: 0.22s [590,-400] ─Quad In→ 0.58s [560,300] ─Quad Out→ 0.74s [560,240] ─Quad Out→ 0.92s [560,300] ─Quad In→ 1.58s [560,300] ─Quad Out→ 1.76s [535,300] ─Back Out→ 2.18s [560,300]
+  scale: 0.22s [84,118] ─Quad In→ 0.58s [130,74] ─spring Bouncy→ 0.74s [96,106] ─Quad Out→ 0.92s 100 ─Quad In→ 1.58s 100 ─Quad Out→ 1.67s [112,90] ─spring Bouncy→ 2.08s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+0.2)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+"Candy mint square" (rect l_03jm4)
+  position: 0.3s [720,-310] ─Quad In→ 0.66s [740,390] ─Quad Out→ 0.82s [740,330] ─Quad Out→ 1s [740,390] ─Quad In→ 1.61s [740,390] ─Quad Out→ 1.79s [710,390] ─Back Out→ 2.21s [740,390]
+  scale: 0.3s [84,118] ─Quad In→ 0.66s [130,74] ─spring Bouncy→ 0.82s [96,106] ─Quad Out→ 1s 100 ─Quad In→ 1.61s 100 ─Quad Out→ 1.7s [112,90] ─spring Bouncy→ 2.11s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+0.4)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+"Candy blue circle" (ellipse l_03jm5)
+  position: 0.4s [520,-230] ─Quad In→ 0.76s 470 ─Quad Out→ 0.92s [470,410] ─Quad Out→ 1.1s 470 ─Quad In→ 1.64s 470 ─Quad Out→ 1.82s [495,470] ─Back Out→ 2.24s 470
+  scale: 0.4s [84,118] ─Quad In→ 0.76s [130,74] ─spring Bouncy→ 0.92s [96,106] ─Quad Out→ 1.1s 100 ─Quad In→ 1.64s 100 ─Quad Out→ 1.73s [112,90] ─spring Bouncy→ 2.14s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+0.6)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+"Candy purple star" (path l_03jm6)
+  position: 0.5s [600,-200] ─Quad In→ 0.86s [660,500] ─Quad Out→ 1.02s [660,440] ─Quad Out→ 1.2s [660,500] ─Quad In→ 1.67s [660,500] ─Quad Out→ 1.85s [635,500] ─Back Out→ 2.27s [660,500]
+  scale: 0.5s [84,118] ─Quad In→ 0.86s [130,74] ─spring Bouncy→ 1.02s [96,106] ─Quad Out→ 1.2s 100 ─Quad In→ 1.67s 100 ─Quad Out→ 1.76s [112,90] ─spring Bouncy→ 2.17s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+0.8)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+"Candy yellow square" (rect l_03jm7)
+  position: 0.58s [240,-220] ─Quad In→ 0.94s [200,480] ─Quad Out→ 1.1s [200,420] ─Quad Out→ 1.28s [200,480] ─Quad In→ 1.7s [200,480] ─Quad Out→ 1.88s [230,480] ─Back Out→ 2.3s [200,480]
+  scale: 0.58s [84,118] ─Quad In→ 0.94s [130,74] ─spring Bouncy→ 1.1s [96,106] ─Quad Out→ 1.28s 100 ─Quad In→ 1.7s 100 ─Quad Out→ 1.79s [112,90] ─spring Bouncy→ 2.2s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+1.0)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+"Candy soft pink circle" (ellipse l_03jm8)
+  position: 0.66s [830,-400] ─Quad In→ 1.02s [860,300] ─Quad Out→ 1.18s [860,240] ─Quad Out→ 1.36s [860,300] ─Quad In→ 1.73s [860,300] ─Quad Out→ 1.91s [840,300] ─Back Out→ 2.33s [860,300]
+  scale: 0.66s [84,118] ─Quad In→ 1.02s [130,74] ─spring Bouncy→ 1.18s [96,106] ─Quad Out→ 1.36s 100 ─Quad In→ 1.73s 100 ─Quad Out→ 1.82s [112,90] ─spring Bouncy→ 2.23s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+1.2)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+"Candy teal star" (path l_03jm9)
+  position: 0.76s [900,-230] ─Quad In→ 1.12s [880,470] ─Quad Out→ 1.28s [880,410] ─Quad Out→ 1.46s [880,470] ─Quad In→ 1.76s [880,470] ─Quad Out→ 1.94s [900,470] ─Back Out→ 2.36s [880,470]
+  scale: 0.76s [84,118] ─Quad In→ 1.12s [130,74] ─spring Bouncy→ 1.28s [96,106] ─Quad Out→ 1.46s 100 ─Quad In→ 1.76s 100 ─Quad Out→ 1.85s [112,90] ─spring Bouncy→ 2.26s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+1.4)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+"Letter B" (text l_03jma)
+  position: 2.2s [220,940] ─Quad Out→ 2.5s [220,580] ─Quad In→ 2.8s [220,690]
+  scale: 2.2s [88,116] ─Quad Out→ 2.5s [96,104] ─Quad In→ 2.8s [124,80] ─spring Bouncy→ 3.04s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+0)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+  opacity: 2.2s 0 ─Quad Out→ 2.28s 100
+"Letter o 1" (text l_03jmb)
+  position: 2.33s [380,940] ─Quad Out→ 2.63s [380,580] ─Quad In→ 2.93s [380,690]
+  scale: 2.33s [88,116] ─Quad Out→ 2.63s [96,104] ─Quad In→ 2.93s [124,80] ─spring Bouncy→ 3.17s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+0.15)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+  opacity: 2.33s 0 ─Quad Out→ 2.41s 100
+"Letter o 2" (text l_03jmc)
+  position: 2.46s [540,940] ─Quad Out→ 2.76s [540,580] ─Quad In→ 3.06s [540,690]
+  scale: 2.46s [88,116] ─Quad Out→ 2.76s [96,104] ─Quad In→ 3.06s [124,80] ─spring Bouncy→ 3.3s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+0.3)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+  opacity: 2.46s 0 ─Quad Out→ 2.54s 100
+"Letter p" (text l_03jmd)
+  position: 2.59s [700,940] ─Quad Out→ 2.89s [700,580] ─Quad In→ 3.19s [700,690]
+  scale: 2.59s [88,116] ─Quad Out→ 2.89s [96,104] ─Quad In→ 3.19s [124,80] ─spring Bouncy→ 3.43s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+0.45)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+  opacity: 2.59s 0 ─Quad Out→ 2.67s 100
+"Letter exclamation" (text l_03jme)
+  position: 2.72s [860,940] ─Quad Out→ 3.02s [860,580] ─Quad In→ 3.32s [860,690]
+  scale: 2.72s [88,116] ─Quad Out→ 3.02s [96,104] ─Quad In→ 3.32s [124,80] ─spring Bouncy→ 3.56s 100
+  rotation: expr "value + 4*Math.sin((time-3.6+0.6)*2*Math.PI/1.6)*clamp((time-3.6)/0.4,0,1)"
+  opacity: 2.72s 0 ─Quad Out→ 2.8s 100

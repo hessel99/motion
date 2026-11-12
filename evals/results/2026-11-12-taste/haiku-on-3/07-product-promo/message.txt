@@ -1,0 +1,6 @@
+Title sequence for the launch of "Pulse 2", wireless earbuds. Sequence: quick flashes of three feature words ("40h battery", "Spatial audio", "Pure silence") each on their own beat with energetic transitions, then the product name "PULSE 2" slams in big with a shockwave ring, then "Available now" with a button-like pill. Dark background, electric orange accent. Fast, confident, cut to an imagined 120 BPM beat.
+
+<editor_context>
+comp "Main" 1920x1080 30fps 10s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

@@ -1,0 +1,219 @@
+{
+ "run": {
+  "id": "15-minimal-luxury",
+  "name": "15-minimal-luxury",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 44,
+    "fixes": 3,
+    "timedOut": false
+   },
+   {
+    "round": 2,
+    "scoreBefore": 66,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 44,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 84,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 70,
+     "richness": 84,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 16,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 30,
+     "richness": 16,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "high:no-secondary",
+     "medium:entrance-ease",
+     "medium:thin",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 35.6
+   },
+   "after": {
+    "score": 73,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 3.7
+   }
+  },
+  "wallMs": 51327,
+  "timedOut": false,
+  "turns": 24,
+  "costUsd": 0.3462843,
+  "durationMs": 47086,
+  "usage": {
+   "input": 240325,
+   "cached": 234230,
+   "output": 3889
+  },
+  "errors": [],
+  "toolCalls": 21,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "Still a sans fallback; I'll try a system serif.\nI built the ÉCLAT reveal (7 s, 1080×1920, background #0a0908), but the name and subline render in a sans-serif, not a serif. I tried Cormorant Garamond, Playfair Display and Georgia, and the preview fell back to sans each time. The font is probably missing from this environment. The layers are still set to Georgia, so a serif should show once one is installed or you pick one in the font menu.\n\n- **Gold line:** a 1.5 px champagne-gold vertical line (#d9bf8f) draws down the centre from 0.4 s to 3.2 s with a Sine In Out ease.\n- **Name:** the letters **Letter É, C, L, A, T** fade in one by one from 1.8 s, 0.3 s apart, each with a slow Quart Out ease. They start slightly spread and drift inward as they settle, so the tracking tightens a little. The last letter lands at 5.8 s.\n- **Hairline and subline:** the **Hairline** draws at 4.2 s, then **Subline** (\"EAU DE PARFUM\") fades in softly by 6 s.\n- **Ending:** the lockup holds still to 7 s, with plenty of empty black around it.\n\nI checked it with a contact sheet and a screenshot of the final frame. I did not run the critique tool.\n\nThe tightening is done by moving each letter inward, since tracking can't be animated directly, so the letters are separate layers.\n\nI can make it slower or softer, add a faint gold shimmer sweep across the name, or put it on a longer loop.\nFonts now point to the system serif, the gold line eases out and has a faint idle shimmer, and the critic score went from 44 to 66. I left the slow 2.8 s letter drifts as they are, since the brief asks for nothing fast.\nI set all four letter entrances to Quart Out and the score went from 66 to 73. I skipped the 0.2× retimes on the É, C and A drifts, because they would break the brief's \"nothing fast\" rule, so those three items remain in the critique."
+ },
+ "metrics": {
+  "layers": 8,
+  "drawableLayers": 8,
+  "layerTypes": {
+   "path": 2,
+   "text": 6
+  },
+  "groups": 0,
+  "animatedLayers": 8,
+  "keys": 28,
+  "segments": 12,
+  "easesUsed": {
+   "Quart Out": 5,
+   "Ease Out": 6,
+   "Sine In Out": 1
+  },
+  "distinctEases": 3,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 1,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#6b8cff",
+   "#d9bf8f",
+   "#bfa97f",
+   "#0a0908"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.66,
+  "firstMotion": 0,
+  "lastMotion": 5.933,
+  "endHold": 1.067,
+  "longestHold": 1.34,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.004,
+  "midLuma": 0.039,
+  "toolErrors": 0,
+  "toolCalls": 21
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "subtitle present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "letter-by-letter reveal",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "thin line draws (trim or size/scale animated on a thin layer)",
+    "type": "thinLineDraw",
+    "pass": true
+   },
+   {
+    "text": "serif font",
+    "type": "serifFont",
+    "pass": true
+   },
+   {
+    "text": "slow: shortest keyed move ≥0.8s",
+    "type": "minSegmentDuration",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "negative space: ≤8 layers",
+    "type": "layersMax",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

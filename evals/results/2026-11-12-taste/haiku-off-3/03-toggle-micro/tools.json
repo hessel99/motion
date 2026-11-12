@@ -1,0 +1,231 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1115,
+  "ok": true,
+  "ms": 40,
+  "editorMs": 7,
+  "input": {
+   "comp": {
+    "background": "#f2f2f7",
+    "duration": 2,
+    "name": "Toggle micro-interaction"
+   },
+   "layers": [
+    {
+     "key": "toggle",
+     "name": "Toggle",
+     "type": "group",
+     "x": 340,
+     "y": 266,
+     "w": 120,
+     "h": 68,
+     "children": [
+      {
+       "key": "track",
+       "name": "Track",
+       "type": "rect",
+       "x": 0,
+       "y": 0,
+       "w": 120,
+       "h": 68,
+       "radius": 34,
+       "fill": "#c7c7cc",
+       "animate": {
+        "fill": [
+         {
+          "t": 0.4,
+          "v": "#c7c7cc",
+          "ease": "Ease In Out"
+         },
+         {
+          "t": 0.8,
+          "v": "#34c759"
+         }
+        ]
+       }
+      },
+      {
+       "key": "knob",
+       "name": "Knob",
+       "type": "group",
+       "x": 6,
+       "y": 6,
+       "w": 56,
+       "h": 56,
+       "animate": {
+        "position": [
+         {
+          "t": 0.4,
+          "v": [
+           34,
+           34
+          ],
+          "ease": "Back Out"
+         },
+         {
+          "t": 0.7,
+          "v": [
+           86,
+           34
+          ]
+         }
+        ],
+        "scale": [
+         {
+          "t": 0.4,
+          "v": [
+           100,
+           100
+          ],
+          "ease": "Ease In Out"
+         },
+         {
+          "t": 0.5,
+          "v": [
+           116,
+           88
+          ],
+          "ease": "Ease In Out"
+         },
+         {
+          "t": 0.62,
+          "v": [
+           96,
+           104
+          ],
+          "ease": "Ease In Out"
+         },
+         {
+          "t": 0.74,
+          "v": [
+           100,
+           100
+          ]
+         }
+        ]
+       },
+       "children": [
+        {
+         "key": "knob-dot",
+         "name": "Knob dot",
+         "type": "ellipse",
+         "x": 0,
+         "y": 0,
+         "w": 56,
+         "h": 56,
+         "fill": "#ffffff",
+         "props": {
+          "shadowColor": "#00000033",
+          "shadowBlur": 6,
+          "shadowOffset": [
+           0,
+           2
+          ]
+         }
+        },
+        {
+         "key": "check",
+         "name": "Checkmark",
+         "type": "path",
+         "x": 0,
+         "y": 0,
+         "w": 56,
+         "h": 56,
+         "d": "M19 29 L25 35 L37 22",
+         "fill": "#00000000",
+         "stroke": "#34c759",
+         "strokeWidth": 4,
+         "animate": {
+          "trimEnd": [
+           {
+            "t": 0.55,
+            "v": 0,
+            "ease": "Ease Out"
+           },
+           {
+            "t": 0.8,
+            "v": 100
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 4 keyframe tracks; animation ends 0.8s\",\"ids\":{\"track\":\"l_03jm3\",\"knob-dot\":\"l_03jm5\",\"check\":\"l_03jm6\",\"knob\":\"l_03jm4\",\"toggle\":\"l_03jm2\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 306,
+  "editorMs": 276,
+  "input": {
+   "times": [
+    0,
+    0.4,
+    0.5,
+    0.6,
+    0.8,
+    1.2
+   ],
+   "cell": 240
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 0.4s, 0.5s, 0.6s, 0.8s, 1.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/8e30a1a5-c629-49ab-8355-587d280ac6e2/tool-results/mcp-motion-blob-1794514136187-so185e.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 143,
+  "ok": true,
+  "ms": 33,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm6",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "ease": "Linear"
+      },
+      {
+       "t": 0.55,
+       "v": 0,
+       "ease": "Ease Out"
+      },
+      {
+       "t": 0.8,
+       "v": 100
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 160,
+  "editorMs": 132,
+  "input": {
+   "times": [
+    0,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    1.2
+   ],
+   "cell": 240
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 0.4s, 0.5s, 0.6s, 0.7s, 1.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/8e30a1a5-c629-49ab-8355-587d280ac6e2/tool-results/mcp-motion-blob-1794514138909-yic040.jpg]"
+ }
+]

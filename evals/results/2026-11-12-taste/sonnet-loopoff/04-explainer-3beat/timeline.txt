@@ -1,0 +1,86 @@
+- glow [ellipse] box 560,30,800,800 gradient(#7fe8d8 a0.8→#7fe8d8 a0)
+- n1 [group] #ffffff a0
+  - n1r [rect] box 960,430,0,0 #ffd95a
+  - n1t [text] box 960,430,0,0 #5a4300 "hunter2" Inter 34px w700
+- n2 [group] #ffffff a0
+  - n2r [rect] box 960,430,0,0 #ff9db5
+  - n2t [text] box 960,430,0,0 #6b1230 "Pa$$w0rd!" Inter 32px w700
+- n3 [group] #ffffff a0
+  - n3r [rect] box 960,430,0,0 #9be8c4
+  - n3t [text] box 960,430,0,0 #0f4a33 "qwerty123" Inter 32px w700
+- n4 [group] #ffffff a0
+  - n4r [rect] box 960,430,0,0 #9fd2ff
+  - n4t [text] box 960,430,0,0 #103a66 "letmein" Inter 34px w700
+- n5 [group] #ffffff a0
+  - n5r [rect] box 960,430,0,0 #ffb566
+  - n5t [text] box 960,430,0,0 #6b3300 "Fluffy2019" Inter 32px w700
+- n6 [group] #ffffff a0
+  - n6r [rect] box 960,430,0,0 #ffd95a
+  - n6t [text] box 960,430,0,0 #5a4300 "abc123!" Inter 34px w700
+- n7 [group] #ffffff a0
+  - n7r [rect] box 960,430,0,0 #ff9db5
+  - n7t [text] box 960,430,0,0 #6b1230 "iloveyou" Inter 34px w700
+- n8 [group] #ffffff a0
+  - n8r [rect] box 912,481,48,48 #9be8c4
+  - n8t [text] box 913,498,45,16 #0f4a33 "admin" Inter 36px w700
+- n9 [group] #ffffff a0
+  - n9r [rect] box 959,522,99,99 #9fd2ff
+  - n9t [text] box 968,553,83,42 #103a66 "P@ssw0rd" Inter 32px w700
+- shield [group] #ffffff a0
+  - shbody [path] box 809,252,302,356 #2bb5a0
+  - shinner [path] box 809,252,302,356 #3ccdb7
+  - keyhole [group] #ffffff a0
+    - kh1 [ellipse] box 928,371,65,65 #ffffff
+    - kh2 [rect] box 946,414,28,76 #ffffff
+- check [path] box 905,385,120,102 #000000 a0 stroke #ffffff 22px
+- headline [text] box 260,780,1400,150 #1f3a4d "One key. Every login." Inter 110px w800
+
+comp 1920x1080 12s @30fps, background #fff4e0
+"glow" (ellipse l_03jm2)
+  opacity: 7.6s 0 ─Cubic Out→ 8.4s 80 ─Sine In Out→ 9.4s 45 ─Sine In Out→ 10.4s 80 ─Sine In Out→ 11.6s 50
+"n1" (group l_03jm3)
+  position: 4.2s [795,425] ─Cubic In→ 5.4s [960,430]
+  scale: 0.3s 0 ─Back Out→ 0.8s 100 ─Easy Ease→ 4.2s 100 ─Cubic In→ 5.4s 0
+  rotation: expr "wiggle(7,6)"
+"n2" (group l_03jm6)
+  position: 4.3s [995,395] ─Cubic In→ 5.5s [960,430]
+  scale: 0.42s 0 ─Back Out→ 0.92s 100 ─Easy Ease→ 4.3s 100 ─Cubic In→ 5.5s 0
+  rotation: expr "wiggle(8,6)"
+"n3" (group l_03jm9)
+  position: 4.4s [1205,455] ─Cubic In→ 5.6s [960,430]
+  scale: 0.54s 0 ─Back Out→ 1.04s 100 ─Easy Ease→ 4.4s 100 ─Cubic In→ 5.6s 0
+  rotation: expr "wiggle(6,7)"
+"n4" (group l_03jmc)
+  position: 4.5s [715,615] ─Cubic In→ 5.7s [960,430]
+  scale: 0.66s 0 ─Back Out→ 1.16s 100 ─Easy Ease→ 4.5s 100 ─Cubic In→ 5.7s 0
+  rotation: expr "wiggle(7,6)"
+"n5" (group l_03jmf)
+  position: 4.6s [925,595] ─Cubic In→ 5.8s [960,430]
+  scale: 0.78s 0 ─Back Out→ 1.28s 100 ─Easy Ease→ 4.6s 100 ─Cubic In→ 5.8s 0
+  rotation: expr "wiggle(9,5)"
+"n6" (group l_03jmi)
+  position: 4.7s [1135,615] ─Cubic In→ 5.9s [960,430]
+  scale: 0.9s 0 ─Back Out→ 1.4s 100 ─Easy Ease→ 4.7s 100 ─Cubic In→ 5.9s 0
+  rotation: expr "wiggle(8,7)"
+"n7" (group l_03jml)
+  position: 4.8s [1345,575] ─Cubic In→ 6s [960,430]
+  scale: 1.02s 0 ─Back Out→ 1.52s 100 ─Easy Ease→ 4.8s 100 ─Cubic In→ 6s 0
+  rotation: expr "wiggle(6,6)"
+"n8" (group l_03jmo)
+  position: 4.9s [855,755] ─Cubic In→ 6.1s [960,430]
+  scale: 1.14s 0 ─Back Out→ 1.64s 100 ─Easy Ease→ 4.9s 100 ─Cubic In→ 6.1s 0
+  rotation: expr "wiggle(7,6)"
+"n9" (group l_03jmr)
+  position: 5s [1075,765] ─Cubic In→ 6.2s [960,430]
+  scale: 1.26s 0 ─Back Out→ 1.76s 100 ─Easy Ease→ 5s 100 ─Cubic In→ 6.2s 0
+  rotation: expr "wiggle(9,6)"
+"shield" (group l_03jmu)
+  scale: 3.6s 0 ─spring Bouncy→ 4.4s 100 ─Quad Out→ 5.2s 106 ─Quad In Out→ 5.6s 100 ─Quad In Out→ 6s 108 ─Quad In Out→ 6.5s 100
+"keyhole" (group l_03jmx)
+  opacity: 7.6s 100 ─Quad In→ 8.1s 0
+"check" (path l_03jm10)
+  trimStart: 8.2s 0
+  trimEnd: 8.2s 0 ─Expo Out→ 8.8s 100
+"headline" (text l_03jm11)
+  position: 8.8s [960,855] ─Expo Out→ 9.7s [960,805]
+  opacity: 8.8s 0 ─Expo Out→ 9.25s 100

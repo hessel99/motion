@@ -1,0 +1,204 @@
+{
+ "run": {
+  "id": "02-kinetic-quote",
+  "name": "02-kinetic-quote",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 42,
+    "sub": {
+     "timing": 100,
+     "easing": 64,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 23.199999999999992,
+     "polish": 54,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 36,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 76.8,
+     "polish": 46,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:monotone-ease",
+     "high:no-secondary",
+     "medium:read-hold",
+     "medium:read-hold",
+     "medium:read-hold",
+     "medium:read-hold",
+     "medium:thin",
+     "medium:copy-paste"
+    ],
+    "ms": 8.5
+   },
+   "after": {
+    "score": 42,
+    "sub": {
+     "timing": 100,
+     "easing": 64,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 23.199999999999992,
+     "polish": 54,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 36,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 76.8,
+     "polish": 46,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:monotone-ease",
+     "high:no-secondary",
+     "medium:read-hold",
+     "medium:read-hold",
+     "medium:read-hold",
+     "medium:read-hold",
+     "medium:thin",
+     "medium:copy-paste"
+    ],
+    "ms": 8.5
+   }
+  },
+  "wallMs": 36881,
+  "timedOut": false,
+  "turns": 4,
+  "costUsd": 0.01515272,
+  "durationMs": 36001,
+  "usage": {
+   "input": 149808,
+   "cached": 96162,
+   "output": 6925
+  },
+  "errors": [],
+  "toolCalls": 3,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the quote as an 8-second kinetic typography piece on a near-black background (#0e0e0e) in Inter.\n\n- **Phrase 1 · Design is not just** (0–2.1 s): words fade up one by one, then the phrase lifts out upward.\n- **Phrase 2 · what it looks like.** (1.9–3.7 s): rises in as phrase 1 leaves, so the two overlap rather than stack. It then lifts out.\n- **Phrase 3 · Design is** (3.5–4.95 s): enters word by word and lifts out to make room for the emphasis.\n- **Phrase 4 · how it works.** (4.9 s onward): 124 px, weight 800, in accent orange #ff5a36 (vs. 84 px, weight 600, off-white for the rest). Words slide in on a 0.1 s stagger and it stays on screen to the end.\n- **Attribution · — Steve Jobs** (7.2 s): 26 px muted grey, fades in last below the emphasis.\n\nI checked the piece with an 8-frame contact sheet, which shows the sequence and the hand-offs working. I did not run a formal layout check.\n\nChoices I made that you may want to change: I split the quote into four phrases, \"Design is\" then \"how it works.\" so the emphasis gets its own moment. The phrase transitions are vertical lift-out and rise-in, not a morph. The attribution is quite dim, so it may need a brighter grey if it's hard to read on your screen.\n\nI can try a different transition (e.g., word-level exits or a blur hand-off) or make the emphasis phrase animate more dramatically."
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 5,
+  "layerTypes": {
+   "text": 5
+  },
+  "groups": 0,
+  "animatedLayers": 5,
+  "keys": 22,
+  "segments": 7,
+  "easesUsed": {
+   "Easy Ease": 7
+  },
+  "distinctEases": 1,
+  "easeFamilies": 1,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 4,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#f2f1ec",
+   "#ff5a36",
+   "#8f8f88",
+   "#0e0e0e"
+  ],
+  "keyCoverage": 0.513,
+  "visualActivity": 0.218,
+  "firstMotion": 0.133,
+  "lastMotion": 7.2,
+  "endHold": 0.8,
+  "longestHold": 1.876,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0.268,
+  "textOverlapPairs": {
+   "Phrase 1 · Design is not just × Phrase 2 · what it looks like": 0.134,
+   "Phrase 2 · what it looks like × Phrase 3 · Design is": 0.134
+  },
+  "partialOverlapTime": 0.268,
+  "exits": 3,
+  "beats": 5,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.013,
+  "midLuma": 0.062,
+  "toolErrors": 0,
+  "toolCalls": 3
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "quote text present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "attribution present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "per-letter or per-word text animation",
+    "type": "textAnimatorMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 text layers (phrases)",
+    "type": "textLayersMin",
+    "pass": true
+   },
+   {
+    "text": "phrases exit/transition (some text animates out)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "emphasis: one phrase larger or bolder than the rest",
+    "type": "textEmphasis",
+    "pass": true
+   },
+   {
+    "text": "3–4 beats over the 8s",
+    "type": "beatsMin",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

@@ -1,0 +1,19 @@
+- Panel [rect] box 120,800,800,150 #4a5d75
+- Accent Line [rect] box 120,794,800,4 #9bbce0
+- Name Mask [group] #ffffff a0
+  - Name [text] box 156,820,740,62 #f2f6fa "Dr. Amelia Hart" Inter 46px w600
+- Title Mask [group] #ffffff a0
+  - Title [text] box 156,890,740,42 #c3d1e2 "Head of Research, Larkspur Labs" Inter 26px w400
+
+comp 1920x1080 6s @30fps, background #1b2430
+"Panel" (rect l_03jm2)
+  position: 0.5s [440,875] ─Cubic In Out→ 1.6s [520,875] ─Easy Ease→ 5s [520,875] ─Cubic In Out→ 5.8s [480,875]
+  opacity: 0.5s 0 ─Cubic In Out→ 1.05s 72 ─Easy Ease→ 5.4s 72 ─Cubic In Out→ 5.8s 0
+"Accent Line" (rect l_03jm3)
+  scale: 0.2s [0,100] ─Cubic In Out→ 1.4s 100 ─Easy Ease→ 5s 100 ─Cubic In Out→ 5.8s [0,100]
+"Name" (text l_03jm5)
+  position: 1s [370,95] ─Cubic In Out→ 2s [370,31] ─Easy Ease→ 4.7s [370,31] ─Cubic In Out→ 5.4s [370,-33]
+  opacity: 1s 0 ─Cubic In Out→ 1.5s 100 ─Easy Ease→ 5.05s 100 ─Cubic In Out→ 5.4s 0
+"Title" (text l_03jm7)
+  position: 1.25s [370,69] ─Cubic In Out→ 2.25s [370,21] ─Easy Ease→ 4.8s [370,21] ─Cubic In Out→ 5.5s [370,-27]
+  opacity: 1.25s 0 ─Cubic In Out→ 1.75s 100 ─Easy Ease→ 5.15s 100 ─Cubic In Out→ 5.5s 0

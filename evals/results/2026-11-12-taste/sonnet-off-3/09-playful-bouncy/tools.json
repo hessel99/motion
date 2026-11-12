@@ -1,0 +1,29 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 10303,
+  "ok": true,
+  "ms": 228,
+  "editorMs": 6,
+  "input": "{\"comp\":{\"background\":\"#2A1B63\",\"duration\":5},\"layers\":[{\"key\":\"A\",\"name\":\"Candy Circle Pink\",\"type\":\"ellipse\",\"center\":[210,230],\"w\":200,\"h\":200,\"fill\":\"#FF4F8B\",\"expr\":{\"rotation\":\"value + clamp(time-3.4,0,1)*7*sin(time*5+index)\"},\"animate\":{\"position\":[{\"t\":0.2,\"v\":[210,-200],\"ease\":\"Quad In\"},{\"t\":0.65,\"v\":[210,230],\"ease\":\"Quad Out\"},{\"t\":0.9,\"v\":[210,140],\"ease\":\"Quad In\"},{\"t\":1.15,\"v\":[210,230],\"ease\":\"Quad Out\"},{\"t\":1.3,\"v\":[210,205],\"ease\":\"Quad In\"},{\"t\":1.45,\"v\":[210,230],\"ease\":\"Quad Out\"},{\"t\":2.7,\"v\":[210,230],\"ease\":\"Quad Out\"},{\"t\":2.95,\"v\":[250,230],\"ease\":\"Quad Out\"},{\"t\":3.3,\"v\":[210,230],\"ease\":\"spring Bouncy\"}],\"scale\":[{\"t\":0.2,\"v\":[90,112],\"ease\":\"Quad Out\"},{\"t\":0.65,\"v\":[135,70],\"ease\":\"Quad Out\"},{\"t\":0.9,\"v\":[88,116],\"ease\":\"Quad Out\"},{\"t\":1.15,\"v\":[120,82],\"ease\":\"Quad Out\"},{\"t\":1.3,\"v\":[94,108],\"ease\":\"Quad Out\"},{\"t\":1.45,\"v\":[100,100]}],\"rotation\":[{\"t\":2.7,\"v\":0,\"ease\":\"Quad Out\"},{\"t\":2.95,\"v\":25,\"ease\":\"Quad Out\"},{\"t\":3.3,\"v\":0,\"ease\":\"spring Bouncy\"}]}},{\"key\":\"B\",\"name\":\"Candy Star Yellow\",\"type\":\"star\",\"points\":5,\"inner\":0.5,\"center\":[870,220],\"w\":230,\"h\":230,\"fill\":\"#FFD23F\",\"expr\":{\"rotation\":\"value + clamp(time-3.4,0,1)*7*sin(time*5+index)\"},\"animate\":{\"position\":[{\"t\":0.4,\"v\":[870,-200],\"ease\":\"Quad In\"},{\"t\":0.85,\"v\":[870,220],\"ease\":\"Quad Out\"},{\"t\":1.1,\"v\":[870,130],\"ease\":\"Quad In\"},{\"t\":1.35,\"v\":[870,220],\"ease\":\"Quad Out\"},{\"t\":1.5,\"v\":[870,195],\"ease\":\"Quad In\"},{\"t\":1.65,\"v\":[870,220],\"ease\":\"Quad Out\"},{\"t\":2.75,\"v\":[870,220],\"ease\":\"Quad Out\"},{\"t\":3,\"v\":[830,220],\"ease\":\"Quad Out\"},{\"t\":3.35,\"v\":[870,220],\"ease\":\"spring Bouncy\"}],\"scale\":[{\"t\":0.4,\"v\":[90,112],\"ease\":\"Quad Out\"},{\"t\":0.85,\"v\":[135,70],\"ease\":\"Quad Out\"},{\"t\":1.1,\"v\":[88,116],\"ease\":\"Quad Out\"},{\"t\":1.35,\"v\":[120,82],\"ease\":\"Quad Out\"},{\"t\":1.5,\"v\":[94,108],\"ease\":\"Quad Out\"},{\"t\":1.65,\"v\":[100,100]}],\"rotation\":[{\"t\":0.4,\"v\":-40,\"ease\":\"Quad Out\"},{\"t\":1.65,\"v\":0},{\"t\":2.75,\"v\":0,\"ease\":\"Quad Out\"},{\"t\":3,\"v\":-30,\"ease\":\"Quad Out\"},{\"t\":3.35,\"v\":0,\"ease\":\"spring Bouncy\"}]}},{\"key\":\"C\",\"name\":\"Candy Square Mint\",\"type\":\"rect\",\"radius\":50,\"center\":[190,870],\"w\":190,\"h\":190,\"fill\":\"#2EE6C5\",\"expr\":{\"rotation\":\"value + clamp(time-3.4,0,1)*7*sin(time*5+index)\"},\"animate\":{\"position\":[{\"t\":0.6,\"v\":[190,-200],\"ease\":\"Quad In\"},{\"t\":1.05,\"v\":[190,870],\"ease\":\"Quad Out\"},{\"t\":1.3,\"v\":[190,780],\"ease\":\"Quad In\"},{\"t\":1.55,\"v\":[190,870],\"ease\":\"Quad Out\"},{\"t\":1.7,\"v\":[190,845],\"ease\":\"Quad In\"},{\"t\":1.85,\"v\":[190,870],\"ease\":\"Quad Out\"},{\"t\":2.8,\"v\":[190,870],\"ease\":\"Quad Out\"},{\"t\":3.05,\"v\":[230,870],\"ease\":\"Quad Out\"},{\"t\":3.4,\"v\":[190,870],\"ease\":\"spring Bouncy\"}],\"scale\":[{\"t\":0.6,\"v\":[90,112],\"ease\":\"Quad Out\"},{\"t\":1.05,\"v\":[135,70],\"ease\":\"Quad Out\"},{\"t\":1.3,\"v\":[88,116],\"ease\":\"Quad Out\"},{\"t\":1.55,\"v\":[120,82],\"ease\":\"Quad Out\"},{\"t\":1.7,\"v\":[94,108],\"ease\":\"Quad Out\"},{\"t\":1.85,\"v\":[100,100]}],\"rotation\":[{\"t\":0.6,\"v\":0},{\"t\":2.8,\"v\":0,\"ease\":\"Quad Out\"},{\"t\":3.05,\"v\":20,\"ease\":\"Quad Out\"},{\"t\":3.4,\"v\":0,\"ease\":\"spring Bou…",
+  "result": "{\"summary\":\"12 created, 0 updated, 35 keyframe tracks; animation ends 3.75s\",\"ids\":{\"A\":\"l_03jm2\",\"B\":\"l_03jm3\",\"C\":\"l_03jm4\",\"D\":\"l_03jm5\",\"E\":\"l_03jm6\",\"F\":\"l_03jm7\",\"G\":\"l_03jm8\",\"L1\":\"l_03jm9\",\"L2\":\"l_03jma\",\"L3\":\"l_03jmb\",\"L4\":\"l_03jmc\",\"L5\":\"l_03jmd\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 255,
+  "editorMs": 149,
+  "input": {
+   "times": [
+    0.9,
+    1.5,
+    2.4,
+    3,
+    3.8,
+    4.6
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.9s, 1.5s, 2.4s, 3s, 3.8s, 4.6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/0154a2e3-fdf1-4405-9408-ca2eb91233b5/tool-results/mcp-motion-blob-1794514028918-hvwvbf.jpg]"
+ }
+]

@@ -1,0 +1,209 @@
+{
+ "run": {
+  "id": "15-minimal-luxury",
+  "name": "15-minimal-luxury",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 51,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 51,
+    "sub": {
+     "timing": 91.6,
+     "easing": 84,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 70,
+     "richness": 84,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 8.4,
+     "easing": 16,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 30,
+     "richness": 16,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "high:no-secondary",
+     "medium:entrance-ease",
+     "medium:thin",
+     "low:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 9.4
+   },
+   "after": {
+    "score": 86,
+    "sub": {
+     "timing": 91.6,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 8.4,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin",
+     "low:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 5.4
+   }
+  },
+  "wallMs": 41433,
+  "timedOut": false,
+  "turns": 17,
+  "costUsd": 0.17721549999999997,
+  "durationMs": 37870,
+  "usage": {
+   "input": 141864,
+   "cached": 137528,
+   "output": 3079
+  },
+  "errors": [],
+  "toolCalls": 15,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the ÉCLAT reveal at 1080×1920. It's 8 s long, and I checked it only on a contact sheet at five times. I didn't run the critic, so the serif's rendering and the timing are unchecked.\n\n- **Background and line:** the background is near-black (#0a0908). **Gold line** is a single 2 px champagne vertical, centred, that draws slowly from 0.6 s to about 4.2 s with a sine in-out ease.\n- **Name:** **Letter É / C / L / A / T** are five separate layers in a light Cormorant Garamond serif at 120 px. They fade in one after another from about 2.6 s, about 0.4 s apart. Each letter drifts toward the centre as it fades, so the wide tracking tightens slightly (letter spacing goes from about 124 px to 110 px) and settles by 6.5 s.\n- **Subline:** **Eau de Parfum** is small, widely tracked and dimmer gold. It fades in last, from about 5.2 s to 7 s.\n- **Ending:** the last second is a held lockup with a lot of empty space around it.\n\nThe tracking tightening comes from moving the letter layers, not from a tracking property. If you'd rather have a single editable text layer, I can switch to that, but the tightening would be lost.\n\nI can slow it further, add a faint gold shimmer sweep across the name, or put a second hairline under the name.\nI switched the text to a serif that is available, changed the entrance easing to Quart Out, and added a slow float to the subline. The critic now scores it 86/100.\n\nIt still flags the piece as sparse, and calls the letter drifts (É and T) too slow for the distance. I left both alone because the brief asked for slow and restrained motion."
+ },
+ "metrics": {
+  "layers": 7,
+  "drawableLayers": 7,
+  "layerTypes": {
+   "path": 1,
+   "text": 6
+  },
+  "groups": 0,
+  "animatedLayers": 7,
+  "keys": 30,
+  "segments": 11,
+  "easesUsed": {
+   "Sine In Out": 1,
+   "Quart Out": 4,
+   "Ease Out": 6
+  },
+  "distinctEases": 3,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 1,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#6b8cff",
+   "#d4b87a",
+   "#b89d68",
+   "#0a0908"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.536,
+  "firstMotion": 2.6,
+  "lastMotion": 6.867,
+  "endHold": 1.133,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.004,
+  "midLuma": 0.038,
+  "toolErrors": 0,
+  "toolCalls": 15
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "subtitle present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "letter-by-letter reveal",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "thin line draws (trim or size/scale animated on a thin layer)",
+    "type": "thinLineDraw",
+    "pass": true
+   },
+   {
+    "text": "serif font",
+    "type": "serifFont",
+    "pass": true
+   },
+   {
+    "text": "slow: shortest keyed move ≥0.8s",
+    "type": "minSegmentDuration",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "negative space: ≤8 layers",
+    "type": "layersMax",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

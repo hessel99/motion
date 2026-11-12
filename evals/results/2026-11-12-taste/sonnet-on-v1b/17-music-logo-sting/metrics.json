@@ -1,0 +1,197 @@
+{
+ "run": {
+  "id": "17-music-logo-sting",
+  "name": "17-music-logo-sting",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 75,
+    "fixes": 2,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 75,
+    "sub": {
+     "timing": 100,
+     "easing": 96.5,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 58,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 3.5,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 42,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:dead-trim",
+     "low:exit-ease"
+    ],
+    "ms": 13.8
+   },
+   "after": {
+    "score": 98,
+    "sub": {
+     "timing": 100,
+     "easing": 96.5,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 3.5,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "low:exit-ease"
+    ],
+    "ms": 4.5
+   }
+  },
+  "wallMs": 76992,
+  "timedOut": false,
+  "turns": 14,
+  "costUsd": 0.45166649999999997,
+  "durationMs": 72387,
+  "usage": {
+   "input": 382289,
+   "cached": 366032,
+   "output": 8965
+  },
+  "errors": [],
+  "toolCalls": 12,
+  "toolErrors": 1,
+  "toolsAvailable": 76,
+  "finalText": "The wordmark overlaps the mark while the mark is still sliding, so I'm delaying its entrance to trail the mark.\nThe Pulse sting is built on the 120 BPM grid, with the logo landing on the 4.00 s drop. I checked it on contact-sheet frames only. I didn't run the critic or play it back. I also skipped the storyboard step and built straight away.\n\n- **Build (0–4 s):** the **ring** draws itself on and the **dot** pulses on every beat. The pulses grow from 8 to 34 points of scale. At 3.5 s the dot swells, then both parts compress and hold at 3.95 s as anticipation.\n- **Drop (4.0 s):** **ring** and **dot** spring out to full size on the downbeat. A pink shockwave (**wave1**) and a short white flash (**flash**) fire at the same frame.\n- **Lockup move (4.5–5.6 s):** the **mark** slides left with an Expo In Out ease. The **wordmark** \"Pulse\" then slides out from behind it inside a clipping group (**reveal**). I delayed it to 4.85 s because it overlapped the mark in the first pass.\n- **Secondary hits:** at 5.5 s (accent) the **dot** punches to 135% and a small pink ring (**wave2**) fires. At 6.0 s (downbeat) the **ring** pulses to 107% and a white ring (**wave3**) fires.\n- **Settle (6.5–8 s):** the lockup holds clean: ring and dot at 100%, wordmark beside them, nothing left in motion.\n\nThe look is dark background, off-white ring and wordmark, and a coral dot with coral shockwaves. The music runs to 9.5 s but the comp is 8 s, so the end of the track is cut off.\n\nI can add a subtle idle breathing to the final hold or put sound effects on the hits. I can also try a slower, more elegant version as a variation.\nI fixed the ring draw-on with a real trim, and the critic now scores 98/100. I left the shockwave easing on Expo Out because those rings are expanding ripples, not exits, so they should decelerate."
+ },
+ "metrics": {
+  "layers": 10,
+  "drawableLayers": 7,
+  "layerTypes": {
+   "audio": 1,
+   "rect": 1,
+   "ellipse": 4,
+   "group": 2,
+   "text": 1,
+   "path": 1
+  },
+  "groups": 2,
+  "animatedLayers": 8,
+  "keys": 64,
+  "segments": 38,
+  "easesUsed": {
+   "Ease Out": 6,
+   "Expo Out": 13,
+   "Ease In": 3,
+   "Expo In Out": 1,
+   "Cubic In Out": 2,
+   "Sine In Out": 2,
+   "Spring 0.4": 1,
+   "Quad Out": 9,
+   "Spring 0.5": 1
+  },
+  "distinctEases": 9,
+  "easeFamilies": 6,
+  "overshootSegments": 2,
+  "keyedOvershoots": 0,
+  "springSegments": 2,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#ffffff",
+   "#ff4d6d",
+   "#0e0e12"
+  ],
+  "keyCoverage": 0.863,
+  "visualActivity": 0.704,
+  "firstMotion": 0.467,
+  "lastMotion": 6.933,
+  "endHold": 1.067,
+  "longestHold": 0.201,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 1.675,
+  "exits": 4,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.019,
+  "midLuma": 0.265,
+  "toolErrors": 1,
+  "toolCalls": 12
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "the music is kept",
+    "type": "audioKept",
+    "pass": true
+   },
+   {
+    "text": "a hero landing on the drop (4.0 s, ±1 frame)",
+    "type": "hitAt",
+    "pass": true
+   },
+   {
+    "text": "moves land on beats (≥60% of landings within ±1 frame of the 120 BPM grid)",
+    "type": "onBeats",
+    "pass": false
+   },
+   {
+    "text": "restraint: not every beat carries a landing",
+    "type": "notEveryBeat",
+    "pass": true
+   }
+  ],
+  "hits": 4,
+  "checkable": 5,
+  "total": 5
+ },
+ "video": null
+}

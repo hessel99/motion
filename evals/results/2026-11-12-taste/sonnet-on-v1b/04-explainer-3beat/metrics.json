@@ -1,0 +1,209 @@
+{
+ "run": {
+  "id": "04-explainer-3beat",
+  "name": "04-explainer-3beat",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 85,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 93,
+     "composition": 100,
+     "readability": 80.8,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 7,
+     "composition": 0,
+     "readability": 19.2,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:text-collision",
+     "low:lead-late",
+     "low:uniform-stagger"
+    ],
+    "ms": 197.9
+   },
+   "after": {
+    "score": 85,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 93,
+     "composition": 100,
+     "readability": 80.8,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 7,
+     "composition": 0,
+     "readability": 19.2,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:text-collision",
+     "low:lead-late",
+     "low:uniform-stagger"
+    ],
+    "ms": 197.9
+   }
+  },
+  "wallMs": 70166,
+  "timedOut": false,
+  "turns": 13,
+  "costUsd": 0.20651550000000002,
+  "durationMs": 67993,
+  "usage": {
+   "input": 388483,
+   "cached": 370315,
+   "output": 9684
+  },
+  "errors": [],
+  "toolCalls": 12,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "Scene is built and checks out in the contact sheet, so I'm closing out the beat progress now.\nI built the 12-second scene in flat-explainer style: a cream background, pink, yellow and teal notes, and a navy shield. I checked it with one contact sheet but haven't run the critique tool. The only flag so far is a 0.1 s overlap of two note labels at about 4.5 s, which I haven't fixed.\n\n- **Beat 1, 0–4 s, anxious pile:** Eight sticky notes (**n1–n8**) with passwords like \"hunter2\", \"qwerty123\" and \"letmein\" pop in one after another. Each wobbles on its own rhythm, so the jitter looks nervous rather than uniform. From about 3 s a faint **shield** fades in behind the pile as the cue for what comes next.\n- **Beat 2, about 3.6–6 s, suck-in:** Each note swells slightly, then spirals into the shield's centre while shrinking. They follow each other 0.06 s apart. The shield gulps with a couple of squashes, then becomes solid, so the pile hands over to the shield with no cut.\n- **Beat 3, about 6–12 s, glow and headline:** The shield moves up to make room. A yellow **glow** and a ring pulse appear, and the **check** mark draws on inside the shield. The headline \"One key. Every login.\" slides up beneath it at 8 s, then everything holds still to the end.\n\nThe note spirals are a rotation and position move rather than a curved path. Beat 2 finishes around 6 s, so the shield and headline hold for a while at the end.\n\nI can add a gentle breathing pulse on the shield during the hold, tighten the timing, or make the notes bigger and busier. Say which."
+ },
+ "metrics": {
+  "layers": 29,
+  "drawableLayers": 21,
+  "layerTypes": {
+   "ellipse": 2,
+   "path": 2,
+   "group": 8,
+   "rect": 8,
+   "text": 9
+  },
+  "groups": 8,
+  "animatedLayers": 13,
+  "keys": 99,
+  "segments": 54,
+  "easesUsed": {
+   "Cubic Out": 4,
+   "Expo Out": 1,
+   "Ease Out": 1,
+   "Ease In": 1,
+   "Cubic In Out": 2,
+   "Quad Out": 11,
+   "Quad In Out": 2,
+   "Expo In": 24,
+   "Back Out": 8
+  },
+  "distinctEases": 9,
+  "easeFamilies": 5,
+  "overshootSegments": 8,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 8,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 1,
+  "paletteSize": 5,
+  "palette": [
+   "#ffd803",
+   "#8bd3dd",
+   "#172c66",
+   "#ffffff",
+   "#f582ae"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.592,
+  "firstMotion": 0.2,
+  "lastMotion": 8.533,
+  "endHold": 3.467,
+  "longestHold": 0.871,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 4.355,
+  "exits": 1,
+  "beats": 6,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.036,
+  "midLuma": 0.956,
+  "toolErrors": 0,
+  "toolCalls": 12
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "3 beats",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "headline present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 sticky notes (rects) in beat 1",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "jitter/anxious motion (wiggle expression or many small keys)",
+    "type": "jitter",
+    "pass": false
+   },
+   {
+    "text": "shield/vault as a custom path",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "uses most of the 12s (animated coverage ≥70%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "notes converge (moving toward one point)",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "transitions between beats are continuous",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 5,
+  "checkable": 6,
+  "total": 8
+ },
+ "video": null
+}

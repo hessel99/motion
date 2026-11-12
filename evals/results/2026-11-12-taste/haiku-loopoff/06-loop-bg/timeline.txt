@@ -1,0 +1,79 @@
+- Blob purple [ellipse] box 150,-50,900,900 #7f5af0
+- Blob teal [ellipse] box 1044,207,832,832 #2cb1bc
+- Blob violet [ellipse] box 779,-8,600,600 #a855f7
+- Dot grid [group] #ffffff a0
+  - Dot row 1 [group] #ffffff a0
+    - r0c0 [ellipse] box 237,217,6,6 #ffffff
+    - r0c1 [ellipse] box 397,217,6,6 #ffffff
+    - r0c2 [ellipse] box 557,217,6,6 #ffffff
+    - r0c3 [ellipse] box 717,217,6,6 #ffffff
+    - r0c4 [ellipse] box 877,217,6,6 #ffffff
+    - r0c5 [ellipse] box 1037,217,6,6 #ffffff
+    - r0c6 [ellipse] box 1197,217,6,6 #ffffff
+    - r0c7 [ellipse] box 1357,217,6,6 #ffffff
+    - r0c8 [ellipse] box 1517,217,6,6 #ffffff
+    - r0c9 [ellipse] box 1677,217,6,6 #ffffff
+  - Dot row 2 [group] #ffffff a0
+    - r1c0 [ellipse] box 237,377,6,6 #ffffff
+    - r1c1 [ellipse] box 397,377,6,6 #ffffff
+    - r1c2 [ellipse] box 557,377,6,6 #ffffff
+    - r1c3 [ellipse] box 717,377,6,6 #ffffff
+    - r1c4 [ellipse] box 877,377,6,6 #ffffff
+    - r1c5 [ellipse] box 1037,377,6,6 #ffffff
+    - r1c6 [ellipse] box 1197,377,6,6 #ffffff
+    - r1c7 [ellipse] box 1357,377,6,6 #ffffff
+    - r1c8 [ellipse] box 1517,377,6,6 #ffffff
+    - r1c9 [ellipse] box 1677,377,6,6 #ffffff
+  - Dot row 3 [group] #ffffff a0
+    - r2c0 [ellipse] box 237,537,6,6 #ffffff
+    - r2c1 [ellipse] box 397,537,6,6 #ffffff
+    - r2c2 [ellipse] box 557,537,6,6 #ffffff
+    - r2c3 [ellipse] box 717,537,6,6 #ffffff
+    - r2c4 [ellipse] box 877,537,6,6 #ffffff
+    - r2c5 [ellipse] box 1037,537,6,6 #ffffff
+    - r2c6 [ellipse] box 1197,537,6,6 #ffffff
+    - r2c7 [ellipse] box 1357,537,6,6 #ffffff
+    - r2c8 [ellipse] box 1517,537,6,6 #ffffff
+    - r2c9 [ellipse] box 1677,537,6,6 #ffffff
+  - Dot row 4 [group] #ffffff a0
+    - r3c0 [ellipse] box 237,697,6,6 #ffffff
+    - r3c1 [ellipse] box 397,697,6,6 #ffffff
+    - r3c2 [ellipse] box 557,697,6,6 #ffffff
+    - r3c3 [ellipse] box 717,697,6,6 #ffffff
+    - r3c4 [ellipse] box 877,697,6,6 #ffffff
+    - r3c5 [ellipse] box 1037,697,6,6 #ffffff
+    - r3c6 [ellipse] box 1197,697,6,6 #ffffff
+    - r3c7 [ellipse] box 1357,697,6,6 #ffffff
+    - r3c8 [ellipse] box 1517,697,6,6 #ffffff
+    - r3c9 [ellipse] box 1677,697,6,6 #ffffff
+  - Dot row 5 [group] #ffffff a0
+    - r4c0 [ellipse] box 237,857,6,6 #ffffff
+    - r4c1 [ellipse] box 397,857,6,6 #ffffff
+    - r4c2 [ellipse] box 557,857,6,6 #ffffff
+    - r4c3 [ellipse] box 717,857,6,6 #ffffff
+    - r4c4 [ellipse] box 877,857,6,6 #ffffff
+    - r4c5 [ellipse] box 1037,857,6,6 #ffffff
+    - r4c6 [ellipse] box 1197,857,6,6 #ffffff
+    - r4c7 [ellipse] box 1357,857,6,6 #ffffff
+    - r4c8 [ellipse] box 1517,857,6,6 #ffffff
+    - r4c9 [ellipse] box 1677,857,6,6 #ffffff
+
+comp 1920x1080 6s @30fps, background #0b1026
+"Blob purple" (ellipse l_03jm2)
+  position: expr "value + [120*Math.sin(time*2*Math.PI/6), 80*Math.cos(time*2*Math.PI/6)]"
+  scale: expr "value + [4*Math.sin(time*2*Math.PI/6), 4*Math.sin(time*2*Math.PI/6)]"
+"Blob teal" (ellipse l_03jm3)
+  position: expr "value + [-110*Math.sin(time*2*Math.PI/6 + 1.6), 90*Math.cos(time*2*Math.PI/6 + 1.6)]"
+  scale: expr "value + [-4*Math.sin(time*2*Math.PI/6 + 1.6), -4*Math.sin(time*2*Math.PI/6 + 1.6)]"
+"Blob violet" (ellipse l_03jm4)
+  position: expr "value + [80*Math.cos(time*2*Math.PI/6 + 3), 60*Math.sin(time*2*Math.PI/6 + 3)]"
+"Dot row 1" (group l_03jm6)
+  opacity: expr "15 + 45*(0.5+0.5*Math.sin(time*2*Math.PI/3 - 0))"
+"Dot row 2" (group l_03jmh)
+  opacity: expr "15 + 45*(0.5+0.5*Math.sin(time*2*Math.PI/3 - 0.7))"
+"Dot row 3" (group l_03jms)
+  opacity: expr "15 + 45*(0.5+0.5*Math.sin(time*2*Math.PI/3 - 1.4))"
+"Dot row 4" (group l_03jm13)
+  opacity: expr "15 + 45*(0.5+0.5*Math.sin(time*2*Math.PI/3 - 2.1))"
+"Dot row 5" (group l_03jm1e)
+  opacity: expr "15 + 45*(0.5+0.5*Math.sin(time*2*Math.PI/3 - 2.8))"

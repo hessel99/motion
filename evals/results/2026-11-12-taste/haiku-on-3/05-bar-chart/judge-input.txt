@@ -1,0 +1,108 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (05-bar-chart, 1920x1080, 6s @30fps):
+Animated bar chart: "Revenue by quarter" — Q1 12, Q2 18, Q3 15, Q4 27 ($M). Draw the axis line first, then the bars grow up from the baseline one after another, value labels count/fade in above each bar, Q4 bar is highlighted in an accent color with a little extra pop. Title top-left. Clean and readable.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- title present [yes]
+- 4 bars (rects) [yes]
+- bars grow from the baseline (size/scale animated, bottom edge fixed) [yes]
+- staggered bar entrances [yes]
+- value labels present (≥4 numeric text layers) [yes]
+- accent highlight on Q4 (≥2 bar colors) [yes]
+- bar heights proportional to data [?]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- title [text] box 192,116,1000,90 #0f172a "Revenue by quarter" Inter 72px w700
+- subtitle [text] box 194,212,900,44 #64748b "Quarterly revenue, $M" Inter 32px w500
+- axis [rect] box 240,858,1440,4 #94a3b8
+- bar-q1 [rect] box 380,620,200,240 #cbd5e1
+- bar-q2 [rect] box 700,500,200,360 #cbd5e1
+- bar-q3 [rect] box 1020,560,200,300 #cbd5e1
+- bar-q4 [rect] box 1340,320,200,540 #2563eb
+- val-q1 [text] box 380,550,200,60 #334155 "12" Inter 48px w700
+- val-q2 [text] box 700,430,200,60 #334155 "18" Inter 48px w700
+- val-q3 [text] box 1020,490,200,60 #334155 "15" Inter 48px w700
+- val-q4 [text] box 1340,240,200,80 #2563eb "27" Inter 64px w800
+- x-q1 [text] box 380,885,200,50 #64748b "Q1" Inter 36px w500
+- x-q2 [text] box 700,885,200,50 #64748b "Q2" Inter 36px w500
+- x-q3 [text] box 1020,885,200,50 #64748b "Q3" Inter 36px w500
+- x-q4 [text] box 1340,885,200,50 #2563eb "Q4" Inter 36px w700
+
+TIMELINE:
+comp 1920x1080 6s @30fps, background #ffffff
+"title" (text l_03jm2)
+  position: 0s [692,181] ─Expo Out→ 0.6s [692,159] ─Sine In Out→ 0.72s [692,161.9] ─Sine In Out→ 0.84s [692,161]
+  opacity: 0s 0 ─Expo Out→ 0.3s 100
+"subtitle" (text l_03jm3)
+  position: 0.15s [644,250] ─Expo Out→ 0.75s [644,232.4] ─Sine In Out→ 0.87s [644,234.72] ─Sine In Out→ 0.99s [644,234]
+  opacity: 0.15s 0 ─Expo Out→ 0.45s 100
+"axis" (rect l_03jm4)
+  scale: 0.2s [0,100] ─Expo Out→ 0.8s 100
+"bar-q1" (rect l_03jm5)
+  scale: 0.9s [100,0] ─Quart Out→ 1.6s 100
+"bar-q2" (rect l_03jm6)
+  scale: 1.05s [100,0] ─Quart Out→ 1.75s 100
+"bar-q3" (rect l_03jm7)
+  scale: 1.2s [100,0] ─Quart Out→ 1.9s 100
+"bar-q4" (rect l_03jm8)
+  scale: 1.35s [100,0] ─Quart Out→ 2.05s 100 ─Cubic Out→ 2.3s [100,104] ─Cubic In Out→ 2.65s 100
+  fill: 2.05s #2563eb
+"val-q1" (text l_03jm9)
+  position: 1.2s [480,596] ─Quart Out→ 1.7s [480,580]
+  opacity: 1.2s 0 ─Quart Out→ 1.45s 100
+"val-q2" (text l_03jma)
+  position: 1.35s [800,476] ─Quart Out→ 1.85s [800,460]
+  opacity: 1.35s 0 ─Quart Out→ 1.6s 100
+"val-q3" (text l_03jmb)
+  position: 1.5s [1120,536] ─Quart Out→ 2s [1120,520]
+  opacity: 1.5s 0 ─Quart Out→ 1.75s 100
+"val-q4" (text l_03jmc)
+  position: 1.65s [1440,296] ─Quart Out→ 2.15s [1440,278.4] ─Sine In Out→ 2.25s [1440,280.72] ─Sine In Out→ 2.35s [1440,280]
+  scale: 1.65s 80 ─Cubic In Out→ 2.05s 102 ─Sine In Out→ 2.13s 99.1 ─Sine In Out→ 2.21s 100 ─spring:0.4→ 2.65s 100 ─Sine In Out→ 5.33s 104.4 ─Sine In Out→ 5.57s 103.82 ─Sine In Out→ 5.81s 104
+  opacity: 1.65s 0 ─Quart Out→ 1.9s 100
+"x-q1" (text l_03jmd)
+  position: 0.8s [480,918] ─Quart Out→ 1.3s [480,910]
+  opacity: 0.8s 0 ─Quart Out→ 1.05s 100
+"x-q2" (text l_03jme)
+  position: 0.8s [800,918] ─Quart Out→ 1.3s [800,910]
+  opacity: 0.8s 0 ─Quart Out→ 1.05s 100
+"x-q3" (text l_03jmf)
+  position: 0.8s [1120,918] ─Quart Out→ 1.3s [1120,910]
+  opacity: 0.8s 0 ─Quart Out→ 1.05s 100
+"x-q4" (text l_03jmg)
+  position: 0.8s [1440,918] ─Quart Out→ 1.3s [1440,910]
+  opacity: 0.8s 0 ─Quart Out→ 1.05s 100
+
+AUTOMATIC METRICS:
+layers 15 drawable (text 10, rect 5), 67 keys, 39 moving segments
+eases: Expo Out×5, Sine In Out×11, Quart Out×20, Cubic Out×1, Cubic In Out×2; springs 0, overshooting 0, hold 0
+expressions 0, text animators 0, precomps 0, paths 0, gradients 0, markers 0
+palette (7): #0f172a #64748b #94a3b8 #cbd5e1 #2563eb #334155 #ffffff
+motion from 0s to 2.6s (end hold 3.4s, longest still 0s), visual activity 44% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 0s; text-on-text overlap 0s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

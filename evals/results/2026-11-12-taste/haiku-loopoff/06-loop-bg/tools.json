@@ -1,0 +1,61 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 195,
+  "ok": true,
+  "ms": 61,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "seamless looping ambient background for conference stage screen, soft blurred blobs purple to teal drifting slowly, subtle grid of dots gently pulsing, 6 second loop"
+  },
+  "result": "# Example: Seamless ambient loop (background, blobs, gradient)\n> tags: loop, seamless, looping, ambient, background, bg, blobs, gradient, liquid, calm, wallpaper, idle, endless, gif\n\n## Brief\n\"A calm 4 s seamless looping background with soft colourful blobs, for a website hero.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"duration\": 4, \"background\": \"#0B1026\", \"name\"…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 30,
+  "editorMs": 0,
+  "input": {},
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":6,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":0,\"layers\":[]}"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 5730,
+  "ok": true,
+  "ms": 992,
+  "editorMs": 8,
+  "input": "{\"comp\":{\"background\":\"#0B1026\",\"duration\":6,\"fps\":30},\"layers\":[{\"key\":\"blob-purple\",\"name\":\"Blob purple\",\"type\":\"ellipse\",\"center\":[600,480],\"w\":900,\"h\":900,\"fill\":\"#7F5AF0\",\"opacity\":55,\"props\":{\"blur\":150},\"expr\":{\"position\":\"value + [120*Math.sin(time*2*Math.PI/6), 80*Math.cos(time*2*Math.PI/6)]\",\"scale\":\"value + [4*Math.sin(time*2*Math.PI/6), 4*Math.sin(time*2*Math.PI/6)]\"}},{\"key\":\"blob-teal\",\"name\":\"Blob teal\",\"type\":\"ellipse\",\"center\":[1350,620],\"w\":800,\"h\":800,\"fill\":\"#2CB1BC\",\"opacity\":50,\"props\":{\"blur\":150},\"expr\":{\"position\":\"value + [-110*Math.sin(time*2*Math.PI/6 + 1.6), 90*Math.cos(time*2*Math.PI/6 + 1.6)]\",\"scale\":\"value + [-4*Math.sin(time*2*Math.PI/6 + 1.6), -4*Math.sin(time*2*Math.PI/6 + 1.6)]\"}},{\"key\":\"blob-violet\",\"name\":\"Blob violet\",\"type\":\"ellipse\",\"center\":[1000,300],\"w\":600,\"h\":600,\"fill\":\"#A855F7\",\"opacity\":40,\"props\":{\"blur\":130},\"expr\":{\"position\":\"value + [80*Math.cos(time*2*Math.PI/6 + 3), 60*Math.sin(time*2*Math.PI/6 + 3)]\"}},{\"key\":\"dots\",\"name\":\"Dot grid\",\"type\":\"group\",\"children\":[{\"key\":\"row0\",\"name\":\"Dot row 1\",\"type\":\"group\",\"expr\":{\"opacity\":\"15 + 45*(0.5+0.5*Math.sin(time*2*Math.PI/3 - 0))\"},\"children\":[{\"key\":\"r0c0\",\"type\":\"ellipse\",\"center\":[240,220],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r0c1\",\"type\":\"ellipse\",\"center\":[400,220],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r0c2\",\"type\":\"ellipse\",\"center\":[560,220],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r0c3\",\"type\":\"ellipse\",\"center\":[720,220],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r0c4\",\"type\":\"ellipse\",\"center\":[880,220],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r0c5\",\"type\":\"ellipse\",\"center\":[1040,220],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r0c6\",\"type\":\"ellipse\",\"center\":[1200,220],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r0c7\",\"type\":\"ellipse\",\"center\":[1360,220],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r0c8\",\"type\":\"ellipse\",\"center\":[1520,220],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r0c9\",\"type\":\"ellipse\",\"center\":[1680,220],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"}]},{\"key\":\"row1\",\"name\":\"Dot row 2\",\"type\":\"group\",\"expr\":{\"opacity\":\"15 + 45*(0.5+0.5*Math.sin(time*2*Math.PI/3 - 0.7))\"},\"children\":[{\"key\":\"r1c0\",\"type\":\"ellipse\",\"center\":[240,380],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r1c1\",\"type\":\"ellipse\",\"center\":[400,380],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r1c2\",\"type\":\"ellipse\",\"center\":[560,380],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r1c3\",\"type\":\"ellipse\",\"center\":[720,380],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r1c4\",\"type\":\"ellipse\",\"center\":[880,380],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r1c5\",\"type\":\"ellipse\",\"center\":[1040,380],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r1c6\",\"type\":\"ellipse\",\"center\":[1200,380],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r1c7\",\"type\":\"ellipse\",\"center\":[1360,380],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r1c8\",\"type\":\"ellipse\",\"center\":[1520,380],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"},{\"key\":\"r1c9\",\"type\":\"ellipse\",\"center\":[1680,380],\"w\":6,\"h\":6,\"fill\":\"#FFFFFF\"}]},{\"key\":\"row2\",\"name\":\"Dot row 3\",\"type\":\"group\",\"expr\":{\"opacity\":\"15 + 45*(0.5+0.5*Math.s…",
+  "result": "{\"summary\":\"59 created, 0 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"blob-purple\":\"l_03jm2\",\"blob-teal\":\"l_03jm3\",\"blob-violet\":\"l_03jm4\",\"r0c0\":\"l_03jm7\",\"r0c1\":\"l_03jm8\",\"r0c2\":\"l_03jm9\",\"r0c3\":\"l_03jma\",\"r0c4\":\"l_03jmb\",\"r0c5\":\"l_03jmc\",\"r0c6\":\"l_03jmd\",\"r0c7\":\"l_03jme\",\"r0c8\":\"l_03jmf\",\"r0c9\":\"l_03jmg\",\"row0\":\"l_03jm6\",\"r1c0\":\"l_03jmi\",\"r1c1\":\"l_03jmj\",\"r1c2\":\"l_03jmk\",\"r1c3\":\"l_03…"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 13,
+  "ok": true,
+  "ms": 1023,
+  "editorMs": 24,
+  "input": {
+   "loop": true
+  },
+  "result": "score 100/100 (no issues found)"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 2750,
+  "editorMs": 2704,
+  "input": {
+   "times": [
+    0,
+    1.5,
+    3,
+    4.5,
+    5.97
+   ],
+   "cell": 320
+  },
+  "result": "5 frames left→right, top→bottom at 0s, 1.5s, 3s, 4.5s, 5.97s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/a153829e-6b6e-4336-8155-b4f2b1a030e4/tool-results/mcp-motion-blob-1794511550537-p01ii8.jpg]"
+ }
+]

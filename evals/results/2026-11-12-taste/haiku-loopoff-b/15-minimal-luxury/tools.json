@@ -1,0 +1,503 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 859,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 2,
+  "input": {
+   "comp": {
+    "background": "#0b0b0c",
+    "duration": 7,
+    "width": 1080,
+    "height": 1920
+   },
+   "layers": [
+    {
+     "key": "line",
+     "name": "Gold line",
+     "type": "rect",
+     "x": 360,
+     "y": 838,
+     "w": 360,
+     "h": 2,
+     "fill": "#d2b98a",
+     "center": [
+      540,
+      840
+     ],
+     "animate": {
+      "scale": [
+       {
+        "t": 0.4,
+        "v": [
+         0,
+         100
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 3,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0.4,
+        "v": 0
+       },
+       {
+        "t": 0.9,
+        "v": 100,
+        "ease": "Sine Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "name",
+     "name": "Name ÉCLAT",
+     "type": "text",
+     "x": 0,
+     "y": 870,
+     "w": 1080,
+     "h": 140,
+     "text": {
+      "content": "ÉCLAT",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 128,
+      "fontWeight": 500,
+      "align": "center"
+     },
+     "tracking": 48,
+     "fill": "#efe4cc"
+    },
+    {
+     "key": "tagline",
+     "name": "Tagline",
+     "type": "text",
+     "x": 0,
+     "y": 1050,
+     "w": 1080,
+     "h": 60,
+     "text": {
+      "content": "EAU DE PARFUM",
+      "fontFamily": "Inter",
+      "fontSize": 32,
+      "fontWeight": 400,
+      "align": "center"
+     },
+     "tracking": 14,
+     "fill": "#c9b48a",
+     "animate": {
+      "opacity": [
+       {
+        "t": 5,
+        "v": 0
+       },
+       {
+        "t": 6.4,
+        "v": 100,
+        "ease": "Sine Out"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"3 created, 0 updated, 3 keyframe tracks; animation ends 6.4s\",\"ids\":{\"line\":\"l_03jm2\",\"name\":\"l_03jm3\",\"tagline\":\"l_03jm4\"}}"
+ },
+ {
+  "name": "split_text",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jm3",
+   "by": "char"
+  },
+  "result": "{\"group\":\"l_03jm5\",\"pieces\":5,\"ids\":[\"l_03jm6\",\"l_03jm7\",\"l_03jm8\",\"l_03jm9\",\"l_03jma\"],\"note\":\"pieces are char text layers in group coordinates\"}"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 80,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 0,
+  "input": {
+   "ids": [
+    "l_03jm6",
+    "l_03jm7",
+    "l_03jm8",
+    "l_03jm9",
+    "l_03jma"
+   ],
+   "includeStatic": true
+  },
+  "result": "comp 7s @30fps\n\"É\" (text l_03jm6)\n  (static)\n\"C\" (text l_03jm7)\n  (static)\n\"L\" (text l_03jm8)\n  (static)\n\"A\" (text l_03jm9)\n  (static)\n\"T\" (text l_03jma)\n  (static)"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm6"
+  },
+  "result": "{\"id\":\"l_03jm6\",\"name\":\"É\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[62.59375,76.8]},\"position\":{\"v\":[279.25,76.8]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9372549019607843,0.8941176470588236,0.8,1]}},\"text\":{\"content\":\"É\",\"fontFamily\":\"Cormorant…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jma"
+  },
+  "result": "{\"id\":\"l_03jma\",\"name\":\"T\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[65.78125,76.8]},\"position\":{\"v\":[808.625,76.8]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9372549019607843,0.8941176470588236,0.8,1]}},\"text\":{\"content\":\"T\",\"fontFamily\":\"Cormoran…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 38,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm7"
+  },
+  "result": "{\"id\":\"l_03jm7\",\"name\":\"C\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[70.9375,76.8]},\"position\":{\"v\":[412.78125,76.8]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9372549019607843,0.8941176470588236,0.8,1]}},\"text\":{\"content\":\"C\",\"fontFamily\":\"Cormora…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm8"
+  },
+  "result": "{\"id\":\"l_03jm8\",\"name\":\"L\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[60.1875,76.8]},\"position\":{\"v\":[543.90625,76.8]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9372549019607843,0.8941176470588236,0.8,1]}},\"text\":{\"content\":\"L\",\"fontFamily\":\"Cormora…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 45,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm9"
+  },
+  "result": "{\"id\":\"l_03jm9\",\"name\":\"A\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[69.375,76.8]},\"position\":{\"v\":[673.46875,76.8]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[0,0]},\"fill\":{\"v\":[0.9372549019607843,0.8941176470588236,0.8,1]}},\"text\":{\"content\":\"A\",\"fontFamily\":\"Cormoran…"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 1117,
+  "ok": true,
+  "ms": 128,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm6",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 2.6,
+       "v": [
+        247.5,
+        76.8
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 4.2,
+       "v": [
+        279.25,
+        76.8
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm6",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 2.6,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.7,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 2.8,
+       "v": [
+        397,
+        76.8
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 4.4,
+       "v": [
+        412.78,
+        76.8
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 2.8,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 3.9,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 3,
+       "v": [
+        543.9,
+        76.8
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 4.6,
+       "v": [
+        543.91,
+        76.8
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 3,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 4.1,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jm9",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 3.2,
+       "v": [
+        689,
+        76.8
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 4.8,
+       "v": [
+        673.47,
+        76.8
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm9",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 3.2,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 4.3,
+       "v": 100
+      }
+     ]
+    },
+    {
+     "id": "l_03jma",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 3.4,
+       "v": [
+        840.4,
+        76.8
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 5,
+       "v": [
+        808.63,
+        76.8
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jma",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 3.4,
+       "v": 0,
+       "ease": "Sine Out"
+      },
+      {
+       "t": 4.5,
+       "v": 100
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 10 tracks on 5 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 175,
+  "editorMs": 119,
+  "input": {
+   "frames": 6,
+   "start": 0,
+   "end": 7
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 1.4s, 2.8s, 4.2s, 5.6s, 7s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/3e2bc843-8b21-4eec-9386-2b326ca8e2f2/tool-results/mcp-motion-blob-1794513674319-jese2u.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 56,
+  "editorMs": 19,
+  "input": {},
+  "result": "score 43/100 (timing 87, composition 81, readability 81, polish 70, richness 84, technical 64)\n1. [high] font \"Cormorant Garamond\" is not available: 5 text layer(s) render in a fallback\n   → update_layer {\"id\":\"l_03jm6\",\"text\":{\"fontFamily\":\"serif\"}}\n   → update_layer {\"id\":\"l_03jm7\",\"text\":{\"fontFamily\":\"serif\"}}\n   → update_layer {\"id\":\"l_03jm8\",\"text\":{\"fontFamily\":\"serif\"}}\n   → update_layer {…"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 57,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm6",
+   "props": {},
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 57,
+  "ok": true,
+  "ms": 37,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "props": {},
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 57,
+  "ok": true,
+  "ms": 42,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jm8",
+   "props": {},
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 57,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm9",
+   "props": {},
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 57,
+  "ok": true,
+  "ms": 26,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jma",
+   "props": {},
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 27,
+  "ok": true,
+  "ms": 124,
+  "editorMs": 78,
+  "input": {
+   "times": [
+    2.4,
+    3.6,
+    4.8,
+    6.6
+   ]
+  },
+  "result": "4 frames left→right, top→bottom at 2.4s, 3.6s, 4.8s, 6.6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/3e2bc843-8b21-4eec-9386-2b326ca8e2f2/tool-results/mcp-motion-blob-1794513678429-pvn1mh.jpg]"
+ }
+]

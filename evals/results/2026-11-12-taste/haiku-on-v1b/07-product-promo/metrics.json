@@ -1,0 +1,198 @@
+{
+ "run": {
+  "id": "07-product-promo",
+  "name": "07-product-promo",
+  "model": "haiku",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 87,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 94.4,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 5.6000000000000005,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin",
+     "low:slow-stagger"
+    ],
+    "ms": 7.5
+   },
+   "after": {
+    "score": 87,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 94.4,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 5.6000000000000005,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin",
+     "low:slow-stagger"
+    ],
+    "ms": 7.5
+   }
+  },
+  "wallMs": 60048,
+  "timedOut": false,
+  "turns": 9,
+  "costUsd": 0.01246734,
+  "durationMs": 57606,
+  "usage": {
+   "input": 347435,
+   "cached": 328884,
+   "output": 10939
+  },
+  "errors": [],
+  "toolCalls": 8,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the \"Pulse 2\" title sequence in the Main composition: 10 s, 1920×1080, 30 fps, on a near-black `#0B0B0D` background with electric orange `#FF5A1F` as the accent. The critic scores it 87/100.\n\n- **Feature words (0.5–3.5 s):** \"40h battery\", \"Spatial audio\", \"Pure silence\" each hold for two beats at 120 BPM (1 s each). Each cut lands on a beat and fires a full-frame orange flash that snaps out in about 0.16 s. Each word enters with a 125% → 100% Expo Out punch and cuts hard on exit.\n- **Product name (3.5 s):** **PULSE 2** slams in from 180% to 100% with Expo Out. A thin orange shockwave ring expands from behind it and fades by 4.2 s. An orange rule draws out under the name at 4.0 s to fill the gap before the next beat.\n- **Available now (7.0 s):** an orange pill with dark text springs in at the 7.0 s beat and holds to the end.\n\nMarkers sit on the cut beats (0.5, 1.5, 2.5, 3.5, 7.0 s). I didn't add any audio, since you didn't ask for a music track. The cuts are on the 120 BPM grid by design, so if you add a track, the timing will need checking against its actual beats.\n\nPossible next tweaks: a second ring on the 7.0 s pill beat, a wipe transition instead of the flash, or a larger pill with more padding."
+ },
+ "metrics": {
+  "layers": 10,
+  "drawableLayers": 10,
+  "layerTypes": {
+   "rect": 4,
+   "text": 5,
+   "ellipse": 1
+  },
+  "groups": 0,
+  "animatedLayers": 9,
+  "keys": 39,
+  "segments": 25,
+  "easesUsed": {
+   "Hold": 12,
+   "Expo Out": 10,
+   "Quad Out": 1,
+   "Spring 0.4": 2
+  },
+  "distinctEases": 4,
+  "easeFamilies": 4,
+  "overshootSegments": 2,
+  "keyedOvershoots": 0,
+  "springSegments": 2,
+  "holdKeys": 12,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 5,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#0b0b0d",
+   "#ff5a1f",
+   "#f5f5f0"
+  ],
+  "keyCoverage": 0.5,
+  "visualActivity": 0.201,
+  "firstMotion": 0.467,
+  "lastMotion": 7.467,
+  "endHold": 2.533,
+  "longestHold": 2.613,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.268,
+  "exits": 5,
+  "beats": 7,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.08,
+  "midLuma": 0.11,
+  "toolErrors": 0,
+  "toolCalls": 8
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "3 feature words present",
+    "type": "textAllOf",
+    "pass": true
+   },
+   {
+    "text": "product name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "\"Available now\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 beats",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "shockwave ring (stroked ellipse scaling up)",
+    "type": "ring",
+    "pass": true
+   },
+   {
+    "text": "feature words exit (transitions, not stacking)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "beat-aligned timing (markers or keys on a 0.5s grid)",
+    "type": "beatGrid",
+    "pass": true
+   },
+   {
+    "text": "dark background",
+    "type": "darkBackground",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

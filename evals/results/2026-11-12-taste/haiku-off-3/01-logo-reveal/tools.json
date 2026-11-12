@@ -1,0 +1,265 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1173,
+  "ok": true,
+  "ms": 475,
+  "editorMs": 7,
+  "input": {
+   "comp": {
+    "background": "#0B1F3A",
+    "duration": 4,
+    "fps": 60
+   },
+   "layers": [
+    {
+     "key": "mark-ring",
+     "name": "Mark ring",
+     "type": "ellipse",
+     "x": 600,
+     "y": 380,
+     "w": 240,
+     "h": 240,
+     "fill": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "stroke": "#3EE0B4",
+     "strokeWidth": 22
+    },
+    {
+     "key": "mark-slash",
+     "name": "Mark slash",
+     "type": "rect",
+     "x": 570,
+     "y": 483,
+     "w": 300,
+     "h": 34,
+     "radius": 6,
+     "rotation": -45,
+     "fill": "#3EE0B4",
+     "animate": {
+      "scale": [
+       {
+        "t": 0.45,
+        "v": [
+         0,
+         100
+        ],
+        "ease": "Expo Out"
+       },
+       {
+        "t": 0.95,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "wordmark",
+     "name": "Wordmark",
+     "type": "group",
+     "x": 840,
+     "y": 360,
+     "w": 520,
+     "h": 280,
+     "clip": true,
+     "children": [
+      {
+       "key": "wordmark-text",
+       "name": "Wordmark text",
+       "type": "text",
+       "x": 40,
+       "y": 60,
+       "w": 480,
+       "h": 180,
+       "text": {
+        "content": "NOVA",
+        "fontSize": 150,
+        "fontWeight": 700,
+        "align": "left",
+        "tracking": 4
+       },
+       "fill": "#FFFFFF",
+       "animate": {
+        "position": [
+         {
+          "t": 0.9,
+          "v": [
+           100,
+           150
+          ],
+          "ease": "Expo Out"
+         },
+         {
+          "t": 1.7,
+          "v": [
+           280,
+           150
+          ]
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "key": "tagline",
+     "name": "Tagline",
+     "type": "text",
+     "x": 660,
+     "y": 680,
+     "w": 600,
+     "h": 60,
+     "text": {
+      "content": "Money, made simple",
+      "fontSize": 40,
+      "fontWeight": 400,
+      "align": "center",
+      "tracking": 1
+     },
+     "fill": "#9FB3CC",
+     "animate": {
+      "opacity": [
+       {
+        "t": 1.9,
+        "v": 0,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 2.4,
+        "v": 100
+       }
+      ],
+      "position": [
+       {
+        "t": 1.9,
+        "v": [
+         960,
+         722
+        ],
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 2.4,
+        "v": [
+         960,
+         710
+        ]
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 4 keyframe tracks; animation ends 2.4s\",\"ids\":{\"mark-ring\":\"l_03jm2\",\"mark-slash\":\"l_03jm3\",\"wordmark-text\":\"l_03jm5\",\"wordmark\":\"l_03jm4\",\"tagline\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "draw_on",
+  "argsBytes": 76,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm2"
+   ],
+   "t": 0,
+   "duration": 0.8,
+   "ease": "Quart In Out",
+   "fill": "keep"
+  },
+  "result": "draw on: 1 path(s) 0s–0.8s; Mark ring → path"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 9,
+  "ok": true,
+  "ms": 55,
+  "editorMs": 36,
+  "input": {
+   "t": 3.2
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/bb131c0c-521f-41a8-88f4-401a5932dbfc/tool-results/mcp-motion-blob-1794514146835-7vepfn.png]"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 52,
+  "ok": true,
+  "ms": 162,
+  "editorMs": 138,
+  "input": {
+   "times": [
+    0.2,
+    0.5,
+    0.8,
+    1.1,
+    1.4,
+    1.8,
+    2.2,
+    3
+   ],
+   "cell": 240
+  },
+  "result": "8 frames left→right, top→bottom at 0.2s, 0.5s, 0.8s, 1.1s, 1.4s, 1.8s, 2.2s, 3s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/bb131c0c-521f-41a8-88f4-401a5932dbfc/tool-results/mcp-motion-blob-1794514148212-xftf8q.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 129,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm5",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0.9,
+       "v": [
+        -210,
+        150
+       ],
+       "ease": "Quart Out"
+      },
+      {
+       "t": 1.7,
+       "v": [
+        280,
+        150
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 54,
+  "ok": true,
+  "ms": 234,
+  "editorMs": 215,
+  "input": {
+   "times": [
+    0.2,
+    0.9,
+    1.1,
+    1.3,
+    1.5,
+    1.8,
+    2.4,
+    3.5
+   ],
+   "cell": 240
+  },
+  "result": "8 frames left→right, top→bottom at 0.2s, 0.9s, 1.1s, 1.3s, 1.5s, 1.8s, 2.4s, 3.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/bb131c0c-521f-41a8-88f4-401a5932dbfc/tool-results/mcp-motion-blob-1794514154838-fhblpo.jpg]"
+ }
+]

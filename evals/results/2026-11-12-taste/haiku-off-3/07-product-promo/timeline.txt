@@ -1,0 +1,39 @@
+- Word 1 · 40h battery [text] box 0,400,1920,280 #f5f5f5 "40h battery" Inter 220px w900
+- Word 2 · Spatial audio [text] box 0,400,1920,280 #f5f5f5 "Spatial audio" Inter 220px w900
+- Word 3 · Pure silence [text] box 0,400,1920,280 #f5f5f5 "Pure silence" Inter 220px w900
+- Wipe 1 · orange [rect] box 1920,0,1920,1080 #ff5a1f
+- Wipe 2 · orange [rect] box 1920,0,1920,1080 #ff5a1f
+- Wipe 3 · orange [rect] box 1920,0,1920,1080 #ff5a1f
+- Shockwave ring [ellipse] box 390,-30,1140,1140 #000000 a0 stroke #ff5a1f 14px
+- Product name · PULSE 2 [text] box 0,380,1920,320 #f5f5f5 "PULSE 2" Inter 320px w900
+- CTA pill · Available now [rect] box 730,710,460,120 #ff5a1f
+- CTA label · Available now [text] box 730,735,460,70 #0b0b0d "Available now" Inter 52px w700
+
+comp 1920x1080 10s @30fps, background #0b0b0d, markers 0 Beat 1, 0.5 Beat 2, 1 Beat 3, 1.5 Beat 4, 2 Beat 5, 2.5 Beat 6 · PULSE 2, 3 Beat 7, 3.5 Beat 8 · Available
+"Word 1 · 40h battery" (text l_03jm2)
+  scale: 0s 120 ─Expo Out→ 0.25s 100
+  opacity: 0s 100 ─hold→ 0.39s 0
+"Word 2 · Spatial audio" (text l_03jm3)
+  scale: 0.5s 120 ─Expo Out→ 0.75s 100
+  opacity: 0s 0 ─hold→ 0.5s 100 ─hold→ 0.89s 0
+"Word 3 · Pure silence" (text l_03jm4)
+  scale: 1s 120 ─Expo Out→ 1.25s 100
+  opacity: 0s 0 ─hold→ 1s 100 ─hold→ 2.36s 0
+"Wipe 1 · orange" (rect l_03jm5)
+  position: 0s [-960,540] ─Easy Ease→ 0.3s [-960,540] ─Quart Out→ 0.42s [960,540] ─Quart In→ 0.56s [2880,540]
+"Wipe 2 · orange" (rect l_03jm6)
+  position: 0s [-960,540] ─Easy Ease→ 0.8s [-960,540] ─Quart Out→ 0.92s [960,540] ─Quart In→ 1.06s [2880,540]
+"Wipe 3 · orange" (rect l_03jm7)
+  position: 0s [-960,540] ─Easy Ease→ 2.3s [-960,540] ─Quart Out→ 2.42s [960,540] ─Quart In→ 2.56s [2880,540]
+"Shockwave ring" (ellipse l_03jm8)
+  scale: 2.5s 20 ─Easy Ease→ 3.2s 380
+  opacity: 2.5s 100 ─hold→ 3.2s 0
+"Product name · PULSE 2" (text l_03jm9)
+  scale: 2.5s 150 ─Back Out→ 2.85s 100
+  opacity: 2.5s 100
+"CTA pill · Available now" (rect l_03jma)
+  scale: 3.5s 0 ─Back Out→ 3.8s 100
+  opacity: 3.5s 100
+"CTA label · Available now" (text l_03jmb)
+  position: 3.7s [960,785] ─Easy Ease→ 4s [960,770]
+  opacity: 3.7s 0 ─hold→ 4s 100

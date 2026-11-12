@@ -1,0 +1,192 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 247,
+  "ok": true,
+  "ms": 30,
+  "editorMs": 2,
+  "input": {
+   "name": "examples",
+   "brief": "Hand-drawn organic bakery logo \"Crumb & Co\": wobbly line-drawn wheat stalk and loaf draw on via stroke reveal, irregular warm blob shapes breathe slowly, friendly name appears, boil/wobble at 12fps feel, soft eases."
+  },
+  "result": "# Example: Elegant logo reveal, the line draws the mark and the wordmark slides out from behind it\n> tags: logo, reveal, elegant, minimal, luxury, corporate, line, stroke, draw, draw-on, trim, wordmark, mask, behind, monogram, calm\n\n## Brief\n\"Logo reveal for NOVA (a circle monogram with a slash). Calm and premium, dark background, 4 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 17,
+  "ok": true,
+  "ms": 47,
+  "editorMs": 0,
+  "input": {
+   "name": "styles"
+  },
+  "result": "Style recipes (get_guide {name: \"styles/<name>\"}):\n- styles/corporate-smooth: Clean, trustworthy and calm: brand blue, soft cards, gentle fades and long decelerating eases, no surprises.\n- styles/cyber-neon: Night-city neon: glowing strokes on near-black, magenta/cyan, grids receding to the horizon, flicker-on lights and smooth synth motion.\n- styles/data-viz: Precise, honest charts that build in …"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 36,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 0,
+  "input": {
+   "name": "styles/hand-drawn-organic"
+  },
+  "result": "# Hand-drawn organic\n> Imperfect, warm and human: wobbly strokes drawing on, earthy palette, boiling lines and gentle arcs.\n\n**Use for**: wellness, food, education, nonprofits, storytelling, craft brands.\n\n## Palette\n- Background `#F6EFE3` (paper); ink `#2E2A24`.\n- Accents: `#D97757` terracotta, `#7A9E7E` sage, `#E9B44C` mustard, `#5B7DB1` dusty blue.\n\n## Shapes\nPath layers with irregular curves (…"
+ },
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1935,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "title": "Crumb & Co: hand-drawn bakery sting",
+   "duration": 6,
+   "style": "styles/hand-drawn-organic",
+   "styleReason": "Warm, imperfect, human feel for a bakery; wobbly line art and earthy blobs fit the craft brand.",
+   "concepts": [
+    {
+     "name": "Rising crumb",
+     "idea": "The wheat stalk draws up from the bottom edge like a sprout, the loaf outline draws around it, and the blobs swell like dough under the lines.",
+     "why": "Bread rises and grows; the stalk and loaf are the depicted objects acting, not parts assembling."
+    },
+    {
+     "name": "Hand-sketched menu card",
+     "idea": "Stalk and loaf are drawn as a pencil sketch with boil, then the name is underlined with a scribbled stroke.",
+     "why": "Reads like a baker's hand-drawn chalkboard, friendly and honest."
+    }
+   ],
+   "beats": [
+    {
+     "name": "Stalk draws up",
+     "start": 0,
+     "end": 1.8,
+     "description": "Wobbly wheat stalk line draws up from the bottom centre-left (trimEnd 0→100), grain heads sprout with small arcs. Two warm blobs (mustard, terracotta) fade up under it.",
+     "style": "Sine In Out draw-ons 1.2 s, boil wiggle on strokes, blobs ease Quad Out."
+    },
+    {
+     "name": "Loaf draws on",
+     "start": 1.4,
+     "end": 3,
+     "description": "A hand-drawn loaf outline draws on to the right of the stalk, with a scoring line across it. Sage blob grows behind it.",
+     "style": "Sine In Out, staggered 0.4 s after stalk."
+    },
+    {
+     "name": "Name appears",
+     "start": 2.8,
+     "end": 4.6,
+     "description": "'Crumb & Co' appears in friendly serif, letters rise in with a soft stagger; a terracotta scribble underline draws under it.",
+     "style": "Quad Out per letter, 0.03 s stagger; underline Sine In Out."
+    },
+    {
+     "name": "Breathe and hold",
+     "start": 4.6,
+     "end": 6,
+     "description": "Blobs breathe slowly (scale ±2%), line boil continues, everything settles into the final lockup.",
+     "style": "Sine loops, no hard stops."
+    }
+   ],
+   "notes": "Palette: paper #F6EFE3, ink #2E2A24, terracotta #D97757, sage #7A9E7E, mustard #E9B44C. Serif 600 for the name. Comp 1920x1080, 24fps, 6 s. No music. Final frame: full lockup, no sound."
+  },
+  "result": "storyboard \"Crumb & Co: hand-drawn bakery sting\" shown to the user (4 beats, 6s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 5,
+  "editorMs": 1,
+  "input": {
+   "beat": 1,
+   "status": "active"
+  },
+  "result": "beat 1 \"Stalk draws up\" active; 0/4 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3042,
+  "ok": true,
+  "ms": 180,
+  "editorMs": 7,
+  "input": "{\"comp\":{\"width\":1920,\"height\":1080,\"duration\":6,\"fps\":24,\"background\":\"#F6EFE3\"},\"layers\":[{\"key\":\"blob-mustard\",\"name\":\"Blob mustard\",\"type\":\"path\",\"d\":\"M560 600 C560 520 640 480 700 500 C760 520 790 610 760 680 C730 750 620 770 575 720 C545 685 558 640 560 600 Z\",\"fill\":\"#E9B44CD9\",\"enter\":{\"t\":0.3,\"duration\":0.9,\"from\":{\"scale\":60,\"opacity\":0},\"ease\":\"Quad Out\"},\"expr\":{\"scale\":\"value + [2*Math.sin(time*2*Math.PI/2.4), 2*Math.sin(time*2*Math.PI/2.4)]\"}},{\"key\":\"blob-terracotta\",\"name\":\"Blob terracotta\",\"type\":\"path\",\"d\":\"M1180 380 C1240 360 1300 400 1296 460 C1292 520 1240 540 1200 520 C1160 500 1130 410 1180 380 Z\",\"fill\":\"#D97757D9\",\"enter\":{\"t\":1.8,\"duration\":0.9,\"from\":{\"scale\":60,\"opacity\":0},\"ease\":\"Quad Out\"},\"expr\":{\"scale\":\"value + [2*Math.sin(time*2*Math.PI/3.1), 2*Math.sin(time*2*Math.PI/3.1)]\"}},{\"key\":\"blob-sage\",\"name\":\"Blob sage\",\"type\":\"path\",\"d\":\"M840 700 C830 620 920 600 1000 620 C1080 640 1100 700 1080 740 C1060 780 900 790 860 760 C840 745 845 720 840 700 Z\",\"fill\":\"#7A9E7ED9\",\"enter\":{\"t\":1.5,\"duration\":0.9,\"from\":{\"scale\":60,\"opacity\":0},\"ease\":\"Quad Out\"},\"expr\":{\"scale\":\"value + [2*Math.sin(time*2*Math.PI/2.9), 2*Math.sin(time*2*Math.PI/2.9)]\"}},{\"key\":\"stalk\",\"name\":\"Wheat stalk\",\"type\":\"path\",\"d\":\"M700 820 C698 700 704 600 700 480 C698 400 702 330 700 260\",\"stroke\":\"#2E2A24\",\"strokeWidth\":7,\"fill\":\"#00000000\",\"drawOn\":{\"t\":0.2,\"duration\":1.2,\"ease\":\"Sine In Out\"},\"expr\":{\"position\":\"wiggle(8, 0.8)\"}},{\"key\":\"grains\",\"name\":\"Wheat grains\",\"type\":\"path\",\"d\":\"M700 430 C676 424 660 404 656 380 C680 384 698 402 700 430 Z M700 400 C724 394 740 374 744 350 C720 354 702 372 700 400 Z M700 350 C678 344 664 326 662 304 C684 308 698 324 700 350 Z M700 320 C720 314 734 298 736 276 C716 280 702 296 700 320 Z M700 290 C694 270 696 250 700 236 C706 252 706 272 700 290 Z\",\"stroke\":\"#2E2A24\",\"strokeWidth\":6,\"fill\":\"#00000000\",\"drawOn\":{\"t\":1,\"duration\":0.8,\"ease\":\"Sine In Out\"},\"expr\":{\"position\":\"wiggle(8, 0.8)\"}},{\"key\":\"loaf\",\"name\":\"Loaf outline\",\"type\":\"path\",\"d\":\"M880 700 C858 640 870 540 940 500 C1000 468 1100 466 1160 500 C1222 536 1236 640 1214 700 C1200 730 1170 740 1046 742 C920 742 892 732 880 700 Z\",\"stroke\":\"#2E2A24\",\"strokeWidth\":7,\"fill\":\"#00000000\",\"drawOn\":{\"t\":1.4,\"duration\":1.2,\"ease\":\"Sine In Out\"},\"expr\":{\"position\":\"wiggle(8, 0.8)\"}},{\"key\":\"score\",\"name\":\"Loaf score\",\"type\":\"path\",\"d\":\"M948 580 C996 556 1066 552 1132 572\",\"stroke\":\"#2E2A24\",\"strokeWidth\":6,\"fill\":\"#00000000\",\"drawOn\":{\"t\":2.4,\"duration\":0.6,\"ease\":\"Sine In Out\"},\"expr\":{\"position\":\"wiggle(8, 0.8)\"}},{\"key\":\"name\",\"name\":\"Name\",\"text\":\"Crumb & Co\",\"font\":\"serif\",\"fontSize\":120,\"fontWeight\":600,\"align\":\"center\",\"x\":360,\"y\":830,\"w\":1200,\"h\":150,\"fill\":\"#2E2A24\",\"textAnim\":{\"by\":\"char\",\"preset\":\"Fade up\",\"start\":2.8,\"duration\":0.5,\"stagger\":0.04}},{\"key\":\"underline\",\"name\":\"Name underline\",\"type\":\"path\",\"d\":\"M760 972 C880 956 1020 990 1160 966\",\"stroke\":\"#D97757\",\"strokeWidth\":9,\"fill\":\"#00000000\",\"drawOn\":{\"t\":4,\"duration\":0.6,\"ease\":\"Sine In Out…",
+  "result": "{\"summary\":\"9 created, 0 updated, 16 keyframe tracks; animation ends 4.6s\",\"ids\":{\"blob-mustard\":\"l_03jm2\",\"blob-terracotta\":\"l_03jm3\",\"blob-sage\":\"l_03jm4\",\"stalk\":\"l_03jm5\",\"grains\":\"l_03jm6\",\"loaf\":\"l_03jm7\",\"score\":\"l_03jm8\",\"name\":\"l_03jm9\",\"underline\":\"l_03jma\"}}"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "beat": 1,
+   "status": "done"
+  },
+  "result": "beat 1 \"Stalk draws up\" done; 1/4 beats finished"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 12,
+  "input": {},
+  "result": "score 100/100 (no issues found)"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 162,
+  "editorMs": 145,
+  "input": {
+   "times": [
+    0.5,
+    1.5,
+    2.5,
+    3.5,
+    4.5,
+    5.8
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 1.5s, 2.5s, 3.5s, 4.5s, 5.79s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/4ae74f8e-1ee8-48f3-8d96-a7e1474022db/tool-results/mcp-motion-blob-1794513659062-tcr9y8.jpg]"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 93,
+  "ok": true,
+  "ms": 6,
+  "editorMs": 0,
+  "input": {
+   "beat": 2,
+   "status": "done",
+   "note": "loaf, sage blob, score line drawn on together with beat 1"
+  },
+  "result": "beat 2 \"Loaf draws on\" done; 2/4 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 96,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 0,
+  "input": {
+   "beat": 3,
+   "status": "done",
+   "note": "name letter-by-letter fade up, terracotta underline draws on"
+  },
+  "result": "beat 3 \"Name appears\" done; 3/4 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 91,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "beat": 4,
+   "status": "done",
+   "note": "blobs breathe at different periods, boil on all strokes"
+  },
+  "result": "beat 4 \"Breathe and hold\" done; 4/4 beats finished — now critique (the critique tool, then contact_sheet; rubric: get_guide handbook, section \"Critique\")"
+ }
+]

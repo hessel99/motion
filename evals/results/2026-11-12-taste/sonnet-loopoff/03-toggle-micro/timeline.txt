@@ -1,0 +1,15 @@
+- Track Off [rect] box 280,235,240,130 #c9ccd1
+- Track On [rect] box 280,235,240,130 #34c759
+- Knob [group] #ffffff a0
+  - Knob Body [ellipse] box 402,247,106,106 #ffffff
+  - Checkmark [path] box 436,285,38,29 #000000 a0 stroke #34c759 8px
+
+comp 800x600 2s @60fps, background #f2f3f5
+"Track On" (rect l_03jm3)
+  opacity: 0s 0 ─Easy Ease→ 0.4s 0 ─Quad Out→ 0.8s 100
+"Knob" (group l_03jm4)
+  position: 0s [345,300] ─Easy Ease→ 0.4s [345,300] ─Cubic Out→ 0.68s [464,300] ─Easy Ease→ 0.95s [455,300]
+  scale: 0s 100 ─Easy Ease→ 0.4s 100 ─Cubic Out→ 0.54s [124,89] ─Easy Ease→ 0.7s [92,108] ─Easy Ease→ 1s 100
+"Checkmark" (path l_03jm6)
+  trimStart: 0.7s 0
+  trimEnd: 0.7s 0 ─Cubic Out→ 1s 100

@@ -1,0 +1,313 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 890,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 1,
+  "input": {
+   "title": "Design is how it works — kinetic quote",
+   "duration": 8,
+   "style": "Kinetic typography, bold Swiss: dark ink background, off-white type, single orange accent",
+   "beats": [
+    {
+     "name": "Design is not",
+     "start": 0,
+     "end": 2,
+     "description": "'Design is not' slams in word by word, then slides up and out as the next phrase arrives.",
+     "style": "Expo Out, word stagger 0.08"
+    },
+    {
+     "name": "just what it looks like.",
+     "start": 2,
+     "end": 4,
+     "description": "Letters rise per char; phrase exits upward while 'Design is' comes in.",
+     "style": "Quart Out per-letter, 0.03 stagger"
+    },
+    {
+     "name": "Design is how it works.",
+     "start": 4,
+     "end": 7,
+     "description": "'Design is' small, then 'how it works.' pops huge, bold, orange with scale overshoot.",
+     "style": "spring bounce, accent color"
+    },
+    {
+     "name": "Attribution",
+     "start": 6.3,
+     "end": 8,
+     "description": "— Steve Jobs fades in small below, with an orange rule drawing on.",
+     "style": "Fade + draw-on"
+    }
+   ]
+  },
+  "result": "storyboard \"Design is how it works — kinetic quote\" shown to the user (4 beats, 8s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1695,
+  "ok": true,
+  "ms": 43,
+  "editorMs": 6,
+  "input": {
+   "comp": {
+    "background": "#0e0e12",
+    "duration": 8
+   },
+   "layers": [
+    {
+     "key": "p1",
+     "text": {
+      "content": "Design is not",
+      "fontSize": 120,
+      "fontWeight": 800,
+      "align": "center"
+     },
+     "x": 40,
+     "y": 440,
+     "w": 1000,
+     "h": 160,
+     "fill": "#f4f1ea",
+     "outPoint": 2.3,
+     "textAnim": {
+      "by": "word",
+      "preset": "Fade up",
+      "start": 0.2,
+      "stagger": 0.12,
+      "duration": 0.5
+     },
+     "exit": {
+      "t": 2.2,
+      "duration": 0.35,
+      "to": {
+       "opacity": 0,
+       "dy": -100
+      },
+      "ease": "Cubic In"
+     }
+    },
+    {
+     "key": "p2",
+     "text": {
+      "content": "just what it looks like.",
+      "fontSize": 76,
+      "fontWeight": 600,
+      "align": "center"
+     },
+     "x": 40,
+     "y": 455,
+     "w": 1000,
+     "h": 120,
+     "fill": "#f4f1ea",
+     "inPoint": 2,
+     "outPoint": 4.4,
+     "textAnim": {
+      "by": "char",
+      "preset": "Fade up",
+      "start": 2.1,
+      "stagger": 0.03,
+      "duration": 0.4
+     },
+     "exit": {
+      "t": 4.3,
+      "duration": 0.35,
+      "to": {
+       "opacity": 0,
+       "dy": -100
+      },
+      "ease": "Cubic In"
+     }
+    },
+    {
+     "key": "p3a",
+     "text": {
+      "content": "Design is",
+      "fontSize": 64,
+      "fontWeight": 500,
+      "align": "center"
+     },
+     "x": 40,
+     "y": 360,
+     "w": 1000,
+     "h": 90,
+     "fill": "#9a9aa6",
+     "inPoint": 4.2,
+     "textAnim": {
+      "by": "word",
+      "preset": "Fade up",
+      "start": 4.3,
+      "stagger": 0.1,
+      "duration": 0.4
+     }
+    },
+    {
+     "key": "p3b",
+     "text": {
+      "content": "how it works.",
+      "fontSize": 150,
+      "fontWeight": 900,
+      "align": "center"
+     },
+     "x": 20,
+     "y": 450,
+     "w": 1040,
+     "h": 200,
+     "fill": "#ff5a1f",
+     "inPoint": 4.6,
+     "textAnim": {
+      "by": "word",
+      "start": 4.7,
+      "stagger": 0.22,
+      "duration": 0.6,
+      "ease": "spring:0.35",
+      "from": {
+       "opacity": 0,
+       "scale": 40,
+       "dy": 60
+      }
+     }
+    },
+    {
+     "key": "rule",
+     "type": "rect",
+     "x": 440,
+     "y": 740,
+     "w": 200,
+     "h": 4,
+     "fill": "#ff5a1f",
+     "inPoint": 6.2,
+     "animate": {
+      "scale": [
+       {
+        "t": 6.2,
+        "v": [
+         0,
+         100
+        ],
+        "ease": "Expo Out"
+       },
+       {
+        "t": 6.8,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "attr",
+     "text": {
+      "content": "— Steve Jobs",
+      "fontSize": 30,
+      "fontWeight": 500,
+      "align": "center",
+      "letterSpacing": 4
+     },
+     "x": 340,
+     "y": 770,
+     "w": 400,
+     "h": 50,
+     "fill": "#f4f1ea",
+     "inPoint": 6.4,
+     "enter": {
+      "t": 6.5,
+      "duration": 0.6,
+      "from": {
+       "opacity": 0,
+       "dy": 20
+      },
+      "ease": "Expo Out"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"6 created, 0 updated, 7 keyframe tracks; animation ends 7.1s\",\"ids\":{\"p1\":\"l_03jm2\",\"p2\":\"l_03jm3\",\"p3a\":\"l_03jm4\",\"p3b\":\"l_03jm5\",\"rule\":\"l_03jm6\",\"attr\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 44,
+  "ok": true,
+  "ms": 258,
+  "editorMs": 195,
+  "input": {
+   "times": [
+    0.8,
+    2.1,
+    2.6,
+    4.2,
+    5.2,
+    7
+   ],
+   "cell": 300
+  },
+  "result": "6 frames left→right, top→bottom at 0.8s, 2.1s, 2.6s, 4.2s, 5.2s, 7s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/51c33785-6735-4ac2-bebf-c97077c21991/tool-results/mcp-motion-blob-1794510903588-rwx0yt.jpg]"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 366,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "key": "p2",
+     "textAnim": {
+      "by": "char",
+      "preset": "Fade up",
+      "start": 0.1,
+      "stagger": 0.03,
+      "duration": 0.4
+     }
+    },
+    {
+     "key": "p3a",
+     "inPoint": 4.2,
+     "textAnim": {
+      "by": "word",
+      "preset": "Fade up",
+      "start": 0.1,
+      "stagger": 0.1,
+      "duration": 0.4
+     }
+    },
+    {
+     "key": "p3b",
+     "textAnim": {
+      "by": "word",
+      "start": 0.1,
+      "stagger": 0.22,
+      "duration": 0.6,
+      "ease": "spring:0.35",
+      "from": {
+       "opacity": 0,
+       "scale": 40,
+       "dy": 60
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 3 updated, 0 keyframe tracks; animation ends 4.3s\",\"ids\":{\"p2\":\"l_03jm3\",\"p3a\":\"l_03jm4\",\"p3b\":\"l_03jm5\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 271,
+  "editorMs": 247,
+  "input": {
+   "times": [
+    2.5,
+    3.5,
+    4.5,
+    5.2,
+    5.8,
+    7.5
+   ],
+   "cell": 300
+  },
+  "result": "6 frames left→right, top→bottom at 2.5s, 3.5s, 4.5s, 5.2s, 5.8s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/51c33785-6735-4ac2-bebf-c97077c21991/tool-results/mcp-motion-blob-1794510907902-pjrnvk.jpg]"
+ }
+]

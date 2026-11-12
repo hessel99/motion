@@ -1,0 +1,6 @@
+Minimal luxury reveal for a perfume, "ÉCLAT — Eau de Parfum", vertical story format. Near-black background, champagne gold accents, a single thin gold line that slowly draws, the name in a wide-tracked serif fading in letter by letter with tracking tightening slightly, generous negative space. Slow, restrained, expensive. Nothing should move fast.
+
+<editor_context>
+comp "Main" 1080x1920 30fps 7s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

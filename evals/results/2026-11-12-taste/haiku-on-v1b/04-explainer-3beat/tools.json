@@ -1,0 +1,454 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 352,
+  "ok": true,
+  "ms": 42,
+  "editorMs": 2,
+  "input": {
+   "name": "examples",
+   "brief": "12-second explainer scene for a password manager: three beats of ~4s. Messy pile of sticky notes with passwords jitters anxiously, gets sucked into a shield/vault icon, shield glows and headline \"One key. Every login.\" lands with a check mark. Flat illustration style, friendly colors, beats hand over without hard cuts."
+  },
+  "result": "# Example: Explainer beat, problem to solution with a match transition\n> tags: explainer, explain, how it works, steps, problem, solution, story, beat, icons, onboarding, flat, illustration, product, app, saas\n\n## Brief\n\"One explainer beat: messy notes everywhere (problem) become one tidy secure app (solution). Friendly flat style, 6 s, with a caption for each half.\"\n\n## Tool calls\n```json\n[\n  {\"t…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 22,
+  "ok": false,
+  "ms": 46,
+  "editorMs": 1,
+  "error": "no guide \"styles/flat\". guides: workflow, handbook, cookbook, concepts, music, styles/corporate-smooth, styles/cyber-neon, styles/data-viz, styles/editorial, styles/flat-explainer, styles/glitch-retro, styles/hand-drawn-organic, styles/kinetic-type, styles/liquid-blob, styles/minimal-luxury, styles/neo-brutalist, styles/paper-cutout, styles/parallax-3d, styles/playful-bouncy, styles/swiss, styles/",
+  "input": {
+   "name": "styles/flat"
+  },
+  "result": "no guide \"styles/flat\". guides: workflow, handbook, cookbook, concepts, music, styles/corporate-smooth, styles/cyber-neon, styles/data-viz, styles/editorial, styles/flat-explainer, styles/glitch-retro, styles/hand-drawn-organic, styles/kinetic-type, styles/liquid-blob, styles/minimal-luxury, styles/neo-brutalist, styles/paper-cutout, styles/parallax-3d, styles/playful-bouncy, styles/swiss, styles/…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 32,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 0,
+  "input": {
+   "name": "styles/flat-explainer"
+  },
+  "result": "# Flat illustration explainer\n> Friendly flat illustrations from simple shapes, clear icons and step-by-step reveals that explain one idea per beat.\n\n**Use for**: product explainers, onboarding, how-it-works, education, app store videos.\n\n## Palette\n- Background `#EAF4F4` or `#FFF8F0`; ink `#22313F`.\n- Illustration set: `#FF7F50` coral, `#2EC4B6` teal, `#FFBF69` amber, `#3D5A80` navy, `#FFFFFF` hi…"
+ },
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1919,
+  "ok": true,
+  "ms": 36,
+  "editorMs": 1,
+  "input": {
+   "title": "Password manager explainer (12 s)",
+   "style": "Flat explainer (friendly flat illustration, Back Out pops, Cubic/Quart Out moves, Expo In for suction)",
+   "styleReason": "Flat explainer suits a one-idea-per-beat product story with friendly colors.",
+   "duration": 12,
+   "beats": [
+    {
+     "name": "Problem: sticky-note pile",
+     "start": 0,
+     "end": 4,
+     "description": "A messy pile of 5-6 colored sticky notes, each with a password line (dots and short strings), pops in with Back Out and jitters anxiously with small fast rotation wobbles. Hands over by pulling the notes toward the center as beat 2 begins.",
+     "style": "Back Out pops 0.3-0.4s, staggered 0.08s; anxious jitter at ~1.5 Hz, ±3°; coral, teal, amber notes on cream #FFF8F0, navy ink #22313F."
+    },
+    {
+     "name": "Gather: notes sucked into the vault",
+     "start": 3.5,
+     "end": 7.5,
+     "description": "Notes spiral on arcs into a navy shield/vault icon at center (Expo In suction, staggered), shrinking as they enter. The shield pops in early (overlapping the end of beat 1) so the notes have a target. Shield flashes a single pulse as the last note lands.",
+     "style": "Expo In for the pull, shield Back Out pop, no hard cut: notes shrink into the shield's center point."
+    },
+    {
+     "name": "Resolve: glow, check, headline",
+     "start": 7.5,
+     "end": 12,
+     "description": "Shield glows (soft amber halo pulse), a teal check mark draws on inside it (trimEnd 0-100, Cubic In Out 0.5s). Headline 'One key. Every login.' lands below in Inter 700 ~72px navy, word-by-word rise, settling and holding to the end.",
+     "style": "Cubic Out / Quart Out moves, check draw 0.5s, headline fade-up 0.5s; final frame holds ≥2s for reading."
+    }
+   ],
+   "notes": "Palette: background #FFF8F0, ink #22313F, coral #FF7F50, teal #2EC4B6, amber #FFBF69, navy #3D5A80, white highlights. Font: Inter. No gradients, one radius family (12-24). 1920x1080 30fps. Open question: keep the headline on the final frame with the shield above it (planned), not a separate end card."
+  },
+  "result": "storyboard \"Password manager explainer (12 s)\" shown to the user (3 beats, 12s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 56,
+  "editorMs": 1,
+  "input": {
+   "beat": 1,
+   "status": "active"
+  },
+  "result": "beat 1 \"Problem: sticky-note pile\" active; 0/3 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 7303,
+  "ok": true,
+  "ms": 299,
+  "editorMs": 9,
+  "input": "{\"comp\":{\"background\":\"#FFF8F0\",\"duration\":12,\"fps\":30},\"layers\":[{\"key\":\"note-1\",\"type\":\"group\",\"name\":\"Note 1 · qwerty\",\"x\":760,\"y\":355,\"w\":200,\"h\":150,\"children\":[{\"key\":\"note-1-card\",\"type\":\"rect\",\"name\":\"Note 1 card\",\"x\":0,\"y\":0,\"w\":200,\"h\":150,\"radius\":16,\"fill\":\"#FF7F50\"},{\"key\":\"note-1-text\",\"type\":\"text\",\"name\":\"Note 1 text\",\"center\":[100,75],\"text\":{\"content\":\"qwerty\",\"fontSize\":30,\"fontWeight\":700,\"align\":\"center\",\"fontFamily\":\"Inter\"},\"fill\":\"#22313F\"}],\"rotation\":-14,\"expr\":{\"rotation\":\"value + 2.5*Math.sin(time*2*Math.PI*1.6)*clamp(1-(time-3.2)/0.4,0,1)\",\"position\":\"value + [1.5*Math.sin(time*2*Math.PI*2.3)*clamp(1-(time-3.2)/0.4,0,1), 1.5*Math.cos(time*2*Math.PI*1.9)*clamp(1-(time-3.2)/0.4,0,1)]\"},\"animate\":{\"position\":[{\"t\":0,\"v\":[860,430]},{\"t\":3.6,\"v\":[860,430],\"ease\":\"Expo In\"},{\"t\":4.3,\"v\":[960,474]}],\"scale\":[{\"t\":0.3,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.7,\"v\":100,\"ease\":\"Linear\"},{\"t\":3.6,\"v\":100,\"ease\":\"Quad In\"},{\"t\":4.3,\"v\":0}],\"rotation\":[{\"t\":3.6,\"v\":-14,\"ease\":\"Expo In\"},{\"t\":4.3,\"v\":186}]}},{\"key\":\"note-2\",\"type\":\"group\",\"name\":\"Note 2 · hunter2\",\"x\":970,\"y\":340,\"w\":200,\"h\":150,\"children\":[{\"key\":\"note-2-card\",\"type\":\"rect\",\"name\":\"Note 2 card\",\"x\":0,\"y\":0,\"w\":200,\"h\":150,\"radius\":16,\"fill\":\"#2EC4B6\"},{\"key\":\"note-2-text\",\"type\":\"text\",\"name\":\"Note 2 text\",\"center\":[100,75],\"text\":{\"content\":\"hunter2\",\"fontSize\":30,\"fontWeight\":700,\"align\":\"center\",\"fontFamily\":\"Inter\"},\"fill\":\"#22313F\"}],\"rotation\":9,\"expr\":{\"rotation\":\"value + 2.5*Math.sin(time*2*Math.PI*1.7)*clamp(1-(time-3.2)/0.4,0,1)\",\"position\":\"value + [1.5*Math.sin(time*2*Math.PI*2.1)*clamp(1-(time-3.2)/0.4,0,1), 1.5*Math.cos(time*2*Math.PI*2.0)*clamp(1-(time-3.2)/0.4,0,1)]\"},\"animate\":{\"position\":[{\"t\":0,\"v\":[1070,440]},{\"t\":3.68,\"v\":[1070,440],\"ease\":\"Expo In\"},{\"t\":4.38,\"v\":[960,474]}],\"scale\":[{\"t\":0.4,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.8,\"v\":100,\"ease\":\"Linear\"},{\"t\":3.68,\"v\":100,\"ease\":\"Quad In\"},{\"t\":4.38,\"v\":0}],\"rotation\":[{\"t\":3.68,\"v\":9,\"ease\":\"Expo In\"},{\"t\":4.38,\"v\":-151}]}},{\"key\":\"note-3\",\"type\":\"group\",\"name\":\"Note 3 · dots\",\"x\":865,\"y\":485,\"w\":200,\"h\":150,\"children\":[{\"key\":\"note-3-card\",\"type\":\"rect\",\"name\":\"Note 3 card\",\"x\":0,\"y\":0,\"w\":200,\"h\":150,\"radius\":16,\"fill\":\"#FFBF69\"},{\"key\":\"note-3-text\",\"type\":\"text\",\"name\":\"Note 3 text\",\"center\":[100,75],\"text\":{\"content\":\"••••••••\",\"fontSize\":34,\"fontWeight\":700,\"align\":\"center\",\"fontFamily\":\"Inter\"},\"fill\":\"#22313F\"}],\"rotation\":-4,\"expr\":{\"rotation\":\"value + 2.5*Math.sin(time*2*Math.PI*1.5)*clamp(1-(time-3.2)/0.4,0,1)\",\"position\":\"value + [1.5*Math.sin(time*2*Math.PI*2.2)*clamp(1-(time-3.2)/0.4,0,1), 1.5*Math.cos(time*2*Math.PI*2.4)*clamp(1-(time-3.2)/0.4,0,1)]\"},\"animate\":{\"position\":[{\"t\":0,\"v\":[965,560]},{\"t\":3.76,\"v\":[965,560],\"ease\":\"Expo In\"},{\"t\":4.46,\"v\":[960,474]}],\"scale\":[{\"t\":0.5,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.9,\"v\":100,\"ease\":\"Linear\"},{\"t\":3.76,\"v\":100,\"ease\":\"Quad In\"},{\"t\":4.46,\"v\":0}],\"rotation\":[{\"t\":3.76,\"v\":-4,\"ease\":\"Expo In\"},{\"t\":4.46,\"v\":176}]}},{\"key\":\"note-4\",\"type\":\"group\",…",
+  "result": "{\"summary\":\"22 created, 0 updated, 24 keyframe tracks; animation ends 11.2s\",\"ids\":{\"note-1-card\":\"l_03jm3\",\"note-1-text\":\"l_03jm4\",\"note-1\":\"l_03jm2\",\"note-2-card\":\"l_03jm6\",\"note-2-text\":\"l_03jm7\",\"note-2\":\"l_03jm5\",\"note-3-card\":\"l_03jm9\",\"note-3-text\":\"l_03jma\",\"note-3\":\"l_03jm8\",\"note-4-card\":\"l_03jmc\",\"note-4-text\":\"l_03jmd\",\"note-4\":\"l_03jmb\",\"note-5-card\":\"l_03jmf\",\"note-5-text\":\"l_03jmg\",…"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 73,
+  "editorMs": 59,
+  "input": {
+   "beat": 1,
+   "status": "done"
+  },
+  "result": "beat 1 \"Problem: sticky-note pile\" done; 1/3 beats finished\ncritic on this beat (0–4s): [high] \"Note 3 text\" and \"Note 5 text\" overlap for 0.6 s (0.9s–2.6s): let the outgoing text clear (or move apart) before the next arrives → retime {\"ids\":[\"l_03jmg\"],\"offset\":0.65} | [medium] \"Vault shield\" is drawn over \"Note 1 text\" for 0.9 s. Fix before the next beat if it is quick."
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 51,
+  "ok": true,
+  "ms": 168,
+  "editorMs": 135,
+  "input": {
+   "times": [
+    0.8,
+    2.5,
+    3.9,
+    4.4,
+    5.5,
+    7,
+    8.5,
+    11
+   ],
+   "cell": 280
+  },
+  "result": "8 frames left→right, top→bottom at 0.8s, 2.5s, 3.9s, 4.4s, 5.5s, 7s, 8.5s, 11s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/e7168c42-1cd7-4ea1-b411-b0f91c2cb102/tool-results/mcp-motion-blob-1794512987553-pvyzpr.jpg]"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 19,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 0,
+  "input": {
+   "ids": [
+    "l_03jmm"
+   ]
+  },
+  "result": "comp 12s @30fps\n\"Check mark\" (path l_03jmm)\n  trimEnd: 7s 0 ─Cubic In Out→ 7.5s 100"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 970,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm2",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        800,
+        400
+       ]
+      },
+      {
+       "t": 3.6,
+       "v": [
+        800,
+        400
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 4.3,
+       "v": [
+        960,
+        474
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm5",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        1080,
+        400
+       ]
+      },
+      {
+       "t": 3.68,
+       "v": [
+        1080,
+        400
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 4.38,
+       "v": [
+        960,
+        474
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        940,
+        520
+       ]
+      },
+      {
+       "t": 3.76,
+       "v": [
+        940,
+        520
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 4.46,
+       "v": [
+        960,
+        474
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jmb",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        760,
+        600
+       ]
+      },
+      {
+       "t": 3.84,
+       "v": [
+        760,
+        600
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 4.54,
+       "v": [
+        960,
+        474
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jme",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        1120,
+        600
+       ]
+      },
+      {
+       "t": 3.92,
+       "v": [
+        1120,
+        600
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 4.62,
+       "v": [
+        960,
+        474
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jmh",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        300
+       ]
+      },
+      {
+       "t": 4,
+       "v": [
+        960,
+        300
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 4.7,
+       "v": [
+        960,
+        474
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jmm",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 7,
+       "v": 0,
+       "ease": "Cubic In Out"
+      },
+      {
+       "t": 7.5,
+       "v": 100
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 7 tracks on 7 layers"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 79,
+  "editorMs": 0,
+  "input": {
+   "beat": 2,
+   "status": "active"
+  },
+  "result": "beat 2 \"Gather: notes sucked into the vault\" active; 1/3 beats finished"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 52,
+  "ok": true,
+  "ms": 1006,
+  "editorMs": 938,
+  "input": {
+   "times": [
+    0.8,
+    2.5,
+    3.6,
+    4,
+    4.6,
+    5.5,
+    6.8,
+    7.4
+   ],
+   "cell": 280
+  },
+  "result": "8 frames left→right, top→bottom at 0.8s, 2.5s, 3.6s, 4s, 4.6s, 5.5s, 6.8s, 7.4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/e7168c42-1cd7-4ea1-b411-b0f91c2cb102/tool-results/mcp-motion-blob-1794513001268-by81ah.jpg]"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 38,
+  "editorMs": 20,
+  "input": {
+   "beat": 2,
+   "status": "done"
+  },
+  "result": "beat 2 \"Gather: notes sucked into the vault\" done; 2/3 beats finished\ncritic on this beat (3.5–7.5s): [medium] \"Vault shield\" is drawn over \"Note 2 text\" for 0.9 s | [medium] \"Vault shield\" is drawn over \"Note 3 text\" for 1.1 s. Fix before the next beat if it is quick."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "beat": 3,
+   "status": "active"
+  },
+  "result": "beat 3 \"Resolve: glow, check, headline\" active; 2/3 beats finished"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 18,
+  "input": {},
+  "result": "score 75/100 (timing 86, choreography 93, readability 74)\n1. [medium] \"Vault shield\" is drawn over \"Note 2 text\" for 0.9 s\n2. [medium] \"Vault shield\" is drawn over \"Note 3 text\" for 1.1 s\n3. [medium] \"Vault shield\".scale move takes 0.05 s for scale Δ6%: too abrupt, ~0.15 s fits (handbook timing table)\n   → retime {\"ids\":[\"l_03jml\"],\"pivot\":4.75,\"scale\":3}\n4. [low] the hero \"Vault glow\" enters at 4…"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 42,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jml"
+   ],
+   "pivot": 4.75,
+   "scale": 3
+  },
+  "result": "retimed 1 layers; animation now ends at 6.1s"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 168,
+  "editorMs": 112,
+  "input": {
+   "times": [
+    6.9,
+    7.3,
+    7.8,
+    8.4,
+    9.6,
+    11.5
+   ],
+   "cell": 280
+  },
+  "result": "6 frames left→right, top→bottom at 6.9s, 7.3s, 7.8s, 8.4s, 9.6s, 11.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/e7168c42-1cd7-4ea1-b411-b0f91c2cb102/tool-results/mcp-motion-blob-1794513006090-0y7bqk.jpg]"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 124,
+  "editorMs": 28,
+  "input": {
+   "beat": 3,
+   "status": "done"
+  },
+  "result": "beat 3 \"Resolve: glow, check, headline\" done; 3/3 beats finished — now critique (the critique tool, then contact_sheet; rubric: get_guide handbook, section \"Critique\")"
+ }
+]

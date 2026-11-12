@@ -1,0 +1,960 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 218,
+  "ok": true,
+  "ms": 114,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "logo sting for brand \"Pulse\": round mark (circle with smaller dot inside) plus wordmark, synced to music, build anticipation, land logo on drop, secondary hits on beats, clean lockup end"
+  },
+  "result": "# Example: Playful logo sting, the dot drops in and lands (make my logo move)\n> tags: logo, sting, playful, bouncy, fun, kids, app, mark, wordmark, drop, land, squash, bounce, simple, make my logo move\n\n## Brief\n\"Make my logo move: a round orange mark and the word 'pip'. Fun and friendly, about 3 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"duration\": 3, \"backgrou…"
+ },
+ {
+  "name": "get_audio_analysis",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 84,
+  "editorMs": 1,
+  "input": {},
+  "result": "music \"Sting 120 BPM\" (layer l_03jm3): 120 BPM, 4/4, steady grid; audible 0.00–9.50s in comp (comp is 8.00s)\nbeat 0.50s, bar 2.00s; 16 beats from 0.00s; 4 bars, downbeats: 0.00 2.00 4.00 6.00\nsections: build 0.00–4.00 (energy 0.59) | drop 4.00–8.00 (energy 1)\naccents (strongest hits, time:strength): 0.50:0.38 1.00:0.34 3.50:0.33 4.00:1.00 5.50:0.31 6.00:0.32\nenergy per bar (▁ quiet .. █ loud): ▄▅█…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 69,
+  "editorMs": 0,
+  "input": {},
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":8,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":1,\"layers\":[{\"id\":\"l_03jm3\",\"name\":\"Sting 120 BPM\",\"type\":\"audio\",\"props\":{\"anchor\":[0,0],\"position\":[0,0],\"scale\":[100,100],\"rotation\":…"
+ },
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1686,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "title": "Pulse logo sting",
+   "duration": 8,
+   "style": "Kinetic brand sting: springs and expo eases, one red accent on near-black",
+   "styleReason": "The brand is named Pulse and the track is 120 BPM, so the mark's own beat is the motion language.",
+   "concepts": [
+    {
+     "name": "Heartbeat",
+     "idea": "The inner dot beats on every music beat while the ring draws on; the build tightens the ring; on the drop (4.0 s) the mark lands and bursts ripples out of the dot.",
+     "why": "The name is Pulse: the mark literally pulses with the track."
+    },
+    {
+     "name": "Orbit lock",
+     "idea": "A dot orbits inside the ring, speeding up through the build, and locks to the ring's edge on the drop; the wordmark follows.",
+     "why": "Clear geometric story: a dot finding its orbit."
+    }
+   ],
+   "recommended": 0,
+   "beats": [
+    {
+     "name": "Build",
+     "start": 0,
+     "end": 4,
+     "description": "Ring draws on (0-1.4 s). Dot pulses on every beat, punches growing 108→124%, and the ring squeezes in toward the drop as anticipation.",
+     "style": "Quad In into each hit, Expo Out back; no wordmark yet."
+    },
+    {
+     "name": "Drop landing",
+     "start": 4,
+     "end": 4.6,
+     "description": "At 4.0 s the ring bursts 112% and springs to 100; the dot overshoots to 150% and settles; first ripple leaves the mark; wordmark letters rise in from 4.1 s.",
+     "style": "Spring Bouncy on the dot, Expo Out on the ripple, 0.05 s letter stagger."
+    },
+    {
+     "name": "Secondary hits",
+     "start": 4.6,
+     "end": 6.6,
+     "description": "Dot hits on 5.0, 5.5 and 6.0 s with a ripple on 5.0 and 6.0 s; each hit smaller than the last.",
+     "style": "Hits 112/110/108%, ripples fade 60→0."
+    },
+    {
+     "name": "Lockup hold",
+     "start": 6.6,
+     "end": 8,
+     "description": "Everything rests at 100%: clean lockup, mark plus Pulse wordmark, nothing moves.",
+     "style": "Static hold to comp end."
+    }
+   ]
+  },
+  "result": "storyboard \"Pulse logo sting\" shown to the user (4 beats, 8s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 0,
+  "input": {
+   "beat": 1,
+   "status": "active"
+  },
+  "result": "beat 1 \"Build\" active; 0/4 beats finished"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2895,
+  "ok": false,
+  "ms": 16,
+  "editorMs": 3,
+  "error": "layer \"mark-ring\": drawOn needs a path layer (type path / shape / star)",
+  "input": {
+   "comp": {
+    "background": "#0B0B10",
+    "duration": 8
+   },
+   "layers": [
+    {
+     "key": "ripple-3",
+     "name": "Ripple 3",
+     "type": "ellipse",
+     "x": 510,
+     "y": 420,
+     "w": 240,
+     "h": 240,
+     "fill": "#00000000",
+     "stroke": "#FF3B5C",
+     "strokeWidth": 3,
+     "opacity": 0,
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100
+       },
+       {
+        "t": 6,
+        "v": 100
+       },
+       {
+        "t": 6.9,
+        "v": 250,
+        "ease": "Expo Out"
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 6,
+        "v": 60,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 6.9,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "ripple-2",
+     "name": "Ripple 2",
+     "type": "ellipse",
+     "x": 510,
+     "y": 420,
+     "w": 240,
+     "h": 240,
+     "fill": "#00000000",
+     "stroke": "#FF3B5C",
+     "strokeWidth": 3,
+     "opacity": 0,
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100
+       },
+       {
+        "t": 5,
+        "v": 100
+       },
+       {
+        "t": 5.9,
+        "v": 250,
+        "ease": "Expo Out"
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 5,
+        "v": 60,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 5.9,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "ripple-1",
+     "name": "Ripple 1 (drop)",
+     "type": "ellipse",
+     "x": 510,
+     "y": 420,
+     "w": 240,
+     "h": 240,
+     "fill": "#00000000",
+     "stroke": "#FF3B5C",
+     "strokeWidth": 3,
+     "opacity": 0,
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100
+       },
+       {
+        "t": 4,
+        "v": 100
+       },
+       {
+        "t": 4.9,
+        "v": 250,
+        "ease": "Expo Out"
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 4,
+        "v": 80,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 4.9,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "mark-ring",
+     "name": "Mark ring",
+     "type": "ellipse",
+     "x": 510,
+     "y": 420,
+     "w": 240,
+     "h": 240,
+     "fill": "#00000000",
+     "stroke": "#F4F4F5",
+     "strokeWidth": 22,
+     "drawOn": {
+      "t": 0,
+      "duration": 1.4,
+      "ease": "Cubic In Out"
+     },
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100,
+        "ease": "Ease In Out"
+       },
+       {
+        "t": 3,
+        "v": 100,
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 3.92,
+        "v": 90,
+        "ease": "Quad In"
+       },
+       {
+        "t": 4,
+        "v": 112,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 4.45,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "mark-dot",
+     "name": "Mark dot",
+     "type": "ellipse",
+     "x": 584,
+     "y": 494,
+     "w": 92,
+     "h": 92,
+     "fill": "#FF3B5C",
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 0.38,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 0.5,
+        "v": 108,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 0.88,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 1,
+        "v": 110,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 1.38,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 1.5,
+        "v": 112,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 1.88,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 2,
+        "v": 114,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 2.38,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 2.5,
+        "v": 116,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 2.88,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 3,
+        "v": 118,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 3.13,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 3.25,
+        "v": 120,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 3.38,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 3.5,
+        "v": 122,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 3.63,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 3.75,
+        "v": 124,
+        "ease": "Quad In"
+       },
+       {
+        "t": 4,
+        "v": 150,
+        "ease": "spring Bouncy"
+       },
+       {
+        "t": 4.5,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 4.88,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 5,
+        "v": 112,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 5.38,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 5.5,
+        "v": 110,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 5.88,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 6,
+        "v": 108,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 6.5,
+        "v": 100,
+        "ease": "Ease Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "wordmark",
+     "name": "Wordmark",
+     "type": "text",
+     "text": "Pulse",
+     "fontSize": 200,
+     "fontWeight": 700,
+     "tracking": -6,
+     "x": 820,
+     "y": 410,
+     "w": 640,
+     "h": 260,
+     "fill": "#F4F4F5",
+     "opacity": 0,
+     "textAnim": {
+      "by": "char",
+      "preset": "Fade up",
+      "start": 4.1,
+      "stagger": 0.05,
+      "duration": 0.5
+     },
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 4,
+        "v": 100
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "layer \"mark-ring\": drawOn needs a path layer (type path / shape / star)"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2951,
+  "ok": true,
+  "ms": 227,
+  "editorMs": 3,
+  "input": {
+   "comp": {
+    "background": "#0B0B10",
+    "duration": 8
+   },
+   "layers": [
+    {
+     "key": "ripple-3",
+     "name": "Ripple 3",
+     "type": "ellipse",
+     "x": 510,
+     "y": 420,
+     "w": 240,
+     "h": 240,
+     "fill": "#00000000",
+     "stroke": "#FF3B5C",
+     "strokeWidth": 3,
+     "opacity": 0,
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100
+       },
+       {
+        "t": 6,
+        "v": 100
+       },
+       {
+        "t": 6.9,
+        "v": 250,
+        "ease": "Expo Out"
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 6,
+        "v": 60,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 6.9,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "ripple-2",
+     "name": "Ripple 2",
+     "type": "ellipse",
+     "x": 510,
+     "y": 420,
+     "w": 240,
+     "h": 240,
+     "fill": "#00000000",
+     "stroke": "#FF3B5C",
+     "strokeWidth": 3,
+     "opacity": 0,
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100
+       },
+       {
+        "t": 5,
+        "v": 100
+       },
+       {
+        "t": 5.9,
+        "v": 250,
+        "ease": "Expo Out"
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 5,
+        "v": 60,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 5.9,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "ripple-1",
+     "name": "Ripple 1 (drop)",
+     "type": "ellipse",
+     "x": 510,
+     "y": 420,
+     "w": 240,
+     "h": 240,
+     "fill": "#00000000",
+     "stroke": "#FF3B5C",
+     "strokeWidth": 3,
+     "opacity": 0,
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100
+       },
+       {
+        "t": 4,
+        "v": 100
+       },
+       {
+        "t": 4.9,
+        "v": 250,
+        "ease": "Expo Out"
+       }
+      ],
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 4,
+        "v": 80,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 4.9,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "mark-ring",
+     "name": "Mark ring",
+     "type": "path",
+     "d": "M120 0 A120 120 0 1 1 120 240 A120 120 0 1 1 120 0 Z",
+     "w": 240,
+     "h": 240,
+     "x": 510,
+     "y": 420,
+     "fill": "#00000000",
+     "stroke": "#F4F4F5",
+     "strokeWidth": 22,
+     "drawOn": {
+      "t": 0,
+      "duration": 1.4,
+      "ease": "Cubic In Out"
+     },
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100,
+        "ease": "Ease In Out"
+       },
+       {
+        "t": 3,
+        "v": 100,
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 3.92,
+        "v": 90,
+        "ease": "Quad In"
+       },
+       {
+        "t": 4,
+        "v": 112,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 4.45,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "mark-dot",
+     "name": "Mark dot",
+     "type": "ellipse",
+     "x": 584,
+     "y": 494,
+     "w": 92,
+     "h": 92,
+     "fill": "#FF3B5C",
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 0.38,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 0.5,
+        "v": 108,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 0.88,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 1,
+        "v": 110,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 1.38,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 1.5,
+        "v": 112,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 1.88,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 2,
+        "v": 114,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 2.38,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 2.5,
+        "v": 116,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 2.88,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 3,
+        "v": 118,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 3.13,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 3.25,
+        "v": 120,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 3.38,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 3.5,
+        "v": 122,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 3.63,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 3.75,
+        "v": 124,
+        "ease": "Quad In"
+       },
+       {
+        "t": 4,
+        "v": 150,
+        "ease": "spring Bouncy"
+       },
+       {
+        "t": 4.5,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 4.88,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 5,
+        "v": 112,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 5.38,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 5.5,
+        "v": 110,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 5.88,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 6,
+        "v": 108,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 6.5,
+        "v": 100,
+        "ease": "Ease Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "wordmark",
+     "name": "Wordmark",
+     "type": "text",
+     "text": "Pulse",
+     "fontSize": 200,
+     "fontWeight": 700,
+     "tracking": -6,
+     "x": 820,
+     "y": 410,
+     "w": 640,
+     "h": 260,
+     "fill": "#F4F4F5",
+     "opacity": 0,
+     "textAnim": {
+      "by": "char",
+      "preset": "Fade up",
+      "start": 4.1,
+      "stagger": 0.05,
+      "duration": 0.5
+     },
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0,
+        "interp": "hold"
+       },
+       {
+        "t": 4,
+        "v": 100
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"6 created, 0 updated, 11 keyframe tracks; animation ends 6.9s\",\"ids\":{\"ripple-3\":\"l_03jm8\",\"ripple-2\":\"l_03jm9\",\"ripple-1\":\"l_03jma\",\"mark-ring\":\"l_03jmb\",\"mark-dot\":\"l_03jmc\",\"wordmark\":\"l_03jmd\"}}"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 26,
+  "ok": true,
+  "ms": 139,
+  "editorMs": 31,
+  "input": {
+   "beat": 1,
+   "status": "done"
+  },
+  "result": "beat 1 \"Build\" done; 1/4 beats finished"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 54,
+  "ok": true,
+  "ms": 314,
+  "editorMs": 221,
+  "input": {
+   "times": [
+    0.4,
+    1.6,
+    3.5,
+    4.1,
+    4.6,
+    5.2,
+    6.2,
+    7.5
+   ],
+   "cell": 280
+  },
+  "result": "8 frames left→right, top→bottom at 0.4s, 1.6s, 3.5s, 4.1s, 4.6s, 5.2s, 6.2s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/bb2f6b87-8812-4335-8e35-96579f2c6918/tool-results/mcp-motion-blob-1794512125337-5f7gsc.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 37,
+  "editorMs": 5,
+  "input": {},
+  "result": "score 88/100 (easing 83, music 96)\n1. [low] \"Mark dot\".scale arrives at full speed at 4s (Quad In): ease the landing (Cubic In Out) or add a settle\n   → set_easing {\"id\":\"l_03jmc\",\"prop\":\"scale\",\"indices\":[18],\"ease\":\"Cubic In Out\"}\n2. [low] \"Mark ring\".scale arrives at full speed at 4s (Quad In): ease the landing (Cubic In Out) or add a settle\n   → set_easing {\"id\":\"l_03jmb\",\"prop\":\"scale\",\"indic…"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 71,
+  "ok": true,
+  "ms": 22,
+  "editorMs": 5,
+  "input": {
+   "beat": 2,
+   "status": "done",
+   "note": "drop landing, ripple, wordmark rise"
+  },
+  "result": "beat 2 \"Drop landing\" done; 2/4 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 70,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 6,
+  "input": {
+   "beat": 3,
+   "status": "done",
+   "note": "hits on 5.0, 5.5, 6.0 with ripples"
+  },
+  "result": "beat 3 \"Secondary hits\" done; 3/4 beats finished"
+ },
+ {
+  "name": "update_progress",
+  "argsBytes": 56,
+  "ok": true,
+  "ms": 33,
+  "editorMs": 8,
+  "input": {
+   "beat": 4,
+   "status": "done",
+   "note": "static lockup to 8 s"
+  },
+  "result": "beat 4 \"Lockup hold\" done; 4/4 beats finished — now critique (the critique tool, then contact_sheet; rubric: get_guide handbook, section \"Critique\")"
+ }
+]

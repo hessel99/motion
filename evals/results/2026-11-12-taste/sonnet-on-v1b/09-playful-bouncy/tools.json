@@ -1,0 +1,30 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 3654,
+  "ok": true,
+  "ms": 153,
+  "editorMs": 4,
+  "input": "{\"comp\":{\"background\":\"#FFF4E0\",\"duration\":5},\"layers\":[{\"key\":\"s1\",\"name\":\"Pink circle\",\"type\":\"ellipse\",\"x\":60,\"y\":70,\"w\":220,\"h\":220,\"fill\":\"#FF5C8A\",\"enter\":{\"t\":0,\"duration\":1,\"from\":{\"dy\":-1200,\"scale\":[80,125]},\"ease\":\"spring:0.5\"},\"expr\":{\"position\":\"value+[0,6*Math.sin(time*4)]\"}},{\"key\":\"s2\",\"name\":\"Yellow star\",\"shape\":\"star\",\"x\":760,\"y\":70,\"w\":200,\"h\":200,\"fill\":\"#FFC93C\",\"enter\":{\"t\":0.15,\"duration\":1,\"from\":{\"dy\":-1200,\"scale\":[80,125],\"rotation\":-90},\"ease\":\"spring:0.5\"},\"expr\":{\"rotation\":\"value+4*Math.sin(time*3)\"}},{\"key\":\"s3\",\"name\":\"Teal square\",\"type\":\"rect\",\"x\":70,\"y\":790,\"w\":170,\"h\":170,\"radius\":44,\"fill\":\"#2EC4B6\",\"enter\":{\"t\":0.3,\"duration\":1,\"from\":{\"dy\":-1400,\"scale\":[80,125]},\"ease\":\"spring:0.5\"},\"expr\":{\"rotation\":\"value+5*Math.sin(time*3.5)\"}},{\"key\":\"s4\",\"name\":\"Purple circle\",\"type\":\"ellipse\",\"x\":820,\"y\":800,\"w\":160,\"h\":160,\"fill\":\"#8E6CFF\",\"enter\":{\"t\":0.45,\"duration\":1,\"from\":{\"dy\":-1400,\"scale\":[80,125]},\"ease\":\"spring:0.5\"},\"expr\":{\"position\":\"value+[0,6*Math.sin(time*4+1)]\"}},{\"key\":\"s5\",\"name\":\"Orange star\",\"shape\":\"star\",\"x\":455,\"y\":60,\"w\":130,\"h\":130,\"fill\":\"#FF8A3D\",\"enter\":{\"t\":0.6,\"duration\":1,\"from\":{\"dy\":-1200,\"scale\":[80,125]},\"ease\":\"spring:0.5\"},\"expr\":{\"rotation\":\"value-6*Math.sin(time*3)\"}},{\"key\":\"s6\",\"name\":\"Blue square\",\"type\":\"rect\",\"x\":270,\"y\":840,\"w\":130,\"h\":130,\"radius\":36,\"fill\":\"#4DA8FF\",\"enter\":{\"t\":0.75,\"duration\":1,\"from\":{\"dy\":-1400,\"scale\":[80,125]},\"ease\":\"spring:0.5\"},\"expr\":{\"rotation\":\"value+6*Math.sin(time*3+2)\"}},{\"key\":\"s7\",\"name\":\"Green circle\",\"type\":\"ellipse\",\"x\":640,\"y\":850,\"w\":120,\"h\":120,\"fill\":\"#7ED957\",\"enter\":{\"t\":0.9,\"duration\":1,\"from\":{\"dy\":-1400,\"scale\":[80,125]},\"ease\":\"spring:0.5\"},\"expr\":{\"position\":\"value+[0,5*Math.sin(time*4+2)]\"}},{\"key\":\"s8\",\"name\":\"Pink star\",\"shape\":\"star\",\"x\":30,\"y\":440,\"w\":100,\"h\":100,\"fill\":\"#FF5C8A\",\"enter\":{\"t\":1.05,\"duration\":1,\"from\":{\"dy\":-1200,\"scale\":[80,125]},\"ease\":\"spring:0.5\"},\"expr\":{\"rotation\":\"value+8*Math.sin(time*3)\"}},{\"key\":\"l1\",\"name\":\"Letter B\",\"text\":{\"content\":\"B\",\"fontSize\":300,\"fontWeight\":900,\"fontFamily\":\"Inter\",\"align\":\"center\"},\"x\":110,\"y\":380,\"w\":200,\"h\":340,\"fill\":\"#FF5C8A\",\"enter\":{\"t\":2,\"duration\":0.9,\"from\":{\"dy\":800,\"scale\":[75,130]},\"ease\":\"spring:0.55\"},\"expr\":{\"rotation\":\"value+clamp((time-3.4)*3,0,1)*5*Math.sin(time*6)\"}},{\"key\":\"l2\",\"name\":\"Letter o1\",\"text\":{\"content\":\"o\",\"fontSize\":300,\"fontWeight\":900,\"fontFamily\":\"Inter\",\"align\":\"center\"},\"x\":270,\"y\":380,\"w\":200,\"h\":340,\"fill\":\"#FF8A3D\",\"enter\":{\"t\":2.2,\"duration\":0.9,\"from\":{\"dy\":800,\"scale\":[75,130]},\"ease\":\"spring:0.55\"},\"expr\":{\"rotation\":\"value+clamp((time-3.4)*3,0,1)*5*Math.sin(time*6+1)\"}},{\"key\":\"l3\",\"name\":\"Letter o2\",\"text\":{\"content\":\"o\",\"fontSize\":300,\"fontWeight\":900,\"fontFamily\":\"Inter\",\"align\":\"center\"},\"x\":440,\"y\":380,\"w\":200,\"h\":340,\"fill\":\"#2EC4B6\",\"enter\":{\"t\":2.4,\"duration\":0.9,\"from\":{\"dy\":800,\"scale\":[75,130]},\"ease\":\"spring:0.55\"},\"expr\":{\"rotation\":\"value+clamp((time-3.4)*3,0,1)*5*Math.sin(time*6+2)\"}},{\"key\":\"l4\",\"name…",
+  "result": "{\"summary\":\"13 created, 0 updated, 27 keyframe tracks; animation ends 3.7s\",\"ids\":{\"s1\":\"l_03jm2\",\"s2\":\"l_03jm3\",\"s3\":\"l_03jm4\",\"s4\":\"l_03jm5\",\"s5\":\"l_03jm6\",\"s6\":\"l_03jm7\",\"s7\":\"l_03jm8\",\"s8\":\"l_03jm9\",\"l1\":\"l_03jma\",\"l2\":\"l_03jmb\",\"l3\":\"l_03jmc\",\"l4\":\"l_03jmd\",\"l5\":\"l_03jme\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 221,
+  "editorMs": 206,
+  "input": {
+   "times": [
+    0.4,
+    0.8,
+    1.5,
+    2.4,
+    3.2,
+    4.5
+   ],
+   "cell": 300
+  },
+  "result": "6 frames left→right, top→bottom at 0.4s, 0.8s, 1.5s, 2.4s, 3.2s, 4.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/e2a64cfb-e8a9-4b96-bc6f-5aa0a7111930/tool-results/mcp-motion-blob-1794512660900-wriaiu.jpg]"
+ }
+]

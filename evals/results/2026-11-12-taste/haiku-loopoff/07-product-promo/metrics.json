@@ -1,0 +1,212 @@
+{
+ "run": {
+  "id": "07-product-promo",
+  "name": "07-product-promo",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 77,
+    "sub": {
+     "timing": 91.6,
+     "easing": 96.5,
+     "choreography": 87.2,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 8.4,
+     "easing": 3.5,
+     "choreography": 12.8,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin",
+     "medium:slow-stagger",
+     "low:timing-range",
+     "low:timing-range",
+     "low:exit-ease"
+    ],
+    "ms": 5.1
+   },
+   "after": {
+    "score": 77,
+    "sub": {
+     "timing": 91.6,
+     "easing": 96.5,
+     "choreography": 87.2,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 8.4,
+     "easing": 3.5,
+     "choreography": 12.8,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin",
+     "medium:slow-stagger",
+     "low:timing-range",
+     "low:timing-range",
+     "low:exit-ease"
+    ],
+    "ms": 5.1
+   }
+  },
+  "wallMs": 51477,
+  "timedOut": false,
+  "turns": 13,
+  "costUsd": 0.012857140000000001,
+  "durationMs": 50210,
+  "usage": {
+   "input": 399359,
+   "cached": 380754,
+   "output": 10660
+  },
+  "errors": [],
+  "toolCalls": 12,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the 10-second \"Pulse 2\" title sequence on a 120 BPM grid (beat = 0.5 s, bar = 2 s). The critic scores it 77/100, and I'm leaving the rest as is.\n\n- **Feature flashes (0–3 s):** \"40h battery\" lands on beat 1 with a scale punch, \"Spatial audio\" slides in from the right on beat 3, and \"Pure silence\" snaps in with a spring tilt on beat 5. Each word hard-cuts out on the next beat, with a short orange flash frame on every cut.\n- **Product slam (3–6 s):** \"PULSE 2\" slams in from oversize on the 3 s half-bar with a full-frame orange flash. An orange shockwave ring expands from the wordmark and its stroke thins as it goes.\n- **Available now (6–10 s):** on the 6 s bar downbeat the wordmark lifts up, an orange pill pops in below, and \"Available now\" fades in on it. The end holds with a slow push on the wordmark and the text stays on screen to the end.\n\nPalette is #0B0B0D background, #F5F5F5 type and #FF5A1F orange, all in Inter 900. The layers are named (Word 1–3, Shockwave ring, Product name, Available now pill, Available now text, Orange flash) so they're easy to find.\n\nChoices I made that you may want to change:\n- There's no music file, so the beat grid is imagined. If you have a track, I can snap the landings to its real bars.\n- Each feature word holds for about 0.9 s. That's quick enough to read but may feel slow for \"flashes\". Shortening the holds is an easy change.\n- The critic still flags the word entrances as abrupt (0.3 s) and the 1 s spacing between words. Both are deliberate for a snappy cut, so I left them.\n\nI can add secondary motion to the wordmark or a thin orange rule under the pill if you want the end to feel busier."
+ },
+ "metrics": {
+  "layers": 8,
+  "drawableLayers": 8,
+  "layerTypes": {
+   "rect": 2,
+   "text": 5,
+   "ellipse": 1
+  },
+  "groups": 0,
+  "animatedLayers": 8,
+  "keys": 53,
+  "segments": 28,
+  "easesUsed": {
+   "Hold": 14,
+   "Quad Out": 2,
+   "Expo Out": 5,
+   "Spring 0.4": 1,
+   "Ease In": 1,
+   "Quart Out": 1,
+   "Expo In Out": 1,
+   "Sine In Out": 1,
+   "Back Out": 1,
+   "Custom(0,0,0.67,1)": 1
+  },
+  "distinctEases": 10,
+  "easeFamilies": 9,
+  "overshootSegments": 2,
+  "keyedOvershoots": 1,
+  "springSegments": 1,
+  "holdKeys": 14,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#ff5a1f",
+   "#f5f5f5",
+   "#0b0b0d"
+  ],
+  "keyCoverage": 0.627,
+  "visualActivity": 0.362,
+  "firstMotion": 0,
+  "lastMotion": 8.867,
+  "endHold": 1.133,
+  "longestHold": 2.278,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0.067,
+  "textOverlapPairs": {
+   "Product name - PULSE 2 × Available now text": 0.067
+  },
+  "partialOverlapTime": 4.087,
+  "exits": 5,
+  "beats": 5,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.075,
+  "midLuma": 0.102,
+  "toolErrors": 0,
+  "toolCalls": 12
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "3 feature words present",
+    "type": "textAllOf",
+    "pass": true
+   },
+   {
+    "text": "product name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "\"Available now\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 beats",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "shockwave ring (stroked ellipse scaling up)",
+    "type": "ring",
+    "pass": true
+   },
+   {
+    "text": "feature words exit (transitions, not stacking)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "beat-aligned timing (markers or keys on a 0.5s grid)",
+    "type": "beatGrid",
+    "pass": true
+   },
+   {
+    "text": "dark background",
+    "type": "darkBackground",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

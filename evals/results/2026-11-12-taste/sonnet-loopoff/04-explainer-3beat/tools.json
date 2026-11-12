@@ -1,0 +1,68 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1044,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 1,
+  "input": {
+   "title": "One key. Every login.",
+   "duration": 12,
+   "style": "Flat illustration",
+   "styleReason": "Friendly flat shapes, soft palette, springy eases",
+   "beats": [
+    {
+     "name": "Chaos",
+     "start": 0,
+     "end": 4,
+     "description": "Cream-colored background. ~9 sticky notes in yellow/pink/mint/blue with password scribbles pop in staggered onto a messy pile, then jitter anxiously (small rotation/position wiggle).",
+     "style": "Back Out pops, wiggle expression, warm pastel palette"
+    },
+    {
+     "name": "Suck-in",
+     "start": 3.6,
+     "end": 8,
+     "description": "A teal shield with a keyhole fades up in the center while the notes are still jittering; notes accelerate in on curved paths, shrinking and spinning into the shield. Shield squashes with each gulp, then settles.",
+     "style": "Cubic In for pulls, spring on shield; overlapping handover"
+    },
+    {
+     "name": "Resolve",
+     "start": 7.6,
+     "end": 12,
+     "description": "Shield glows (soft halo pulses), shifts up-left; a check mark draws on in it, headline 'One key. Every login.' lands below with a rise-and-fade, then holds.",
+     "style": "Expo Out, draw-on check, glow pulse"
+    }
+   ]
+  },
+  "result": "storyboard \"One key. Every login.\" shown to the user (3 beats, 12s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 6722,
+  "ok": true,
+  "ms": 535,
+  "editorMs": 9,
+  "input": "{\"comp\":{\"background\":\"#fff4e0\",\"duration\":12},\"layers\":[{\"key\":\"glow\",\"type\":\"ellipse\",\"x\":560,\"y\":30,\"w\":800,\"h\":800,\"fill\":{\"type\":\"radial\",\"stops\":[{\"pos\":0,\"color\":\"#7fe8d8cc\"},{\"pos\":1,\"color\":\"#7fe8d800\"}]},\"opacity\":0,\"animate\":{\"opacity\":[{\"t\":7.6,\"v\":0,\"ease\":\"Cubic Out\"},{\"t\":8.4,\"v\":80,\"ease\":\"Sine In Out\"},{\"t\":9.4,\"v\":45,\"ease\":\"Sine In Out\"},{\"t\":10.4,\"v\":80,\"ease\":\"Sine In Out\"},{\"t\":11.6,\"v\":50}]}},{\"key\":\"n1\",\"type\":\"group\",\"x\":700,\"y\":330,\"w\":190,\"h\":190,\"rotation\":-12,\"expr\":{\"rotation\":\"wiggle(7,6)\"},\"animate\":{\"scale\":[{\"t\":0.3,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.8,\"v\":100},{\"t\":4.2,\"v\":100,\"ease\":\"Cubic In\"},{\"t\":5.4,\"v\":0}],\"position\":[{\"t\":4.2,\"v\":[795,425],\"ease\":\"Cubic In\"},{\"t\":5.4,\"v\":[960,430]}]},\"children\":[{\"key\":\"n1r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":190,\"h\":190,\"radius\":10,\"fill\":\"#ffd95a\"},{\"key\":\"n1t\",\"text\":{\"content\":\"hunter2\",\"fontSize\":34,\"fontWeight\":700,\"align\":\"center\"},\"x\":0,\"y\":75,\"w\":190,\"h\":50,\"fill\":\"#5a4300\"}]},{\"key\":\"n2\",\"type\":\"group\",\"x\":900,\"y\":300,\"w\":190,\"h\":190,\"rotation\":8,\"expr\":{\"rotation\":\"wiggle(8,6)\"},\"animate\":{\"scale\":[{\"t\":0.42,\"v\":0,\"ease\":\"Back Out\"},{\"t\":0.92,\"v\":100},{\"t\":4.3,\"v\":100,\"ease\":\"Cubic In\"},{\"t\":5.5,\"v\":0}],\"position\":[{\"t\":4.3,\"v\":[995,395],\"ease\":\"Cubic In\"},{\"t\":5.5,\"v\":[960,430]}]},\"children\":[{\"key\":\"n2r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":190,\"h\":190,\"radius\":10,\"fill\":\"#ff9db5\"},{\"key\":\"n2t\",\"text\":{\"content\":\"Pa$$w0rd!\",\"fontSize\":32,\"fontWeight\":700,\"align\":\"center\"},\"x\":0,\"y\":75,\"w\":190,\"h\":50,\"fill\":\"#6b1230\"}]},{\"key\":\"n3\",\"type\":\"group\",\"x\":1110,\"y\":360,\"w\":190,\"h\":190,\"rotation\":-6,\"expr\":{\"rotation\":\"wiggle(6,7)\"},\"animate\":{\"scale\":[{\"t\":0.54,\"v\":0,\"ease\":\"Back Out\"},{\"t\":1.04,\"v\":100},{\"t\":4.4,\"v\":100,\"ease\":\"Cubic In\"},{\"t\":5.6,\"v\":0}],\"position\":[{\"t\":4.4,\"v\":[1205,455],\"ease\":\"Cubic In\"},{\"t\":5.6,\"v\":[960,430]}]},\"children\":[{\"key\":\"n3r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":190,\"h\":190,\"radius\":10,\"fill\":\"#9be8c4\"},{\"key\":\"n3t\",\"text\":{\"content\":\"qwerty123\",\"fontSize\":32,\"fontWeight\":700,\"align\":\"center\"},\"x\":0,\"y\":75,\"w\":190,\"h\":50,\"fill\":\"#0f4a33\"}]},{\"key\":\"n4\",\"type\":\"group\",\"x\":620,\"y\":520,\"w\":190,\"h\":190,\"rotation\":14,\"expr\":{\"rotation\":\"wiggle(7,6)\"},\"animate\":{\"scale\":[{\"t\":0.66,\"v\":0,\"ease\":\"Back Out\"},{\"t\":1.16,\"v\":100},{\"t\":4.5,\"v\":100,\"ease\":\"Cubic In\"},{\"t\":5.7,\"v\":0}],\"position\":[{\"t\":4.5,\"v\":[715,615],\"ease\":\"Cubic In\"},{\"t\":5.7,\"v\":[960,430]}]},\"children\":[{\"key\":\"n4r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":190,\"h\":190,\"radius\":10,\"fill\":\"#9fd2ff\"},{\"key\":\"n4t\",\"text\":{\"content\":\"letmein\",\"fontSize\":34,\"fontWeight\":700,\"align\":\"center\"},\"x\":0,\"y\":75,\"w\":190,\"h\":50,\"fill\":\"#103a66\"}]},{\"key\":\"n5\",\"type\":\"group\",\"x\":830,\"y\":500,\"w\":190,\"h\":190,\"rotation\":-4,\"expr\":{\"rotation\":\"wiggle(9,5)\"},\"animate\":{\"scale\":[{\"t\":0.78,\"v\":0,\"ease\":\"Back Out\"},{\"t\":1.28,\"v\":100},{\"t\":4.6,\"v\":100,\"ease\":\"Cubic In\"},{\"t\":5.8,\"v\":0}],\"position\":[{\"t\":4.6,\"v\":[925,595],\"ease\":\"Cubic In\"},{\"t\":5.8,\"v\":[960,430]}]},\"children\":[{\"key\":\"n5r\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":190,\"h\":190,…",
+  "result": "{\"summary\":\"36 created, 0 updated, 25 keyframe tracks; animation ends 11.6s\",\"ids\":{\"glow\":\"l_03jm2\",\"n1r\":\"l_03jm4\",\"n1t\":\"l_03jm5\",\"n1\":\"l_03jm3\",\"n2r\":\"l_03jm7\",\"n2t\":\"l_03jm8\",\"n2\":\"l_03jm6\",\"n3r\":\"l_03jma\",\"n3t\":\"l_03jmb\",\"n3\":\"l_03jm9\",\"n4r\":\"l_03jmd\",\"n4t\":\"l_03jme\",\"n4\":\"l_03jmc\",\"n5r\":\"l_03jmg\",\"n5t\":\"l_03jmh\",\"n5\":\"l_03jmf\",\"n6r\":\"l_03jmj\",\"n6t\":\"l_03jmk\",\"n6\":\"l_03jmi\",\"n7r\":\"l_03jmm\",\"…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 40,
+  "ok": true,
+  "ms": 5311,
+  "editorMs": 5284,
+  "input": {
+   "times": [
+    0.6,
+    2,
+    4.6,
+    5.6,
+    7,
+    8.6,
+    9.6,
+    11.5
+   ]
+  },
+  "result": "8 frames left→right, top→bottom at 0.6s, 2s, 4.6s, 5.6s, 7s, 8.6s, 9.6s, 11.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/23d39877-73c0-4376-8252-fea8c4e7789d/tool-results/mcp-motion-blob-1794510968130-dlh08c.jpg]"
+ }
+]

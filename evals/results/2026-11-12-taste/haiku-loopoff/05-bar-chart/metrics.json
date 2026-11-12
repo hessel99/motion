@@ -1,0 +1,191 @@
+{
+ "run": {
+  "id": "05-bar-chart",
+  "name": "05-bar-chart",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 11
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 11
+   }
+  },
+  "wallMs": 34194,
+  "timedOut": false,
+  "turns": 8,
+  "costUsd": 0.00906926,
+  "durationMs": 31724,
+  "usage": {
+   "input": 326024,
+   "cached": 312486,
+   "output": 6476
+  },
+  "errors": [],
+  "toolCalls": 7,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The bar chart is built in the Main composition (1920×1080, 6 s). The critique now scores it 100/100.\n\n- **Title:** \"Revenue by quarter\" top-left, with a \"$M\" unit line below it. Both fade and rise in.\n- **Axis:** a thin grey baseline wipes in from the left first (0.3–0.9 s).\n- **Bars:** Q1 to Q4 grow up from the baseline one after another, 0.15 s apart, with Quart Out easing. The grey bars are neutral and Q4 is blue. Q4 overshoots to 106% and settles.\n- **Values:** 12, 18, 15 fade and rise above each bar as it lands. The 27 uses a spring pop at 1.9 s.\n- **Quarter labels:** Q1–Q4 fade in under the baseline, with Q4 in the accent blue.\n- **Hold:** after the build the Q4 bar drifts slowly to 102% so the last 3 s aren't static.\n\nChoices I made that you didn't specify: the bar values are static text, not a counting number, since I used a fade/rise for the labels. I also left out a \"+80% vs Q3\" callout to keep it clean. I can add either if you want them."
+ },
+ "metrics": {
+  "layers": 15,
+  "drawableLayers": 15,
+  "layerTypes": {
+   "text": 10,
+   "rect": 5
+  },
+  "groups": 0,
+  "animatedLayers": 15,
+  "keys": 45,
+  "segments": 23,
+  "easesUsed": {
+   "Quart Out": 18,
+   "Custom(0.65,0,0.67,1)": 1,
+   "Sine In Out": 1,
+   "Spring 0.4": 2,
+   "Ease Out": 1
+  },
+  "distinctEases": 5,
+  "easeFamilies": 5,
+  "overshootSegments": 2,
+  "keyedOvershoots": 1,
+  "springSegments": 2,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 7,
+  "palette": [
+   "#0f172a",
+   "#64748b",
+   "#94a3b8",
+   "#cbd5e1",
+   "#2563eb",
+   "#334155",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.983,
+  "visualActivity": 0.402,
+  "firstMotion": 0.067,
+  "lastMotion": 2.467,
+  "endHold": 3.533,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.335,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.052,
+  "midLuma": 0.942,
+  "toolErrors": 0,
+  "toolCalls": 7
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "4 bars (rects)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "bars grow from the baseline (size/scale animated, bottom edge fixed)",
+    "type": "barsGrow",
+    "pass": true
+   },
+   {
+    "text": "staggered bar entrances",
+    "type": "staggered",
+    "pass": true
+   },
+   {
+    "text": "value labels present (≥4 numeric text layers)",
+    "type": "numericTextMin",
+    "pass": true
+   },
+   {
+    "text": "accent highlight on Q4 (≥2 bar colors)",
+    "type": "paletteMin",
+    "pass": true
+   },
+   {
+    "text": "bar heights proportional to data",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": null
+}

@@ -1,0 +1,116 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (12-hand-drawn, 1920x1080, 6s @24fps):
+Hand-drawn, organic feel for a bakery called "Crumb & Co". A wobbly line-drawn wheat stalk and a loaf draw themselves on (stroke reveal), a few irregular blob shapes in warm earthy colors breathe slowly, the name appears in a friendly way. Imperfect is good: slight boil/wobble on the lines (like hand-animated at 12fps), soft eases, nothing mechanical.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- name present [yes]
+- stroke draw-on (trim paths animated) [yes]
+- custom paths (≥2) [yes]
+- boil/wobble (wiggle expression, hold keys or path keys) [NO]
+- breathing blobs (scale animated) [yes]
+- warm palette [yes]
+- no linear eases [yes]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- blob1 [path] box 166,565,607,509 #e9b872
+- blob2 [path] box 1188,97,585,507 #c9714b
+- blob3 [path] box 1376,597,467,406 #a9b78a
+- wheat [group] #ffffff a0
+  - stem [path] box 403,250,20,650 #000000 a0 stroke #5a3a22 9px
+  - g1 [path] box 333,300,76,100 #000000 a0 stroke #5a3a22 8px
+  - g2 [path] box 407,295,76,105 #000000 a0 stroke #5a3a22 8px
+  - g3 [path] box 333,425,78,95 #000000 a0 stroke #5a3a22 8px
+  - g4 [path] box 411,420,77,100 #000000 a0 stroke #5a3a22 8px
+- loaf [group] #ffffff a0
+  - loafbody [path] box 952,592,493,231 #000000 a0 stroke #5a3a22 10px
+  - s1 [path] box 1098,642,35,70 #000000 a0 stroke #5a3a22 8px
+  - s2 [path] box 1208,632,35,85 #000000 a0 stroke #5a3a22 8px
+  - s3 [path] box 1318,643,32,72 #000000 a0 stroke #5a3a22 8px
+- name [text] box 460,785,1000,190 #5a3a22 "Crumb & Co" Inter 150px w600
+- tag [text] box 560,971,800,50 #8a5a38 "baked by hand, every morning" Inter 42px w400
+
+TIMELINE:
+comp 1920x1080 6s @24fps, background #f6ecd9
+"blob1" (path l_03jm2)
+  scale: 0s 80 ─Sine Out→ 1.2s 100
+  scale: expr "value + 3*Math.sin(time*1.3)"
+  opacity: 0s 0 ─Sine Out→ 0.6s 85
+"blob2" (path l_03jm3)
+  scale: 0.2s 80 ─Sine Out→ 1.5s 100
+  scale: expr "value + 3*Math.sin(time*1.1+2)"
+  opacity: 0.2s 0 ─Sine Out→ 0.85s 70
+"blob3" (path l_03jm4)
+  scale: 0.4s 80 ─Sine Out→ 1.7s 100
+  scale: expr "value + 4*Math.sin(time*0.9+4)"
+  opacity: 0.4s 0 ─Sine Out→ 1.05s 80
+"wheat" (group l_03jm5)
+  position: expr "value + [2*Math.sin(Math.floor(time*12)*1.9), 2*Math.cos(Math.floor(time*12)*3.3)]"
+  rotation: expr "value + 0.7*Math.sin(Math.floor(time*12)*2.7) "
+"stem" (path l_03jm6)
+  trimStart: 0.8s 0
+  trimEnd: 0.8s 0 ─Sine In Out→ 2s 100
+"g1" (path l_03jm7)
+  trimStart: 1.7s 0
+  trimEnd: 1.7s 0 ─Sine Out→ 2.3s 100
+"g2" (path l_03jm8)
+  trimStart: 1.9s 0
+  trimEnd: 1.9s 0 ─Sine Out→ 2.5s 100
+"g3" (path l_03jm9)
+  trimStart: 2.1s 0
+  trimEnd: 2.1s 0 ─Sine Out→ 2.7s 100
+"g4" (path l_03jma)
+  trimStart: 2.3s 0
+  trimEnd: 2.3s 0 ─Sine Out→ 2.9s 100
+"loaf" (group l_03jmb)
+  position: expr "value + [2*Math.sin(Math.floor(time*12)*1.9), 2*Math.cos(Math.floor(time*12)*3.3)]"
+  rotation: expr "value + 0.7*Math.sin(Math.floor(time*12)*2.7) "
+"loafbody" (path l_03jmc)
+  trimStart: 1.2s 0
+  trimEnd: 1.2s 0 ─Sine In Out→ 2.8s 100
+"s1" (path l_03jmd)
+  trimStart: 2.8s 0
+  trimEnd: 2.8s 0 ─Ease In Out→ 3.2s 100
+"s2" (path l_03jme)
+  trimStart: 2.95s 0
+  trimEnd: 2.95s 0 ─Ease In Out→ 3.35s 100
+"s3" (path l_03jmf)
+  trimStart: 3.1s 0
+  trimEnd: 3.1s 0 ─Ease In Out→ 3.5s 100
+"name" (text l_03jmg)
+  text animator: in by word, start 3.2s, 0.7s each, stagger 0.2s, ease spring:0.3
+"tag" (text l_03jmh)
+  opacity: 3.95s 0 ─Ease Out→ 4.35s 100
+
+AUTOMATIC METRICS:
+layers 14 drawable (path 12, group 2, text 2), 41 keys, 16 moving segments
+eases: Sine Out×10, Sine In Out×2, Ease In Out×3, Ease Out×1; springs 0, overshooting 0, hold 0
+expressions 7, text animators 1, precomps 0, paths 12, gradients 0, markers 0
+palette (6): #e9b872 #c9714b #a9b78a #5a3a22 #8a5a38 #f6ecd9
+motion from 0s to 6s (end hold 0s, longest still 0.067s), visual activity 97% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 0s; text-on-text overlap 0s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

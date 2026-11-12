@@ -1,0 +1,200 @@
+{
+ "run": {
+  "id": "02-kinetic-quote",
+  "name": "02-kinetic-quote",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 70,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 70,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 73.8,
+     "polish": 70,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 26.2,
+     "polish": 30,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:no-secondary",
+     "medium:read-hold",
+     "low:contrast"
+    ],
+    "ms": 14
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 2.6
+   }
+  },
+  "wallMs": 58634,
+  "timedOut": false,
+  "turns": 16,
+  "costUsd": 0.3512495,
+  "durationMs": 53314,
+  "usage": {
+   "input": 402170,
+   "cached": 390704,
+   "output": 5801
+  },
+  "errors": [],
+  "toolCalls": 14,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "Layers after the first one are still invisible, so I'm inspecting what the build actually produced.\nI've built the 8 s quote on a dark background (`#0E0E12`) with cream text and an orange accent (`#FF5A1F`). I checked it in a contact sheet at eight points, and the phrases, the hand-off between them and the final lockup all look right. I haven't run the motion critic.\n\nThe quote is split into four moments:\n\n1. **Design is** (0–1.9 s) is large and bold. Its words slide in one after another, then it lifts up and fades out.\n2. **not just what / it looks like.** (1.7–4 s) is two lines, the second in grey. The words slide in per word, and both lines rise out as the next phrase arrives.\n3. **Design is** (3.8 s on) pops in letter by letter with a small bounce and stays at the top as the lead-in.\n4. **how it / works.** (4.7–5.6 s) is the emphasis. It's much bigger (220 px vs 104 px), heavier and orange, and each letter springs in with overshoot. It lands under \"Design is\" so the sentence reads as one.\n\n**— STEVE JOBS** fades up small and last, at 6.4 s, and everything holds until the end.\n\nI can speed up or slow down the transitions, add a beat of shared motion between phrases, or try a different accent color if you'd like.\nI applied the three fixes (overshoot on the first and last text moves, a later exit for \"it looks like.\", and a lighter grey `#B8B4AC` for it), and the critic now scores the piece 100/100 with no issues."
+ },
+ "metrics": {
+  "layers": 7,
+  "drawableLayers": 7,
+  "layerTypes": {
+   "text": 7
+  },
+  "groups": 0,
+  "animatedLayers": 7,
+  "keys": 26,
+  "segments": 12,
+  "easesUsed": {
+   "Expo In": 6,
+   "Sine In Out": 4,
+   "Cubic Out": 2
+  },
+  "distinctEases": 3,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 2,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 6,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#f4f1ea",
+   "#b8b4ac",
+   "#ff5a1f",
+   "#8e8a83",
+   "#0e0e12"
+  ],
+  "keyCoverage": 0.652,
+  "visualActivity": 0.193,
+  "firstMotion": 1.6,
+  "lastMotion": 7.2,
+  "endHold": 0.8,
+  "longestHold": 1.608,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0.201,
+  "textOverlapPairs": {
+   "p1 × p2a": 0.134,
+   "p2a × p3": 0.067
+  },
+  "partialOverlapTime": 0.201,
+  "exits": 3,
+  "beats": 6,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.055,
+  "midLuma": 0.076,
+  "toolErrors": 0,
+  "toolCalls": 14
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "quote text present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "attribution present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "per-letter or per-word text animation",
+    "type": "textAnimatorMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 text layers (phrases)",
+    "type": "textLayersMin",
+    "pass": true
+   },
+   {
+    "text": "phrases exit/transition (some text animates out)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "emphasis: one phrase larger or bolder than the rest",
+    "type": "textEmphasis",
+    "pass": true
+   },
+   {
+    "text": "3–4 beats over the 8s",
+    "type": "beatsMin",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

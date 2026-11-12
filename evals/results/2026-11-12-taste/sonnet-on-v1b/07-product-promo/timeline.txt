@@ -1,0 +1,50 @@
+- f1 [text] box 60,400,1800,280 #f5f5f7 "40H BATTERY" Inter 240px w900
+- f2 [text] box 60,400,1800,280 #f5f5f7 "SPATIAL AUDIO" Inter 240px w900
+- f2bar [rect] box 160,700,0,14 #ff5a00
+- f3 [text] box 60,400,1800,280 #ff5a00 "PURE SILENCE" Inter 240px w900
+- name [text] box 54,279,1811,483 #f5f5f7 "PULSE 2" Inter 420px w900
+- ring1 [ellipse] box -160,-600,2240,2240 #000000 a0 stroke #ff5a00 14px
+- ring2 [ellipse] box 120,-320,1680,1680 #000000 a0 stroke #f5f5f7 5px
+- pill [rect] box 960,745,0,0 #ff5a00
+- avail [text] box 610,725,700,100 #0b0b0f "Available now" Inter 84px w800
+- p1 [rect] box 1920,0,1920,1080 #ff5a00
+- p2 [rect] box -1920,0,1920,1080 #ff5a00
+- p3 [rect] box 0,0,1920,1080 #ff5a00
+
+comp 1920x1080 8s @30fps, background #0b0b0f
+"f1" (text l_03jm2)
+  scale: 0.12s 135 ─Expo Out→ 0.45s 100
+  opacity: 0s 0 ─hold→ 0.12s 100 ─Ease In→ 0.92s 100 ─Ease In→ 0.97s 0
+"f2" (text l_03jm3)
+  position: 1.12s [1260,540] ─Expo Out→ 1.5s [960,540]
+  opacity: 1s 0 ─hold→ 1.12s 100 ─Ease In→ 1.92s 100 ─Ease In→ 1.97s 0
+"f2bar" (rect l_03jm4)
+  scale: 1.15s [0,100] ─Expo Out→ 1.6s 100 ─Quart In Out→ 1.92s 100 ─Quart In Out→ 1.97s [0,100]
+"f3" (text l_03jm5)
+  position: 2.12s [960,640] ─Expo Out→ 2.5s [960,540]
+  scale: 2.12s 70 ─Expo Out→ 2.5s 100
+  opacity: 2s 0 ─hold→ 2.12s 100 ─Ease In→ 2.92s 100 ─Ease In→ 2.97s 0
+"name" (text l_03jm6)
+  position: 3s [960,520] ─Quart In Out→ 3.04s [972,512] ─Quart In Out→ 3.08s [950,528] ─Quart In Out→ 3.12s [966,518] ─Quart In Out→ 3.16s [958,522] ─Quart In Out→ 3.2s [960,520] ─Expo Out→ 5.5s [960,520] ─Expo Out→ 6s [960,330]
+  scale: 3s 170 ─Expo Out→ 3.35s 100 ─Sine In Out→ 5.5s 103 ─Expo Out→ 6s 62
+  opacity: 2.99s 0 ─hold→ 3s 100
+"ring1" (ellipse l_03jm7)
+  scale: 3s 10 ─Expo Out→ 4s 560
+  opacity: 3s 100 ─Quad Out→ 4s 0
+"ring2" (ellipse l_03jm8)
+  scale: 3.1s 10 ─Expo Out→ 4.1s 420
+  opacity: 3.1s 80 ─Quad Out→ 4.1s 0
+"pill" (rect l_03jm9)
+  scale: 5.5s 0 ─spring:0.35→ 6s 100
+  scale: expr "value + 2*Math.sin(time*2*Math.PI*1)"
+  opacity: 5.49s 0 ─hold→ 5.5s 100
+"avail" (text l_03jma)
+  position: 5.65s [960,775] ─Expo Out→ 6s [960,745]
+  opacity: 5.65s 0 ─Ease Out→ 5.85s 100
+"p1" (rect l_03jmb)
+  position: 0s [-960,540] ─Expo Out→ 0.15s [960,540] ─Expo In→ 0.4s [2880,540]
+"p2" (rect l_03jmc)
+  position: 1s [2880,540] ─Expo Out→ 1.15s [960,540] ─Expo In→ 1.4s [-960,540]
+"p3" (rect l_03jmd)
+  position: 0s [960,1620] ─hold→ 2s [960,1620] ─Expo Out→ 2.15s [960,540] ─Expo In→ 2.4s [960,-540] ─hold→ 2.94s [960,540]
+  opacity: 0s 0 ─hold→ 2s 100 ─hold→ 2.41s 0 ─hold→ 2.94s 100 ─hold→ 3s 100 ─Expo Out→ 3.35s 0

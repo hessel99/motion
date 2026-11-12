@@ -1,0 +1,202 @@
+{
+ "run": {
+  "id": "12-hand-drawn",
+  "name": "12-hand-drawn",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 64,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 68,
+     "richness": 100,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 32,
+     "richness": 0,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "medium:default-fill",
+     "medium:default-fill"
+    ],
+    "ms": 18.2
+   },
+   "after": {
+    "score": 64,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 68,
+     "richness": 100,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 32,
+     "richness": 0,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "medium:default-fill",
+     "medium:default-fill"
+    ],
+    "ms": 18.2
+   }
+  },
+  "wallMs": 45156,
+  "timedOut": false,
+  "turns": 15,
+  "costUsd": 0.12413469999999999,
+  "durationMs": 43438,
+  "usage": {
+   "input": 295603,
+   "cached": 286047,
+   "output": 5733
+  },
+  "errors": [],
+  "toolCalls": 14,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the 6 s intro and checked it with contact sheets. Here is what's in it.\n\n- **Background and blobs:** a cream paper background with four irregular blobs in terracotta, mustard, sage and clay. They fade in and breathe slowly, each on its own rhythm.\n- **Line drawing:**\n  - The **wheat stalk** draws itself on (0.7–2.8 s), stem first, then the grains.\n  - The **loaf** outline draws on from 1.0 to 2.8 s, then its fill fades in.\n  - Three score marks are added across the top afterwards.\n  - The whole drawing sits in one group (**art**) that jitters at 12 fps, with a small position and rotation shift on every step, so it looks hand-animated.\n- **Name:** \"Crumb & Co\" pops in letter by letter from 3.3 s with a soft springy bounce. A hand-drawn clay underline draws on at 4.3 s. The last stretch holds on the lockup while the boil and breathing keep going.\n\nI used the Fredoka font for the name. If it isn't installed, the name will show in a fallback font.\n\nI fixed two problems on the way. The filled shapes were showing before they were drawn, and stray blue dots appeared at the start of some strokes. Both are gone in the last check.\n\nI'd suggest making the boil slightly stronger, or adding a few small crumb dots that pop around the loaf at the end. Tell me which you'd like."
+ },
+ "metrics": {
+  "layers": 17,
+  "drawableLayers": 16,
+  "layerTypes": {
+   "path": 15,
+   "group": 1,
+   "text": 1
+  },
+  "groups": 1,
+  "animatedLayers": 17,
+  "keys": 61,
+  "segments": 25,
+  "easesUsed": {
+   "Sine Out": 12,
+   "Sine In Out": 2,
+   "Ease Out": 6,
+   "Ease In Out": 5
+  },
+  "distinctEases": 4,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 9,
+  "textAnimators": 1,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 15,
+  "gradientLayers": 0,
+  "paletteSize": 8,
+  "palette": [
+   "#e4b48c",
+   "#e8c76a",
+   "#a9b78a",
+   "#c98262",
+   "#6b8cff",
+   "#5b3a22",
+   "#d9a066",
+   "#f6ecd9"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.03,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [
+   "Fredoka"
+  ],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.087,
+  "midLuma": 0.869,
+  "toolErrors": 0,
+  "toolCalls": 14
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "stroke draw-on (trim paths animated)",
+    "type": "trimAnimated",
+    "pass": true
+   },
+   {
+    "text": "custom paths (≥2)",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "boil/wobble (wiggle expression, hold keys or path keys)",
+    "type": "jitter",
+    "pass": false
+   },
+   {
+    "text": "breathing blobs (scale animated)",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "warm palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "no linear eases",
+    "type": "noLinear",
+    "pass": true
+   }
+  ],
+  "hits": 6,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

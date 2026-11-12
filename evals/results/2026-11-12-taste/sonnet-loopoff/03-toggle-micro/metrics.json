@@ -1,0 +1,187 @@
+{
+ "run": {
+  "id": "03-toggle-micro",
+  "name": "03-toggle-micro",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 5.5
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 5.5
+   }
+  },
+  "wallMs": 21631,
+  "timedOut": false,
+  "turns": 6,
+  "costUsd": 0.05935920000000001,
+  "durationMs": 20024,
+  "usage": {
+   "input": 190434,
+   "cached": 185872,
+   "output": 2254
+  },
+  "errors": [],
+  "toolCalls": 5,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "Fill is showing; make it transparent and round the stroke look by hiding fill.\nI built the toggle as a 2 s, 60 fps animation on a 800×600 canvas. I checked it on a contact sheet at 0, 0.55, 0.8 and 1.2 s. I did not run `critique` or look at it in playback.\n\n- **Start:** it opens in the off state, with a grey track (**Track Off**) and a white knob (**Knob**) on the left. Nothing moves until 0.4 s.\n- **Slide:** the knob travels right from 0.4 s, overshoots by about 9 px, and settles by about 0.95 s.\n- **Squash and stretch:** the knob stretches wide while it moves and squashes slightly tall on landing, then returns to normal by 1.0 s.\n- **Color:** a green track (**Track On**) fades in over the grey one between 0.4 and 0.8 s.\n- **Checkmark:** a green check (**Checkmark**) is drawn inside the knob from 0.7 to 1.0 s. It sits in the same group as the knob, so it moves and squashes with it.\n\nThe toggle holds still from about 1.0 s to the end. The check was first showing as a blue filled shape from the start; I fixed that by making its fill transparent, so only the green stroke draws on.\n\nI can make the overshoot bouncier, add a soft shadow under the knob, or loop it back to off."
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "rect": 2,
+   "group": 1,
+   "ellipse": 1,
+   "path": 1
+  },
+  "groups": 1,
+  "animatedLayers": 3,
+  "keys": 15,
+  "segments": 7,
+  "easesUsed": {
+   "Quad Out": 1,
+   "Cubic Out": 3,
+   "Easy Ease": 3
+  },
+  "distinctEases": 3,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 2,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#c9ccd1",
+   "#34c759",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.3,
+  "visualActivity": 0.302,
+  "firstMotion": 0.4,
+  "lastMotion": 1,
+  "endHold": 1,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.021,
+  "midLuma": 0.94,
+  "toolErrors": 0,
+  "toolCalls": 5
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "track + knob layers",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "knob position animated",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "track color changes grey → green (fill keys or crossfade)",
+    "type": "colorChange",
+    "pass": true
+   },
+   {
+    "text": "overshoot on the knob (Back/spring)",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch (non-uniform scale or size)",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "checkmark (path) appears",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "settled by ~1.2s (motion ends ≤1.5s)",
+    "type": "motionEndsBy",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

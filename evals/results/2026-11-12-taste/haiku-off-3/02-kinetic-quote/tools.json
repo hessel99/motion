@@ -1,0 +1,345 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1120,
+  "ok": true,
+  "ms": 37,
+  "editorMs": 1,
+  "input": {
+   "title": "Design is how it works — kinetic quote",
+   "style": "Swiss kinetic typography: near-black ground, single sans (Inter), word-by-word fade-up entrances, phrase exits up and out, Expo Out in / Cubic In out. One accent colour on the emphasis.",
+   "duration": 8,
+   "beats": [
+    {
+     "name": "Phrase 1",
+     "start": 0,
+     "end": 1.9,
+     "description": "'Design is not just' fades up word by word, holds, then lifts out upward.",
+     "style": "Words Fade up, 0.07s stagger; layer exit Cubic In 0.4s."
+    },
+    {
+     "name": "Phrase 2",
+     "start": 1.9,
+     "end": 3.5,
+     "description": "'what it looks like.' rises in word by word as phrase 1 leaves; holds, then lifts out.",
+     "style": "Overlapping hand-off, no stacking."
+    },
+    {
+     "name": "Phrase 3",
+     "start": 3.5,
+     "end": 4.9,
+     "description": "'Design is' enters, holds briefly, lifts out to make room for the emphasis.",
+     "style": "Same word-fade entrance."
+    },
+    {
+     "name": "Emphasis",
+     "start": 4.9,
+     "end": 8,
+     "description": "'how it works.' punches in larger, heavier, in the accent colour, word by word; then the small attribution '— Steve Jobs' fades in last below it.",
+     "style": "fontSize 124 / weight 800 vs 84 / 600; accent #ff5a36; attribution 26px muted grey."
+    }
+   ]
+  },
+  "result": "storyboard \"Design is how it works — kinetic quote\" shown to the user (4 beats, 8s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2361,
+  "ok": true,
+  "ms": 361,
+  "editorMs": 7,
+  "input": {
+   "comp": {
+    "background": "#0e0e0e",
+    "duration": 8,
+    "fps": 30
+   },
+   "layers": [
+    {
+     "key": "p1",
+     "name": "Phrase 1 · Design is not just",
+     "type": "text",
+     "x": 40,
+     "y": 440,
+     "w": 1000,
+     "h": 200,
+     "text": {
+      "content": "Design is not just",
+      "fontFamily": "Inter",
+      "fontSize": 84,
+      "fontWeight": 600,
+      "align": "center",
+      "lineHeight": 1.1
+     },
+     "fill": "#f2f1ec",
+     "textAnim": {
+      "by": "word",
+      "preset": "Fade up",
+      "start": 0.2,
+      "stagger": 0.07,
+      "duration": 0.5,
+      "ease": "Expo Out"
+     },
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 100
+       },
+       {
+        "t": 1.7,
+        "v": 100
+       },
+       {
+        "t": 2.1,
+        "v": 0,
+        "ease": "Cubic In"
+       }
+      ],
+      "position": [
+       {
+        "t": 0,
+        "v": [
+         540,
+         540
+        ]
+       },
+       {
+        "t": 1.7,
+        "v": [
+         540,
+         540
+        ]
+       },
+       {
+        "t": 2.1,
+        "v": [
+         540,
+         500
+        ],
+        "ease": "Cubic In"
+       }
+      ]
+     }
+    },
+    {
+     "key": "p2",
+     "name": "Phrase 2 · what it looks like",
+     "type": "text",
+     "x": 40,
+     "y": 440,
+     "w": 1000,
+     "h": 200,
+     "text": {
+      "content": "what it looks like.",
+      "fontFamily": "Inter",
+      "fontSize": 84,
+      "fontWeight": 600,
+      "align": "center",
+      "lineHeight": 1.1
+     },
+     "fill": "#f2f1ec",
+     "textAnim": {
+      "by": "word",
+      "preset": "Fade up",
+      "start": 1.9,
+      "stagger": 0.07,
+      "duration": 0.5,
+      "ease": "Expo Out"
+     },
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 100
+       },
+       {
+        "t": 3.3,
+        "v": 100
+       },
+       {
+        "t": 3.7,
+        "v": 0,
+        "ease": "Cubic In"
+       }
+      ],
+      "position": [
+       {
+        "t": 0,
+        "v": [
+         540,
+         540
+        ]
+       },
+       {
+        "t": 3.3,
+        "v": [
+         540,
+         540
+        ]
+       },
+       {
+        "t": 3.7,
+        "v": [
+         540,
+         500
+        ],
+        "ease": "Cubic In"
+       }
+      ]
+     }
+    },
+    {
+     "key": "p3",
+     "name": "Phrase 3 · Design is",
+     "type": "text",
+     "x": 40,
+     "y": 440,
+     "w": 1000,
+     "h": 200,
+     "text": {
+      "content": "Design is",
+      "fontFamily": "Inter",
+      "fontSize": 84,
+      "fontWeight": 600,
+      "align": "center",
+      "lineHeight": 1.1
+     },
+     "fill": "#f2f1ec",
+     "textAnim": {
+      "by": "word",
+      "preset": "Fade up",
+      "start": 3.5,
+      "stagger": 0.07,
+      "duration": 0.5,
+      "ease": "Expo Out"
+     },
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 100
+       },
+       {
+        "t": 4.6,
+        "v": 100
+       },
+       {
+        "t": 4.95,
+        "v": 0,
+        "ease": "Cubic In"
+       }
+      ],
+      "position": [
+       {
+        "t": 0,
+        "v": [
+         540,
+         540
+        ]
+       },
+       {
+        "t": 4.6,
+        "v": [
+         540,
+         540
+        ]
+       },
+       {
+        "t": 4.95,
+        "v": [
+         540,
+         500
+        ],
+        "ease": "Cubic In"
+       }
+      ]
+     }
+    },
+    {
+     "key": "p4",
+     "name": "Emphasis · how it works",
+     "type": "text",
+     "x": 40,
+     "y": 420,
+     "w": 1000,
+     "h": 240,
+     "text": {
+      "content": "how it works.",
+      "fontFamily": "Inter",
+      "fontSize": 124,
+      "fontWeight": 800,
+      "align": "center",
+      "lineHeight": 1.05
+     },
+     "fill": "#ff5a36",
+     "textAnim": {
+      "by": "word",
+      "preset": "Slide words",
+      "start": 4.9,
+      "stagger": 0.1,
+      "duration": 0.6,
+      "ease": "Expo Out"
+     },
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "attr",
+     "name": "Attribution · Steve Jobs",
+     "type": "text",
+     "x": 240,
+     "y": 860,
+     "w": 600,
+     "h": 40,
+     "text": {
+      "content": "— Steve Jobs",
+      "fontFamily": "Inter",
+      "fontSize": 26,
+      "fontWeight": 500,
+      "align": "center",
+      "tracking": 2
+     },
+     "fill": "#8f8f88",
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 6.8,
+        "v": 0
+       },
+       {
+        "t": 7.2,
+        "v": 100,
+        "ease": "Ease Out"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 8 keyframe tracks; animation ends 7.2s\",\"ids\":{\"p1\":\"l_03jm2\",\"p2\":\"l_03jm3\",\"p3\":\"l_03jm4\",\"p4\":\"l_03jm5\",\"attr\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 382,
+  "editorMs": 368,
+  "input": {
+   "start": 0,
+   "end": 8,
+   "frames": 8
+  },
+  "result": "8 frames left→right, top→bottom at 0s, 1.13s, 2.3s, 3.43s, 4.57s, 5.7s, 6.87s, 8s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/58c299a6-b663-471e-bb6b-138fbfee1511/tool-results/mcp-motion-blob-1794514136298-kitwb1.jpg]"
+ }
+]

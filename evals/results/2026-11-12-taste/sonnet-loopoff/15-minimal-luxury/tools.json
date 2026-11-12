@@ -1,0 +1,157 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 949,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 3,
+  "input": {
+   "comp": {
+    "background": "#0a0908",
+    "duration": 7,
+    "fps": 30
+   },
+   "layers": [
+    {
+     "key": "line",
+     "name": "Gold Line",
+     "type": "path",
+     "points": "540,420 540,840",
+     "stroke": "#d6b98a",
+     "strokeWidth": 2,
+     "drawOn": {
+      "t": 0.6,
+      "duration": 3.2,
+      "ease": "Sine In Out"
+     }
+    },
+    {
+     "key": "name",
+     "name": "ECLAT Name",
+     "type": "text",
+     "text": {
+      "content": "ÉCLAT",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 120,
+      "fontWeight": 400,
+      "align": "center",
+      "letterSpacing": 36
+     },
+     "fill": "#d6b98a",
+     "x": 90,
+     "y": 900,
+     "w": 900,
+     "h": 160,
+     "animate": {
+      "scale": [
+       {
+        "t": 2,
+        "v": 106,
+        "ease": "Sine Out"
+       },
+       {
+        "t": 6,
+        "v": 100
+       }
+      ]
+     },
+     "textAnim": {
+      "by": "char",
+      "start": 2,
+      "duration": 1.6,
+      "stagger": 0.4,
+      "ease": "Sine Out",
+      "from": {
+       "opacity": 0,
+       "dy": 10
+      }
+     }
+    },
+    {
+     "key": "sub",
+     "name": "Eau de Parfum",
+     "type": "text",
+     "text": {
+      "content": "EAU DE PARFUM",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 30,
+      "fontWeight": 500,
+      "align": "center",
+      "letterSpacing": 14
+     },
+     "fill": "#a8926c",
+     "x": 90,
+     "y": 1080,
+     "w": 900,
+     "h": 50,
+     "animate": {
+      "opacity": [
+       {
+        "t": 4.4,
+        "v": 0
+       },
+       {
+        "t": 6,
+        "v": 100,
+        "ease": "Sine Out"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"3 created, 0 updated, 4 keyframe tracks; animation ends 6s\",\"ids\":{\"line\":\"l_03jm2\",\"name\":\"l_03jm3\",\"sub\":\"l_03jm4\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 122,
+  "editorMs": 73,
+  "input": {
+   "frames": 6,
+   "cell": 240
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 1.4s, 2.8s, 4.2s, 5.6s, 7s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/da09e6af-a636-4425-8e9d-c5edc8a5c63f/tool-results/mcp-motion-blob-1794511054798-s92nha.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 57,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm3",
+   "text": {
+    "fontFamily": "Playfair Display"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 57,
+  "ok": true,
+  "ms": 22,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "text": {
+    "fontFamily": "Playfair Display"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 71,
+  "editorMs": 15,
+  "input": {
+   "t": 6.5,
+   "maxSize": 400
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/da09e6af-a636-4425-8e9d-c5edc8a5c63f/tool-results/mcp-motion-blob-1794511057169-svj4bx.png]"
+ }
+]

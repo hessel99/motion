@@ -1,0 +1,21 @@
+- Sting 120 BPM [audio] #6b8cff
+- Wordmark Pulse [text] box 850,420,640,240 #f4f4f6 "Pulse" Inter 200px w700
+- Logo mark [group] #ffffff a0
+  - Shockwave ring [ellipse] box 394,254,572,572 #000000 a0 stroke #ff3b5c 8px
+  - Logo ring [ellipse] box 570,430,220,220 #000000 a0 stroke #ff3b5c 14px
+  - Logo dot [ellipse] box 635,495,90,90 #ff3b5c
+
+comp 1920x1080 9.5s @30fps, background #121214
+"Wordmark Pulse" (text l_03jm4)
+  opacity: 0s 100
+  text animator: in by char, start 4.5s, 0.6s each, stagger 0.04s, ease Expo Out
+"Logo mark" (group l_03jm5)
+  position: 0s [960,540] ─Easy Ease→ 4s [960,540] ─Expo Out→ 4.45s [680,540]
+  scale: 0s 100 ─Easy Ease→ 5.5s 100 ─Quad Out→ 5.6s 104 ─Quart Out→ 5.9s 100 ─Easy Ease→ 6s 100 ─Quad Out→ 6.1s 104 ─Quart Out→ 6.4s 100
+"Shockwave ring" (ellipse l_03jm6)
+  scale: 4s 70 ─Expo Out→ 4.9s 260
+  opacity: 0s 0 ─Easy Ease→ 4s 100 ─Quad Out→ 4.9s 0
+"Logo ring" (ellipse l_03jm7)
+  scale: 0s 0 ─Easy Ease→ 0.9s 70 ─Expo Out→ 4s 70 ─spring:0.35→ 4.5s 100
+"Logo dot" (ellipse l_03jm8)
+  scale: 0s 0 ─Expo Out→ 0.4s 58 ─Easy Ease→ 0.5s 66 ─Easy Ease→ 0.75s 60 ─Easy Ease→ 1s 68 ─Easy Ease→ 1.25s 62 ─Easy Ease→ 1.5s 70 ─Easy Ease→ 1.75s 64 ─Easy Ease→ 2s 72 ─Easy Ease→ 2.25s 66 ─Easy Ease→ 2.5s 74 ─Easy Ease→ 2.75s 68 ─Easy Ease→ 3s 76 ─Easy Ease→ 3.25s 70 ─Easy Ease→ 3.5s 82 ─Easy Ease→ 3.75s 66 ─Ease In→ 4s 100

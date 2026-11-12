@@ -1,0 +1,72 @@
+- Sticky notes pile [group] #ffffff a0
+  - Note 1 [group] #ffffff a0
+    - Paper [rect] box 960,540,0,0 #f582ae
+    - Line 1 [rect] box 960,540,0,0 #172c66
+    - Line 2 [rect] box 960,540,0,0 #172c66
+    - Line 3 [rect] box 960,540,0,0 #172c66
+    - Line 4 [rect] box 960,540,0,0 #172c66
+  - Note 2 [group] #ffffff a0
+    - Paper [rect] box 960,540,0,0 #8bd3dd
+    - Line 1 [rect] box 960,540,0,0 #172c66
+    - Line 2 [rect] box 960,540,0,0 #172c66
+    - Line 3 [rect] box 960,540,0,0 #172c66
+    - Line 4 [rect] box 960,540,0,0 #172c66
+  - Note 3 [group] #ffffff a0
+    - Paper [rect] box 960,540,0,0 #ffd803
+    - Line 1 [rect] box 960,540,0,0 #172c66
+    - Line 2 [rect] box 960,540,0,0 #172c66
+    - Line 3 [rect] box 960,540,0,0 #172c66
+    - Line 4 [rect] box 960,540,0,0 #172c66
+  - Note 4 [group] #ffffff a0
+    - Paper [rect] box 960,540,0,0 #8bd3dd
+    - Line 1 [rect] box 960,540,0,0 #172c66
+    - Line 2 [rect] box 960,540,0,0 #172c66
+    - Line 3 [rect] box 960,540,0,0 #172c66
+    - Line 4 [rect] box 960,540,0,0 #172c66
+  - Note 5 [group] #ffffff a0
+    - Paper [rect] box 960,540,0,0 #f582ae
+    - Line 1 [rect] box 960,540,0,0 #172c66
+    - Line 2 [rect] box 960,540,0,0 #172c66
+    - Line 3 [rect] box 960,540,0,0 #172c66
+    - Line 4 [rect] box 960,540,0,0 #172c66
+- Shield glow [ellipse] box 750,330,420,420 #8bd3dd
+- Vault shield [path] box 840,400,240,280 #8bd3dd stroke #172c66 10px
+- Check mark [path] box 905,505,115,80 #000000 a0 stroke #172c66 22px
+- Headline [text] box 260,790,1400,120 #172c66 "One key. Every login." Inter 104px w800
+
+comp 1920x1080 12s @30fps, background #fef6e4
+"Note 1" (group l_03jm3)
+  position: 3.7s [860,470] ─Quart In→ 4.06s [960,540]
+  scale: 0.2s 0 ─Back Out→ 0.8s 100 ─linear→ 3.7s 100 ─Quart In→ 4.06s 0
+  rotation: 0.2s -40 ─Back Out→ 0.8s -12
+  rotation: expr "value + 3.5*Math.sin(time*2*Math.PI/0.55)"
+"Note 2" (group l_03jm9)
+  position: 3.82s [1070,450] ─Quart In→ 4.18s [960,540]
+  scale: 0.27s 0 ─Back Out→ 0.87s 100 ─linear→ 3.82s 100 ─Quart In→ 4.18s 0
+  rotation: 0.27s 40 ─Back Out→ 0.87s 9
+  rotation: expr "value - 3.5*Math.sin(time*2*Math.PI/0.62)"
+"Note 3" (group l_03jmf)
+  position: 3.94s [960,610] ─Quart In→ 4.3s [960,540]
+  scale: 0.34s 0 ─Back Out→ 0.94s 100 ─linear→ 3.94s 100 ─Quart In→ 4.3s 0
+  rotation: 0.34s -30 ─Back Out→ 0.94s -5
+  rotation: expr "value + 3.5*Math.sin(time*2*Math.PI/0.48)"
+"Note 4" (group l_03jml)
+  position: 4.06s [770,640] ─Quart In→ 4.42s [960,540]
+  scale: 0.41s 0 ─Back Out→ 1.01s 100 ─linear→ 4.06s 100 ─Quart In→ 4.42s 0
+  rotation: 0.41s 50 ─Back Out→ 1.01s 14
+  rotation: expr "value - 3.5*Math.sin(time*2*Math.PI/0.7)"
+"Note 5" (group l_03jmr)
+  position: 4.18s [1110,630] ─Quart In→ 4.54s [960,540]
+  scale: 0.48s 0 ─Back Out→ 1.08s 100 ─linear→ 4.18s 100 ─Quart In→ 4.54s 0
+  rotation: 0.48s -50 ─Back Out→ 1.08s -16
+  rotation: expr "value + 3.5*Math.sin(time*2*Math.PI/0.58)"
+"Shield glow" (ellipse l_03jmy)
+  opacity: 4.8s 0 ─Sine In Out→ 5.4s 70 ─Sine In Out→ 6.8s 35 ─Sine In Out→ 8.2s 60
+"Vault shield" (path l_03jmz)
+  scale: 3.6s 0 ─Back Out→ 4.2s 100 ─Cubic In Out→ 4.7s 100 ─Sine In Out→ 4.85s 106 ─Sine In Out→ 5.15s 100
+"Check mark" (path l_03jm10)
+  trimStart: 6s 0
+  trimEnd: 6s 0 ─Cubic Out→ 6.5s 100
+"Headline" (text l_03jm11)
+  position: 6.6s [960,850] ─Quart Out→ 7.3s [960,820]
+  opacity: 6.6s 0 ─Quart Out→ 6.95s 100 ─Ease In→ 7.2s 100

@@ -1,0 +1,27 @@
+- Sting 120 BPM [audio] #6b8cff
+- Ripple 3 [ellipse] box 510,420,240,240 #000000 a0 stroke #ff3b5c 3px
+- Ripple 2 [ellipse] box 510,420,240,240 #000000 a0 stroke #ff3b5c 3px
+- Ripple 1 (drop) [ellipse] box 510,420,240,240 #000000 a0 stroke #ff3b5c 3px
+- Mark ring [path] box 496,406,269,269 #000000 a0 stroke #f4f4f5 22px
+- Mark dot [ellipse] box 561,471,138,138 #ff3b5c
+- Wordmark [text] box 820,410,640,260 #f4f4f5 "Pulse" Inter 200px w700
+
+comp 1920x1080 8s @30fps, background #0b0b10
+"Ripple 3" (ellipse l_03jm8)
+  scale: 0s 100 ─Quart In Out→ 6s 100 ─Quart In Out→ 6.9s 250
+  opacity: 0s 0 ─hold→ 6s 60 ─Quad Out→ 6.9s 0
+"Ripple 2" (ellipse l_03jm9)
+  scale: 0s 100 ─Quart In Out→ 5s 100 ─Quart In Out→ 5.9s 250
+  opacity: 0s 0 ─hold→ 5s 60 ─Quad Out→ 5.9s 0
+"Ripple 1 (drop)" (ellipse l_03jma)
+  scale: 0s 100 ─Quart In Out→ 4s 100 ─Quart In Out→ 4.9s 250
+  opacity: 0s 0 ─hold→ 4s 80 ─Quad Out→ 4.9s 0
+"Mark ring" (path l_03jmb)
+  scale: 0s 100 ─Ease In Out→ 3s 100 ─Cubic In Out→ 3.92s 90 ─Quad In→ 4s 112 ─Expo Out→ 4.45s 100
+  trimStart: 0s 0
+  trimEnd: 0s 0 ─Cubic In Out→ 1.4s 100
+"Mark dot" (ellipse l_03jmc)
+  scale: 0s 100 ─Quad In→ 0.38s 100 ─Quad In→ 0.5s 108 ─Expo Out→ 0.88s 100 ─Quad In→ 1s 110 ─Expo Out→ 1.38s 100 ─Quad In→ 1.5s 112 ─Expo Out→ 1.88s 100 ─Quad In→ 2s 114 ─Expo Out→ 2.38s 100 ─Quad In→ 2.5s 116 ─Expo Out→ 2.88s 100 ─Quad In→ 3s 118 ─Expo Out→ 3.13s 100 ─Quad In→ 3.25s 120 ─Expo Out→ 3.38s 100 ─Quad In→ 3.5s 122 ─Expo Out→ 3.63s 100 ─Quad In→ 3.75s 124 ─Quad In→ 4s 150 ─spring Bouncy→ 4.5s 100 ─Quad In→ 4.88s 100 ─Quad In→ 5s 112 ─Expo Out→ 5.38s 100 ─Quad In→ 5.5s 110 ─Expo Out→ 5.88s 100 ─Quad In→ 6s 108 ─Expo Out→ 6.5s 100
+"Wordmark" (text l_03jmd)
+  opacity: 0s 0 ─hold→ 4s 100
+  text animator: in by char, start 4.1s, 0.5s each, stagger 0.05s, ease Expo Out

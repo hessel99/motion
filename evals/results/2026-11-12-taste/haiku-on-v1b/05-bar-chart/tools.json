@@ -1,0 +1,187 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 4043,
+  "ok": true,
+  "ms": 501,
+  "editorMs": 4,
+  "input": "{\"comp\":{\"background\":\"#f5f4f0\",\"duration\":6},\"layers\":[{\"key\":\"title\",\"name\":\"Title\",\"type\":\"text\",\"x\":160,\"y\":112,\"w\":1200,\"h\":80,\"text\":{\"content\":\"Revenue by quarter\",\"fontSize\":64,\"fontWeight\":700,\"align\":\"left\",\"fontFamily\":\"Inter\"},\"fill\":\"#14161a\",\"enter\":{\"t\":0,\"duration\":0.6,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":16}}},{\"key\":\"subtitle\",\"name\":\"Subtitle\",\"type\":\"text\",\"x\":160,\"y\":186,\"w\":1200,\"h\":44,\"text\":{\"content\":\"Quarterly revenue, $M\",\"fontSize\":28,\"fontWeight\":400,\"align\":\"left\",\"fontFamily\":\"Inter\"},\"fill\":\"#6b7280\",\"enter\":{\"t\":0.15,\"duration\":0.6,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":12}}},{\"key\":\"axis\",\"name\":\"Axis line\",\"type\":\"path\",\"d\":\"M200 880 L1720 880\",\"fill\":\"#00000000\",\"stroke\":\"#14161a\",\"strokeWidth\":2,\"drawOn\":{\"t\":0,\"duration\":0.6,\"ease\":\"Ease In Out\",\"from\":\"start\"}},{\"key\":\"bar-q1\",\"name\":\"Bar Q1\",\"type\":\"rect\",\"anchor\":\"bottom\",\"position\":[420,880],\"w\":240,\"h\":240,\"fill\":\"#cfd3da\",\"radius\":[10,10,0,0],\"animate\":{\"scale\":[{\"t\":0.7,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":1.5,\"v\":[100,100]}]}},{\"key\":\"bar-q2\",\"name\":\"Bar Q2\",\"type\":\"rect\",\"anchor\":\"bottom\",\"position\":[780,880],\"w\":240,\"h\":360,\"fill\":\"#cfd3da\",\"radius\":[10,10,0,0],\"animate\":{\"scale\":[{\"t\":0.9,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":1.7,\"v\":[100,100]}]}},{\"key\":\"bar-q3\",\"name\":\"Bar Q3\",\"type\":\"rect\",\"anchor\":\"bottom\",\"position\":[1140,880],\"w\":240,\"h\":300,\"fill\":\"#cfd3da\",\"radius\":[10,10,0,0],\"animate\":{\"scale\":[{\"t\":1.1,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":1.9,\"v\":[100,100]}]}},{\"key\":\"bar-q4\",\"name\":\"Bar Q4 (highlight)\",\"type\":\"rect\",\"anchor\":\"bottom\",\"position\":[1500,880],\"w\":240,\"h\":540,\"fill\":\"#2563eb\",\"radius\":[10,10,0,0],\"animate\":{\"scale\":[{\"t\":1.3,\"v\":[100,0],\"ease\":\"Expo Out\"},{\"t\":2.1,\"v\":[100,100],\"ease\":\"Ease In Out\"},{\"t\":2.35,\"v\":[100,104],\"ease\":\"Ease In Out\"},{\"t\":2.7,\"v\":[100,100]}]}},{\"key\":\"label-q1\",\"name\":\"Value Q1\",\"type\":\"text\",\"center\":[420,606],\"w\":240,\"h\":48,\"text\":{\"content\":\"$12M\",\"fontSize\":36,\"fontWeight\":600,\"align\":\"center\",\"fontFamily\":\"Inter\"},\"fill\":\"#14161a\",\"enter\":{\"t\":1.2,\"duration\":0.4,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":12}}},{\"key\":\"label-q2\",\"name\":\"Value Q2\",\"type\":\"text\",\"center\":[780,486],\"w\":240,\"h\":48,\"text\":{\"content\":\"$18M\",\"fontSize\":36,\"fontWeight\":600,\"align\":\"center\",\"fontFamily\":\"Inter\"},\"fill\":\"#14161a\",\"enter\":{\"t\":1.4,\"duration\":0.4,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":12}}},{\"key\":\"label-q3\",\"name\":\"Value Q3\",\"type\":\"text\",\"center\":[1140,546],\"w\":240,\"h\":48,\"text\":{\"content\":\"$15M\",\"fontSize\":36,\"fontWeight\":600,\"align\":\"center\",\"fontFamily\":\"Inter\"},\"fill\":\"#14161a\",\"enter\":{\"t\":1.6,\"duration\":0.4,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":12}}},{\"key\":\"label-q4\",\"name\":\"Value Q4 (highlight)\",\"type\":\"text\",\"center\":[1500,306],\"w\":240,\"h\":48,\"text\":{\"content\":\"$27M\",\"fontSize\":40,\"fontWeight\":700,\"align\":\"center\",\"fontFamily\":\"Inter\"},\"fill\":\"#2563eb\",\"enter\":{\"t\":1.8,\"duration\":0.4,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dy\":12}}},{\"key\":\"q-q1\",\"name\":\"Quarter Q1\",\"type\":\"text\",…",
+  "result": "{\"summary\":\"15 created, 0 updated, 26 keyframe tracks; animation ends 2.7s\",\"ids\":{\"title\":\"l_03jm2\",\"subtitle\":\"l_03jm3\",\"axis\":\"l_03jm4\",\"bar-q1\":\"l_03jm5\",\"bar-q2\":\"l_03jm6\",\"bar-q3\":\"l_03jm7\",\"bar-q4\":\"l_03jm8\",\"label-q1\":\"l_03jm9\",\"label-q2\":\"l_03jma\",\"label-q3\":\"l_03jmb\",\"label-q4\":\"l_03jmc\",\"q-q1\":\"l_03jmd\",\"q-q2\":\"l_03jme\",\"q-q3\":\"l_03jmf\",\"q-q4\":\"l_03jmg\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 15,
+  "input": {},
+  "result": "score 56/100 (timing 64, easing 81, readability 64)\n1. [high] nothing moves for the last 3.3 s (motion ends 2.7s of 6s): keep the brief's length and carry the hold with a slow push / idle motion, or extend the build\n   → animate {\"tracks\":[{\"id\":\"l_03jm8\",\"prop\":\"scale\",\"merge\":true,\"keyframes\":[{\"t\":2.7,\"v\":[100,100],\"ease\":\"Sine In Out\"},{\"t\":6,\"v\":[104,104]}]}]}\n2. [high] \"Title\" and \"Subtitle\"…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 384,
+  "editorMs": 219,
+  "input": {
+   "times": [
+    0.3,
+    0.9,
+    1.5,
+    2.2,
+    2.5,
+    5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.3s, 0.9s, 1.5s, 2.2s, 2.5s, 5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/3aeb2629-e80a-4bc3-8342-f1b16921a3ed/tool-results/mcp-motion-blob-1794512947738-czjuva.jpg]"
+ },
+ {
+  "name": "camera_rig",
+  "argsBytes": 487,
+  "ok": true,
+  "ms": 356,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "id": "l_03jm2",
+     "depth": 0
+    },
+    {
+     "id": "l_03jm3",
+     "depth": 0
+    },
+    {
+     "id": "l_03jm4",
+     "depth": 1
+    },
+    {
+     "id": "l_03jm5",
+     "depth": 1
+    },
+    {
+     "id": "l_03jm6",
+     "depth": 1
+    },
+    {
+     "id": "l_03jm7",
+     "depth": 1
+    },
+    {
+     "id": "l_03jm8",
+     "depth": 1
+    },
+    {
+     "id": "l_03jm9",
+     "depth": 1
+    },
+    {
+     "id": "l_03jma",
+     "depth": 1
+    },
+    {
+     "id": "l_03jmb",
+     "depth": 1
+    },
+    {
+     "id": "l_03jmc",
+     "depth": 1
+    },
+    {
+     "id": "l_03jmd",
+     "depth": 1
+    },
+    {
+     "id": "l_03jme",
+     "depth": 1
+    },
+    {
+     "id": "l_03jmf",
+     "depth": 1
+    },
+    {
+     "id": "l_03jmg",
+     "depth": 1
+    }
+   ],
+   "keys": [
+    {
+     "t": 2.7,
+     "zoom": 100,
+     "ease": "Sine In Out"
+    },
+    {
+     "t": 6,
+     "zoom": 102
+    }
+   ]
+  },
+  "result": "{\"groups\":{\"0\":\"l_03jmh\",\"1\":\"l_03jmi\"},\"keys\":2,\"note\":\"animate a depth group like a null for extra moves; depth 0 stays fixed\"}"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 355,
+  "editorMs": 3,
+  "input": {
+   "id": "l_03jm2",
+   "prop": "position",
+   "indices": [
+    0
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 67,
+  "ok": true,
+  "ms": 187,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm3",
+   "prop": "position",
+   "indices": [
+    0
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_easing",
+  "argsBytes": 64,
+  "ok": true,
+  "ms": 110,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "prop": "scale",
+   "indices": [
+    0
+   ],
+   "ease": "Quart Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 219,
+  "editorMs": 12,
+  "input": {},
+  "result": "score 80/100 (readability 64)\n1. [high] \"Title\" and \"Subtitle\" overlap for 5.58 s (0.5s–6s): let the outgoing text clear (or move apart) before the next arrives\n   → retime {\"ids\":[\"l_03jm3\"],\"offset\":5.63}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 44,
+  "editorMs": 9,
+  "input": {},
+  "result": "score 80/100 (readability 64)\n1. [high] \"Title\" and \"Subtitle\" overlap for 5.58 s (0.5s–6s): let the outgoing text clear (or move apart) before the next arrives\n   → retime {\"ids\":[\"l_03jm3\"],\"offset\":5.63}"
+ }
+]

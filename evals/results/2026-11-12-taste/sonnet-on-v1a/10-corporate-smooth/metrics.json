@@ -1,0 +1,203 @@
+{
+ "run": {
+  "id": "10-corporate-smooth",
+  "name": "10-corporate-smooth",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 83,
+    "sub": {
+     "timing": 86,
+     "easing": 84,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 14,
+     "easing": 16,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:entrance-ease",
+     "low:dead-time",
+     "low:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 6.7
+   },
+   "after": {
+    "score": 83,
+    "sub": {
+     "timing": 86,
+     "easing": 84,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 14,
+     "easing": 16,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:entrance-ease",
+     "low:dead-time",
+     "low:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 6.7
+   }
+  },
+  "wallMs": 22422,
+  "timedOut": false,
+  "turns": 6,
+  "costUsd": 0.06517239999999999,
+  "durationMs": 21258,
+  "usage": {
+   "input": 191384,
+   "cached": 186084,
+   "output": 2538
+  },
+  "errors": [],
+  "toolCalls": 5,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the lower third in the comp: a 6 s piece on a dark blue-grey background, with everything cleared by about 5.7 s. I checked it on a contact sheet and one full-size frame at 2.5 s. I haven't run the critic or played it back in real time.\n\n- **Accent line:** a thin light-blue line extends left to right from 0.2 s to 1.4 s.\n- **Panel:** a translucent slate panel fades in and drifts about 60 px into place behind the line from 0.6 s to 1.8 s.\n- **Name and title:** \"Dr. Amelia Hart\" (Inter 600) and \"Head of Research, Larkspur Labs\" slide up out of clipped masks. The name starts at 1.0 s and the title at 1.25 s, so the title follows slightly behind the name.\n- **Hold:** the full lockup sits from about 2.2 s to 4.7 s.\n- **Exit:** the text slides up out of its masks, then the panel drifts back and fades, and the line retracts to the left. It runs from 4.7 s to 5.7 s.\n\nAll eases are Cubic or Sine In Out and nothing overshoots. The palette is blue-grey with a pale blue accent and off-white text.\n\nThe dark background is only for previewing. If you want to overlay this on footage, I can remove it. I can also slow the timing, move the lockup, or make the panel more or less transparent."
+ },
+ "metrics": {
+  "layers": 6,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "rect": 2,
+   "group": 2,
+   "text": 2
+  },
+  "groups": 2,
+  "animatedLayers": 4,
+  "keys": 20,
+  "segments": 10,
+  "easesUsed": {
+   "Cubic In Out": 8,
+   "Ease Out": 1,
+   "Ease In": 1
+  },
+  "distinctEases": 3,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#3b4f66",
+   "#8ab4e0",
+   "#f1f5f9",
+   "#b8c7d8",
+   "#1a222c"
+  ],
+  "keyCoverage": 0.492,
+  "visualActivity": 0.48,
+  "firstMotion": 0.2,
+  "lastMotion": 5.733,
+  "endHold": 0.267,
+  "longestHold": 2.68,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.804,
+  "exits": 1,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0,
+  "midLuma": 0.141,
+  "toolErrors": 0,
+  "toolCalls": 5
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "title present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "placed in the lower third",
+    "type": "lowerThird",
+    "pass": true
+   },
+   {
+    "text": "no overshoot",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "animates out by the end",
+    "type": "exitsMin",
+    "pass": false
+   },
+   {
+    "text": "hold in the middle (≥1.5s without key motion)",
+    "type": "holdMin",
+    "pass": true
+   },
+   {
+    "text": "translucent panel (opacity < 100 or alpha)",
+    "type": "translucent",
+    "pass": true
+   },
+   {
+    "text": "accent line extends",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 7,
+  "total": 8
+ },
+ "video": null
+}

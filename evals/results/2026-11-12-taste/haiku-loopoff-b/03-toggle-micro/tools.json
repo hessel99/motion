@@ -1,0 +1,178 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1048,
+  "ok": true,
+  "ms": 1202,
+  "editorMs": 6,
+  "input": {
+   "comp": {
+    "background": "#f2f2f7",
+    "duration": 2
+   },
+   "layers": [
+    {
+     "key": "track",
+     "type": "rect",
+     "name": "Track",
+     "x": 340,
+     "y": 268,
+     "w": 120,
+     "h": 64,
+     "radius": 32,
+     "fill": "#c7c7cc",
+     "animate": {
+      "fill": [
+       {
+        "t": 0.4,
+        "v": "#c7c7cc",
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 0.75,
+        "v": "#34c759"
+       }
+      ]
+     }
+    },
+    {
+     "key": "knob",
+     "type": "group",
+     "name": "Knob",
+     "x": 344,
+     "y": 272,
+     "w": 56,
+     "h": 56,
+     "animate": {
+      "position": [
+       {
+        "t": 0.4,
+        "v": [
+         372,
+         300
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 0.72,
+        "v": [
+         432,
+         300
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 0.86,
+        "v": [
+         428,
+         300
+        ]
+       }
+      ],
+      "scale": [
+       {
+        "t": 0.4,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 0.56,
+        "v": [
+         116,
+         88
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 0.72,
+        "v": [
+         96,
+         104
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 0.9,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ]
+     },
+     "children": [
+      {
+       "key": "knob-ellipse",
+       "type": "ellipse",
+       "name": "Knob ellipse",
+       "x": 0,
+       "y": 0,
+       "w": 56,
+       "h": 56,
+       "fill": "#ffffff",
+       "props": {
+        "shadowColor": "#00000026",
+        "shadowOffset": [
+         0,
+         2
+        ],
+        "shadowBlur": 6
+       }
+      },
+      {
+       "key": "check",
+       "type": "path",
+       "name": "Check",
+       "d": "M18 29 L25 36 L38 22",
+       "x": 0,
+       "y": 0,
+       "w": 56,
+       "h": 56,
+       "stroke": "#34c759",
+       "strokeWidth": 4,
+       "fill": "#00000000",
+       "drawOn": {
+        "t": 0.6,
+        "duration": 0.25,
+        "ease": "Sine Out",
+        "from": "start"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 5 keyframe tracks; animation ends 0.9s\",\"ids\":{\"track\":\"l_03jm2\",\"knob-ellipse\":\"l_03jm4\",\"check\":\"l_03jm5\",\"knob\":\"l_03jm3\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 494,
+  "editorMs": 472,
+  "input": {
+   "times": [
+    0,
+    0.4,
+    0.5,
+    0.6,
+    0.72,
+    1.2
+   ],
+   "cell": 240
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 0.4s, 0.5s, 0.6s, 0.72s, 1.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/37d1650b-44d7-4878-a2ca-e59d8af571cc/tool-results/mcp-motion-blob-1794513412674-4j21x2.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 75,
+  "editorMs": 13,
+  "input": {},
+  "result": "score 100/100 (no issues found)"
+ }
+]

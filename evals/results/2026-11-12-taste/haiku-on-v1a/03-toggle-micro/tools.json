@@ -1,0 +1,220 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 238,
+  "ok": true,
+  "ms": 38,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "iOS-style pill toggle switch micro-interaction: off grey to on green, knob slides with squash-and-stretch and small overshoot, track color crossfades, checkmark appears in knob, toggle at 0.4s, settle by 1.2s"
+  },
+  "result": "# Example: UI micro-interaction, a toggle switching on\n> tags: ui, micro-interaction, toggle, switch, button, app, interface, product, feedback, state change, ios, settings\n\n## Brief\n\"A settings toggle switching from off to on, for a product video. 1.5 s, light UI.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"duration\": 1.6, \"background\": \"#F2F2F7\"},\n    \"layers\": [\n…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1169,
+  "ok": true,
+  "ms": 103,
+  "editorMs": 5,
+  "input": {
+   "comp": {
+    "background": "#F2F2F7",
+    "duration": 2
+   },
+   "layers": [
+    {
+     "key": "track",
+     "name": "Toggle track",
+     "type": "rect",
+     "x": 320,
+     "y": 255,
+     "w": 160,
+     "h": 90,
+     "radius": 45,
+     "fill": "#D1D1D6",
+     "animate": {
+      "fill": [
+       {
+        "t": 0.4,
+        "v": "#D1D1D6",
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 0.65,
+        "v": "#34C759"
+       }
+      ]
+     }
+    },
+    {
+     "key": "knob",
+     "name": "Toggle knob",
+     "type": "ellipse",
+     "x": 328,
+     "y": 263,
+     "w": 74,
+     "h": 74,
+     "fill": "#FFFFFF",
+     "animate": {
+      "position": [
+       {
+        "t": 0.4,
+        "v": [
+         365,
+         300
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 0.8,
+        "v": [
+         441,
+         300
+        ],
+        "ease": "Ease In Out"
+       },
+       {
+        "t": 0.98,
+        "v": [
+         435,
+         300
+        ]
+       }
+      ],
+      "scale": [
+       {
+        "t": 0.4,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 0.6,
+        "v": [
+         116,
+         90
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 0.8,
+        "v": [
+         96,
+         104
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 1,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "check",
+     "name": "Toggle checkmark",
+     "shape": "check",
+     "x": 350,
+     "y": 285,
+     "w": 30,
+     "h": 30,
+     "stroke": "#34C759",
+     "strokeWidth": 6,
+     "fill": "#00000000",
+     "animate": {
+      "position": [
+       {
+        "t": 0.4,
+        "v": [
+         365,
+         300
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 0.8,
+        "v": [
+         441,
+         300
+        ],
+        "ease": "Ease In Out"
+       },
+       {
+        "t": 0.98,
+        "v": [
+         435,
+         300
+        ]
+       }
+      ],
+      "scale": [
+       {
+        "t": 0.4,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 0.6,
+        "v": [
+         116,
+         90
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 0.8,
+        "v": [
+         96,
+         104
+        ],
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 1,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ]
+     },
+     "drawOn": {
+      "t": 0.8,
+      "duration": 0.25,
+      "ease": "Cubic Out"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"3 created, 0 updated, 7 keyframe tracks; animation ends 1.05s\",\"ids\":{\"track\":\"l_03jm2\",\"knob\":\"l_03jm3\",\"check\":\"l_03jm4\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 79,
+  "editorMs": 60,
+  "input": {
+   "times": [
+    0,
+    0.4,
+    0.6,
+    0.8,
+    0.95,
+    1.2
+   ],
+   "cell": 240
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 0.4s, 0.6s, 0.8s, 0.95s, 1.2s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/ef34f1f7-8383-4436-80b4-753ee53d0aa7/tool-results/mcp-motion-blob-1794511813747-wha2oz.jpg]"
+ }
+]

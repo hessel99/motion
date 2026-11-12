@@ -1,0 +1,198 @@
+[
+ {
+  "name": "get_audio_analysis",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 65,
+  "editorMs": 1,
+  "input": {},
+  "result": "music \"Sting 120 BPM\" (layer l_03jm3): 120 BPM, 4/4, steady grid; audible 0.00–9.50s in comp (comp is 8.00s)\nbeat 0.50s, bar 2.00s; 16 beats from 0.00s; 4 bars, downbeats: 0.00 2.00 4.00 6.00\nsections: build 0.00–4.00 (energy 0.59) | drop 4.00–8.00 (energy 1)\naccents (strongest hits, time:strength): 0.50:0.38 1.00:0.34 3.50:0.33 4.00:1.00 5.50:0.31 6.00:0.32\nenergy per bar (▁ quiet .. █ loud): ▄▅█…"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 56,
+  "editorMs": 0,
+  "input": {},
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":8,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":1,\"layers\":[{\"id\":\"l_03jm3\",\"name\":\"Sting 120 BPM\",\"type\":\"audio\",\"props\":{\"anchor\":[0,0],\"position\":[0,0],\"scale\":[100,100],\"rotation\":…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 103,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "logo sting synced to music build and drop, circle mark with dot, wordmark"
+  },
+  "result": "# Example: Playful logo sting, the dot drops in and lands (make my logo move)\n> tags: logo, sting, playful, bouncy, fun, kids, app, mark, wordmark, drop, land, squash, bounce, simple, make my logo move\n\n## Brief\n\"Make my logo move: a round orange mark and the word 'pip'. Fun and friendly, about 3 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"duration\": 3, \"backgrou…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3200,
+  "ok": false,
+  "ms": 34,
+  "editorMs": 3,
+  "error": "unknown ease \"Expo InOut\". presets: Linear, Easy Ease, Ease In, Ease Out, Ease In Out, Sine In, Sine Out, Sine In Out, Quad In, Quad Out, Quad In Out, Cubic In, Cubic Out, Cubic In Out, Quart In, Quart Out, Quart In Out, Expo In, Expo Out, Expo In Out, Back In, Back Out, Back In Out, Snappy, Gentle",
+  "input": "{\"comp\":{\"duration\":8,\"background\":\"#0E0E12\"},\"layers\":[{\"key\":\"flash\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":1920,\"h\":1080,\"fill\":\"#FFFFFF\",\"opacity\":0,\"animate\":{\"opacity\":[{\"t\":3.98,\"v\":0},{\"t\":4,\"v\":22,\"ease\":\"Expo Out\"},{\"t\":4.35,\"v\":0}]}},{\"key\":\"wave1\",\"type\":\"ellipse\",\"x\":840,\"y\":420,\"w\":240,\"h\":240,\"fill\":\"#00000000\",\"stroke\":\"#FF4D6D\",\"strokeWidth\":6,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":4,\"v\":[100,100],\"ease\":\"Expo Out\"},{\"t\":4.9,\"v\":[320,320]}],\"opacity\":[{\"t\":3.99,\"v\":0},{\"t\":4,\"v\":80},{\"t\":4.9,\"v\":0,\"ease\":\"Sine Out\"}]}},{\"key\":\"wave2\",\"type\":\"ellipse\",\"x\":570,\"y\":420,\"w\":240,\"h\":240,\"fill\":\"#00000000\",\"stroke\":\"#FF4D6D\",\"strokeWidth\":4,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":5.5,\"v\":[60,60],\"ease\":\"Expo Out\"},{\"t\":6.2,\"v\":[200,200]}],\"opacity\":[{\"t\":5.49,\"v\":0},{\"t\":5.5,\"v\":60},{\"t\":6.2,\"v\":0,\"ease\":\"Sine Out\"}]}},{\"key\":\"wave3\",\"type\":\"ellipse\",\"x\":570,\"y\":420,\"w\":240,\"h\":240,\"fill\":\"#00000000\",\"stroke\":\"#F5F2EC\",\"strokeWidth\":3,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":6,\"v\":[100,100],\"ease\":\"Expo Out\"},{\"t\":6.9,\"v\":[260,260]}],\"opacity\":[{\"t\":5.99,\"v\":0},{\"t\":6,\"v\":45},{\"t\":6.9,\"v\":0,\"ease\":\"Sine Out\"}]}},{\"key\":\"reveal\",\"type\":\"group\",\"clip\":true,\"x\":800,\"y\":380,\"w\":900,\"h\":320,\"children\":[{\"key\":\"wordmark\",\"text\":\"Pulse\",\"fontSize\":190,\"fontWeight\":700,\"tracking\":-4,\"x\":50,\"y\":45,\"fill\":\"#F5F2EC\",\"animate\":{\"position\":[{\"t\":4.6,\"v\":[-420,160],\"ease\":\"Expo Out\"},{\"t\":5.4,\"v\":[50,45]}]}}]},{\"key\":\"mark\",\"type\":\"group\",\"x\":0,\"y\":0,\"w\":1920,\"h\":1080,\"children\":[{\"key\":\"ring\",\"type\":\"path\",\"shape\":\"circle\",\"x\":840,\"y\":420,\"w\":240,\"h\":240,\"fill\":\"#00000000\",\"stroke\":\"#F5F2EC\",\"strokeWidth\":14,\"animate\":{\"trimEnd\":[{\"t\":0.2,\"v\":0},{\"t\":3.5,\"v\":100,\"ease\":\"Sine In Out\"}],\"scale\":[{\"t\":0,\"v\":[70,70]},{\"t\":3.5,\"v\":[76,76],\"ease\":\"Sine In Out\"},{\"t\":3.95,\"v\":[58,58],\"ease\":\"Cubic In Out\"},{\"t\":4,\"v\":[58,58],\"ease\":\"spring:0.35\"},{\"t\":4.7,\"v\":[100,100]},{\"t\":5.95,\"v\":[100,100],\"ease\":\"Quad Out\"},{\"t\":6.05,\"v\":[107,107],\"ease\":\"Quad Out\"},{\"t\":6.5,\"v\":[100,100]}],\"opacity\":[{\"t\":0,\"v\":45},{\"t\":3.5,\"v\":60},{\"t\":4,\"v\":100}]}},{\"key\":\"dot\",\"type\":\"ellipse\",\"x\":920,\"y\":500,\"w\":80,\"h\":80,\"fill\":\"#FF4D6D\",\"animate\":{\"scale\":[{\"t\":0,\"v\":[50,50]},{\"t\":0.5,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":0.6,\"v\":[58,58],\"ease\":\"Quad Out\"},{\"t\":0.95,\"v\":[50,50]},{\"t\":1,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":1.1,\"v\":[60,60],\"ease\":\"Quad Out\"},{\"t\":1.45,\"v\":[50,50]},{\"t\":1.5,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":1.6,\"v\":[62,62],\"ease\":\"Quad Out\"},{\"t\":1.95,\"v\":[50,50]},{\"t\":2,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":2.1,\"v\":[66,66],\"ease\":\"Quad Out\"},{\"t\":2.45,\"v\":[50,50]},{\"t\":2.5,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":2.6,\"v\":[70,70],\"ease\":\"Quad Out\"},{\"t\":2.95,\"v\":[50,50]},{\"t\":3,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":3.1,\"v\":[76,76],\"ease\":\"Quad Out\"},{\"t\":3.45,\"v\":[50,50]},{\"t\":3.5,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":3.58,\"v\":[84,84],\"ease\":\"Cubic In Out\"},{\"t\":3.95,\"v\":[28,28],\"ease\":\"Cubic In Out\"},{\"t\":4,\"v\":[28,28],\"ease\":\"spring:0.45\"},{\"t\":4.7,\"v\":[100,100]},{\"t\":5.5,\"v\":[100,100],\"eas…",
+  "result": "unknown ease \"Expo InOut\". presets: Linear, Easy Ease, Ease In, Ease Out, Ease In Out, Sine In, Sine Out, Sine In Out, Quad In, Quad Out, Quad In Out, Cubic In, Cubic Out, Cubic In Out, Quart In, Quart Out, Quart In Out, Expo In, Expo Out, Expo In Out, Back In, Back Out, Back In Out, Snappy, Gentle"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3201,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 2,
+  "input": "{\"comp\":{\"duration\":8,\"background\":\"#0E0E12\"},\"layers\":[{\"key\":\"flash\",\"type\":\"rect\",\"x\":0,\"y\":0,\"w\":1920,\"h\":1080,\"fill\":\"#FFFFFF\",\"opacity\":0,\"animate\":{\"opacity\":[{\"t\":3.98,\"v\":0},{\"t\":4,\"v\":22,\"ease\":\"Expo Out\"},{\"t\":4.35,\"v\":0}]}},{\"key\":\"wave1\",\"type\":\"ellipse\",\"x\":840,\"y\":420,\"w\":240,\"h\":240,\"fill\":\"#00000000\",\"stroke\":\"#FF4D6D\",\"strokeWidth\":6,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":4,\"v\":[100,100],\"ease\":\"Expo Out\"},{\"t\":4.9,\"v\":[320,320]}],\"opacity\":[{\"t\":3.99,\"v\":0},{\"t\":4,\"v\":80},{\"t\":4.9,\"v\":0,\"ease\":\"Sine Out\"}]}},{\"key\":\"wave2\",\"type\":\"ellipse\",\"x\":570,\"y\":420,\"w\":240,\"h\":240,\"fill\":\"#00000000\",\"stroke\":\"#FF4D6D\",\"strokeWidth\":4,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":5.5,\"v\":[60,60],\"ease\":\"Expo Out\"},{\"t\":6.2,\"v\":[200,200]}],\"opacity\":[{\"t\":5.49,\"v\":0},{\"t\":5.5,\"v\":60},{\"t\":6.2,\"v\":0,\"ease\":\"Sine Out\"}]}},{\"key\":\"wave3\",\"type\":\"ellipse\",\"x\":570,\"y\":420,\"w\":240,\"h\":240,\"fill\":\"#00000000\",\"stroke\":\"#F5F2EC\",\"strokeWidth\":3,\"opacity\":0,\"animate\":{\"scale\":[{\"t\":6,\"v\":[100,100],\"ease\":\"Expo Out\"},{\"t\":6.9,\"v\":[260,260]}],\"opacity\":[{\"t\":5.99,\"v\":0},{\"t\":6,\"v\":45},{\"t\":6.9,\"v\":0,\"ease\":\"Sine Out\"}]}},{\"key\":\"reveal\",\"type\":\"group\",\"clip\":true,\"x\":800,\"y\":380,\"w\":900,\"h\":320,\"children\":[{\"key\":\"wordmark\",\"text\":\"Pulse\",\"fontSize\":190,\"fontWeight\":700,\"tracking\":-4,\"x\":50,\"y\":45,\"fill\":\"#F5F2EC\",\"animate\":{\"position\":[{\"t\":4.6,\"v\":[-420,160],\"ease\":\"Expo Out\"},{\"t\":5.4,\"v\":[50,45]}]}}]},{\"key\":\"mark\",\"type\":\"group\",\"x\":0,\"y\":0,\"w\":1920,\"h\":1080,\"children\":[{\"key\":\"ring\",\"type\":\"path\",\"shape\":\"circle\",\"x\":840,\"y\":420,\"w\":240,\"h\":240,\"fill\":\"#00000000\",\"stroke\":\"#F5F2EC\",\"strokeWidth\":14,\"animate\":{\"trimEnd\":[{\"t\":0.2,\"v\":0},{\"t\":3.5,\"v\":100,\"ease\":\"Sine In Out\"}],\"scale\":[{\"t\":0,\"v\":[70,70]},{\"t\":3.5,\"v\":[76,76],\"ease\":\"Sine In Out\"},{\"t\":3.95,\"v\":[58,58],\"ease\":\"Cubic In Out\"},{\"t\":4,\"v\":[58,58],\"ease\":\"spring:0.35\"},{\"t\":4.7,\"v\":[100,100]},{\"t\":5.95,\"v\":[100,100],\"ease\":\"Quad Out\"},{\"t\":6.05,\"v\":[107,107],\"ease\":\"Quad Out\"},{\"t\":6.5,\"v\":[100,100]}],\"opacity\":[{\"t\":0,\"v\":45},{\"t\":3.5,\"v\":60},{\"t\":4,\"v\":100}]}},{\"key\":\"dot\",\"type\":\"ellipse\",\"x\":920,\"y\":500,\"w\":80,\"h\":80,\"fill\":\"#FF4D6D\",\"animate\":{\"scale\":[{\"t\":0,\"v\":[50,50]},{\"t\":0.5,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":0.6,\"v\":[58,58],\"ease\":\"Quad Out\"},{\"t\":0.95,\"v\":[50,50]},{\"t\":1,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":1.1,\"v\":[60,60],\"ease\":\"Quad Out\"},{\"t\":1.45,\"v\":[50,50]},{\"t\":1.5,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":1.6,\"v\":[62,62],\"ease\":\"Quad Out\"},{\"t\":1.95,\"v\":[50,50]},{\"t\":2,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":2.1,\"v\":[66,66],\"ease\":\"Quad Out\"},{\"t\":2.45,\"v\":[50,50]},{\"t\":2.5,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":2.6,\"v\":[70,70],\"ease\":\"Quad Out\"},{\"t\":2.95,\"v\":[50,50]},{\"t\":3,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":3.1,\"v\":[76,76],\"ease\":\"Quad Out\"},{\"t\":3.45,\"v\":[50,50]},{\"t\":3.5,\"v\":[50,50],\"ease\":\"Expo Out\"},{\"t\":3.58,\"v\":[84,84],\"ease\":\"Cubic In Out\"},{\"t\":3.95,\"v\":[28,28],\"ease\":\"Cubic In Out\"},{\"t\":4,\"v\":[28,28],\"ease\":\"spring:0.45\"},{\"t\":4.7,\"v\":[100,100]},{\"t\":5.5,\"v\":[100,100],\"eas…",
+  "result": "{\"summary\":\"9 created, 0 updated, 13 keyframe tracks; animation ends 6.9s\",\"ids\":{\"flash\":\"l_03jmb\",\"wave1\":\"l_03jmc\",\"wave2\":\"l_03jmd\",\"wave3\":\"l_03jme\",\"wordmark\":\"l_03jmg\",\"reveal\":\"l_03jmf\",\"ring\":\"l_03jmi\",\"dot\":\"l_03jmj\",\"mark\":\"l_03jmh\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 54,
+  "ok": true,
+  "ms": 391,
+  "editorMs": 264,
+  "input": {
+   "times": [
+    1.5,
+    3.8,
+    4.05,
+    4.5,
+    5,
+    5.6,
+    6.05,
+    7.5
+   ],
+   "cell": 400
+  },
+  "result": "8 frames left→right, top→bottom at 1.5s, 3.8s, 4.07s, 4.5s, 5s, 5.6s, 6.07s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/3e675a84-2558-48c4-ae10-d83f88c884cf/tool-results/mcp-motion-blob-1794512788488-sjhsqi.jpg]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 128,
+  "ok": true,
+  "ms": 49,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jmg",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 4.6,
+       "v": [
+        -300,
+        160
+       ],
+       "ease": "Expo Out"
+      },
+      {
+       "t": 5.4,
+       "v": [
+        310,
+        160
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 38,
+  "ok": true,
+  "ms": 235,
+  "editorMs": 182,
+  "input": {
+   "times": [
+    4.8,
+    5.2,
+    5.6,
+    7.5
+   ],
+   "cell": 500
+  },
+  "result": "4 frames left→right, top→bottom at 4.8s, 5.2s, 5.6s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/3e675a84-2558-48c4-ae10-d83f88c884cf/tool-results/mcp-motion-blob-1794512793515-x2mb3w.jpg, original 2020x305, displayed at 2000x302. Multiply coordinates by 1.01 to map to original image.]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 129,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jmg",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 4.85,
+       "v": [
+        -300,
+        160
+       ],
+       "ease": "Expo Out"
+      },
+      {
+       "t": 5.6,
+       "v": [
+        310,
+        160
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 36,
+  "ok": true,
+  "ms": 119,
+  "editorMs": 89,
+  "input": {
+   "times": [
+    4.7,
+    5,
+    5.3,
+    5.8
+   ],
+   "cell": 500
+  },
+  "result": "4 frames left→right, top→bottom at 4.7s, 5s, 5.3s, 5.8s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/3e675a84-2558-48c4-ae10-d83f88c884cf/tool-results/mcp-motion-blob-1794512796423-8sjlci.jpg, original 2020x305, displayed at 2000x302. Multiply coordinates by 1.01 to map to original image.]"
+ },
+ {
+  "name": "draw_on",
+  "argsBytes": 77,
+  "ok": true,
+  "ms": 75,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jmi"
+   ],
+   "t": 0.2,
+   "duration": 3.3,
+   "ease": "Sine In Out",
+   "fill": "keep"
+  },
+  "result": "draw on: 1 path(s) 0.2s–3.5s"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 36,
+  "editorMs": 11,
+  "input": {},
+  "result": "score 98/100 (easing 97)\n1. [low] 3 exits decelerate away (Expo Out): exits accelerate (Expo In / Cubic In) and are shorter than entrances\n   → set_easing {\"id\":\"l_03jmc\",\"prop\":\"scale\",\"indices\":[0],\"ease\":\"Cubic In\"}\n   → set_easing {\"id\":\"l_03jmd\",\"prop\":\"scale\",\"indices\":[0],\"ease\":\"Cubic In\"}\n   → set_easing {\"id\":\"l_03jme\",\"prop\":\"scale\",\"indices\":[0],\"ease\":\"Cubic In\"}"
+ }
+]

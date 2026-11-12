@@ -1,0 +1,196 @@
+{
+ "run": {
+  "id": "12-hand-drawn",
+  "name": "12-hand-drawn",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 78,
+    "sub": {
+     "timing": 95.8,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "low:timing-range"
+    ],
+    "ms": 33.3
+   },
+   "after": {
+    "score": 78,
+    "sub": {
+     "timing": 95.8,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 4.2,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:font-fallback",
+     "low:timing-range"
+    ],
+    "ms": 33.3
+   }
+  },
+  "wallMs": 34468,
+  "timedOut": false,
+  "turns": 14,
+  "costUsd": 0.1181472,
+  "durationMs": 33550,
+  "usage": {
+   "input": 396821,
+   "cached": 387132,
+   "output": 4071
+  },
+  "errors": [],
+  "toolCalls": 13,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "Positioning the loaf and checking the frames next.\nI built the 6 s piece on a warm cream background, but I haven't looked at a frame since the last nudge to the loaf's position.\n\n- **Lines:** the wobbly **stalk** draws on from 0.6 s and the **loaf** from 1.2 s, both with soft Sine In Out strokes in brown. They boil in 12 fps steps, jittering a couple of pixels and rotating about half a degree each frame, so they read as hand-animated.\n- **Blobs:** **blob1** (ochre), **blob2** (sage) and **blob3** (terracotta) fade in staggered and breathe slowly at slightly different rates.\n- **Name:** \"Crumb & Co\" in Georgia pops in letter by letter from 3 s with a soft spring. The tagline \"baked by hand, with love\" fades up at 4 s.\n\nI didn't run critique or fix anything beyond positioning. The earlier frames showed the name wrapping, so I widened its box. I also moved the stalk and loaf onto their blobs, and the last check had the layout balanced.\n\nI can make the boil rougher or calmer, slow the draw-on, or add a loop so it repeats cleanly."
+ },
+ "metrics": {
+  "layers": 7,
+  "drawableLayers": 7,
+  "layerTypes": {
+   "path": 5,
+   "text": 2
+  },
+  "groups": 0,
+  "animatedLayers": 7,
+  "keys": 23,
+  "segments": 11,
+  "easesUsed": {
+   "Cubic Out": 8,
+   "Sine In Out": 2,
+   "Easy Ease": 1
+  },
+  "distinctEases": 3,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 8,
+  "textAnimators": 1,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 5,
+  "gradientLayers": 0,
+  "paletteSize": 6,
+  "palette": [
+   "#e9b872",
+   "#c9d4a0",
+   "#e3a58a",
+   "#6b4a2b",
+   "#a0522d",
+   "#f6ead6"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.983,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0.067,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.03,
+  "exits": 0,
+  "beats": 4,
+  "missingFonts": [
+   "Georgia"
+  ],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.061,
+  "midLuma": 0.883,
+  "toolErrors": 0,
+  "toolCalls": 13
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "stroke draw-on (trim paths animated)",
+    "type": "trimAnimated",
+    "pass": true
+   },
+   {
+    "text": "custom paths (≥2)",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "boil/wobble (wiggle expression, hold keys or path keys)",
+    "type": "jitter",
+    "pass": false
+   },
+   {
+    "text": "breathing blobs (scale animated)",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "warm palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "no linear eases",
+    "type": "noLinear",
+    "pass": true
+   }
+  ],
+  "hits": 6,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

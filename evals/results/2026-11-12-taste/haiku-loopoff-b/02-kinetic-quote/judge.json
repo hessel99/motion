@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 5,
+  "style_match": 6,
+  "timing_easing": 5,
+  "composition": 7,
+  "richness": 4,
+  "polish": 5
+ },
+ "overall": 5.33,
+ "critique": [
+  "The comp runs 10s instead of the briefed 8s, so the attribution lands at 8.5–9.1s, outside the requested duration. Each phrase is a fade-up exit (2.3–2.6s, 4.5–4.8s, 6.3–6.6s) followed by the next word-reveal starting 0.1s later in the same spot, so the phrases swap in sequence instead of transitioning into each other. On top of that, the short 'Design is' line sits idle for about 1.4s and the 'how it works.' hero gets no bigger moment than its per-letter reveal.",
+  "Cut the timing to 8s and build real handoffs: have 'what it looks like.' push 'Design is not just' up and out, and have 'Design is' shrink or slide aside as 'how it / works.' scales in with an overshoot spring. Bring in the attribution at about 7.0s and hold to the end. Delete the dead 0s→exit 'Easy Ease' position and opacity keys that don't change anything."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0658798,
+ "ms": 14551,
+ "raw": "```json\n{\"brief_fit\": 5, \"style_match\": 6, \"timing_easing\": 5, \"composition\": 7, \"richness\": 4, \"polish\": 5,\n \"critique\": [\"The comp runs 10s instead of the briefed 8s, so the attribution lands at 8.5–9.1s, outside the requested duration. Each phrase is a fade-up exit (2.3–2.6s, 4.5–4.8s, 6.3–6.6s) followed by the next word-reveal starting 0.1s later in the same spot, so the phrases swap in sequence instead of transitioning into each other. On top of that, the short 'Design is' line sits idle for about 1.4s and the 'how it works.' hero gets no bigger moment than its per-letter reveal.\", \"Cut the timing to 8s and build real handoffs: have 'what it looks like.' push 'Design is not just' up and out, and have 'Design is' shrink or slide aside as 'how it / works.' scales in with an overshoot spring. Bring in the attribution at about 7.0s and hold to the end. Delete the dead 0s→exit 'Easy Ease' position and opacity keys that don't change anything.\"]}\n```"
+}

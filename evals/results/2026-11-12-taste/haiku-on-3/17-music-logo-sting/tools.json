@@ -1,0 +1,746 @@
+[
+ {
+  "name": "get_document",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 0,
+  "input": {},
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":30,\"duration\":8,\"background\":[0.07,0.07,0.08,1],\"markers\":[]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":1,\"layers\":[{\"id\":\"l_03jm3\",\"name\":\"Sting 120 BPM\",\"type\":\"audio\",\"props\":{\"anchor\":[0,0],\"position\":[0,0],\"scale\":[100,100],\"rotation\":…"
+ },
+ {
+  "name": "get_audio_analysis",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 2,
+  "input": {},
+  "result": "music \"Sting 120 BPM\" (layer l_03jm3): 120 BPM, 4/4, steady grid; audible 0.00–9.50s in comp (comp is 8.00s)\nbeat 0.50s, bar 2.00s; 16 beats from 0.00s; 4 bars, downbeats: 0.00 2.00 4.00 6.00\nsections: build 0.00–4.00 (energy 0.59) | drop 4.00–8.00 (energy 1)\naccents (strongest hits, time:strength): 0.50:0.38 1.00:0.34 3.50:0.33 4.00:1.00 5.50:0.31 6.00:0.32\nenergy per bar (▁ quiet .. █ loud): ▄▅█…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 212,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "logo sting for brand Pulse, round mark circle with smaller dot inside plus wordmark, synced to music, build anticipation, land logo on drop, secondary hits on beats, clean lockup end"
+  },
+  "result": "# Example: Playful logo sting, the dot drops in and lands (make my logo move)\n> tags: logo, sting, playful, bouncy, fun, kids, app, mark, wordmark, drop, land, squash, bounce, simple, make my logo move\n\n## Brief\n\"Make my logo move: a round orange mark and the word 'pip'. Fun and friendly, about 3 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n    \"comp\": {\"duration\": 3, \"backgrou…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2364,
+  "ok": true,
+  "ms": 109,
+  "editorMs": 4,
+  "input": {
+   "comp": {
+    "duration": 8,
+    "background": "#0B0B0F"
+   },
+   "layers": [
+    {
+     "key": "ripple",
+     "type": "ellipse",
+     "x": 525,
+     "y": 410,
+     "w": 260,
+     "h": 260,
+     "fill": "#00000000",
+     "stroke": "#FF3B5C",
+     "strokeWidth": 6,
+     "animate": {
+      "scale": [
+       {
+        "t": 4,
+        "v": 100,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 4.9,
+        "v": 170
+       },
+       {
+        "t": 6,
+        "v": 100,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 6.9,
+        "v": 170
+       }
+      ],
+      "opacity": [
+       {
+        "t": 4,
+        "v": 80,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 4.9,
+        "v": 0
+       },
+       {
+        "t": 6,
+        "v": 80,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 6.9,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "ring",
+     "type": "ellipse",
+     "x": 525,
+     "y": 410,
+     "w": 260,
+     "h": 260,
+     "fill": "#00000000",
+     "stroke": "#FF3B5C",
+     "strokeWidth": 14,
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 3.95,
+        "v": 100,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 4,
+        "v": 112,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 4.35,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "dot",
+     "type": "ellipse",
+     "x": 615,
+     "y": 500,
+     "w": 80,
+     "h": 80,
+     "fill": "#FF3B5C",
+     "animate": {
+      "scale": [
+       {
+        "t": 0,
+        "v": 100,
+        "ease": "Quad Out"
+       },
+       {
+        "t": 0.5,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 0.62,
+        "v": 106,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 0.8,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 1,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 1.12,
+        "v": 110,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 1.3,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 1.5,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 1.62,
+        "v": 112,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 1.8,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 2,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 2.12,
+        "v": 116,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 2.3,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 2.5,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 2.62,
+        "v": 118,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 2.8,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 3,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 3.12,
+        "v": 122,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 3.3,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 3.5,
+        "v": 100,
+        "ease": "Quad In"
+       },
+       {
+        "t": 3.95,
+        "v": 60,
+        "ease": "Linear"
+       },
+       {
+        "t": 4,
+        "v": 140,
+        "ease": "spring Bouncy"
+       },
+       {
+        "t": 4.45,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 4.5,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 4.62,
+        "v": 110,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 4.8,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 5,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 5.12,
+        "v": 108,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 5.3,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 5.5,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 5.62,
+        "v": 112,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 5.8,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 6,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 6.12,
+        "v": 114,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 6.3,
+        "v": 100,
+        "ease": "Linear"
+       },
+       {
+        "t": 6.5,
+        "v": 100,
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 6.62,
+        "v": 106,
+        "ease": "Cubic In"
+       },
+       {
+        "t": 6.85,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "wordmark",
+     "text": {
+      "content": "Pulse",
+      "fontSize": 220,
+      "fontWeight": 800,
+      "tracking": -6,
+      "align": "left"
+     },
+     "x": 795,
+     "y": 408,
+     "w": 700,
+     "h": 264,
+     "fill": "#F5F5F7",
+     "textAnim": {
+      "by": "char",
+      "preset": "Pop letters",
+      "start": 4.15,
+      "stagger": 0.05,
+      "duration": 0.5
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 4 keyframe tracks; animation ends 6.9s\",\"ids\":{\"ripple\":\"l_03jm4\",\"ring\":\"l_03jm5\",\"dot\":\"l_03jm6\",\"wordmark\":\"l_03jm7\"}}"
+ },
+ {
+  "name": "draw_on",
+  "argsBytes": 72,
+  "ok": true,
+  "ms": 7,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm5"
+   ],
+   "t": 0,
+   "duration": 3.9,
+   "ease": "Cubic In",
+   "fill": "keep"
+  },
+  "result": "draw on: 1 path(s) 0s–3.9s; ring → path"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 47,
+  "editorMs": 19,
+  "input": {},
+  "result": "score 85/100 (timing 81, easing 97, richness 84)\n1. [medium] 4 elements and 33 moves for 8s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch\n2. [medium] \"ring\".scale move takes 0.05 s for scale Δ12%: too abrupt, ~0.15 s fits (handbook timing table)\n   → retime {\"ids\":[\"l_03jm5\"],\"pivot\":3.95,\"scale\":3}\n3. [medium] \"dot\".scale mov…"
+ },
+ {
+  "name": "set_keyframes",
+  "argsBytes": 1385,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm6",
+   "prop": "scale",
+   "keyframes": [
+    {
+     "t": 0,
+     "v": 100,
+     "ease": "Quad Out"
+    },
+    {
+     "t": 0.5,
+     "v": 100,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 0.62,
+     "v": 106,
+     "ease": "Cubic In"
+    },
+    {
+     "t": 0.8,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 1,
+     "v": 100,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 1.12,
+     "v": 110,
+     "ease": "Cubic In"
+    },
+    {
+     "t": 1.3,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 1.5,
+     "v": 100,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 1.62,
+     "v": 112,
+     "ease": "Cubic In"
+    },
+    {
+     "t": 1.8,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 2,
+     "v": 100,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 2.12,
+     "v": 116,
+     "ease": "Cubic In"
+    },
+    {
+     "t": 2.3,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 2.5,
+     "v": 100,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 2.62,
+     "v": 118,
+     "ease": "Cubic In"
+    },
+    {
+     "t": 2.8,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 3,
+     "v": 100,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 3.12,
+     "v": 122,
+     "ease": "Cubic In"
+    },
+    {
+     "t": 3.3,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 3.5,
+     "v": 100,
+     "ease": "Quad In"
+    },
+    {
+     "t": 3.85,
+     "v": 60,
+     "ease": "Linear"
+    },
+    {
+     "t": 4,
+     "v": 140,
+     "ease": "spring Bouncy"
+    },
+    {
+     "t": 4.45,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 4.5,
+     "v": 100,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 4.62,
+     "v": 110,
+     "ease": "Cubic In"
+    },
+    {
+     "t": 4.8,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 5,
+     "v": 100,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 5.12,
+     "v": 108,
+     "ease": "Cubic In"
+    },
+    {
+     "t": 5.3,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 5.5,
+     "v": 100,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 5.62,
+     "v": 112,
+     "ease": "Cubic In"
+    },
+    {
+     "t": 5.8,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 6,
+     "v": 100,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 6.12,
+     "v": 114,
+     "ease": "Cubic In"
+    },
+    {
+     "t": 6.3,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 6.5,
+     "v": 100,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 6.62,
+     "v": 106,
+     "ease": "Cubic In"
+    },
+    {
+     "t": 6.85,
+     "v": 100
+    }
+   ]
+  },
+  "result": "set 38 keyframes on dot.scale"
+ },
+ {
+  "name": "set_keyframes",
+  "argsBytes": 168,
+  "ok": true,
+  "ms": 39,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "prop": "scale",
+   "keyframes": [
+    {
+     "t": 0,
+     "v": 100,
+     "ease": "Linear"
+    },
+    {
+     "t": 3.85,
+     "v": 100,
+     "ease": "Quad Out"
+    },
+    {
+     "t": 4,
+     "v": 112,
+     "ease": "Cubic Out"
+    },
+    {
+     "t": 4.35,
+     "v": 100
+    }
+   ]
+  },
+  "result": "set 4 keyframes on ring.scale"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 5,
+  "input": {},
+  "result": "score 88/100 (easing 92, richness 84)\n1. [medium] 4 elements and 33 moves for 8s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch\n2. [low] \"dot\".scale arrives at full speed at 3.85s (Quad In): ease the landing (Cubic In Out) or add a settle\n   → set_easing {\"id\":\"l_03jm6\",\"prop\":\"scale\",\"indices\":[19],\"ease\":\"Cubic In Out\"}\n3. [l…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 160,
+  "editorMs": 141,
+  "input": {
+   "times": [
+    0.5,
+    2,
+    3.9,
+    4.1,
+    4.6,
+    6.1,
+    7.5
+   ],
+   "cell": 240
+  },
+  "result": "7 frames left→right, top→bottom at 0.5s, 2s, 3.9s, 4.1s, 4.6s, 6.1s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/0606f546-12e7-4f08-b461-98d6bac9e688/tool-results/mcp-motion-blob-1794514811252-rf6gm8.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 37,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "props": {
+    "position": [
+     622,
+     540
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "props": {
+    "position": [
+     622,
+     540
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 47,
+  "ok": true,
+  "ms": 21,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm6",
+   "props": {
+    "position": [
+     622,
+     540
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm7"
+  },
+  "result": "{\"id\":\"l_03jm7\",\"name\":\"wordmark\",\"type\":\"text\",\"parent\":null,\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[350,132]},\"position\":{\"v\":[1145,540]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100]},\"size\":{\"v\":[700,264]},\"fill\":{\"v\":[0.9607843137254902,0.9607843137254902,0.9686274509803922,1]}},\"text\":{\"content\":\"Pulse\",\"fontFa…"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "props": {
+    "position": [
+     1162,
+     540
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 36,
+  "ok": true,
+  "ms": 92,
+  "editorMs": 83,
+  "input": {
+   "times": [
+    2,
+    4.1,
+    4.6,
+    7.5
+   ],
+   "cell": 300
+  },
+  "result": "4 frames left→right, top→bottom at 2s, 4.1s, 4.6s, 7.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/0606f546-12e7-4f08-b461-98d6bac9e688/tool-results/mcp-motion-blob-1794514818859-0dyyur.jpg]"
+ }
+]

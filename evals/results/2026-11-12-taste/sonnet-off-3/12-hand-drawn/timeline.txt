@@ -1,0 +1,82 @@
+- blob1 [path] box 164,110,652,579 #e4b48c
+- blob2 [path] box 1094,191,652,579 #e8c76a
+- blob3 [path] box 1509,649,341,322 #a9b78a
+- blob4 [path] box 114,684,342,313 #c98262
+- art [group] #ffffff a0
+  - stem [path] box 753,213,13,446 #6b8cff stroke #5b3a22 8px
+  - g1 [path] box 682,317,76,83 #e8c76a stroke #5b3a22 7px
+  - g2 [path] box 760,317,79,83 #e8c76a stroke #5b3a22 7px
+  - g3 [path] box 689,235,74,83 #e8c76a stroke #5b3a22 7px
+  - g4 [path] box 764,236,77,83 #e8c76a stroke #5b3a22 7px
+  - g5 [path] box 748,129,36,106 #e8c76a stroke #5b3a22 7px
+  - loaf [path] box 955,361,491,290 #d9a066 stroke #5b3a22 8px
+  - score1 [path] box 1089,442,46,75 #6b8cff stroke #5b3a22 7px
+  - score2 [path] box 1189,428,47,83 #6b8cff stroke #5b3a22 7px
+  - score3 [path] #6b8cff stroke #5b3a22 7px
+- name [text] box 360,720,1200,220 #5b3a22 "Crumb & Co" Fredoka 170px w700
+- underline [path] #6b8cff stroke #c98262 9px
+
+comp 1920x1080 6s @24fps, background #f6ecd9
+"blob1" (path l_03jm2)
+  scale: 0s 60 ─Sine Out→ 1.4s 100
+  scale: expr "[100+4*Math.sin(time*1.1), 100+4*Math.cos(time*1.1)]"
+  rotation: expr "4*Math.sin(time*0.5)"
+  opacity: 0s 0 ─Sine Out→ 0.7s 70
+"blob2" (path l_03jm3)
+  scale: 0.2s 60 ─Sine Out→ 1.6s 100
+  scale: expr "[100+5*Math.cos(time*0.9), 100+5*Math.sin(time*0.9)]"
+  rotation: expr "-5*Math.sin(time*0.4)"
+  opacity: 0.2s 0 ─Sine Out→ 0.9s 65
+"blob3" (path l_03jm4)
+  scale: 0.4s 60 ─Sine Out→ 1.6s 100
+  scale: expr "[100+6*Math.sin(time*1.4), 100+6*Math.cos(time*1.2)]"
+  opacity: 0.4s 0 ─Sine Out→ 1s 70
+"blob4" (path l_03jm5)
+  scale: 0.3s 60 ─Sine Out→ 1.5s 100
+  scale: expr "[100+5*Math.cos(time*1.2), 100+5*Math.sin(time*1.0)]"
+  rotation: expr "6*Math.sin(time*0.6)"
+  opacity: 0.3s 0 ─Sine Out→ 0.9s 60
+"art" (group l_03jm6)
+  position: expr "value + [3*Math.sin(Math.floor(time*12)*12.9), 3*Math.sin(Math.floor(time*12)*78.2)]"
+  rotation: expr "0.5*Math.sin(Math.floor(time*12)*39.3)"
+"stem" (path l_03jm7) visible 0.7s–1000000000s
+  trimStart: 0.7s 0
+  trimEnd: 0.7s 0 ─Sine In Out→ 1.9s 100
+"g1" (path l_03jm8)
+  fill: 1.92s #e8c76a00 ─Ease Out→ 2.2s #e8c76a
+  trimStart: 1.5s 0
+  trimEnd: 1.5s 0 ─Ease In Out→ 2.2s 100
+"g2" (path l_03jm9)
+  fill: 2.12s #e8c76a00 ─Ease Out→ 2.4s #e8c76a
+  trimStart: 1.7s 0
+  trimEnd: 1.7s 0 ─Ease In Out→ 2.4s 100
+"g3" (path l_03jma)
+  fill: 2.32s #e8c76a00 ─Ease Out→ 2.6s #e8c76a
+  trimStart: 1.9s 0
+  trimEnd: 1.9s 0 ─Ease In Out→ 2.6s 100
+"g4" (path l_03jmb)
+  fill: 2.52s #e8c76a00 ─Ease Out→ 2.8s #e8c76a
+  trimStart: 2.1s 0
+  trimEnd: 2.1s 0 ─Ease In Out→ 2.8s 100
+"g5" (path l_03jmc)
+  fill: 2.72s #e8c76a00 ─Ease Out→ 3s #e8c76a
+  trimStart: 2.3s 0
+  trimEnd: 2.3s 0 ─Ease In Out→ 3s 100
+"loaf" (path l_03jmd)
+  fill: 2.08s #d9a06600 ─Ease Out→ 2.8s #d9a066
+  trimStart: 1s 0
+  trimEnd: 1s 0 ─Sine In Out→ 2.8s 100
+"score1" (path l_03jme) visible 2.8s–1000000000s
+  trimStart: 2.8s 0
+  trimEnd: 2.8s 0 ─Sine Out→ 3.2s 100
+"score2" (path l_03jmf) visible 2.95s–1000000000s
+  trimStart: 2.95s 0
+  trimEnd: 2.95s 0 ─Sine Out→ 3.35s 100
+"score3" (path l_03jmg) visible 3.1s–1000000000s
+  trimStart: 3.1s 0
+  trimEnd: 3.1s 0 ─Sine Out→ 3.5s 100
+"name" (text l_03jmh)
+  text animator: in by char, start 3.3s, 0.6s each, stagger 0.07s, ease spring:0.35
+"underline" (path l_03jmi) visible 4.3s–1000000000s
+  trimStart: 4.3s 0
+  trimEnd: 4.3s 0 ─Sine Out→ 5s 100

@@ -1,0 +1,207 @@
+{
+ "run": {
+  "id": "07-product-promo",
+  "name": "07-product-promo",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 81,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 16.3
+   },
+   "after": {
+    "score": 81,
+    "sub": {
+     "timing": 67.00000000000001,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 33,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 16.3
+   }
+  },
+  "wallMs": 52014,
+  "timedOut": false,
+  "turns": 10,
+  "costUsd": 0.15186760000000002,
+  "durationMs": 50599,
+  "usage": {
+   "input": 366379,
+   "cached": 353436,
+   "output": 6478
+  },
+  "errors": [],
+  "toolCalls": 9,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the 8 s title sequence in \"Main\", cut to 120 BPM (0.5 s per beat). I checked it with contact sheets only. I didn't run the critic or play it back in real time.\n\n- **Flashes (0–3 s):** each feature word gets one bar of 1 s.\n  - **40H BATTERY** slams in with a scale punch on a horizontal orange wipe.\n  - **SPATIAL AUDIO** slides in from the right, with an orange underline.\n  - **PURE SILENCE** is orange and rises with a scale-up, behind a vertical wipe.\n  - Each word cuts out on the frame the next one arrives, and an orange flash bridges into the slam.\n- **PULSE 2 (3 s):** at the bar downbeat the name slams in from 170% with a short shake. An orange shockwave ring expands and fades, with a thinner white ring just behind it.\n- **Available now (5.5 s):** the name shifts up and shrinks, then an orange pill pops in with a spring. \"Available now\" in dark type rises into it, and the pill pulses gently until the end.\n- **Look:** near-black `#0B0B0F` background, electric orange `#FF5A00` accent, heavy white type, Expo easing throughout.\n\nI fixed a stray blue fill on the rings, but I only re-checked a few frames afterwards and didn't re-view the first three flashes. I also enlarged the pill text to 84 px, so check that it still fits the pill.\n\nI used no audio track, so the beat timing is my own 120 BPM grid. If you add music, `sync_to_audio` can snap the hits to it. I can also speed up the wipes or add sound effects if you want."
+ },
+ "metrics": {
+  "layers": 12,
+  "drawableLayers": 12,
+  "layerTypes": {
+   "text": 5,
+   "rect": 5,
+   "ellipse": 2
+  },
+  "groups": 0,
+  "animatedLayers": 12,
+  "keys": 71,
+  "segments": 41,
+  "easesUsed": {
+   "Expo Out": 15,
+   "Hold": 9,
+   "Ease In": 3,
+   "Quart In Out": 6,
+   "Sine In Out": 1,
+   "Quad Out": 2,
+   "Spring 0.4": 1,
+   "Ease Out": 1,
+   "Expo In": 3
+  },
+  "distinctEases": 9,
+  "easeFamilies": 7,
+  "overshootSegments": 1,
+  "keyedOvershoots": 2,
+  "springSegments": 1,
+  "holdKeys": 9,
+  "linearSegments": 0,
+  "expressions": 1,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#f5f5f7",
+   "#ff5a00",
+   "#0b0b0f"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.921,
+  "firstMotion": 0,
+  "lastMotion": 8,
+  "endHold": 0,
+  "longestHold": 0.067,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.201,
+  "exits": 6,
+  "beats": 5,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.068,
+  "midLuma": 0.175,
+  "toolErrors": 0,
+  "toolCalls": 9
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "3 feature words present",
+    "type": "textAllOf",
+    "pass": true
+   },
+   {
+    "text": "product name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "\"Available now\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 beats",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "shockwave ring (stroked ellipse scaling up)",
+    "type": "ring",
+    "pass": true
+   },
+   {
+    "text": "feature words exit (transitions, not stacking)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "beat-aligned timing (markers or keys on a 0.5s grid)",
+    "type": "beatGrid",
+    "pass": false
+   },
+   {
+    "text": "dark background",
+    "type": "darkBackground",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}

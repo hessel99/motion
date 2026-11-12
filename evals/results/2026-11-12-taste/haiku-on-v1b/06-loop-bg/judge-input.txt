@@ -1,0 +1,173 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (06-loop-bg, 1920x1080, 6s @30fps):
+A seamless looping ambient background for a conference stage screen: soft blurred-looking blobs/orbs in a purple-to-teal palette drifting slowly, plus a subtle grid of small dots that gently pulses. It must loop perfectly at 6 seconds (frame 0 == last frame), no visible jump. Calm, not busy.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- loops seamlessly (first frame ≈ frame at the loop point) [yes]
+- everything moves (animated coverage ≥90%) [yes]
+- ≥3 blobs/orbs (ellipses) [yes]
+- dot grid (≥15 layers) [yes]
+- uses loop expressions or matching first/last keys [yes]
+- purple/teal palette [yes]
+- calm: no fast motion [?]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- Background [rect] box 0,0,1920,1080 #0b0716
+- Blob deep indigo [ellipse] box 360,-60,1200,1200 gradient(#4c1d95 a0.7→#4c1d95 a0)
+- Blob purple [ellipse] box 110,-90,900,900 gradient(#7c3aed a0.7→#7c3aed a0)
+- Blob teal [ellipse] box 1140,250,900,900 gradient(#14b8a6 a0.67→#14b8a6 a0)
+- Blob violet [ellipse] box 950,-20,700,700 gradient(#a855f7 a0.65→#a855f7 a0)
+- Blob cyan [ellipse] box 140,320,800,800 gradient(#2dd4bf a0.55→#2dd4bf a0)
+- Dot grid [group] #ffffff a0
+  - d-0-0 [ellipse] box 236,176,8,8 #5eead4
+  - d-0-1 [ellipse] box 476,176,8,8 #5eead4
+  - d-0-2 [ellipse] box 716,176,8,8 #5eead4
+  - d-0-3 [ellipse] box 956,176,8,8 #5eead4
+  - d-0-4 [ellipse] box 1196,176,8,8 #5eead4
+  - d-0-5 [ellipse] box 1436,176,8,8 #5eead4
+  - d-0-6 [ellipse] box 1676,176,8,8 #5eead4
+  - d-1-0 [ellipse] box 236,356,8,8 #5eead4
+  - d-1-1 [ellipse] box 476,356,8,8 #5eead4
+  - d-1-2 [ellipse] box 716,356,8,8 #5eead4
+  - d-1-3 [ellipse] box 956,356,8,8 #5eead4
+  - d-1-4 [ellipse] box 1196,356,8,8 #5eead4
+  - d-1-5 [ellipse] box 1436,356,8,8 #5eead4
+  - d-1-6 [ellipse] box 1676,356,8,8 #5eead4
+  - d-2-0 [ellipse] box 236,536,8,8 #5eead4
+  - d-2-1 [ellipse] box 476,536,8,8 #5eead4
+  - d-2-2 [ellipse] box 716,536,8,8 #5eead4
+  - d-2-3 [ellipse] box 956,536,8,8 #5eead4
+  - d-2-4 [ellipse] box 1196,536,8,8 #5eead4
+  - d-2-5 [ellipse] box 1436,536,8,8 #5eead4
+  - d-2-6 [ellipse] box 1676,536,8,8 #5eead4
+  - d-3-0 [ellipse] box 236,716,8,8 #5eead4
+  - d-3-1 [ellipse] box 476,716,8,8 #5eead4
+  - d-3-2 [ellipse] box 716,716,8,8 #5eead4
+  - d-3-3 [ellipse] box 956,716,8,8 #5eead4
+  - d-3-4 [ellipse] box 1196,716,8,8 #5eead4
+  - d-3-5 [ellipse] box 1436,716,8,8 #5eead4
+  - d-3-6 [ellipse] box 1676,716,8,8 #5eead4
+  - d-4-0 [ellipse] box 236,896,8,8 #5eead4
+  - d-4-1 [ellipse] box 476,896,8,8 #5eead4
+  - d-4-2 [ellipse] box 716,896,8,8 #5eead4
+  - d-4-3 [ellipse] box 956,896,8,8 #5eead4
+  - d-4-4 [ellipse] box 1196,896,8,8 #5eead4
+  - d-4-5 [ellipse] box 1436,896,8,8 #5eead4
+  - d-4-6 [ellipse] box 1676,896,8,8 #5eead4
+
+TIMELINE:
+comp 1920x1080 6s @30fps, background #0b0716
+"Blob deep indigo" (ellipse l_03jm3)
+  scale: expr "[100 + 6*sin(1.0471976*time), 100 + 6*sin(1.0471976*time)]"
+"Blob purple" (ellipse l_03jm4)
+  position: expr "[560 + 120*sin(1.0471976*time), 420 + 60*cos(1.0471976*time)]"
+"Blob teal" (ellipse l_03jm5)
+  position: expr "[1450 - 140*cos(1.0471976*time), 700 + 110*sin(1.0471976*time)]"
+"Blob violet" (ellipse l_03jm6)
+  position: expr "[1300 + 100*sin(2.0943951*time), 250 + 80*cos(2.0943951*time)]"
+"Blob cyan" (ellipse l_03jm7)
+  position: expr "[440 + 100*cos(2.0943951*time), 720 - 60*sin(1.0471976*time)]"
+"d-0-0" (ellipse l_03jm9)
+  opacity: expr "30 + 25*sin(2.0943951*time - 0)"
+"d-0-1" (ellipse l_03jma)
+  opacity: expr "30 + 25*sin(2.0943951*time - 0.5)"
+"d-0-2" (ellipse l_03jmb)
+  opacity: expr "30 + 25*sin(2.0943951*time - 1)"
+"d-0-3" (ellipse l_03jmc)
+  opacity: expr "30 + 25*sin(2.0943951*time - 1.5)"
+"d-0-4" (ellipse l_03jmd)
+  opacity: expr "30 + 25*sin(2.0943951*time - 2)"
+"d-0-5" (ellipse l_03jme)
+  opacity: expr "30 + 25*sin(2.0943951*time - 2.5)"
+"d-0-6" (ellipse l_03jmf)
+  opacity: expr "30 + 25*sin(2.0943951*time - 3)"
+"d-1-0" (ellipse l_03jmg)
+  opacity: expr "30 + 25*sin(2.0943951*time - 0.5)"
+"d-1-1" (ellipse l_03jmh)
+  opacity: expr "30 + 25*sin(2.0943951*time - 1)"
+"d-1-2" (ellipse l_03jmi)
+  opacity: expr "30 + 25*sin(2.0943951*time - 1.5)"
+"d-1-3" (ellipse l_03jmj)
+  opacity: expr "30 + 25*sin(2.0943951*time - 2)"
+"d-1-4" (ellipse l_03jmk)
+  opacity: expr "30 + 25*sin(2.0943951*time - 2.5)"
+"d-1-5" (ellipse l_03jml)
+  opacity: expr "30 + 25*sin(2.0943951*time - 3)"
+"d-1-6" (ellipse l_03jmm)
+  opacity: expr "30 + 25*sin(2.0943951*time - 3.5)"
+"d-2-0" (ellipse l_03jmn)
+  opacity: expr "30 + 25*sin(2.0943951*time - 1)"
+"d-2-1" (ellipse l_03jmo)
+  opacity: expr "30 + 25*sin(2.0943951*time - 1.5)"
+"d-2-2" (ellipse l_03jmp)
+  opacity: expr "30 + 25*sin(2.0943951*time - 2)"
+"d-2-3" (ellipse l_03jmq)
+  opacity: expr "30 + 25*sin(2.0943951*time - 2.5)"
+"d-2-4" (ellipse l_03jmr)
+  opacity: expr "30 + 25*sin(2.0943951*time - 3)"
+"d-2-5" (ellipse l_03jms)
+  opacity: expr "30 + 25*sin(2.0943951*time - 3.5)"
+"d-2-6" (ellipse l_03jmt)
+  opacity: expr "30 + 25*sin(2.0943951*time - 4)"
+"d-3-0" (ellipse l_03jmu)
+  opacity: expr "30 + 25*sin(2.0943951*time - 1.5)"
+"d-3-1" (ellipse l_03jmv)
+  opacity: expr "30 + 25*sin(2.0943951*time - 2)"
+"d-3-2" (ellipse l_03jmw)
+  opacity: expr "30 + 25*sin(2.0943951*time - 2.5)"
+"d-3-3" (ellipse l_03jmx)
+  opacity: expr "30 + 25*sin(2.0943951*time - 3)"
+"d-3-4" (ellipse l_03jmy)
+  opacity: expr "30 + 25*sin(2.0943951*time - 3.5)"
+"d-3-5" (ellipse l_03jmz)
+  opacity: expr "30 + 25*sin(2.0943951*time - 4)"
+"d-3-6" (ellipse l_03jm10)
+  opacity: expr "30 + 25*sin(2.0943951*time - 4.5)"
+"d-4-0" (ellipse l_03jm11)
+  opacity: expr "30 + 25*sin(2.0943951*time - 2)"
+"d-4-1" (ellipse l_03jm12)
+  opacity: expr "30 + 25*sin(2.0943951*time - 2.5)"
+"d-4-2" (ellipse l_03jm13)
+  opacity: expr "30 + 25*sin(2.0943951*time - 3)"
+"d-4-3" (ellipse l_03jm14)
+  opacity: expr "30 + 25*sin(2.0943951*time - 3.5)"
+"d-4-4" (ellipse l_03jm15)
+  opacity: expr "30 + 25*sin(2.0943951*time - 4)"
+"d-4-5" (ellipse l_03jm16)
+  opacity: expr "30 + 25*sin(2.0943951*time - 4.5)"
+"d-4-6" (ellipse l_03jm17)
+  opacity: expr "30 + 25*sin(2.0943951*time - 5)"
+
+AUTOMATIC METRICS:
+layers 41 drawable (rect 1, ellipse 40, group 1), 0 keys, 0 moving segments
+eases: none; springs 0, overshooting 0, hold 0
+expressions 40, text animators 0, precomps 0, paths 0, gradients 5, markers 0
+palette (7): #0b0716 #4c1d95 #7c3aed #14b8a6 #a855f7 #2dd4bf #5eead4
+motion from 0s to 6s (end hold 0s, longest still 0s), visual activity 100% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 4.221s; text-on-text overlap 0s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

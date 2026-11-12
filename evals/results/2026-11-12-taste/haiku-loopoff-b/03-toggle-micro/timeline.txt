@@ -1,0 +1,14 @@
+- Track [rect] box 340,268,120,64 #34c759
+- Knob [group] #ffffff a0
+  - Knob ellipse [ellipse] box 400,272,56,56 #ffffff
+  - Check [path] box 400,272,56,56 #000000 a0 stroke #34c759 4px
+
+comp 800x600 2s @60fps, background #f2f2f7
+"Track" (rect l_03jm2)
+  fill: 0.4s #c7c7cc ─Sine In Out→ 0.75s #34c759
+"Knob" (group l_03jm3)
+  position: 0.4s [372,300] ─Cubic In Out→ 0.72s [432,300] ─Sine In Out→ 0.86s [428,300]
+  scale: 0.4s 100 ─Sine In Out→ 0.56s [116,88] ─Sine In Out→ 0.72s [96,104] ─Sine In Out→ 0.9s 100
+"Check" (path l_03jm5)
+  trimStart: 0.6s 0
+  trimEnd: 0.6s 0 ─Sine Out→ 0.85s 100

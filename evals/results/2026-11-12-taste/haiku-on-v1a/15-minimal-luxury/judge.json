@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 7,
+  "style_match": 7,
+  "timing_easing": 6,
+  "composition": 5,
+  "richness": 4,
+  "polish": 5
+ },
+ "overall": 5.67,
+ "critique": [
+  "The gold rule sits at y=900, inside the letters' cap-height zone, so it reads as a stray strikethrough clipping the tops of L and A rather than a deliberate accent. The lockup also feels cramped: the line, name and subtitle are stacked tight in the vertical center, with no structure using the 1920px height.",
+  "Move the rule clear of the type, e.g. ~60-80px below the name between it and EAU DE PARFUM, or well above it as a horizon. Keep its slow center-out draw but let it finish after the last letter lands. Give the subtitle more air, and add a subtle sustained secondary motion through the 2.3s end hold, like a slow overall tracking settle or a soft champagne sheen across the line, so the expensive feel carries to the end."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0503718,
+ "ms": 11278,
+ "raw": "```json\n{\"brief_fit\": 7, \"style_match\": 7, \"timing_easing\": 6, \"composition\": 5, \"richness\": 4, \"polish\": 5, \"critique\": [\"The gold rule sits at y=900, inside the letters' cap-height zone, so it reads as a stray strikethrough clipping the tops of L and A rather than a deliberate accent. The lockup also feels cramped: the line, name and subtitle are stacked tight in the vertical center, with no structure using the 1920px height.\", \"Move the rule clear of the type, e.g. ~60-80px below the name between it and EAU DE PARFUM, or well above it as a horizon. Keep its slow center-out draw but let it finish after the last letter lands. Give the subtitle more air, and add a subtle sustained secondary motion through the 2.3s end hold, like a slow overall tracking settle or a soft champagne sheen across the line, so the expensive feel carries to the end.\"]}\n```"
+}

@@ -1,0 +1,18 @@
+- Sting 120 BPM [audio] #6b8cff
+- ripple [ellipse] box 492,410,260,260 #000000 a0 stroke #ff3b5c 6px
+- ring [path] box 476,394,291,291 #000000 a0 stroke #ff3b5c 14px
+- dot [ellipse] box 566,484,112,112 #ff3b5c
+- wordmark [text] box 812,408,700,264 #f5f5f7 "Pulse" Inter 220px w800
+
+comp 1920x1080 8s @30fps, background #0b0b0f
+"ripple" (ellipse l_03jm4)
+  scale: 4s 100 ─Expo Out→ 4.9s 170 ─Cubic In Out→ 6s 100 ─Expo Out→ 6.9s 170
+  opacity: 4s 80 ─Quad Out→ 4.9s 0 ─Ease Out→ 6s 80 ─Quad Out→ 6.9s 0
+"ring" (path l_03jm5)
+  scale: 0s 100 ─linear→ 3.85s 100 ─Quad Out→ 4s 112 ─Cubic Out→ 4.35s 100
+  trimStart: 0s 0
+  trimEnd: 0s 0 ─Cubic In→ 3.9s 100
+"dot" (ellipse l_03jm6)
+  scale: 0s 100 ─Quad Out→ 0.5s 100 ─Cubic Out→ 0.62s 106 ─Cubic In→ 0.8s 100 ─linear→ 1s 100 ─Cubic Out→ 1.12s 110 ─Cubic In→ 1.3s 100 ─linear→ 1.5s 100 ─Cubic Out→ 1.62s 112 ─Cubic In→ 1.8s 100 ─linear→ 2s 100 ─Cubic Out→ 2.12s 116 ─Cubic In→ 2.3s 100 ─linear→ 2.5s 100 ─Cubic Out→ 2.62s 118 ─Cubic In→ 2.8s 100 ─linear→ 3s 100 ─Cubic Out→ 3.12s 122 ─Cubic In→ 3.3s 100 ─linear→ 3.5s 100 ─Quad In→ 3.85s 60 ─linear→ 4s 140 ─spring Bouncy→ 4.45s 100 ─linear→ 4.5s 100 ─Cubic Out→ 4.62s 110 ─Cubic In→ 4.8s 100 ─linear→ 5s 100 ─Cubic Out→ 5.12s 108 ─Cubic In→ 5.3s 100 ─linear→ 5.5s 100 ─Cubic Out→ 5.62s 112 ─Cubic In→ 5.8s 100 ─linear→ 6s 100 ─Cubic Out→ 6.12s 114 ─Cubic In→ 6.3s 100 ─linear→ 6.5s 100 ─Cubic Out→ 6.62s 106 ─Cubic In→ 6.85s 100
+"wordmark" (text l_03jm7)
+  text animator: in by char, start 4.15s, 0.5s each, stagger 0.05s, ease spring:0.5

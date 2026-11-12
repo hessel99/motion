@@ -1,0 +1,30 @@
+- Gold line [rect] box 360,839,360,2 #d2b98a
+- Name ÉCLAT [group] #ffffff a0
+  - É [text] box 214,870,127,154 #efe4cc "É" serif 128px w500
+  - C [text] box 339,870,134,154 #efe4cc "C" serif 128px w500
+  - L [text] box 484,870,127,154 #efe4cc "L" serif 128px w500
+  - A [text] box 612,870,141,154 #efe4cc "A" serif 128px w500
+  - T [text] box 767,870,127,154 #efe4cc "T" serif 128px w500
+- Tagline [text] box 0,1050,1080,60 #c9b48a "EAU DE PARFUM" Inter 32px w400
+
+comp 1080x1920 7s @30fps, background #0b0b0c
+"Gold line" (rect l_03jm2)
+  scale: 0.4s [0,100] ─Sine In Out→ 3s 100
+  opacity: 0.4s 0 ─Easy Ease→ 0.9s 100
+"É" (text l_03jm6)
+  position: 2.6s [247.5,76.8] ─Cubic Out→ 4.2s [279.25,76.8]
+  opacity: 2.6s 0 ─Sine Out→ 3.7s 100
+"C" (text l_03jm7)
+  position: 2.8s [397,76.8] ─Cubic Out→ 4.4s [412.78,76.8]
+  opacity: 2.8s 0 ─Sine Out→ 3.9s 100
+"L" (text l_03jm8)
+  position: 3s [543.9,76.8] ─Cubic Out→ 4.6s [543.91,76.8]
+  opacity: 3s 0 ─Sine Out→ 4.1s 100
+"A" (text l_03jm9)
+  position: 3.2s [689,76.8] ─Cubic Out→ 4.8s [673.47,76.8]
+  opacity: 3.2s 0 ─Sine Out→ 4.3s 100
+"T" (text l_03jma)
+  position: 3.4s [840.4,76.8] ─Cubic Out→ 5s [808.63,76.8]
+  opacity: 3.4s 0 ─Sine Out→ 4.5s 100
+"Tagline" (text l_03jm4)
+  opacity: 5s 0 ─Easy Ease→ 6.4s 100

@@ -1,0 +1,195 @@
+{
+ "run": {
+  "id": "02-kinetic-quote",
+  "name": "02-kinetic-quote",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 58,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 42.39999999999999,
+     "polish": 70,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 57.599999999999994,
+     "polish": 30,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:no-secondary",
+     "medium:read-hold",
+     "medium:read-hold",
+     "medium:read-hold"
+    ],
+    "ms": 4.8
+   },
+   "after": {
+    "score": 58,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 42.39999999999999,
+     "polish": 70,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 57.599999999999994,
+     "polish": 30,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:no-secondary",
+     "medium:read-hold",
+     "medium:read-hold",
+     "medium:read-hold"
+    ],
+    "ms": 4.8
+   }
+  },
+  "wallMs": 73225,
+  "timedOut": false,
+  "turns": 30,
+  "costUsd": 0.02013195,
+  "durationMs": 70329,
+  "usage": {
+   "input": 792983,
+   "cached": 766045,
+   "output": 14173
+  },
+  "errors": [],
+  "toolCalls": 29,
+  "toolErrors": 1,
+  "toolsAvailable": 76,
+  "finalText": "The quote is built as a 10-second kinetic type piece on a dark background, with four phrases handing off cleanly and the attribution last.\n\n- **Phrase 1, \"Design is not just\"** (white, 0.2 s): words slide up one by one, then exit upward.\n- **Phrase 2, \"what it looks like.\"** (grey): same word reveal, starting as phrase 1 leaves.\n- **Phrase 3, \"Design is\"** (white): same reveal, starting as phrase 2 leaves.\n- **Hero, \"how it / works.\"** (red, 210 px, about 2x the setup size): letters rise in one by one from 6.7 s, so the punchline is the largest and most saturated element.\n- **Attribution, \"— Steve Jobs\"** (small grey, 28 px): fades in at about 8.5 s.\n\nI extended the composition from 8 s to 10 s so each phrase holds long enough to read. The phrases are on separate layers, named \"Phrase 1 · …\", \"Hero · …\" and \"Attribution · …\", so you can retime them individually.\n\nThe last critique scored it 58/100. The remaining flags are that phrases 1 and 2 hold about 1.2–1.3 s (a bit short of the 1.4 s it wants), phrase 3 holds about 0.75 s, and nothing has overshoot or settle motion. I'd lengthen the holds by roughly 0.2 s each if you want to take that, and I can add a settle on the hero if you want more life in the final frame."
+ },
+ "metrics": {
+  "layers": 6,
+  "drawableLayers": 6,
+  "layerTypes": {
+   "text": 6
+  },
+  "groups": 0,
+  "animatedLayers": 6,
+  "keys": 23,
+  "segments": 8,
+  "easesUsed": {
+   "Expo In": 3,
+   "Ease In": 3,
+   "Quart Out": 2
+  },
+  "distinctEases": 3,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 5,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#f5f5f0",
+   "#8a8a8a",
+   "#ff3d2e",
+   "#0e0e0e"
+  ],
+  "keyCoverage": 0.535,
+  "visualActivity": 0.201,
+  "firstMotion": 0.133,
+  "lastMotion": 9.133,
+  "endHold": 0.867,
+  "longestHold": 2.077,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 3,
+  "beats": 5,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.036,
+  "midLuma": 0.06,
+  "toolErrors": 1,
+  "toolCalls": 29
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "quote text present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "attribution present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "per-letter or per-word text animation",
+    "type": "textAnimatorMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 text layers (phrases)",
+    "type": "textLayersMin",
+    "pass": true
+   },
+   {
+    "text": "phrases exit/transition (some text animates out)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "emphasis: one phrase larger or bolder than the rest",
+    "type": "textEmphasis",
+    "pass": true
+   },
+   {
+    "text": "3–4 beats over the 8s",
+    "type": "beatsMin",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

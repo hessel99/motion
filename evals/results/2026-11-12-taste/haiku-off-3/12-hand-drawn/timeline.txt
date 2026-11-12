@@ -1,0 +1,41 @@
+- Blob sage [path] box 651,411,618,299 #7a9e7e
+- Blob terracotta [path] box 472,262,455,416 #d97757
+- Blob mustard [path] box 1041,301,377,337 #e9b44c
+- Wheat stalk [path] box 757,236,86,484 #000000 a0 stroke #2e2a24 6px
+- Loaf outline [path] box 926,506,284,162 #000000 a0 stroke #2e2a24 6px
+- Loaf score [path] box 985,576,177,27 #000000 a0 stroke #2e2a24 5px
+- Name Crumb & Co [text] box 356,799,1207,233 #2e2a24 "Crumb & Co" serif 150px w500
+- Mustard underline [path] box 660,936,600,28 #000000 a0 stroke #e9b44c 9px
+
+comp 1920x1080 6s @24fps, background #f6efe3
+"Blob sage" (path l_03jm2)
+  position: 0s [960,580] ─Sine In Out→ 1s [960,560]
+  scale: expr "[100+2*sin(time*1.1), 100+2*sin(time*1.1)]"
+  opacity: 0s 0 ─Sine In Out→ 0.5s 85
+"Blob terracotta" (path l_03jm3)
+  position: 0.15s [700,490] ─Sine In Out→ 1.15s [700,470]
+  scale: expr "[100+2*sin(time*0.9+1), 100+2*sin(time*0.9+1)]"
+  opacity: 0.15s 0 ─Sine In Out→ 0.65s 90
+"Blob mustard" (path l_03jm4)
+  position: 0.3s [1230,490] ─Sine In Out→ 1.3s [1230,470]
+  scale: expr "[100+2*sin(time*1.3+2), 100+2*sin(time*1.3+2)]"
+  opacity: 0.3s 0 ─Sine In Out→ 0.8s 90
+"Wheat stalk" (path l_03jm5)
+  rotation: expr "wiggle(8, 0.5)"
+  trimStart: 0.4s 0
+  trimEnd: 0.4s 0 ─Sine In Out→ 1.8s 100
+"Loaf outline" (path l_03jm6)
+  rotation: expr "wiggle(8, 0.5)"
+  trimStart: 1.4s 0
+  trimEnd: 1.4s 0 ─Sine In Out→ 2.6s 100
+"Loaf score" (path l_03jm7)
+  rotation: expr "wiggle(8, 0.5)"
+  trimStart: 2.4s 0
+  trimEnd: 2.4s 0 ─Sine In Out→ 3s 100
+"Name Crumb & Co" (text l_03jm8)
+  position: 3s [960,915] ─spring Gentle→ 4s [960,885]
+  rotation: 3s -3 ─spring Gentle→ 4s 0
+  opacity: 3s 0 ─Ease Out→ 3.5s 100
+"Mustard underline" (path l_03jm9)
+  trimStart: 4.2s 0
+  trimEnd: 4.2s 0 ─Sine In Out→ 4.9s 100

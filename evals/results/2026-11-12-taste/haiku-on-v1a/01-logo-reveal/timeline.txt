@@ -1,0 +1,18 @@
+- Mark ring [path] box 602,440,200,200 #000000 a0 stroke #f4f6fb 14px
+- Mark slash [path] box 632,470,140,140 #000000 a0 stroke #5eead4 22px
+- Wordmark reveal [group] #ffffff a0
+  - Wordmark NOVA [text] box 866,440,460,180 #f4f6fb "NOVA" Inter 150px w700
+- Tagline [text] box 872,642,560,56 #8fa3bf "Money, made simple" Inter 40px w400
+
+comp 1920x1080 4s @60fps, background #0b1f3a
+"Mark ring" (path l_03jm2)
+  trimStart: 0.1s 0
+  trimEnd: 0.1s 0 ─Cubic In Out→ 0.9s 100
+"Mark slash" (path l_03jm3)
+  trimStart: 0.75s 0
+  trimEnd: 0.75s 0 ─Expo Out→ 1.15s 100
+"Wordmark NOVA" (text l_03jm5)
+  position: 0s [-250,130] ─hold→ 0.95s [-250,130] ─Quart Out→ 1.85s [282,130] ─Sine In Out→ 2.03s [264.6,130] ─Sine In Out→ 2.21s [270,130]
+"Tagline" (text l_03jm6)
+  position: 1.9s [1152,676] ─Quart Out→ 2.5s [1152,664]
+  opacity: 1.9s 0 ─Quart Out→ 2.2s 80.47

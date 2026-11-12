@@ -1,0 +1,260 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1336,
+  "ok": true,
+  "ms": 90,
+  "editorMs": 1,
+  "input": {
+   "title": "Pulse 2 — Launch Title",
+   "duration": 8,
+   "style": "Kinetic tech punch: near-black + electric orange",
+   "styleReason": "Fast, confident, beat-cut; Expo/Quart eases, hard cuts on the beat.",
+   "beats": [
+    {
+     "name": "Flash 1 – 40h battery",
+     "start": 0,
+     "end": 1,
+     "description": "Orange wipe panel sweeps across, word '40H BATTERY' slams up from a mask on beat 0, exits with a fast wipe at 0.9s.",
+     "style": "Expo Out in, Expo In out, 120 BPM = 0.5s/beat"
+    },
+    {
+     "name": "Flash 2 – Spatial audio",
+     "start": 1,
+     "end": 2,
+     "description": "Word drops in per-letter from the left with slight scale pop on beat 2; orange bar underlines; wipe out.",
+     "style": "Quart Out, stagger 0.03"
+    },
+    {
+     "name": "Flash 3 – Pure silence",
+     "start": 2,
+     "end": 3,
+     "description": "Word scales from 140% to 100% with a fade, then cuts to a flash of orange at 2.9s as bridge to the slam.",
+     "style": "Expo Out"
+    },
+    {
+     "name": "Slam – PULSE 2",
+     "start": 3,
+     "end": 5.5,
+     "description": "Huge 'PULSE 2' slams in from 160% scale on the bar downbeat at 3.0s, shockwave orange ring expands and fades, subtle camera-shake via position jitter, subtle idle push-in.",
+     "style": "Expo Out, ring scale 0→300%"
+    },
+    {
+     "name": "Available now",
+     "start": 5.5,
+     "end": 8,
+     "description": "PULSE 2 shifts up and shrinks; 'Available now' fades up and an orange pill button pops in with spring and a gentle pulse.",
+     "style": "spring:0.3 pill, Quart Out text"
+    }
+   ]
+  },
+  "result": "storyboard \"Pulse 2 — Launch Title\" shown to the user (5 beats, 8s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 118,
+  "ok": true,
+  "ms": 22,
+  "editorMs": 2,
+  "input": {
+   "name": "examples",
+   "brief": "fast kinetic title sequence, product launch, beat-cut words, shockwave ring, pill button"
+  },
+  "result": "# Example: Kinetic type cut to music (120 BPM): words on downbeats, not on every beat\n> tags: music, song, beat, bpm, rhythm, audio, kinetic, type, words, lyric, drop, sync, energetic, promo, cut to the beat\n\n## Brief\n\"Kinetic type for our launch track (120 BPM, 4/4): MOVE / FAST / BREAK / THINGS, then the drop with the logo word NOW. 8 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"get_audio_analysis\",…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 3910,
+  "ok": true,
+  "ms": 180,
+  "editorMs": 10,
+  "input": "{\"comp\":{\"duration\":8,\"background\":\"#0B0B0F\",\"fps\":30,\"name\":\"Pulse 2 Title\"},\"layers\":[{\"key\":\"f1\",\"text\":\"40H BATTERY\",\"fontSize\":240,\"fontWeight\":900,\"tracking\":-8,\"align\":\"center\",\"center\":[960,540],\"w\":1800,\"h\":280,\"fill\":\"#F5F5F7\",\"animate\":{\"scale\":[{\"t\":0.12,\"v\":135,\"ease\":\"Expo Out\"},{\"t\":0.45,\"v\":100}],\"opacity\":[{\"t\":0,\"v\":0,\"interp\":\"hold\"},{\"t\":0.12,\"v\":100},{\"t\":0.92,\"v\":100,\"ease\":\"Ease In\"},{\"t\":0.97,\"v\":0}]}},{\"key\":\"f2\",\"text\":\"SPATIAL AUDIO\",\"fontSize\":240,\"fontWeight\":900,\"tracking\":-8,\"align\":\"center\",\"center\":[960,540],\"w\":1800,\"h\":280,\"fill\":\"#F5F5F7\",\"animate\":{\"position\":[{\"t\":1.12,\"v\":[1260,540],\"ease\":\"Expo Out\"},{\"t\":1.5,\"v\":[960,540]}],\"opacity\":[{\"t\":1,\"v\":0,\"interp\":\"hold\"},{\"t\":1.12,\"v\":100},{\"t\":1.92,\"v\":100,\"ease\":\"Ease In\"},{\"t\":1.97,\"v\":0}]}},{\"key\":\"f2bar\",\"type\":\"rect\",\"x\":160,\"y\":700,\"w\":1600,\"h\":14,\"fill\":\"#FF5A00\",\"anchor\":\"left\",\"animate\":{\"scale\":[{\"t\":1.15,\"v\":[0,100],\"ease\":\"Expo Out\"},{\"t\":1.6,\"v\":[100,100]},{\"t\":1.92,\"v\":[100,100]},{\"t\":1.97,\"v\":[0,100]}]}},{\"key\":\"f3\",\"text\":\"PURE SILENCE\",\"fontSize\":240,\"fontWeight\":900,\"tracking\":-8,\"align\":\"center\",\"center\":[960,540],\"w\":1800,\"h\":280,\"fill\":\"#FF5A00\",\"animate\":{\"scale\":[{\"t\":2.12,\"v\":70,\"ease\":\"Expo Out\"},{\"t\":2.5,\"v\":100}],\"position\":[{\"t\":2.12,\"v\":[960,640],\"ease\":\"Expo Out\"},{\"t\":2.5,\"v\":[960,540]}],\"opacity\":[{\"t\":2,\"v\":0,\"interp\":\"hold\"},{\"t\":2.12,\"v\":100},{\"t\":2.92,\"v\":100},{\"t\":2.97,\"v\":0}]}},{\"key\":\"name\",\"text\":\"PULSE 2\",\"fontSize\":420,\"fontWeight\":900,\"tracking\":-14,\"align\":\"center\",\"center\":[960,520],\"w\":1800,\"h\":480,\"fill\":\"#F5F5F7\",\"animate\":{\"scale\":[{\"t\":3,\"v\":170,\"ease\":\"Expo Out\"},{\"t\":3.35,\"v\":100,\"ease\":\"Sine In Out\"},{\"t\":5.5,\"v\":103,\"ease\":\"Expo Out\"},{\"t\":6,\"v\":62}],\"position\":[{\"t\":3,\"v\":[960,520]},{\"t\":3.04,\"v\":[972,512]},{\"t\":3.08,\"v\":[950,528]},{\"t\":3.12,\"v\":[966,518]},{\"t\":3.16,\"v\":[958,522]},{\"t\":3.2,\"v\":[960,520],\"ease\":\"Expo Out\"},{\"t\":5.5,\"v\":[960,520],\"ease\":\"Expo Out\"},{\"t\":6,\"v\":[960,330]}],\"opacity\":[{\"t\":2.99,\"v\":0,\"interp\":\"hold\"},{\"t\":3,\"v\":100}]}},{\"key\":\"ring1\",\"type\":\"ellipse\",\"x\":760,\"y\":320,\"w\":400,\"h\":400,\"stroke\":\"#FF5A00\",\"strokeWidth\":14,\"animate\":{\"scale\":[{\"t\":3,\"v\":[10,10],\"ease\":\"Expo Out\"},{\"t\":4,\"v\":[560,560]}],\"opacity\":[{\"t\":3,\"v\":100,\"ease\":\"Quad Out\"},{\"t\":4,\"v\":0}]}},{\"key\":\"ring2\",\"type\":\"ellipse\",\"x\":760,\"y\":320,\"w\":400,\"h\":400,\"stroke\":\"#F5F5F7\",\"strokeWidth\":5,\"animate\":{\"scale\":[{\"t\":3.1,\"v\":[10,10],\"ease\":\"Expo Out\"},{\"t\":4.1,\"v\":[420,420]}],\"opacity\":[{\"t\":3.1,\"v\":80,\"ease\":\"Quad Out\"},{\"t\":4.1,\"v\":0}]}},{\"key\":\"pill\",\"type\":\"rect\",\"x\":600,\"y\":670,\"w\":720,\"h\":150,\"radius\":75,\"fill\":\"#FF5A00\",\"animate\":{\"scale\":[{\"t\":5.5,\"v\":[0,0],\"ease\":\"spring:0.35\"},{\"t\":6,\"v\":[100,100]}],\"opacity\":[{\"t\":5.49,\"v\":0,\"interp\":\"hold\"},{\"t\":5.5,\"v\":100}]},\"expr\":{\"scale\":\"value + 2*Math.sin(time*2*Math.PI*1)\"}},{\"key\":\"avail\",\"text\":\"Available now\",\"fontSize\":72,\"fontWeight\":800,\"tracking\":-1,\"align\":\"center\",\"center\":[960,745],\"w\":700,\"h\":100,\"fill\":\"#0B0B0F\",\"animate\":{\"position\":[{\"t\":5.65,\"v\":[960…",
+  "result": "{\"summary\":\"12 created, 0 updated, 23 keyframe tracks; animation ends 6s\",\"ids\":{\"f1\":\"l_03jm2\",\"f2\":\"l_03jm3\",\"f2bar\":\"l_03jm4\",\"f3\":\"l_03jm5\",\"name\":\"l_03jm6\",\"ring1\":\"l_03jm7\",\"ring2\":\"l_03jm8\",\"pill\":\"l_03jm9\",\"avail\":\"l_03jma\",\"p1\":\"l_03jmb\",\"p2\":\"l_03jmc\",\"p3\":\"l_03jmd\"}}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 478,
+  "ok": true,
+  "ms": 54,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jmd",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 2,
+       "v": 100,
+       "interp": "hold"
+      },
+      {
+       "t": 2.41,
+       "v": 0,
+       "interp": "hold"
+      },
+      {
+       "t": 2.94,
+       "v": 100,
+       "interp": "hold"
+      },
+      {
+       "t": 3,
+       "v": 100,
+       "ease": "Expo Out"
+      },
+      {
+       "t": 3.35,
+       "v": 0
+      }
+     ]
+    },
+    {
+     "id": "l_03jmd",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        1620
+       ],
+       "interp": "hold"
+      },
+      {
+       "t": 2,
+       "v": [
+        960,
+        1620
+       ],
+       "ease": "Expo Out"
+      },
+      {
+       "t": 2.15,
+       "v": [
+        960,
+        540
+       ],
+       "ease": "Expo In"
+      },
+      {
+       "t": 2.4,
+       "v": [
+        960,
+        -540
+       ],
+       "interp": "hold"
+      },
+      {
+       "t": 2.94,
+       "v": [
+        960,
+        540
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 2 tracks on 1 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 70,
+  "ok": true,
+  "ms": 403,
+  "editorMs": 386,
+  "input": {
+   "times": [
+    0.1,
+    0.3,
+    0.7,
+    1.3,
+    1.7,
+    2.1,
+    2.3,
+    2.95,
+    3.05,
+    3.3,
+    4,
+    6.5
+   ],
+   "cell": 300
+  },
+  "result": "12 frames left→right, top→bottom at 0.1s, 0.3s, 0.7s, 1.3s, 1.7s, 2.1s, 2.3s, 2.97s, 3.07s, 3.3s, 4s, 6.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/4e8182b8-da24-4ccc-b16e-f682d784a476/tool-results/mcp-motion-blob-1794512626885-6wb7ek.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "props": {
+    "fill": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 79,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm8",
+   "props": {
+    "fill": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jma",
+   "text": {
+    "fontSize": 84
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 222,
+  "editorMs": 162,
+  "input": {
+   "times": [
+    3.05,
+    3.3,
+    3.7,
+    6.5
+   ],
+   "cell": 400
+  },
+  "result": "4 frames left→right, top→bottom at 3.07s, 3.3s, 3.7s, 6.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/4e8182b8-da24-4ccc-b16e-f682d784a476/tool-results/mcp-motion-blob-1794512632267-1exr6s.jpg]"
+ }
+]

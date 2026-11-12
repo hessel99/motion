@@ -1,0 +1,30 @@
+- Gold line [path] box 360,930,360,2 #000000 a0 stroke #c9a96e 1.5px
+- Name ÉCLAT [group] #ffffff a0
+  - É [text] box 144,960,152,165 #e9d9b4 "É" serif 150px w400
+  - C [text] box 299,960,161,165 #e9d9b4 "C" serif 150px w400
+  - L [text] box 474,960,152,165 #e9d9b4 "L" serif 150px w400
+  - A [text] box 623,960,169,165 #e9d9b4 "A" serif 150px w400
+  - T [text] box 792,960,152,165 #e9d9b4 "T" serif 150px w400
+- Subline [text] box 40,1190,1000,36 #a8966f "EAU DE PARFUM" Inter 30px w400
+
+comp 1080x1920 7s @30fps, background #0a0a0b
+"Gold line" (path l_03jm2)
+  trimStart: 0.5s 50 ─Sine In Out→ 3.1s 0
+  trimEnd: 0.5s 50 ─Sine In Out→ 3.1s 100
+"É" (text l_03jm6)
+  position: expr "value + [-2*ease(time,1.6,4.8,14,0), 0]"
+  opacity: 1.6s 0 ─Ease Out→ 3s 100
+"C" (text l_03jm7)
+  position: expr "value + [-1*ease(time,1.6,4.8,14,0), 0]"
+  opacity: 1.8s 0 ─Ease Out→ 3.2s 100
+"L" (text l_03jm8)
+  opacity: 2s 0 ─Ease Out→ 3.4s 100
+"A" (text l_03jm9)
+  position: expr "value + [1*ease(time,1.6,4.8,14,0), 0]"
+  opacity: 2.2s 0 ─Ease Out→ 3.6s 100
+"T" (text l_03jma)
+  position: expr "value + [2*ease(time,1.6,4.8,14,0), 0]"
+  opacity: 2.4s 0 ─Ease Out→ 3.8s 100
+"Subline" (text l_03jm4)
+  position: 4.2s [540,1208] ─Sine Out→ 5.4s [540,1198]
+  opacity: 4.2s 0 ─Sine Out→ 4.8s 100

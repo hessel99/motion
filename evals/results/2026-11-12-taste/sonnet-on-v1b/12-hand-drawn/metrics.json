@@ -1,0 +1,203 @@
+{
+ "run": {
+  "id": "12-hand-drawn",
+  "name": "12-hand-drawn",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 54,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 54,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 93,
+     "readability": 44.8,
+     "polish": 100,
+     "richness": 100,
+     "technical": 64,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 7,
+     "readability": 55.2,
+     "polish": 0,
+     "richness": 0,
+     "technical": 36,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:text-collision",
+     "high:font-fallback",
+     "medium:read-hold",
+     "low:safe-area",
+     "low:safe-area"
+    ],
+    "ms": 27.9
+   },
+   "after": {
+    "score": 100,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [],
+    "ms": 7.5
+   }
+  },
+  "wallMs": 41427,
+  "timedOut": false,
+  "turns": 12,
+  "costUsd": 0.18028080000000002,
+  "durationMs": 38460,
+  "usage": {
+   "input": 189928,
+   "cached": 184505,
+   "output": 3542
+  },
+  "errors": [],
+  "toolCalls": 10,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built a 6 s piece on a cream paper background. It plays as one pass with no loop. I only checked it on a contact sheet and didn't run critique.\n\n- **Draw-on:** the wobbly **wheat** stalk (stem plus four leaves) and the **loaf** (body plus three score marks) draw themselves with soft Sine In Out eases, staggered between about 0.8 s and 3.5 s.\n- **Boil:** both line groups jitter at 12 fps. They shift slightly in position and rotation, so it reads as hand-animated.\n- **Blobs:** three irregular blobs (ochre, terracotta, sage) fade in and keep breathing slowly.\n- **Name:** \"Crumb & Co\" in a rounded font rises word by word with a soft spring overshoot at about 3.2 s. A small tagline, \"baked by hand, every morning\", fades in at 4.2 s.\n\nThe name sits low and touches the sage and ochre blobs, and the tagline is quite small. I'd fix both next by moving the artwork up and enlarging the tagline. I can also make the boil stronger or add a slow paper-grain wobble to the blobs.\nFixed all three issues (font swapped to Inter, name and tagline separated, tagline timing moved earlier), and the critic now scores 98/100. The one leftover title-safe note on the tagline is fixed too, but I didn't re-run critique after that last nudge."
+ },
+ "metrics": {
+  "layers": 16,
+  "drawableLayers": 14,
+  "layerTypes": {
+   "path": 12,
+   "group": 2,
+   "text": 2
+  },
+  "groups": 2,
+  "animatedLayers": 16,
+  "keys": 41,
+  "segments": 16,
+  "easesUsed": {
+   "Sine Out": 10,
+   "Sine In Out": 2,
+   "Ease In Out": 3,
+   "Ease Out": 1
+  },
+  "distinctEases": 4,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 7,
+  "textAnimators": 1,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 12,
+  "gradientLayers": 0,
+  "paletteSize": 6,
+  "palette": [
+   "#e9b872",
+   "#c9714b",
+   "#a9b78a",
+   "#5a3a22",
+   "#8a5a38",
+   "#f6ecd9"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.972,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0.067,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 4,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.092,
+  "midLuma": 0.857,
+  "toolErrors": 0,
+  "toolCalls": 10
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "stroke draw-on (trim paths animated)",
+    "type": "trimAnimated",
+    "pass": true
+   },
+   {
+    "text": "custom paths (≥2)",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "boil/wobble (wiggle expression, hold keys or path keys)",
+    "type": "jitter",
+    "pass": false
+   },
+   {
+    "text": "breathing blobs (scale animated)",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "warm palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "no linear eases",
+    "type": "noLinear",
+    "pass": true
+   }
+  ],
+  "hits": 6,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": null
+}

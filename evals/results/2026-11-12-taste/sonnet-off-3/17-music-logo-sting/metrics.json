@@ -1,0 +1,188 @@
+{
+ "run": {
+  "id": "17-music-logo-sting",
+  "name": "17-music-logo-sting",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 59,
+    "sub": {
+     "timing": 100,
+     "easing": 93,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 58,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 7,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 42,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:dead-trim",
+     "medium:thin",
+     "low:entrance-ease"
+    ],
+    "ms": 12.9
+   },
+   "after": {
+    "score": 59,
+    "sub": {
+     "timing": 100,
+     "easing": 93,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 58,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 7,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 42,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:dead-trim",
+     "medium:thin",
+     "low:entrance-ease"
+    ],
+    "ms": 12.9
+   }
+  },
+  "wallMs": 35099,
+  "timedOut": false,
+  "turns": 8,
+  "costUsd": 0.0935942,
+  "durationMs": 33346,
+  "usage": {
+   "input": 240209,
+   "cached": 232562,
+   "output": 3977
+  },
+  "errors": [],
+  "toolCalls": 7,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "I built the Pulse logo sting on a 120 BPM beat grid, with the logo landing at 4.0 s on the drop. I checked it on contact-sheet frames at 1 s, 3.5 s, 4.1 s, 4.6 s, 6.1 s and 7.5 s. I haven't played it back with sound.\n\n- **Build (0–3.5 s):** the **dot** pops in and pulses on every beat, a little harder each time. The **ring** draws itself on, speeding up and getting brighter as it goes.\n- **Anticipation (3.5–4.0 s):** the ring tightens inward and the dot shrinks to a pinprick, like a held breath.\n- **Drop (4.0 s):** the dot snaps back out with an overshoot and the ring settles into place. A teal **shock ring** (`shock2`) bursts outward in the same hit.\n- **Wordmark (4.4–5.2 s):** **wordmark** \"Pulse\" fades in and slides out from behind the mark.\n- **Secondary hits (5.5 s and 6.0 s):** the dot and ring pulse on both beats. The 6.0 s downbeat is the bigger one and fires a second shock ring.\n- **Lockup (6.7–8 s):** everything holds still on the clean mark and wordmark.\n\nColors are white and teal (`#3DE0C5`) on the dark background.\n\nThe music runs to 9.5 s but the comp is 8 s, so the sting ends 1.5 s before the track does. I can extend the comp or add a short exit if you want.\n\nI can also add a subtle glow on the drop, or give the wordmark a letter-by-letter reveal."
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "audio": 1,
+   "ellipse": 3,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 4,
+  "keys": 57,
+  "segments": 36,
+  "easesUsed": {
+   "Easy Ease": 21,
+   "Expo Out": 2,
+   "Quad Out": 11,
+   "Quad In Out": 1,
+   "Back Out": 1
+  },
+  "distinctEases": 5,
+  "easeFamilies": 4,
+  "overshootSegments": 1,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#3de0c5",
+   "#f4f6fa",
+   "#121214"
+  ],
+  "keyCoverage": 0.844,
+  "visualActivity": 0.796,
+  "firstMotion": 0,
+  "lastMotion": 6.8,
+  "endHold": 1.2,
+  "longestHold": 0.268,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.335,
+  "exits": 1,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [
+   "ring"
+  ],
+  "neverVisible": [],
+  "loopDiff": 0.017,
+  "midLuma": 0.075,
+  "toolErrors": 0,
+  "toolCalls": 7
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "the music is kept",
+    "type": "audioKept",
+    "pass": true
+   },
+   {
+    "text": "a hero landing on the drop (4.0 s, ±1 frame)",
+    "type": "hitAt",
+    "pass": false
+   },
+   {
+    "text": "moves land on beats (≥60% of landings within ±1 frame of the 120 BPM grid)",
+    "type": "onBeats",
+    "pass": false
+   },
+   {
+    "text": "restraint: not every beat carries a landing",
+    "type": "notEveryBeat",
+    "pass": true
+   }
+  ],
+  "hits": 3,
+  "checkable": 5,
+  "total": 5
+ },
+ "video": null
+}

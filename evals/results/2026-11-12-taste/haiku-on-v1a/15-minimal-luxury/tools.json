@@ -1,0 +1,376 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 261,
+  "ok": true,
+  "ms": 26,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Minimal luxury perfume reveal, vertical story, near-black background, champagne gold thin line that draws slowly, wide-tracked serif name fading in letter by letter with tracking tightening, generous negative space, slow restrained"
+  },
+  "result": "# Example: Elegant logo reveal, the line draws the mark and the wordmark slides out from behind it\n> tags: logo, reveal, elegant, minimal, luxury, corporate, line, stroke, draw, draw-on, trim, wordmark, mask, behind, monogram, calm\n\n## Brief\n\"Logo reveal for NOVA (a circle monogram with a slash). Calm and premium, dark background, 4 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n…"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 797,
+  "ok": true,
+  "ms": 149,
+  "editorMs": 4,
+  "input": {
+   "comp": {
+    "width": 1080,
+    "height": 1920,
+    "duration": 7,
+    "background": "#0B0B0C",
+    "name": "ÉCLAT Reveal"
+   },
+   "layers": [
+    {
+     "key": "rule",
+     "type": "path",
+     "d": "M0 0 L260 0",
+     "x": 410,
+     "y": 900,
+     "w": 260,
+     "h": 2,
+     "stroke": "#C8A96A",
+     "strokeWidth": 1.5,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 0.4,
+      "duration": 2.6,
+      "from": "center",
+      "ease": "Sine In Out"
+     }
+    },
+    {
+     "key": "name",
+     "text": {
+      "content": "ÉCLAT",
+      "fontFamily": "Georgia",
+      "fontSize": 150,
+      "fontWeight": 300,
+      "align": "center"
+     },
+     "tracking": 44,
+     "center": [
+      540,
+      975
+     ],
+     "fill": "#EFE6D2",
+     "animate": {
+      "opacity": [
+       {
+        "t": 1.2,
+        "v": 0
+       },
+       {
+        "t": 2.6,
+        "v": 100,
+        "ease": "Sine Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "sub",
+     "text": {
+      "content": "EAU DE PARFUM",
+      "fontFamily": "Georgia",
+      "fontSize": 30,
+      "fontWeight": 400,
+      "align": "center"
+     },
+     "tracking": 16,
+     "center": [
+      540,
+      1075
+     ],
+     "fill": "#C8A96A",
+     "animate": {
+      "opacity": [
+       {
+        "t": 3.6,
+        "v": 0
+       },
+       {
+        "t": 4.8,
+        "v": 100,
+        "ease": "Sine Out"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"3 created, 0 updated, 4 keyframe tracks; animation ends 4.8s\",\"ids\":{\"rule\":\"l_03jm2\",\"name\":\"l_03jm3\",\"sub\":\"l_03jm4\"}}"
+ },
+ {
+  "name": "split_text",
+  "argsBytes": 84,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 3,
+  "input": {
+   "id": "l_03jm3",
+   "by": "char",
+   "t": 1.2,
+   "duration": 1.4,
+   "stagger": 0.2,
+   "preset": "Fade in"
+  },
+  "result": "{\"group\":\"l_03jm5\",\"pieces\":5,\"ids\":[\"l_03jm6\",\"l_03jm7\",\"l_03jm8\",\"l_03jm9\",\"l_03jma\"],\"note\":\"pieces are char text layers in group coordinates\"}"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 69,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm6",
+    "l_03jm7",
+    "l_03jm8",
+    "l_03jm9",
+    "l_03jma",
+    "l_03jm5"
+   ]
+  },
+  "result": "comp 7s @30fps\n\"É\" (text l_03jm6)\n  opacity: 1.2s 0 ─Ease Out→ 2.6s 100\n\"C\" (text l_03jm7)\n  opacity: 1.4s 0 ─Ease Out→ 2.8s 100\n\"L\" (text l_03jm8)\n  opacity: 1.6s 0 ─Ease Out→ 3s 100\n\"A\" (text l_03jm9)\n  opacity: 1.8s 0 ─Ease Out→ 3.2s 100\n\"T\" (text l_03jma)\n  opacity: 2s 0 ─Ease Out→ 3.4s 100\n\"name\" (group l_03jm5)\n  opacity: 1.2s 0 ─Ease Out→ 2.6s 100"
+ },
+ {
+  "name": "set_keyframes",
+  "argsBytes": 63,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jm5",
+   "prop": "opacity",
+   "keyframes": [
+    {
+     "t": 0,
+     "v": 100
+    }
+   ]
+  },
+  "result": "set 1 keyframes on name.opacity"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm6"
+  },
+  "result": "{\"id\":\"l_03jm6\",\"name\":\"É\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[66.64111328125,90]},\"position\":{\"v\":[66.64111328125,90]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100],\"kf\":[{\"t\":1.2,\"v\":[0],\"interp\":\"bezier\",\"out\":[0,0],\"in\":[0.667,1]},{\"t\":2.5999999999999996,\"v\":[100],\"interp\":\"be…"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jma"
+  },
+  "result": "{\"id\":\"l_03jma\",\"name\":\"T\",\"type\":\"text\",\"parent\":\"l_03jm5\",\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[69.6806640625,90]},\"position\":{\"v\":[629.8359375,90]},\"scale\":{\"v\":[100,100]},\"rotation\":{\"v\":[0]},\"opacity\":{\"v\":[100],\"kf\":[{\"t\":2,\"v\":[0],\"interp\":\"bezier\",\"out\":[0,0],\"in\":[0.667,1]},{\"t\":3.4,\"v\":[100],\"interp\":\"bezier\",\"out\":[0.333,0]…"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 88,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm6"
+   ],
+   "prop": "position",
+   "expr": "value + [ease(time, 1.2, 4.4, -12, 0), 0]"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 87,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm7"
+   ],
+   "prop": "position",
+   "expr": "value + [ease(time, 1.2, 4.4, -6, 0), 0]"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 86,
+  "ok": true,
+  "ms": 8,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm9"
+   ],
+   "prop": "position",
+   "expr": "value + [ease(time, 1.2, 4.4, 6, 0), 0]"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 87,
+  "ok": true,
+  "ms": 66,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jma"
+   ],
+   "prop": "position",
+   "expr": "value + [ease(time, 1.2, 4.4, 12, 0), 0]"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 14,
+  "input": {},
+  "result": "score 72/100 (richness 84, technical 64)\n1. [high] font \"Georgia\" is not available: 6 text layer(s) render in a fallback\n   → update_layer {\"id\":\"l_03jm6\",\"text\":{\"fontFamily\":\"serif\"}}\n   → update_layer {\"id\":\"l_03jm7\",\"text\":{\"fontFamily\":\"serif\"}}\n   → update_layer {\"id\":\"l_03jm8\",\"text\":{\"fontFamily\":\"serif\"}}\n   → update_layer {\"id\":\"l_03jm9\",\"text\":{\"fontFamily\":\"serif\"}}\n2. [medium] 4 eleme…"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 208,
+  "editorMs": 107,
+  "input": {
+   "times": [
+    0,
+    1.5,
+    2.5,
+    3.5,
+    4.8,
+    6.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0s, 1.5s, 2.5s, 3.5s, 4.8s, 6.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b04600b1-7d00-44b3-bb2d-568d355933d1/tool-results/mcp-motion-blob-1794512014813-sbq51u.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm6",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm8",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm9",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 25,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jma",
+   "text": {
+    "fontFamily": "serif"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 60,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "text": {
+    "fontFamily": "serif",
+    "fontSize": 36
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 6,
+  "input": {},
+  "result": "score 90/100 (richness 84)\n1. [medium] 4 elements and 10 moves for 7s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 21,
+  "ok": true,
+  "ms": 45,
+  "editorMs": 18,
+  "input": {
+   "t": 6,
+   "maxSize": 540
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/b04600b1-7d00-44b3-bb2d-568d355933d1/tool-results/mcp-motion-blob-1794512019615-gttpg4.png]"
+ }
+]

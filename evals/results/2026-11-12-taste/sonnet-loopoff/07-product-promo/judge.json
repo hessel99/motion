@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 5,
+  "style_match": 6,
+  "timing_easing": 5,
+  "composition": 5,
+  "richness": 5,
+  "polish": 4
+ },
+ "overall": 5,
+ "critique": [
+  "The feature section is one identical orange-bar wipe repeated four times, drawn above the words at a 1s/60 BPM cadence with keys 0.05s off the 0.5s grid. Full-frame orange floods half of the opening frames, the words get only about 0.7s of clean read each, the comp is 8s instead of the briefed 10s, and the 'Available now' label sits high and undersized in its pill.",
+  "Rebuild the first 4s on a strict 0.5s grid: cut each word in on the downbeat and use thinner or angled orange slashes (or a fast clip mask) that reveal the word instead of covering it. Then extend to 10s so PULSE 2 and the pill get a real hold, and center and enlarge the pill label (about 64–72px, vertically centered in a taller pill)."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0614478,
+ "ms": 13010,
+ "raw": "```json\n{\"brief_fit\": 5, \"style_match\": 6, \"timing_easing\": 5, \"composition\": 5, \"richness\": 5, \"polish\": 4,\n \"critique\": [\"The feature section is one identical orange-bar wipe repeated four times, drawn above the words at a 1s/60 BPM cadence with keys 0.05s off the 0.5s grid. Full-frame orange floods half of the opening frames, the words get only about 0.7s of clean read each, the comp is 8s instead of the briefed 10s, and the 'Available now' label sits high and undersized in its pill.\", \"Rebuild the first 4s on a strict 0.5s grid: cut each word in on the downbeat and use thinner or angled orange slashes (or a fast clip mask) that reveal the word instead of covering it. Then extend to 10s so PULSE 2 and the pill get a real hold, and center and enlarge the pill label (about 64–72px, vertically centered in a taller pill).\"]}\n```"
+}

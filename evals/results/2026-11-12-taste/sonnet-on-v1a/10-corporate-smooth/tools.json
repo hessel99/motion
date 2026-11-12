@@ -1,0 +1,304 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 1599,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 2,
+  "input": {
+   "comp": {
+    "background": "#1a222c"
+   },
+   "layers": [
+    {
+     "key": "panel",
+     "name": "Panel",
+     "x": 120,
+     "y": 822,
+     "w": 780,
+     "h": 150,
+     "fill": "#3b4f66",
+     "opacity": 72,
+     "radius": 6,
+     "animate": {
+      "opacity": [
+       {
+        "t": 0.6,
+        "v": 0
+       },
+       {
+        "t": 1.6,
+        "v": 72,
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 4.9,
+        "v": 72
+       },
+       {
+        "t": 5.7,
+        "v": 0,
+        "ease": "Sine In Out"
+       }
+      ],
+      "position": [
+       {
+        "t": 0.6,
+        "v": [
+         450,
+         897
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 1.8,
+        "v": [
+         510,
+         897
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 4.9,
+        "v": [
+         510,
+         897
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 5.7,
+        "v": [
+         450,
+         897
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "line",
+     "name": "Accent Line",
+     "x": 120,
+     "y": 808,
+     "w": 780,
+     "h": 4,
+     "fill": "#8ab4e0",
+     "anchor": "left",
+     "animate": {
+      "scale": [
+       {
+        "t": 0.2,
+        "v": [
+         0,
+         100
+        ]
+       },
+       {
+        "t": 1.4,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Cubic In Out"
+       },
+       {
+        "t": 4.9,
+        "v": [
+         100,
+         100
+        ]
+       },
+       {
+        "t": 5.6,
+        "v": [
+         0,
+         100
+        ],
+        "ease": "Cubic In Out"
+       }
+      ]
+     }
+    },
+    {
+     "key": "nameClip",
+     "name": "Name Mask",
+     "type": "group",
+     "x": 160,
+     "y": 838,
+     "w": 700,
+     "h": 66,
+     "clip": true,
+     "children": [
+      {
+       "key": "name",
+       "name": "Name",
+       "text": {
+        "content": "Dr. Amelia Hart",
+        "fontSize": 52,
+        "fontWeight": 600,
+        "fontFamily": "Inter"
+       },
+       "x": 0,
+       "y": 0,
+       "w": 700,
+       "h": 66,
+       "fill": "#f1f5f9",
+       "animate": {
+        "position": [
+         {
+          "t": 1,
+          "v": [
+           350,
+           100
+          ]
+         },
+         {
+          "t": 1.9,
+          "v": [
+           350,
+           33
+          ],
+          "ease": "Cubic In Out"
+         },
+         {
+          "t": 4.7,
+          "v": [
+           350,
+           33
+          ]
+         },
+         {
+          "t": 5.4,
+          "v": [
+           350,
+           -40
+          ],
+          "ease": "Cubic In Out"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "key": "titleClip",
+     "name": "Title Mask",
+     "type": "group",
+     "x": 160,
+     "y": 908,
+     "w": 700,
+     "h": 42,
+     "clip": true,
+     "children": [
+      {
+       "key": "title",
+       "name": "Title",
+       "text": {
+        "content": "Head of Research, Larkspur Labs",
+        "fontSize": 28,
+        "fontWeight": 400,
+        "fontFamily": "Inter"
+       },
+       "x": 0,
+       "y": 0,
+       "w": 700,
+       "h": 42,
+       "fill": "#b8c7d8",
+       "animate": {
+        "position": [
+         {
+          "t": 1.25,
+          "v": [
+           350,
+           80
+          ]
+         },
+         {
+          "t": 2.15,
+          "v": [
+           350,
+           21
+          ],
+          "ease": "Cubic In Out"
+         },
+         {
+          "t": 4.8,
+          "v": [
+           350,
+           21
+          ]
+         },
+         {
+          "t": 5.5,
+          "v": [
+           350,
+           -50
+          ],
+          "ease": "Cubic In Out"
+         }
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"6 created, 0 updated, 5 keyframe tracks; animation ends 5.7s\",\"ids\":{\"panel\":\"l_03jm2\",\"line\":\"l_03jm3\",\"name\":\"l_03jm5\",\"nameClip\":\"l_03jm4\",\"title\":\"l_03jm7\",\"titleClip\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 205,
+  "editorMs": 92,
+  "input": {
+   "times": [
+    0.5,
+    1,
+    1.5,
+    2.5,
+    5.2,
+    5.9
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 1s, 1.5s, 2.5s, 5.2s, 5.9s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/c83df59f-76ef-4ccc-907a-a353f18d2e80/tool-results/mcp-motion-blob-1794511365249-0t6p7v.jpg]"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 40,
+  "ok": true,
+  "ms": 37,
+  "editorMs": 0,
+  "input": {
+   "ids": [
+    "l_03jm3"
+   ],
+   "includeStatic": true
+  },
+  "result": "comp 6s @30fps\n\"Accent Line\" (rect l_03jm3)\n  scale: 0.2s [0,100] ─Cubic In Out→ 1.4s 100 ─Cubic In Out→ 4.9s 100 ─Cubic In Out→ 5.6s [0,100]"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 24,
+  "ok": true,
+  "ms": 47,
+  "editorMs": 32,
+  "input": {
+   "t": 2.5,
+   "maxSize": 1000
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/c83df59f-76ef-4ccc-907a-a353f18d2e80/tool-results/mcp-motion-blob-1794511368539-mb4hk2.png]"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm3"
+  },
+  "result": "{\"id\":\"l_03jm3\",\"name\":\"Accent Line\",\"type\":\"rect\",\"parent\":null,\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[0,2]},\"position\":{\"v\":[120,810]},\"scale\":{\"v\":[0,100],\"kf\":[{\"t\":0.2,\"v\":[0,100],\"interp\":\"bezier\",\"out\":[0.65,0],\"in\":[0.667,1]},{\"t\":1.4,\"v\":[100,100],\"interp\":\"bezier\",\"out\":[0.65,0],\"in\":[0.35,1]},{\"t\":4.9,\"v\":[100,100],\"interp\":…"
+ }
+]

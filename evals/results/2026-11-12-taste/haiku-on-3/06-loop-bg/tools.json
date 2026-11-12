@@ -1,0 +1,48 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 4234,
+  "ok": true,
+  "ms": 641,
+  "editorMs": 9,
+  "input": "{\"comp\":{\"background\":\"#0b0718\",\"duration\":6,\"fps\":30,\"width\":1920,\"height\":1080},\"layers\":[{\"key\":\"orb-cyan\",\"name\":\"Orb cyan\",\"type\":\"ellipse\",\"center\":[380,860],\"w\":620,\"h\":620,\"fill\":\"#2dd4bf\",\"opacity\":28,\"props\":{\"blur\":150},\"expr\":{\"position\":\"value + [90*sin(time*1.0471976+3.0), -80*cos(time*1.0471976+0.2)]\"}},{\"key\":\"orb-violet\",\"name\":\"Orb violet\",\"type\":\"ellipse\",\"center\":[560,420],\"w\":900,\"h\":900,\"fill\":\"#7c3aed\",\"opacity\":50,\"props\":{\"blur\":150},\"expr\":{\"position\":\"value + [110*sin(time*1.0471976), 70*cos(time*1.0471976+1.3)]\"}},{\"key\":\"orb-teal\",\"name\":\"Orb teal\",\"type\":\"ellipse\",\"center\":[1360,660],\"w\":820,\"h\":820,\"fill\":\"#14b8a6\",\"opacity\":40,\"props\":{\"blur\":170},\"expr\":{\"position\":\"value + [-110*cos(time*1.0471976+0.7), 80*sin(time*1.0471976)]\"}},{\"key\":\"orb-fuchsia\",\"name\":\"Orb fuchsia\",\"type\":\"ellipse\",\"center\":[1150,260],\"w\":480,\"h\":480,\"fill\":\"#a855f7\",\"opacity\":35,\"props\":{\"blur\":120},\"expr\":{\"position\":\"value + [90*cos(time*1.0471976+2.0), 70*sin(time*1.0471976+0.5)]\"}},{\"key\":\"dots\",\"name\":\"Dot grid\",\"type\":\"path\",\"fill\":\"#c4b5fd\",\"opacity\":30,\"d\":\"M131 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M281 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M431 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M581 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M731 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M881 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1031 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1181 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1331 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1481 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1631 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1781 90a4 4 0 1 0 8 0a4 4 0 1 0-8 0M131 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M281 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M431 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M581 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M731 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M881 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1031 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1181 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1331 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1481 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1631 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1781 240a4 4 0 1 0 8 0a4 4 0 1 0-8 0M131 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M281 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M431 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M581 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M731 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M881 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1031 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1181 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1331 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1481 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1631 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1781 390a4 4 0 1 0 8 0a4 4 0 1 0-8 0M131 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M281 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M431 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M581 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M731 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M881 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1031 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1181 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1331 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1481 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1631 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M1781 540a4 4 0 1 0 8 0a4 4 0 1 0-8 0M131 690a4 4 0 1 0 8 0a4 4 0 1 0-8 0M281 690a4 4 0 1 0 8 0a4 4 0 1 0-8 0M431 690a4 4 0 1 0 8 0a4 4 0 1 0-8 0M581 690a4 4 0 1 0 8 0a4 4 0 1 0-8 0M731 690a4 4 0 1 0 8 0a4 4 …",
+  "result": "{\"summary\":\"5 created, 0 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"orb-cyan\":\"l_03jm2\",\"orb-violet\":\"l_03jm3\",\"orb-teal\":\"l_03jm4\",\"orb-fuchsia\":\"l_03jm5\",\"dots\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 16,
+  "input": {},
+  "result": "score 100/100 (no issues found)"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 30,
+  "ok": true,
+  "ms": 1416,
+  "editorMs": 1398,
+  "input": {
+   "frames": 4,
+   "start": 0,
+   "end": 6
+  },
+  "result": "4 frames left→right, top→bottom at 0s, 2s, 4s, 6s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/5cc2626d-85f0-4d4c-a678-c14e6c7dc290/tool-results/mcp-motion-blob-1794514593027-bib4t2.jpg]"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 73,
+  "ok": true,
+  "ms": 8,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm6"
+   ],
+   "prop": "opacity",
+   "expr": "45 + 30*sin(time*1.0471976)"
+  },
+  "result": "ok"
+ }
+]

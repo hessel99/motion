@@ -1,0 +1,34 @@
+- Gold Line [path] box 540,380,1,440 #6b8cff stroke #d9bf8f 1.5px
+- Letter É [text] box 209,890,120,170 #d9bf8f "É" serif 130px w400
+- Letter C [text] box 346,890,120,170 #d9bf8f "C" serif 130px w400
+- Letter L [text] box 480,890,120,170 #d9bf8f "L" serif 130px w400
+- Letter A [text] box 611,890,120,170 #d9bf8f "A" serif 130px w400
+- Letter T [text] box 760,890,120,170 #d9bf8f "T" serif 130px w400
+- Hairline [path] box 490,1110,100,1 #6b8cff stroke #d9bf8f 1px
+- Subline [text] box 240,1150,600,50 #bfa97f "EAU DE PARFUM" serif 26px w500
+
+comp 1080x1920 7s @30fps, background #0a0908
+"Gold Line" (path l_03jm2)
+  opacity: expr "value * (0.85 + 0.15 * Math.sin(time * 1.2))"
+  trimStart: 0.4s 0
+  trimEnd: 0.4s 0 ─Quart Out→ 3.2s 100
+"Letter É" (text l_03jm3)
+  position: 1.8s [246,975] ─Quart Out→ 4.6s [270,975]
+  opacity: 1.8s 0 ─Ease Out→ 3.6s 100
+"Letter C" (text l_03jm4)
+  position: 2.1s [423,975] ─Quart Out→ 4.9s [405,975]
+  opacity: 2.1s 0 ─Ease Out→ 3.9s 100
+"Letter L" (text l_03jm5)
+  position: 2.4s [540,975] ─Sine In Out→ 5.2s [540,975]
+  opacity: 2.4s 0 ─Ease Out→ 4.2s 100
+"Letter A" (text l_03jm6)
+  position: 2.7s [657,975] ─Quart Out→ 5.5s [675,975]
+  opacity: 2.7s 0 ─Ease Out→ 4.5s 100
+"Letter T" (text l_03jm7)
+  position: 3s [834,975] ─Quart Out→ 5.8s [810,975]
+  opacity: 3s 0 ─Ease Out→ 4.8s 100
+"Hairline" (path l_03jm8)
+  trimStart: 4.2s 0
+  trimEnd: 4.2s 0 ─Sine In Out→ 5.8s 100
+"Subline" (text l_03jm9)
+  opacity: 4.6s 0 ─Ease Out→ 6s 100

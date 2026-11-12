@@ -1,0 +1,216 @@
+{
+ "run": {
+  "id": "07-product-promo",
+  "name": "07-product-promo",
+  "model": "haiku",
+  "seed": 1,
+  "taste": false,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 32,
+    "sub": {
+     "timing": 31.000000000000014,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 0,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 69,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 180,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:end-hold",
+     "high:read-hold",
+     "high:read-hold",
+     "high:text-collision",
+     "high:text-collision",
+     "high:text-collision",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 12.6
+   },
+   "after": {
+    "score": 32,
+    "sub": {
+     "timing": 31.000000000000014,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 0,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 69,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 180,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:end-hold",
+     "high:read-hold",
+     "high:read-hold",
+     "high:text-collision",
+     "high:text-collision",
+     "high:text-collision",
+     "medium:timing-range",
+     "medium:timing-range",
+     "medium:timing-range",
+     "low:timing-range"
+    ],
+    "ms": 12.6
+   }
+  },
+  "wallMs": 71117,
+  "timedOut": false,
+  "turns": 15,
+  "costUsd": 0.01493833,
+  "durationMs": 70297,
+  "usage": {
+   "input": 499826,
+   "cached": 482803,
+   "output": 13415
+  },
+  "errors": [],
+  "toolCalls": 14,
+  "toolErrors": 0,
+  "toolsAvailable": 76,
+  "finalText": "The \"Pulse 2\" title sequence is built on the Main comp (1920×1080, 30 fps, 10 s), with near-black background `#0B0B0D`, electric orange `#FF5A1F`, and Inter Black type. Markers sit on every 0.5 s beat (120 BPM).\n\n- **Feature flashes (0–2.4 s):** **40h battery**, **Spatial audio** and **Pure silence** hit on beats 0, 1 and 2. Each word slams in at 120% and settles with Expo Out. Hard cuts are covered by full-frame orange wipes (**Wipe 1–3**). \"Pure silence\" holds about 1.3 s so it reads before the cut.\n- **Product name (2.5–3.2 s):** **Product name · PULSE 2** lands on beat 5 at 150% and settles with a Back Out overshoot. A single orange **Shockwave ring** expands behind it and fades out.\n- **Resolve (3.5–10 s):** **CTA pill · Available now** pops in under the wordmark on beat 7, with the **CTA label** rising into place. It holds to the final frame.\n\nChecks: I looked at frames across the sequence (wipe coverage, word swaps, the slam, the pill landing) and they read as intended. The automated frame check flagged only expected items: off-screen wipes before and after their moves, and the zero-size pill at 0.2 s. I did not change anything in response.\n\nChoices I made: the word flashes are one beat each (0.5 s), which is tight for reading, so the second and third words get their extra time from the holds. The lockup sits slightly low (PULSE 2 centred vertically, pill below it). There is no sound design, since you didn't ask for it.\n\nPossible next tweaks: a longer hold on \"Pure silence\", a shorter shockwave, or moving the lockup up so the group sits centred."
+ },
+ "metrics": {
+  "layers": 10,
+  "drawableLayers": 10,
+  "layerTypes": {
+   "text": 5,
+   "rect": 4,
+   "ellipse": 1
+  },
+  "groups": 0,
+  "animatedLayers": 10,
+  "keys": 40,
+  "segments": 20,
+  "easesUsed": {
+   "Expo Out": 3,
+   "Hold": 7,
+   "Quart Out": 3,
+   "Quart In": 3,
+   "Easy Ease": 2,
+   "Back Out": 2
+  },
+  "distinctEases": 6,
+  "easeFamilies": 5,
+  "overshootSegments": 2,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 7,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 8,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#f5f5f5",
+   "#ff5a1f",
+   "#0b0b0d"
+  ],
+  "keyCoverage": 0.37,
+  "visualActivity": 0.255,
+  "firstMotion": 0,
+  "lastMotion": 4,
+  "endHold": 6,
+  "longestHold": 1.072,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.335,
+  "exits": 4,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.178,
+  "midLuma": 0.128,
+  "toolErrors": 0,
+  "toolCalls": 14
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "3 feature words present",
+    "type": "textAllOf",
+    "pass": true
+   },
+   {
+    "text": "product name present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "\"Available now\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 beats",
+    "type": "beatsMin",
+    "pass": false
+   },
+   {
+    "text": "shockwave ring (stroked ellipse scaling up)",
+    "type": "ring",
+    "pass": true
+   },
+   {
+    "text": "feature words exit (transitions, not stacking)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "beat-aligned timing (markers or keys on a 0.5s grid)",
+    "type": "beatGrid",
+    "pass": true
+   },
+   {
+    "text": "dark background",
+    "type": "darkBackground",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": null
+}
