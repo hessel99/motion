@@ -475,7 +475,7 @@ function EasePanel() {
   );
 }
 
-function MiniSpring({ bounce }: { bounce: number }) {
+export function MiniSpring({ bounce }: { bounce: number }) {
   const s = 18, p = 2;
   let d = '';
   for (let i = 0; i <= 24; i++) {
@@ -507,7 +507,7 @@ function SpringView({ bounce, onChange }: { bounce: number; onChange: (b: number
   );
 }
 
-function MiniCurve({ v }: { v: number[] }) {
+export function MiniCurve({ v }: { v: number[] }) {
   const s = 18, p = 2;
   const X = (x: number) => p + x * (s - 2 * p), Y = (y: number) => s - p - y * (s - 2 * p) * 0.7 - (s - 2 * p) * 0.15;
   return <svg width={s} height={s}><path d={`M${X(0)} ${Y(0)} C${X(v[0])} ${Y(v[1])} ${X(v[2])} ${Y(v[3])} ${X(1)} ${Y(1)}`} fill="none" stroke="currentColor" stroke-width="1.4" /></svg>;

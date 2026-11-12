@@ -18,8 +18,8 @@ import { audioDuration, audioFailed, audioPeaks } from '../audio/engine';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { setEase, setInterp, setSpring, updateMarker, deleteMarker, cloneLayers, deleteLayers } from '../core/commands';
 
-const HEADER_H = 28;
-const ROW_H = 24;
+export const HEADER_H = 28;
+export const ROW_H = 24;
 const INDENT = 14;
 
 /** prop rows a layer type can show, in row order (built once per type, not per layer per rebuild) */
@@ -119,6 +119,14 @@ export class Timeline {
   private graph: GraphView;
   /** layer name filter (search box in the header) */
   filter = '';
+  /** layout modes (src/ui/layouts): list only the selected layers (and their ancestors) */
+  focusSelection = false;
+  /** expanded layers list every property they have (score layout), not only the animated ones */
+  allProps = false;
+  /** prop rows skip the value text (a DOM overlay edits the values in place) */
+  hideValues = false;
+  /** called after the rows were redrawn (rows, scroll or selection changed; never during playback) */
+  onBase: (() => void) | null = null;
 
   constructor(private ed: Editor, private host: HTMLElement) {
     this.graph = new GraphView(ed.store);
@@ -145,7 +153,7 @@ export class Timeline {
       this.baseDirty = true;
       if (st.comp.duration !== lastDur) { lastDur = st.comp.duration; if (this.drag?.kind !== 'compEnd') this.fitTime(); }
     });
-    st.on('selection', () => { this.baseDirty = true; });
+    st.on('selection', () => { this.baseDirty = true; if (this.focusSelection) { this.rowsDirty = true; this.scrollY = 0; } });
     st.on('workarea', () => { this.baseDirty = true; });
     st.on('keys', () => { this.baseDirty = true; });
     st.on('time', () => { if (!st.playing) this.baseDirty = true; });
@@ -182,8 +190,20 @@ export class Timeline {
       c.style.height = r.height + 'px';
     }
     this.playheadDrawn = null; this.lastPlayheadX = -1;
+    if (r.height > HEADER_H + ROW_H) this.clampScroll();
     if (this.autoFit && r.width > 0) { this.fitTime(); this.autoFit = false; }
     this.baseDirty = true;
+  }
+
+  /** redraw the rows on the next frame */
+  invalidate() { this.baseDirty = true; }
+
+  /** the layout changed this timeline's modes or size: rebuild rows and re-fit the time scale */
+  relayout() {
+    this.rowsDirty = true;
+    this.baseDirty = true;
+    this.autoFit = true;
+    this.resize();
   }
 
   fitTime() {
@@ -232,6 +252,12 @@ export class Timeline {
       }
       this.matched = matched;
     }
+    // focus: only the selection (plus ancestors, so the tree still reads). nothing selected: every layer
+    if (this.focusSelection && st.selection.length) {
+      const k = new Set<string>();
+      for (const id of st.selection) { let cur: string | null = id; while (cur && !k.has(cur)) { k.add(cur); cur = L[cur]?.parent ?? null; } }
+      if (keep) { for (const id of keep) if (!k.has(id)) keep.delete(id); } else keep = k;
+    }
     const expanded = this.expanded;
     // all rows share one object shape (monomorphic access in the draw / hit-test loops)
     const walk = (ids: string[], depth: number) => {
@@ -247,7 +273,8 @@ export class Timeline {
           let m = 0;
           for (let k = 0; k < keys.length; k++) {
             const p = l.props[keys[k]];
-            if (p && (p.kf?.length || p.expr)) { m |= 1 << k; rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: keys[k], hasChildren: false, mask: -1 }); }
+            if (p && (p.kf?.length || p.expr)) m |= 1 << k;
+            if (p && (this.allProps || p.kf?.length || p.expr)) { rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: keys[k], hasChildren: false, mask: -1 }); }
           }
           row.mask = m;
           walk(l.children, depth + 1);
@@ -298,7 +325,8 @@ export class Timeline {
     // rows only change when an ancestor had to be expanded (or an edit is pending)
     if (this.rowsDirty) this.buildRows();
     const i = this.layerRowIndex(id);
-    if (i >= 0) {
+    // hidden (a summoned sheet that is closed): no viewport to scroll into
+    if (i >= 0 && this.h > HEADER_H + ROW_H) {
       const y = i * ROW_H;
       if (y < this.scrollY) this.scrollY = y;
       else if (y + ROW_H > this.scrollY + this.h - HEADER_H) this.scrollY = y + ROW_H - (this.h - HEADER_H);
@@ -316,7 +344,7 @@ export class Timeline {
   // ---------- drawing ----------
   private frame() {
     if (this.rowsDirty) { this.buildRows(); this.baseDirty = true; }
-    if (this.baseDirty) { this.drawBase(); this.baseDirty = false; }
+    if (this.baseDirty) { this.drawBase(); this.baseDirty = false; this.onBase?.(); }
     const px = Math.round(this.tToX(this.ed.store.time));
     if (px === this.lastPlayheadX) return;
     this.lastPlayheadX = px;
@@ -493,7 +521,7 @@ export class Timeline {
     const ix = 8 + r.depth * INDENT;
     const animated = hasAnim(l);
     // twirl
-    if (r.hasChildren || animated) {
+    if (r.hasChildren || animated || this.allProps) {
       g.fillStyle = T.tlTwirl;
       g.beginPath();
       if (this.expanded.has(l.id)) { g.moveTo(ix, cy - 2); g.lineTo(ix + 8, cy - 2); g.lineTo(ix + 4, cy + 3); }
@@ -602,12 +630,14 @@ export class Timeline {
     g.font = T.font.ui;
     g.fillText(PROP_DEFS[key].label + (l.props[key]?.expr ? '  =' : ''), ix + 30, cy);
     // current value
+    if (!this.hideValues) {
     const v = valueAt(l, key, st.time);
     g.fillStyle = T.tlValue;
     g.font = T.font.monoSm;
     const txt = fmtValue(key, v);
     const tw = g.measureText(txt).width;
     g.fillText(txt, this.leftW - 12 - tw, cy);
+    }
     // keyframes: only the visible time range (keys are sorted by time)
     for (let i = lowerBound(kf, this.xToT(this.leftW - 6) - 1e-9); i < kf.length; i++) {
       const x = this.tToX(kf[i].t);

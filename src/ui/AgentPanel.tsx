@@ -12,6 +12,7 @@ import { MentionInput, type Mention } from './agent/MentionInput';
 import { TurnReview } from './agent/TurnReview';
 import { VariationTray, installVariationThumbs } from './agent/VariationTray';
 import './agent/agent.css';
+import { takeAgentPrompt } from './layouts/layout';
 
 const STORAGE = 'motion.agent';
 const pref = (k: string, d: string) => { try { return localStorage.getItem(STORAGE + '.' + k) || d; } catch { return d; } };
@@ -44,6 +45,17 @@ export function AgentPanel() {
   useEffect(() => editor.store.on('history', () => force(x => x + 1)), []);
   useEffect(() => editor.store.on('selection', () => force(x => x + 1)), []);
   useEffect(() => installVariationThumbs(), []);
+  // another surface (storyboard, command palette) hands over a prompt: prefill it and focus the input
+  useEffect(() => {
+    const take = () => {
+      const p = takeAgentPrompt();
+      if (p == null) return;
+      setInput(p);
+      requestAnimationFrame(() => { const ta = list.current?.parentElement?.querySelector<HTMLTextAreaElement>('.agent-input textarea'); if (ta) { ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length; } });
+    };
+    take();
+    return editor.on('agent-prompt', take);
+  }, []);
   // keep scrolled to the bottom unless the user scrolled up to read
   useEffect(() => { if (stick.current) list.current?.scrollTo({ top: 1e9 }); }, [msgs, turn]);
   // elapsed timer while a turn runs

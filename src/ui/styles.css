@@ -233,7 +233,7 @@ kbd, .kbd {
   grid-template-rows: 44px 1fr 300px;
   grid-template-areas: 'top top top' 'left center right' 'bottom bottom bottom';
 }
-.app.no-agent { grid-template-columns: 0 1fr 272px; }
+.app.no-agent:not([class*="layout-"]), .app.layout-classic.no-agent { grid-template-columns: 0 1fr 272px; }
 .topbar { grid-area: top; display: flex; align-items: center; justify-content: space-between; padding: 0 var(--space-4); border-bottom: 1px solid var(--border); background: var(--surface-1); gap: var(--space-4); -webkit-app-region: drag; contain: layout paint; }
 .topbar button, .topbar input { -webkit-app-region: no-drag; }
 .tb-left, .tb-center, .tb-right { display: flex; align-items: center; gap: var(--space-3); }

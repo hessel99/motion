@@ -13,12 +13,23 @@ import {
 import { setProjectName, editMode, newComposition, addPrecompLayer, renameComp, deleteLayers } from '../core/commands';
 import { Button, Dialog, Kbd } from './ui';
 import { getTheme, setTheme } from './theme';
+import { LAYOUTS, layout, setLayout, summon, toggleSummon, type LayoutId } from './layouts/layout';
+import { attachMagnet } from './layouts/magnet';
+import { StageChrome } from './layouts/StageChrome';
+import { ScoreFields } from './layouts/ScoreFields';
+import { ScoreTabs, Transport } from './layouts/Transport';
+import { Storyboard, SummonBar } from './layouts/Storyboard';
+import { CommandPalette } from './layouts/CommandPalette';
+import './layouts/layouts.css';
 
 let vp: ViewportController | null = null;
 let tl: Timeline | null = null;
 
 export function App() {
   const [agentOpen, setAgentOpen] = useState(() => { try { return localStorage.getItem('motion.agentOpen') !== '0'; } catch { return true; } });
+  useChannels([], ['layout']);
+  const L = layout();
+  const right = useRef<HTMLElement>(null);
   useEffect(() => { try { localStorage.setItem('motion.agentOpen', agentOpen ? '1' : '0'); } catch { /* */ } requestAnimationFrame(() => { vp?.resize(); tl?.resize(); }); }, [agentOpen]);
   useEffect(() => {
     setupShortcuts({
@@ -27,14 +38,34 @@ export function App() {
       toggleAgent: () => setAgentOpen(o => !o),
       editText: id => startTextEdit(id),
     });
+    return editor.on('agent-open', () => setAgentOpen(true));
   }, []);
+  // a layout change moves the same panels: the canvases follow through their ResizeObservers;
+  // the composition is re-fitted to the new stage and the timeline re-fits its time scale
+  const firstLayout = useRef(true);
+  useEffect(() => {
+    applyTimelineMode(L);
+    if (firstLayout.current) { firstLayout.current = false; return; }
+    requestAnimationFrame(() => { vp?.resize(); vp?.fit(); tl?.relayout(); });
+  }, [L]);
+  // stage: the drawer grows / shrinks, so the stage re-fits (director's sheet floats: no re-fit)
+  useEffect(() => { if (L === 'stage' && tl) { applyTimelineMode(L); requestAnimationFrame(() => { vp?.resize(); vp?.fit(); tl?.relayout(); }); } }, [summon.timeline]);
+  // stage: the inspector is a card that sits next to the selection
+  useEffect(() => (L === 'stage' && right.current ? attachMagnet(right.current, () => vp) : undefined), [L]);
+  const cls = ['app', 'layout-' + L, agentOpen ? '' : 'no-agent', summon.timeline ? 'sum-timeline' : '', summon.inspector ? 'sum-inspector' : ''].filter(Boolean).join(' ');
   return (
-    <div class={'app' + (agentOpen ? '' : ' no-agent')}>
+    <div class={cls}>
       <Guard name="Top bar"><TopBar agentOpen={agentOpen} toggleAgent={() => setAgentOpen(o => !o)} /></Guard>
-      {agentOpen && <aside class="left"><Guard name="Agent"><AgentPanel /></Guard></aside>}
+      {agentOpen && <aside class="left" aria-label="AI agent"><Guard name="Agent"><AgentPanel /></Guard></aside>}
       <main class="center"><Viewport /></main>
-      <aside class="right"><Guard name="Inspector"><Inspector /></Guard></aside>
-      <section class="bottom"><TimelineHost /></section>
+      <aside class="right" ref={right} aria-label="Inspector"><Guard name="Inspector"><Inspector /></Guard></aside>
+      <section class="bottom" aria-label="Timeline"><TimelineHost /></section>
+      {L === 'stage' && <StageChrome key="stage" agentOpen={agentOpen} openAgent={() => setAgentOpen(true)} />}
+      {L === 'score' && <Transport key="score" />}
+      {L === 'score' && <ScoreTabs key="score-tabs" />}
+      {L === 'director' && <Storyboard key="story" />}
+      {L === 'director' && <SummonBar key="summon" />}
+      <CommandPalette toggleAgent={() => setAgentOpen(o => !o)} fit={() => vp?.fit()} />
       <ShortcutHelp />
       <Welcome />
       <Benchmark />
@@ -44,7 +75,7 @@ export function App() {
 
 // ---------------- top bar ----------------
 function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
-  useChannels(['doc', 'playing', 'history', 'comps'], ['view']);
+  useChannels(['doc', 'playing', 'history', 'comps'], ['view', 'layout']);
   const s = editor.store;
   const time = useRef<HTMLSpanElement>(null);
   useEffect(() => editor.onFrame((_n, t) => {
@@ -80,6 +111,8 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
       { label: 'Run performance benchmark', action: () => editor.emit('benchmark') },
       { separator: true },
       { label: editor.showHud ? 'Hide performance HUD' : 'Show performance HUD', action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
+      { label: 'Layout', submenu: LAYOUTS.map(x => ({ label: (x.id === layout() ? '● ' : '   ') + x.label, action: () => setLayout(x.id) })) },
+      { label: 'Command palette', shortcut: '⌘K', action: () => toggleSummon('palette', true) },
       { label: getTheme() === 'light' ? 'Dark theme' : 'Light theme', action: () => setTheme(getTheme() === 'light' ? 'dark' : 'light') },
       { label: editor.snapPlaybackToFrames ? 'Play smooth (display refresh)' : 'Play at composition fps', action: () => { editor.snapPlaybackToFrames = !editor.snapPlaybackToFrames; toast(editor.snapPlaybackToFrames ? 'Playback snaps to composition frames' : 'Playback is smooth (every display frame)'); } },
     ];
@@ -122,6 +155,10 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
         }}>↶</Button>
         <Button variant="ghost" icon disabled={!s.canRedo} tip="Redo (⇧⌘Z)" onClick={() => s.redo()}>↷</Button>
         <Button variant="ghost" class="zoom" tip="Zoom to fit (⌘0)" onClick={() => vp?.fit()}>{Math.round((vp?.zoom ?? 1) * 100)}%</Button>
+        <Button variant="ghost" class="layout-switch" tip="Window layout (⌘K for everything)" aria-haspopup="menu" onClick={(e: MouseEvent) => {
+          const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+          showContextMenu(r.left, r.bottom + 4, LAYOUTS.map(x => ({ label: (x.id === layout() ? '● ' : '   ') + x.label, action: () => setLayout(x.id) })));
+        }}>▦ {LAYOUTS.find(x => x.id === layout())!.short} ▾</Button>
         <Button variant="ghost" active={props.agentOpen} tip="AI agent (⌘I)" onClick={props.toggleAgent}>✦ Agent</Button>
       </div>
     </header>
@@ -209,7 +246,40 @@ function TimelineHost() {
     (globalThis as any).timeline = tl;
     editor.store.on('selection', () => { const s = editor.store.selection; if (s.length === 1) tl!.reveal(s[0]); });
   }, []);
-  return <div class="timeline" ref={host} />;
+  useChannels([], ['layout']);
+  return (
+    <div class="tl-wrap">
+      <div class="timeline" ref={host} />
+      {layout() === 'score' && <ScoreFields getTl={() => tl} />}
+    </div>
+  );
+}
+
+/** per layout timeline behaviour (see layouts/layout.ts) */
+let autoExpanded = new Set<string>();
+let unsubSel: (() => void) | null = null;
+function applyTimelineMode(L: LayoutId) {
+  if (!tl) return;
+  const t = tl;
+  t.focusSelection = L === 'stage' && !summon.timeline;
+  t.allProps = L === 'score';
+  t.leftW = L === 'score' ? 440 : 300;
+  if (L !== 'score') t.hideValues = false;
+  unsubSel?.(); unsubSel = null;
+  for (const id of autoExpanded) t.expand(id, false);
+  autoExpanded = new Set();
+  // stage + score: the selected layers open up (and close again when deselected)
+  if (L === 'stage' || L === 'score') {
+    const sync = () => {
+      const sel = new Set(editor.store.selection);
+      for (const id of autoExpanded) if (!sel.has(id)) t.expand(id, false);
+      for (const id of sel) if (!t.expanded.has(id)) { t.expand(id, true); autoExpanded.add(id); }
+      for (const id of [...autoExpanded]) if (!sel.has(id)) autoExpanded.delete(id);
+    };
+    sync();
+    unsubSel = editor.store.on('selection', sync);
+  }
+  t.relayout();
 }
 
 // ---------------- text editing overlay ----------------

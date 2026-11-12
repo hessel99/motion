@@ -1,0 +1,203 @@
+/* =====================================================================================
+   Window layouts (src/ui/layouts, docs/layouts.md). Every layout re-composes the same mounted
+   panels (.left agent, .center viewport, .right inspector, .bottom timeline) with classes on
+   .app; the extra chrome of a layout is its own element. Tokens only.
+   Same performance rules as styles.css: no blur / backdrop-filter, no transitions on layout,
+   floating panels are `contain`ed and moved with transforms.
+   ===================================================================================== */
+.app { position: relative; }
+.tl-wrap { position: relative; width: 100%; height: 100%; }
+
+/* floating panel look (stage cards, director sheets) */
+.layout-stage .left, .layout-stage .right,
+.layout-director .right, .layout-director .bottom {
+  position: absolute; grid-area: auto;
+  background: var(--surface-1); border: 1px solid var(--border-overlay); border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2); overflow: hidden;
+}
+
+/* ================= A · Stage (canvas first) ================= */
+.app.layout-stage {
+  --drawer-h: 176px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 44px minmax(0, 1fr) 34px var(--drawer-h);
+  grid-template-areas: 'top' 'center' 'drawerbar' 'bottom';
+}
+.app.layout-stage.sum-timeline { --drawer-h: 46vh; }
+.layout-stage .left {
+  z-index: 5; left: var(--space-6); top: calc(44px + var(--space-6)); bottom: calc(var(--drawer-h) + 34px + var(--space-6));
+  width: 340px; border-right: 1px solid var(--border-overlay);
+}
+/* the inspector card: placed next to the selection by layouts/magnet.ts (left/top; absolute + contained) */
+.layout-stage .right {
+  z-index: 4; left: 0; top: 0; width: 264px;
+  overflow: visible; contain: layout; border-left: 1px solid var(--border-overlay);
+}
+/* the card's content scrolls, not the card: a scroll container straight over the WebGL canvas
+   left stale tiles above it (chromium), an inner one does not */
+.layout-stage .right > .inspector, .layout-director .right > .inspector {
+  max-height: min(560px, calc(100vh - 44px - 34px - var(--drawer-h) - 2 * var(--space-6)));
+  overflow: auto; border-radius: inherit;
+}
+.layout-stage .right .inspector { padding-bottom: 0; }
+.layout-stage .right .insp-section:last-child, .layout-stage .right .section:last-child { border-bottom: 0; }
+.layout-stage .right::before {
+  /* magnet tick: which side of the selection the card hangs on */
+  content: ''; position: sticky; display: block; top: 0; height: 2px; margin-bottom: -2px; z-index: 1;
+  background: var(--accent); opacity: 0;
+}
+.layout-stage .right[data-dock='right']::before, .layout-stage .right[data-dock='left']::before { opacity: 0.8; }
+.layout-stage .bottom { border-top: 0; }
+.stage-drawer-bar {
+  grid-area: drawerbar; display: flex; align-items: center; gap: var(--space-4);
+  padding: 0 var(--space-4) 0 var(--space-2); background: var(--surface-1);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); contain: layout paint;
+}
+.stage-drawer-grip { width: 44px; min-width: 44px; height: 24px; background: transparent; border-color: transparent; padding: 0; }
+.stage-drawer-grip:hover:not(:disabled) { background: var(--surface-hover); border-color: transparent; }
+.stage-grip-line { width: 22px; height: 3px; border-radius: 2px; background: var(--border-strong); }
+.stage-drawer-what { font-size: var(--text-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stage-drawer-bar kbd { margin-left: var(--space-2); }
+.stage-agent-pill {
+  position: absolute; z-index: 5; left: var(--space-6); bottom: calc(var(--drawer-h) + 34px + var(--space-6));
+  height: 32px; padding: 0 var(--space-6) 0 var(--space-5); border-radius: var(--radius-pill);
+  background: var(--surface-1); border-color: var(--border-overlay); box-shadow: var(--shadow-1); color: var(--text-secondary);
+}
+.stage-agent-spark { color: var(--accent-text); }
+/* new layouts: the viewport's tool bar is a vertical rail on the stage's left edge (the bottom
+   of the stage belongs to the drawer / transport / storyboard) */
+.app:not(.layout-classic) .toolbar { right: auto; top: 50%; bottom: auto; left: var(--space-6); transform: translateY(-50%); flex-direction: column; }
+.layout-stage:not(.no-agent) .toolbar { left: calc(340px + 2 * var(--space-6)); }
+.layout-director .toolbar { top: calc(50% + 20px); }
+
+/* ================= B · Score (stage + score) ================= */
+.app.layout-score {
+  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-rows: 44px 40px minmax(0, 1fr) 44px minmax(220px, 42%);
+  grid-template-areas: 'top top' 'center tabs' 'center side' 'transport transport' 'bottom bottom';
+}
+.layout-score .left, .layout-score .right { grid-area: side; border-left: 1px solid var(--border); border-right: 0; }
+.layout-score.sum-inspector .left { display: none; }
+.layout-score:not(.sum-inspector):not(.no-agent) .right { display: none; }
+.layout-score .bottom { border-top: 0; }
+.layout-score .tb-center { visibility: hidden; }
+.score-tabs {
+  grid-area: tabs; display: flex; align-items: center; padding: 0 var(--space-5);
+  background: var(--surface-1); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.score-tabs .seg { flex: 1; }
+.score-transport {
+  grid-area: transport; position: relative; display: flex; align-items: center; gap: var(--space-7);
+  padding: 0 var(--space-5); background: var(--surface-1); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  contain: layout paint;
+}
+.st-group { display: flex; align-items: center; gap: var(--space-2); }
+.st-timecode { font: var(--weight-semibold) var(--text-lg) var(--font-mono); font-variant-numeric: tabular-nums; min-width: 92px; margin-left: var(--space-4); contain: layout paint; }
+.st-meta { white-space: nowrap; }
+.st-sel { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.st-progress { position: absolute; left: 0; right: 0; top: -1px; height: 2px; pointer-events: none; }
+.st-progress > div { height: 100%; background: var(--tl-playhead); transform-origin: 0 50%; transform: scaleX(0); }
+
+/* inline values + ease swatches over the score's property rows (layouts/ScoreFields.tsx) */
+.score-fields { position: absolute; left: 0; bottom: 0; overflow: hidden; pointer-events: none; z-index: var(--z-canvas-ui); }
+.score-row { position: absolute; left: 0; top: 0; height: 24px; display: flex; align-items: center; gap: var(--space-3); pointer-events: auto; }
+.score-vals { display: flex; align-items: center; gap: var(--space-2); justify-content: flex-end; }
+.score-vals .num { flex: 1 1 0; max-width: 96px; min-height: 20px; height: 20px; background: transparent; border-color: transparent; }
+.score-vals .num:hover:not(:focus-within) { border-color: var(--border); background: var(--surface-0); }
+.score-vals .num:focus-within { background: var(--surface-0); }
+.score-vals .num input { padding: 0 var(--space-2); font: var(--text-xs) var(--font-mono); color: var(--tl-value); text-align: right; }
+.score-vals .num-label { padding: 0 var(--space-1) 0 var(--space-2); min-width: 12px; font-size: var(--text-2xs); }
+.score-vals .num-label:empty { display: none; }
+.score-vals .swatch { height: 16px; width: 16px; }
+.score-hex { font-size: var(--text-xs); color: var(--tl-value); }
+.score-ease {
+  width: 26px; min-width: 26px; height: 20px; min-height: 0; padding: 0; color: var(--text-muted);
+  background: var(--surface-0); border-color: var(--border); border-radius: var(--radius-sm);
+}
+.score-ease svg { width: 18px; height: 18px; }
+.score-ease:hover:not(:disabled) { color: var(--accent-text); }
+.score-ease.on { color: var(--accent-soft-text); background: var(--accent-soft); border-color: var(--accent-soft-border); }
+.score-ease.none { display: inline-block; border: 1px dashed var(--border); background: transparent; opacity: 0.6; }
+.score-hold { font-size: var(--text-xs); }
+
+/* ================= C · Director (conversation + storyboard) ================= */
+.app.layout-director {
+  grid-template-columns: 400px minmax(0, 1fr);
+  grid-template-rows: 44px minmax(0, 1fr) auto;
+  grid-template-areas: 'top top' 'left center' 'left story';
+}
+.app.layout-director.no-agent { grid-template-columns: 0 minmax(0, 1fr); }
+.layout-director .left { border-right: 1px solid var(--border); }
+.layout-director .right {
+  display: none; z-index: 6; right: var(--space-6); top: calc(44px + var(--space-6)); width: 280px;
+  overflow: visible; contain: layout; --drawer-h: 180px;
+  border-left: 1px solid var(--border-overlay);
+}
+.layout-director.sum-inspector .right { display: block; }
+.layout-director .bottom {
+  display: none; z-index: 7; left: calc(400px + var(--space-4)); right: var(--space-4); bottom: var(--space-4); height: 44%;
+  border-top: 1px solid var(--border-overlay);
+}
+.layout-director.no-agent .bottom { left: var(--space-4); }
+.layout-director.sum-timeline .bottom { display: block; }
+.summon-bar {
+  position: absolute; z-index: 5; top: calc(44px + var(--space-6)); left: calc(400px + var(--space-6));
+  display: flex; gap: var(--space-1); padding: var(--space-1); background: var(--surface-1);
+  border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-1);
+}
+.layout-director.no-agent .summon-bar { left: var(--space-6); }
+
+.storyboard {
+  grid-area: story; display: flex; flex-direction: column; gap: var(--space-3);
+  padding: var(--space-4) var(--space-6) var(--space-5); background: var(--surface-1); border-top: 1px solid var(--border);
+  contain: layout paint;
+}
+.sb-head { display: flex; align-items: center; gap: var(--space-5); min-height: var(--control-h-md); }
+.sb-strip { display: flex; gap: var(--space-5); overflow-x: auto; overflow-y: hidden; padding-bottom: var(--space-1); }
+.sb-card { flex: 0 0 152px; display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.sb-frame {
+  position: relative; display: block; width: 100%; height: auto; min-height: 0; padding: 0; overflow: hidden;
+  background: var(--vp-bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+}
+.sb-frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.sb-blank { display: block; width: 100%; height: 100%; background: var(--surface-0); }
+.sb-frame:hover:not(:disabled) { border-color: var(--border-strong); }
+.sb-card.on .sb-frame { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.sb-time {
+  position: absolute; left: var(--space-2); bottom: var(--space-2); padding: 0 var(--space-2);
+  font-size: var(--text-2xs); border-radius: var(--radius-xs); background: var(--surface-3); color: var(--text-secondary);
+}
+.sb-card.on .sb-time { background: var(--accent-solid); color: var(--text-on-accent); }
+.sb-cap { display: flex; align-items: center; gap: var(--space-2); min-height: var(--control-h-sm); }
+.sb-cap-text { flex: 1; min-width: 0; font-size: var(--text-xs); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-ask { width: var(--control-h-sm); min-width: var(--control-h-sm); padding: 0; color: var(--accent-text); opacity: 0.55; }
+.sb-card:hover .sb-ask, .sb-ask:focus-visible { opacity: 1; }
+.sb-add {
+  flex: 0 0 120px; align-self: flex-start; aspect-ratio: 16 / 9; height: auto; flex-direction: column; gap: var(--space-2);
+  border: 1px dashed var(--border-strong); background: transparent; color: var(--text-muted); font-size: var(--text-xs);
+}
+.sb-add-plus { color: var(--accent-text); font-size: var(--text-lg); }
+.sb-thread { position: relative; height: 10px; margin: 0 var(--space-1); }
+.sb-thread::before { content: ''; position: absolute; left: 0; right: 0; top: 4px; height: 2px; border-radius: 1px; background: var(--border); }
+.sb-dot { position: absolute; top: 2px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--keyframe-idle); }
+.sb-playhead { position: absolute; left: 0; right: 0; top: 0; height: 10px; pointer-events: none; }
+.sb-playhead > span { position: absolute; left: -1px; top: -1px; width: 2px; height: 12px; border-radius: 1px; background: var(--tl-playhead); }
+
+/* ================= command palette (every layout) ================= */
+.palette-backdrop { position: fixed; inset: 0; z-index: var(--z-modal); background: var(--backdrop); display: flex; justify-content: center; align-items: flex-start; padding-top: 14vh; }
+.palette {
+  width: min(560px, calc(100vw - 32px)); background: var(--surface-overlay); border: 1px solid var(--border-overlay);
+  border-radius: var(--radius-xl); box-shadow: var(--shadow-3); overflow: hidden; display: flex; flex-direction: column;
+}
+.palette-input { min-height: 44px; border: 0; border-bottom: 1px solid var(--border-overlay); border-radius: 0; background: transparent; padding: 0 var(--space-7); font-size: var(--text-lg); }
+.palette-input:focus { box-shadow: none; border-color: var(--border-overlay); }
+.palette-list { max-height: 52vh; overflow: auto; padding: var(--space-2); }
+.palette-item { display: flex; align-items: center; gap: var(--space-5); min-height: 30px; padding: 0 var(--space-5); border-radius: var(--radius-sm); cursor: default; }
+.palette-item.active { background: var(--accent-solid); color: var(--text-on-accent); }
+.palette-group { width: 64px; flex: none; font-size: var(--text-2xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.palette-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.palette-hint { flex: none; font-size: var(--text-xs); color: var(--text-muted); max-width: 46%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.palette-item.active .palette-group, .palette-item.active .palette-hint { color: var(--text-on-accent); }
+.palette-item.ask .palette-label { color: var(--accent-text); }
+.palette-item.ask.active .palette-label { color: var(--text-on-accent); }
+.palette-empty { padding: var(--space-5); }
