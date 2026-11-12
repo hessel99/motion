@@ -13,6 +13,7 @@ import { compileExpr, runExpr, type ExprContext } from '../core/expr';
 import { PROP_DEFS, type Layer, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
 import { Atlas, type AtlasEntry } from './atlas';
+import type { PathGeometry, PathKey } from '../core/model';
 import { loadBundledFonts } from './fonts';
 import { cubicBezier, EASE_PRESETS, springAt } from '../core/easing';
 import { layoutText, textUnits, type TextUnit, rasterImage, rasterPath, rasterShapePaint, rasterText, setImageLoadedHandler, type RasterResult } from './raster';
@@ -193,6 +194,9 @@ interface Item {
   owner: number;
   /** per-unit text animation state */
   units: UnitState[] | null;
+  /** per-frame raster (animated path shape / trim paths) */
+  prevEntry?: AtlasEntry | null; prevRaster?: RasterResult | null; prevScale?: number;
+  dyn: { base: string; trim: Track[] | null; pkf: PathKey[] | null; eases: ((p: number) => number)[]; frame: number; t: number } | null;
   /** properties driven by expressions (bit = TR_* index) + their compiled programs */
   exprMask: number;
   exprs: ({ node: any; track: Track; keyTimes: number[] } | null)[] | null;
@@ -416,7 +420,7 @@ export class Renderer {
         id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10), isoGroup: layer.children.length > 0 || layer.type === 'precomp',
         hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden),
         rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
-        tOff, owner, units: null, exprMask: 0, exprs: null, tEnd,
+        tOff, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null,
       };
       if (parent >= 0) {
         const p = this.items[parent];
@@ -482,6 +486,18 @@ export class Renderer {
     it.rasterBase = this.rasterBase(l, complex);
     it.rasterKey = null;
     it.entry = null;
+    it.dyn = null;
+    if (l.type === 'path' && ((l.pathKf?.length ?? 0) >= 2 || l.trim)) {
+      const pkf = l.pathKf && l.pathKf.length >= 2 ? l.pathKf : null;
+      it.dyn = {
+        base: it.rasterBase!,
+        trim: l.trim ? [new Track(l.trim.start, 1), new Track(l.trim.end, 1), new Track(l.trim.offset, 1)] : null,
+        pkf,
+        eases: pkf ? pkf.map((k, j) => (j < pkf.length - 1 && k.interp === 'bezier' ? cubicBezier(k.out[0], k.out[1], pkf[j + 1].in[0], pkf[j + 1].in[1]) : (x: number) => x)) : [],
+        frame: NaN, t: 0,
+      };
+      it.animated = true; // re-render every frame while it changes
+    }
     this.evalItem(i, 0, true);
     this.unitCount -= it.units?.length ?? 0;
     it.units = null;
@@ -692,6 +708,26 @@ export class Renderer {
     // have an older resolution? keep it and upgrade when time allows
     const hasOld = !!it.entry && !it.entry.dead;
     const S = this.style, os = i * ST;
+    if (it.dyn) {
+      // per-frame shape: draw now within budget, otherwise keep showing the previous frame
+      if (performance.now() > budgetEnd + 8 && it.prevEntry && !it.prevEntry.dead) {
+        it.entry = it.prevEntry; it.raster = it.prevRaster!; it.rasterScale = it.prevScale!;
+        this.pendingUpgrade = true;
+        return true;
+      }
+      const d = it.dyn;
+      const geo = d.pkf ? interpPathKeys(d.pkf, d.eases, d.t) : l.geometry;
+      const tv = d.trim ? { start: d.trim[0].eval1(d.t) / 100, end: d.trim[1].eval1(d.t) / 100, offset: d.trim[2].eval1(d.t) / 360 } : undefined;
+      const r = rasterPath(geo === l.geometry ? l : { ...l, geometry: geo }, bucket, S[os + 14], tv);
+      if (!r) return hasOld;
+      const e = this.atlas.alloc(key, r.pw, r.ph);
+      if (!e) return hasOld;
+      this.atlas.upload(e, r.data);
+      r.data = undefined as any;
+      this.rasterMeta.set(key, r);
+      it.rasterKey = key; it.raster = r; it.entry = e; it.rasterScale = bucket; it.rasterGen = this.atlas.generation;
+      return true;
+    }
     // off the main thread: resolution upgrades, and anything beyond this frame's raster budget.
     // first-time rasters within budget stay synchronous so edits (typing, drawing) never flicker.
     if (l.type !== 'image' && this.workersOk && (hasOld || performance.now() > budgetEnd)) {
@@ -913,6 +949,16 @@ export class Renderer {
           if (sy < minY) minY = sy; if (sy > maxY) maxY = sy;
         }
         if (maxX < 0 || maxY < 0 || minX > cw0 || minY > ch0) { culled++; continue; }
+      }
+      if (it.dyn) {
+        const fr = Math.round((t - it.tOff) * this.store.comp.fps);
+        if (fr !== it.dyn.frame) {
+          it.dyn.frame = fr;
+          it.dyn.t = t - it.tOff;
+          it.rasterBase = `${it.dyn.base}|f${fr}`;
+          if (it.entry) { it.prevEntry = it.entry; it.prevRaster = it.raster; it.prevScale = it.rasterScale; }
+          it.entry = null;
+        }
       }
       if (it.kind >= KIND_MASK) {
         // raster space -> local box: paths scale geometry space by size/geomSize
@@ -1306,3 +1352,28 @@ export function easeFn(name: string): (p: number) => number {
 }
 
 function hashStr(s: string) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+
+/** interpolate keyframed path shapes (pairwise when command structures match, else hold) */
+export function interpPathKeys(kf: PathKey[], eases: ((p: number) => number)[], t: number): PathGeometry[] {
+  if (t <= kf[0].t) return kf[0].geometry;
+  const last = kf[kf.length - 1];
+  if (t >= last.t) return last.geometry;
+  let i = 0;
+  while (i < kf.length - 2 && kf[i + 1].t <= t) i++;
+  const a = kf[i], b = kf[i + 1];
+  if (a.interp === 'hold') return a.geometry;
+  const p = eases[i]((t - a.t) / (b.t - a.t || 1));
+  if (a.geometry.length !== b.geometry.length) return p < 0.5 ? a.geometry : b.geometry;
+  return a.geometry.map((ga, gi) => {
+    const gb = b.geometry[gi];
+    if (ga.cmds.length !== gb.cmds.length) return p < 0.5 ? ga : gb;
+    return {
+      fillRule: ga.fillRule,
+      cmds: ga.cmds.map((ca, ci) => {
+        const cb = gb.cmds[ci];
+        if (ca[0] !== cb[0]) return p < 0.5 ? ca : cb;
+        return ca.map((v, k) => (k === 0 ? v : (v as number) + (((cb as any)[k] as number) - (v as number)) * p)) as any;
+      }),
+    };
+  });
+}

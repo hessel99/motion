@@ -282,3 +282,14 @@ describe('review 2 regressions', () => {
     expect(kf.map(k => k.v[0])).toEqual([100, 0]);
   });
 });
+
+import { interpPathKeys } from '../src/render/renderer';
+describe('path morphing', () => {
+  it('interpolates matching command structures and holds otherwise', () => {
+    const k = (t: number, x: number) => ({ t, geometry: [{ cmds: [['M', 0, 0], ['L', x, 0], ['Z']] as any, fillRule: 'nonzero' as const }], interp: 'linear' as const, out: [0, 0] as [number, number], in: [1, 1] as [number, number] });
+    const kf = [k(0, 100), k(1, 200)];
+    const lin = (p: number) => p;
+    expect(interpPathKeys(kf, [lin, lin], 0.5)[0].cmds[1]).toEqual(['L', 150, 0]);
+    expect(interpPathKeys(kf, [lin, lin], 2)[0].cmds[1]).toEqual(['L', 200, 0]);
+  });
+});

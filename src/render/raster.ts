@@ -103,10 +103,37 @@ function hasComplexPaint(l: Layer) {
   return !!l.paints && l.paints.some(p => p.type !== 'solid');
 }
 
+/** trim (0..1 start/end, offset in turns) for strokes, applied with a dash pattern */
+export interface TrimValues { start: number; end: number; offset: number }
+
+function pathLength(p: Path2D, g: PathGeometry): number {
+  // polyline approximation of the command list (only used for trim dash lengths)
+  let len = 0, x = 0, y = 0, sx = 0, sy = 0;
+  for (const c of g.cmds) {
+    if (c[0] === 'M') { x = sx = c[1]; y = sy = c[2]; }
+    else if (c[0] === 'L') { len += Math.hypot(c[1] - x, c[2] - y); x = c[1]; y = c[2]; }
+    else if (c[0] === 'Z') { len += Math.hypot(sx - x, sy - y); x = sx; y = sy; }
+    else {
+      const pts = c[0] === 'C' ? [x, y, c[1], c[2], c[3], c[4], c[5], c[6]] : [x, y, c[1], c[2], c[1], c[2], c[3], c[4]];
+      let px = x, py = y;
+      for (let k = 1; k <= 12; k++) {
+        const t = k / 12, u = 1 - t;
+        const qx = u * u * u * pts[0] + 3 * u * u * t * pts[2] + 3 * u * t * t * pts[4] + t * t * t * pts[6];
+        const qy = u * u * u * pts[1] + 3 * u * u * t * pts[3] + 3 * u * t * t * pts[5] + t * t * t * pts[7];
+        len += Math.hypot(qx - px, qy - py); px = qx; py = qy;
+      }
+      x = pts[6]; y = pts[7];
+    }
+  }
+  void p;
+  return len;
+}
+
 /** vector path: fill + stroke coverage masks in geometry space */
-export function rasterPath(l: Layer, scale: number, strokeWidth: number): RasterResult | null {
+export function rasterPath(l: Layer, scale: number, strokeWidth: number, trimArg?: TrimValues): RasterResult | null {
   const geoms = l.geometry ?? [];
-  const strokeGeoms = l.strokeGeometry;
+  const strokeGeoms = trimArg ? undefined : l.strokeGeometry;
+  trim = trimArg;
   const [bx, by, bw, bh] = geometryBounds(strokeGeoms ? [...geoms, ...strokeGeoms] : geoms);
   const pad = (strokeGeoms ? 0 : strokeWidth) + 2 / scale;
   const x = bx - pad, y = by - pad, w = bw + pad * 2, h = bh + pad * 2;
@@ -134,6 +161,7 @@ export function rasterPath(l: Layer, scale: number, strokeWidth: number): Raster
   return { kind: 'mask', pw, ph, x, y, w: pw / s, h: ph / s, data: out };
 }
 
+let trim: TrimValues | undefined;
 function strokeGeom(c: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, l: Layer, geoms: PathGeometry[], strokeGeoms: PathGeometry[] | undefined, width: number, style: string) {
   if (strokeGeoms) {
     // figma provides pre-outlined stroke geometry: fill it
@@ -147,6 +175,15 @@ function strokeGeom(c: OffscreenCanvasRenderingContext2D | CanvasRenderingContex
   const align = l.strokeAlign ?? 'center';
   for (const g of geoms) {
     const p = toPath2D(g);
+    if (trim) {
+      const L = pathLength(p, g);
+      let a = Math.min(trim.start, trim.end), b = Math.max(trim.start, trim.end);
+      const vis = (b - a) * L;
+      if (vis <= 0.01) continue;
+      const off = (((a + trim.offset) % 1) + 1) % 1 * L;
+      c.setLineDash([vis, Math.max(0.0001, L - vis)]);
+      c.lineDashOffset = -off;
+    }
     if (align === 'center') { c.lineWidth = width; c.stroke(p); continue; }
     c.save();
     c.lineWidth = width * 2;
@@ -161,6 +198,8 @@ function strokeGeom(c: OffscreenCanvasRenderingContext2D | CanvasRenderingContex
     c.stroke(p);
     c.restore();
   }
+  c.setLineDash([]);
+  c.lineDashOffset = 0;
 }
 
 function cssColor(v: number[]) {

@@ -95,6 +95,25 @@ export interface TextData {
   align: 'left' | 'center' | 'right';
 }
 
+/** keyframed path shape (morphing). commands are interpolated pairwise when the structure matches */
+export interface PathKey {
+  t: number;
+  geometry: PathGeometry[];
+  interp: Interp;
+  out: [number, number];
+  in: [number, number];
+}
+
+/** after effects / lottie "trim paths" on a path layer's stroke (and fill outline) */
+export interface Trim {
+  /** 0..100 */
+  start: Prop;
+  /** 0..100 */
+  end: Prop;
+  /** degrees (360 = one full path length) */
+  offset: Prop;
+}
+
 /** parametric per-unit text animation (text reveal), evaluated in the renderer */
 export interface TextAnim {
   by: 'char' | 'word' | 'line';
@@ -135,6 +154,10 @@ export interface Layer {
   geometry?: PathGeometry[]; // for 'path': coordinates in geometry space (0..geomSize)
   /** size the geometry was authored at; rendering scales geometry by size/geomSize */
   geomSize?: [number, number];
+  /** animated path shape (overrides `geometry` over time) */
+  pathKf?: PathKey[];
+  /** trim paths (stroke drawing on/off) */
+  trim?: Trim;
   strokeGeometry?: PathGeometry[];
   text?: TextData;
   textAnim?: TextAnim;
