@@ -241,7 +241,7 @@ export function projectToLottie(project: Project): any {
           const t = l.text!;
           const fill = firstV(l.props.fill, [1, 1, 1, 1]);
           const fName = (t.fontFamily || 'Inter').replace(/\s+/g, '') + (t.fontWeight >= 700 ? '-Bold' : '-Regular');
-          fonts.set(fName, { fName, fFamily: t.fontFamily, fStyle: `${t.fontWeight >= 700 ? 'Bold' : 'Regular'}${t.fontStyle === 'italic' ? ' Italic' : ''}`, ascent: 75 });
+          fonts.set(fName, { fName, fFamily: t.fontFamily, fStyle: `${t.fontWeight >= 700 ? 'Bold' : 'Regular'}${t.fontStyle === 'italic' ? ' Italic' : ''}`, ascent: 75, origin: 0, fPath: '', fWeight: '' });
           const doc = {
             s: t.fontSize, f: fName, t: t.content.replace(/\n/g, '\r'), j: t.align === 'right' ? 1 : t.align === 'center' ? 2 : 0,
             tr: t.fontSize ? R((t.letterSpacing / t.fontSize) * 1000) : 0, lh: R(t.fontSize * t.lineHeight), ls: 0,

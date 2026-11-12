@@ -132,6 +132,8 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
 - Keyframe and shape-layer byte layouts follow the spec but are not yet verified against real files with keyframes.
 - Skipped: effects, masks, mattes, expressions, 3D, cameras, lights.
 - **Lottie** import/export is the reliable interchange format today (round-trip tested).
+- **Lottie export is verified against the official lottie-web player** (`scripts/export-compare.mjs`): frame-identical for transforms, easing, springs and opacity with its default SVG renderer.
+  - Known gap: lottie-web's *canvas* renderer only draws text that is embedded as glyph shapes ("chars"), which we don't export yet; its SVG renderer and the mobile players use system fonts.
 
 ## Agent integration
 
