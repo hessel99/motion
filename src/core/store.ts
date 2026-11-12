@@ -62,6 +62,8 @@ export class Store {
   time = 0;
   playing = false;
   loop = true;
+  /** preview range [start, end] in seconds (after effects "work area"); null = whole comp */
+  workArea: [number, number] | null = null;
   private listeners = new Set<Listener>();
   private uiListeners = new Map<string, Set<() => void>>();
   private undoStack: Entry[] = [];
@@ -212,6 +214,7 @@ export class Store {
   openComp(id: string) {
     if (!this.project.comps[id] || id === this.project.activeComp) return;
     this.project.activeComp = id;
+    this.workArea = null;
     this.selection = [];
     this.keySelection.clear();
     this.time = Math.min(this.time, this.comp.duration);

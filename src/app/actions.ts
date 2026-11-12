@@ -478,7 +478,13 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (k === 't') return run(() => editor.setTool('text'));
     if (k === 'p' && !e.shiftKey) return run(() => editor.setTool('pen'));
     if (k === 'h') return run(() => editor.setTool('hand'));
-    if (k === 'home') return run(() => s.setTime(0));
+    if (k === 'b' || k === 'n') return run(() => {
+      const wa = s.workArea ?? [0, s.comp.duration];
+      s.workArea = k === 'b' ? [Math.min(s.time, wa[1] - 1 / s.comp.fps), wa[1]] : [wa[0], Math.max(s.time, wa[0] + 1 / s.comp.fps)];
+      s.emit('workarea');
+      toast(`Preview range ${s.workArea[0].toFixed(2)}s – ${s.workArea[1].toFixed(2)}s`);
+    });
+    if (k === 'home') return run(() => s.setTime(s.workArea?.[0] ?? 0));
     if (k === 'end') return run(() => s.setTime(s.comp.duration));
     if (k === ',' || k === 'pageup') return run(() => editor.stepFrames(e.shiftKey ? -10 : -1));
     if (k === '.' || k === 'pagedown') return run(() => editor.stepFrames(e.shiftKey ? 10 : 1));

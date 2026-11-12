@@ -78,6 +78,7 @@ export class Timeline {
       if (st.comp.duration !== lastDur) { lastDur = st.comp.duration; if (this.drag?.kind !== 'compEnd') this.fitTime(); }
     });
     st.on('selection', () => { this.baseDirty = true; });
+    st.on('workarea', () => { this.baseDirty = true; });
     st.on('keys', () => { this.baseDirty = true; });
     st.on('time', () => { if (!st.playing) this.baseDirty = true; });
     st.on('comps', () => { this.expanded.clear(); this.scrollY = 0; this.fitTime(); this.rowsDirty = true; this.baseDirty = true; });
@@ -321,6 +322,18 @@ export class Timeline {
         const mx = Math.round(this.tToX((f + m * minor) / fps)) + 0.5;
         g.fillStyle = '#2f2f35';
         g.fillRect(mx, HEADER_H - 4, 1, 4);
+      }
+    }
+    // work area (preview range)
+    const wa = this.ed.store.workArea;
+    if (wa) {
+      const ax = Math.max(this.leftW, this.tToX(wa[0])), bx = Math.min(this.w, this.tToX(wa[1]));
+      if (bx > ax) {
+        g.fillStyle = 'rgba(76,141,255,0.35)';
+        g.fillRect(ax, HEADER_H - 5, bx - ax, 4);
+        g.fillStyle = 'rgba(0,0,0,0.25)';
+        g.fillRect(this.leftW, HEADER_H, Math.max(0, ax - this.leftW), this.h);
+        g.fillRect(bx, HEADER_H, Math.max(0, this.w - bx), this.h);
       }
     }
     const endX = this.tToX(comp.duration);
@@ -778,7 +791,12 @@ export class Timeline {
 
   private dbl(e: MouseEvent) {
     const [x, y] = this.local(e);
-    if (y < HEADER_H && x > this.leftW) { this.fitTime(); return; }
+    if (y < HEADER_H && x > this.leftW) {
+      // double click on the work area bar clears it, elsewhere fits the time
+      if (this.ed.store.workArea && y > HEADER_H - 8) { this.ed.store.workArea = null; this.ed.store.emit('workarea'); return; }
+      this.fitTime();
+      return;
+    }
     const i = this.rowAtY(y);
     if (i < 0) return;
     const r = this.rows[i];

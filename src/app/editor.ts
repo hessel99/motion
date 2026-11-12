@@ -48,7 +48,9 @@ export class Editor {
   onFrame(fn: FrameHook) { this.hooks.add(fn); return () => { this.hooks.delete(fn); }; }
 
   play() {
-    if (this.store.time >= this.store.comp.duration - 1e-6) this.store.setTime(0);
+    const wa = this.store.workArea;
+    if (wa && (this.store.time < wa[0] || this.store.time >= wa[1] - 1e-6)) this.store.setTime(wa[0]);
+    else if (this.store.time >= this.store.comp.duration - 1e-6) this.store.setTime(0);
     this.lastNow = performance.now();
     this.clock = this.store.time;
     this.store.setPlaying(true);
@@ -89,9 +91,11 @@ export class Editor {
       // unsnapped playback clock (snapping it would freeze playback when dt < one frame)
       if (Math.abs(this.clock - store.time) > 1 / comp.fps) this.clock = store.time; // user moved the playhead
       let t = this.clock + Math.min(dt, 100) / 1000;
-      if (t >= comp.duration) {
-        if (store.loop) t = t % comp.duration;
-        else { t = comp.duration; store.setPlaying(false); }
+      const wa = store.workArea;
+      const a = wa ? wa[0] : 0, b = wa ? Math.min(wa[1], comp.duration) : comp.duration;
+      if (t >= b) {
+        if (store.loop) t = a + ((t - a) % Math.max(1e-3, b - a));
+        else { t = b; store.setPlaying(false); }
       }
       this.clock = t;
       if (this.snapPlaybackToFrames) t = Math.floor(t * comp.fps + 1e-6) / comp.fps;
