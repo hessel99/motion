@@ -26,7 +26,9 @@
 - **Import**:
   - **Figma copy and paste** (just ⌘C in Figma, ⌘V here)
   - SVG (by paste or drop), Lottie JSON, After Effects `.aep` (best effort, see below), images
-- **Export**: Lottie JSON
+- **Export**: Lottie JSON and **video** (MP4 H.264 / WebM VP9 through WebCodecs + mediabunny; verified with ffprobe in Chromium and Electron)
+- **Graph editor**: value curves in the timeline. Drag keys (time/value) and bezier handles on the real curve, which Figma Motion doesn't have.
+- **Snapping + smart guides** in the viewport; timeline scrollbars; layers can be moved in time; keyframe copy/paste
 - **AI agent sidebar**: chat with **Claude Code**, Codex CLI or Gemini CLI using *your own subscription* (through the local bridge). The agent drives the editor with MCP tools: add/update layers, keyframes, easing, screenshots and more.
 - **Autosave** to local storage, plus `.motion` project files (JSON)
 
@@ -111,7 +113,9 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
   - instances → their component subtree
   - gradients → gradient paints
 - Pasting a single frame into an empty project makes the composition the size of that frame, Figma Motion style.
-- **Not yet verified against a real Figma clipboard.** No Figma desktop app was available here, so the tests use a synthetic payload with Figma's field names. Several field names are educated guesses (listed in `src/import/figma/convert.ts`). The first real paste may need small fixes.
+- **Verified against real Figma clipboard captures**, including the 2025 format. The captures come from the test data of github.com/darknoon/figma-format-parse; run `scripts/figma-real-check.sh`, which downloads them on demand because that repo has no license. A real iPhone screen (51 layers: frames, component instances, text, emoji) pastes and renders correctly in under 50ms.
+- Newer clipboards can omit cached vector geometry and only carry the **vector network** blob. We decode that too (`src/import/figma/vectornet.ts`).
+- Unit tests also cover a synthetic payload. Some rarer fields are still educated guesses (listed in `src/import/figma/convert.ts`).
 
 ## After Effects `.aep`
 
@@ -136,4 +140,4 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
 - Only the nearest clip ancestor clips (no nested clip intersection). No masks or mattes yet. No effects yet (on purpose).
 - No graph editor yet: easing is edited per segment (like Figma Motion). A value/speed graph would be a differentiator.
 - Rasterization runs on the main thread. Moving it to a worker with OffscreenCanvas would remove the cold-start stutter on huge imports.
-- Video export (WebCodecs) and precomps/multiple compositions are not built yet.
+- Precomps/multiple compositions are not built yet.

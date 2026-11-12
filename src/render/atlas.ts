@@ -170,6 +170,8 @@ export class Atlas {
         gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.tex);
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
         gl.pixelStorei(gl.UNPACK_ROW_LENGTH, PAGE);
+        // 3d uploads: skip rows are only valid when the source image height is declared
+        gl.pixelStorei(gl.UNPACK_IMAGE_HEIGHT, PAGE);
       }
       const unionArea = (d.x1 - d.x0) * (d.y1 - d.y0);
       const rects = d.rects.length / 4 <= 24 && unionArea > d.area * 3 ? d.rects : [d.x0, d.y0, d.x1, d.y1];
@@ -184,6 +186,7 @@ export class Atlas {
     }
     if (n) {
       gl.pixelStorei(gl.UNPACK_ROW_LENGTH, 0);
+      gl.pixelStorei(gl.UNPACK_IMAGE_HEIGHT, 0);
       gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, 0);
       gl.pixelStorei(gl.UNPACK_SKIP_ROWS, 0);
     }

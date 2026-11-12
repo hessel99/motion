@@ -10,6 +10,7 @@
 // our renderer expects paint.transform to map that same unit gradient space onto the normalized box,
 // i.e. the inverse of figma's matrix. we store [a,b,c,d,e,f] (canvas order: x' = a x + c y + e).
 
+import { decodeVectorNetwork } from './vectornet';
 import { createLayer, uid, type Asset, type Layer, type LayerType, type Paint, type PathCmd, type PathGeometry, type TextData } from '../../core/model';
 import { bytesToBase64 } from './decode';
 
@@ -223,7 +224,7 @@ class Converter {
   private convertNode(n: any): Layer | null {
     const type: string = n.type ?? 'FRAME';
     const w = Math.max(0, num(n.size?.x, 0)), h = Math.max(0, num(n.size?.y, 0));
-    const hasGeom = (n.fillGeometry?.length ?? 0) > 0 || (n.strokeGeometry?.length ?? 0) > 0;
+    const hasGeom = (n.fillGeometry?.length ?? 0) > 0 || (n.strokeGeometry?.length ?? 0) > 0 || typeof n.vectorData?.vectorNetworkBlob === 'number';
 
     let lt: LayerType;
     if (type === 'TEXT') lt = n.textData?.characters != null || !hasGeom ? 'text' : 'path';
@@ -278,6 +279,20 @@ class Converter {
     if (lt === 'path') {
       layer.geometry = this.geoms(n.fillGeometry);
       layer.geomSize = [w, h];
+      // newer clipboards: no cached geometry, only the vector network
+      if (!layer.geometry.length && typeof n.vectorData?.vectorNetworkBlob === 'number') {
+        const bytes = blobBytes(this.blobs[n.vectorData.vectorNetworkBlob]);
+        const ns = n.vectorData.normalizedSize;
+        const net = bytes ? decodeVectorNetwork(bytes, ns?.x ? w / ns.x : 1, ns?.y ? h / ns.y : 1) : null;
+        if (net) {
+          if (net.fills.length) layer.geometry = net.fills;
+          else if (net.stroke) {
+            // open network (lines) has no regions: draw it as a stroked path without fill
+            layer.geometry = [net.stroke];
+            layer.props.fill!.v = [0, 0, 0, 0];
+          }
+        }
+      }
     }
     this.applyStroke(layer, n, lt === 'path');
     return layer;

@@ -1,0 +1,16 @@
+import { chromium } from './pw.mjs';
+import { readFileSync } from 'node:fs';
+const [,, file, out] = process.argv;
+const browser = await chromium.launch({ args: ['--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
+const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('console', m => (m.type() === 'error' || m.type() === 'warning') && !m.text().includes('GL Driver') && errs.push(m.text()));
+await page.goto((process.env.URL || 'http://localhost:5173/') + '?blank&nobridge');
+await page.waitForFunction(() => window.editor?.renderer);
+await page.evaluate(html => { const dt = new DataTransfer(); dt.setData('text/html', html); document.body.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true })); }, readFileSync(file, 'utf8'));
+await page.waitForTimeout(1500);
+await page.evaluate(() => { editor.store.select([]); viewport.fit(); });
+await page.waitForTimeout(500);
+console.log(JSON.stringify(await page.evaluate(() => ({ comp: [editor.store.comp.width, editor.store.comp.height], n: Object.keys(editor.store.project.layers).length }))));
+await page.screenshot({ path: out });
+console.log(errs.length ? errs : 'no errors');
+await browser.close();
