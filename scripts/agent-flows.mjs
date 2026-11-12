@@ -35,7 +35,7 @@ const rootNames = () => ev(() => editor.store.comp.root.map((id) => editor.store
 const shot = (name) => page.screenshot({ path: `${out}/${name}.png` });
 
 await page.goto(`${base}?blank&bridge=${port}`);
-await page.evaluate(() => { for (const k of Object.keys(localStorage)) if (k.startsWith('motion.agent')) localStorage.removeItem(k); });
+await page.evaluate(() => { for (const k of Object.keys(localStorage)) if (k.startsWith('motion.agent')) localStorage.removeItem(k); localStorage.setItem('motion.agent.taste', 'off'); }); // the polishing loop has its own check (scripts/taste-ui-check.mjs)
 await page.goto(`${base}?blank&bridge=${port}`);
 await page.waitForFunction(() => window.editor?.renderer);
 if (!(await page.locator('.agent-head').count())) await page.click('[aria-label="Agent"]');
@@ -162,7 +162,9 @@ const pend = page.locator('[data-testid=agent-queued]');
 check(await pend.count() === 1 && /waiting for the agent/i.test(await pend.innerText()), 'AIUX-21: the brief waits as a pending bubble');
 await shot('06-offline-pending');
 bridge = await startBridge({ port, log: () => {}, claudeShaders: false, dataDir: fs.mkdtempSync('/tmp/motion-flows-') });
-await page.click('[data-testid=agent-reconnect]');
+// the client may reconnect on its own before the click: click Reconnect only while it's offered
+const rc = page.locator('[data-testid=agent-reconnect]').first();
+if (await rc.isVisible().catch(() => false)) await rc.click({ timeout: 3000 }).catch(() => {});
 await page.waitForSelector('.dot.connected', { timeout: 10000 });
 await page.waitForFunction(() => document.querySelectorAll('[data-testid=agent-queued]').length === 0, null, { timeout: 10000 });
 await idle();
