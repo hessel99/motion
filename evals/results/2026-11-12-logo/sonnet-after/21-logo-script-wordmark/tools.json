@@ -1,0 +1,180 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1060,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 1,
+  "input": {
+   "title": "Bloom – logo sting",
+   "duration": 6,
+   "style": "Calm editorial minimal",
+   "styleReason": "Elegant, calm florist brand: cream, deep green ink, slow eased draw-on.",
+   "concepts": [
+    {
+     "name": "Written by hand",
+     "idea": "The monoline 'bloom' writes itself in one continuous stroke, then the leaf grows from a tiny stem above the o.",
+     "why": "Script = handwriting; the draw-on feels personal and crafted."
+    },
+    {
+     "name": "Sprout",
+     "idea": "The leaf sprouts first and the wordmark grows out beneath it.",
+     "why": "Growth metaphor, but less elegant than writing."
+    }
+   ],
+   "recommended": 0,
+   "beats": [
+    {
+     "name": "Lead-in",
+     "start": 0,
+     "end": 0.4,
+     "description": "Empty cream frame, a soft beat of stillness."
+    },
+    {
+     "name": "Write",
+     "start": 0.4,
+     "end": 3,
+     "description": "One continuous stroke writes 'bloom' left to right, Sine In Out.",
+     "style": "deep green #1f4d3a stroke"
+    },
+    {
+     "name": "Leaf grows",
+     "start": 2.8,
+     "end": 3.8,
+     "description": "Leaf grows from its base above the o with a gentle overshoot and sway.",
+     "style": "Back Out / Expo Out"
+    },
+    {
+     "name": "Hold",
+     "start": 3.8,
+     "end": 6,
+     "description": "Finished lockup held still."
+    }
+   ]
+  },
+  "result": "storyboard \"Bloom – logo sting\" shown to the user (4 beats, 6s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1019,
+  "ok": true,
+  "ms": 96,
+  "editorMs": 3,
+  "input": {
+   "comp": {
+    "background": "#f6efe0",
+    "duration": 6
+   },
+   "layers": [
+    {
+     "key": "word",
+     "name": "bloom wordmark",
+     "type": "path",
+     "d": "M560 610 C600 590 650 450 668 388 C678 352 645 352 640 400 C625 500 620 590 640 608 C690 640 765 600 748 548 C735 508 668 522 650 585 C662 612 700 616 722 600 C760 560 808 430 828 396 C848 362 812 360 808 402 C795 485 790 580 815 606 C838 622 868 598 890 568 C905 535 950 512 985 530 C1030 552 995 628 945 618 C895 606 915 540 975 528 C1010 520 1030 560 1040 590 C1052 612 1085 598 1100 570 C1115 535 1160 515 1195 532 C1240 556 1205 630 1155 618 C1108 606 1125 540 1185 528 C1225 522 1245 560 1255 590 C1265 612 1290 612 1305 585 C1320 545 1318 525 1335 525 C1360 525 1350 585 1365 600 C1380 612 1395 600 1410 570 C1420 540 1425 525 1445 525 C1470 525 1460 590 1475 603 C1490 612 1510 598 1530 570",
+     "stroke": "#1f4d3a",
+     "strokeWidth": 8,
+     "props": {}
+    },
+    {
+     "key": "leaf",
+     "name": "leaf",
+     "type": "path",
+     "d": "M35 110 C0 70 5 25 35 0 C65 25 70 70 35 110 Z",
+     "x": 1115,
+     "y": 395,
+     "w": 70,
+     "h": 110,
+     "fill": "#2f7a55",
+     "rotation": 18
+    }
+   ]
+  },
+  "result": "{\"summary\":\"2 created, 0 updated, 0 keyframe tracks; animation ends 0s\",\"ids\":{\"word\":\"l_03jm2\",\"leaf\":\"l_03jm3\"}}"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 7,
+  "ok": true,
+  "ms": 34,
+  "editorMs": 20,
+  "input": {
+   "t": 0
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/137d6c95-c399-4398-95fa-9d73a9cde553/tool-results/mcp-motion-blob-1794518353846-1jp28m.png]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm2",
+   "props": {
+    "fill": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "draw_on",
+  "argsBytes": 93,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm2"
+   ],
+   "t": 0.4,
+   "duration": 2.6,
+   "ease": "Sine In Out",
+   "fill": "hide",
+   "strokeWidth": 8
+  },
+  "result": "draw on: 1 path(s) 0.4s–3s"
+ },
+ {
+  "name": "rig",
+  "argsBytes": 99,
+  "ok": true,
+  "ms": 26,
+  "editorMs": 4,
+  "input": {
+   "kind": "grow",
+   "ids": [
+    "l_03jm3"
+   ],
+   "t0": 2.9,
+   "duration": 1,
+   "intensity": 0.4,
+   "options": {
+    "from": "bottom"
+   }
+  },
+  "result": "{\"kind\":\"grow\",\"t0\":2.9,\"end\":4,\"layers\":[{\"id\":\"l_03jm3\",\"name\":\"leaf\",\"keys\":{\"scale\":2,\"rotation\":4}}],\"pivots\":{\"leaf\":[35,110]}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 137,
+  "editorMs": 95,
+  "input": {
+   "times": [
+    0.2,
+    1.2,
+    2.2,
+    3.2,
+    3.6,
+    5.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.2s, 1.2s, 2.2s, 3.2s, 3.6s, 5.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/137d6c95-c399-4398-95fa-9d73a9cde553/tool-results/mcp-motion-blob-1794518360965-sour6r.jpg]"
+ }
+]

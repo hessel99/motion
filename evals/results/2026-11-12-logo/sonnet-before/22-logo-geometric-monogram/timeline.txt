@@ -1,0 +1,23 @@
+- bar [rect] box 505,390,56,300 #ffffff
+- armUp [path] box 593,390,148,150 #ffffff
+- armLow [path] box 593,540,148,150 #ff6b2c
+- reveal [group] #ffffff a0
+  - wordmark [text] box 805,400,684,180 #ffffff "KOBALT" Inter 150px w700
+- rule [rect] box 805,590,640,3 #ff6b2c
+- studio [text] box 808,618,356,48 #9db4e6 "STUDIO" Inter 40px w500
+
+comp 1920x1080 6s @60fps, background #0a1a3a
+"bar" (rect l_03jm2)
+  scale: 0.3s [100,0] ─Quart In Out→ 0.95s [100,108] ─Sine In Out→ 1.08s [100,96.4] ─Sine In Out→ 1.21s 100
+"armUp" (path l_03jm3)
+  scale: 0.75s 0 ─Expo Out→ 1.4s 108 ─Sine In Out→ 1.53s 96.4 ─Sine In Out→ 1.66s 100
+"armLow" (path l_03jm4)
+  position: expr "value + [0, time > 3.2 ? 5*Math.sin((time-3.2)*2*Math.PI/5.6) : 0]"
+  scale: 0.9s 0 ─Expo Out→ 1.55s 108 ─Sine In Out→ 1.68s 96.4 ─Sine In Out→ 1.81s 100
+"wordmark" (text l_03jm6)
+  position: 1.5s [1337,100] ─Quart Out→ 2.5s [2114.6,100] ─Sine In Out→ 2.7s [2031.08,100] ─Sine In Out→ 2.9s [2057,100]
+"rule" (rect l_03jm7)
+  scale: 2.1s [0,100] ─Quart In Out→ 2.8s 100
+"studio" (text l_03jm8)
+  position: 2.4s [2807,658] ─Expo Out→ 3.2s [2807,642]
+  opacity: 2.4s 0 ─Expo Out→ 2.8s 100

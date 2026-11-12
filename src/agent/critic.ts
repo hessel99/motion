@@ -40,7 +40,7 @@ export interface Critique {
   /** raw penalty points per category (before CAT_WEIGHTS) */
   penalties: Record<Category, number>;
   issues: Issue[];
-  stats: { layers: number; animated: number; segments: number; samples: number; lastMotion: number; ms: number; logo: boolean };
+  stats: { layers: number; animated: number; segments: number; samples: number; lastMotion: number; ms: number; logo: boolean; lockup?: { lock: number; hold: number; wordmark?: number } };
 }
 export interface CriticOptions {
   /** only report issues touching this time range (a storyboard beat); the score still covers the whole piece */
@@ -371,6 +371,7 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
   const loopy = opts.loop ?? detectLoop(store, infos, D);
   const primary = pickPrimary(infos.filter(x => !isBg(x) && !x.piece && x.area > 0 && !(x.group && x.l.children.length > 6)));
   const logo = detectLogo(store, infos, isBg, D, W, H, S, opts.logo);
+  let lockup: Critique['stats']['lockup'];
 
   /** a deliberate impact (gravity): another property starts changing at the landing (a squash), or the
    *  move falls back after a hop (the previous segment went the other way) */
@@ -908,7 +909,12 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
     // tiny secondary bits (sparkles, specks) may keep moving through the hold
     const markL = logo.mark.filter(x => !x.group && x.area >= 0.02 * lockArea);
     const wordL = logo.word;
-    const leaves = [...markL, ...wordL];
+    const leavesAll = [...markL, ...wordL];
+    // idle loops (expressions: breathing, wobble) may run through the hold: such a layer counts as settled
+    // once its keyed motion is done
+    const idle = (x: Info) => x.expr || ancestors(store, x.l).some(a => PHYS.some(k => a.props[k]?.expr?.trim()));
+    const leaves = leavesAll.filter(x => !idle(x));
+    const keyedEnd = (xs: Info[]) => Math.max(0, ...xs.filter(idle).flatMap(x => x.segs.map(sg => sg.t1)));
     const sz = (li: number, r: number) => Math.max(G(r, li, 2) - G(r, li, 0), G(r, li, 3) - G(r, li, 1));
     const same = (li: number, s: number, r: number) => {
       const oa = G(s, li, 4), ob = G(r, li, 4);
@@ -931,9 +937,12 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
       while (r > 0) { const a = settledFrom(leaves, r); if (r - a >= minRun && full(a)) break; r = a - 1; }
       if (r > 0) rRef = r;
     }
-    const lockS = settledFrom(leaves, rRef), markS = settledFrom(markL.length ? markL : leaves, rRef);
-    const lockT = times[lockS], markLand = times[markS];
+    const stillMark = markL.filter(x => !idle(x));
+    const lockS0 = leaves.length ? settledFrom(leaves, rRef) : 0, markS0 = stillMark.length ? settledFrom(stillMark, rRef) : lockS0;
+    const lockT = Math.max(times[lockS0], keyedEnd(leavesAll)), markLand = Math.max(times[markS0], keyedEnd(markL));
+    const lockS = sampleAt(lockT);
     const hold = (exits ? times[rRef] : D) - lockT;
+    lockup = { lock: r2(lockT), hold: r2(hold) };
     // first keyed motion (idle expressions run from 0 by nature)
     const keyed = animated.flatMap(x => [...x.segs.map(sg => sg.t0), ...(x.l.textAnim ? [x.l.inPoint + x.l.textAnim.start] : []), ...(x.l.pathKf && x.l.pathKf.length > 1 ? [x.l.pathKf[0].t] : [])]);
     const fm = Math.min(keyed.length ? Math.min(...keyed) : firstMotion, ...markL.map(x => x.enterT >= 0 && isFinite(x.enterT) ? x.enterT : D));
@@ -949,6 +958,11 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
     // hold: the exact lockup on screen ≥ 1.2 s (3+ identical frames of a 12-frame sheet), not a dead 3 s+
     if (hold < 1.2) push('logo-hold', hold < 0.6 ? 'high' : 'medium', `the finished lockup holds for ${r2(Math.max(0, hold))} s${exits ? ' before the exit' : ''}: hold it still ≥ 1.2 s (1.5-2 s; elegant 2.5 s) so it reads`, ids, [lockT, exits ? times[rRef] : D],
       exits ? [{ tool: 'retime', args: { from: r2(times[rRef] - 0.01), offset: r2(1.6 - hold) } }] : [{ tool: 'set_composition', args: { duration: r2(lockT + 1.7) } }]);
+    // a long hold: the study's holds are 1.5-2.5 s; a slow creep through 3 s+ of nothing is still nothing
+    const lastBig = Math.max(lockT, ...all.filter(sg => !(sg.t1 - sg.t0 > 1.5 && (sg.key === 'scale' ? sg.mag < 8 : sg.key === 'position' ? sg.mag < 20 * S : sg.key === 'rotation' ? sg.mag < 5 : true))).map(sg => sg.t1));
+    const longHold = pace === 'calm' ? 3.6 : 3.1;
+    if (!exits && !loopy && D - lastBig > longHold) push('logo-hold', D - lastBig > longHold + 1 ? 'medium' : 'low', `the lockup sits for ${r2(D - lastBig)} s after the last real move (${ft(lastBig)}): logo holds run 1.5-2 s (elegant 2.5 s); end the sting sooner instead of stretching the hold`, [], [lastBig, D],
+      [{ tool: 'set_composition', args: { duration: r2(lastBig + (pace === 'calm' ? 2.4 : 2)) } }]);
     // length vs pace (medians 5-6 s; fast 4-5, elegant ≤ 7.5)
     const [lo, hi] = pace === 'fast' ? [3.5, 6.5] : pace === 'calm' ? [4.5, 9] : [4, 7.5];
     if (!loopy && (D > hi || D < lo)) push('logo-length', D > hi + 1.5 ? 'medium' : 'low', `the sting runs ${ft(D)}: ${pace} logo stings run ${lo}-${hi} s (lead-in 0.25 s, build to ~2.5 s, wordmark, hold 1.5-2 s)`, [], [0, D],
@@ -970,12 +984,14 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
       const mb = unionBox(markL.map(x => x.idx), lockS, G), mc = [(mb[0] + mb[2]) / 2, (mb[1] + mb[3]) / 2];
       const wb0 = unionBox(wIdx, ws, G), wb1 = unionBox(wIdx, lockS, G);
       const d0 = Math.hypot((wb0[0] + wb0[2]) / 2 - mc[0], (wb0[1] + wb0[3]) / 2 - mc[1]), d1 = Math.hypot((wb1[0] + wb1[2]) / 2 - mc[0], (wb1[1] + wb1[3]) / 2 - mc[1]);
-      const outOfMark = d1 - d0 > 15 * S;
+      // out of the mark = it travels away from the mark a real distance (a 40-60 px nudge beside a fade is not)
+      const outOfMark = d1 - d0 > Math.max(110 * S, 0.3 * (wb1[2] - wb1[0]));
       const built = wordL.some(x => x.l.textAnim) || wordL.filter(x => x.segs.length).length >= 3;
       const moves = wordL.some(x => x.segs.some(sg => sg.kind === 'enter' && sg.key !== 'opacity' && !(sg.key === 'scale' && Math.abs(sg.a.v[0] - sg.a.v[1]) < 1)));
       if (!clipped && !outOfMark && !built) {
         const from = (markL.length > 1 && logo.markGroup) ? logo.markGroup : markL.slice().sort((a, b) => b.area - a.area)[0].l.id;
-        push('logo-wordmark-entry', moves ? 'low' : 'medium', `the wordmark ${moves ? 'slides in on its own' : 'only fades / pops in'}: let it come out of the mark (slide out from behind it under a mask while the mark makes room, grow from a glyph, or build from the same parts)`, wids, [wStart, wStart + 0.6],
+        const fades = wordL.some(x => x.segs.some(sg => sg.key === 'opacity' && sg.kind === 'enter'));
+        push('logo-wordmark-entry', moves && !fades ? 'low' : 'medium', `the wordmark ${moves ? (fades ? 'fades in with a small nudge beside the mark' : 'slides in on its own') : 'only fades / pops in'}: let it come out of the mark (slide out from behind it under a mask while the mark makes room, grow from a glyph, or build from the same parts)`, wids, [wStart, wStart + 0.6],
           [{ tool: 'rig', args: { kind: 'reveal-from', ids: wids.slice(0, 1), t0: r2(Math.max(wStart, markLand + 0.4)), duration: 0.6, options: { from } } }]);
       }
     }
@@ -1029,7 +1045,7 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
   if (opts.range) { const [a, b] = opts.range; list = list.filter(i => !i.t || (i.t[1] >= a - 0.05 && i.t[0] <= b + 0.05)); }
   return {
     score, sub, penalties: pen, issues: list.slice(0, opts.max ?? 12),
-    stats: { layers: infos.length, animated: animated.length, segments: all.length, samples: N + 1, lastMotion: r2(lastMotion), logo: !!logo, ms: Math.round(((globalThis.performance ?? Date).now() - t0) * 10) / 10 },
+    stats: { layers: infos.length, animated: animated.length, segments: all.length, samples: N + 1, lastMotion: r2(lastMotion), logo: !!logo, lockup, ms: Math.round(((globalThis.performance ?? Date).now() - t0) * 10) / 10 },
   };
 }
 
@@ -1295,6 +1311,7 @@ function musicCheck(store: Store, all: Seg[], fps: number, push: (rule: string, 
 export function formatCritique(c: Critique, opts: { max?: number; calls?: boolean } = {}): string {
   const subs = CATEGORIES.filter(k => c.sub[k] < 100).map(k => `${k} ${Math.round(c.sub[k])}`).join(', ');
   const lines = [`score ${c.score}/100${subs ? ` (${subs})` : ' (no issues found)'}`];
+  if (c.stats.lockup) lines.push(`logo sting: lockup complete at ${c.stats.lockup.lock}s, held ${c.stats.lockup.hold}s (aim: idea done by ~2.5 s, hold 1.5-2 s; recipes: get_guide "logo-recipes")`);
   c.issues.slice(0, opts.max ?? 8).forEach((i, n) => {
     lines.push(`${n + 1}. [${i.severity}] ${i.message}`);
     if (opts.calls !== false) for (const f of i.fix) lines.push(`   → ${f.tool} ${JSON.stringify(f.args)}`);

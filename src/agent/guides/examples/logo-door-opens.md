@@ -17,18 +17,18 @@
        "drawOn": {"t": 0.1, "duration": 0.9, "ease": "Cubic In Out"}},
       {"key": "door", "type": "rect", "x": 920, "y": 520, "w": 80, "h": 120, "fill": "#F59E0B", "anchor": "left",
        "animate": {"scale": [{"t": 0.95, "v": [100, 100], "ease": "Cubic In Out"}, {"t": 1.45, "v": [18, 100], "ease": "spring Gentle"}, {"t": 2.2, "v": [26, 100]}]}},
-      {"key": "wordmark", "text": "Haven", "fontSize": 128, "fontWeight": 700, "tracking": -3, "x": 1150, "y": 420, "fill": "#F8FAFC",
-       "enter": {"t": 1.3, "from": {"opacity": 0, "dx": -60}}},
+      {"key": "wordmark", "text": "Haven", "fontSize": 128, "fontWeight": 700, "tracking": -3, "x": 1150, "y": 420, "fill": "#F8FAFC"},
       {"key": "tagline", "text": "Welcome home", "fontSize": 40, "fontWeight": 500, "x": 1156, "y": 576, "fill": "#94A3B8",
-       "enter": {"t": 1.6, "from": {"opacity": 0, "dy": 24}}}
+       "enter": {"t": 2.05, "from": {"opacity": 0, "dy": 24}}}
     ]}},
+  {"tool": "rig", "args": {"kind": "reveal-from", "ids": ["<wordmark>"], "t0": 1.5, "duration": 0.6, "intensity": 0.4, "options": {"from": "<house>"}}},
   {"tool": "secondary_motion", "args": {"ids": ["<wordmark>"], "overshoot": 0.06, "segments": "first"}}
 ]
 ```
 
 ## Why it works
 - The hero action is what the mark depicts: the door swings open on its hinge (anchor "left"), with a spring settle, instead of the logo popping in.
-- Lead → follow: the outline draws first (0.1–1.0 s), the door opens as it completes, the wordmark slides out of the door's light 0.35 s later, the tagline 0.3 s after that: overlap, never all at once.
-- Entrances decelerate (enter defaults: Quart Out / Ease Out fades); the wordmark gets a 6% overshoot settle.
+- Lead → follow: the outline draws first (0.1–1.0 s), the door opens as it completes, the wordmark slides out from behind the house as the door swings open (`rig reveal-from`, a mask at the house's edge), the tagline 0.55 s after that: overlap, never all at once.
+- Entrances decelerate (Expo-like reveal, Quart Out / Ease Out fades); the wordmark gets a 6% overshoot settle as its final small move.
 - The warm glow behind the door keeps breathing through the hold (a 2 s sine that divides the comp), so the ending is alive, not frozen.
 - Palette: navy, off-white, one warm accent; type 128/40 with weight contrast; everything inside the title-safe area.

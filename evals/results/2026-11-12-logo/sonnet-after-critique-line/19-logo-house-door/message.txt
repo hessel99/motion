@@ -1,0 +1,6 @@
+Logo sting for "Hearth", a home-rental app. Build the mark yourself from shapes: a simple house outline (pentagon) with a door in it. Then the wordmark "Hearth" to the right of the mark. Warm and welcoming, dark warm background, one warm accent. A short sting that ends on the full lockup.
+
+<editor_context>
+comp "Main" 1920x1080 60fps 6s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

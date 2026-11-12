@@ -1,0 +1,54 @@
+- Line A-B [path] box 570,430,120,50 #000000 a0 stroke #5b4bff 6px
+- Line A-D [path] box 570,480,70,75 #000000 a0 stroke #5b4bff 6px
+- Line B-D [path] box 640,430,50,125 #000000 a0 stroke #5b4bff 6px
+- Line B-C [path] box 690,430,85,90 #000000 a0 stroke #5b4bff 6px
+- Line D-C [path] box 640,520,135,35 #000000 a0 stroke #5b4bff 6px
+- Line D-E [path] box 640,555,90,85 #000000 a0 stroke #5b4bff 6px
+- Line C-E [path] box 730,520,45,120 #000000 a0 stroke #5b4bff 6px
+- Dot A [ellipse] box 550,460,40,40 #5b4bff
+- Dot B [ellipse] box 670,410,40,40 #5b4bff
+- Dot D hub [ellipse] box 612,527,55,55 #5b4bff
+- Dot C [ellipse] box 755,500,40,40 #5b4bff
+- Dot E [ellipse] box 710,620,40,40 #5b4bff
+- Wordmark [text] box 850,440,520,200 #1b1b2f "Mesh" Inter 190px w700
+
+comp 1920x1080 6s @60fps, background #f7f5f0
+"Line A-B" (path l_03jm2)
+  trimStart: 0.7s 0
+  trimEnd: 0.7s 0 ─Cubic Out→ 1.15s 100
+"Line A-D" (path l_03jm3)
+  trimStart: 1.06s 0
+  trimEnd: 1.06s 0 ─Cubic Out→ 1.63s 100
+"Line B-D" (path l_03jm4)
+  trimStart: 1s 0
+  trimEnd: 1s 0 ─Cubic Out→ 1.45s 100
+"Line B-C" (path l_03jm5)
+  trimStart: 1.38s 0
+  trimEnd: 1.38s 0 ─Cubic Out→ 1.94s 100
+"Line D-C" (path l_03jm6)
+  trimStart: 1.2s 0
+  trimEnd: 1.2s 0 ─Cubic Out→ 1.65s 100
+"Line D-E" (path l_03jm7)
+  trimStart: 1.63s 0
+  trimEnd: 1.63s 0 ─Cubic Out→ 2.19s 100
+"Line C-E" (path l_03jm8)
+  trimStart: 1.4s 0
+  trimEnd: 1.4s 0 ─Cubic Out→ 1.85s 100
+"Dot A" (ellipse l_03jm9)
+  scale: 0.25s 0 ─spring:0.4→ 0.75s 100
+  opacity: 0.25s 0 ─Ease Out→ 0.5s 100
+"Dot B" (ellipse l_03jma)
+  scale: 0.4s 0 ─spring:0.4→ 0.9s 100 ─Easy Ease→ 4.2s 100 ─Sine In Out→ 4.9s 115 ─Sine In Out→ 5.6s 100
+  opacity: 0.4s 0 ─Ease Out→ 0.65s 100
+"Dot D hub" (ellipse l_03jmb)
+  scale: 0.1s 0 ─spring:0.4→ 0.65s 100 ─Easy Ease→ 2.6s 100 ─Sine In Out→ 3.4s 112 ─Sine In Out→ 4.2s 100 ─Sine In Out→ 5s 112 ─Sine In Out→ 5.8s 100
+  opacity: 0.1s 0 ─Ease Out→ 0.38s 100
+"Dot C" (ellipse l_03jmc)
+  scale: 0.55s 0 ─spring:0.4→ 1.05s 100 ─Easy Ease→ 3s 100 ─Sine In Out→ 3.7s 115 ─Sine In Out→ 4.4s 100
+  opacity: 0.55s 0 ─Ease Out→ 0.8s 100
+"Dot E" (ellipse l_03jmd)
+  scale: 0.7s 0 ─spring:0.4→ 1.2s 100
+  opacity: 0.7s 0 ─Ease Out→ 0.95s 100
+"Wordmark" (text l_03jme)
+  position: 1.1s [1040,540] ─Expo Out→ 1.8s [1110,540]
+  opacity: 1.1s 0 ─Expo Out→ 1.45s 100

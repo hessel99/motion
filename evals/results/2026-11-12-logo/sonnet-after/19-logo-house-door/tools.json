@@ -1,0 +1,293 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1045,
+  "ok": true,
+  "ms": 30,
+  "editorMs": 1,
+  "input": {
+   "title": "Hearth logo sting",
+   "duration": 5,
+   "style": "Warm minimal, Expo Out family",
+   "concepts": [
+    {
+     "name": "House draws, door opens",
+     "idea": "The house outline writes itself, then the door hinges open with a warm glow spilling out and settles closed-lit.",
+     "why": "Welcoming: a door opening onto warmth is the idea of a home rental."
+    },
+    {
+     "name": "Hearth glow",
+     "idea": "The door lights up like a fire, glow pulses, house frames it.",
+     "why": "Ties to the name Hearth."
+    }
+   ],
+   "recommended": 0,
+   "beats": [
+    {
+     "name": "House draws",
+     "start": 0,
+     "end": 1.4,
+     "description": "Pentagon outline draws on in cream from the base corner on a dark warm brown background.",
+     "style": "Expo Out, stroke 14px"
+    },
+    {
+     "name": "Door opens",
+     "start": 1.2,
+     "end": 2.6,
+     "description": "Amber door fades in and hinges open, warm glow behind, then settles.",
+     "style": "Expo Out, accent #ff9a3c"
+    },
+    {
+     "name": "Wordmark",
+     "start": 2,
+     "end": 3.2,
+     "description": "Hearth slides out from behind the mark to its right.",
+     "style": "Expo Out"
+    },
+    {
+     "name": "Hold",
+     "start": 3.2,
+     "end": 5,
+     "description": "Full lockup held still.",
+     "style": "still"
+    }
+   ]
+  },
+  "result": "storyboard \"Hearth logo sting\" shown to the user (4 beats, 5s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 967,
+  "ok": true,
+  "ms": 97,
+  "editorMs": 7,
+  "input": {
+   "comp": {
+    "background": "#1f1410",
+    "duration": 5,
+    "fps": 60
+   },
+   "layers": [
+    {
+     "key": "house",
+     "name": "House",
+     "type": "path",
+     "d": "M510 520 L650 400 L790 520 L790 680 L510 680 Z",
+     "closed": true,
+     "stroke": "#f6e7d2",
+     "strokeWidth": 14,
+     "drawOn": {
+      "t": 0.25,
+      "duration": 1.1,
+      "ease": "Expo Out",
+      "from": "start"
+     }
+    },
+    {
+     "key": "glow",
+     "name": "Door glow",
+     "x": 610,
+     "y": 550,
+     "w": 80,
+     "h": 130,
+     "fill": "#ffb15c",
+     "opacity": 0,
+     "animate": {
+      "opacity": [
+       {
+        "t": 1.5,
+        "v": 0,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 2.2,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "door",
+     "name": "Door",
+     "x": 610,
+     "y": 550,
+     "w": 80,
+     "h": 130,
+     "fill": "#ff9a3c",
+     "anchor": "left",
+     "opacity": 0,
+     "animate": {
+      "opacity": [
+       {
+        "t": 1.3,
+        "v": 0,
+        "ease": "Expo Out"
+       },
+       {
+        "t": 1.6,
+        "v": 100
+       }
+      ],
+      "scale": [
+       {
+        "t": 1.5,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Expo Out"
+       },
+       {
+        "t": 2.4,
+        "v": [
+         22,
+         100
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "word",
+     "name": "Wordmark",
+     "text": {
+      "content": "Hearth",
+      "fontFamily": "Inter",
+      "fontSize": 190,
+      "fontWeight": 600
+     },
+     "x": 850,
+     "y": 430,
+     "w": 620,
+     "h": 220,
+     "fill": "#f6e7d2",
+     "align": "left",
+     "enter": {
+      "t": 2.1,
+      "duration": 0.9,
+      "ease": "Expo Out",
+      "from": {
+       "opacity": 0,
+       "dx": -90
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 7 keyframe tracks; animation ends 3s\",\"ids\":{\"house\":\"l_03jm2\",\"glow\":\"l_03jm3\",\"door\":\"l_03jm4\",\"word\":\"l_03jm5\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 136,
+  "editorMs": 119,
+  "input": {
+   "times": [
+    0.6,
+    1.4,
+    2,
+    2.6,
+    3.2,
+    4.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.6s, 1.4s, 2s, 2.6s, 3.2s, 4.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/5f7e7c1d-1b5d-4612-8635-9de4528de40f/tool-results/mcp-motion-blob-1794518302207-sbgxo3.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 3,
+  "input": {
+   "id": "l_03jm2",
+   "props": {
+    "fill": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 27,
+  "ok": true,
+  "ms": 74,
+  "editorMs": 60,
+  "input": {
+   "times": [
+    0.6,
+    1.4,
+    2.2,
+    4.5
+   ]
+  },
+  "result": "4 frames left→right, top→bottom at 0.6s, 1.4s, 2.2s, 4.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/5f7e7c1d-1b5d-4612-8635-9de4528de40f/tool-results/mcp-motion-blob-1794518306557-19zi7a.jpg]"
+ },
+ {
+  "name": "set_keyframes",
+  "argsBytes": 196,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "prop": "scale",
+   "keyframes": [
+    {
+     "t": 1.5,
+     "v": [
+      100,
+      100
+     ],
+     "ease": "Expo Out"
+    },
+    {
+     "t": 2.3,
+     "v": [
+      22,
+      100
+     ],
+     "ease": "Expo In Out"
+    },
+    {
+     "t": 2.9,
+     "v": [
+      22,
+      100
+     ],
+     "ease": "Expo Out"
+    },
+    {
+     "t": 3.5,
+     "v": [
+      100,
+      100
+     ]
+    }
+   ]
+  },
+  "result": "set 4 keyframes on Door.scale"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 25,
+  "ok": true,
+  "ms": 81,
+  "editorMs": 63,
+  "input": {
+   "times": [
+    1.8,
+    2.4,
+    3,
+    4.5
+   ]
+  },
+  "result": "4 frames left→right, top→bottom at 1.8s, 2.4s, 3s, 4.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/5f7e7c1d-1b5d-4612-8635-9de4528de40f/tool-results/mcp-motion-blob-1794518315440-06h7or.jpg]"
+ }
+]

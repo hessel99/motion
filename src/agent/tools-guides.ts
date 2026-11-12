@@ -22,6 +22,10 @@ const beatSchema = {
   required: ['name', 'start', 'end', 'description'],
 };
 
+/** concepts = a logo / brand mark: the study's defaults travel with the storyboard result (models that skip
+ *  get_guide still see them); the recipes and examples stay on demand */
+const LOGO_HINT = ' Logo build: before building, get_guide "logo-recipes" (the recipe of the chosen concept\'s family) and get_guide "examples" with the brief. Defaults: 0.25 s still lead-in; the idea done by ~2.5 s; the wordmark as its own beat 0.5-0.7 s after the mark lands, out from behind the mark (rig reveal-from) rather than faded on top; the exact lockup held still 1.5-2 s; total 5-6 s; one easing family; a small final move.';
+
 export const GUIDE_TOOLS: ToolDef[] = [
   {
     name: 'get_guide',
@@ -72,7 +76,7 @@ export const GUIDE_TOOLS: ToolDef[] = [
     },
     run: (a) => {
       const sb = storyboards.propose(a);
-      const head = `storyboard "${sb.title}" shown to the user (${sb.beats.length} beats, ${sb.duration}s).`;
+      const head = `storyboard "${sb.title}" shown to the user (${sb.beats.length} beats, ${sb.duration}s).` + (Array.isArray(a.concepts) && a.concepts.length ? LOGO_HINT : '');
       if (approvalMode() === 'auto') return text(`${head} Auto-approved: build it now, beat by beat (update_progress {beat:1, status:"active"} … {status:"done"}).`);
       return text(`${head} Wait for approval: end your turn now with one short line. The approved (maybe edited) storyboard arrives as the next message; follow that version.`);
     },

@@ -1,0 +1,223 @@
+{
+ "run": {
+  "id": "19-logo-house-door",
+  "name": "19-logo-house-door",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 80,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 80,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 80.8,
+     "readability": 100,
+     "polish": 100,
+     "richness": 54,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 19.2,
+     "readability": 0,
+     "polish": 0,
+     "richness": 46,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "high:one-move",
+     "medium:grow-middle",
+     "medium:thin"
+    ],
+    "ms": 6.6
+   },
+   "after": {
+    "score": 90,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 80.8,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 19.2,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:grow-middle",
+     "medium:one-move"
+    ],
+    "ms": 1.6
+   }
+  },
+  "wallMs": 46266,
+  "timedOut": false,
+  "turns": 15,
+  "costUsd": 0.6595810999999999,
+  "durationMs": 44556,
+  "usage": {
+   "input": 373071,
+   "cached": 316090,
+   "output": 4334
+  },
+  "errors": [],
+  "toolCalls": 13,
+  "toolErrors": 0,
+  "toolsAvailable": 83,
+  "finalText": "The wordmark's opacity is stuck at 0 because the entrance used the layer's rest value, which was 0. I'm setting explicit keyframes to fix it.\nI built the Hearth sting as a 4 s composition. It ends on the full lockup, with the mark on the left and \"Hearth\" to its right. I checked it only in contact-sheet frames, not played back in real time, and I didn't run the critic.\n\n- **Look:** dark warm brown background (#2a1a14), cream house outline and wordmark, and one amber accent.\n- **0–1.2 s:** the **house** outline (a pentagon) draws itself on, centred on screen.\n- **1.1–1.9 s:** the amber **door** appears inside the house, then swings open on its left edge. A pale amber **glow** shows behind it.\n- **1.9–2.8 s:** the mark slides left to its final position.\n- **2.3–3.1 s:** the **word** \"Hearth\" fades in and slides out to the right of the mark, with an ease-out.\n- **3.1–4 s:** the lockup holds.\n\nThe open door is a narrow sliver in the frames I checked. If you want the opening to read more clearly, I can widen the door or add a light spill.\n\nI can also add a small bounce when the door opens, or a soft pulse on the glow once the lockup settles.\nI added overshoot to the wordmark and the mark's slide, and pinned the door's pivot to its left edge. The critic now scores 90/100. It still flags the door pivot and the \"moves once\" note, which I left as they are."
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "group": 1,
+   "rect": 2,
+   "path": 1,
+   "text": 1
+  },
+  "groups": 1,
+  "animatedLayers": 5,
+  "keys": 22,
+  "segments": 11,
+  "easesUsed": {
+   "Expo In Out": 1,
+   "Sine In Out": 4,
+   "Ease Out": 3,
+   "Expo Out": 2,
+   "Cubic In Out": 1
+  },
+  "distinctEases": 5,
+  "easeFamilies": 4,
+  "overshootSegments": 0,
+  "keyedOvershoots": 2,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#ffd9a0",
+   "#f6e7d3",
+   "#f2a65a",
+   "#2a1a14"
+  ],
+  "keyCoverage": 0.805,
+  "visualActivity": 0.569,
+  "firstMotion": 1.067,
+  "lastMotion": 3.4,
+  "endHold": 0.6,
+  "longestHold": 0.067,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0.067,
+  "exits": 0,
+  "beats": 4,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.017,
+  "midLuma": 0.117,
+  "toolErrors": 0,
+  "toolCalls": 13
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"Hearth\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "blank lead-in: first motion between 0.1 and 0.5 s",
+    "type": "firstMotionBetween",
+    "pass": false
+   },
+   {
+    "text": "wordmark arrives after the mark, within the build (first visible 0.8-3.2 s)",
+    "type": "textFirstVisibleBetween",
+    "pass": true
+   },
+   {
+    "text": "final lockup held still ≥ 1.2 s (≥ 3 identical end frames)",
+    "type": "lockupHoldMin",
+    "pass": false
+   },
+   {
+    "text": "sting length 4.5-7.5 s",
+    "type": "durationBetween",
+    "pass": false
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "one idea that comes from the mark itself (you can name its verb: opens, assembles, writes, becomes); not a generic pop/fade",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "wordmark enters from the mark (slides out from behind it under a mask, grows from a glyph, or is built from the same parts) and the mark makes room",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "snap and settle: hard decelerations (expo / spring), a small final move, one easing family",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "the door moves on its hinge (pivot at an edge, scale/rotation)",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 4,
+  "checkable": 7,
+  "total": 11
+ },
+ "video": null
+}

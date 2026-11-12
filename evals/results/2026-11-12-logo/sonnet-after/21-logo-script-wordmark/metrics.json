@@ -1,0 +1,212 @@
+{
+ "run": {
+  "id": "21-logo-script-wordmark",
+  "name": "21-logo-script-wordmark",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 90,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 80.8,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100,
+     "logo": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 19.2,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0,
+     "logo": 0
+    },
+    "issues": [
+     "medium:grow-middle",
+     "medium:thin"
+    ],
+    "ms": 3.4
+   },
+   "after": {
+    "score": 90,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 80.8,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100,
+     "logo": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 19.2,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0,
+     "logo": 0
+    },
+    "issues": [
+     "medium:grow-middle",
+     "medium:thin"
+    ],
+    "ms": 3.4
+   }
+  },
+  "wallMs": 34755,
+  "timedOut": false,
+  "turns": 8,
+  "costUsd": 0.0877996,
+  "durationMs": 34028,
+  "usage": {
+   "input": 260674,
+   "cached": 254176,
+   "output": 3641
+  },
+  "errors": [],
+  "toolCalls": 7,
+  "toolErrors": 0,
+  "toolsAvailable": 83,
+  "finalText": "I built the **Bloom** logo sting at 6 s, 1920×1080, 60 fps, with a cream background (#f6efe0) and deep green ink (#1f4d3a). I checked it with one contact sheet, but I didn't run the critic or a second tweak round.\n\n- **Lead-in (0–0.4 s):** a still cream frame.\n- **Write (0.4–3 s):** the **bloom wordmark** is a single monoline script path that draws itself on in one continuous stroke, easing in and out (Sine In Out).\n- **Leaf (2.9–3.9 s):** the **leaf** is a solid green shape above the second \"o\". It grows from its base with a small overshoot and settle.\n- **Hold (3.9–6 s):** the finished lockup stays still.\n\nThe script is hand-built from curves, so the \"b\" bowl reads a little like an \"l\". The lockup also sits slightly right of the canvas centre.\n\nI can redraw the \"b\", centre the lockup, or move the leaf over the first \"o\" if you want."
+ },
+ "metrics": {
+  "layers": 2,
+  "drawableLayers": 2,
+  "layerTypes": {
+   "path": 2
+  },
+  "groups": 0,
+  "animatedLayers": 2,
+  "keys": 9,
+  "segments": 5,
+  "easesUsed": {
+   "Sine In Out": 4,
+   "Spring 0.4": 1
+  },
+  "distinctEases": 2,
+  "easeFamilies": 2,
+  "overshootSegments": 1,
+  "keyedOvershoots": 1,
+  "springSegments": 1,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#1f4d3a",
+   "#2f7a55",
+   "#f6efe0"
+  ],
+  "keyCoverage": 0.6,
+  "visualActivity": 0.145,
+  "firstMotion": 2.867,
+  "lastMotion": 3.8,
+  "endHold": 2.2,
+  "longestHold": 0.067,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.009,
+  "midLuma": 0.931,
+  "toolErrors": 0,
+  "toolCalls": 7
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"bloom\" present",
+    "type": "textOrLetters",
+    "pass": false
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "blank lead-in: first motion between 0.1 and 0.5 s",
+    "type": "firstMotionBetween",
+    "pass": false
+   },
+   {
+    "text": "wordmark arrives after the mark, within the build (first visible 0.8-3.2 s)",
+    "type": "textFirstVisibleBetween",
+    "pass": false
+   },
+   {
+    "text": "final lockup held still ≥ 1.2 s (≥ 3 identical end frames)",
+    "type": "lockupHoldMin",
+    "pass": true
+   },
+   {
+    "text": "sting length 4.5-7.5 s",
+    "type": "durationBetween",
+    "pass": true
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "one idea that comes from the mark itself (you can name its verb: opens, assembles, writes, becomes); not a generic pop/fade",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "wordmark enters from the mark (slides out from behind it under a mask, grows from a glyph, or is built from the same parts) and the mark makes room",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "snap and settle: hard decelerations (expo / spring), a small final move, one easing family",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "a stroke writes on (animated trim)",
+    "type": "trimAnimated",
+    "pass": true
+   }
+  ],
+  "hits": 5,
+  "checkable": 8,
+  "total": 11
+ },
+ "video": null
+}

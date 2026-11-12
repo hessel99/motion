@@ -1,0 +1,14 @@
+- House outline [path] box 545,440,200,200 #000000 a0 stroke #ff8a3d 14px
+- Door [rect] box 623,552,44,82 #ff8a3d
+- Wordmark [text] box 808,455,620,180 #f5e9dc "Hearth" Inter 160px w600
+
+comp 1920x1080 4.5s @60fps, background #1c1410
+"House outline" (path l_03jm2)
+  trimStart: 0.3s 0
+  trimEnd: 0.3s 0 ─Cubic In Out→ 1.3s 100
+"Door" (rect l_03jm3)
+  scale: 1.3s [0,100] ─Cubic In Out→ 1.9s [110,100] ─Sine In Out→ 2.02s [95.5,100] ─Sine In Out→ 2.14s 100
+  opacity: 1.3s 0 ─Ease Out→ 1.4s 100
+"Wordmark" (text l_03jm4)
+  position: 1.9s [1065,545] ─Expo Out→ 2.6s [1120,545] ─Sine In Out→ 2.74s [1112.75,545] ─Sine In Out→ 2.88s [1115,545]
+  opacity: 1.9s 0 ─Expo Out→ 2.25s 100

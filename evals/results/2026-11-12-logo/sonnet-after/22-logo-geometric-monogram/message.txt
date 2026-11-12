@@ -1,0 +1,6 @@
+Logo sting for "Kobalt Studio", an architecture studio. The mark is a geometric monogram "K" built from three simple shapes (a vertical bar and two diagonal bars or triangles); the wordmark "KOBALT" with a smaller "STUDIO" under it. Precise and confident, dark blue background, white plus one accent. End on the lockup.
+
+<editor_context>
+comp "Main" 1920x1080 60fps 6s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

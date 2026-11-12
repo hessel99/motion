@@ -1,0 +1,597 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1514,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 0,
+  "input": {
+   "title": "Kobalt Studio – logo sting",
+   "duration": 6,
+   "style": "Swiss / architectural precision",
+   "styleReason": "Architecture studio: grid, construction lines, exact eases, no bounce.",
+   "concepts": [
+    {
+     "name": "Constructed",
+     "idea": "A thin accent construction line is drawn, the vertical bar rises from it like a column, then the two diagonals slide in and lock to the stem.",
+     "why": "Reads as building a structure: architecture, precision."
+    },
+    {
+     "name": "Blueprint draw",
+     "idea": "The K is drawn as outline strokes like a blueprint, then fills solid.",
+     "why": "Plan drawing language, but slower and more generic."
+    },
+    {
+     "name": "Slide-fit",
+     "idea": "Three bars slide in from different edges and snap into the monogram.",
+     "why": "Simple modular assembly; less story."
+    }
+   ],
+   "recommended": 0,
+   "beats": [
+    {
+     "name": "Foundation",
+     "start": 0,
+     "end": 1.2,
+     "description": "Dark blue field. Accent baseline draws across center from the left; the vertical bar grows up from it.",
+     "style": "Expo Out, #0B1F4A bg, accent #3D8BFF"
+    },
+    {
+     "name": "Assemble",
+     "start": 1.2,
+     "end": 2.6,
+     "description": "Upper diagonal then lower diagonal slide in along their angles and lock against the stem; small accent pulse on the joint.",
+     "style": "Cubic Out, 0.12s stagger"
+    },
+    {
+     "name": "Wordmark",
+     "start": 2.6,
+     "end": 3.8,
+     "description": "KOBALT reveals from behind the mark (masked slide), STUDIO fades up smaller, tracked wide beneath; baseline shrinks to an underline.",
+     "style": "Expo Out, tracked caps"
+    },
+    {
+     "name": "Lockup hold",
+     "start": 3.8,
+     "end": 6,
+     "description": "Still lockup, held 2 s.",
+     "style": "Static"
+    }
+   ]
+  },
+  "result": "storyboard \"Kobalt Studio – logo sting\" shown to the user (4 beats, 6s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1626,
+  "ok": true,
+  "ms": 97,
+  "editorMs": 3,
+  "input": {
+   "comp": {
+    "background": "#0B1F4A",
+    "duration": 6,
+    "fps": 60
+   },
+   "layers": [
+    {
+     "key": "base",
+     "type": "rect",
+     "name": "Baseline",
+     "x": 600,
+     "y": 689,
+     "w": 720,
+     "h": 3,
+     "fill": "#3D8BFF",
+     "anchor": "left",
+     "animate": {
+      "size": [
+       {
+        "t": 0.2,
+        "v": [
+         0,
+         3
+        ],
+        "ease": "Expo Out"
+       },
+       {
+        "t": 1,
+        "v": [
+         720,
+         3
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "stem",
+     "name": "Stem",
+     "type": "rect",
+     "x": 600,
+     "y": 420,
+     "w": 50,
+     "h": 240,
+     "fill": "#FFFFFF",
+     "anchor": "bottom",
+     "animate": {
+      "scale": [
+       {
+        "t": 0.6,
+        "v": [
+         100,
+         0
+        ],
+        "ease": "Expo Out"
+       },
+       {
+        "t": 1.3,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "key": "up",
+     "name": "Diagonal Upper",
+     "type": "path",
+     "points": "650,540 750,420 810,420 690,570",
+     "closed": true,
+     "fill": "#FFFFFF",
+     "animate": {
+      "position": [
+       {
+        "t": 1.3,
+        "v": [
+         -90,
+         90
+        ],
+        "ease": "Cubic Out"
+       },
+       {
+        "t": 2,
+        "v": [
+         0,
+         0
+        ]
+       }
+      ],
+      "opacity": [
+       {
+        "t": 1.3,
+        "v": 0
+       },
+       {
+        "t": 1.5,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "lo",
+     "name": "Diagonal Lower",
+     "type": "path",
+     "points": "690,570 815,660 750,660 650,600",
+     "closed": true,
+     "fill": "#3D8BFF",
+     "animate": {
+      "opacity": [
+       {
+        "t": 1.45,
+        "v": 0
+       },
+       {
+        "t": 1.65,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "wmclip",
+     "type": "group",
+     "name": "Wordmark Clip",
+     "x": 860,
+     "y": 400,
+     "w": 700,
+     "h": 260,
+     "clip": true,
+     "children": [
+      {
+       "key": "kob",
+       "type": "text",
+       "name": "KOBALT",
+       "text": {
+        "content": "KOBALT",
+        "fontFamily": "Inter",
+        "fontSize": 130,
+        "fontWeight": 600,
+        "letterSpacing": 8
+       },
+       "fill": "#FFFFFF",
+       "x": 0,
+       "y": 20,
+       "w": 700,
+       "h": 160,
+       "align": "left",
+       "animate": {
+        "position": [
+         {
+          "t": 2.6,
+          "v": [
+           -120,
+           100
+          ],
+          "ease": "Expo Out"
+         },
+         {
+          "t": 3.5,
+          "v": [
+           350,
+           100
+          ]
+         }
+        ],
+        "opacity": [
+         {
+          "t": 2.6,
+          "v": 0
+         },
+         {
+          "t": 2.9,
+          "v": 100
+         }
+        ]
+       }
+      },
+      {
+       "key": "stu",
+       "type": "text",
+       "name": "STUDIO",
+       "text": {
+        "content": "STUDIO",
+        "fontFamily": "Inter",
+        "fontSize": 40,
+        "fontWeight": 400,
+        "letterSpacing": 22
+       },
+       "fill": "#3D8BFF",
+       "x": 0,
+       "y": 190,
+       "w": 700,
+       "h": 50,
+       "align": "left",
+       "animate": {
+        "opacity": [
+         {
+          "t": 3.1,
+          "v": 0
+         },
+         {
+          "t": 3.8,
+          "v": 100,
+          "ease": "Cubic Out"
+         }
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "result": "{\"summary\":\"7 created, 0 updated, 8 keyframe tracks; animation ends 3.8s\",\"ids\":{\"base\":\"l_03jm2\",\"stem\":\"l_03jm3\",\"up\":\"l_03jm4\",\"lo\":\"l_03jm5\",\"kob\":\"l_03jm7\",\"stu\":\"l_03jm8\",\"wmclip\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 86,
+  "editorMs": 68,
+  "input": {
+   "times": [
+    0.5,
+    1.2,
+    1.8,
+    2.8,
+    3.4,
+    5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 1.2s, 1.8s, 2.8s, 3.4s, 5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/2c97e453-c5d5-4014-acfc-6d5843c0b1f4/tool-results/mcp-motion-blob-1794518362167-3xyx9d.jpg]"
+ },
+ {
+  "name": "get_document",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {},
+  "result": "{\"file\":\"Untitled\",\"composition\":{\"id\":\"c_03jm1\",\"name\":\"Main\",\"width\":1920,\"height\":1080,\"fps\":60,\"duration\":6,\"background\":[0.043,0.122,0.29,1]},\"compositions\":[{\"id\":\"c_03jm1\",\"name\":\"Main\",\"active\":true}],\"currentTime\":0,\"selection\":[],\"layerCount\":7,\"layers\":[{\"id\":\"l_03jm2\",\"name\":\"Baseline\",\"type\":\"rect\",\"props\":{\"anchor\":[0,1.5],\"position\":[600,690.5],\"scale\":[100,100],\"rotation\":[0],\"opac…"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 414,
+  "ok": true,
+  "ms": 36,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm2",
+     "prop": "size",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        720,
+        3
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.2,
+       "v": [
+        0,
+        100
+       ],
+       "ease": "Expo Out"
+      },
+      {
+       "t": 1,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 1.3,
+       "v": [
+        640,
+        585
+       ],
+       "ease": "Cubic Out"
+      },
+      {
+       "t": 2,
+       "v": [
+        730,
+        495
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 2.6,
+       "v": [
+        230,
+        100
+       ],
+       "ease": "Expo Out"
+      },
+      {
+       "t": 3.5,
+       "v": [
+        350,
+        100
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 4 tracks on 3 layers"
+ },
+ {
+  "name": "set_keyframes",
+  "argsBytes": 64,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm2",
+   "prop": "size",
+   "keyframes": [
+    {
+     "t": 0,
+     "v": [
+      720,
+      3
+     ]
+    }
+   ]
+  },
+  "result": "set 1 keyframes on Baseline.size"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 73,
+  "editorMs": 55,
+  "input": {
+   "times": [
+    0.6,
+    1.2,
+    1.8,
+    2.8,
+    3.4,
+    5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.6s, 1.2s, 1.8s, 2.8s, 3.4s, 5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/2c97e453-c5d5-4014-acfc-6d5843c0b1f4/tool-results/mcp-motion-blob-1794518370605-6n59dg.jpg]"
+ },
+ {
+  "name": "get_animation",
+  "argsBytes": 40,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 0,
+  "input": {
+   "ids": [
+    "l_03jm2"
+   ],
+   "includeStatic": true
+  },
+  "result": "comp 6s @60fps\n\"Baseline\" (rect l_03jm2)\n  scale: 0.2s [0,100] ─Expo Out→ 1s 100\n  size: 0s [720,3]"
+ },
+ {
+  "name": "delete_layers",
+  "argsBytes": 19,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm2"
+   ]
+  },
+  "result": "ok"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 80,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Baseline",
+   "x": 600,
+   "y": 689,
+   "w": 720,
+   "h": 3,
+   "fill": "#3D8BFF"
+  },
+  "result": "{\"id\":\"l_03jm9\"}"
+ },
+ {
+  "name": "set_pivot",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jm9",
+   "at": "left"
+  },
+  "result": "{\"id\":\"l_03jm9\",\"name\":\"Baseline\",\"anchor\":[0,1.5],\"pivotInComp\":[600,690.5]}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 120,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm9",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.2,
+       "v": [
+        0,
+        100
+       ],
+       "ease": "Expo Out"
+      },
+      {
+       "t": 1,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 8,
+  "input": {},
+  "result": "score 74/100 (choreography 96, polish 70, richness 54)\n1. [high] no follow-through, overshoot, settle or idle motion anywhere in 6s: everything stops dead\n   → secondary_motion {\"ids\":[\"l_03jm7\",\"l_03jm3\",\"l_03jm4\"],\"overshoot\":0.08,\"segments\":\"first\"}\n2. [high] 6 of 6 elements move once and stop: give the hero a second beat (an accent, a settle, a transition) and overlap follow-through on the oth…"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 21,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 16,
+  "input": {
+   "t": 5,
+   "maxSize": 500
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/2c97e453-c5d5-4014-acfc-6d5843c0b1f4/tool-results/mcp-motion-blob-1794518377699-tahrud.png]"
+ },
+ {
+  "name": "secondary_motion",
+  "argsBytes": 84,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm7",
+    "l_03jm4"
+   ],
+   "props": [
+    "position"
+   ],
+   "overshoot": 0.06,
+   "oscillations": 1
+  },
+  "result": "added overshoot 6% to KOBALT (1 moves), Diagonal Upper (1 moves)"
+ },
+ {
+  "name": "secondary_motion",
+  "argsBytes": 54,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm3"
+   ],
+   "props": [
+    "scale"
+   ],
+   "overshoot": 0.04
+  },
+  "result": "added overshoot 4% to Stem (1 moves)"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 5,
+  "input": {},
+  "result": "score 95/100 (choreography 96)\n1. [low] the hero \"KOBALT\" enters at 2.6s, after 4 smaller elements: the lead should move first (or at least early)\n   → retime {\"ids\":[\"l_03jm7\"],\"offset\":-2.4}"
+ }
+]

@@ -1,0 +1,18 @@
+- word [path] box 560,359,805,271 #000000 a0 stroke #1f4d36 10px
+- stem [path] box 975,432,1,40 #000000 a0 stroke #1f4d36 7px
+- leaf [path] box 975,434,0,0 #1f4d36
+- tag [text] box 780,740,360,36 #1f4d36 "FLORIST" Inter 30px w400
+
+comp 1920x1080 6s @60fps, background #f7f1e3
+"word" (path l_03jm2)
+  trimStart: 0.4s 0
+  trimEnd: 0.4s 0 ─Sine In Out→ 3s 100
+"stem" (path l_03jm3)
+  trimStart: 3s 0
+  trimEnd: 3s 0 ─Sine Out→ 3.4s 100
+"leaf" (path l_03jm4)
+  scale: 3.2s 0 ─spring Gentle→ 4s 100
+  rotation: 3.2s -30 ─spring Gentle→ 4s 0 ─Sine In Out→ 4.6s -3 ─Sine In Out→ 5.2s 0
+"tag" (text l_03jm5)
+  position: 4s [960,758] ─Sine Out→ 4.9s [960,748]
+  opacity: 4s 0 ─Sine Out→ 4.45s 100

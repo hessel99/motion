@@ -1,0 +1,6 @@
+Logo sting for "Bloom", a florist. The logo is a monoline script wordmark "bloom" (draw it as one continuous stroke path, or use a script font) with a small leaf above the o. Elegant and calm, cream background, deep green ink. End on the finished lockup.
+
+<editor_context>
+comp "Main" 1920x1080 60fps 6s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

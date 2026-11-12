@@ -1,0 +1,400 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 2258,
+  "ok": true,
+  "ms": 106,
+  "editorMs": 9,
+  "input": {
+   "comp": {
+    "background": "#F7F5F0",
+    "duration": 6,
+    "fps": 60,
+    "name": "Mesh sting"
+   },
+   "layers": [
+    {
+     "key": "l1",
+     "name": "Line A-B",
+     "points": "570,480 690,430",
+     "stroke": "#5B4BFF",
+     "strokeWidth": 6,
+     "drawOn": {
+      "t": 0.7,
+      "duration": 0.45,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "l2",
+     "name": "Line A-D",
+     "points": "570,480 640,555",
+     "stroke": "#5B4BFF",
+     "strokeWidth": 6,
+     "drawOn": {
+      "t": 0.85,
+      "duration": 0.45,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "l3",
+     "name": "Line B-D",
+     "points": "690,430 640,555",
+     "stroke": "#5B4BFF",
+     "strokeWidth": 6,
+     "drawOn": {
+      "t": 1,
+      "duration": 0.45,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "l4",
+     "name": "Line B-C",
+     "points": "690,430 775,520",
+     "stroke": "#5B4BFF",
+     "strokeWidth": 6,
+     "drawOn": {
+      "t": 1.1,
+      "duration": 0.45,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "l5",
+     "name": "Line D-C",
+     "points": "640,555 775,520",
+     "stroke": "#5B4BFF",
+     "strokeWidth": 6,
+     "drawOn": {
+      "t": 1.2,
+      "duration": 0.45,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "l6",
+     "name": "Line D-E",
+     "points": "640,555 730,640",
+     "stroke": "#5B4BFF",
+     "strokeWidth": 6,
+     "drawOn": {
+      "t": 1.3,
+      "duration": 0.45,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "l7",
+     "name": "Line C-E",
+     "points": "775,520 730,640",
+     "stroke": "#5B4BFF",
+     "strokeWidth": 6,
+     "drawOn": {
+      "t": 1.4,
+      "duration": 0.45,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "d1",
+     "name": "Dot A",
+     "type": "ellipse",
+     "x": 550,
+     "y": 460,
+     "w": 40,
+     "h": 40,
+     "fill": "#5B4BFF",
+     "enter": {
+      "t": 0.25,
+      "duration": 0.5,
+      "ease": "spring:0.4",
+      "from": {
+       "scale": 0,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "d2",
+     "name": "Dot B",
+     "type": "ellipse",
+     "x": 670,
+     "y": 410,
+     "w": 40,
+     "h": 40,
+     "fill": "#5B4BFF",
+     "enter": {
+      "t": 0.4,
+      "duration": 0.5,
+      "ease": "spring:0.4",
+      "from": {
+       "scale": 0,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "d3",
+     "name": "Dot D hub",
+     "type": "ellipse",
+     "x": 614,
+     "y": 529,
+     "w": 52,
+     "h": 52,
+     "fill": "#5B4BFF",
+     "enter": {
+      "t": 0.1,
+      "duration": 0.55,
+      "ease": "spring:0.4",
+      "from": {
+       "scale": 0,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "d4",
+     "name": "Dot C",
+     "type": "ellipse",
+     "x": 755,
+     "y": 500,
+     "w": 40,
+     "h": 40,
+     "fill": "#5B4BFF",
+     "enter": {
+      "t": 0.55,
+      "duration": 0.5,
+      "ease": "spring:0.4",
+      "from": {
+       "scale": 0,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "d5",
+     "name": "Dot E",
+     "type": "ellipse",
+     "x": 710,
+     "y": 620,
+     "w": 40,
+     "h": 40,
+     "fill": "#5B4BFF",
+     "enter": {
+      "t": 0.7,
+      "duration": 0.5,
+      "ease": "spring:0.4",
+      "from": {
+       "scale": 0,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "word",
+     "name": "Wordmark",
+     "x": 850,
+     "y": 440,
+     "w": 520,
+     "h": 200,
+     "text": {
+      "content": "Mesh",
+      "fontFamily": "Inter",
+      "fontSize": 190,
+      "fontWeight": 700,
+      "align": "left"
+     },
+     "fill": "#1B1B2F",
+     "enter": {
+      "t": 1.7,
+      "duration": 0.7,
+      "ease": "Expo Out",
+      "from": {
+       "opacity": 0,
+       "dx": -70
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"13 created, 0 updated, 26 keyframe tracks; animation ends 2.4s\",\"ids\":{\"l1\":\"l_03jm2\",\"l2\":\"l_03jm3\",\"l3\":\"l_03jm4\",\"l4\":\"l_03jm5\",\"l5\":\"l_03jm6\",\"l6\":\"l_03jm7\",\"l7\":\"l_03jm8\",\"d1\":\"l_03jm9\",\"d2\":\"l_03jma\",\"d3\":\"l_03jmb\",\"d4\":\"l_03jmc\",\"d5\":\"l_03jmd\",\"word\":\"l_03jme\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 132,
+  "editorMs": 116,
+  "input": {
+   "times": [
+    0.3,
+    0.8,
+    1.3,
+    1.9,
+    2.5,
+    5.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.3s, 0.8s, 1.3s, 1.9s, 2.5s, 5.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/4d0e034e-2a35-4930-949d-142746a1703a/tool-results/mcp-motion-blob-1794518450607-3x2jux.jpg]"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 62,
+  "ok": true,
+  "ms": 50,
+  "editorMs": 3,
+  "input": {
+   "ids": [
+    "l_03jm3",
+    "l_03jm5",
+    "l_03jm7"
+   ],
+   "scale": 1.25,
+   "pivot": 0
+  },
+  "result": "retimed 3 layers; animation now ends at 2.19s"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 27,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jme"
+   ],
+   "offset": -0.6
+  },
+  "result": "retimed 1 layers; animation now ends at 1.8s"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 617,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jmb",
+     "prop": "scale",
+     "merge": true,
+     "keyframes": [
+      {
+       "t": 2.6,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.4,
+       "v": [
+        112,
+        112
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.2,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5,
+       "v": [
+        112,
+        112
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.8,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jmc",
+     "prop": "scale",
+     "merge": true,
+     "keyframes": [
+      {
+       "t": 3,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.7,
+       "v": [
+        115,
+        115
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.4,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jma",
+     "prop": "scale",
+     "merge": true,
+     "keyframes": [
+      {
+       "t": 4.2,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 4.9,
+       "v": [
+        115,
+        115
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 5.6,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 3 tracks on 3 layers"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 9,
+  "input": {},
+  "result": "score 95/100 (choreography 96)\n1. [low] the hero \"Wordmark\" enters at 1.1s, after 5 smaller elements: the lead should move first (or at least early)\n   → retime {\"ids\":[\"l_03jme\"],\"offset\":-1}"
+ }
+]

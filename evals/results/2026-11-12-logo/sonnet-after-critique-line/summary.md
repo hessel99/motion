@@ -1,0 +1,13 @@
+# Agent eval — eval-after3
+
+2 runs, model sonnet. Agent cost $0.33 (judge $0.12); mean 30.5s, 12.5 turns, 10.5 tool calls, $0.16 per brief. Tool errors 0. Checklist 93% of machine-checkable items. Critic 91.5/100 (polishing rounds 1/brief). Judge overall **5.42**/10 (brief_fit 6, style_match 6, timing_easing 5, composition 5.5, richness 4.5, polish 5.5).
+
+| brief | time | turns | cost | tools (err) | layers | keys | eases | spr/txt/expr/pre | activity | off-canvas | txt overlap | checklist | critic | fit | style | timing | comp | rich | polish | **overall** |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 19-logo-house-door | 26s | 9 | $0.13 | 7 (0) | 3 | 15 | 4 | 0/0/0/0 | 28% | 0s | 0s | 6/7 | 89 (70→, 1r) | 6 | 6 | 5 | 5 | 4 | 6 | **5.33** |
+| 20-logo-network-dots | 35s | 16 | $0.20 | 14 (0) | 13 | 46 | 7 | 1/0/0/0 | 40% | 0s | 0s | 8/8 | 94 (82→, 1r) | 6 | 6 | 5 | 6 | 5 | 5 | **5.5** |
+
+## Judge critique
+
+- **19-logo-house-door**: The sting is three disconnected steps with no idea drawn from the mark. A slow Cubic In Out outline draw is followed by a door that stretches horizontally (scaleX 0→110 with an overshoot, which reads as a squash, not a hinge swing). The wordmark then simply fades in and drifts 55px right. The house also sits alone, off-centre to the left, for about 0.6s, and the mark never moves to make room. / Make the door the idea: put its anchor on the hinge edge and swing it open with an expo/spring snap. Let the wordmark slide out from behind the open door under a mask while the house shifts left into the final centred lockup. Use one expo-out family for every move, including a faster trace on the outline.
+- **20-logo-network-dots**: All motion is finished by 2.33s, leaving a 2.67s static hold (over half the 5s sting). The build itself is a generic pop-in, then trim-path draw, then slide: the dots Back-Out pop, the lines draw one by one, and the wordmark slides on separately. Nothing grows out of the network idea, and the mark never makes room. Mixed eases (Back, Cubic, Expo, Spring, custom) mean there is no single snap-and-settle language. At ~1.8s the wordmark is still crowding the mark before it drifts out to its final spacing. / Make the mark do the reveal and stretch the build across ~3.5s with one expo/spring family. Have the network assemble so each line shoots out and pulls the next dot into place. Then the rightmost dot or line should push the wordmark out from behind a working mask, with the mark sliding left a few pixels to make room. Finish with a small settle, such as a 1-2% scale breath on the whole lockup, and hold for about 1.5s.

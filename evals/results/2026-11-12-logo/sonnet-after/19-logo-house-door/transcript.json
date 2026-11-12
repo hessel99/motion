@@ -1,0 +1,128 @@
+[
+ {
+  "kind": "session",
+  "sessionId": "5f7e7c1d-1b5d-4612-8635-9de4528de40f",
+  "at": 1794518288084
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01LSZYVrYS39VaGd8kvjHSQ9",
+  "name": "propose_storyboard",
+  "input": "{\"title\":\"Hearth logo sting\",\"duration\":5,\"style\":\"Warm minimal, Expo Out family\",\"concepts\":[{\"name\":\"House draws, door opens\",\"idea\":\"The house outline writes itself, then the door hinges open with a warm glow spilling out and settles closed-lit.\",\"why\":\"Welcoming: a door opening onto warmth is the idea of a home rental.\"},{\"name\":\"Hearth glow\",\"idea\":\"The door lights up like a fire, glow pulses, house frames it.\",\"why\":\"Ties to the name Hearth.\"}],\"recommended\":0,\"beats\":[{\"name\":\"House draws\",\"start\":0,\"end\":1.4,\"description\":\"Pentagon outline draws on in cream from the base corner on a dark warm brown background.\",\"style\":\"Expo Out, stroke 14px\"},{\"name\":\"Door opens\",\"start\":1.2,\"end\":2.6,\"description\":\"Amber door fades in and hinges open, warm glow behind, then settles.\",\"style\":\"Expo Out, accent #ff9a3c\"},{\"name\":\"Wordmark\",\"start\":2,\"end\":3.2,\"description\":\"Hearth slides out from behind the mark to its right.\",\"style\":\"Expo Out\"},{\"name\":\"Hold\",\"start\":3.2,\"end\":5,\"description\":\"Full lockup held still.\",\"style\":\"still\"}]}",
+  "at": 1794518293336
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01LSZYVrYS39VaGd8kvjHSQ9",
+  "isError": false,
+  "summary": "storyboard \"Hearth logo sting\" shown to the user (4 beats, 5s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"}).",
+  "at": 1794518293366
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_0113PA2JmYDW2Gw71TzaErqf",
+  "name": "build_scene",
+  "input": "{\"comp\":{\"background\":\"#1f1410\",\"duration\":5,\"fps\":60},\"layers\":[{\"key\":\"house\",\"name\":\"House\",\"type\":\"path\",\"d\":\"M510 520 L650 400 L790 520 L790 680 L510 680 Z\",\"closed\":true,\"stroke\":\"#f6e7d2\",\"strokeWidth\":14,\"drawOn\":{\"t\":0.25,\"duration\":1.1,\"ease\":\"Expo Out\",\"from\":\"start\"}},{\"key\":\"glow\",\"name\":\"Door glow\",\"x\":610,\"y\":550,\"w\":80,\"h\":130,\"fill\":\"#ffb15c\",\"opacity\":0,\"animate\":{\"opacity\":[{\"t\":1.5,\"v\":0,\"ease\":\"Expo Out\"},{\"t\":2.2,\"v\":100}]}},{\"key\":\"door\",\"name\":\"Door\",\"x\":610,\"y\":550,\"w\":80,\"h\":130,\"fill\":\"#ff9a3c\",\"anchor\":\"left\",\"opacity\":0,\"animate\":{\"opacity\":[{\"t\":1.3,\"v\":0,\"ease\":\"Expo Out\"},{\"t\":1.6,\"v\":100}],\"scale\":[{\"t\":1.5,\"v\":[100,100],\"ease\":\"Expo Out\"},{\"t\":2.4,\"v\":[22,100]}]}},{\"key\":\"word\",\"name\":\"Wordmark\",\"text\":{\"content\":\"Hearth\",\"fontFamily\":\"Inter\",\"fontSize\":190,\"fontWeight\":600},\"x\":850,\"y\":430,\"w\":620,\"h\":220,\"fill\":\"#f6e7d2\",\"align\":\"left\",\"enter\":{\"t\":2.1,\"duration\":0.9,\"ease\":\"Expo Out\",\"from\":{\"opacity\":0,\"dx\":-90}}}]}",
+  "at": 1794518300990
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_0113PA2JmYDW2Gw71TzaErqf",
+  "isError": false,
+  "summary": "{\"summary\":\"4 created, 0 updated, 7 keyframe tracks; animation ends 3s\",\"ids\":{\"house\":\"l_03jm2\",\"glow\":\"l_03jm3\",\"door\":\"l_03jm4\",\"word\":\"l_03jm5\"}}",
+  "at": 1794518301087
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01EVEmaN7fQXaJBchdHvoFyZ",
+  "name": "contact_sheet",
+  "input": "{\"times\":[0.6,1.4,2,2.6,3.2,4.5]}",
+  "at": 1794518302079
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01EVEmaN7fQXaJBchdHvoFyZ",
+  "isError": false,
+  "summary": "6 frames left→right, top→bottom at 0.6s, 1.4s, 2s, 2.6s, 3.2s, 4.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/5f7e7c1d-1b5d-4612-8635-9de4528de40f/tool-results/mcp-motion-blob-1794518302207-sbgxo3.jpg]",
+  "at": 1794518302215
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_016PwjKme4jEJwvFghMcJ9Jb",
+  "name": "update_layer",
+  "input": "{\"id\":\"l_03jm2\",\"props\":{\"fill\":[0,0,0,0]}}",
+  "at": 1794518306233
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_016PwjKme4jEJwvFghMcJ9Jb",
+  "isError": false,
+  "summary": "ok",
+  "at": 1794518306246
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_0115SazMAYvedEdMUFMutZc7",
+  "name": "contact_sheet",
+  "input": "{\"times\":[0.6,1.4,2.2,4.5]}",
+  "at": 1794518306490
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_0115SazMAYvedEdMUFMutZc7",
+  "isError": false,
+  "summary": "4 frames left→right, top→bottom at 0.6s, 1.4s, 2.2s, 4.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/5f7e7c1d-1b5d-4612-8635-9de4528de40f/tool-results/mcp-motion-blob-1794518306557-19zi7a.jpg]",
+  "at": 1794518306564
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_016vKm2hfoZqxSsQUHfHAzEc",
+  "name": "set_keyframes",
+  "input": "{\"id\":\"l_03jm4\",\"prop\":\"scale\",\"keyframes\":[{\"t\":1.5,\"v\":[100,100],\"ease\":\"Expo Out\"},{\"t\":2.3,\"v\":[22,100],\"ease\":\"Expo In Out\"},{\"t\":2.9,\"v\":[22,100],\"ease\":\"Expo Out\"},{\"t\":3.5,\"v\":[100,100]}]}",
+  "at": 1794518310272
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_016vKm2hfoZqxSsQUHfHAzEc",
+  "isError": false,
+  "summary": "set 4 keyframes on Door.scale",
+  "at": 1794518310299
+ },
+ {
+  "kind": "thinking",
+  "text": "I've finished the sting with the door swinging closed again before the hold, though I haven't yet checked that change visually. I'll check the end frames next, then adjust the door swing, wordmark size, or glow if needed.\n\n",
+  "at": 1794518315364
+ },
+ {
+  "kind": "tool_use",
+  "id": "toolu_01JkvFrVEpWVvAts6gyCPUVU",
+  "name": "contact_sheet",
+  "input": "{\"times\":[1.8,2.4,3,4.5]}",
+  "at": 1794518315366
+ },
+ {
+  "kind": "tool_result",
+  "id": "toolu_01JkvFrVEpWVvAts6gyCPUVU",
+  "isError": false,
+  "summary": "4 frames left→right, top→bottom at 1.8s, 2.4s, 3s, 4.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/5f7e7c1d-1b5d-4612-8635-9de4528de40f/tool-results/mcp-motion-blob-1794518315440-06h7or.jpg]",
+  "at": 1794518315447
+ },
+ {
+  "kind": "text",
+  "text": "The Hearth sting is built: 5 s, ending on the full lockup. I checked it with contact sheets only. I didn't run the critique or play it back.\n\n- **Mark:** a cream house outline draws itself on, starting at 0.25 s. The amber door (`#ff9a3c`) fades in, hinges open at 1.5 s with a warm glow behind it, then swings shut again by 3.5 s.\n- **Wordmark:** \"Hearth\" slides out to the right of the mark at 2.1 s and settles by about 3 s.\n- **Hold:** the finished lockup stays still from about 3.5 s to 5 s, on a dark warm brown background.\n\nTwo things I noticed in the frames. The door is a thin sliver at 3.0 s, still mid-swing back, and fully closed by 4.5 s. The warm glow behind it is hard to see because the door covers most of it. I can make the glow stronger or the door swing wider if you want.\n\nAll motion uses Expo easing, and the only accent colour is the amber door.",
+  "at": 1794518317989
+ },
+ {
+  "kind": "done",
+  "result": "The Hearth sting is built: 5 s, ending on the full lockup. I checked it with contact sheets only. I didn't run the critique or play it back.\n\n- **Mark:** a cream house outline draws itself on, starting at 0.25 s. The amber door (`#ff9a3c`) fades in, hinges open at 1.5 s with a warm glow behind it, then swings shut again by 3.5 s.\n- **Wordmark:** \"Hearth\" slides out to the right of the mark at 2.1 s and settles by about 3 s.\n- **Hold:** the finished lockup stays still from about 3.5 s to 5 s, on a dark warm brown background.\n\nTwo things I noticed in the frames. The door is a thin sliver at 3.0 s, still mid-swing back, and fully closed by 4.5 s. The warm glow behind it is hard to see because the door covers most of it. I can make the glow stronger or the door swing wider if you want.\n\nAll motion uses Expo easing, and the only accent colour is the amber door.",
+  "costUsd": 0.2836438,
+  "durationMs": 32376,
+  "numTurns": 8,
+  "usage": {
+   "input": 365416,
+   "cached": 310698,
+   "output": 3373
+  },
+  "at": 1794518320413
+ }
+]

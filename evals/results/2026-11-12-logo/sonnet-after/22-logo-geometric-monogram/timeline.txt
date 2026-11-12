@@ -1,0 +1,23 @@
+- Stem [rect] box 600,420,50,240 #ffffff
+- Diagonal Upper [path] box 650,420,160,150 #ffffff
+- Diagonal Lower [path] box 650,570,165,90 #3d8bff
+- Wordmark Clip [group] #ffffff a0
+  - KOBALT [text] box 862,420,700,160 #ffffff "KOBALT" Inter 130px w600
+  - STUDIO [text] box 860,590,700,50 #3d8bff "STUDIO" Inter 40px w400
+- Baseline [rect] box 600,689,720,3 #3d8bff
+
+comp 1920x1080 6s @60fps, background #0b1f4a
+"Stem" (rect l_03jm3)
+  scale: 0.6s [100,0] ─Expo Out→ 1.3s [100,104] ─Sine In Out→ 1.44s [100,98.2] ─Sine In Out→ 1.58s 100
+"Diagonal Upper" (path l_03jm4)
+  position: 1.3s [640,585] ─Cubic Out→ 2s [735.4,489.6] ─Sine In Out→ 2.14s [727.57,497.43] ─Sine In Out→ 2.28s [730,495]
+  opacity: 1.3s 0 ─Ease Out→ 1.5s 100
+"Diagonal Lower" (path l_03jm5)
+  opacity: 1.45s 0 ─Ease Out→ 1.65s 100
+"KOBALT" (text l_03jm7)
+  position: 2.6s [230,100] ─Expo Out→ 3.5s [357.2,100] ─Sine In Out→ 3.68s [346.76,100] ─Sine In Out→ 3.86s [350,100]
+  opacity: 2.6s 0 ─Ease Out→ 2.9s 100
+"STUDIO" (text l_03jm8)
+  opacity: 3.1s 0 ─Ease Out→ 3.8s 100
+"Baseline" (rect l_03jm9)
+  scale: 0.2s [0,100] ─Expo Out→ 1s 100

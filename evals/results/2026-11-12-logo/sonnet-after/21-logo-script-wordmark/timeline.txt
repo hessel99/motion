@@ -1,0 +1,10 @@
+- bloom wordmark [path] box 560,362,970,257 #000000 a0 stroke #1f4d3a 8px
+- leaf [path] box 1114,474,45,33 #2f7a55
+
+comp 1920x1080 6s @60fps, background #f6efe0
+"bloom wordmark" (path l_03jm2)
+  trimStart: 0.4s 0
+  trimEnd: 0.4s 0 ─Sine In Out→ 3s 100
+"leaf" (path l_03jm3)
+  scale: 2.9s [45,0] ─spring:0.37→ 3.9s 100
+  rotation: 2.9s 14 ─Sine In Out→ 3.45s 20.4 ─Sine In Out→ 3.75s 17.2 ─Sine In Out→ 4s 18
