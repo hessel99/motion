@@ -358,7 +358,6 @@ function AgentRuns() {
     <>
       <Card title="Review" sub="After every run that changed the file, a review card lists what changed. Keep it, compare before / after, or revert everything in one step.">
         <Row label="Undo history" sub="Agent edits are normal undo steps: ⌘Z works too."><CircleCheck class="ok-icon" /></Row>
-        <Row label="Variations" sub="Ask for variations: the agent saves A / B / C versions you preview and pick in the sidebar."><CircleCheck class="ok-icon" /></Row>
       </Card>
       <Card title="Conversations" sub="Conversations are saved per file on this computer.">
         <Row label={`${count} saved conversation${count === 1 ? '' : 's'}`}>

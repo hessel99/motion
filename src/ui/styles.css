@@ -325,8 +325,6 @@ kbd, .kbd {
 .preset:hover:not(:disabled) { background: var(--input-bg-hover); }
 .preset::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--text-disabled); }
 .preset.in::before { background: var(--preset-in); }
-.preset.out::before { background: var(--preset-out); }
-.preset.loop::before { background: var(--preset-loop); }
 .expr-add { font-size: var(--text-xs); padding: 1px var(--space-2); min-height: var(--control-h-sm); }
 .expr-row { margin-bottom: var(--space-5); }
 .expr-edit { width: 100%; font: var(--text-xs) var(--font-mono); resize: vertical; user-select: text; }
@@ -411,8 +409,6 @@ kbd, .kbd {
 .fill-kind { margin-top: var(--space-3); }
 .fill-kind .seg { flex: 0 0 auto; }
 .fill-kind .num { flex: 1; }
-.preset-pick { flex: 1; justify-content: flex-start; background: var(--input-bg); font-weight: var(--weight-regular); }
-.preset-pick:hover:not(:disabled) { background: var(--input-bg-hover); }
 /* key navigation: the diamond stays; the ‹ › arrows show on hover of an animated row */
 .field-row-trail { position: relative; }
 .prop-row .keynav-step { position: absolute; top: 50%; transform: translateY(-50%); visibility: hidden !important; }
