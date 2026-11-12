@@ -248,6 +248,8 @@ export interface RenderStats {
   atlasPages: number;
   drawCalls: number;
   culled: number;
+  /** instance bytes uploaded this frame */
+  uploadBytes: number;
 }
 
 export class Renderer {
@@ -301,8 +303,12 @@ export class Renderer {
   private needsCompile = true;
   private dirtyLayers = new Set<string>();
   dirty = true;
-  stats: RenderStats = { instances: 0, layers: 0, evalMs: 0, writeMs: 0, rasterMs: 0, gpuSubmitMs: 0, frameMs: 0, atlasEntries: 0, atlasPages: 0, drawCalls: 0, culled: 0 };
+  stats: RenderStats = { instances: 0, layers: 0, evalMs: 0, writeMs: 0, rasterMs: 0, gpuSubmitMs: 0, frameMs: 0, atlasEntries: 0, atlasPages: 0, drawCalls: 0, culled: 0, uploadBytes: 0 };
   private rasterBudgetMs = 6;
+  private ranges: number[] = [];
+  /** skip unchanged instances during playback (off = rewrite + upload everything, for a/b tests) */
+  incremental = true;
+  private lastCull = true;
   private pendingUpgrade = false;
   lastTime = -1;
 
@@ -448,6 +454,18 @@ export class Renderer {
       this.style = new Float64Array(cap * ST);
       this.xf = new Float64Array(cap * 8);
       this.drawnMask = new Uint8Array(cap);
+      this.sPar = new Int32Array(cap);
+      this.sTOff = new Float64Array(cap);
+      this.sIn = new Float64Array(cap);
+      this.sOut = new Float64Array(cap);
+      this.sEnd = new Float64Array(cap);
+      this.sFlags = new Uint8Array(cap);
+      this.sMask = new Int32Array(cap);
+      this.sExpr = new Int32Array(cap);
+      this.sH = new Int32Array(cap * 10);
+      this.chg = new Uint8Array(cap);
+      this.vis = new Uint8Array(cap);
+      this.lastK = new Int32Array(cap);
     }
     for (let i = 0; i < n; i++) {
       const { layer, parent, tOff, owner, tEnd } = entries[i];
@@ -463,6 +481,7 @@ export class Renderer {
         it.clip = p.layer.clip || p.layer.type === 'precomp' ? parent : p.clip;
       }
       this.items[i] = it;
+      this.sPar[i] = parent; this.sTOff[i] = tOff; this.sEnd[i] = tEnd;
       this.compileItem(i);
     }
     this.needsCompile = false;
@@ -490,7 +509,7 @@ export class Renderer {
       const p = l.props[key];
       const tr = p ? new Track(p, PROP_DEFS[key].dim, key === 'position') : defaultTrack(key);
       it.tracks[k] = tr;
-      if (tr.animated) { mask |= 1 << k; it.h[k] = this.pool.add(p!, PROP_DEFS[key].dim, key === 'position'); }
+      if (tr.animated) { mask |= 1 << k; it.h[k] = this.sH[i * 10 + k] = this.pool.add(p!, PROP_DEFS[key].dim, key === 'position'); }
     }
     // expressions: evaluated every frame on top of the keyframed/static value
     let emask = 0;
@@ -535,6 +554,10 @@ export class Renderer {
       };
       it.animated = true; // re-render every frame while it changes
     }
+    // struct-of-arrays mirror of what the per-frame loops read (no object pointer chasing)
+    this.sIn[i] = l.inPoint; this.sOut[i] = l.outPoint;
+    this.sMask[i] = mask & ~emask; this.sExpr[i] = emask;
+    this.sFlags[i] = (it.animated ? 1 : 0) | (it.hidden ? 2 : 0);
     this.evalItem(i, 0, true);
     this.unitCount -= it.units?.length ?? 0;
     it.units = null;
@@ -590,9 +613,9 @@ export class Renderer {
   /** evaluate local transform + style of item i at time t (static items only once).
    *  cached transform components let us skip static tracks entirely. */
   private evalItem(i: number, t: number, force = false) {
-    const it = this.items[i];
     const X = this.xf, o8 = i * 8, os = i * ST, S = this.style;
     if (force) {
+      const it = this.items[i];
       // compile time: evaluate everything once with the track objects (static values)
       const tr = it.tracks;
       tr[TR_ANCHOR].eval(t, X, o8);
@@ -608,24 +631,26 @@ export class Renderer {
       this.composeLocal(i);
       return;
     }
-    const m = it.animMask & ~it.exprMask;
-    if (it.exprMask) this.evalExprs(i, t);
-    if (!m) { if (it.exprMask & 0x0f) this.composeLocal(i); return; }
-    const h = it.h, P = this.pool;
+    const m = this.sMask[i], em = this.sExpr[i];
+    if (em) this.evalExprs(i, t);
+    if (!m) { if (em & 0x0f) this.composeLocal(i); return; }
+    const H = this.sH, h = i * 10, P = this.pool;
     if (m & 0x0f) {
-      if (m & (1 << TR_ANCHOR)) P.eval(h[TR_ANCHOR], t, X, o8);
-      if (m & (1 << TR_POS)) P.eval(h[TR_POS], t, X, o8 + 2);
-      if (m & (1 << TR_SCALE)) P.eval(h[TR_SCALE], t, X, o8 + 4);
-      if (m & (1 << TR_ROT)) { P.eval(h[TR_ROT], t, X, o8 + 6); X[o8 + 6] *= Math.PI / 180; }
+      if (m & (1 << TR_ANCHOR)) P.eval(H[h + TR_ANCHOR], t, X, o8);
+      if (m & (1 << TR_POS)) P.eval(H[h + TR_POS], t, X, o8 + 2);
+      if (m & (1 << TR_SCALE)) P.eval(H[h + TR_SCALE], t, X, o8 + 4);
+      if (m & (1 << TR_ROT)) { P.eval(H[h + TR_ROT], t, X, o8 + 6); X[o8 + 6] *= Math.PI / 180; }
     }
     // transform changed by keyframes and/or expressions
-    if ((m | it.exprMask) & 0x0f) this.composeLocal(i);
-    if (m & (1 << TR_OPA)) { P.eval(h[TR_OPA], t, X, o8 + 7); this.lopa[i] = Math.min(1, Math.max(0, X[o8 + 7] / 100)); }
-    if (m & (1 << TR_SIZE)) P.eval(h[TR_SIZE], t, S, os);
-    if (m & (1 << TR_RAD)) P.eval(h[TR_RAD], t, S, os + 2);
-    if (m & (1 << TR_FILL)) P.eval(h[TR_FILL], t, S, os + 6);
-    if (m & (1 << TR_STROKE)) P.eval(h[TR_STROKE], t, S, os + 10);
-    if (m & (1 << TR_SW)) P.eval(h[TR_SW], t, S, os + 14);
+    if ((m | em) & 0x0f) this.composeLocal(i);
+    if (m & (1 << TR_OPA)) { P.eval(H[h + TR_OPA], t, X, o8 + 7); const v = X[o8 + 7] / 100; this.lopa[i] = v < 0 ? 0 : v > 1 ? 1 : v; }
+    if (m & 0x3e0) {
+      if (m & (1 << TR_SIZE)) P.eval(H[h + TR_SIZE], t, S, os);
+      if (m & (1 << TR_RAD)) P.eval(H[h + TR_RAD], t, S, os + 2);
+      if (m & (1 << TR_FILL)) P.eval(H[h + TR_FILL], t, S, os + 6);
+      if (m & (1 << TR_STROKE)) P.eval(H[h + TR_STROKE], t, S, os + 10);
+      if (m & (1 << TR_SW)) P.eval(H[h + TR_SW], t, S, os + 14);
+    }
   }
 
   private exprCtx: ExprContext = { time: 0, value: 0, index: 0, fps: 30, duration: 1, inPoint: 0, valueAt: () => 0, keyTimes: [], seed: 0 };
@@ -691,18 +716,42 @@ export class Renderer {
   private subEnd = new Int32Array(0);
 
   /** compute world matrices and opacities for all items at time t */
-  evaluate(t: number) { this.evaluateRange(t, 0, this.items.length); }
+  evaluate(t: number, all = true) { this.evaluateRange(t, 0, this.items.length, all); }
 
-  private evaluateRange(t: number, from: number, to: number) {
-    const items = this.items, W = this.world, L = this.local, O = this.opa, LO = this.lopa;
+  // struct-of-arrays copies of the item fields the per-frame loops need
+  private sPar = new Int32Array(0);
+  private sTOff = new Float64Array(0);
+  private sIn = new Float64Array(0);
+  private sOut = new Float64Array(0);
+  private sEnd = new Float64Array(0);
+  /** bit 0 animated, bit 1 hidden */
+  private sFlags = new Uint8Array(0);
+  private sMask = new Int32Array(0);
+  private sExpr = new Int32Array(0);
+  private sH = new Int32Array(0);
+  /** world matrix / opacity / visibility of item i changed in the last evaluation */
+  private chg = new Uint8Array(0);
+  private vis = new Uint8Array(0);
+  /** instance slot item i was written to last frame (-1 = not drawn) */
+  private lastK = new Int32Array(0);
+
+  /** evaluates [from, to). items that are static, keep their visibility and whose parent did not
+   *  change keep last frame's world matrix (all = recompute everything, e.g. after edits). */
+  private evaluateRange(t: number, from: number, to: number, all: boolean) {
+    const W = this.world, L = this.local, O = this.opa, LO = this.lopa;
+    const PAR = this.sPar, TOFF = this.sTOff, IN = this.sIn, OUT = this.sOut, END = this.sEnd, FL = this.sFlags, CHG = this.chg, VIS = this.vis;
     for (let i = from; i < to; i++) {
-      const it = items[i];
-      const tl = t - it.tOff;
-      if (it.animated) this.evalItem(i, tl);
+      const tl = t - TOFF[i];
+      const fl = FL[i];
+      let c = all;
+      if (fl & 1) { this.evalItem(i, tl); c = true; }
+      const vis = (fl & 2) || tl < IN[i] || tl >= OUT[i] || t >= END[i] ? 0 : 1;
+      if (vis !== VIS[i]) { VIS[i] = vis; c = true; }
+      const p = PAR[i];
+      if (p >= 0 && CHG[p]) c = true;
+      if (!c) { CHG[i] = 0; continue; }
+      CHG[i] = 1;
       const o = i * 6;
-      const p = it.parent;
-      const l = it.layer;
-      const vis = it.hidden || tl < l.inPoint || tl >= l.outPoint || t >= it.tEnd ? 0 : 1;
       if (p < 0) {
         W[o] = L[o]; W[o + 1] = L[o + 1]; W[o + 2] = L[o + 2]; W[o + 3] = L[o + 3]; W[o + 4] = L[o + 4]; W[o + 5] = L[o + 5];
         O[i] = LO[i] * vis;
@@ -887,6 +936,10 @@ export class Renderer {
   render(t: number, retry = false) {
     if (this.contextLost) return;
     const f0 = performance.now();
+    // anything but the time moving (edits, view, rasters arriving, context restore) sets dirty:
+    // then every instance is rewritten. during plain playback only changed items are.
+    let full = !this.incremental || this.dirty || retry || this.syncRaster || this.cullOffscreen !== this.lastCull || this.needsCompile || this.dirtyLayers.size > 0;
+    this.lastCull = this.cullOffscreen;
     const compactions0 = this.atlas.compactions + this.atlas.generation;
     const store = this.store;
     if (this.needsCompile) this.compile();
@@ -906,9 +959,9 @@ export class Renderer {
     const e0 = performance.now();
     // same time + only a few layers edited (dragging while paused): re-evaluate just their subtrees
     if (t === this.evalTime && !this.evalAll && this.dirtyIdx.length && this.dirtyIdx.length < 64) {
-      for (const i of this.dirtyIdx) this.evaluateRange(t, i, this.subEnd[i]);
+      for (const i of this.dirtyIdx) this.evaluateRange(t, i, this.subEnd[i], true);
     } else if (t !== this.evalTime || this.evalAll || this.dirtyIdx.length) {
-      this.evaluate(t);
+      this.evaluate(t, this.evalAll || this.dirtyIdx.length > 0);
     }
     this.evalTime = t;
     this.evalAll = false;
@@ -917,7 +970,14 @@ export class Renderer {
 
     const items = this.items, n = items.length;
     const need = (n + 1 + this.unitCount) * F;
-    if (this.inst.length < need) this.inst = new Float32Array(Math.max(need, this.inst.length * 2));
+    if (this.inst.length < need) { this.inst = new Float32Array(Math.max(need, this.inst.length * 2)); full = true; }
+    if (this.icap < this.inst.byteLength) full = true; // gpu buffer gets reallocated below
+    const CHG = this.chg, lastK = this.lastK;
+    const frame = this.atlas.frame;
+    // instance ranges written this frame (uploaded with bufferSubData per range)
+    const ranges = this.ranges;
+    ranges.length = 0;
+    let rs = 0, re = 0;
     const I = this.inst, W = this.world, S = this.style, O = this.opa;
     const comp = store.comp;
     const z = this.zoom * this.dpr;
@@ -957,7 +1017,7 @@ export class Renderer {
       const it = items[i];
       mask[i] = 0;
       const l = it.layer;
-      if (O[i] <= 0.0005) continue;
+      if (O[i] <= 0.0005) { lastK[i] = -1; continue; }
       if (l.mask && !(top && top.maskEnd > i)) {
         // masks the following siblings: region = rest of the parent's subtree
         flush();
@@ -979,11 +1039,27 @@ export class Renderer {
       if (bm !== curBlend) { flush(); cmds.push(CMD_BLEND, bm, 0); curBlend = bm; }
       if (it.units) {
         const r0 = performance.now();
+        const k0 = k;
         k = this.writeUnits(i, k, t, div !== 1 ? O[i] / div : O[i], budgetEnd);
         rasterMs += performance.now() - r0;
         mask[i] = 1;
+        lastK[i] = -1;
+        if (k > k0) { if (k0 !== re) { if (re > rs) ranges.push(rs, re); rs = k0; } re = k; }
         continue;
       }
+      // unchanged since last frame and still in the same slot: the instance data in the cpu
+      // array and in the gpu buffer is still valid. skip the write and the upload.
+      if (!full && !CHG[i] && !it.dyn) {
+        const lk = lastK[i];
+        if (lk < 0) continue;
+        if (lk === k) {
+          if (it.entry) it.entry.lastUsed = frame; // keep its raster alive in the atlas lru
+          mask[i] = 1;
+          k++;
+          continue;
+        }
+      }
+      lastK[i] = -1;
       const os = i * ST, o6 = i * 6;
       if (it.kind === KIND_RECT || it.kind === KIND_ELLIPSE) {
         if (S[os + 9] <= 0 && (S[os + 14] <= 0 || S[os + 13] <= 0)) continue;
@@ -1059,8 +1135,12 @@ export class Renderer {
       I[o + 28] = page;
       this.writeClip(I, o, it.clip);
       mask[i] = 1;
+      lastK[i] = k;
+      if (k !== re) { if (re > rs) ranges.push(rs, re); rs = k; }
+      re = k + 1;
       k++;
     }
+    if (re > rs) ranges.push(rs, re);
     flush();
     this.isolatedLastFrame = isolated;
     const w1 = performance.now();
@@ -1095,12 +1175,26 @@ export class Renderer {
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.ibuf);
-    const bytes = k * F * 4;
     if (this.icap < this.inst.byteLength) {
       gl.bufferData(gl.ARRAY_BUFFER, this.inst.byteLength, gl.DYNAMIC_DRAW);
       this.icap = this.inst.byteLength;
     }
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.inst, 0, k * F);
+    let bytes = 0;
+    if (full) { if (k) gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.inst, 0, k * F); bytes = k * F * 4; }
+    else {
+      // merge ranges separated by small gaps (fewer calls), fall back to one union range when fragmented
+      const GAP = 32;
+      let a = -1, b = -1, calls = 0;
+      const many = ranges.length > 128;
+      for (let r = 0; r < ranges.length; r += 2) {
+        const x = ranges[r], y = ranges[r + 1];
+        if (a >= 0 && (many || x - b <= GAP)) { b = y; continue; }
+        if (a >= 0) { gl.bufferSubData(gl.ARRAY_BUFFER, a * F * 4, this.inst, a * F, (b - a) * F); bytes += (b - a) * F * 4; calls++; }
+        a = x; b = y;
+      }
+      if (a >= 0) { gl.bufferSubData(gl.ARRAY_BUFFER, a * F * 4, this.inst, a * F, (b - a) * F); bytes += (b - a) * F * 4; calls++; }
+      void calls;
+    }
     if (cmds.length === 3 && cmds[0] === CMD_DRAW && cmds[1] === 0) {
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, k); // common case: the whole scene in one call
     } else {
@@ -1108,7 +1202,6 @@ export class Renderer {
     }
     gl.bindVertexArray(null);
     const g1 = performance.now();
-    void bytes;
 
     const st = this.stats;
     st.instances = k;
@@ -1122,6 +1215,7 @@ export class Renderer {
     st.atlasPages = this.atlas.pages;
     st.drawCalls = 1;
     st.culled = culled;
+    st.uploadBytes = bytes;
     this.lastTime = t;
     this.dirty = this.pendingUpgrade;
   }

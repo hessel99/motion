@@ -5,7 +5,7 @@ const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
 page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-await page.goto('http://localhost:5173/?nobridge&blank');
+await page.goto(`${process.env.URL || 'http://localhost:5173/'}?nobridge&blank`);
 await page.waitForFunction(() => window.editor?.renderer);
 const ev = (fn, arg) => page.evaluate(fn, arg);
 let _lw = 300; const timeline_leftW = () => _lw;

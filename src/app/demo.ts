@@ -21,7 +21,11 @@ function chain(keys: Keyframe[], eases: [number, number, number, number][]) {
   return keys;
 }
 
-export interface StressOptions { count: number; kinds?: ('rect' | 'ellipse' | 'text' | 'path')[]; nested?: boolean; seed?: number }
+export interface StressOptions {
+  count: number; kinds?: ('rect' | 'ellipse' | 'text' | 'path')[]; nested?: boolean; seed?: number;
+  /** fraction of layers that animate (default 1). realistic scenes: most layers are static at any time */
+  animated?: number;
+}
 
 export function stressProject(opts: StressOptions): Project {
   const p = createProject(`Stress ${opts.count}`);
@@ -31,6 +35,7 @@ export function stressProject(opts: StressOptions): Project {
   const kinds = opts.kinds ?? ['rect', 'ellipse'];
   const eases = EASE_PRESETS.filter(e => e.group !== 'basic').map(e => e.v);
   let parent: Layer | null = null;
+  const frac = opts.animated ?? 1, ra = rnd((opts.seed ?? 7) + 1);
   for (let i = 0; i < opts.count; i++) {
     const kind = kinds[i % kinds.length];
     const s = 6 + r() * 40;
@@ -56,6 +61,7 @@ export function stressProject(opts: StressOptions): Project {
     l.props.scale = { v: [100, 100], kf: chain(times.map(t => { const sc = 50 + r() * 100; return kf(t, [sc, sc]); }), [eases[Math.floor(r() * eases.length)]]) };
     l.props.opacity = { v: [100], kf: chain(times.map(t => kf(t, [30 + r() * 70])), [[0.42, 0, 0.58, 1]]) };
     l.props.fill = { v: color, kf: chain(times.map(t => kf(t, hsl((hue + t * 0.1) % 1, 0.7, 0.6))), [[0.42, 0, 0.58, 1]]) };
+    if (frac < 1 && ra() >= frac) for (const k of ['position', 'rotation', 'scale', 'opacity', 'fill'] as const) { const pr = l.props[k]!; pr.v = pr.kf![0].v; delete pr.kf; }
     p.layers[l.id] = l;
     if (opts.nested && i % 10 === 0) {
       // every 10 layers start a rotating group to stress the hierarchy
