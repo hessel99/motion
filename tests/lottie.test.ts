@@ -245,3 +245,26 @@ describe('lottie round trip', () => {
     expect(back2.duration).toBe(4);
   });
 });
+
+import { describe as d2, it as i2, expect as e2 } from 'vitest';
+import { projectToLottie as toL } from '../src/export/lottie';
+import { lottieToProject as fromL } from '../src/import/lottie';
+import { createProject as cp, createLayer as cl } from '../src/core/model';
+import { Track as Tr } from '../src/core/evaluate';
+d2('lottie export: springs + expressions', () => {
+  i2('bakes springs into samples that match our evaluation', () => {
+    const p = cp('s');
+    const comp = p.comps[p.activeComp];
+    const l = cl('rect', { x: 0, y: 0, w: 100, h: 100 });
+    l.props.rotation = { v: [0], kf: [{ t: 0, v: [0], interp: 'spring', bounce: 0.5, out: [0, 0], in: [1, 1] }, { t: 1, v: [90], interp: 'linear', out: [0, 0], in: [1, 1] }], expr: 'value + 0' };
+    p.layers[l.id] = l; comp.root.push(l.id);
+    const lot = toL(p);
+    const r = lot.layers[0].ks.r;
+    e2(r.k.length).toBeGreaterThan(30);
+    e2(r.x).toContain('value + 0');
+    const back = fromL(JSON.parse(JSON.stringify(lot)));
+    const bl = Object.values(back.layers)[0] as any;
+    const a = new Tr(l.props.rotation, 1), b = new Tr({ v: [0], kf: bl.props.rotation.kf }, 1);
+    for (let t = 0; t <= 1; t += 0.05) e2(Math.abs(a.eval1(t) - b.eval1(t))).toBeLessThan(1.5);
+  });
+});

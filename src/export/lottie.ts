@@ -1,3 +1,4 @@
+import { springAt } from '../core/easing';
 // export our model to lottie / bodymovin json (v5 schema).
 //
 // mapping:
@@ -22,9 +23,33 @@ function firstV(p: Prop | undefined, def: number[]): number[] {
   return p.kf && p.kf.length ? p.kf[0].v : p.v;
 }
 
+/** lottie has no springs: bake spring segments into linear keys sampled every frame */
+function bakeSprings(kf: Keyframe[], fr: number): Keyframe[] {
+  if (!kf.some((k, i) => k.interp === 'spring' && i < kf.length - 1)) return kf;
+  const out: Keyframe[] = [];
+  for (let i = 0; i < kf.length; i++) {
+    const k = kf[i], nx = kf[i + 1];
+    if (k.interp !== 'spring' || !nx) { out.push(k); continue; }
+    const steps = Math.max(2, Math.round((nx.t - k.t) * fr));
+    for (let s2 = 0; s2 < steps; s2++) {
+      const p = s2 / steps;
+      const e = springAt(k.bounce ?? 0.3, p);
+      out.push({ t: k.t + (nx.t - k.t) * p, v: k.v.map((v, d) => v + ((nx.v[d] ?? v) - v) * e), interp: 'linear', out: [0, 0], in: [1, 1] });
+    }
+  }
+  return out;
+}
+
 function exportProp(p: Prop | undefined, def: number[], fr: number, conv: (v: number[]) => number[] = v => v, spatial = false): any {
+  const r = exportPropInner(p, def, fr, conv, spatial);
+  // expressions: our syntax is a subset of after effects / lottie-web javascript for the common cases
+  if (p?.expr) r.x = p.expr.startsWith('var ') ? p.expr : `var $bm_rt = ${p.expr};`;
+  return r;
+}
+
+function exportPropInner(p: Prop | undefined, def: number[], fr: number, conv: (v: number[]) => number[] = v => v, spatial = false): any {
   if (!p) return { a: 0, k: conv(def).map(R) };
-  const kf = p.kf;
+  const kf = p.kf ? bakeSprings(p.kf, fr) : p.kf;
   if (!kf || kf.length < 2) {
     const v = conv(kf && kf.length ? kf[0].v : p.v).map(R);
     return { a: 0, k: v.length === 1 ? v[0] : v };
