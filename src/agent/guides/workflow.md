@@ -25,7 +25,7 @@ Ask (one short question, with 2–3 options and your default) only when a wrong 
 3. Call `propose_storyboard` (title, style, styleReason, duration, beats). The user sees an editable card.
    - Result says "wait for approval": end your turn with one line ("Storyboard ready — approve or edit it."). The approved (maybe edited) storyboard comes back as the next message: follow THAT version (beat names, times, notes).
    - Result says "auto-approved": continue building immediately.
-4. Set the comp (`set_composition` duration = storyboard duration + 0.3–0.5 s rest) and beat markers (`set_markers`, one per beat start).
+4. Set the comp (`set_composition` duration = storyboard duration + 0.3–0.5 s rest).
 
 ## 4. Blocking (per beat)
 `update_progress` { beat, status: "active" } → create the layers of the beat in their final (resting) poses: layout on the grid, safe areas, hierarchy by size/contrast. Name every layer meaningfully ("Title", "Card 2", "Logo mark"); group parts that move together (`group_layers`) and use groups as parents for secondary motion. Check the resting layout with one `screenshot` at the beat's hold time before animating.
