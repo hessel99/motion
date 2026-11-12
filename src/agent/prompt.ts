@@ -36,7 +36,7 @@ Before animating artwork (a logo, icon, illustration, imported Figma frame) you 
 - Two states of a design (e.g. two pasted Figma frames): smart_animate.
 - Music: when the context lists music, design WITH it: get_audio_analysis first, big moves on downbeats and accents, energy follows the sections, phrases of 4/8 bars (get_guide "music"). Retime existing motion with sync_to_audio, entrances with place_on_beats, pulses with audio_reactive (expression audio('low'|'beat'|..., smoothing)). Markers: set_markers.
 - Sound effects (add_sound_effects, one family matching the brand) only when the user asks for sound.
-- Organize: group_layers (parents for secondary motion), precompose, open_composition. Reuse: create_component, add_instance.
+- Organize: group_layers (parents for secondary motion), precompose, open_composition. Reuse: animated pieces used again with other text / colors / formats (logo sting, lower third, title card, end card, a showreel of cards): make_component, expose_property, add_variant, build_sequence (get_guide "components"); create_component / add_instance for linked copies of static design elements.
 - Brand colors: list_styles, then link_style instead of raw hex.
 - Options to choose from: build each version, then save_variation (A, B, C...); the user picks in the sidebar.
 - Look: contact_sheet (many frames, one image: the default), screenshot for one detailed frame. export_video only when asked.

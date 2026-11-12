@@ -555,7 +555,7 @@ export function setRanges(store: Store, compRef: string, ranges: { name: string;
 
 /** add an instance of a component to the active composition (or under `parent`) */
 export function addMotionInstance(store: Store, compRef: string, opts: {
-  x?: number; y?: number; start?: number; play?: PlaySpec; props?: Record<string, ExposedValue>; variants?: Record<string, string>; parent?: string | null; name?: string; select?: boolean;
+  x?: number; y?: number; start?: number; play?: PlaySpec; props?: Record<string, ExposedValue | null>; variants?: Record<string, string>; parent?: string | null; name?: string; select?: boolean;
 } = {}): Layer {
   const P = store.project;
   const comp = findComponent(P, compRef);
@@ -574,7 +574,8 @@ export function addMotionInstance(store: Store, compRef: string, opts: {
     for (const [k, v] of Object.entries(opts.props)) {
       const p = findProp(comp.component, k);
       if (!p) throw new Error(`${comp.name} has no property "${k}". properties: ${(comp.component?.props ?? []).map(x => x.name).join(', ') || 'none'}`);
-      vals[p.id] = v;
+      if (v === null || v === undefined) continue;
+      vals[p.id] = checkValue(p, v);
     }
     if (Object.keys(vals).length) l.inst.props = vals;
   }
