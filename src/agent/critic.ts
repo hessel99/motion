@@ -18,8 +18,8 @@ import { music, beats } from '../audio/timing';
 import { linkOf, tokenValue } from '../core/tokens';
 
 export type Severity = 'high' | 'medium' | 'low';
-export type Category = 'timing' | 'easing' | 'choreography' | 'composition' | 'readability' | 'polish' | 'richness' | 'technical' | 'brand' | 'music';
-export const CATEGORIES: Category[] = ['timing', 'easing', 'choreography', 'composition', 'readability', 'polish', 'richness', 'technical', 'brand', 'music'];
+export type Category = 'timing' | 'easing' | 'choreography' | 'composition' | 'readability' | 'polish' | 'richness' | 'technical' | 'brand' | 'music' | 'logo';
+export const CATEGORIES: Category[] = ['timing', 'easing', 'choreography', 'composition', 'readability', 'polish', 'richness', 'technical', 'brand', 'music', 'logo'];
 export interface ToolCall { tool: string; args: Record<string, any> }
 export interface Issue {
   rule: string;
@@ -40,7 +40,7 @@ export interface Critique {
   /** raw penalty points per category (before CAT_WEIGHTS) */
   penalties: Record<Category, number>;
   issues: Issue[];
-  stats: { layers: number; animated: number; segments: number; samples: number; lastMotion: number; ms: number };
+  stats: { layers: number; animated: number; segments: number; samples: number; lastMotion: number; ms: number; logo: boolean };
 }
 export interface CriticOptions {
   /** only report issues touching this time range (a storyboard beat); the score still covers the whole piece */
@@ -51,6 +51,10 @@ export interface CriticOptions {
   fontOk?: (family: string) => boolean;
   /** max issues returned (default 12) */
   max?: number;
+  /** logo mode (the logo-sting rubric): default auto (one mark + a short wordmark, ≤ 10 s); false = off */
+  logo?: boolean;
+  /** the piece's pace for the logo timing ranges (default medium; from the style's feel in the app) */
+  pace?: 'fast' | 'medium' | 'calm';
 }
 
 /** rule table: category and how much one occurrence weighs (x severity points). calibrated against the
@@ -91,10 +95,20 @@ export const RULES: Record<string, { cat: Category; w: number; title: string }> 
   'font-drift': { cat: 'brand', w: 0.6, title: 'too many font families' },
   'off-beat': { cat: 'music', w: 1, title: 'big moves miss the beat' },
   'every-beat': { cat: 'music', w: 0.6, title: 'something lands on every beat' },
+  'logo-generic': { cat: 'logo', w: 1.6, title: 'logo: no idea from the mark (pops / fades)' },
+  'logo-lead-in': { cat: 'logo', w: 0.5, title: 'logo: no lead-in' },
+  'logo-lock': { cat: 'logo', w: 0.8, title: 'logo: lockup completes late' },
+  'logo-hold': { cat: 'logo', w: 1, title: 'logo: final lockup not held' },
+  'logo-length': { cat: 'logo', w: 0.6, title: 'logo: length vs pace' },
+  'logo-wordmark-timing': { cat: 'logo', w: 0.8, title: 'logo: wordmark not its own beat' },
+  'logo-wordmark-entry': { cat: 'logo', w: 0.8, title: 'logo: wordmark does not come from the mark' },
+  'logo-snap': { cat: 'logo', w: 0.5, title: 'logo: moves drift instead of snapping' },
+  'logo-final-move': { cat: 'logo', w: 0.4, title: 'logo: ends on a big move' },
+  'logo-ease-family': { cat: 'logo', w: 0.5, title: 'logo: mixed easing families' },
 };
 const SEV: Record<Severity, number> = { high: 30, medium: 16, low: 7 };
 /** category weights of the overall score (calibrated) */
-export const CAT_WEIGHTS: Record<Category, number> = { timing: 0.3, easing: 0.9, choreography: 1.8, composition: 0.4, readability: 0.8, polish: 0.4, richness: 0.6, technical: 1.4, brand: 0.2, music: 0.8 };
+export const CAT_WEIGHTS: Record<Category, number> = { timing: 0.3, easing: 0.9, choreography: 1.8, composition: 0.4, readability: 0.8, polish: 0.4, richness: 0.6, technical: 1.4, brand: 0.2, music: 0.8, logo: 1 };
 /** penalty points (after category weights) that halve the score's distance to 0: score = 100·0.5^(P/HALF) */
 export const HALF = 110;
 
@@ -272,13 +286,24 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
   const infos: Info[] = [];
   const all: Seg[] = [];
   let exprLayers = 0;
+  const masked = new Set<string>();
+  // animated masks (draw-on strokes, moving wipes) are motion too
+  let maskMoves = 0;
+  for (const id of order) { const l = L[id]; if (l?.mask) for (const k of PROP_KEYS) { const kf = l.props[k]?.kf; if (kf && kf.length > 1) maskMoves += kf.length - 1; } }
   for (let i = 0; i < nL; i++) {
     const l = L[order[i]];
     if (!l || !(LEAF.has(l.type) || l.type === 'group') || l.mask) continue;
     const segs: Seg[] = [];
     let expr = false, first = Infinity, last = -Infinity;
-    // segments of this layer and its ancestors (a group's move moves its children)
+    // segments of this layer and its ancestors (a group's move moves its children), and of the masks
+    // below them (a mask that draws on / moves is a reveal of what it masks)
+    const chain: Layer[] = [];
     for (let cur: Layer | undefined = l; cur; cur = cur.parent ? L[cur.parent] : undefined) {
+      chain.push(cur);
+      const sib = cur.parent ? L[cur.parent]?.children ?? [] : comp.root;
+      for (const id of sib.slice(0, Math.max(0, sib.indexOf(cur.id)))) { const m = L[id]; if (m?.mask) { chain.push(m); if (cur === l) masked.add(l.id); } }
+    }
+    for (const cur of chain) {
       for (const key of PROP_KEYS) {
         const pr = cur.props[key];
         if (!pr) continue;
@@ -345,6 +370,7 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
   const firstMotion = animated.length ? Math.min(...animated.map(x => (isFinite(x.first) ? x.first : D))) : 0;
   const loopy = opts.loop ?? detectLoop(store, infos, D);
   const primary = pickPrimary(infos.filter(x => !isBg(x) && !x.piece && x.area > 0 && !(x.group && x.l.children.length > 6)));
+  const logo = detectLogo(store, infos, isBg, D, W, H, S, opts.logo);
 
   /** a deliberate impact (gravity): another property starts changing at the landing (a squash), or the
    *  move falls back after a hop (the previous segment went the other way) */
@@ -366,10 +392,12 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
       if (!PHYS.includes(sg.key) || sg.kind === 'exit' || sg.a.interp === 'hold') continue;
       const big = sg.key === 'position' || sg.key === 'size' ? sg.mag >= 24 * S : sg.key === 'scale' ? sg.mag >= 8 : sg.mag >= 10;
       if (!big || sg.s1 < 0.6) continue;
+      if (sg.t1 - sg.t0 < 0.1) continue; // a snap / blink shut: deliberate
       if (sg.a.interp === 'linear' && (sg.t1 - sg.t0 > 2.5 || (sg.key === 'rotation' && sg.mag >= 180))) continue; // drifts, spins
       const kf = sg.l.props[sg.key]!.kf!;
       const n = kf[sg.i + 2];
       if (n && n.t - sg.b.t < 0.06 && n.v.some((x, j) => Math.abs(x - sg.b.v[j]) > 1e-6)) continue; // continues / turns into an overshoot
+      if (!kf[sg.i + 2] && sg.s0 < sg.s1 && (masked.has(sg.l.id) || ancestors(store, sg.l).some(a => a.clip))) continue; // accelerates behind a mask: an exit
       if (impact(sg)) continue;
       hits.push(sg);
     }
@@ -504,7 +532,8 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
   // long static endings and dead time (holds for reading are fine; long nothing is not)
   if (animated.length && !loopy) {
     const endHold = D - lastMotion;
-    if (endHold > Math.max(2, 0.3 * D)) {
+    // logo stings hold the finished lockup still on purpose (1.5-2.5 s): only a long static ending counts
+    if (endHold > (logo ? (opts.pace === 'calm' ? 3.5 : 3) : Math.max(2, 0.3 * D))) {
       const hero = primary ?? animated[0];
       const sc = valueAt(hero.l, 'scale', lastMotion);
       push('end-hold', endHold > Math.max(3, 0.45 * D) ? 'high' : 'medium', `nothing moves for the last ${r2(endHold)} s (motion ends ${ft(lastMotion)} of ${ft(D)}): keep the brief's length and carry the hold with a slow push / idle motion, or extend the build`, [hero.l.id], [lastMotion, D],
@@ -643,6 +672,8 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
         if (s === N) end = true;
       }
       if (still < 0.4 && !end) continue;
+      // a camera crop (the layer or a parent keyed ≥ 150%: a pull-back, a push-in) clips on purpose until it lands
+      if (!end && [x.l, ...ancestors(store, x.l)].some(a => a.props.scale?.kf?.some(k => Math.max(...k.v) >= 150))) continue;
       n++;
       const [dx, dy] = intoFrame(x.restBox, W, H, 0.04);
       push('off-canvas', x.text || end ? 'high' : 'medium', `${nm(x.l)} sits ${Math.round(outsideBox(x.restBox, W, H) * 100)}% outside the frame ${end ? 'at the end' : `for ${r2(still)} s at rest`}`, [x.l.id], undefined, moveFix(store, x.l, dx, dy));
@@ -664,13 +695,15 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
     for (const x of infos) {
       if (g >= 3 || x.text || x.group) continue;
       const sz = x.l.props.size?.kf, sc = x.l.props.scale?.kf;
-      const yGrow = (sc && sc.some(k => Math.abs(k.v[0] - k.v[1]) > 20) && sc.some(k => k.v[1] < 30)) || (sz && sz.length >= 2 && Math.abs(sz[0].v[1] - sz[sz.length - 1].v[1]) > 30 && Math.abs(sz[0].v[0] - sz[sz.length - 1].v[0]) < 2);
-      const xGrow = !yGrow && ((sc && sc.some(k => Math.abs(k.v[0] - k.v[1]) > 20) && sc.some(k => k.v[0] < 30)) || (sz && sz.length >= 2 && Math.abs(sz[0].v[0] - sz[sz.length - 1].v[0]) > 30 && Math.abs(sz[0].v[1] - sz[sz.length - 1].v[1]) < 2));
+      const yGrow = (sc && sc.some(k => Math.abs(k.v[0] - k.v[1]) > 20) && edgeKey(sc, 1)) || (sz && sz.length >= 2 && Math.abs(sz[0].v[1] - sz[sz.length - 1].v[1]) > 30 && Math.abs(sz[0].v[0] - sz[sz.length - 1].v[0]) < 2);
+      const xGrow = !yGrow && ((sc && sc.some(k => Math.abs(k.v[0] - k.v[1]) > 20) && edgeKey(sc, 0)) || (sz && sz.length >= 2 && Math.abs(sz[0].v[0] - sz[sz.length - 1].v[0]) > 30 && Math.abs(sz[0].v[1] - sz[sz.length - 1].v[1]) < 2));
       if (!yGrow && !xGrow) continue;
       const lo = yGrow ? 1 : 0, hi = yGrow ? 3 : 2;
       let minLo = Infinity, maxLo = -Infinity, minHi = Infinity, maxHi = -Infinity, ext = 0;
+      // only while it grows / shrinks itself (a parent's nudge moves both edges and is not a growth)
+      const spans = [sc, sz].flatMap(kf => (kf ?? []).slice(1).map((k, i) => [kf![i].t, k.t, +k.v.some((v, j) => Math.abs(v - kf![i].v[j]) > 1e-6)]).filter(q => q[2]));
       for (let s = 0; s <= N; s++) {
-        if (G(s, x.idx, 4) < 0.05) continue;
+        if (G(s, x.idx, 4) < 0.05 || !spans.some(([a, b]) => times[s] >= a - 1e-6 && times[s] <= b + 1e-6)) continue;
         const a = G(s, x.idx, lo), b = G(s, x.idx, hi);
         if (b - a < 2) continue;
         minLo = Math.min(minLo, a); maxLo = Math.max(maxLo, a); minHi = Math.min(minHi, b); maxHi = Math.max(maxHi, b); ext = Math.max(ext, b - a);
@@ -735,10 +768,12 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
     const drawn = infos.filter(x => !x.group && !x.piece && x.area > 1 && !isBg(x));
     const pieces = infos.filter(x => x.piece).length;
     const elems = drawn.length + Math.min(3, Math.ceil(pieces / 3));
-    const moves = all.filter(s => s.key !== 'opacity').length + exprLayers * 2 + infos.filter(x => x.l.textAnim).length * 2;
-    const want = D <= 2.5 ? 2 : D <= 6.5 ? 4 : D <= 12 ? 6 : 8;
-    if (D >= 2 && (elems < want || moves < D * 1.2)) {
-      const sev: Severity = elems <= want / 2 || moves < D * 0.6 ? 'high' : 'medium';
+    const moves = all.filter(s => s.key !== 'opacity').length + exprLayers * 2 + infos.filter(x => x.l.textAnim).length * 2 + maskMoves;
+    // a logo sting builds in ~2.5 s and then holds still on purpose: judge the build, not the hold
+    const Dm = logo ? Math.min(D, 4) : D;
+    const want = logo ? (D <= 2.5 ? 2 : 3) : D <= 2.5 ? 2 : D <= 6.5 ? 4 : D <= 12 ? 6 : 8;
+    if (D >= 2 && (elems < want || moves < Dm * 1.2)) {
+      const sev: Severity = elems <= want / 2 || moves < Dm * 0.6 ? 'high' : 'medium';
       push('thin', sev, `${elems} element${elems === 1 ? '' : 's'} and ${moves} moves for ${ft(D)}: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch`, primary ? [primary.l.id] : [], undefined,
         primary && primary.segs.some(s => PHYS.includes(s.key)) ? [{ tool: 'secondary_motion', args: { ids: [primary.l.id], overshoot: 0.1, segments: 'all' } }] : []);
     }
@@ -863,6 +898,121 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
     }
   }
 
+  // ================================================================ logo (a sting: one mark + a wordmark, ≤ 10 s)
+  // measurable parts of the logo rubric (guides/logo-recipes.md, from a study of 249 professional logo
+  // animations): lead-in, lock time, hold, length vs pace, wordmark delay and entry, snap, final move,
+  // easing family, and whether the idea is more than pops and fades
+  if (logo && animated.length) {
+    const pace = opts.pace ?? 'medium';
+    const lockArea = (() => { const b = unionBox([...logo.mark, ...logo.word].map(x => x.idx), N, G); return Math.max(1, (b[2] - b[0]) * (b[3] - b[1])); })();
+    // tiny secondary bits (sparkles, specks) may keep moving through the hold
+    const markL = logo.mark.filter(x => !x.group && x.area >= 0.02 * lockArea);
+    const wordL = logo.word;
+    const leaves = [...markL, ...wordL];
+    const sz = (li: number, r: number) => Math.max(G(r, li, 2) - G(r, li, 0), G(r, li, 3) - G(r, li, 1));
+    const same = (li: number, s: number, r: number) => {
+      const oa = G(s, li, 4), ob = G(r, li, 4);
+      if (oa < 0.05 && ob < 0.05) return true;
+      if (Math.abs(oa - ob) > 0.1) return false;
+      const tol = Math.max(4 * S, 0.03 * sz(li, r));
+      for (let k = 0; k < 4; k++) if (Math.abs(G(s, li, k) - G(r, li, k)) > tol) return false;
+      return true;
+    };
+    // the reference frame: the last frame with the whole lockup on screen (before a mirrored exit, if any)
+    let rRef = N;
+    const full = (s: number) => (!wordL.length || wordL.some(x => G(s, x.idx, 4) > 0.5)) && markL.filter(x => G(s, x.idx, 4) > 0.5).length >= Math.max(1, Math.ceil(markL.length * 0.8));
+    while (rRef > 0 && !full(rRef)) rRef--;
+    const exits = rRef < N - 1;
+    const settledFrom = (list: Info[], r: number) => { let s = r; while (s > 0 && list.every(x => same(x.idx, s - 1, r))) s--; return s; };
+    // with an exit, the lockup is the last still stretch (≥ 0.5 s) before it leaves
+    if (exits) {
+      const minRun = Math.max(1, Math.round((0.5 / D) * N));
+      let r = rRef;
+      while (r > 0) { const a = settledFrom(leaves, r); if (r - a >= minRun && full(a)) break; r = a - 1; }
+      if (r > 0) rRef = r;
+    }
+    const lockS = settledFrom(leaves, rRef), markS = settledFrom(markL.length ? markL : leaves, rRef);
+    const lockT = times[lockS], markLand = times[markS];
+    const hold = (exits ? times[rRef] : D) - lockT;
+    // first keyed motion (idle expressions run from 0 by nature)
+    const keyed = animated.flatMap(x => [...x.segs.map(sg => sg.t0), ...(x.l.textAnim ? [x.l.inPoint + x.l.textAnim.start] : []), ...(x.l.pathKf && x.l.pathKf.length > 1 ? [x.l.pathKf[0].t] : [])]);
+    const fm = Math.min(keyed.length ? Math.min(...keyed) : firstMotion, ...markL.map(x => x.enterT >= 0 && isFinite(x.enterT) ? x.enterT : D));
+    const build = lockT - fm;
+    const ids = animated.map(x => x.l.id).slice(0, 24);
+    // lead-in: almost nothing starts on frame 0 (median first motion 0.27 s)
+    if (fm < 0.05 && !loopy) push('logo-lead-in', 'low', `the logo moves from frame 0: leave a 0.2-0.3 s blank (or still) lead-in so the first frame reads`, [], [0, 0.3],
+      [{ tool: 'retime', args: { offset: 0.25 } }]);
+    // lock: the idea is done by ~2.5 s (build 1.5-3 s); long builds lose the viewer
+    const maxBuild = pace === 'fast' ? 2.6 : pace === 'calm' ? 3.8 : 3.2;
+    if (build > maxBuild + 0.2) push('logo-lock', build > maxBuild + 1 ? 'medium' : 'low', `the lockup completes at ${ft(lockT)} (a ${r2(build)} s build): logo builds land in 1.5-3 s (idea done by ~2.5 s, wordmark 0.5-0.7 s after)`, ids, [fm, lockT],
+      [{ tool: 'retime', args: { ids, pivot: r2(fm), scale: r2(Math.max(0.4, (maxBuild - 0.3) / build)) } }]);
+    // hold: the exact lockup on screen ≥ 1.2 s (3+ identical frames of a 12-frame sheet), not a dead 3 s+
+    if (hold < 1.2) push('logo-hold', hold < 0.6 ? 'high' : 'medium', `the finished lockup holds for ${r2(Math.max(0, hold))} s${exits ? ' before the exit' : ''}: hold it still ≥ 1.2 s (1.5-2 s; elegant 2.5 s) so it reads`, ids, [lockT, exits ? times[rRef] : D],
+      exits ? [{ tool: 'retime', args: { from: r2(times[rRef] - 0.01), offset: r2(1.6 - hold) } }] : [{ tool: 'set_composition', args: { duration: r2(lockT + 1.7) } }]);
+    // length vs pace (medians 5-6 s; fast 4-5, elegant ≤ 7.5)
+    const [lo, hi] = pace === 'fast' ? [3.5, 6.5] : pace === 'calm' ? [4.5, 9] : [4, 7.5];
+    if (!loopy && (D > hi || D < lo)) push('logo-length', D > hi + 1.5 ? 'medium' : 'low', `the sting runs ${ft(D)}: ${pace} logo stings run ${lo}-${hi} s (lead-in 0.25 s, build to ~2.5 s, wordmark, hold 1.5-2 s)`, [], [0, D],
+      [{ tool: 'set_composition', args: { duration: r2(Math.min(hi, Math.max(lo, lockT + 1.8 + (exits ? D - times[rRef] : 0)))) } }]);
+    // wordmark: a separate beat 0.4-0.8 s after the mark lands, ideally out of the mark
+    const wIdx = wordL.map(x => x.idx);
+    let ws = -1;
+    for (let s = 0; s <= N && ws < 0; s++) if (wIdx.some(li => G(s, li, 4) > 0.05 && outside(s, li) < 0.97)) ws = s;
+    if (wordL.length && markL.length && ws > 0) {
+      const wStart = Math.min(times[ws], ...wordL.flatMap(x => x.segs.filter(sg => sg.kind === 'enter').map(sg => sg.t0)), ...wordL.filter(x => x.l.textAnim).map(x => x.l.inPoint + x.l.textAnim!.start));
+      const delay = wStart - markLand;
+      const wids = logo.wordIds;
+      if (delay < -0.6 && markLand - fm > 0.8) push('logo-wordmark-timing', 'medium', `the wordmark starts at ${ft(wStart)}, ${r2(-delay)} s before the mark lands (${ft(markLand)}): let the mark finish its idea, then the wordmark 0.4-0.8 s later as its own beat`, wids, [wStart, markLand],
+        [{ tool: 'retime', args: { ids: wids, offset: r2(markLand + 0.5 - wStart) } }]);
+      else if (delay > 1.6) push('logo-wordmark-timing', 'low', `the wordmark waits ${r2(delay)} s after the mark lands: bring it in 0.4-0.8 s after (0.45 s fast, 0.8 s elegant)`, wids, [markLand, wStart],
+        [{ tool: 'retime', args: { ids: wids, offset: r2(markLand + 0.6 - wStart) } }]);
+      // entry: from behind the mark under a mask, out of the mark, or built letter by letter, not a plain fade / pop
+      const clipped = wordL.some(x => masked.has(x.l.id) || ancestors(store, x.l).some(a => a.clip || masked.has(a.id)));
+      const mb = unionBox(markL.map(x => x.idx), lockS, G), mc = [(mb[0] + mb[2]) / 2, (mb[1] + mb[3]) / 2];
+      const wb0 = unionBox(wIdx, ws, G), wb1 = unionBox(wIdx, lockS, G);
+      const d0 = Math.hypot((wb0[0] + wb0[2]) / 2 - mc[0], (wb0[1] + wb0[3]) / 2 - mc[1]), d1 = Math.hypot((wb1[0] + wb1[2]) / 2 - mc[0], (wb1[1] + wb1[3]) / 2 - mc[1]);
+      const outOfMark = d1 - d0 > 15 * S;
+      const built = wordL.some(x => x.l.textAnim) || wordL.filter(x => x.segs.length).length >= 3;
+      const moves = wordL.some(x => x.segs.some(sg => sg.kind === 'enter' && sg.key !== 'opacity' && !(sg.key === 'scale' && Math.abs(sg.a.v[0] - sg.a.v[1]) < 1)));
+      if (!clipped && !outOfMark && !built) {
+        const from = (markL.length > 1 && logo.markGroup) ? logo.markGroup : markL.slice().sort((a, b) => b.area - a.area)[0].l.id;
+        push('logo-wordmark-entry', moves ? 'low' : 'medium', `the wordmark ${moves ? 'slides in on its own' : 'only fades / pops in'}: let it come out of the mark (slide out from behind it under a mask while the mark makes room, grow from a glyph, or build from the same parts)`, wids, [wStart, wStart + 0.6],
+          [{ tool: 'rig', args: { kind: 'reveal-from', ids: wids.slice(0, 1), t0: r2(Math.max(wStart, markLand + 0.4)), duration: 0.6, options: { from } } }]);
+      }
+    }
+    // the idea: something becomes / does something (draw-on, morph, hinge, assemble, a mask reveal, a pivoted
+    // turn, a pull-back) rather than every part popping or fading in
+    const kinds = markL.map(x => techniqueOf(store, x, masked));
+    const anim = kinds.filter(k => k !== 'static');
+    const generic = anim.filter(k => k === 'pop' || k === 'fade').length;
+    const groupMoves = logo.markGroup && L[logo.markGroup] && PHYS.some(k => (L[logo.markGroup!].props[k]?.kf?.length ?? 0) >= 2 && L[logo.markGroup!].props[k]!.kf!.some((q, i, a) => i > 0 && q.v.some((v, j) => Math.abs(v - a[0].v[j]) > 25)));
+    if (anim.length && !groupMoves && generic / anim.length >= 0.7) push('logo-generic', generic === anim.length ? 'high' : 'medium', `${generic} of ${anim.length} parts of the mark just ${kinds.includes('pop') ? 'pop / scale in' : 'fade in'}: no idea from the mark itself. Pick a concept family that comes from its form or meaning (assemble, draw, transform, the object's own action, a pull-back) — get_guide "logo-recipes"`, markL.map(x => x.l.id).slice(0, 8), [fm, markLand],
+      [{ tool: 'get_guide', args: { name: 'logo-recipes' } }]);
+    // snap and settle: arrivals decelerate hard (expo / quart / spring) unless the piece is calm and soft
+    const arrivals = all.filter(sg => markL.some(x => x.l.id === sg.l.id) && PHYS.includes(sg.key) && sg.kind !== 'exit' && sg.a.interp !== 'hold' && sg.t1 <= lockT + 0.05 && (sg.key === 'position' ? sg.mag >= 30 * S : sg.mag >= 12));
+    const springy = arrivals.some(sg => overshootSeg(sg.a, sg.b) || sg.a.interp === 'spring');
+    const soft = arrivals.filter(sg => sg.s0 < 0.8 && !overshootSeg(sg.a, sg.b) && sg.a.interp !== 'spring');
+    if (pace !== 'calm' && arrivals.length >= 2 && !springy && soft.length / arrivals.length >= 0.6) push('logo-snap', 'low', `${soft.length} of ${arrivals.length} mark moves drift in symmetrically (${[...new Set(soft.map(s => s.ease))].slice(0, 3).join(', ')}): logos snap (Expo / Quart Out arrivals, then dead still) or spring; soft Sine In Out only for calm / elegant pieces`, [...new Set(soft.map(s => s.l.id))].slice(0, 6), undefined,
+      soft.slice(0, 3).map(sg => ({ tool: 'set_easing', args: { id: sg.l.id, prop: sg.key, indices: [sg.i], ease: 'Expo Out' } })));
+    // the final move is small (a 20-60 px nudge, a settle), not a big landing
+    const lastMoves = all.filter(sg => leaves.some(x => x.l.id === sg.l.id) && PHYS.includes(sg.key) && sg.kind !== 'exit' && sg.a.interp !== 'hold' && sg.t1 <= lockT + 0.05 && sg.t1 >= lockT - 0.35);
+    const bigLast = lastMoves.filter(sg => (sg.key === 'position' ? sg.mag >= 300 * S : sg.key === 'scale' ? sg.mag >= 60 : sg.mag >= 90) && !overshootSeg(sg.a, sg.b) && sg.a.interp !== 'spring');
+    if (lastMoves.length && bigLast.length === lastMoves.length) push('logo-final-move', 'low', `the lockup ends on a big move (${nm(bigLast[0].l)}.${bigLast[0].key}): finish with a small 20-60 px nudge or a settle, then rest`, [bigLast[0].l.id], [bigLast[0].t0, bigLast[0].t1],
+      [{ tool: 'secondary_motion', args: { ids: [bigLast[0].l.id], overshoot: 0.06, segments: 'last' } }]);
+    // one easing family (snappy expo / soft sine / springs); settles and small follow-ups don't count
+    const fam = new Map<string, number>();
+    for (const sg of all) {
+      if (!PHYS.includes(sg.key) || sg.a.interp === 'hold' || sg.kind === 'exit') continue;
+      const kf = sg.l.props[sg.key]!.kf!;
+      let big = 0; for (let k = 0; k < kf.length - 1; k++) { let m = 0; for (let j = 0; j < kf[k].v.length; j++) m += (kf[k + 1].v[j] - kf[k].v[j]) ** 2; big = Math.max(big, Math.sqrt(m)); }
+      if (sg.mag * (sg.key === 'scale' ? Math.SQRT2 : 1) < 0.3 * big) continue;
+      const f = easeFamily(sg);
+      if (f) fam.set(f, (fam.get(f) ?? 0) + 1);
+    }
+    const tot = [...fam.values()].reduce((a, b) => a + b, 0);
+    const mixed = [...fam.entries()].filter(([, n]) => n / Math.max(1, tot) >= 0.2);
+    if (tot >= 6 && mixed.length >= 3) push('logo-ease-family', 'low', `the moves mix ${mixed.map(([f, n]) => `${f} ${n}`).join(', ')}: one easing family per logo (followers reuse the lead's ease 0.03-0.1 s later)`, [], undefined, []);
+  }
+
   // ================================================================ music
   let hasMusic = false;
   try { hasMusic = musicCheck(store, all, fps, push); } catch { /* no analysis */ }
@@ -879,17 +1029,124 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
   if (opts.range) { const [a, b] = opts.range; list = list.filter(i => !i.t || (i.t[1] >= a - 0.05 && i.t[0] <= b + 0.05)); }
   return {
     score, sub, penalties: pen, issues: list.slice(0, opts.max ?? 12),
-    stats: { layers: infos.length, animated: animated.length, segments: all.length, samples: N + 1, lastMotion: r2(lastMotion), ms: Math.round(((globalThis.performance ?? Date).now() - t0) * 10) / 10 },
+    stats: { layers: infos.length, animated: animated.length, segments: all.length, samples: N + 1, lastMotion: r2(lastMotion), logo: !!logo, ms: Math.round(((globalThis.performance ?? Date).now() - t0) * 10) / 10 },
   };
 }
 
 // ---------------------------------------------------------------- pieces
+
+interface LogoParts { mark: Info[]; word: Info[]; wordIds: string[]; markGroup?: string }
+const LOGO_NAME = /logo|lockup|wordmark|sting|brand ?mark/i;
+
+/** a logo sting: a mark (shapes) and a short, big wordmark forming one lockup near the centre, ≤ 10 s */
+function detectLogo(store: Store, infos: Info[], isBg: (x: Info) => boolean, D: number, W: number, H: number, S: number, force?: boolean): LogoParts | null {
+  if (force === false) return null;
+  const L = store.project.layers;
+  const hint = LOGO_NAME.test(store.comp.name) || infos.some(x => LOGO_NAME.test(x.l.name));
+  if (!force && D > 10.5) return null;
+  const texts = infos.filter(x => x.text && x.l.text!.content.trim());
+  const units: { leaves: Info[]; size: number; words: number; content: string }[] = [];
+  for (const x of texts.filter(t => !t.piece)) {
+    const size = x.l.text!.fontSize ?? 0, content = x.l.text!.content.trim(), cy = (x.restBox[1] + x.restBox[3]) / 2;
+    // single letters set by hand on one baseline (a word with shapes standing in for some letters) are one wordmark
+    const join = content.length <= 2 ? units.find(u => u.content.length <= 12 && Math.abs(u.size - size) < 1 && u.leaves.every(y => y.l.text!.content.trim().length <= 2 && Math.abs((y.restBox[1] + y.restBox[3]) / 2 - cy) < 0.5 * size)) : undefined;
+    if (join) { join.leaves.push(x); join.content += content; continue; }
+    units.push({ leaves: [x], size, words: content.split(/\s+/).length, content });
+  }
+  const byParent = new Map<string, Info[]>();
+  for (const x of texts.filter(t => t.piece)) byParent.set(x.l.parent ?? '', [...(byParent.get(x.l.parent ?? '') ?? []), x]);
+  for (const [, ps] of byParent) units.push({ leaves: ps, size: Math.max(...ps.map(p => p.l.text!.fontSize ?? 0)), words: 1, content: ps.map(p => p.l.text!.content).join('') });
+  const totalWords = units.reduce((a, u) => a + u.words, 0);
+  const mark = infos.filter(x => !x.text && !x.group && !isBg(x) && x.area > 1 && !x.l.mask);
+  if (!mark.length || (!force && (mark.length > (hint ? 30 : 16) || units.length > 3 || totalWords > 8))) return null;
+  const cand = units.filter(u => u.words <= 3).sort((a, b) => b.size - a.size)[0];
+  // the wordmark is big and dominant (taglines ≤ 0.65 of it); UI labels and lower thirds are smaller
+  if (!force && units.length && (!cand || cand.size < (hint ? 48 : 80) * S || units.some(u => u !== cand && u.size > 0.65 * cand.size))) return null;
+  if (!force && !units.length && !hint) return null;
+  const word = cand?.leaves ?? [];
+  // a card / panel behind the wordmark makes it a UI or a title card, not a lockup
+  if (!force && word.length) {
+    const wb = word.reduce((b, x) => [Math.min(b[0], x.restBox[0]), Math.min(b[1], x.restBox[1]), Math.max(b[2], x.restBox[2]), Math.max(b[3], x.restBox[3])], [Infinity, Infinity, -Infinity, -Infinity]);
+    const wc = [(wb[0] + wb[2]) / 2, (wb[1] + wb[3]) / 2], wa = (wb[2] - wb[0]) * (wb[3] - wb[1]);
+    if (mark.some(x => x.restBox[0] <= wc[0] && x.restBox[2] >= wc[0] && x.restBox[1] <= wc[1] && x.restBox[3] >= wc[1] && x.area > 3 * wa)) return null;
+  }
+  // one lockup: the mark and the wordmark sit together around the middle of the frame
+  const box = (xs: Info[]) => xs.reduce((b, x) => [Math.min(b[0], x.restBox[0]), Math.min(b[1], x.restBox[1]), Math.max(b[2], x.restBox[2]), Math.max(b[3], x.restBox[3])], [Infinity, Infinity, -Infinity, -Infinity]);
+  const mb = box(mark), all = box([...mark, ...word]);
+  const cx = (all[0] + all[2]) / 2, cy = (all[1] + all[3]) / 2;
+  if (!force && !hint && (cx < 0.2 * W || cx > 0.8 * W || cy < 0.25 * H || cy > 0.75 * H)) return null;
+  if (!force && (mb[2] - mb[0]) * (mb[3] - mb[1]) < 0.003 * W * H) return null;
+  if (!force && word.length) {
+    const wb = box(word);
+    const gap = Math.max(0, Math.max(wb[0], mb[0]) - Math.min(wb[2], mb[2]), Math.max(wb[1], mb[1]) - Math.min(wb[3], mb[3]));
+    if (gap > 0.35 * W) return null;
+  }
+  // the mark's own group (common ancestor that doesn't hold the wordmark)
+  const anc = (l: Layer) => ancestors(store, l).map(a => a.id);
+  let common = anc(mark[0].l);
+  for (const x of mark.slice(1)) { const a = new Set(anc(x.l)); common = common.filter(id => a.has(id)); }
+  const wordAnc = new Set(word.flatMap(x => anc(x.l)));
+  const markGroup = common.find(id => !wordAnc.has(id) && L[id]);
+  return { mark, word, wordIds: word.map(x => x.l.id), markGroup };
+}
+
+function ancestors(store: Store, l: Layer): Layer[] {
+  const out: Layer[] = [];
+  for (let c = l.parent ? store.project.layers[l.parent] : undefined; c; c = c.parent ? store.project.layers[c.parent] : undefined) out.push(c);
+  return out;
+}
+
+function unionBox(idxs: number[], s: number, G: (s: number, l: number, k: number) => number): number[] {
+  const b = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const li of idxs) { if (G(s, li, 4) <= 0.02) continue; b[0] = Math.min(b[0], G(s, li, 0)); b[1] = Math.min(b[1], G(s, li, 1)); b[2] = Math.max(b[2], G(s, li, 2)); b[3] = Math.max(b[3], G(s, li, 3)); }
+  return isFinite(b[0]) ? b : [0, 0, 0, 0];
+}
+
+/** how a part of a mark comes alive: a transformation / action, or a generic pop / fade (or nothing) */
+function techniqueOf(store: Store, x: Info, masked: Set<string>): 'transform' | 'pop' | 'fade' | 'static' {
+  const l = x.l;
+  if (masked.has(l.id) || (l.pathKf?.length ?? 0) >= 2) return 'transform';
+  if ((['trimStart', 'trimEnd', 'trimOffset'] as PropKey[]).some(k => (l.props[k]?.kf?.length ?? 0) >= 2)) return 'transform';
+  if ((['position', 'rotation', 'scale'] as PropKey[]).some(k => l.props[k]?.expr?.trim())) return 'transform';
+  for (const a of ancestors(store, l)) for (const k of PHYS) { const kf = a.props[k]?.kf; if (kf && kf.length > 1 && kf.some((q, i) => i > 0 && q.v.some((v, j) => Math.abs(v - kf[0].v[j]) > (k === 'position' ? 40 : 15)))) return 'transform'; }
+  const segs = x.segs.filter(sg => sg.a.interp !== 'hold' || sg.key !== 'opacity');
+  if (!segs.length) return 'static';
+  let pop = false;
+  for (const sg of segs) {
+    if (sg.key === 'position' && sg.mag >= 40) return 'transform';
+    if (sg.key === 'rotation' && sg.mag >= 15) return 'transform';
+    if (sg.key === 'size' || sg.key === 'radius') return 'transform';
+    if (sg.key === 'scale') {
+      if (Math.abs(sg.a.v[0] - sg.a.v[1]) > 8 || Math.abs(sg.b.v[0] - sg.b.v[1]) > 8 || Math.max(sg.a.v[0], sg.b.v[0]) > 150) return 'transform';
+      // scaled from a pivot that is not its centre (grows from a base, a tail, a hinge)
+      const an = valueAt(l, 'anchor', sg.t1), [w, h] = layerSize(store, l, sg.t1);
+      if (w > 0 && h > 0 && (Math.abs(an[0] - w / 2) > 0.2 * w || Math.abs(an[1] - h / 2) > 0.2 * h)) return 'transform';
+      pop = true;
+    }
+  }
+  return pop ? 'pop' : 'fade';
+}
+
+/** easing family of an arrival: snappy (fast start, hard stop), soft (symmetric), spring (overshoot) */
+function easeFamily(sg: Seg): string | null {
+  if (sg.a.interp === 'spring' || overshootSeg(sg.a, sg.b)) return 'spring';
+  if (sg.a.interp === 'linear') return 'linear';
+  if (sg.s0 >= 1.5 && sg.s1 <= 0.35) return 'snappy';
+  if (sg.s0 < 1 && sg.s1 < 1) return 'soft';
+  return null;
+}
 
 /** overall score from the penalty points per category (also used by calibration with other weights) */
 export function scoreOf(pen: Record<Category, number>, music = true, w: Record<Category, number> = CAT_WEIGHTS, half = HALF): number {
   let P = 0;
   for (const c of CATEGORIES) if (c !== 'music' || music) P += (pen[c] ?? 0) * w[c];
   return Math.round(100 * Math.pow(0.5, P / half));
+}
+
+/** a growth from (or shrink to) ~0 on one axis at the start or end of the track; a squash in the middle
+ *  (a blink, a squash on landing) that comes back is not a growth */
+function edgeKey(kf: Keyframe[], j: number): boolean {
+  return kf[0].v[j] < 30 || kf[kf.length - 1].v[j] < 30;
 }
 
 function unitsOf(l: Layer): number {

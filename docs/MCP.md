@@ -9,7 +9,7 @@ VS Code, Codex or your own agent.
 - Transport: Streamable HTTP, `POST` only, JSON responses (no SSE stream). JSON-RPC batches work.
 - Protocol versions: `2025-06-18`, `2025-03-26`, `2024-11-05`
 - Methods: `initialize`, `ping`, `tools/list`, `tools/call`, `resources/list`, `resources/read` (`prompts/list` is empty)
-- Resources: the motion guides as markdown, `motion://guides/<name>` (`handbook`, `workflow`, `concepts`, `cookbook`,
+- Resources: the motion guides as markdown, `motion://guides/<name>` (`handbook`, `workflow`, `concepts`, `logo-recipes`, `cookbook`,
   `styles/<style>`), the same text the `get_guide` tool returns. Text tool results over 24k characters are cut
   with a note (`MOTION_MAX_TOOL_TEXT`).
 - Local only: binds 127.0.0.1; requests with a non-loopback `Host` or a non-local browser `Origin` get 403.
@@ -99,7 +99,7 @@ Worked examples for the higher-level tools are in `docs/agent-tools-cookbook.md`
 | `inspect_artwork` | yes | One labeled image (real render with numbered outlines + every part alone on a neutral background) and JSON per part: bounds, area, colors, subpaths, components/holes, aspect, letter-like rows, relations (`inHoleOf`, `inside`, `contains`, `neighbours`) and a geometry-only hint ("tall rectangle, sits in the hole of #2 (house-like pentagon with a hole)"). Compound paths are listed as `n.k` components |
 | `split_shape` | | One compound path → part layers at exactly the same place, in a group that takes the original's transform/keys: `components` (holes stay with their contour, a shape inside a hole is its own part) or `subpaths`; text → letters; a group → every compound path inside |
 | `set_pivot` | | Anchor to a named spot (`left`, `bottom`, `top-left`, ...), a comp point or another layer's edge (`{layerEdgeOf}`) without moving the layer (position compensated, also keyed / parented) |
-| `rig` | | Motion rigs as editable keys: `hinge` (door/lid with foreshortening, perspective taper, shading, lit opening), `grow`, `swing`, `unfold`, `orbit`, `blink`, `pulse`, `beat`, `liquid-fill`, `draw-then-fill`, `launch`, `land`, `type-on`, `assemble`, `reveal-from`; `t0`, `duration`, `intensity`, `mode`, `loop`, `options`. Returns keys per layer and created helper layers |
+| `rig` | | Motion rigs as editable keys: `hinge` (door/lid with foreshortening, perspective taper, shading, lit opening), `grow`, `swing`, `unfold`, `orbit`, `blink`, `pulse`, `beat`, `liquid-fill`, `draw-then-fill`, `launch`, `land`, `type-on`, `assemble`, `reveal-from`, `frame-detail` (camera pull-back from a detail at N×), `color-cuts` (palette cuts on a beat grid with hold keys, settles on the base colour); `t0`, `duration`, `intensity`, `mode`, `loop`, `options`. Returns keys per layer and created helper layers |
 
 All input schemas are validated as strict JSON Schema in `tests/agent.test.ts` (every array has
 `items`, enums are non-empty, `required` names real properties), so they load in Claude, Gemini and

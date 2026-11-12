@@ -303,6 +303,26 @@ export function runCheck(check, m, d) {
       return Math.max(...fs) / Math.min(...fs) >= 1.3 || Math.max(...fw) - Math.min(...fw) >= 200 || fills.length >= 2;
     }
     case 'numericTextMin': return textLayers(d).filter((l) => /\d/.test(l.text.content)).length >= check.min;
+    // logo stings (rubric of the logo study, docs/logo-study.md)
+    case 'firstMotionBetween': return m.firstMotion >= check.min - 0.02 && m.firstMotion <= check.max + 0.02;
+    case 'durationBetween': return d.comp.duration >= check.min - 0.01 && d.comp.duration <= check.max + 0.01;
+    case 'textFirstVisibleBetween': {
+      // the wordmark: the earliest-visible text layer (or letter piece)
+      const t = Math.min(...textLayers(d).map((l) => d.firstVis[l.id]).filter((x) => x != null));
+      return isFinite(t) && t >= check.min - 0.02 && t <= check.max + 0.02;
+    }
+    case 'lockupHoldMin': {
+      // the final frame held: trailing samples where every visible item is within 3 px / 0.05 opacity of the last frame
+      const last = new Map(d.S[d.S.length - 1].items.map((it) => [it[0], it]));
+      let t0 = d.S[d.S.length - 1].t;
+      for (let i = d.S.length - 1; i >= 0; i--) {
+        const same = d.S[i].items.every((it) => { const q = last.get(it[0]); if (!q) return it[5] <= 0.05; return Math.abs(it[5] - q[5]) <= 0.05 && [1, 2, 3, 4].every((k) => Math.abs(it[k] - q[k]) <= 3); });
+        if (!same) break;
+        t0 = d.S[i].t;
+      }
+      return d.comp.duration - t0 >= check.seconds - 0.05;
+    }
+    case 'pathMorph': return L.some((l) => (l.pathKf?.length ?? 0) >= 2);
     case 'staggered': {
       const t = L.filter((l) => DRAWABLE.has(l.type) && l.type !== 'text').map((l) => d.segs.filter((s) => s.id === l.id).reduce((a, s) => Math.min(a, s.t0), Infinity)).filter(isFinite).sort((a, b) => a - b);
       let best = 1, run = 1;

@@ -9,7 +9,7 @@ import type { Tx } from '../core/store';
 import { flattenCmds, type Ring } from '../import/pathops';
 import { fontString, layoutText, toPath2D, getBitmap } from '../render/raster';
 import { st, text, need, parseColor, idsSchema, resolveEase, buildKeys, renderer, hasRenderer, type ToolDef, type ToolContent } from './tool-kit';
-import { apply, inv, mul, worldMatrix, localMatrix, layerSize, rng, textUnitsSafe, type Mat } from './motion-math';
+import { apply, inv, mul, worldMatrix, localMatrix, layerSize, rng, textUnitsSafe, contrast, type Mat } from './motion-math';
 import { ellipseCmds, rectCmds, transformCmds, cmdsBounds } from './shape-lib';
 import { fmtTime } from './describe';
 import { splitTx, detach } from './tools-type';
@@ -1269,16 +1269,93 @@ function rigRevealFrom(c: Ctx, tx: Tx, list: Layer[]) {
   c.created.push({ id: G.id, name: 'Reveal', role: 'group: mask + revealed layers' }, { id: mk.id, name: 'Reveal mask', role: 'mask (edge at the from layer)' });
 }
 
-const RIG_KINDS = ['hinge', 'grow', 'swing', 'unfold', 'orbit', 'blink', 'pulse', 'beat', 'liquid-fill', 'draw-then-fill', 'launch', 'land', 'type-on', 'assemble', 'reveal-from'] as const;
-const DEFAULT_DUR: Record<string, number> = { hinge: 1.1, grow: 0.9, swing: 2.2, unfold: 1.2, orbit: 3, blink: 0.25, pulse: 1.2, beat: 0.9, 'liquid-fill': 2.2, 'draw-then-fill': 1.2, launch: 1.3, land: 1.1, 'type-on': 1, assemble: 1.3, 'reveal-from': 0.9 };
-const REVERSIBLE = new Set(['grow', 'unfold', 'assemble', 'reveal-from', 'type-on', 'draw-then-fill']);
+/** camera pull-back from a detail: the layers start N× bigger around one point (a detail of the mark) and
+ *  settle to rest. every layer pivots on the same composition point, so several top-level layers zoom as one */
+function rigFrameDetail(c: Ctx, tx: Tx, list: Layer[]) {
+  const { s, t0, dur } = c;
+  const at = c.o.at ?? c.o.detail ?? c.o.center;
+  let P: number[];
+  if (Array.isArray(at)) P = at.map(Number);
+  else if (typeof at === 'string' && s.layer(at)) { const b = compBox(s.layer(at)!, t0); P = [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]; }
+  else {
+    // a named spot of the union of the layers (default: a bit off the centre, never dead centre)
+    const u: Box = [Infinity, Infinity, -Infinity, -Infinity];
+    list.forEach(l => { const b = compBox(l, t0); boxOfPts([b[0], b[1], b[2], b[3]], u); });
+    const f = typeof at === 'string' ? NAMED[normName(at)] : [0.4, 0.42];
+    if (!f) throw new Error(`frame-detail at must be [x,y] (comp px), a layer id or a named spot (${Object.keys(NAMED).join(', ')})`);
+    P = [u[0] + (u[2] - u[0]) * f[0], u[1] + (u[3] - u[1]) * f[1]];
+  }
+  if (P.length !== 2 || !P.every(isFinite)) throw new Error('frame-detail at must be [x,y] in composition px');
+  const N = Math.max(1.2, Math.min(40, +(c.o.zoom ?? c.o.scale ?? 6)));
+  const tilt = c.o.tilt ?? 4;
+  const ease = c.o.ease ?? (dur >= 1.8 ? 'Sine Out' : 'Expo Out');
+  c.span = dur;
+  list.forEach(l => {
+    pivotTx(tx, l, pivotPoint(l, P, t0), t0);
+    const S = valueAt(l, 'scale', t0), R = valueAt(l, 'rotation', t0)[0];
+    put(c, tx, l, 'scale', [{ t: t0, v: scaleBy(S, N, N), ease }, { t: t0 + dur, v: S }]);
+    if (tilt) put(c, tx, l, 'rotation', [{ t: t0, v: [R + tilt], ease }, { t: t0 + dur, v: [R] }]);
+  });
+  c.notes.push(`starts at ${r1(N * 10) / 10}x around [${P.map(Math.round).join(', ')}], at rest at ${r1((t0 + dur) * 100) / 100}s${c.reverse ? ' (out: pushes into the detail, ends at the zoom)' : ''}`);
+}
+
+/** background (or any fill) cuts through a palette on a beat grid with hold keys, settling on its own colour;
+ *  optional ink layers flip to stay readable when the background's luminance flips */
+function rigColorCuts(c: Ctx, tx: Tx, list: Layer[]) {
+  const { t0, dur } = c;
+  const cols: number[][] = (Array.isArray(c.o.colors) ? c.o.colors : []).map(parseColor);
+  if (cols.length < 1) throw new Error('color-cuts needs options.colors: ["#hex", ...] (the brand palette, 2-5 colours)');
+  let times: number[];
+  if (Array.isArray(c.o.beats) && c.o.beats.length) times = c.o.beats.map(Number).filter(isFinite).sort((a: number, b: number) => a - b);
+  else {
+    const every = c.o.bpm ? 60 / +c.o.bpm * (c.o.beatsPerCut ?? 1) : +(c.o.every ?? 0.5);
+    if (!(every >= 0.05)) throw new Error('every must be >= 0.05 s');
+    const n = Math.max(1, Math.round(c.o.count ?? (c.o.duration !== undefined ? Math.floor(dur / every) : cols.length)));
+    times = Array.from({ length: n }, (_, i) => t0 + i * every);
+  }
+  const lumOf = (x: number[]) => 0.2126 * x[0] + 0.7152 * x[1] + 0.0722 * x[2];
+  list.forEach(l => {
+    if (!l.props.fill && l.type !== 'rect' && l.type !== 'ellipse' && l.type !== 'path' && l.type !== 'text') throw new Error(`"${l.name}" has no fill to cut`);
+    const base = c.o.settle !== undefined ? parseColor(c.o.settle) : valueAt(l, 'fill', t0);
+    const fr: F[] = times.map((t, i) => ({ t, v: cols[i % cols.length], interp: 'hold' as const }));
+    const settleT = times[times.length - 1] + (times.length > 1 ? times[times.length - 1] - times[times.length - 2] : 0.5);
+    if (times[0] > 1e-3) fr.unshift({ t: times[0] - 1e-3, v: base, interp: 'hold' });
+    fr.push({ t: settleT, v: base });
+    put(c, tx, l, 'fill', fr);
+    // ink: text / marks drawn over the background flip between their colour and an inverse when contrast drops
+    for (const id of (Array.isArray(c.o.ink) ? c.o.ink : c.o.ink ? [c.o.ink] : [])) {
+      const ink = need(id);
+      const own = valueAt(ink, 'fill', t0);
+      const alt = c.o.inkAlt !== undefined ? parseColor(c.o.inkAlt) : lumOf(own) > 0.5 ? [0.07, 0.07, 0.08, own[3]] : [1, 1, 1, own[3]];
+      const pick = (bg: number[]) => (contrast(own, bg) >= 3 || contrast(own, bg) >= contrast(alt, bg) ? own : alt);
+      const ik: F[] = fr.map(f => ({ t: f.t, v: f.t >= settleT - 1e-6 ? own : pick(f.v), interp: 'hold' as const }));
+      put(c, tx, ink, 'fill', ik);
+    }
+  });
+  c.notes.push(`${times.length} cuts from ${r1(times[0] * 100) / 100}s, settles on the base colour at ${r1((times[times.length - 1] + (times.length > 1 ? times[times.length - 1] - times[times.length - 2] : 0.5)) * 100) / 100}s`);
+}
+
+const RIG_KINDS = ['hinge', 'grow', 'swing', 'unfold', 'orbit', 'blink', 'pulse', 'beat', 'liquid-fill', 'draw-then-fill', 'launch', 'land', 'type-on', 'assemble', 'reveal-from', 'frame-detail', 'color-cuts'] as const;
+const DEFAULT_DUR: Record<string, number> = { hinge: 1.1, grow: 0.9, swing: 2.2, unfold: 1.2, orbit: 3, blink: 0.25, pulse: 1.2, beat: 0.9, 'liquid-fill': 2.2, 'draw-then-fill': 1.2, launch: 1.3, land: 1.1, 'type-on': 1, assemble: 1.3, 'reveal-from': 0.9, 'frame-detail': 1.2, 'color-cuts': 2 };
+const REVERSIBLE = new Set(['grow', 'unfold', 'assemble', 'reveal-from', 'type-on', 'draw-then-fill', 'frame-detail']);
+
+/** a full-frame rect at the bottom of the composition in the background colour (for color-cuts without ids) */
+function backgroundRect(): Layer {
+  const s = st();
+  const ex = s.comp.root.map(id => s.layer(id)!).find(l => l && l.name === 'Background' && l.type === 'rect');
+  if (ex) return ex;
+  const l = createLayer('rect', { x: 0, y: 0, w: s.comp.width, h: s.comp.height, name: 'Background', color: s.comp.background ?? [0, 0, 0, 1] });
+  s.transact('Agent: background', tx => insertLayer(s, tx, l, null, 0));
+  return l;
+}
 
 /** rig layers: one undo step; returns a compact summary of the keys created */
 export function runRig(a: any) {
   const s = st();
   const kind = String(a.kind ?? '').toLowerCase().replace(/[\s_]+/g, '-');
   if (!(RIG_KINDS as readonly string[]).includes(kind)) throw new Error(`unknown rig kind "${a.kind}". kinds: ${RIG_KINDS.join(', ')}`);
-  const ids: string[] = Array.isArray(a.ids) ? a.ids : a.id ? [a.id] : s.selection;
+  let ids: string[] = Array.isArray(a.ids) ? a.ids : a.id ? [a.id] : s.selection;
+  if (!ids.length && kind === 'color-cuts') ids = [backgroundRect().id];
   if (!ids.length) throw new Error('ids: the layers to rig (or select them)');
   let list = ids.map(need);
   // a single group means its parts for rigs that act per part
@@ -1324,6 +1401,8 @@ export function runRig(a: any) {
         case 'type-on': return rigTypeOn(c, tx, list);
         case 'assemble': return rigAssemble(c, tx, list);
         case 'reveal-from': return rigRevealFrom(c, tx, list);
+        case 'frame-detail': return rigFrameDetail(c, tx, list);
+        case 'color-cuts': return rigColorCuts(c, tx, list);
       }
     });
   }, `Agent: rig ${kind}`);
@@ -1446,7 +1525,9 @@ export const CONCEPT_TOOLS: ToolDef[] = [
 - type-on: typewriter (text layers or a group of letters; cursor:true).
 - assemble: parts fly in from offsets to their places, staggered by distance from the center (order inside-out|outside-in).
 - reveal-from: the layers slide out from behind options.from (e.g. wordmark from the mark) under a mask at the mark's edge.
-Common: t0 (default playhead), duration, intensity 0..1 (default 0.6), mode in|out (out = reverse of grow/unfold/assemble/reveal-from/type-on/draw-then-fill), stagger, loop. Returns the keys created per layer.`,
+- frame-detail: camera pull-back from a detail: the layers (the whole lockup) start options.zoom× (default 6) around options.at ([x,y] comp px, a layer id or a named spot; never the dead centre) with a tilt° (default 4) and settle to rest (Expo Out; Sine Out for durations ≥ 1.8 s). mode out = push into the detail.
+- color-cuts: a fill (default: a new full-frame "Background" rect) cuts through options.colors with hold keys every options.every s (or bpm / beats [times]), count cuts, then settles on its own colour (or settle); ink: [ids] flip to stay readable.
+Common: t0 (default playhead), duration, intensity 0..1 (default 0.6), mode in|out (out = reverse of grow/unfold/assemble/reveal-from/type-on/draw-then-fill/frame-detail), stagger, loop. Returns the keys created per layer.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -1455,7 +1536,7 @@ Common: t0 (default playhead), duration, intensity 0..1 (default 0.6), mode in|o
         mode: { type: 'string', description: 'hinge: open|close|open-close; others: in|out' },
         direction: { description: 'launch/unfold/reveal-from/orbit direction', anyOf: [{ type: 'string' }, { type: 'number' }] },
         loop: { type: 'boolean' },
-        options: { type: 'object', description: 'kind specific (see description): edge, angle, swing, light, hold, from, center, around, turns, tilt, orient, count, every, period, level, color, waves, amplitude, trail, cursor, speed, order, seed, distance, stagger, ease, pivot, perspective, shade, nudge' },
+        options: { type: 'object', description: 'kind specific (see description): edge, angle, swing, light, hold, from, center, around, turns, tilt, orient, count, every, period, level, color, waves, amplitude, trail, cursor, speed, order, seed, distance, stagger, ease, pivot, perspective, shade, nudge, at, zoom, colors, every, bpm, beats, settle, ink, inkAlt' },
       },
       required: ['kind'],
     },

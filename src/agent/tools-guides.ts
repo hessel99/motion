@@ -26,7 +26,7 @@ export const GUIDE_TOOLS: ToolDef[] = [
   {
     name: 'get_guide',
     readOnly: true,
-    description: 'Load motion-design knowledge on demand. No name: the index.' + TASTE_GUIDE_HINT + ' "workflow" (director method, scope rules), "handbook" (principles with numbers, timing tables, easing names, critique rubric), "concepts" (read the artwork + brand; metaphor → motion recipes: door opens, leaf grows, rocket launches; anti-patterns), "cookbook" (worked recipes with exact tool calls), "styles" (index of style recipes), "styles/<name>" (palette, type, easing, timing, signature moves of one style). section: return only one "## " section (e.g. "Timing tables").',
+    description: 'Load motion-design knowledge on demand. No name: the index.' + TASTE_GUIDE_HINT + ' "workflow" (director method, scope rules), "handbook" (principles with numbers, timing tables, easing names, critique rubric), "concepts" (read the artwork + brand; the 11 logo concept families; metaphor → motion recipes: door opens, leaf grows, rocket launches; anti-patterns), "logo-recipes" (logo stings: timing by pace, easing families, wordmark entry, 25 recipes with exact tool calls), "cookbook" (worked recipes with exact tool calls), "styles" (index of style recipes), "styles/<name>" (palette, type, easing, timing, signature moves of one style). section: return only one "## " section (e.g. "Timing tables").',
     inputSchema: {
       type: 'object',
       properties: {
