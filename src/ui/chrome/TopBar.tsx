@@ -9,7 +9,7 @@ import { editor } from '../../app/editor';
 import { DEV } from '../../app/prefs';
 import { loadDemo, loadStress, newProject, openFileDialog, saveProject } from '../../app/actions';
 import { openShare } from './Share';
-import { activeDoc, closeDoc, docName, documents, isDocDirty, moveDoc, switchTo, type Doc } from '../../app/documents';
+import { activeDoc, closeDoc, docName, documents, isDocBusy, isDocDirty, moveDoc, switchTo, type Doc } from '../../app/documents';
 import { setProjectName } from '../../core/commands';
 import { useChannels } from '../hooks';
 import { menuFrom, showContextMenu, type MenuItem } from '../menu';
@@ -128,6 +128,7 @@ function DocTab({ doc, active }: { doc: Doc; active: boolean }) {
             onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter') commit((e.target as HTMLInputElement).value); if (e.key === 'Escape') setRenaming(false); }}
             onBlur={e => commit((e.target as HTMLInputElement).value)} />
         : <span class="tb-name">{name}</span>}
+      {isDocBusy(doc) && <span class="tb-run" data-testid="tab-running" role="img" aria-label="The agent is working in this file" title="The agent is working in this file" />}
       {dirty && <span class="tb-dirty" aria-label="Unsaved changes" />}
       <button type="button" class="tb-close" aria-label={`Close ${name}`} title="Close (⌘W)" onClick={close}><X size={13} /></button>
     </div>

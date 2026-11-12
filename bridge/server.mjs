@@ -114,7 +114,9 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
   const figmaStatus = async (ws) => send(ws ?? editor, { type: 'figma_status', ...(await shaders.status()) });
 
   // ---------- tool calls into the editor ----------
-  function callEditorTool(name, args) {
+  /** chatId: the editor chat whose CLI made the call (from the per-chat MCP url, /mcp?chat=…), so
+   *  the editor runs the tool on that chat's document even when another tab is in front */
+  function callEditorTool(name, args, chatId) {
     return new Promise((resolve) => {
       if (!editor || editor.readyState !== 1) {
         return resolve({ ok: false, error: 'The Motion editor is not open (no editor connected to the bridge). Ask the user to open the editor and try again.' });
@@ -125,7 +127,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
         resolve({ ok: false, error: `Tool "${name}" timed out after ${TOOL_TIMEOUT_MS / 1000}s waiting for the editor.` });
       }, TOOL_TIMEOUT_MS);
       pending.set(id, { resolve, timer, ws: editor });
-      send(editor, { type: 'tool_call', id, name, args: args ?? {} });
+      send(editor, { type: 'tool_call', id, name, args: args ?? {}, ...(chatId ? { chatId } : {}) });
     });
   }
 
@@ -140,7 +142,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
   }
 
   // ---------- MCP (Streamable HTTP, JSON responses only) ----------
-  async function handleRpc(msg) {
+  async function handleRpc(msg, chatId) {
     const isRequest = msg && typeof msg === 'object' && 'id' in msg && msg.id !== null;
     const reply = (result) => ({ jsonrpc: '2.0', id: msg.id, result });
     const fail = (code, message) => ({ jsonrpc: '2.0', id: msg?.id ?? null, error: { code, message } });
@@ -175,7 +177,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
         if (editor && tools.length && !tools.some((t) => t.name === name)) {
           return reply({ content: [{ type: 'text', text: `Unknown tool: ${name}` }], isError: true });
         }
-        const r = await callEditorTool(name, msg.params?.arguments);
+        const r = await callEditorTool(name, msg.params?.arguments, chatId);
         if (r.ok) {
           const content = Array.isArray(r.content) && r.content.length ? materializeFiles(r.content) : [{ type: 'text', text: 'ok' }];
           return reply({ content: compactContent(content), isError: false });
@@ -253,6 +255,8 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
     }
     if (url.pathname === '/mcp') {
       if (req.method !== 'POST') return json(res, 405, { error: 'method not allowed' }, { Allow: 'POST' });
+      const chat = url.searchParams.get('chat');
+      const chatId = chat && /^[\w-]{1,64}$/.test(chat) ? chat : undefined;
       let body;
       try {
         body = JSON.parse(await readBody(req));
@@ -260,11 +264,11 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
         return json(res, 400, { jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } });
       }
       if (Array.isArray(body)) {
-        const results = (await Promise.all(body.map(handleRpc))).filter(Boolean);
+        const results = (await Promise.all(body.map((m) => handleRpc(m, chatId)))).filter(Boolean);
         if (!results.length) { res.writeHead(202); return res.end(); }
         return json(res, 200, results);
       }
-      const result = await handleRpc(body);
+      const result = await handleRpc(body, chatId);
       if (!result) { res.writeHead(202); return res.end(); }
       return json(res, 200, result);
     }
@@ -329,7 +333,8 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
               systemPrompt: typeof msg.systemPrompt === 'string' && msg.systemPrompt ? msg.systemPrompt : undefined,
               maxTurns: Number.isInteger(msg.maxTurns) && msg.maxTurns > 0 ? Math.min(msg.maxTurns, 500) : undefined,
               readOnlyTools: Array.isArray(msg.readOnlyTools) ? msg.readOnlyTools.filter((t) => typeof t === 'string' && /^[\w-]+$/.test(t)) : undefined,
-              mcpUrl: `http://127.0.0.1:${actualPort}/mcp`,
+              // per chat: tool calls carry the chat id back to the editor (runs belong to a document)
+              mcpUrl: `http://127.0.0.1:${actualPort}/mcp${/^[\w-]{1,64}$/.test(chatId) ? `?chat=${chatId}` : ''}`,
               workDir,
             },
             emit,

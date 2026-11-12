@@ -6,7 +6,7 @@
 // listeners: editor channel 'docs' (tab list, active tab, dirty dots).
 
 import { editor } from './editor';
-import type { DocState } from '../core/store';
+import { Store, type DocState } from '../core/store';
 import { createProject, type Project } from '../core/model';
 import { rememberRecent } from './recent';
 
@@ -20,8 +20,11 @@ export interface Doc {
   savedAt: number;
   /** canvas view to restore on switch */
   view: { zoom: number; panX: number; panY: number } | null;
-  /** serialized project of a background document for autosave (background documents don't change) */
+  /** serialized project of a background document for autosave (cleared when an agent run edits it) */
   json: string | null;
+  /** a background document an agent run is still working in: its own Store (made from `state`),
+   *  so the run's edits land in this document while another tab is in front. see docStore() */
+  bg?: Store | null;
 }
 
 let seq = 0;
@@ -35,6 +38,33 @@ let pendingPath: string | null = null;
 const vp = () => (globalThis as any).viewport as { zoom: number; panX: number; panY: number; setView(z: number, x: number, y: number): void } | undefined;
 
 export function documents(): readonly Doc[] { return docs; }
+
+/** documents an agent run is working in (the tab shows a spinner; an untouched tab is not reused) */
+const busy = new Set<string>();
+export function isDocBusy(d: Doc) { return busy.has(d.id); }
+export function setDocBusy(id: string, on: boolean) {
+  if (on === busy.has(id)) return;
+  if (on) busy.add(id); else busy.delete(id);
+  emit();
+}
+/** the id of the tab that was just closed (editor channel 'doc-closed') */
+export let closedDoc: string | null = null;
+
+/** the store that holds a document's state right now: the editor's while it is the active tab,
+ *  else a Store of its own (created on first use from the parked state, folded back on switchTo).
+ *  null once the tab is closed. agent runs edit their document through this, never editor.store */
+export function docStore(d: Doc): Store | null {
+  if (!docs.includes(d)) return null;
+  if (d === active || !d.state) return editor.store;
+  if (!d.bg) {
+    const bg = new Store();
+    bg.restoreState(d.state);
+    bg.on('doc', () => { d.json = null; });
+    bg.on('history', emit);
+    d.bg = bg;
+  }
+  return d.bg;
+}
 export function activeDoc(): Doc | null { return active; }
 
 export function docProject(d: Doc): Project { return d.state ? d.state.project : editor.store.project; }
@@ -43,6 +73,7 @@ export function docName(d: Doc) { return docProject(d).name || 'Untitled'; }
 export function isDocDirty(d: Doc | null = active): boolean {
   if (!d) return false;
   if (!d.state) return editor.store.topEntryId !== d.savedAt;
+  if (d.bg) return d.bg.topEntryId !== d.savedAt;
   const u = d.state.undo;
   return (u[u.length - 1]?.id ?? 0) !== d.savedAt;
 }
@@ -52,7 +83,7 @@ function emit() { editor.emit('docs'); }
 /** a tab that was never touched: a new file can take its place instead of opening another tab */
 function pristine(d: Doc) {
   const s = editor.store;
-  return !d.state && !d.path && s.historyLength === 0 && Object.keys(s.project.layers).length === 0;
+  return !d.state && !d.path && !busy.has(d.id) && s.historyLength === 0 && Object.keys(s.project.layers).length === 0;
 }
 
 /** every editor.load() lands in the active tab (a new one when none is open) */
@@ -105,7 +136,9 @@ export function switchTo(id: string) {
   if (!d || d === active) return;
   park();
   active = d;
-  const st = d.state!;
+  // a run edited it in the background: its own store has the newest state
+  const st = d.bg ? d.bg.saveState() : d.state!;
+  d.bg = null;
   d.state = null;
   d.json = null;
   switching = true;
@@ -153,6 +186,8 @@ export function closeDoc(id: string, opts: { force?: boolean } = {}): boolean {
     else {
       // last tab: an empty store behind the Home view
       docs.splice(i, 1);
+      closedDoc = d.id;
+      editor.emit('doc-closed');
       active = null;
       switching = true;
       try { editor.store.load(createProject('Untitled')); editor.emit('loaded'); } finally { switching = false; }
@@ -165,6 +200,9 @@ export function closeDoc(id: string, opts: { force?: boolean } = {}): boolean {
     if (d.path || Object.keys(p.layers).length) rememberRecent(p, d.path);
   }
   docs.splice(docs.indexOf(d), 1);
+  d.bg = null;
+  closedDoc = d.id;
+  editor.emit('doc-closed');
   emit();
   return true;
 }
@@ -174,7 +212,7 @@ export function serializeSession(serialize: () => string): string {
   if (!docs.length) return JSON.stringify({ session: 1, docs: [], active: 0 });
   const out = docs.map(d => {
     if (!d.state) return serialize();
-    return d.json ??= JSON.stringify(d.state.project);
+    return d.json ??= JSON.stringify((d.bg ?? d.state).project);
   });
   return `{"session":1,"active":${active ? docs.indexOf(active) : 0},"paths":${JSON.stringify(docs.map(d => d.path))},"docs":[${out.join(',')}]}`;
 }

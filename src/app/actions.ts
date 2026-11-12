@@ -75,11 +75,25 @@ export function toast(msg: string, kind: 'info' | 'error' = 'info') {
   if (!host) { host = document.createElement('div'); host.className = 'toasts'; host.setAttribute('role', 'status'); host.setAttribute('aria-live', 'polite'); document.body.appendChild(host); }
   const el = document.createElement('div');
   el.className = 'toast ' + kind;
-  el.textContent = msg;
   host.appendChild(el);
   while (host.children.length > 3) host.firstElementChild!.remove();
-  setTimeout(() => el.classList.add('out'), kind === 'error' ? 5000 : 2200);
-  setTimeout(() => el.remove(), kind === 'error' ? 5400 : 2600);
+  if (kind === 'error') {
+    // errors stay until dismissed: there is time to read them (and they are announced right away)
+    el.setAttribute('role', 'alert');
+    const t = document.createElement('span');
+    t.textContent = msg;
+    const x = document.createElement('button');
+    x.type = 'button';
+    x.className = 'toast-x';
+    x.setAttribute('aria-label', 'Dismiss');
+    x.textContent = '✕';
+    x.onclick = () => el.remove();
+    el.append(t, x);
+    return;
+  }
+  el.textContent = msg;
+  setTimeout(() => el.classList.add('out'), 2200);
+  setTimeout(() => el.remove(), 2600);
 }
 
 // ---------------- files ----------------

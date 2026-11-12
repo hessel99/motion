@@ -8,7 +8,7 @@ import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { setExpr } from '../core/commands';
 import { audioLevel, bandIndex, AUDIO_BANDS } from '../core/audio-env';
 import { editor } from '../app/editor';
-import { st, text, idsSchema, checkProp, need, writeTrack, type ToolDef, type ToolContent } from './tool-kit';
+import { st, text, idsSchema, checkProp, need, writeTrack, hasRenderer, type ToolDef, type ToolContent } from './tool-kit';
 import { ensureAnalysis } from '../audio/analysis-store';
 import { music, musicLayer, beats, bars, accents, sections, onsets, refreshAudioEnv, beatPeriod, type Music } from '../audio/timing';
 import { syncToMusic, patternTimes, distributeOnBeats, type SyncMode, type BeatPattern } from '../audio/sync';
@@ -30,7 +30,7 @@ async function needMusic(): Promise<Music> {
   if (!a) throw new Error('the audio could not be decoded / analysed');
   const m = music(s);
   if (!m) throw new Error('the audio layer is hidden or muted');
-  if (refreshAudioEnv(s) && editor.renderer) editor.renderer.dirty = true;
+  if (refreshAudioEnv(s) && hasRenderer()) editor.renderer.dirty = true;
   return m;
 }
 
