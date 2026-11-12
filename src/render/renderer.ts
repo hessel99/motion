@@ -517,6 +517,7 @@ export class Renderer {
       case 'path': it.kind = complex ? KIND_RGBA : KIND_MASK; break;
       case 'text': it.kind = KIND_MASK; break;
       case 'image': it.kind = KIND_RGBA; break;
+      case 'audio': it.kind = KIND_NONE; break;
       case 'precomp': it.kind = KIND_NONE; break;
     }
     it.rasterBase = this.rasterBase(l, complex);

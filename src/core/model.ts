@@ -33,7 +33,7 @@ export interface Prop {
 export type BlendMode = 'normal' | 'multiply' | 'screen' | 'add' | 'darken' | 'lighten';
 export const BLEND_MODES: BlendMode[] = ['normal', 'multiply', 'screen', 'add', 'darken', 'lighten'];
 
-export type LayerType = 'group' | 'rect' | 'ellipse' | 'path' | 'text' | 'image' | 'precomp';
+export type LayerType = 'group' | 'rect' | 'ellipse' | 'path' | 'text' | 'image' | 'precomp' | 'audio';
 
 /** ordered list of animatable properties shown in timeline / inspector */
 export const PROP_DEFS = {
@@ -64,6 +64,7 @@ export const TYPE_PROPS: Record<LayerType, PropKey[]> = {
   path: ['size', 'fill', 'stroke', 'strokeWidth', 'trimStart', 'trimEnd', 'trimOffset'],
   text: ['size', 'fill'],
   image: ['size'],
+  audio: [],
   precomp: ['size'],
 };
 
@@ -160,6 +161,8 @@ export interface Layer {
   text?: TextData;
   textAnim?: TextAnim;
   imageRef?: string; // asset id
+  /** audio: volume 0..1 (startTime = when the clip starts, in comp time) */
+  volume?: number;
   /** precomp: referenced composition id and when it starts (comp time) */
   compRef?: string;
   startTime?: number;
@@ -180,7 +183,7 @@ export interface Composition {
 
 export interface Asset {
   id: string;
-  kind: 'image';
+  kind: 'image' | 'audio';
   mime: string;
   /** data url (portable). large assets could move to a blob store later */
   data: string;
