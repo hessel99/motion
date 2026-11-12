@@ -625,8 +625,9 @@ export class ViewportController {
         g.fillRect(sx - 3, sy - 3, 6, 6);
       }
     }
-    // selection
+    // selection (audio layers have nothing to show on the canvas)
     for (const id of st.selection) {
+      if (st.layer(id)?.type === 'audio') continue;
       const c = r.corners(id);
       if (!c) continue;
       g.strokeStyle = accent;
@@ -634,7 +635,7 @@ export class ViewportController {
       poly(c);
       g.stroke();
     }
-    if (st.selection.length === 1 && !(this.drag && this.drag.kind === 'move')) {
+    if (st.selection.length === 1 && st.layer(st.selection[0])?.type !== 'audio' && !(this.drag && this.drag.kind === 'move')) {
       const c = r.corners(st.selection[0]);
       if (c) {
         const pts = this.handlePoints(c);

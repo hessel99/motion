@@ -118,6 +118,28 @@ function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
 
 // ---------------- layer panel ----------------
 function LayerPanel({ layers }: { layers: Layer[] }) {
+  if (layers.every(x => x.type === 'audio')) return <AudioPanel layers={layers} />;
+  return <VisualLayerPanel layers={layers} />;
+}
+
+function AudioPanel({ layers }: { layers: Layer[] }) {
+  const store = st();
+  const l = layers[0];
+  const ids = layers.map(x => x.id);
+  return (
+    <Section title={layers.length > 1 ? `${layers.length} audio layers` : l.name} right={<span class="insp-type">audio</span>}>
+      <div class="row">
+        <span class="muted small">Volume</span>
+        <input type="range" min="0" max="1" step="0.01" value={l.volume ?? 1} style={{ flex: 1 }} onChange={e => setLayerField(store, ids, 'volume', +(e.target as HTMLInputElement).value, 'Volume')} />
+        <span class="small">{Math.round((l.volume ?? 1) * 100)}%</span>
+      </div>
+      <div class="row"><NumField label="Start" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={(n, mk) => store.transact('Audio start', tx => { for (const id of ids) { const x = store.layer(id); if (x) { tx.set(x, 'startTime', n); tx.touch(id); } } }, mk)} /></div>
+      <div class="muted small">Drag the waveform in the timeline to move it. Exported videos include audio.</div>
+    </Section>
+  );
+}
+
+function VisualLayerPanel({ layers }: { layers: Layer[] }) {
   const store = st();
   const l = layers[0];
   const t = store.time;

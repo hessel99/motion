@@ -29,7 +29,9 @@ export class Editor {
   attachCanvas(canvas: HTMLCanvasElement) {
     this.renderer = new Renderer(this.store, canvas);
     this.start();
+    import('../audio/engine').then(m => { this.audio = new m.AudioEngine(this); });
   }
+  audio: import('../audio/engine').AudioEngine | null = null;
 
   setTool(t: Tool) {
     this.tool = t;

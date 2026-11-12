@@ -140,13 +140,14 @@ export async function openFileDialog() {
   }
   const inp = document.createElement('input');
   inp.type = 'file';
-  inp.accept = '.motion,.json,.aep,.svg,image/*';
+  inp.accept = '.motion,.json,.aep,.svg,image/*,audio/*';
   inp.onchange = async () => { for (const f of inp.files ?? []) await openBrowserFile(f); };
   inp.click();
 }
 
 export async function openBrowserFile(f: File) {
   const ext = f.name.split('.').pop()!.toLowerCase();
+  if (f.type.startsWith('audio/') || ['mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac'].includes(ext)) return importAudio(f);
   // svg is "image/svg+xml" but must go to the vector importer, not the bitmap path
   if (ext === 'svg' || f.type === 'image/svg+xml') return importSvgText(await f.text());
   if (ext === 'aep' || f.type.startsWith('image/')) {
@@ -305,6 +306,18 @@ async function importSvgText(text: string) {
   const res = m.svgToLayers(text);
   insertLayers(res, { label: 'Import SVG', fitCompIfEmpty: true });
   toast(`Imported ${res.layers.length} layers from SVG`);
+}
+
+async function importAudio(f: File) {
+  const data = await new Promise<string>((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result as string); r.onerror = rej; r.readAsDataURL(f); });
+  const asset: Asset = { id: uid('a'), kind: 'audio', mime: f.type || 'audio/mpeg', data, width: 0, height: 0 };
+  const { createLayer } = await import('../core/model');
+  const l = createLayer('audio', { x: 0, y: 0, w: 0, h: 0, name: f.name.replace(/\.[^.]+$/, '') });
+  l.imageRef = asset.id;
+  l.startTime = st().time;
+  l.volume = 1;
+  insertLayers({ layers: [l], roots: [l.id], assets: [asset] }, { label: 'Import audio' });
+  toast(`Audio added at ${st().time.toFixed(2)}s`);
 }
 
 async function importImage(f: File) {

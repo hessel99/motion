@@ -6,6 +6,7 @@ import type { Asset, Layer } from '../core/model';
 import type { Editor } from '../app/editor';
 
 const buffers = new Map<string, AudioBuffer | 'loading' | 'error'>();
+const pending = new Map<string, Promise<AudioBuffer | null>>();
 const peaksCache = new Map<string, Float32Array>();
 let ctx: AudioContext | null = null;
 let onDecoded: (() => void) | null = null;
@@ -20,11 +21,44 @@ export function getAudioBuffer(asset: Asset): AudioBuffer | null {
   if (b && b !== 'loading' && b !== 'error') return b;
   if (!b) {
     buffers.set(asset.id, 'loading');
-    fetch(asset.data).then(r => r.arrayBuffer()).then(ab => audioCtx().decodeAudioData(ab))
-      .then(buf => { buffers.set(asset.id, buf); onDecoded?.(); })
-      .catch(() => buffers.set(asset.id, 'error'));
+    pending.set(asset.id, fetch(asset.data).then(r => r.arrayBuffer()).then(ab => audioCtx().decodeAudioData(ab))
+      .then(buf => { buffers.set(asset.id, buf); onDecoded?.(); return buf; })
+      .catch(() => { buffers.set(asset.id, 'error'); return null; }));
   }
   return null;
+}
+
+/** waits for the decoded buffer (null if decoding failed) */
+export async function loadAudioBuffer(asset: Asset): Promise<AudioBuffer | null> {
+  return getAudioBuffer(asset) ?? (await pending.get(asset.id)) ?? null;
+}
+
+/**
+ * mixes the visible audio layers of the root comp for [t0, t1) into one stereo buffer, honoring
+ * start time, in/out points and volume. returns null when there is no audible audio.
+ */
+export async function mixAudio(project: { layers: Record<string, Layer>; assets: Record<string, Asset> }, root: string[], t0: number, t1: number, sampleRate = 48000): Promise<AudioBuffer | null> {
+  const layers = Object.values(project.layers).filter(l => l.type === 'audio' && l.visible && root.includes(l.id) && (l.volume ?? 1) > 0);
+  const len = Math.max(1, Math.ceil((t1 - t0) * sampleRate));
+  let oc: OfflineAudioContext | null = null;
+  for (const l of layers) {
+    const asset = l.imageRef ? project.assets[l.imageRef] : undefined;
+    if (!asset) continue;
+    const buf = await loadAudioBuffer(asset);
+    if (!buf) continue;
+    const start = l.startTime ?? 0;
+    const from = Math.max(t0, l.inPoint, start);
+    const to = Math.min(t1, l.outPoint, start + buf.duration);
+    if (to <= from) continue;
+    oc ??= new OfflineAudioContext(2, len, sampleRate);
+    const src = oc.createBufferSource();
+    src.buffer = buf;
+    const gain = oc.createGain();
+    gain.gain.value = l.volume ?? 1;
+    src.connect(gain).connect(oc.destination);
+    src.start(from - t0, from - start, to - from);
+  }
+  return oc ? oc.startRendering() : null;
 }
 
 /** min/max peaks per bucket for waveform drawing (cached) */

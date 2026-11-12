@@ -7,7 +7,9 @@
 
 import {
   Output, BufferTarget, Mp4OutputFormat, WebMOutputFormat, EncodedVideoPacketSource, EncodedPacket,
+  AudioBufferSource, getFirstEncodableAudioCodec,
 } from 'mediabunny';
+import { mixAudio } from '../audio/engine';
 import { editor } from '../app/editor';
 import { getBitmap } from '../render/raster';
 
@@ -208,6 +210,20 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
   });
   const source = new EncodedVideoPacketSource(picked.codec.startsWith('avc1') ? 'avc' : picked.codec.startsWith('vp09') ? 'vp9' : 'vp8');
   output.addVideoTrack(source, { frameRate: fps });
+  // audio: all audio layers mixed offline into one stereo track
+  let audio: { src: AudioBufferSource; buf: AudioBuffer } | null = null;
+  {
+    const st = editor.store;
+    const mixed = await mixAudio(st.project, st.comp.root, t0, t1).catch(() => null);
+    if (mixed) {
+      const codec = await getFirstEncodableAudioCodec(picked.format === 'mp4' ? ['aac', 'opus'] : ['opus', 'vorbis'], { numberOfChannels: 2, sampleRate: mixed.sampleRate });
+      if (codec) {
+        const src = new AudioBufferSource({ codec, bitrate: 192_000 });
+        output.addAudioTrack(src);
+        audio = { src, buf: mixed };
+      } else console.warn('no encodable audio codec; exporting without audio');
+    }
+  }
   let encErr: unknown = null;
   let mux: Promise<void> = Promise.resolve();
   const encoder = new VideoEncoder({
@@ -221,6 +237,8 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
   let finished = false;
   try {
     await output.start();
+    // audio first (it is small): the muxer can then interleave each video packet immediately
+    if (audio) { await audio.src.add(audio.buf); audio.src.close(); }
     encoder.configure(picked.config);
     await waitForAssets();
     const keyEvery = Math.max(1, Math.round(fps * 2));

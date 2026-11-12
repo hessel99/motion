@@ -10,6 +10,7 @@ import {
 import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type PropKey } from '../core/model';
 import { showContextMenu, type MenuItem } from './menu';
 import { GraphView } from './graph';
+import { audioDuration, audioPeaks } from '../audio/engine';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { setEase, setInterp, setSpring } from '../core/commands';
 
@@ -87,6 +88,7 @@ export class Timeline {
     ed.on('loaded', () => {
       lastDur = st.comp.duration; this.expanded.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
     ed.onFrame(() => this.frame());
+    ed.on('audio', () => { this.baseDirty = true; });
     this.canvas.addEventListener('pointerdown', e => this.down(e));
     this.canvas.addEventListener('pointermove', e => this.move(e));
     this.canvas.addEventListener('pointerup', e => this.up(e));
@@ -409,6 +411,23 @@ export class Timeline {
       g.beginPath();
       g.roundRect(inX, y + 4, outX - inX, ROW_H - 8, 3);
       g.fill();
+    }
+    // audio waveform
+    if (l.type === 'audio' && l.imageRef) {
+      const asset = st.project.assets[l.imageRef];
+      const peaks = asset ? audioPeaks(asset) : null;
+      const dur = asset ? audioDuration(asset) : null;
+      if (peaks && dur) {
+        const start = l.startTime ?? 0;
+        const x0 = this.tToX(start), x1 = this.tToX(start + dur);
+        g.fillStyle = isSel ? 'rgba(120,220,170,0.9)' : 'rgba(80,190,140,0.75)';
+        const h = (ROW_H - 8) / 2;
+        for (let x = Math.max(this.leftW, Math.floor(x0)); x < Math.min(this.w, x1); x += 2) {
+          const p = peaks[Math.min(peaks.length - 1, Math.floor(((x - x0) / (x1 - x0)) * peaks.length))];
+          const ph = Math.max(0.5, p * h);
+          g.fillRect(x, cy - ph, 1.5, ph * 2);
+        }
+      } else { g.fillStyle = '#6a6a72'; g.font = '10px system-ui'; g.fillText('decoding audio…', Math.max(this.leftW + 6, this.tToX(l.startTime ?? 0)), cy); }
     }
     // text animation range (per-unit reveal) as a bar
     if (l.textAnim && l.text) {
@@ -760,7 +779,7 @@ export class Timeline {
           tx.set(l, 'inPoint', o.inP + dt);
           if (o.outP < 1e8) tx.set(l, 'outPoint', o.outP + dt);
           for (const k in o.kf) tx.set(l.props[k as PropKey]!, 'kf', o.kf[k as PropKey]!.map(f => ({ ...f, t: f.t + dt })));
-          if (l.type === 'precomp') { tx.set(l, 'startTime', o.start + dt); tx.structure(); }
+          if (l.type === 'precomp' || l.type === 'audio') { tx.set(l, 'startTime', o.start + dt); tx.structure(); }
           tx.touch(id);
         }
       });
@@ -947,6 +966,7 @@ function drawTypeIcon(g: CanvasRenderingContext2D, type: Layer['type'], x: numbe
     case 'image': g.rect(x - 5, y - 4, 10, 8); g.moveTo(x - 5, y + 3); g.lineTo(x - 1, y - 1); g.lineTo(x + 2, y + 2); g.stroke(); break;
     case 'path': g.moveTo(x - 5, y + 4); g.bezierCurveTo(x - 3, y - 6, x + 3, y + 6, x + 5, y - 4); g.stroke(); break;
     case 'precomp': g.rect(x - 5, y - 4, 10, 8); g.rect(x - 2.5, y - 1.5, 5, 3); g.stroke(); break;
+    case 'audio': for (let k = -4; k <= 4; k += 2) { const hh = [2, 4, 5, 3, 2][(k + 4) / 2]; g.fillRect(x + k - 0.5, y - hh, 1.2, hh * 2); } break;
   }
 }
 function ellipsize(g: CanvasRenderingContext2D, s: string, max: number) {
