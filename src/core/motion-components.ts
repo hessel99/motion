@@ -435,7 +435,11 @@ export class InstanceResolver {
   /** copies made in the last pass (stats / tests) */
   patched = 0;
 
-  begin() { this.seen.clear(); this.patched = 0; }
+  begin(changed?: Iterable<string>) {
+    this.seen.clear(); this.patched = 0;
+    // layers edited in place since the last pass (the renderer knows them): drop their copies
+    if (changed) { const ids = new Set(changed); if (ids.size) for (const [k, e] of this.cache) if (ids.has(e.src.id)) this.cache.delete(k); }
+  }
   /** drop entries not used since begin() */
   end() { for (const k of this.cache.keys()) if (!this.seen.has(k)) this.cache.delete(k); }
 
@@ -458,7 +462,7 @@ export class InstanceResolver {
 /** what a patched copy was made from (edits replace these objects through tx.set) */
 function depsOf(l: Layer): unknown[] {
   const d: unknown[] = [l.props, l.text, l.imageRef, l.paints, l.visible, l.pathKf, l.textAnim, l.inst, l.play, l.children, l.inPoint, l.outPoint, l.effects, l.geometry];
-  for (const k in l.props) d.push(l.props[k as PropKey]);
+  for (const k in l.props) { const p = l.props[k as PropKey]; d.push(p, p?.v, p?.kf, p?.expr); }
   return d;
 }
 function sameDeps(a: unknown[], b: unknown[]) {
@@ -532,7 +536,8 @@ export function guessRanges(P: Project, comp: Composition): { name: string; from
   // the longest still stretch between keys splits entrance from exit
   let best = 0, at = -1;
   for (let i = 1; i < times.length; i++) { const g = times[i] - times[i - 1]; if (g > best) { best = g; at = i; } }
-  if (at < 0 || best < 0.4 || best < comp.duration * 0.15) return [];
+  // an entrance before the rest and an exit after it
+  if (at < 0 || best < 0.4 || best < comp.duration * 0.15 || times[at - 1] <= times[0] || times[at] >= times[times.length - 1]) return [];
   const fps = comp.fps, q = (t: number) => Math.round(t * fps) / fps;
   const a = q(times[at - 1]), b = q(times[at]);
   return [{ name: 'in', from: 0, to: a }, { name: 'hold', from: a, to: b }, { name: 'out', from: b, to: comp.duration }];
@@ -835,8 +840,8 @@ export function addVariant(store: Store, compRef: string, opts: { name: string; 
   const fmt = FORMATS.find(f => f.name === name);
   let w = opts.width, h = opts.height;
   if (fmt && !w && !h) {
-    // keep the component's scale: a 1920x1080 sting's 9:16 variant is 1080x1920
-    const k = Math.max(comp.width, comp.height) / Math.max(fmt.w, fmt.h);
+    // keep the short side: a 1920x1080 sting's 9:16 variant is 1080x1920, its 1:1 1080x1080
+    const k = Math.min(comp.width, comp.height) / Math.min(fmt.w, fmt.h);
     w = Math.round(fmt.w * k); h = Math.round(fmt.h * k);
   }
   const group = opts.group?.trim() || (w || h ? 'Format' : 'Style');
