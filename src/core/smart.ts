@@ -5,7 +5,7 @@
 // root is removed afterwards (one undo step).
 
 import { EASE_PRESETS } from './easing';
-import { defaultEase, PROP_DEFS, TRANSFORM_KEYS, TYPE_PROPS, type Keyframe, type Layer, type PathGeometry, type PathKey, type PropKey } from './model';
+import { defaultEase, EFFECT_KEYS, PROP_DEFS, TRANSFORM_KEYS, TYPE_PROPS, type Keyframe, type Layer, type PathGeometry, type PathKey, type PropKey } from './model';
 import type { Store } from './store';
 import { deleteLayers, moveLayers, valueAt } from './commands';
 
@@ -99,7 +99,14 @@ export function smartAnimate(store: Store, startId: string, endId: string, opts:
           // the roots stay where the start root is (frames are usually placed side by side)
           if (isRoot && (key === 'position' || key === 'anchor')) continue;
           if (!PROP_DEFS[key]) continue;
-          const from = valueAt(a, key, t0), to = valueAt(b, key, b.props[key]?.kf?.length ? t1 : 0);
+          let from = valueAt(a, key, t0), to = valueAt(b, key, b.props[key]?.kf?.length ? t1 : 0);
+          // effect props: a layer without the effect starts / ends at "no effect" (transparent, zero)
+          if (EFFECT_KEYS.includes(key)) {
+            if (!a.props[key] && !b.props[key]) continue;
+            const none = (v: number[]) => (PROP_DEFS[key].unit === 'color' ? [v[0], v[1], v[2], 0] : PROP_DEFS[key].dim === 2 ? v.slice() : [0]);
+            if (!a.props[key]) from = none(to);
+            else if (!b.props[key]) to = none(from);
+          }
           if (differs(from, to)) keyProp(a, key, from, to);
         }
         // vector shape change with the same command structure: path morph keys

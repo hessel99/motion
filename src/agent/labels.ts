@@ -50,6 +50,32 @@ export function toolLabel(rawName: string, input: any, layerName: (id: string) =
     case 'open_composition': return 'Open composition';
     case 'export_video': return `Export ${a.format ?? 'mp4'}`;
     case 'undo': return 'Undo';
+    case 'build_scene': return `Build scene · ${plural(Array.isArray(a.layers) ? a.layers.length : 0, 'layer')}`;
+    case 'add_shape_path': return a.op ? `Shape: ${a.op}` : 'Add path shape';
+    case 'shape_library': return a.shape ? `Add shape ${q(a.shape)}` : 'List shapes';
+    case 'draw_on': return `Draw on ${lns(a.ids)}`;
+    case 'morph': return `Morph ${ln(a.id)}`;
+    case 'arrange': return `Arrange ${lns(a.ids)} (${a.layout ?? 'layout'})`;
+    case 'choreograph': return `Choreograph ${lns(a.ids)} · ${a.pattern ?? 'sequential'}`;
+    case 'secondary_motion': return `Follow-through on ${lns(a.ids)}`;
+    case 'loop': return `Loop ${lns(a.ids)}${a.mode ? ' · ' + a.mode : ''}`;
+    case 'camera_rig': return 'Camera rig';
+    case 'align_to_beats': return `Align ${lns(a.ids)} to beats`;
+    case 'type_layout': return `Type layout${a.key ? ' ' + q(a.key) : ''}`;
+    case 'split_text': return `Split ${ln(a.id)} into ${a.by ?? 'char'}s`;
+    case 'text_on_path': return 'Text on path';
+    case 'inspect_motion': return `Measure motion${a.ids?.length ? ' of ' + lns(a.ids) : ''}`;
+    case 'check_frame': return 'Check frames';
+    case 'timeline_summary': return 'Read the timeline';
+    case 'preview_strip': return `Preview strip${a.layout ? ' (' + a.layout + ')' : ''}`;
+    case 'preview_video': return 'Render GIF preview';
+    case 'get_guide': return a.name ? `Read guide ${q(a.name + (a.section ? ' › ' + a.section : ''))}` : 'List guides';
+    case 'propose_storyboard': return `Storyboard ${q(a.title ?? '')}${Array.isArray(a.beats) ? ` · ${plural(a.beats.length, 'beat')}` : ''}`;
+    case 'update_progress': return `Beat ${a.beat} ${a.status === 'active' ? 'started' : a.status ?? ''}`;
+    case 'inspect_artwork': return `Look at the parts of ${a.id ? ln(a.id) : a.ids?.length ? lns(a.ids) : 'the selection'}`;
+    case 'split_shape': return `Split ${ln(a.id)} into ${a.mode === 'subpaths' ? 'contours' : 'parts'}`;
+    case 'set_pivot': return `Move pivot of ${a.id ? ln(a.id) : lns(a.ids)}${typeof a.at === 'string' ? ' to ' + a.at : ''}`;
+    case 'rig': return `Rig ${a.kind ?? ''} on ${lns(a.ids)}`;
     default: return name.replace(/_/g, ' ');
   }
 }

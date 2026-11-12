@@ -1,0 +1,617 @@
+[
+ {
+  "name": "set_composition",
+  "argsBytes": 24,
+  "ok": true,
+  "ms": 38,
+  "editorMs": 5,
+  "input": {
+   "background": "#f7eedc"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 199,
+  "ok": true,
+  "ms": 114,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Blob terracotta",
+   "x": 330,
+   "y": 230,
+   "w": 600,
+   "h": 600,
+   "d": "M300 20 C460 10 590 140 580 300 C575 450 450 590 290 580 C130 575 20 450 30 290 C35 140 150 30 300 20 Z",
+   "fill": "#e8b08a"
+  },
+  "result": "{\"id\":\"l_03jm1\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 193,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Blob mustard",
+   "x": 1380,
+   "y": 50,
+   "w": 400,
+   "h": 400,
+   "d": "M210 10 C320 20 395 110 385 215 C370 320 290 395 190 388 C80 380 10 300 18 190 C25 90 110 0 210 10 Z",
+   "fill": "#f0cb7a"
+  },
+  "result": "{\"id\":\"l_03jm2\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 191,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Blob sage",
+   "x": 1300,
+   "y": 660,
+   "w": 500,
+   "h": 340,
+   "d": "M60 120 C80 30 220 0 330 30 C450 60 500 150 450 240 C400 330 250 345 140 315 C40 290 40 200 60 120 Z",
+   "fill": "#b5bf96"
+  },
+  "result": "{\"id\":\"l_03jm3\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 164,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Blob rust",
+   "x": 40,
+   "y": 780,
+   "w": 300,
+   "h": 260,
+   "d": "M40 90 C70 10 200 -5 260 60 C310 120 270 220 170 245 C70 265 10 170 40 90 Z",
+   "fill": "#d98e6a"
+  },
+  "result": "{\"id\":\"l_03jm4\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 241,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Wheat stem",
+   "x": 150,
+   "y": 200,
+   "w": 240,
+   "h": 640,
+   "d": "M120 620 C110 500 135 390 118 260 C112 200 122 150 120 100 M119 520 C70 500 40 450 36 410 C80 425 110 470 119 520",
+   "fill": "#00000000",
+   "stroke": "#4a3426",
+   "strokeWidth": 7
+  },
+  "result": "{\"id\":\"l_03jm5\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 420,
+  "ok": true,
+  "ms": 13,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Wheat grains",
+   "x": 150,
+   "y": 200,
+   "w": 240,
+   "h": 640,
+   "d": "M118 250 C84 244 62 214 64 182 C98 188 118 216 118 250 Z M120 230 C154 222 176 192 174 160 C140 166 120 196 120 230 Z M118 175 C86 168 66 140 68 108 C100 114 118 142 118 175 Z M121 150 C152 142 174 114 172 84 C140 90 121 118 121 150 Z M120 100 C104 70 106 40 120 14 C134 40 136 70 120 100 Z",
+   "fill": "#00000000",
+   "stroke": "#4a3426",
+   "strokeWidth": 7
+  },
+  "result": "{\"id\":\"l_03jm6\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 284,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Loaf outline",
+   "x": 480,
+   "y": 420,
+   "w": 480,
+   "h": 300,
+   "d": "M40 150 C20 90 80 40 150 36 C250 24 360 30 420 70 C470 100 460 160 430 200 C420 250 400 270 350 272 L130 276 C80 276 60 250 50 215 C40 190 44 170 40 150 Z",
+   "fill": "#00000000",
+   "stroke": "#4a3426",
+   "strokeWidth": 8
+  },
+  "result": "{\"id\":\"l_03jm7\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 227,
+  "ok": true,
+  "ms": 42,
+  "editorMs": 2,
+  "input": {
+   "type": "path",
+   "name": "Loaf scores",
+   "x": 480,
+   "y": 420,
+   "w": 480,
+   "h": 300,
+   "d": "M150 90 C170 120 175 150 160 185 M240 80 C260 115 265 150 250 185 M330 90 C350 120 352 150 340 185",
+   "fill": "#00000000",
+   "stroke": "#4a3426",
+   "strokeWidth": 6
+  },
+  "result": "{\"id\":\"l_03jm8\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 182,
+  "ok": true,
+  "ms": 42,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Title",
+   "x": 1000,
+   "y": 380,
+   "w": 800,
+   "h": 170,
+   "fill": "#4a3426",
+   "text": {
+    "content": "Crumb & Co",
+    "fontSize": 140,
+    "fontWeight": 700,
+    "fontFamily": "Georgia",
+    "align": "left"
+   }
+  },
+  "result": "{\"id\":\"l_03jm9\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 195,
+  "ok": true,
+  "ms": 25,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Tagline",
+   "x": 1005,
+   "y": 560,
+   "w": 700,
+   "h": 60,
+   "fill": "#8a5a3c",
+   "text": {
+    "content": "baked slowly, with love",
+    "fontSize": 44,
+    "fontWeight": 400,
+    "fontFamily": "Georgia",
+    "align": "left"
+   }
+  },
+  "result": "{\"id\":\"l_03jma\"}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 1417,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm1",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": 0
+      },
+      {
+       "t": 1.2,
+       "v": 85,
+       "ease": "Sine Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm1",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        92,
+        92
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3,
+       "v": [
+        104,
+        100
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 6,
+       "v": [
+        92,
+        92
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0.3,
+       "v": 0
+      },
+      {
+       "t": 1.5,
+       "v": 85,
+       "ease": "Sine Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 2.4,
+       "v": [
+        93,
+        98
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 6,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0.5,
+       "v": 0
+      },
+      {
+       "t": 1.7,
+       "v": 80,
+       "ease": "Sine Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        95,
+        100
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 3.4,
+       "v": [
+        106,
+        96
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 6,
+       "v": [
+        95,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 0.7,
+       "v": 0
+      },
+      {
+       "t": 1.9,
+       "v": 75,
+       "ease": "Sine Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 2,
+       "v": [
+        110,
+        104
+       ],
+       "ease": "Sine In Out"
+      },
+      {
+       "t": 6,
+       "v": [
+        100,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "id": "l_03jm5",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 0.4,
+       "v": 0
+      },
+      {
+       "t": 2,
+       "v": 100,
+       "ease": "Quad In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm6",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 1.6,
+       "v": 0
+      },
+      {
+       "t": 3,
+       "v": 100,
+       "ease": "Sine Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 1,
+       "v": 0
+      },
+      {
+       "t": 2.9,
+       "v": 100,
+       "ease": "Quad In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "trimEnd",
+     "keyframes": [
+      {
+       "t": 2.7,
+       "v": 0
+      },
+      {
+       "t": 3.6,
+       "v": 100,
+       "ease": "Sine Out"
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 12 tracks on 8 layers"
+ },
+ {
+  "name": "set_text_animation",
+  "argsBytes": 157,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm9"
+   ],
+   "preset": "Pop letters",
+   "start": 3,
+   "stagger": 0.07,
+   "duration": 0.7,
+   "ease": "spring:0.45",
+   "from": {
+    "dy": 24,
+    "scale": 70,
+    "opacity": 0,
+    "rotation": -6
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_text_animation",
+  "argsBytes": 110,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jma"
+   ],
+   "preset": "Fade up",
+   "by": "word",
+   "start": 3.9,
+   "stagger": 0.18,
+   "duration": 0.7,
+   "ease": "Sine Out"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 129,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm5",
+    "l_03jm6"
+   ],
+   "prop": "position",
+   "expr": "[270 + sin(floor(time*12)*78.2)*2.5, 520 + cos(floor(time*12)*37.7)*2.5]"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 129,
+  "ok": true,
+  "ms": 5,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm7",
+    "l_03jm8"
+   ],
+   "prop": "position",
+   "expr": "[720 + sin(floor(time*12)*51.3)*2.5, 570 + cos(floor(time*12)*23.9)*2.5]"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 108,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm5",
+    "l_03jm6",
+    "l_03jm7",
+    "l_03jm8"
+   ],
+   "prop": "rotation",
+   "expr": "sin(floor(time*12)*12.9898)*0.7"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 35,
+  "ok": true,
+  "ms": 98,
+  "editorMs": 78,
+  "input": {
+   "times": [
+    0.8,
+    1.8,
+    2.8,
+    3.6,
+    4.4,
+    5.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.79s, 1.79s, 2.79s, 3.58s, 4.42s, 5.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/ba7e82d4-64b5-402b-9f2a-5648f028fb56/tool-results/mcp-motion-blob-1794501968446-0kcdga.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm9",
+   "props": {
+    "size": [
+     900,
+     170
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 48,
+  "ok": true,
+  "ms": 19,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jma",
+   "props": {
+    "position": [
+     1350,
+     610
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 9,
+  "ok": true,
+  "ms": 47,
+  "editorMs": 25,
+  "input": {
+   "t": 5.5
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/ba7e82d4-64b5-402b-9f2a-5648f028fb56/tool-results/mcp-motion-blob-1794501972589-96h3im.png]"
+ }
+]

@@ -1,0 +1,6 @@
+Match this reference as closely as you can (described from a frame-by-frame look): 0–1s: white background, a large diagonal band of saturated gradient (violet → coral → orange) skewed about -12°, slowly sliding left the whole time. 0.3–1.2s: headline "Payments infrastructure for the internet" rises in by line (each line slides up 40px from a clip mask, 80ms stagger, Expo Out), dark navy, left-aligned in the left half. 1.0–1.6s: two buttons fade/slide up: a filled indigo pill "Start now" and a text link "Contact sales →". 1.6–3s: three floating UI cards (white, soft shadow, rounded 12px) rise into the right half at different depths and keep bobbing slightly forever. Last 3s: everything subtly alive, no new entrances.
+
+<editor_context>
+comp "Main" 1920x1080 60fps 6s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

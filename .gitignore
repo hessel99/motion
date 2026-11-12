@@ -11,9 +11,15 @@ electron.png
 .claude/worktrees/
 undefined-*.png
 
+# figma paste captures (Save last Figma paste for debugging / MOTION_FIGMA_CAPTURE_DIR): real designs, never commit
+*.figcapture.json
+figma-captures/
+
 # update signing key (scripts/gen-update-key.mjs): never commit
 .update-key/
 
 # figma shader sources fetched for local tests (figma code: never commit)
 .figma-cache/
 bench/results/shaders/
+# agent eval: transcoder intermediates (results are committed, mp4s are kept < 2 MB)
+evals/results/**/*.raw.*

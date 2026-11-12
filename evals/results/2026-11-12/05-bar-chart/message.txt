@@ -1,0 +1,6 @@
+Animated bar chart: "Revenue by quarter" — Q1 12, Q2 18, Q3 15, Q4 27 ($M). Draw the axis line first, then the bars grow up from the baseline one after another, value labels count/fade in above each bar, Q4 bar is highlighted in an accent color with a little extra pop. Title top-left. Clean and readable.
+
+<editor_context>
+comp "Main" 1920x1080 30fps 6s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

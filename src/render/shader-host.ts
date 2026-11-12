@@ -292,9 +292,9 @@ export class ShaderHost {
     const lib = this.store.project.shaders ?? {};
     const seed = hashId(layer.id);
     let fillRT: SlotRT | null = null;
-    if (fill) { const a = lib[fill.ref.shader]; if (a) fillRT = new SlotRT(fill.ref, a, layer, `${layer.id}:${fill.ref.slot}`, seed); }
+    if (fill) { const a = lib[fill.ref.shader] ?? fill.ref.asset; if (a) fillRT = new SlotRT(fill.ref, a, layer, `${layer.id}:${fill.ref.slot}`, seed); }
     const fxRT: SlotRT[] = [];
-    for (const r of fx) { const a = lib[r.shader]; if (a && a.kind === 'effect') fxRT.push(new SlotRT(r, a, layer, `${layer.id}:${r.slot}`, seed)); }
+    for (const r of fx) { const a = lib[r.shader] ?? r.asset; if (a && a.kind === 'effect') fxRT.push(new SlotRT(r, a, layer, `${layer.id}:${r.slot}`, seed)); }
     if (!fillRT && !fxRT.length) { if (prev) this.detach(prev); return null; }
     // keep the results (and the worker instances: frame.state) of the previous compile
     const out: ItemShaders = { fill: fillRT, fillOpacity: fill?.paint.opacity ?? 1, fx: fxRT, f: prev?.f ?? newResult(), e: prev?.e ?? newResult(), frame: prev?.frame ?? null, contentGen: (prev?.contentGen ?? 0) + 1, childSig: 0 };

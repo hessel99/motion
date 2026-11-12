@@ -97,6 +97,14 @@ export interface ShaderRef {
   enabled?: boolean;
   /** free-text string params (not animatable) */
   text?: Record<string, string>;
+  /** import only: the asset travels with the ref until the paste is inserted (see
+   *  import/figma/shaders.ts hoistShaderAssets); lookups fall back to it */
+  asset?: ShaderAsset;
+}
+
+/** the library entry of a ref */
+export function assetOf(project: Project, ref: ShaderRef): ShaderAsset | undefined {
+  return project.shaders?.[ref.shader] ?? ref.asset;
 }
 
 export type ShaderPropKey = `sh:${string}`;
@@ -437,7 +445,7 @@ export function shaderPropInfo(project: Project, layer: Layer, key: string): Sha
   if (!k) return null;
   const r = findRef(layer, k.slot);
   if (!r) return null;
-  const asset = project.shaders?.[r.ref.shader];
+  const asset = assetOf(project, r.ref);
   const def = asset?.params.find(p => p.key === k.param);
   if (!asset || !def) return null;
   const p = propsOf(layer)[key];
@@ -453,7 +461,7 @@ export function shaderPropInfo(project: Project, layer: Layer, key: string): Sha
 export function shaderPropKeys(project: Project, layer: Layer): string[] {
   const out: string[] = [];
   for (const { ref } of shaderRefs(layer)) {
-    const a = project.shaders?.[ref.shader];
+    const a = assetOf(project, ref);
     if (!a) continue;
     for (const d of a.params) out.push(shaderPropKey(ref.slot, d.key));
   }

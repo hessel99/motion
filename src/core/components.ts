@@ -279,6 +279,7 @@ function cloneInto(tx: Tx, P: Project, mainId: string, parent: string | null, R:
   const copy: Layer = clone(main);
   copy.id = uid();
   copy.parent = parent;
+  delete copy.sceneKey; // the instance is not the layer build_scene keyed
   copy.link = isRoot ? { main: mainId, ...(R.dx ? { dx: R.dx } : {}), ...(R.dy ? { dy: R.dy } : {}), ...(R.dt ? { dt: R.dt } : {}) } : { main: mainId };
   for (const f of fieldsOf(main, copy)) {
     const exp = expected(main, f, R, isRoot);

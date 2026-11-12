@@ -1,0 +1,150 @@
+{
+ "run": {
+  "id": "06-loop-bg",
+  "name": "06-loop-bg",
+  "model": "sonnet",
+  "seed": 1,
+  "wallMs": 83412,
+  "timedOut": false,
+  "turns": 66,
+  "costUsd": 0.2274665,
+  "durationMs": 82675,
+  "usage": {
+   "input": 252451,
+   "cached": 233765,
+   "output": 12939
+  },
+  "errors": [],
+  "toolCalls": 65,
+  "toolErrors": 0,
+  "toolsAvailable": 37,
+  "finalText": "Now the dot grid (9 rows, each a path layer with a phase-shifted looping pulse).\nThe loop checks out: the 0s and 6s frames are identical. I've finished the background and I'm done checking it.\n\n**What's in the comp**\n- **Blobs:** four soft orbs, named *Blob Purple*, *Blob Teal*, *Blob Violet* and *Blob Cyan*. Each is a stack of concentric low-opacity circles, which fakes a blur. They drift in slow ellipses, and the two smaller ones also breathe slightly in scale.\n- **Dot grid:** a 16×9 grid of small dots, built as 9 row layers named *Dots Row 1–9*. Each row pulses in opacity between about 8% and 52%. The rows are phase-shifted, so a soft wave ripples down the screen.\n- **Background:** solid `#0b0720`.\n\n**Why it loops:** every motion is a sine or cosine with exactly one cycle per 6 seconds, driven by expressions rather than keyframes. Nothing eases to a stop or jumps at the seam. The 6.0s frame sits just past the end of the comp, so playback goes from 5.97s straight back to 0s.\n\n**Limits and tweaks**\n- The editor has no blur effect, so the soft edges are an approximation. At 100% they look gently banded, and a blur or gradient pass in your final output would smooth them.\n- If you want it calmer, reduce the drift amplitudes (80–140px now) or the dot pulse range."
+ },
+ "metrics": {
+  "layers": 39,
+  "drawableLayers": 35,
+  "layerTypes": {
+   "group": 4,
+   "ellipse": 26,
+   "path": 9
+  },
+  "groups": 4,
+  "animatedLayers": 13,
+  "keys": 0,
+  "segments": 0,
+  "easesUsed": {},
+  "distinctEases": 0,
+  "easeFamilies": 0,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 15,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 9,
+  "gradientLayers": 0,
+  "paletteSize": 12,
+  "palette": [
+   "#7c3aed",
+   "#8b5cf6",
+   "#a78bfa",
+   "#0d9488",
+   "#14b8a6",
+   "#5eead4",
+   "#c026d3",
+   "#d8b4fe",
+   "#0891b2",
+   "#06b6d4",
+   "#67e8f9",
+   "#0b0720"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 6.097,
+  "offCanvasLayers": {
+   "Ellipse": 2.077
+  },
+  "clippedAtEnd": [
+   "Ellipse",
+   "Ellipse",
+   "Ellipse"
+  ],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 0,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [
+   "Ellipse",
+   "Ellipse",
+   "Ellipse",
+   "Ellipse",
+   "Ellipse",
+   "Ellipse",
+   "Ellipse",
+   "Ellipse",
+   "Ellipse",
+   "Ellipse"
+  ],
+  "loopDiff": 0,
+  "midLuma": 0.125,
+  "toolErrors": 0,
+  "toolCalls": 65
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "loops seamlessly (first frame ≈ frame at the loop point)",
+    "type": "loops",
+    "pass": true
+   },
+   {
+    "text": "everything moves (animated coverage ≥90%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 blobs/orbs (ellipses)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "dot grid (≥15 layers)",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "uses loop expressions or matching first/last keys",
+    "type": "loopTechnique",
+    "pass": true
+   },
+   {
+    "text": "purple/teal palette",
+    "type": "hueRange",
+    "pass": true
+   },
+   {
+    "text": "calm: no fast motion",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 7
+ },
+ "video": {
+  "frames": 180,
+  "sourceCodec": "avc1.64001f",
+  "bytes": 110746
+ }
+}

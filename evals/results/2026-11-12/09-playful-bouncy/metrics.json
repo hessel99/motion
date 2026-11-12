@@ -1,0 +1,156 @@
+{
+ "run": {
+  "id": "09-playful-bouncy",
+  "name": "09-playful-bouncy",
+  "model": "sonnet",
+  "seed": 1,
+  "wallMs": 90552,
+  "timedOut": false,
+  "turns": 16,
+  "costUsd": 0.23500970000000002,
+  "durationMs": 89704,
+  "usage": {
+   "input": 93925,
+   "cached": 75037,
+   "output": 15197
+  },
+  "errors": [],
+  "toolCalls": 15,
+  "toolErrors": 0,
+  "toolsAvailable": 37,
+  "finalText": "The \"Boop!\" intro is built, and the contact sheet shows it playing correctly from the shapes dropping in through to the final wiggle. The letters render smaller than I intended. The title should be bigger and more central, and I haven't adjusted it yet.\n\n- **0–2.4s, shapes drop in:** six candy shapes fall in staggered. They are a pink circle, yellow star, blue rounded square, green rounded square, purple star and orange circle. Each stretches as it falls, squashes on landing, bounces three times and tilts as it goes.\n- **2.5–2.85s, jostle:** every shape gets nudged sideways with a springy rotation, as if they bumped each other.\n- **2.3–4.0s, letters:** B, o, o, p and ! launch from below one by one, 0.2s apart. Each stretches on the way up, squashes on landing and settles with a small double bounce.\n- **3.4–5s, idle:** the shapes bob and rock, and the letters sway gently until the end.\n\nI can enlarge the letters, add a pop or sparkle on the \"!\", or make the bounces springier."
+ },
+ "metrics": {
+  "layers": 11,
+  "drawableLayers": 11,
+  "layerTypes": {
+   "ellipse": 2,
+   "path": 2,
+   "rect": 2,
+   "text": 5
+  },
+  "groups": 0,
+  "animatedLayers": 11,
+  "keys": 297,
+  "segments": 242,
+  "easesUsed": {
+   "Quad In": 40,
+   "Quad Out": 66,
+   "Easy Ease": 40,
+   "Spring 0.5": 12,
+   "Sine In Out": 73,
+   "Linear": 11
+  },
+  "distinctEases": 6,
+  "easeFamilies": 5,
+  "overshootSegments": 12,
+  "keyedOvershoots": 23,
+  "springSegments": 12,
+  "holdKeys": 0,
+  "linearSegments": 11,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 9,
+  "palette": [
+   "#ff5fa2",
+   "#ffc800",
+   "#3db5ff",
+   "#4cd97b",
+   "#9b6bff",
+   "#ff8a3d",
+   "#e8a900",
+   "#2dbe62",
+   "#fff1d6"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 5,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 0.67,
+  "offCanvasLayers": {
+   "Pink Circle": 0.134,
+   "Yellow Star": 0.402,
+   "Blue Square": 0.067,
+   "Green Square": 0.067,
+   "Purple Star": 0.067,
+   "Orange Circle": 0.067
+  },
+  "clippedAtEnd": [],
+  "textOverlapTime": 0.402,
+  "textOverlapPairs": {
+   "B × o1": 0.134,
+   "o2 × p": 0.134,
+   "p × !": 0.134
+  },
+  "partialOverlapTime": 1.742,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [
+   "Arial Rounded MT Bold"
+  ],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.05,
+  "midLuma": 0.913,
+  "toolErrors": 0,
+  "toolCalls": 15
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "\"Boop\" present (one layer or letter layers)",
+    "type": "textOrLetters",
+    "pass": true
+   },
+   {
+    "text": "per-letter hop (text animator by char or separate letter layers)",
+    "type": "perLetter",
+    "pass": true
+   },
+   {
+    "text": "springs or Back eases",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "star shapes present",
+    "type": "starShape",
+    "pass": true
+   },
+   {
+    "text": "≥5 candy shapes",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "idle wiggle at the end (motion in the last 0.8s)",
+    "type": "activeAtEnd",
+    "pass": true
+   },
+   {
+    "text": "≥4 colors",
+    "type": "paletteMin",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": {
+  "frames": 300,
+  "sourceCodec": "avc1.640020",
+  "bytes": 129941
+ }
+}

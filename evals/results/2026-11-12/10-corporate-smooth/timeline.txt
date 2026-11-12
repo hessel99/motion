@@ -1,0 +1,19 @@
+- Panel [rect] box 120,800,760,140 #5f7a96 a0.85
+- Accent Line [path] box 120,790,760,4 #6b8cff stroke #a9c4de 3px
+- Name [text] box 156,816,700,58 #f2f6fa "Dr. Amelia Hart" Inter 46px w600
+- Title [text] box 156,880,700,38 #c9d6e3 "Head of Research, Larkspur Labs" Inter 27px w400
+
+comp 1920x1080 6s @30fps, background #18202a
+"Panel" (rect l_03jm1)
+  position: 0.6s [380,870] ─Quart In Out→ 1.8s [500,870] ─Quart In Out→ 5s [500,870] ─Quart In Out→ 5.8s [380,870]
+  opacity: 0.6s 0 ─Sine In Out→ 1.6s 100 ─Easy Ease→ 5s 100 ─Sine In Out→ 5.8s 0
+"Accent Line" (path l_03jm2)
+  opacity: 5.3s 100 ─Sine In Out→ 5.9s 0
+  trimStart: 5s 0 ─Quart In Out→ 5.8s 100
+  trimEnd: 0.2s 0 ─Quart In Out→ 1.4s 100
+"Name" (text l_03jm3)
+  opacity: 5s 100 ─Sine In Out→ 5.6s 0
+  text animator: in by line, start 1.2s, 1s each, stagger 0.08s, ease Quart Out
+"Title" (text l_03jm4)
+  opacity: 5.1s 100 ─Sine In Out→ 5.7s 0
+  text animator: in by line, start 1.5s, 1s each, stagger 0.08s, ease Quart Out

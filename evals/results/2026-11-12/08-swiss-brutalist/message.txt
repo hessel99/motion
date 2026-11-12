@@ -1,0 +1,6 @@
+An animated poster in a strict Swiss / brutalist style for "ZÜRICH TYPE WEEK 2027". Hard grid, huge bold grotesk type, black/white plus one signal red. Motion should be mechanical: hard linear or stepped moves, blocks that wipe in on the grid, no soft bounces, no fades. Rotate one big word 90°. Dates "03—07 MAR" in small caps aligned to the grid.
+
+<editor_context>
+comp "Main" 1080x1350 30fps 6s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

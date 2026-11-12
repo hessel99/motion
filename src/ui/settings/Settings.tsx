@@ -11,7 +11,7 @@ import { prefs, setPref } from '../../app/prefs';
 import { agentClient } from '../../agent/client';
 import { useChannels } from '../hooks';
 import { getThemePref, onThemeChange, setTheme, type ThemePref } from '../theme';
-import { Button, Dialog, Kbd, Segmented } from '../ui';
+import { Button, Dialog, Kbd, Segmented, Select } from '../ui';
 import { SHORTCUTS } from '../chrome/shortcuts';
 import { ui, setUi, type SettingsSection } from '../chrome/ui-state';
 import { agentPrefs, setAgentPref, CLAUDE_MODELS, PROVIDER_LABEL } from '../agent/agent-prefs';
@@ -39,6 +39,7 @@ const NAV: { group: string; items: { id: SettingsSection; label: string; Icon: L
   ] },
   { group: 'App', items: [
     { id: 'updates', label: 'Updates', Icon: Download },
+    { id: 'figma', label: 'Figma import', Icon: Code },
   ] },
 ];
 
@@ -72,6 +73,7 @@ export function SettingsPage() {
           {sec === 'runs' && <AgentRuns />}
           {sec === 'fonts' && <Fonts />}
           {sec === 'updates' && <Updates />}
+          {sec === 'figma' && <FigmaImport />}
           {sec === 'profile' && <Placeholder title="Profile" text="Motion runs on your computer without an account. Your name and avatar for comments will live here." />}
           {sec === 'notifications' && <Placeholder title="Notifications" text="Notifications for finished agent runs and exports are coming." />}
           {sec === 'members' && <Placeholder title="Members" text="Files are local and shared as .motion files for now. Shared workspaces are coming." />}
@@ -285,6 +287,20 @@ function Models() {
           <ModelRow on={on('gemini')} label="Gemini" sub="Gemini CLI" available={prov('gemini')?.available} onPick={() => pick('gemini')} />
         </div>
       </Card>
+      <Card title="Directing" sub="How the agent runs bigger briefs.">
+        <Row label="Auto model · full pieces" sub="With Claude · Auto: used for storyboards, styles and multi-beat briefs.">
+          <Select size="sm" aria-label="Model for full pieces" value={agentPrefs.autoFull} onChange={v => setAgentPref('autoFull', v)} options={CLAUDE_MODELS.filter(m => m.id !== 'auto').map(m => ({ value: m.id, label: m.id ? m.label : 'CLI default' }))} />
+        </Row>
+        <Row label="Auto model · edits" sub="With Claude · Auto: used for quick actions, edits and small builds.">
+          <Select size="sm" aria-label="Model for edits" value={agentPrefs.autoQuick} onChange={v => setAgentPref('autoQuick', v)} options={CLAUDE_MODELS.filter(m => m.id !== 'auto').map(m => ({ value: m.id, label: m.id ? m.label : 'CLI default' }))} />
+        </Row>
+        <Row label="Storyboards" sub="For full pieces the agent first proposes beats you can edit.">
+          <Select size="sm" aria-label="Storyboard approval" value={agentPrefs.storyboard} onChange={v => setAgentPref('storyboard', v === 'auto' ? 'auto' : 'ask')} options={[{ value: 'ask', label: 'Wait for my approval' }, { value: 'auto', label: 'Build right away' }]} />
+        </Row>
+        <Row label="Turn budget" sub="Max tool round trips per message (empty = 90). Say “continue” when it runs out.">
+          <input class="input input-sm" type="number" min="5" max="500" step="5" style={{ width: '72px' }} aria-label="Turn budget" placeholder="90" value={agentPrefs.turns} onChange={e => setAgentPref('turns', (e.target as HTMLInputElement).value.replace(/[^\d]/g, ''))} />
+        </Row>
+      </Card>
       <Card title="Default mode">
         <Row label="Edit" sub="The agent changes your file. Every run can be reviewed and undone in one click.">
           <input type="radio" name="agent-mode" aria-label="Edit" checked={agentPrefs.mode === 'edit'} onChange={() => setAgentPref('mode', 'edit')} />
@@ -340,6 +356,18 @@ function Fonts() {
     <Card title="Fonts in this file" sub="Text layers use fonts installed on this computer, or fonts embedded when a design was pasted.">
       {[...used].map(([f, n]) => <Row icon={<ALargeSmall />} label={<span style={{ fontFamily: f }}>{f}</span>} sub={`${n} text layer${n === 1 ? '' : 's'}`} />)}
       {!used.size && <div class="set-empty muted">No text layers yet.</div>}
+    </Card>
+  );
+}
+
+// ---------------- figma import ----------------
+function FigmaImport() {
+  return (
+    <Card title="Debugging Figma pastes" sub="When a paste from Figma does not look right, save it and attach the file to a bug report. The file holds the clipboard data (your design) and how Motion decoded it.">
+      <Row icon={<Download />} label="Save last Figma paste…" sub="Raw clipboard payload plus the decoded layer tree, as one .json file.">
+        <Button onClick={() => { import('../../app/figma-capture').then(m => m.saveLastFigmaPaste()).catch(err => toast(String(err), 'error')); }}>Save…</Button>
+      </Row>
+      <div class="set-empty muted">Developers: start the app with MOTION_FIGMA_CAPTURE_DIR=/folder (desktop) or VITE_FIGMA_CAPTURE_DIR=/folder (npm run dev) to save every paste automatically.</div>
     </Card>
   );
 }

@@ -228,3 +228,35 @@ describe.skipIf(!cached.length)('figma shader library (local cache)', () => {
     }
   });
 });
+
+describe('figma paste: shader paints and effects', () => {
+  it('embeds the shader, its params become props, the asset is hoisted into the library', async () => {
+    const { figmaMessageToLayers } = await import('../src/import/figma/convert');
+    const sh = await import('../src/import/figma/shaders');
+    const g = (localID: number) => ({ sessionID: 1, localID });
+    const tr = { m00: 1, m01: 0, m02: 10, m10: 0, m11: 1, m12: 20 };
+    const nodes: any[] = [
+      { guid: g(0), type: 'DOCUMENT' }, { guid: g(1), type: 'CANVAS', parentIndex: { guid: g(0), position: '!' } },
+      {
+        guid: g(2), type: 'RECTANGLE', name: 'R', parentIndex: { guid: g(1), position: '!' }, size: { x: 100, y: 50 }, transform: tr,
+        fillPaints: [{ type: 'SHADER', visible: true, opacity: 0.5, shaderData: { shaderId: '78022e92-625e-4131-af68-e527f73488a5', name: 'Test stripes', version: 'a'.repeat(40), files: [{ filename: 'main.ts', source: TEST_FILL_MAIN }, { filename: 'features.json', source: TEST_FILL_FEATURES }], params: JSON.stringify({ speed: 2, transform: { x: 10, y: 20, radius: 5, angle: 30 } }) } }],
+        effects: [{ type: 'SHADER', visible: true, shader: { id: '163623c4-6aee-413a-9123-4906ad38e9f7', code: TEST_EFFECT_MAIN }, propertyValues: [{ name: 'amount', value: 30 }] }],
+      },
+    ];
+    const r = figmaMessageToLayers({ type: 'NODE_CHANGES', nodeChanges: nodes, blobs: [] }, { shaders: { convertShaderPaint: sh.convertShaderPaint, convertShaderEffect: sh.convertShaderEffect } });
+    const l = r.layers[0];
+    expect(l.paints!.map(p => p.type)).toEqual(['shader']);
+    expect(l.paints![0].opacity).toBe(0.5);
+    expect(l.shaderEffects!.map(x => x.slot)).toEqual(['e0']);
+    expect(l.props['sh:f0:speed' as PropKey]!.v).toEqual([2]);
+    expect(l.props['sh:f0:transform' as PropKey]!.v).toEqual([10, 20, 5, 30]);
+    expect(l.props['sh:e0:amount' as PropKey]!.v).toEqual([30]);
+    // paste into a store: assets move to project.shaders
+    const s = new Store();
+    s.transact('paste', tx => { for (const x of r.layers) tx.set(s.project.layers, x.id, x); tx.structure(); });
+    sh.hoistShaderAssets(s, r.layers.map(x => x.id));
+    expect(Object.keys(s.project.shaders!).sort()).toEqual(['163623c4-6aee-413a-9123-4906ad38e9f7', '78022e92-625e-4131-af68-e527f73488a5@aaaaaaaaaaaa']);
+    expect(l.paints![0].shader!.asset).toBeUndefined();
+    expect(s.project.shaders!['163623c4-6aee-413a-9123-4906ad38e9f7'].files['main.ts']).toBe(TEST_EFFECT_MAIN);
+  });
+});

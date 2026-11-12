@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 8,
+  "style_match": 6,
+  "timing_easing": 6,
+  "composition": 7,
+  "richness": 5,
+  "polish": 5
+ },
+ "overall": 6.17,
+ "critique": [
+  "Mid-toggle reads poorly: at 0.52s the knob is stretched to 126/88, a flat egg rather than a subtle squash, while the 0.4–0.8s opacity crossfade of green over grey produces a muddy grey-green track. On top of that, the checkmark's trim keys don't render, so it only fades in instead of drawing on.",
+  "Reduce the stretch to about 112/92 and switch the knob travel to a spring or Back-out ease so the overshoot has life. Replace the opacity crossfade with a direct fill-color key from #d1d1d6 to #34c759, and fix the Check path so its trimEnd draw-on actually renders, with a small scale pop at the end."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0575398,
+ "ms": 13048,
+ "raw": "```json\n{\"brief_fit\": 8, \"style_match\": 6, \"timing_easing\": 6, \"composition\": 7, \"richness\": 5, \"polish\": 5,\n \"critique\": [\"Mid-toggle reads poorly: at 0.52s the knob is stretched to 126/88, a flat egg rather than a subtle squash, while the 0.4–0.8s opacity crossfade of green over grey produces a muddy grey-green track. On top of that, the checkmark's trim keys don't render, so it only fades in instead of drawing on.\", \"Reduce the stretch to about 112/92 and switch the knob travel to a spring or Back-out ease so the overshoot has life. Replace the opacity crossfade with a direct fill-color key from #d1d1d6 to #34c759, and fix the Check path so its trimEnd draw-on actually renders, with a small scale pop at the end.\"]}\n```"
+}

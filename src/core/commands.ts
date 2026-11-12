@@ -99,6 +99,7 @@ export function cloneLayers(store: Store, ids: string[], offset = 0) {
     const copy: Layer = JSON.parse(JSON.stringify(src));
     copy.id = uid();
     copy.parent = parent;
+    delete copy.sceneKey; // a copy is not the layer build_scene keyed
     map.set(copy.id, copy);
     copy.children = src.children.map(c => cloneRec(c, copy.id).id);
     return copy;

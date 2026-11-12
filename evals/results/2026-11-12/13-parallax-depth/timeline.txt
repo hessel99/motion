@@ -1,0 +1,40 @@
+- Sky [rect] box -75,-49,2071,1177 #f0cdb8
+- Sky Top [rect] box -75,-44,2071,568 #8ea4cf a0.25
+- Sun Glow [ellipse] box 1453,150,360,360 #fff1d6
+- Far Mountains [path] box -185,374,2255,513 #bcc6dc
+- Haze Far [ellipse] box -330,533,2520,315 #f6e4d8
+- Mid Hills [path] box -357,547,2544,477 #8aa0b4
+- Title [text] box 95,336,1590,159 #fff6ec "Into the Quiet" Inter 130px w300
+- Haze Near [ellipse] box -560,687,2860,286 #dfe6ea
+- Near Trees [path] box -578,591,2886,577 #33505a
+- Foreground Grass [path] box -935,806,3430,368 #14262a
+
+comp 1920x1080 8s @30fps, background #121214
+"Sky" (rect l_03jm1)
+  scale: 0s 100 ─Easy Ease→ 8s 103
+"Sky Top" (rect l_03jm2)
+  scale: 0s 100 ─Easy Ease→ 8s 103
+"Sun Glow" (ellipse l_03jm3)
+  position: 0s [1640,330] ─Easy Ease→ 8s [1625,330]
+"Far Mountains" (path l_03jm4)
+  position: 0s [960,630] ─Easy Ease→ 8s [925,630]
+  scale: 0s 100 ─Easy Ease→ 8s 105
+"Haze Far" (ellipse l_03jm5)
+  position: 0s [960,690] ─Easy Ease→ 8s [900,690]
+  scale: 0s 100 ─Easy Ease→ 8s 110
+"Mid Hills" (path l_03jm6)
+  position: 0s [960,785] ─Easy Ease→ 8s [870,785]
+  scale: 0s 100 ─Easy Ease→ 8s 112
+"Title" (text l_03jm7)
+  position: 0s [960,415] ─Easy Ease→ 8s [820,415]
+  scale: 0s 96 ─Easy Ease→ 8s 116
+  opacity: 2.5s 0 ─Easy Ease→ 4.2s 100
+"Haze Near" (ellipse l_03jm8)
+  position: 0s [960,830] ─Easy Ease→ 8s [780,830]
+  scale: 0s 100 ─Easy Ease→ 8s 120
+"Near Trees" (path l_03jm9)
+  position: 0s [960,880] ─Easy Ease→ 8s [770,880]
+  scale: 0s 100 ─Easy Ease→ 8s 122
+"Foreground Grass" (path l_03jma)
+  position: 0s [960,990] ─Easy Ease→ 8s [600,990]
+  scale: 0s 100 ─Easy Ease→ 8s 145

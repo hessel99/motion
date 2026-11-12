@@ -4,6 +4,7 @@
 // prints the same stream-json lines Claude Code does, so the whole pipeline runs without
 // spending a subscription. Behaviour is picked from the prompt:
 //   "variations" → builds 3 variations;  "Ask mode"/"Critique" → read-only look + a refused edit;
+//   "storyboard" → director flow (propose, then build the approved plan with update_progress);
 //   "fail auth" → auth error;  "slow" → waits (for cancel tests);  otherwise builds two shapes.
 const args = process.argv.slice(2);
 if (args.includes('--version')) { console.log('0.0.0 (fake claude for tests)'); process.exit(0); }
@@ -41,6 +42,30 @@ process.stdin.on('end', async () => {
     await tool('contact_sheet', { frames: 6 });
     const r = await tool('add_layer', { type: 'rect', name: 'Should be refused' });
     say(`Critique:\n1. **Timing**: the entrance is a bit slow.\n2. Stagger the shapes by ~80ms.\n3. Use \`Back Out\` for the pop.\n(edit attempt refused: ${r.isError})`);
+  } else if (/Storyboard approved/.test(prompt)) {
+    // director flow, part 2: build the approved (maybe edited) plan beat by beat
+    const plan = JSON.parse(prompt.match(/<storyboard>(.*?)<\/storyboard>/s)[1]);
+    for (const [i, b] of plan.beats.entries()) {
+      await tool('update_progress', { beat: i + 1, status: 'active' });
+      const id = JSON.parse((await tool('add_layer', { type: 'rect', name: b.name, x: 260 + i * 520, y: 420, w: 240, h: 240, fill: '#E30613' })).text).id;
+      await tool('animate', { tracks: [{ id, prop: 'scale', keyframes: [{ t: b.start, v: 0, ease: 'Expo Out' }, { t: b.start + 0.5, v: 100 }] }, { id, prop: 'rotation', keyframes: [{ t: b.start, v: -20, ease: 'Expo Out' }, { t: b.start + 0.5, v: 0 }] }] });
+      await tool('update_progress', { beat: i + 1, status: 'done', note: 'block + timing' });
+    }
+    await tool('contact_sheet', { frames: 6 });
+    say(`Built **${plan.title}** (concept: ${plan.concept ?? 'none'}${/instead of your recommendation/.test(prompt) ? ', switched' : ''}): ${plan.beats.map((b) => b.name).join(', ')}.`);
+  } else if (/storyboard/i.test(prompt)) {
+    // director flow, part 1: load a style, propose the plan, wait for approval
+    await tool('get_guide', { name: 'styles/swiss' });
+    const r = await tool('propose_storyboard', { title: 'Launch teaser', style: 'Swiss / International', styleReason: 'grid-strict, confident', duration: 6, beats: [
+      { name: 'Hook', start: 0, end: 2, description: 'Red bar wipes in', style: 'Expo Out' },
+      { name: 'Reveal', start: 2, end: 4, description: 'Logo lands on the grid' },
+      { name: 'End card', start: 4, end: 6, description: 'URL types on; hold' },
+    ], recommended: 0, concepts: [
+      { name: 'Grid assembles', idea: 'the week grid wipes in, meetings drop into it', why: 'a calendar is a grid' },
+      { name: 'Orbit path', idea: 'a dot orbits and leaves the days behind', why: 'the name Orbit' },
+      { name: 'Pages flip', idea: 'week pages flip to a calm one' },
+    ] });
+    say(`Storyboard ready (style prefix: ${/\[Style: Swiss/.test(prompt)}; wait: ${/Wait for approval/.test(r.text)}) — approve or edit it.`);
   } else if (/variations/.test(prompt)) {
     const ids = ctxIds.length ? ctxIds : [JSON.parse((await tool('add_layer', { type: 'rect', name: 'Card', x: 860, y: 440, w: 200, h: 200, fill: '#4c8dff', radius: 24 })).text).id];
     const looks = [['A · Snappy', 'Expo Out', 0.4], ['B · Bouncy', 'spring Bouncy', 0.8], ['C · Elegant', 'Sine In Out', 1.2]];

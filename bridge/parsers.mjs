@@ -88,7 +88,8 @@ export function parseClaudeLine(obj, state = {}) {
       emitSession(state, obj.session_id, out);
       if (obj.is_error || (obj.subtype && obj.subtype !== 'success')) {
         const msg = typeof obj.result === 'string' && obj.result ? obj.result : (obj.errors?.join?.('\n') || obj.subtype || 'claude reported an error');
-        out.push({ kind: 'error', message: msg });
+        if (obj.subtype === 'error_max_turns') { out.push({ kind: 'error', message: `Reached the turn budget (error_max_turns, ${obj.num_turns ?? '?'} turns).` }); }
+        else out.push({ kind: 'error', message: msg });
       }
       out.push({
         kind: 'done',

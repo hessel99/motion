@@ -1,0 +1,65 @@
+{
+  "id": "13-parallax-depth",
+  "title": "3D-ish parallax depth",
+  "complexity": "complex",
+  "style": [
+    "parallax",
+    "depth",
+    "landscape"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration": 8
+  },
+  "prompt": "A 3D-feeling parallax shot: a stylised mountain landscape in 5 depth layers (sky gradient, far mountains, mid hills, near trees, foreground grass) with a slow camera push and pan to the right. Farther layers move less and scale less than near ones; add atmospheric haze (lighter, lower-contrast far layers). A title \"Into the Quiet\" fades in mid-shot at a depth between the hills and trees.",
+  "checklist": [
+    {
+      "text": "title present",
+      "check": {
+        "type": "textContains",
+        "text": "Quiet"
+      }
+    },
+    {
+      "text": "≥5 depth layers",
+      "check": {
+        "type": "layersMin",
+        "min": 5
+      }
+    },
+    {
+      "text": "parallax: ≥3 layers moving at clearly different speeds",
+      "check": {
+        "type": "parallax",
+        "min": 3
+      }
+    },
+    {
+      "text": "camera push (scale animated on ≥2 layers)",
+      "check": {
+        "type": "propAnimatedMin",
+        "prop": "scale",
+        "min": 2
+      }
+    },
+    {
+      "text": "custom path shapes for mountains/hills (≥2)",
+      "check": {
+        "type": "pathLayersMin",
+        "min": 2
+      }
+    },
+    {
+      "text": "gradient sky or haze (gradient paint or translucent layers)",
+      "check": {
+        "type": "gradientOrHaze"
+      }
+    },
+    {
+      "text": "title sits between hills and trees in the layer order",
+      "check": null
+    }
+  ]
+}

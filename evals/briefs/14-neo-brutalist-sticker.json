@@ -1,0 +1,70 @@
+{
+  "id": "14-neo-brutalist-sticker",
+  "title": "Neo-brutalist sticker pop",
+  "complexity": "medium",
+  "style": [
+    "neo-brutalist",
+    "sticker",
+    "bold"
+  ],
+  "comp": {
+    "width": 1080,
+    "height": 1080,
+    "fps": 30,
+    "duration": 5
+  },
+  "prompt": "Neo-brutalist social post for a \"SUMMER SALE -40%\". Flat saturated colors (acid yellow, hot pink, cobalt), thick black outlines and hard offset drop shadows (a black copy offset 12px down-right), stickers and badges that slap on with a quick rotation snap and overshoot, slightly tilted. A starburst badge with \"-40%\" spins in last. Punchy, loud, fun.",
+  "checklist": [
+    {
+      "text": "sale text present",
+      "check": {
+        "type": "textContains",
+        "text": "SALE"
+      }
+    },
+    {
+      "text": "\"-40%\" present",
+      "check": {
+        "type": "textContains",
+        "text": "40%"
+      }
+    },
+    {
+      "text": "thick black outlines (black stroke, width ≥4)",
+      "check": {
+        "type": "thickOutline"
+      }
+    },
+    {
+      "text": "hard offset shadows (black copy offset)",
+      "check": {
+        "type": "offsetShadow"
+      }
+    },
+    {
+      "text": "rotation snap on entrance",
+      "check": {
+        "type": "propAnimated",
+        "prop": "rotation"
+      }
+    },
+    {
+      "text": "overshoot on entrances",
+      "check": {
+        "type": "overshoot"
+      }
+    },
+    {
+      "text": "starburst badge (star shape or path)",
+      "check": {
+        "type": "starShape"
+      }
+    },
+    {
+      "text": "tilted elements at rest",
+      "check": {
+        "type": "tiltedAtEnd"
+      }
+    }
+  ]
+}
