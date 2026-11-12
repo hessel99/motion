@@ -8,6 +8,7 @@ import {
   setInstanceVariant, setPlay, setRanges,
 } from '../core/motion-components';
 import { newComposition } from '../core/commands';
+import { promoteToMotionComponent } from '../core/figma-components';
 import type { ExposedValue, Layer, PlaySpec } from '../core/model';
 import { idsSchema, need, parseColor, st, text, type ToolDef } from './tool-kit';
 
@@ -66,12 +67,18 @@ export const COMPONENT_TOOLS: ToolDef[] = [
   },
   {
     name: 'make_component',
-    description: 'Turn top-level layers of the active composition (a logo sting, lower third, title card, end card, transition) into a reusable ANIMATED component: they move into their own composition with their animation, and one instance takes their place. Named parts in / hold / out are found when the animation rests in the middle. Then expose_property for what changes per use (text, colors, logo).',
+    description: 'Turn top-level layers of the active composition (a logo sting, lower third, title card, end card, transition) into a reusable ANIMATED component: they move into their own composition with their animation, and one instance takes their place. Named parts in / hold / out are found when the animation rests in the middle. Then expose_property for what changes per use (text, colors, logo). Passing the main of a linked-copy component (e.g. one pasted from Figma) promotes it: its Figma properties and component-set variants come along, its instances stay.',
     inputSchema: { type: 'object', properties: { ids: { ...idsSchema, description: 'top-level layers (default: the selection)' }, name: { type: 'string' } }, required: ['name'] },
     run: ({ ids, name }) => {
       const s = st();
       const list: string[] = ids?.length ? ids : s.selection;
       list.forEach(need);
+      // a linked-copy component (e.g. pasted from figma): promote it, keeping its instances and properties
+      if (list.length === 1 && s.project.components?.[list[0]]) {
+        const c = promoteToMotionComponent(s, list[0]);
+        if (name) s.transact('Rename component', tx => { tx.set(c, 'name', name); tx.comp(); });
+        return text({ component: describeComponent(s.project, c), note: 'promoted from a linked-copy component: its instances are now instances of this one' });
+      }
       const { comp, layer } = makeComponent(s, list, { name });
       return text({ component: describeComponent(s.project, comp), instance: layer.id, note: 'the layers now live in the component composition; edit them there (open_composition) and every instance follows' });
     },
