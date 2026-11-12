@@ -92,6 +92,52 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   const tool = await ev(() => editor.tool);
   check('MD-13: Shift+R / Shift+T on a selection do not switch tools', tool === 'select', tool);
 
+  // a full-bleed frame (a group with a fill, like a pasted figma frame) with a ring + a star inside
+  const scene = await ev(async () => {
+    const c = await import('/src/core/commands.ts');
+    const s = editor.store;
+    for (const id of s.comp.root.slice()) c.deleteLayers(s, [id]);
+    s.setTime(0);
+    const W = s.comp.width, H = s.comp.height;
+    const ring = c.addLayer(s, 'ellipse', { x: W / 2 - 300, y: H / 2 - 300, w: 600, h: 600, name: 'Ring', color: [0.9, 0.5, 0.2, 1] });
+    const star = c.addLayer(s, 'rect', { x: W / 2 - 60, y: H / 2 - 60, w: 120, h: 120, name: 'Star', color: [1, 1, 1, 1] });
+    const word = c.addLayer(s, 'rect', { x: W / 2 + 400, y: H / 2 - 40, w: 300, h: 80, name: 'Word', color: [1, 1, 1, 1] });
+    const gr = c.groupLayers(s, [ring.id, star.id, word.id], { x: 0, y: 0, w: W, h: H }); const g = gr?.id ?? gr;
+    c.renameLayer?.(s, g, 'Frame');
+    c.setProp(s, g, 'fill', [0.1, 0.12, 0.2, 1]);
+    s.select([]);
+    editor.renderer.render(s.time);
+    return { ring: ring.id, star: star.id, word: word.id, frame: g, W, H };
+  });
+  await page.waitForTimeout(200);
+  const vpb = await page.locator('.viewport').boundingBox();
+  const scr = async (x, y) => { const [sx, sy] = await ev(([x, y]) => viewport.toScreen(x, y), [x, y]); return [vpb.x + sx, vpb.y + sy]; };
+  const sel = () => ev(() => editor.store.selection.slice());
+  const pos = id => ev(id => editor.store.layer(id).props.position?.v.slice(), id);
+  // MD-04: with the star selected, a press on the ring just outside the star's corner selects the
+  // ring (no rotation); outside every other layer the corner zone still rotates
+  await ev(id => editor.store.select([id]), scene.star);
+  await page.waitForTimeout(50);
+  const corner = await ev(id => { const c = editor.renderer.corners(id); return [c[6], c[7]]; }, scene.star); // bottom-left (the selection bar sits above)
+  let p = await scr(corner[0], corner[1]);
+  const off = 14; // screen px, inside the rotation ring
+  const cur = await (async () => { await page.mouse.move(p[0] - off, p[1] + off); await page.waitForTimeout(50); return ev(() => document.querySelector('.viewport').style.cursor); })();
+  check('MD-04: no rotate cursor over a neighbouring layer', cur !== 'alias', cur);
+  await page.mouse.down(); await page.mouse.move(p[0] - off + 30, p[1] + off + 30, { steps: 5 }); await page.mouse.up();
+  const rot = await ev(id => editor.store.layer(id).props.rotation?.v[0] ?? 0, scene.star);
+  check('MD-04: pressing next to the corner over another layer does not rotate', rot === 0, String(rot));
+  check('MD-04: ... it selects that layer', JSON.stringify(await sel()) === JSON.stringify([scene.ring]), JSON.stringify(await ev(() => editor.store.selection.map(id => editor.store.layer(id).name))));
+  await ev(() => { for (let i = 0; i < 3; i++) editor.store.undo(); });
+  // the word sits over the frame background only: its corner zone rotates
+  await ev(id => editor.store.select([id]), scene.word);
+  const wc = await ev(id => { const c = editor.renderer.corners(id); return [c[2], c[3]]; }, scene.word);
+  p = await scr(wc[0], wc[1]);
+  await page.mouse.move(p[0] + off, p[1] - off); await page.waitForTimeout(50);
+  check('MD-04: rotate cursor outside other layers (over the frame background)', await ev(() => document.querySelector('.viewport').style.cursor) === 'alias');
+  await page.mouse.down(); await page.mouse.move(p[0] + off + 30, p[1] + 20, { steps: 5 }); await page.mouse.up();
+  const rot2 = await ev(id => editor.store.layer(id).props.rotation?.v[0] ?? 0, scene.word);
+  check('MD-04: the corner zone rotates there', Math.abs(rot2) > 1, String(rot2));
+
   check('MD: no page errors', errors.length === 0, JSON.stringify(errors.slice(0, 5)));
   await ctx.close();
 }

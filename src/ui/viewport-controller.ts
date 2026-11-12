@@ -234,13 +234,30 @@ export class ViewportController {
       const [hx, hy] = pts[i];
       if (Math.abs(hx - x) <= HANDLE && Math.abs(hy - y) <= HANDLE) return { id, handle: i };
     }
-    // rotation zone: just outside corners
+    // rotation zone: just outside corners, unless another layer is under the pointer (MD-04: a
+    // click there selects / moves that layer, like figma)
     for (let i = 0; i < 4; i++) {
       const [hx, hy] = pts[i * 2];
       const d = Math.hypot(hx - x, hy - y);
-      if (d > HANDLE && d < HANDLE * 3) return { id, handle: 100 + i };
+      if (d > HANDLE && d < HANDLE * 3) return this.otherLayerAt(x, y, id) ? null : { id, handle: 100 + i };
     }
     return null;
+  }
+
+  /** is a layer other than `id` (its own subtree, its ancestors and full-bleed backdrops don't
+   *  count) under the screen point? */
+  private otherLayerAt(x: number, y: number, id: string) {
+    const st = this.ed.store;
+    const [cx, cy] = this.toComp(x, y);
+    const hit = this.ed.renderer.hitTest(cx, cy);
+    if (!hit || hit === id || st.isAncestor(id, hit) || st.isAncestor(hit, id)) return false;
+    return !this.isBackdrop(hit);
+  }
+
+  /** a layer that covers the whole comp (a frame background, a bg rect): containers, not targets */
+  private isBackdrop(id: string) {
+    const b = this.boundsOf([id]), c = this.ed.store.comp;
+    return !!b && b[0] <= 0.5 && b[1] <= 0.5 && b[2] >= c.width - 0.5 && b[3] >= c.height - 0.5;
   }
 
   /** motion path: keyframes + spatial tangent handles of selected layers (screen space) */
