@@ -26,6 +26,7 @@ import { st, text, colorSchema, propValueSchema, easeSchema, keyframeSchema, ids
 export { parseColor, boundsOf } from './tool-kit';
 import { SCENE_TOOLS } from './tools-scene';
 import { SHAPE_TOOLS } from './tools-shapes';
+import { MOTION_TOOLS } from './tools-motion';
 
 function summarize(l: Layer, deep: boolean): any {
   const t = st().time;
@@ -640,6 +641,7 @@ export const TOOLS: ToolDef[] = [
   ...STYLE_TOOLS,
   ...SCENE_TOOLS,
   ...SHAPE_TOOLS,
+  ...MOTION_TOOLS,
 ];
 
 export const AGENT_SYSTEM_PROMPT = `You are working inside "Motion", a motion design editor (like After Effects / Figma Motion).

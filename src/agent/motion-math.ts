@@ -5,7 +5,7 @@
 import type { Store } from '../core/store';
 import { valueAt } from '../core/commands';
 import { compileExpr, evalExpr, EXPR_PROPS } from '../core/expr';
-import { PROP_DEFS, type Layer, type PropKey } from '../core/model';
+import { PROP_DEFS, type Layer, type PathCmd, type PropKey } from '../core/model';
 import { layoutText, textUnits, type TextUnit } from '../render/raster';
 
 export type Mat = number[];
@@ -149,3 +149,42 @@ export function over(a: number[], b: number[]): number[] {
 
 export const r2 = (x: number) => Math.round(x * 100) / 100;
 export const r0 = (x: number) => Math.round(x);
+
+/** evenly spaced points (by arc length) along path commands, with the tangent angle in degrees */
+export function samplePath(cmds: PathCmd[], n: number, tol = 0.5): { x: number; y: number; angle: number }[] {
+  // flatten, keeping open subpaths open
+  const pts: number[][] = [];
+  let x = 0, y = 0, sx = 0, sy = 0;
+  for (const c of cmds) {
+    if (c[0] === 'M') { x = sx = c[1]; y = sy = c[2]; pts.push([x, y]); }
+    else if (c[0] === 'L') { x = c[1]; y = c[2]; pts.push([x, y]); }
+    else if (c[0] === 'Z') { x = sx; y = sy; pts.push([x, y]); }
+    else {
+      const [x1, y1, x2, y2, x3, y3] = c[0] === 'C' ? [c[1], c[2], c[3], c[4], c[5], c[6]] : [x + 2 / 3 * (c[1] - x), y + 2 / 3 * (c[2] - y), c[3] + 2 / 3 * (c[1] - c[3]), c[4] + 2 / 3 * (c[2] - c[4]), c[3], c[4]];
+      const len = Math.hypot(x1 - x, y1 - y) + Math.hypot(x2 - x1, y2 - y1) + Math.hypot(x3 - x2, y3 - y2);
+      const k = Math.max(2, Math.min(200, Math.ceil(len / (tol * 8))));
+      for (let i = 1; i <= k; i++) { const t = i / k, u = 1 - t; pts.push([u * u * u * x + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t * t * t * x3, u * u * u * y + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * y3]); }
+      x = x3; y = y3;
+    }
+  }
+  if (pts.length < 2) throw new Error('the path needs at least two points');
+  const acc = [0];
+  for (let i = 1; i < pts.length; i++) acc.push(acc[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const total = acc[acc.length - 1];
+  const closed = Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 1e-6;
+  const out: { x: number; y: number; angle: number }[] = [];
+  let j = 1;
+  for (let i = 0; i < n; i++) {
+    const d = n === 1 ? total / 2 : total * i / (closed ? n : n - 1);
+    while (j < acc.length - 1 && acc[j] < d) j++;
+    const a = pts[j - 1], b = pts[j], seg = acc[j] - acc[j - 1] || 1, f = Math.min(1, Math.max(0, (d - acc[j - 1]) / seg));
+    out.push({ x: a[0] + (b[0] - a[0]) * f, y: a[1] + (b[1] - a[1]) * f, angle: Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI });
+  }
+  return out;
+}
+
+/** comp-space center of a layer's box at t */
+export function centerOf(store: Store, l: Layer, t: number): [number, number] {
+  const b = worldBox(store, l, t);
+  return [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2];
+}
