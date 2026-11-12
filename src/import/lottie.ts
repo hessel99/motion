@@ -13,6 +13,7 @@ import { createLayer, uid, type Asset, type Composition, type Keyframe, type Lay
 import { evalProp } from '../core/evaluate';
 import { cubicBezier } from '../core/easing';
 import { compileExpr } from '../core/expr';
+import { booleanMany, flattenCmds, ringsToCmds, type BoolOp } from './pathops';
 
 // ======================================================================================
 // prop helpers
@@ -110,13 +111,16 @@ export function identityTR(opacity?: Prop): TR {
 }
 
 export type ShapeNode =
-  | { kind: 'group'; name: string; tr: TR; items: ShapeNode[] }
+  /** isolate: paints / modifiers outside the group do not reach in (paths consumed by a merge paths keep only their own paints) */
+  | { kind: 'group'; name: string; tr: TR; items: ShapeNode[]; isolate?: boolean }
   | { kind: 'rect'; name: string; size: Prop; position: Prop; roundness: Prop }
   | { kind: 'ellipse'; name: string; size: Prop; position: Prop }
   | { kind: 'path'; name: string; cmds: PathCmd[]; keys?: PathAnimKey[] }
   | { kind: 'fill'; name: string; color: Prop; opacity: Prop; rule: 'nonzero' | 'evenodd' }
   | { kind: 'stroke'; name: string; color: Prop; opacity: Prop; width: Prop }
   | { kind: 'gfill'; name: string; gtype: 'linear' | 'radial'; stops: { pos: number; color: [number, number, number, number] }[]; start: number[]; end: number[]; opacity: Prop; rule: 'nonzero' | 'evenodd' }
+  /** gradient stroke: built as a stroke-only mask path under a gradient-filled box */
+  | { kind: 'gstroke'; name: string; gtype: 'linear' | 'radial'; stops: { pos: number; color: [number, number, number, number] }[]; start: number[]; end: number[]; opacity: Prop; width: Prop }
   /** trim paths modifier: applies to the primitives above it (same group and nested groups), like paints */
   | { kind: 'trim'; name: string; start: Prop; end: Prop; offset: Prop };
 
@@ -126,7 +130,7 @@ export interface PathAnimKey { t: number; cmds: PathCmd[]; interp: Keyframe['int
 /** a path source: static commands, optionally animated by keys (keys[0].cmds == cmds) */
 export interface PathSrc { cmds: PathCmd[]; keys?: PathAnimKey[] }
 
-type PaintNode = Extract<ShapeNode, { kind: 'fill' | 'stroke' | 'gfill' }>;
+type PaintNode = Extract<ShapeNode, { kind: 'fill' | 'stroke' | 'gfill' | 'gstroke' }>;
 type TrimNode = Extract<ShapeNode, { kind: 'trim' }>;
 type ModNode = PaintNode | TrimNode;
 type PrimNode = Extract<ShapeNode, { kind: 'rect' | 'ellipse' | 'path' }>;
@@ -383,7 +387,38 @@ export function pathLayer(ctx: BuildCtx, name: string, srcs: PathSrc[], fill?: P
   return l;
 }
 
-function isPaint(n: ShapeNode): n is PaintNode { return n.kind === 'fill' || n.kind === 'stroke' || n.kind === 'gfill'; }
+/**
+ * gradient stroke: a group whose bottom child is the stroke-only path as a mask (white stroke,
+ * stroke opacity as its alpha; trim applies) and above it a box over the stroke bounds filled
+ * with the gradient. animated widths / trims / paths keep working through the mask.
+ */
+function gradientStroke(ctx: BuildCtx, run: PrimNode[], gs: Extract<ShapeNode, { kind: 'gstroke' }>, trim?: TrimNode): Layer {
+  const white: PaintNode = { kind: 'stroke', name: gs.name, color: sprop([1, 1, 1, 1]), opacity: gs.opacity, width: gs.width };
+  const m = pathLayer(ctx, gs.name, run.map(primSrc), undefined, white, trim);
+  m.mask = true;
+  const pos = m.props.position!.v, sz = m.geomSize ?? [0, 0];
+  const w = Math.max(1, ...(gs.width.kf ?? [{ v: gs.width.v }]).map(k => Math.abs(k.v[0] ?? 0)));
+  const box = { cmds: rectCmds(pos[0] - w, pos[1] - w, sz[0] + 2 * w, sz[1] + 2 * w) };
+  const gfill: PaintNode = { kind: 'gfill', name: gs.name, gtype: gs.gtype, stops: gs.stops, start: gs.start, end: gs.end, opacity: sprop([100]), rule: 'nonzero' };
+  const gl = pathLayer(ctx, gs.name, [box], gfill);
+  const unit = ctx.make('group', gs.name, identityTR());
+  unit.props.size = sprop([0, 0]);
+  unit.props.fill = sprop([1, 1, 1, 0]);
+  ctx.adopt(unit, [m, gl]);
+  return unit;
+}
+
+/** a paint that hides another paint of the same kind under it (static, fully opaque) */
+function opaquePaint(p: PaintNode): boolean {
+  if (isAnimated(p.opacity) || (p.opacity.v[0] ?? 100) < 100) return false;
+  if (p.kind === 'fill' || p.kind === 'stroke') return !isAnimated(p.color) && (p.color.v[3] ?? 1) >= 1;
+  return p.stops.every(s => s.color[3] >= 1);
+}
+function widthOf(p: PaintNode): number {
+  return p.kind === 'stroke' || p.kind === 'gstroke' ? (isAnimated(p.width) ? 0 : p.width.v[0] ?? 0) : 0;
+}
+
+function isPaint(n: ShapeNode): n is PaintNode { return n.kind === 'fill' || n.kind === 'stroke' || n.kind === 'gfill' || n.kind === 'gstroke'; }
 function isMod(n: ShapeNode): n is ModNode { return isPaint(n) || n.kind === 'trim'; }
 function isPrim(n: ShapeNode): n is PrimNode { return n.kind === 'rect' || n.kind === 'ellipse' || n.kind === 'path'; }
 
@@ -407,7 +442,7 @@ function groupItems(ctx: BuildCtx, items: ShapeNode[], inherited: ModNode[]): La
     // apply, the trim applies to all of them in after effects (trim sits above the paints)
     return {
       fill: ps.find(p => p.kind === 'fill' || (p.kind === 'gfill' && !(p as any).stroke)) as PaintNode | undefined,
-      stroke: ps.find(p => p.kind === 'stroke') as PaintNode | undefined,
+      stroke: ps.find(p => p.kind === 'stroke' || p.kind === 'gstroke') as PaintNode | undefined,
       trim: ps.find(p => p.kind === 'trim') as TrimNode | undefined,
     };
   };
@@ -419,7 +454,7 @@ function groupItems(ctx: BuildCtx, items: ShapeNode[], inherited: ModNode[]): La
       const g = ctx.make('group', it.name, it.tr, {});
       g.props.size = sprop([0, 0]);
       g.props.fill = sprop([1, 1, 1, 0]);
-      ctx.adopt(g, groupItems(ctx, it.items, after[i]));
+      ctx.adopt(g, groupItems(ctx, it.items, it.isolate ? [] : after[i]));
       out.push(g);
       i++;
       continue;
@@ -429,11 +464,27 @@ function groupItems(ctx: BuildCtx, items: ShapeNode[], inherited: ModNode[]): La
       let j = i + 1;
       while (j < items.length && isPrim(items[j])) j++;
       const run = items.slice(i, j) as PrimNode[];
-      const { fill, stroke, trim } = pick(after[j - 1]);
-      if (fill || stroke) {
-        if (trim || (run.length > 1 && run.some(r => r.kind === 'path'))) {
-          out.push(pathLayer(ctx, run[0].name, run.map(primSrc), fill, stroke, trim));
-        } else for (const r of run) out.push(primLayer(ctx, r, fill, stroke));
+      const { fill, stroke: st, trim } = pick(after[j - 1]);
+      const emit = (f: PaintNode | undefined, s: PaintNode | undefined) => {
+        // a gradient stroke is its own unit above the fill
+        if (s && s.kind === 'gstroke') { out.push(gradientStroke(ctx, run, s, trim)); s = undefined; }
+        if (!f && !s) return;
+        if (trim || (run.length > 1 && run.some(r => r.kind === 'path'))) out.push(pathLayer(ctx, run[0].name, run.map(primSrc), f, s, trim));
+        else for (const r of run) out.push(primLayer(ctx, r, f, s));
+      };
+      emit(fill, st);
+      // further paints below the nearest fill / stroke (ae draws every paint above the paths),
+      // unless the nearer paint of the same kind already covers them
+      let cover = fill, coverS = st;
+      for (const p of after[j - 1]) {
+        if (p === fill || p === st || p.kind === 'trim') continue;
+        if (p.kind === 'fill' || p.kind === 'gfill') {
+          if (cover && opaquePaint(cover)) continue;
+          emit(p, undefined); cover = p;
+        } else {
+          if (coverS && opaquePaint(coverS) && widthOf(coverS) >= widthOf(p)) continue;
+          emit(undefined, p); coverS = p;
+        }
       }
       i = j;
       continue;
@@ -474,7 +525,7 @@ export function buildShapeLayer(ctx: BuildCtx, name: string, items: ShapeNode[],
   if (prims.length === 1 && cur.every(n => isPrim(n) || isMod(n)) && paints.length && cur.indexOf(prims[0]) < cur.indexOf(paints[0])) {
     const tmp = new BuildCtx(ctx.compW, ctx.compH);
     const kids = groupItems(tmp, cur, []);
-    if (kids.length === 1) {
+    if (kids.length === 1 && !kids[0].children.length) {
       const l = kids[0];
       // fold: layer T(p)RS T(-a) · T(c+offset) T(-k)  =>  anchor' = a - c - offset + k
       const c = l.props.position!, k = l.props.anchor!;
@@ -850,7 +901,53 @@ function avg(x: any, d: number): number {
 function arr(x: any): number[] { return Array.isArray(x) ? x.map((v: any) => num(v)) : typeof x === 'number' ? [x] : []; }
 
 /** fr = global frame rate; tf maps a frame of the current (pre)comp to our comp seconds */
-interface LCtx { fr: number; tf: (frame: number) => number }
+interface LCtx {
+  fr: number; tf: (frame: number) => number;
+  /** the layers of the current comp and the layer being converted (for expression references) */
+  layers?: any[]; layer?: any;
+}
+
+const LAYER_PROPS: Record<string, string> = { position: 'p', rotation: 'r', scale: 's', opacity: 'o', anchorPoint: 'a', anchor_point: 'a' };
+const ITEM_PROPS: Record<string, string> = { path: 'ks', start: 's', end: 'e', offset: 'o', color: 'c', opacity: 'o', strokeWidth: 'w', size: 's', position: 'p', roundness: 'r' };
+
+/**
+ * an expression that just reads another property (`$bm_rt = thisComp.layer('Ctrl').effect('Slider
+ * Control')('Slider');`, `content('Group').content('Path').path`, `thisComp.layer(3).transform.rotation`)
+ * resolves to that property's json, so its keyframes drive this one. anything else: null.
+ */
+function exprRef(lp: any, c: LCtx, depth = 0): any {
+  if (!c.layers || typeof lp?.x !== 'string' || depth > 4) return null;
+  const body = lp.x.replace(/^\s*var\s+\$bm_rt\s*;\s*/, '').trim();
+  const m = /^\$bm_rt\s*=\s*([^;]+?)\s*;?\s*$/.exec(body);
+  if (!m) return null;
+  let e = m[1].trim();
+  const str = `(?:'([^']*)'|"([^"]*)"|(\\d+))`;
+  let cur: any = c.layer;
+  const lm = new RegExp(`^thisComp\\.layer\\(${str}\\)\\.?`).exec(e);
+  if (lm) {
+    const name = lm[1] ?? lm[2];
+    cur = name != null ? c.layers.find(l => l?.nm === name) : c.layers[Number(lm[3]) - 1];
+    e = e.slice(lm[0].length);
+  } else if (e.startsWith('thisLayer.')) e = e.slice(10);
+  if (!cur) return null;
+  let kind: 'layer' | 'effect' | 'item' | 'transform' = 'layer';
+  const sel = (list: any[], key: string | undefined, idx: string | undefined) => (Array.isArray(list) ? (key != null ? list.find(x => x?.nm === key || x?.mn === key) : list[Number(idx) - 1]) : undefined);
+  for (let guard = 0; e && guard < 16; guard++) {
+    let mm: RegExpExecArray | null;
+    if ((mm = new RegExp(`^\\.?effect\\(${str}\\)`).exec(e)) && kind === 'layer') { cur = sel(cur.ef, mm[1] ?? mm[2], mm[3]); kind = 'effect'; }
+    else if ((mm = new RegExp(`^\\(${str}\\)`).exec(e)) && kind === 'effect') { const p = sel(cur.ef, mm[1] ?? mm[2], mm[3]); cur = p?.v; kind = 'item'; if (!cur) return null; e = e.slice(mm[0].length); break; }
+    else if ((mm = new RegExp(`^\\.?content\\(${str}\\)`).exec(e)) && (kind === 'layer' || kind === 'item')) { cur = sel(kind === 'layer' ? cur.shapes : cur.it, mm[1] ?? mm[2], mm[3]); kind = 'item'; }
+    else if ((mm = /^\.?transform/.exec(e)) && kind === 'layer') { kind = 'transform'; }
+    else if ((mm = /^\.?(\w+)/.exec(e)) && (kind === 'layer' || kind === 'transform') && LAYER_PROPS[mm[1]]) { cur = cur.ks?.[LAYER_PROPS[mm[1]]]; e = e.slice(mm[0].length); break; }
+    else if ((mm = /^\.?(\w+)/.exec(e)) && kind === 'item' && ITEM_PROPS[mm[1]]) { cur = cur[ITEM_PROPS[mm[1]]]; e = e.slice(mm[0].length); break; }
+    else return null;
+    if (!cur) return null;
+    e = e.slice(mm[0].length);
+  }
+  e = e.replace(/^\.value/, '');
+  if (e || !cur || typeof cur !== 'object' || cur.k === undefined || cur === lp) return null;
+  return typeof cur.x === 'string' ? exprRef(cur, c, depth + 1) ?? cur : cur;
+}
 
 /**
  * convert a lottie animatable value to our prop.
@@ -858,6 +955,7 @@ interface LCtx { fr: number; tf: (frame: number) => number }
  */
 function lprop(lp: any, conv: (v: number[]) => number[], def: number[], c: LCtx, spatial = false): Prop {
   if (lp == null) return sprop(def);
+  if (typeof lp.x === 'string') lp = exprRef(lp, c) ?? lp;
   const k = lp.k;
   const animated = Array.isArray(k) && k.length > 0 && typeof k[0] === 'object' && k[0] !== null && 't' in k[0];
   if (!animated) {
@@ -961,6 +1059,7 @@ function withExpr(p: Prop, lp: any): Prop {
 
 /** keyframed lottie shape (sh ks / mask pt) -> path source with keys */
 function lpathSrc(lp: any, c: LCtx, closed?: boolean): PathSrc {
+  if (typeof lp?.x === 'string') lp = exprRef(lp, c) ?? lp;
   const k = lp?.k;
   const animated = Array.isArray(k) && k.length > 0 && typeof k[0] === 'object' && k[0] !== null && 't' in k[0];
   // old exports put `closed` on the shape item instead of `c` on each shape
@@ -1065,8 +1164,8 @@ function firstStatic(lp: any, def: number[]): number[] {
 }
 
 function lshapes(items: any[], c: LCtx): ShapeNode[] {
-  const out: ShapeNode[] = [];
-  if (!Array.isArray(items)) return out;
+  const out: RawShapeNode[] = [];
+  if (!Array.isArray(items)) return [];
   for (const it of items) {
     if (!it || it.hd === true) continue;
     const name = typeof it.nm === 'string' ? it.nm : '';
@@ -1107,18 +1206,256 @@ function lshapes(items: any[], c: LCtx): ShapeNode[] {
             start: firstStatic(it.s, [0, 0]), end: firstStatic(it.e, [100, 0]), opacity: lprop(it.o, v => [v[0]], [100], c), rule: it.r === 2 ? 'evenodd' : 'nonzero',
           };
           if (it.ty === 'gs') {
-            // gradient stroke -> plain stroke with the first stop colour
-            const col = node.stops[0]?.color ?? [1, 1, 1, 1];
-            out.push({ kind: 'stroke', name: node.name, color: sprop(col), opacity: node.opacity, width: lprop(it.w, v => [v[0]], [1], c) });
+            out.push({ kind: 'gstroke', name: node.name, gtype: node.gtype, stops: node.stops, start: node.start, end: node.end, opacity: node.opacity, width: lprop(it.w, v => [v[0]], [1], c) });
           } else out.push(node);
           break;
         }
-        default: break; // rp, mm, rd, ... unsupported modifiers are skipped
+        case 'rd':
+          out.push({ kind: 'round', name: name || 'Round Corners', radius: lprop(it.r, v => [v[0]], [0], c) });
+          break;
+        case 'mm':
+          out.push({ kind: 'merge', name: name || 'Merge Paths', mode: num(it.mm, 1) });
+          break;
+        case 'rp': {
+          const tr = it.tr ?? {};
+          out.push({
+            kind: 'repeater', name: name || 'Repeater', copies: lprop(it.c, v => [v[0]], [3], c), offset: lprop(it.o, v => [v[0]], [0], c), mode: num(it.m, 1),
+            anchor: lprop(tr.a, v2, [0, 0], c), position: lprop(tr.p, v2, [0, 0], c), scale: lprop(tr.s, v2, [100, 100], c), rotation: lprop(tr.r, v => [v[0]], [0], c),
+            so: lprop(tr.so, v => [v[0]], [100], c), eo: lprop(tr.eo, v => [v[0]], [100], c),
+          });
+          break;
+        }
+        default: break; // tw, pb, op, zz, ... unsupported modifiers are skipped
       }
     } catch { /* skip malformed shape */ }
   }
+  return applyShapeModifiers(out, c.fr);
+}
+
+// ---------------- shape modifiers: round corners, repeater, merge paths ----------------
+
+type RawShapeNode = ShapeNode
+  | { kind: 'round'; name: string; radius: Prop }
+  | { kind: 'merge'; name: string; mode: number }
+  | { kind: 'repeater'; name: string; copies: Prop; offset: Prop; mode: number; anchor: Prop; position: Prop; scale: Prop; rotation: Prop; so: Prop; eo: Prop };
+
+/**
+ * resolve the modifiers of one shape group (items in ae order, nested groups already resolved).
+ * each modifier works on everything above it in the group, in order: round corners rewrites
+ * the primitives, a repeater turns them into transformed copies, merge paths replaces their
+ * paths with one merged path (the originals keep only the paints above the merge).
+ */
+export function applyShapeModifiers(raw: RawShapeNode[], fr: number): ShapeNode[] {
+  let items: ShapeNode[] = [];
+  for (const it of raw) {
+    if (it.kind === 'round') items = items.map(n => roundNode(n, it.radius));
+    else if (it.kind === 'repeater') items = repeatItems(items, it);
+    else if (it.kind === 'merge') items = mergeItems(items, it.mode, it.name, fr);
+    else items.push(it);
+  }
+  return items;
+}
+
+const ROUND_K = 0.5519; // lottie-web's round corners handle length
+
+/** lottie-web round corners: every vertex with no tangents becomes an arc of radius r (at most half of each adjacent edge) */
+export function roundCmds(cmds: PathCmd[], r: number): PathCmd[] {
+  if (!(r > 0)) return cmds;
+  const out: PathCmd[] = [];
+  type V = { x: number; y: number; ix: number; iy: number; ox: number; oy: number };
+  let sub: V[] = [];
+  let closed = false;
+  const flush = () => {
+    if (!sub.length) return;
+    // a closing segment back onto the first vertex: its in-handle belongs to the first vertex
+    if (closed && sub.length > 1) {
+      const a = sub[0], b = sub[sub.length - 1];
+      if (Math.abs(a.x - b.x) < 1e-9 && Math.abs(a.y - b.y) < 1e-9) { a.ix = b.ix; a.iy = b.iy; sub.pop(); }
+    }
+    const n = sub.length;
+    const res: V[] = [];
+    for (let i = 0; i < n; i++) {
+      const v = sub[i];
+      const sharp = v.ix === v.x && v.iy === v.y && v.ox === v.x && v.oy === v.y;
+      if (!sharp || ((i === 0 || i === n - 1) && !closed) || n < 2) { res.push(v); continue; }
+      const p = sub[(i - 1 + n) % n], q = sub[(i + 1) % n];
+      let d = Math.hypot(v.x - p.x, v.y - p.y);
+      let f = d ? Math.min(d / 2, r) / d : 0;
+      const ax = v.x + (p.x - v.x) * f, ay = v.y + (p.y - v.y) * f;
+      res.push({ x: ax, y: ay, ix: ax, iy: ay, ox: ax - (ax - v.x) * ROUND_K, oy: ay - (ay - v.y) * ROUND_K });
+      d = Math.hypot(v.x - q.x, v.y - q.y);
+      f = d ? Math.min(d / 2, r) / d : 0;
+      const bx = v.x + (q.x - v.x) * f, by = v.y + (q.y - v.y) * f;
+      res.push({ x: bx, y: by, ox: bx, oy: by, ix: bx - (bx - v.x) * ROUND_K, iy: by - (by - v.y) * ROUND_K });
+    }
+    out.push(['M', res[0].x, res[0].y]);
+    for (let i = 1; i < res.length; i++) out.push(['C', res[i - 1].ox, res[i - 1].oy, res[i].ix, res[i].iy, res[i].x, res[i].y]);
+    if (closed) {
+      const a = res[res.length - 1], b = res[0];
+      out.push(['C', a.ox, a.oy, b.ix, b.iy, b.x, b.y], ['Z']);
+    }
+    sub = []; closed = false;
+  };
+  let cx = 0, cy = 0;
+  for (const c of cmds) {
+    if (c[0] === 'M') { flush(); cx = c[1]; cy = c[2]; sub.push({ x: cx, y: cy, ix: cx, iy: cy, ox: cx, oy: cy }); continue; }
+    if (c[0] === 'Z') { closed = true; flush(); continue; }
+    if (!sub.length) sub.push({ x: cx, y: cy, ix: cx, iy: cy, ox: cx, oy: cy });
+    const last = sub[sub.length - 1];
+    if (c[0] === 'L') { cx = c[1]; cy = c[2]; sub.push({ x: cx, y: cy, ix: cx, iy: cy, ox: cx, oy: cy }); }
+    else if (c[0] === 'C') { last.ox = c[1]; last.oy = c[2]; cx = c[5]; cy = c[6]; sub.push({ x: cx, y: cy, ix: c[3], iy: c[4], ox: cx, oy: cy }); }
+    else { // quadratic -> cubic handles
+      last.ox = cx + (2 / 3) * (c[1] - cx); last.oy = cy + (2 / 3) * (c[2] - cy);
+      const nx = c[3], ny = c[4];
+      sub.push({ x: nx, y: ny, ix: nx + (2 / 3) * (c[1] - nx), iy: ny + (2 / 3) * (c[2] - ny), ox: nx, oy: ny });
+      cx = nx; cy = ny;
+    }
+  }
+  flush();
   return out;
 }
+
+function roundNode(n: ShapeNode, radius: Prop): ShapeNode {
+  if (n.kind === 'group') return n.isolate ? n : { ...n, items: n.items.map(c => roundNode(c, radius)) };
+  if (n.kind === 'rect') {
+    if (isAnimated(n.roundness) || (n.roundness.v[0] ?? 0) > 0) return n;
+    return { ...n, roundness: cloneProp(radius) };
+  }
+  if (n.kind !== 'path' || (n as any).flat) return n;
+  if (!isAnimated(radius)) {
+    const r = radius.v[0] ?? 0;
+    return { ...n, cmds: roundCmds(n.cmds, r), keys: n.keys?.map(k => ({ ...k, cmds: roundCmds(k.cmds, r) })) };
+  }
+  // animated radius: a radius of 0 still splits the corners, so every key has the same structure
+  const rAt = (t: number) => Math.max(1e-6, evalProp(radius, t, 1, [0])[0]);
+  if (n.keys && n.keys.length > 1) {
+    return { ...n, cmds: roundCmds(n.cmds, rAt(n.keys[0].t)), keys: n.keys.map(k => ({ ...k, cmds: roundCmds(k.cmds, rAt(k.t)) })) };
+  }
+  // static path: keys at the radius keys (vertex positions are linear in r)
+  const keys: PathAnimKey[] = radius.kf!.map(k => ({ t: k.t, cmds: roundCmds(n.cmds, Math.max(1e-6, k.v[0])), interp: k.interp, out: [k.out[0], k.out[1]], in: [k.in[0], k.in[1]] }));
+  return { ...n, cmds: keys[0].cmds, keys };
+}
+
+/**
+ * repeater: copies of everything above it, each in a group carrying the repeater transform
+ * for j = index + offset: rotation j·r and scale s^j around the anchor, position j·p (not
+ * compounded through the rotation, like lottie-web and skottie), and an opacity going from
+ * start to end opacity. composite 1 (above): later copies on top. animated offset / transform
+ * props go through combineProps.
+ */
+function repeatItems(items: ShapeNode[], rp: Extract<RawShapeNode, { kind: 'repeater' }>): ShapeNode[] {
+  const n = Math.max(0, Math.min(500, Math.ceil(firstValue(rp.copies)[0] ?? 0)));
+  if (!n || !items.length) return n ? items : [];
+  const pw = (s: number, j: number) => Math.sign(s || 1) * Math.pow(Math.abs(s / 100), j) * 100;
+  const copies: ShapeNode[] = [];
+  for (let k = 0; k < n; k++) {
+    const tr: TR = {
+      anchor: cloneProp(rp.anchor),
+      position: combineProps([rp.anchor, rp.position, rp.offset], [2, 2, 1], ([a, p, o]) => [a[0] + p[0] * (k + o[0]), a[1] + p[1] * (k + o[0])]),
+      scale: combineProps([rp.scale, rp.offset], [2, 1], ([s, o]) => [pw(s[0], k + o[0]), pw(s[1], k + o[0])]),
+      rotation: combineProps([rp.rotation, rp.offset], [1, 1], ([r, o]) => [r[0] * (k + o[0])]),
+      opacity: combineProps([rp.so, rp.eo], [1, 1], ([so, eo]) => [so[0] + (eo[0] - so[0]) * (n > 1 ? k / (n - 1) : 0)]),
+    };
+    copies.push({ kind: 'group', name: `${rp.name} ${k + 1}`, tr, items: k ? structuredClone(items) : items });
+  }
+  // our item order is top first: composite above (1) puts the last copy on top
+  return rp.mode === 2 ? copies : copies.reverse();
+}
+
+function hasPaint(items: ShapeNode[]): boolean {
+  return items.some(n => (n.kind === 'group' ? hasPaint(n.items) : isPaint(n)));
+}
+
+/** affine of a shape transform at time t: x' = R S (x - a) + p, as [a, b, c, d, e, f] */
+function trMatrix(tr: TR, t: number): number[] {
+  const a = evalProp(tr.anchor, t, 2, [0, 0]), p = evalProp(tr.position, t, 2, [0, 0]), s = evalProp(tr.scale, t, 2, [100, 100]);
+  const r = (evalProp(tr.rotation, t, 1, [0])[0] * Math.PI) / 180;
+  const cs = Math.cos(r), sn = Math.sin(r), sx = s[0] / 100, sy = s[1] / 100;
+  const m = [cs * sx, sn * sx, -sn * sy, cs * sy, 0, 0];
+  m[4] = p[0] - (m[0] * a[0] + m[2] * a[1]);
+  m[5] = p[1] - (m[1] * a[0] + m[3] * a[1]);
+  return m;
+}
+
+function xformCmds(cmds: PathCmd[], ms: number[][]): PathCmd[] {
+  if (!ms.length) return cmds;
+  return cmds.map(c => {
+    if (c[0] === 'Z') return c;
+    const o = c.slice() as any[];
+    for (let i = 1; i + 1 < o.length; i += 2) {
+      let x = o[i], y = o[i + 1];
+      for (let k = ms.length - 1; k >= 0; k--) { const m = ms[k]; const nx = m[0] * x + m[2] * y + m[4]; y = m[1] * x + m[3] * y + m[5]; x = nx; }
+      o[i] = x; o[i + 1] = y;
+    }
+    return o as PathCmd;
+  });
+}
+
+const MERGE_OPS: Record<number, BoolOp> = { 2: 'union', 3: 'difference', 4: 'intersect', 5: 'xor' };
+
+/**
+ * merge paths: the paths above (also in nested groups, through their transforms) become one
+ * path below the originals. mode 1 (merge) concatenates them into one compound path; add /
+ * subtract / intersect / exclude are polygon booleans on the flattened paths, applied top
+ * to bottom (((p1 op p2) op p3) ...). a single path stays as it is. animated inputs are
+ * sampled once per frame.
+ */
+function mergeItems(items: ShapeNode[], mode: number, name: string, fr: number): ShapeNode[] {
+  const ops: { src: PathSrc; chain: TR[] }[] = [];
+  const collect = (list: ShapeNode[], chain: TR[]) => {
+    for (const n of list) {
+      if (n.kind === 'group') { if (!n.isolate) collect(n.items, [...chain, n.tr]); }
+      else if (isPrim(n)) ops.push({ src: primSrc(n), chain });
+    }
+  };
+  collect(items, []);
+  if (!ops.length) return items;
+  const trAnim = (tr: TR) => [tr.anchor, tr.position, tr.scale, tr.rotation].some(isAnimated);
+  const chainAnim = ops.some(o => o.chain.some(trAnim));
+  const boolOp = ops.length > 1 ? MERGE_OPS[mode] : undefined;
+  let node: ShapeNode;
+  if (!chainAnim && !boolOp) {
+    // exact: transformed sources concatenated (keys combined like a compound path)
+    const srcs: PathSrc[] = ops.map(o => {
+      const ms = o.chain.map(tr => trMatrix(tr, 0));
+      return { cmds: xformCmds(o.src.cmds, ms), keys: o.src.keys?.map(k => ({ ...k, cmds: xformCmds(k.cmds, ms) })) };
+    });
+    const keyed = combinePathSrcs(srcs);
+    node = keyed
+      ? { kind: 'path', name, cmds: keyed[0].paths.flat(), keys: keyed.map(k => ({ t: k.t, cmds: k.paths.flat(), interp: k.interp, out: [k.out[0], k.out[1]], in: [k.in[0], k.in[1]] })) }
+      : { kind: 'path', name, cmds: srcs.flatMap(s => s.cmds) };
+  } else {
+    const at = (t: number): PathCmd[] => {
+      const paths = ops.map(o => xformCmds(pathSrcAt(o.src, t), o.chain.map(tr => trMatrix(tr, t))));
+      if (!boolOp) return paths.flat();
+      const [, , w, h] = cmdsBounds(paths.flat());
+      const tol = Math.max(Math.hypot(w, h) / 1500, 1e-6);
+      return ringsToCmds(booleanMany(paths.map(p => flattenCmds(p, tol)), boolOp));
+    };
+    const times: number[] = [];
+    for (const o of ops) {
+      for (const k of o.src.keys ?? []) times.push(k.t);
+      for (const tr of o.chain) for (const p of [tr.anchor, tr.position, tr.scale, tr.rotation]) for (const k of p.kf ?? []) times.push(k.t);
+    }
+    if (!times.length) node = { kind: 'path', name, cmds: at(0) };
+    else {
+      const t0 = Math.min(...times), t1 = Math.max(...times);
+      const nS = Math.max(2, Math.min(300, Math.ceil((t1 - t0) * fr) + 1));
+      const keys: PathAnimKey[] = [];
+      for (let i = 0; i < nS; i++) {
+        const t = t0 + ((t1 - t0) * i) / (nS - 1);
+        keys.push({ t, cmds: at(t), interp: 'linear', out: [0, 0], in: [1, 1] });
+      }
+      node = { kind: 'path', name, cmds: keys[0].cmds, keys };
+    }
+    if (boolOp) (node as any).flat = true;
+  }
+  const out: ShapeNode[] = [];
+  if (hasPaint(items)) out.push({ kind: 'group', name: name + ' (sources)', tr: identityTR(), items, isolate: true });
+  out.push(node);
+  return out;
+}
+
 
 const FONT_WEIGHTS: [RegExp, number][] = [[/thin|hairline/i, 100], [/extra ?light|ultra ?light/i, 200], [/light/i, 300], [/medium/i, 500], [/semi ?bold|demi/i, 600], [/extra ?bold|ultra ?bold/i, 800], [/black|heavy/i, 900], [/bold/i, 700]];
 export function weightFromStyle(style: string): number {
@@ -1327,8 +1664,7 @@ export function lottieToProject(json: any, name?: string, stats?: LottieImportSt
       if (it.ty === 'gr') countShapes(it.it);
       else if (it.ty === 'sh' && it.ks?.a === 1) st.animatedPaths++;
       else if (it.ty === 'tm') st.trims++;
-      else if (['rp', 'rd', 'mm', 'tw', 'pb', 'op', 'zz'].includes(it.ty)) note('shape ' + it.ty);
-      else if (it.ty === 'gs') note('gradient stroke');
+      else if (['tw', 'pb', 'op', 'zz'].includes(it.ty)) note('shape ' + it.ty);
     }
   };
 
@@ -1337,9 +1673,10 @@ export function lottieToProject(json: any, name?: string, stats?: LottieImportSt
     const src: SrcLayerX[] = [];
     layers.forEach((L, index) => {
       if (!L || typeof L !== 'object') return;
+      const lc: LCtx = { ...c, layers, layer: L };
       const ty = L.ty;
       if (![0, 1, 2, 3, 4, 5].includes(ty)) return; // audio, camera, data, ... skipped
-      const tr = ltransform(L.ks, c);
+      const tr = ltransform(L.ks, lc);
       for (const p of [tr.position, tr.scale, tr.rotation, tr.opacity]) if (p.expr) st.expressions++;
       const lname = typeof L.nm === 'string' ? L.nm : `Layer ${index + 1}`;
       const lip = num(L.ip, ip), lop = num(L.op, op);
@@ -1356,7 +1693,7 @@ export function lottieToProject(json: any, name?: string, stats?: LottieImportSt
         : compBoxInLayer(tr, cw, ch);
       const content = (t: TR): Layer | null => {
         switch (ty) {
-          case 4: countShapes(L.shapes); return buildShapeLayer(ctx, lname, lshapes(L.shapes, c), t);
+          case 4: countShapes(L.shapes); return buildShapeLayer(ctx, lname, lshapes(L.shapes, lc), t);
           case 1: {
             const l = ctx.make('rect', lname, t);
             l.props.size = sprop([num(L.sw, 100), num(L.sh, 100)]);
@@ -1426,7 +1763,7 @@ export function lottieToProject(json: any, name?: string, stats?: LottieImportSt
         blend: blendMode(L.bm, note),
         build: (t: TR) => {
           try {
-            const regions = ty === 3 ? [] : maskRegions(masks, c, box);
+            const regions = ty === 3 ? [] : maskRegions(masks, lc, box);
             if (!regions.length) return content(t);
             st.masks++;
             st.maskRegions += regions.length;
