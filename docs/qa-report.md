@@ -3,6 +3,7 @@
 Sweep of the whole app in Chromium (dark, 1440×900 and 1280×800), driven like a designer would.
 The permanent check is `npm run qa` (`scripts/qa-flows.mjs`, against a running dev server: `URL=http://localhost:5173/ npm run qa`).
 `npm run qa:electron` (`scripts/qa-electron.mjs`, needs `npm run build` and xvfb) launches the real Electron app and fails on main / preload / renderer errors.
+The shell agent's `npm run layout:check` (`scripts/layout-lock.mjs`) guards the window structure; it passes on this branch.
 The existing `scripts/e2e.mjs`, `scripts/ui-check.mjs`, `scripts/audio-smoke.mjs` and `scripts/shader-e2e.mjs` all passed at the start of the sweep.
 
 ## Fixed

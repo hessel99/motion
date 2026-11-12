@@ -71,7 +71,8 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   if (w === 1440) {
     await page.goto(`${base}?nobridge&theme=dark`);
     await page.waitForFunction(() => window.editor?.renderer);
-    await page.click('text=Open the demo animation'); await page.waitForTimeout(600);
+    // (the Home "demo" button is dev-only now)
+    await ev(async () => (await import('/src/app/actions.ts')).loadDemo()); await page.waitForTimeout(600);
     await ev(async () => { const D = await import('/src/app/documents.ts'); for (const d of [...D.documents()]) D.closeDoc(d.id, { force: true }); });
     await page.waitForTimeout(2600); // the recent entry is written in idle time
     await page.click('.recent-open >> nth=0'); await page.waitForTimeout(2600);
@@ -81,7 +82,7 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
 
   // QA-5: a precomp copied into another document pointed at a composition that wasn't there
   if (w === 1440) {
-    await page.click('text=Open the demo animation').catch(() => {});
+    // (still on the demo reopened from Recent above)
     await page.waitForTimeout(500);
     await ev(() => { const s = editor.store; s.select(s.comp.root.slice(0, 2)); });
     await page.keyboard.press('Control+Shift+c'); await page.waitForTimeout(200);
