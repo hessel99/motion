@@ -6,11 +6,11 @@ import type { Store } from '../core/store';
 import { Track } from '../core/evaluate';
 import { PROP_DEFS, type Keyframe, type Layer, type PropKey } from '../core/model';
 import { keyId, setSegmentHandles } from '../core/commands';
+import { T } from './theme';
 
 export interface GraphArea { x0: number; y0: number; x1: number; y1: number; tToX(t: number): number; xToT(x: number): number }
 interface Curve { layer: Layer; key: PropKey; dim: number; color: string; handles: boolean }
 
-const DIM_COLORS = ['#ff6b6b', '#4cd964', '#4c8dff', '#ffcc00'];
 
 type GDrag =
   | { kind: 'key'; c: Curve; i: number; sx: number; sy: number; t0: number; v0: number[]; moved: boolean }
@@ -46,7 +46,7 @@ export class GraphView {
         for (const k of kf) { lo = Math.min(lo, k.v[d]); hi = Math.max(hi, k.v[d]); }
         if (hi - lo > bestSpan) { bestSpan = hi - lo; best = d; }
       }
-      for (let d = 0; d < dim; d++) out.push({ layer: l, key, dim: d, handles: d === best, color: PROP_DEFS[key].unit === 'color' ? ['#ff6b6b', '#4cd964', '#4c8dff'][d] : dim === 1 ? '#c792ea' : DIM_COLORS[d] });
+      for (let d = 0; d < dim; d++) out.push({ layer: l, key, dim: d, handles: d === best, color: PROP_DEFS[key].unit === 'color' || dim > 1 ? T.axes[d] : T.axisScalar });
     };
     for (const k of st.keySelection) {
       const [lid, key] = k.split('|');
@@ -80,11 +80,11 @@ export class GraphView {
     g.beginPath();
     g.rect(area.x0, area.y0, area.x1 - area.x0, area.y1 - area.y0);
     g.clip();
-    g.fillStyle = '#141416';
+    g.fillStyle = T.graphBg;
     g.fillRect(area.x0, area.y0, area.x1 - area.x0, area.y1 - area.y0);
     if (!curves.length) {
-      g.fillStyle = '#6a6a72';
-      g.font = '12px system-ui, sans-serif';
+      g.fillStyle = T.graphLabel;
+      g.font = T.font.ui;
       g.fillText('Select an animated layer or keyframes to see value curves', area.x0 + 16, area.y0 + 24);
       g.restore();
       return;
@@ -141,20 +141,20 @@ export class GraphView {
       this.vmin = lo - m; this.vmax = hi + m;
     }
     // horizontal grid with value labels
-    g.font = '10px system-ui, sans-serif';
+    g.font = T.font.uiXs;
     g.textBaseline = 'middle';
     const range = this.vmax - this.vmin;
     const stepV = niceStep(range / 5);
     for (let v = Math.ceil(this.vmin / stepV) * stepV; v <= this.vmax; v += stepV) {
       const y = Math.round(this.vToY(v)) + 0.5;
-      g.fillStyle = 'rgba(255,255,255,0.05)';
+      g.fillStyle = T.graphGrid;
       g.fillRect(area.x0, y, area.x1 - area.x0, 1);
-      g.fillStyle = '#6a6a72';
+      g.fillStyle = T.graphLabel;
       g.fillText(fmt(v), area.x0 + 4, y - 6);
     }
     // curves
     if (this.speed) {
-      g.fillStyle = '#6a6a72';
+      g.fillStyle = T.graphLabel;
       g.fillText('speed (units / s)', area.x1 - 110, area.y0 + 12);
     }
     curves.forEach((c, ci) => {
@@ -174,7 +174,7 @@ export class GraphView {
     const st = this.store;
     if (this.speed) {
       // keyframe times as ticks (speed mode is for reading the easing; edit in value mode)
-      g.fillStyle = 'rgba(255,255,255,0.35)';
+      g.fillStyle = T.graphKeyTick;
       for (const c of curves) if (c.handles) for (const k of c.layer.props[c.key]!.kf!) g.fillRect(Math.round(area.tToX(k.t)), area.y1 - 10, 1, 10);
       g.restore();
       return;
@@ -186,8 +186,8 @@ export class GraphView {
         const x = area.tToX(k.t), y = this.vToY(k.v[c.dim]);
         const sel = st.keySelection.has(keyId(c.layer.id, c.key, i));
         if (sel && c.handles) this.drawHandles(g, c, kf, i);
-        g.fillStyle = sel ? '#ffffff' : c.color;
-        g.strokeStyle = '#141416';
+        g.fillStyle = sel ? T.graphKeySelected : c.color;
+        g.strokeStyle = T.graphBg;
         g.lineWidth = 1.5;
         g.beginPath();
         g.rect(x - 4, y - 4, 8, 8);
@@ -203,13 +203,13 @@ export class GraphView {
     for (const seg of [i - 1, i]) {
       const h = this.handlePos(c, kf, seg);
       if (!h) continue;
-      g.strokeStyle = 'rgba(255,255,255,0.5)';
+      g.strokeStyle = T.graphHandleArm;
       g.lineWidth = 1;
       g.beginPath();
       if (seg === i) { g.moveTo(h.ax, h.ay); g.lineTo(h.ox, h.oy); }
       else { g.moveTo(h.bx, h.by); g.lineTo(h.ix, h.iy); }
       g.stroke();
-      g.fillStyle = '#ffd34d';
+      g.fillStyle = T.graphHandle;
       g.beginPath();
       if (seg === i) g.arc(h.ox, h.oy, 4, 0, Math.PI * 2);
       else g.arc(h.ix, h.iy, 4, 0, Math.PI * 2);

@@ -4,6 +4,7 @@
 import type { Editor } from '../app/editor';
 import { createLayer, type Layer, type PathCmd, type PathGeometry } from '../core/model';
 import { insertLayer } from '../core/commands';
+import { T } from './theme';
 
 interface PenPt { x: number; y: number; hx: number; hy: number } // handle = outgoing tangent (incoming is mirrored)
 
@@ -80,7 +81,7 @@ export class PenTool {
     if (this.editId) this.drawEdit(g);
     if (!this.pts.length) return;
     const S = this.toScreen;
-    g.strokeStyle = '#4c8dff';
+    g.strokeStyle = T.vpSelection;
     g.lineWidth = 1.5;
     g.beginPath();
     const p0 = S(this.pts[0].x, this.pts[0].y);
@@ -100,13 +101,13 @@ export class PenTool {
       const s = S(p.x, p.y);
       if (p.hx || p.hy) {
         const a = S(p.x + p.hx, p.y + p.hy), b = S(p.x - p.hx, p.y - p.hy);
-        g.strokeStyle = 'rgba(255,255,255,0.6)';
+        g.strokeStyle = T.vpTangent;
         g.beginPath(); g.moveTo(b[0], b[1]); g.lineTo(a[0], a[1]); g.stroke();
-        g.fillStyle = '#fff';
+        g.fillStyle = T.vpHandle;
         for (const q of [a, b]) { g.beginPath(); g.arc(q[0], q[1], 3, 0, Math.PI * 2); g.fill(); }
       }
-      g.fillStyle = '#fff';
-      g.strokeStyle = '#4c8dff';
+      g.fillStyle = T.vpHandle;
+      g.strokeStyle = T.vpSelection;
       g.beginPath(); g.rect(s[0] - 3.5, s[1] - 3.5, 7, 7); g.fill(); g.stroke();
     }
   }
@@ -140,7 +141,7 @@ export class PenTool {
     const pts = this.points(l);
     const S = this.toScreen;
     // handle lines: control points to their anchors
-    g.strokeStyle = 'rgba(255,255,255,0.5)';
+    g.strokeStyle = T.vpTangent;
     g.lineWidth = 1;
     l.geometry.forEach((geo, gi) => geo.cmds.forEach((c, ci) => {
       if (c[0] !== 'C') return;
@@ -152,8 +153,8 @@ export class PenTool {
     }));
     for (const p of pts) {
       const s = S(p.x, p.y);
-      g.fillStyle = p.anchor ? '#fff' : '#4c8dff';
-      g.strokeStyle = '#4c8dff';
+      g.fillStyle = p.anchor ? T.vpHandle : T.vpSelection;
+      g.strokeStyle = T.vpSelection;
       g.beginPath();
       if (p.anchor) g.rect(s[0] - 3.5, s[1] - 3.5, 7, 7); else g.arc(s[0], s[1], 3, 0, Math.PI * 2);
       g.fill(); g.stroke();

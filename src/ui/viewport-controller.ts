@@ -9,6 +9,7 @@ import type { Layer } from '../core/model';
 import { Track } from '../core/evaluate';
 import { markSpacePanned } from '../app/actions';
 import { starGeometry } from '../core/shapes';
+import { T, onThemeChange } from './theme';
 
 type Drag =
   | { kind: 'pan'; sx: number; sy: number; px: number; py: number }
@@ -56,6 +57,10 @@ export class ViewportController {
     window.addEventListener('keyup', e => { if (e.code === 'Space') { this.spaceDown = false; this.updateCursor(); } });
     const st = ed.store;
     st.on('selection', () => (this.overlayDirty = true));
+    // theme switch: overlay colors + the webgl pasteboard (clear color) follow the tokens
+    const applyTheme = () => { ed.renderer.editorBg = T.vpBgRgb; ed.renderer.dirty = true; this.overlayDirty = true; };
+    onThemeChange(applyTheme);
+    applyTheme();
     st.on('doc', () => (this.overlayDirty = true));
     st.on('time', () => (this.overlayDirty = true));
     ed.on('tool', () => { this.updateCursor(); if (ed.tool !== 'pen' && this.pen.active) this.pen.finish(false); });
@@ -584,15 +589,15 @@ export class ViewportController {
     const st = this.ed.store, r = this.ed.renderer;
     const comp = st.comp;
     // comp frame outline
-    g.strokeStyle = 'rgba(255,255,255,0.12)';
+    g.strokeStyle = T.vpCompOutline;
     g.lineWidth = 1;
     const [c0x, c0y] = this.toScreen(0, 0);
     g.strokeRect(Math.round(c0x) - 0.5, Math.round(c0y) - 0.5, Math.round(comp.width * this.zoom) + 1, Math.round(comp.height * this.zoom) + 1);
-    g.fillStyle = 'rgba(255,255,255,0.45)';
-    g.font = '11px system-ui, sans-serif';
+    g.fillStyle = T.vpLabel;
+    g.font = T.font.uiSm;
     g.fillText(`${comp.name}  ${comp.width}×${comp.height}`, c0x, c0y - 6);
 
-    const accent = '#4c8dff';
+    const accent = T.vpSelection;
     const poly = (c: number[]) => {
       g.beginPath();
       for (let i = 0; i < 4; i++) {
@@ -623,7 +628,7 @@ export class ViewportController {
         const [sx, sy] = this.toScreen(wx, wy);
         s ? g.lineTo(sx, sy) : g.moveTo(sx, sy);
       }
-      g.strokeStyle = 'rgba(76,141,255,0.6)';
+      g.strokeStyle = T.vpMotionPath;
       g.setLineDash([4, 3]);
       g.stroke();
       g.setLineDash([]);
@@ -633,9 +638,9 @@ export class ViewportController {
         const k = p.kf[pt.idx];
         const kx = pw[0] * k.v[0] + pw[2] * k.v[1] + pw[4], ky = pw[1] * k.v[0] + pw[3] * k.v[1] + pw[5];
         const [ax, ay] = this.toScreen(kx, ky);
-        g.strokeStyle = 'rgba(255,255,255,0.55)';
+        g.strokeStyle = T.vpTangent;
         g.beginPath(); g.moveTo(ax, ay); g.lineTo(pt.x, pt.y); g.stroke();
-        g.fillStyle = '#ffd34d';
+        g.fillStyle = T.vpTangentHandle;
         g.beginPath(); g.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2); g.fill();
       }
       // frame ticks + keyframe squares
@@ -660,7 +665,7 @@ export class ViewportController {
       const c = r.corners(st.selection[0]);
       if (c) {
         const pts = this.handlePoints(c);
-        g.fillStyle = '#fff';
+        g.fillStyle = T.vpHandle;
         g.strokeStyle = accent;
         for (const [hx, hy] of pts) {
           g.beginPath();
@@ -683,17 +688,17 @@ export class ViewportController {
         const label = `${Math.round(sz[0] * sc[0] / 100)} × ${Math.round(sz[1] * sc[1] / 100)}`;
         const by = Math.max(...[1, 3, 5, 7].map(i => this.toScreen(0, c[i])[1]));
         const bx = [0, 2, 4, 6].reduce((s, i) => s + this.toScreen(c[i], 0)[0], 0) / 4;
-        g.font = '11px system-ui, sans-serif';
+        g.font = T.font.uiSm;
         const tw = g.measureText(label).width + 10;
-        g.fillStyle = accent;
+        g.fillStyle = T.vpBadge;
         roundRect(g, bx - tw / 2, by + 8, tw, 18, 3);
         g.fill();
-        g.fillStyle = '#fff';
+        g.fillStyle = T.vpBadgeText;
         g.fillText(label, bx - tw / 2 + 5, by + 21);
       }
     }
     if (this.guides.x.length || this.guides.y.length) {
-      g.strokeStyle = '#ff4d6d';
+      g.strokeStyle = T.vpGuide;
       g.lineWidth = 1;
       const H = this.overlay.height, W = this.overlay.width;
       for (const gx of this.guides.x) { const [sx] = this.toScreen(gx, 0); g.beginPath(); g.moveTo(Math.round(sx) + 0.5, 0); g.lineTo(Math.round(sx) + 0.5, H); g.stroke(); }
@@ -702,7 +707,7 @@ export class ViewportController {
     this.pen.draw(g);
     const d = this.drag;
     if (d?.kind === 'marquee') {
-      g.fillStyle = 'rgba(76,141,255,0.08)';
+      g.fillStyle = T.vpMarqueeFill;
       g.strokeStyle = accent;
       const x = Math.min(d.sx, d.x), y = Math.min(d.sy, d.y);
       g.fillRect(x, y, Math.abs(d.x - d.sx), Math.abs(d.y - d.sy));

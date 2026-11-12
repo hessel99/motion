@@ -10,6 +10,7 @@ import {
 import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type PropKey } from '../core/model';
 import { showContextMenu, type MenuItem } from './menu';
 import { GraphView } from './graph';
+import { T, onThemeChange } from './theme';
 import { audioDuration, audioFailed, audioPeaks } from '../audio/engine';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { setEase, setInterp, setSpring, updateMarker, deleteMarker, cloneLayers, deleteLayers } from '../core/commands';
@@ -90,6 +91,7 @@ export class Timeline {
       lastDur = st.comp.duration; this.expanded.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
     ed.onFrame(() => this.frame());
     ed.on('audio', () => { this.baseDirty = true; });
+    onThemeChange(() => { this.baseDirty = true; });
     this.canvas.addEventListener('pointerdown', e => this.down(e));
     this.canvas.addEventListener('pointermove', e => this.move(e));
     this.canvas.addEventListener('pointerup', e => this.up(e));
@@ -220,7 +222,7 @@ export class Timeline {
   private drawPlayhead(x: number) {
     const g = this.g;
     if (x < this.leftW) return;
-    g.fillStyle = '#ff5a4f';
+    g.fillStyle = T.tlPlayhead;
     g.fillRect(x - 0.5, HEADER_H - 6, 1, this.h);
     g.beginPath();
     g.moveTo(x - 6, 4); g.lineTo(x + 6, 4); g.lineTo(x + 6, HEADER_H - 10); g.lineTo(x, HEADER_H - 4); g.lineTo(x - 6, HEADER_H - 10);
@@ -233,9 +235,9 @@ export class Timeline {
     const st = this.ed.store;
     const comp = st.comp;
     g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    g.fillStyle = '#161618';
+    g.fillStyle = T.tlBg;
     g.fillRect(0, 0, this.w, this.h);
-    g.font = '12px system-ui, -apple-system, Segoe UI, sans-serif';
+    g.font = T.font.ui;
     g.textBaseline = 'middle';
     const sel = new Set(st.selection);
     const first = Math.max(0, Math.floor(this.scrollY / ROW_H));
@@ -244,7 +246,7 @@ export class Timeline {
     const tEnd = this.tToX(comp.duration);
 
     // track background past comp end
-    g.fillStyle = '#111113';
+    g.fillStyle = T.tlBgOutside;
     g.fillRect(Math.max(x0, tEnd), HEADER_H, this.w, this.h);
 
     // rows
@@ -256,9 +258,9 @@ export class Timeline {
       const r = this.rows[i];
       const y = this.rowY(i);
       const isSel = sel.has(r.id) && r.kind === 'layer';
-      if (isSel) { g.fillStyle = 'rgba(76,141,255,0.18)'; g.fillRect(0, y, this.w, ROW_H); }
-      else if (i === this.hoverRow) { g.fillStyle = 'rgba(255,255,255,0.03)'; g.fillRect(0, y, this.w, ROW_H); }
-      g.fillStyle = 'rgba(255,255,255,0.04)';
+      if (isSel) { g.fillStyle = T.tlRowSelected; g.fillRect(0, y, this.w, ROW_H); }
+      else if (i === this.hoverRow) { g.fillStyle = T.tlRowHover; g.fillRect(0, y, this.w, ROW_H); }
+      g.fillStyle = T.tlRowLine;
       g.fillRect(0, y + ROW_H - 1, this.w, 1);
       if (r.kind === 'layer') this.drawLayerRow(g, r, y, isSel);
       else this.drawPropRow(g, r, y);
@@ -270,17 +272,17 @@ export class Timeline {
     }
 
     // left/right divider
-    g.fillStyle = '#2a2a2e';
+    g.fillStyle = T.tlDivider;
     g.fillRect(x0 - 1, 0, 1, this.h);
 
     // ruler
-    g.fillStyle = '#1c1c1f';
+    g.fillStyle = T.tlRulerBg;
     g.fillRect(0, 0, this.w, HEADER_H);
-    g.fillStyle = '#2a2a2e';
+    g.fillStyle = T.tlDivider;
     g.fillRect(0, HEADER_H - 1, this.w, 1);
     this.drawRuler(g);
-    g.fillStyle = '#8a8a93';
-    g.font = '11px system-ui, sans-serif';
+    g.fillStyle = T.tlTabText;
+    g.font = T.font.uiSm;
     // (layer count lives in the search box placeholder area)
     // keys / graph / speed toggle
     const tx0 = this.leftW - 150;
@@ -288,23 +290,23 @@ export class Timeline {
       const mode = !this.graphMode ? 0 : this.graph.speed ? 2 : 1;
       const on = i === mode;
       const bx = tx0 + i * 48;
-      g.fillStyle = on ? 'rgba(76,141,255,0.25)' : 'rgba(255,255,255,0.04)';
+      g.fillStyle = on ? T.tlTabOn : T.tlTab;
       g.beginPath(); g.roundRect(bx, 5, 44, HEADER_H - 10, 4); g.fill();
-      g.fillStyle = on ? '#cfe0ff' : '#8a8a93';
+      g.fillStyle = on ? T.tlTabOnText : T.tlTabText;
       g.fillText(label, bx + 22 - g.measureText(label).width / 2, HEADER_H / 2);
     }
 
     // scrollbars
     const vs = this.vScroll(), hs = this.hScroll();
-    g.fillStyle = 'rgba(255,255,255,0.18)';
+    g.fillStyle = T.tlScrollbar;
     if (vs) { g.beginPath(); g.roundRect(this.w - 7, vs.y, 5, vs.h, 2.5); g.fill(); }
     if (hs) { g.beginPath(); g.roundRect(hs.x, this.h - 7, hs.w, 5, 2.5); g.fill(); }
 
     // drag feedback
     const d = this.drag;
     if (d?.kind === 'marquee') {
-      g.fillStyle = 'rgba(76,141,255,0.1)';
-      g.strokeStyle = '#4c8dff';
+      g.fillStyle = T.tlMarqueeFill;
+      g.strokeStyle = T.tlMarqueeStroke;
       const x = Math.min(d.sx, d.x), y = Math.min(d.sy, d.y);
       g.fillRect(x, y, Math.abs(d.x - d.sx), Math.abs(d.y - d.sy));
       g.strokeRect(x + 0.5, y + 0.5, Math.abs(d.x - d.sx), Math.abs(d.y - d.sy));
@@ -312,7 +314,7 @@ export class Timeline {
     if (d?.kind === 'rows' && d.moved) {
       const tgt = this.dropTarget(d.y);
       if (tgt) {
-        g.fillStyle = '#4c8dff';
+        g.fillStyle = T.tlDrop;
         if (tgt.into) { g.globalAlpha = 0.25; g.fillRect(0, tgt.lineY, this.leftW, ROW_H); g.globalAlpha = 1; }
         else g.fillRect(8 + tgt.depth * INDENT, tgt.lineY - 1, this.leftW - 8 - tgt.depth * INDENT, 2);
       }
@@ -329,22 +331,22 @@ export class Timeline {
     const tStart = Math.max(0, this.xToT(this.leftW));
     const tStop = Math.min(comp.duration, this.xToT(this.w));
     const fStart = Math.floor(tStart * fps / stepF) * stepF;
-    g.font = '10px system-ui, sans-serif';
+    g.font = T.font.uiXs;
     g.textBaseline = 'middle';
     for (let f = fStart; f <= tStop * fps + 1e-6; f += stepF) {
       const x = Math.round(this.tToX(f / fps)) + 0.5;
       if (x < this.leftW) continue;
-      g.fillStyle = '#3a3a40';
+      g.fillStyle = T.tlTick;
       g.fillRect(x, HEADER_H - 8, 1, 8);
-      g.fillStyle = 'rgba(255,255,255,0.025)';
+      g.fillStyle = T.tlGrid;
       g.fillRect(x, HEADER_H, 1, this.h);
-      g.fillStyle = '#8a8a93';
+      g.fillStyle = T.tlRulerText;
       g.fillText(fmtTime(f / fps, fps), x + 3, HEADER_H / 2 - 1);
       // minor ticks
       const minor = stepF >= 5 ? stepF / 5 : 0;
       if (minor >= 1) for (let m = 1; m < 5; m++) {
         const mx = Math.round(this.tToX((f + m * minor) / fps)) + 0.5;
-        g.fillStyle = '#2f2f35';
+        g.fillStyle = T.tlTickMinor;
         g.fillRect(mx, HEADER_H - 4, 1, 4);
       }
     }
@@ -353,9 +355,9 @@ export class Timeline {
     if (wa) {
       const ax = Math.max(this.leftW, this.tToX(wa[0])), bx = Math.min(this.w, this.tToX(wa[1]));
       if (bx > ax) {
-        g.fillStyle = 'rgba(76,141,255,0.35)';
+        g.fillStyle = T.tlWorkArea;
         g.fillRect(ax, HEADER_H - 5, bx - ax, 4);
-        g.fillStyle = 'rgba(0,0,0,0.25)';
+        g.fillStyle = T.tlWorkAreaDim;
         g.fillRect(this.leftW, HEADER_H, Math.max(0, ax - this.leftW), this.h);
         g.fillRect(bx, HEADER_H, Math.max(0, this.w - bx), this.h);
       }
@@ -364,15 +366,15 @@ export class Timeline {
     for (const m of comp.markers ?? []) {
       const mx = Math.round(this.tToX(m.t)) + 0.5;
       if (mx < this.leftW - 2 || mx > this.w + 2) continue;
-      g.fillStyle = 'rgba(255,176,64,0.18)';
+      g.fillStyle = T.tlMarkerLine;
       g.fillRect(mx - 0.5, HEADER_H, 1, this.h);
-      g.fillStyle = '#ffb040';
+      g.fillStyle = T.tlMarker;
       g.beginPath(); g.moveTo(mx - 4, HEADER_H - 13); g.lineTo(mx + 4, HEADER_H - 13); g.lineTo(mx + 4, HEADER_H - 6); g.lineTo(mx, HEADER_H - 2); g.lineTo(mx - 4, HEADER_H - 6); g.closePath(); g.fill();
-      if (m.label) { g.font = '10px system-ui, sans-serif'; g.fillText(m.label, mx + 6, HEADER_H - 7); }
+      if (m.label) { g.font = T.font.uiXs; g.fillText(m.label, mx + 6, HEADER_H - 7); }
     }
     const endX = this.tToX(comp.duration);
     if (endX > this.leftW && endX < this.w) {
-      g.fillStyle = '#4c8dff';
+      g.fillStyle = T.tlCompEnd;
       g.fillRect(endX, 0, 1, HEADER_H);
     }
   }
@@ -385,7 +387,7 @@ export class Timeline {
     const animated = Object.values(l.props).some(p => p?.kf?.length || p?.expr);
     // twirl
     if (r.hasChildren || animated) {
-      g.fillStyle = '#9a9aa3';
+      g.fillStyle = T.tlTwirl;
       g.beginPath();
       if (this.expanded.has(l.id)) { g.moveTo(ix, cy - 2); g.lineTo(ix + 8, cy - 2); g.lineTo(ix + 4, cy + 3); }
       else { g.moveTo(ix + 2, cy - 4); g.lineTo(ix + 7, cy); g.lineTo(ix + 2, cy + 4); }
@@ -394,23 +396,23 @@ export class Timeline {
     }
     // type icon
     const tx = ix + 14;
-    g.strokeStyle = l.visible ? '#b9b9c2' : '#55555c';
+    g.strokeStyle = l.visible ? T.tlIcon : T.tlIconOff;
     g.fillStyle = g.strokeStyle;
     g.lineWidth = 1.2;
     drawTypeIcon(g, l.type, tx, cy);
     // name
-    g.fillStyle = !l.visible ? '#66666e' : isSel ? '#ffffff' : '#d6d6dc';
-    g.font = '12px system-ui, -apple-system, Segoe UI, sans-serif';
+    g.fillStyle = !l.visible ? T.tlLayerNameHidden : isSel ? T.tlLayerNameSelected : T.tlLayerName;
+    g.font = T.font.ui;
     const nameX = tx + 16;
     const maxW = this.leftW - nameX - 70;
     g.fillText(ellipsize(g, l.name, maxW), nameX, cy);
     // solo + eye + lock
     const soloed = st.solo.has(l.id);
-    g.fillStyle = soloed ? '#ffcc00' : '#3a3a40';
+    g.fillStyle = soloed ? T.tlSolo : T.tlControlOff;
     g.beginPath(); g.arc(this.leftW - 58, cy, soloed ? 4 : 3, 0, Math.PI * 2); g.fill();
-    g.fillStyle = l.visible ? '#8a8a93' : '#4a4a50';
+    g.fillStyle = l.visible ? T.tlControl : T.tlControlOff;
     drawEye(g, this.leftW - 40, cy, l.visible);
-    g.fillStyle = l.locked ? '#d6d6dc' : '#3a3a40';
+    g.fillStyle = l.locked ? T.tlControlOn : T.tlControlOff;
     drawLock(g, this.leftW - 20, cy);
 
     // track: layer bar
@@ -418,7 +420,7 @@ export class Timeline {
     const inX = Math.max(this.leftW, this.tToX(Math.max(0, l.inPoint)));
     const outX = Math.min(this.w, this.tToX(Math.min(comp.duration, l.outPoint)));
     if (outX > inX) {
-      g.fillStyle = isSel ? 'rgba(76,141,255,0.30)' : 'rgba(255,255,255,0.06)';
+      g.fillStyle = isSel ? T.tlBarSelected : T.tlBar;
       g.beginPath();
       g.roundRect(inX, y + 4, outX - inX, ROW_H - 8, 3);
       g.fill();
@@ -431,14 +433,14 @@ export class Timeline {
       if (peaks && dur) {
         const start = l.startTime ?? 0;
         const x0 = this.tToX(start), x1 = this.tToX(start + dur);
-        g.fillStyle = isSel ? 'rgba(120,220,170,0.9)' : 'rgba(80,190,140,0.75)';
+        g.fillStyle = isSel ? T.tlAudioSelected : T.tlAudio;
         const h = (ROW_H - 8) / 2;
         for (let x = Math.max(this.leftW, Math.floor(x0)); x < Math.min(this.w, x1); x += 2) {
           const p = peaks[Math.min(peaks.length - 1, Math.floor(((x - x0) / (x1 - x0)) * peaks.length))];
           const ph = Math.max(0.5, p * h);
           g.fillRect(x, cy - ph, 1.5, ph * 2);
         }
-      } else { g.fillStyle = '#6a6a72'; g.font = '10px system-ui'; g.fillText(asset && audioFailed(asset) ? 'audio could not be decoded' : 'decoding audio…', Math.max(this.leftW + 6, this.tToX(l.startTime ?? 0)), cy); }
+      } else { g.fillStyle = T.tlHint; g.font = T.font.uiXs; g.fillText(asset && audioFailed(asset) ? 'audio could not be decoded' : 'decoding audio…', Math.max(this.leftW + 6, this.tToX(l.startTime ?? 0)), cy); }
     }
     // text animation range (per-unit reveal) as a bar
     if (l.textAnim && l.text) {
@@ -448,17 +450,17 @@ export class Timeline {
       const t1 = t0 + ta.duration + ta.stagger * Math.max(0, units - 1);
       const x0 = Math.max(this.leftW, this.tToX(t0)), x1 = Math.min(this.w, this.tToX(t1));
       if (x1 > x0) {
-        g.fillStyle = 'rgba(199,146,234,0.55)';
+        g.fillStyle = T.tlTextAnim;
         g.beginPath(); g.roundRect(x0, y + 7, x1 - x0, ROW_H - 14, 3); g.fill();
-        g.fillStyle = '#f3e8ff';
-        g.font = '10px system-ui, sans-serif';
+        g.fillStyle = T.tlTextAnimLabel;
+        g.font = T.font.uiXs;
         if (x1 - x0 > 60) g.fillText(`text ${ta.by}`, x0 + 5, cy);
       }
     }
     // keyframe summary (collapsed) — union of key times
     if (!this.expanded.has(l.id) && animated) {
       const times = layerKeyTimes(l);
-      g.fillStyle = isSel ? '#cfe0ff' : '#9a9aa3';
+      g.fillStyle = isSel ? T.tlKeySummarySelected : T.tlKeySummary;
       let lastX = -10;
       for (const t of times) {
         const x = this.tToX(t);
@@ -478,16 +480,16 @@ export class Timeline {
     // keyframe nav: ◆ at current time indicator
     const kf = l.props[key]?.kf ?? [];
     const atKey = kf.some(k => Math.abs(k.t - st.time) < 1e-6);
-    g.fillStyle = atKey ? '#4c8dff' : '#5a5a62';
+    g.fillStyle = atKey ? T.tlKeySelected : T.tlKeyOff;
     diamond(g, ix + 18, cy, 4);
-    atKey ? g.fill() : (g.strokeStyle = '#7a7a82', g.stroke());
-    g.fillStyle = '#b9b9c2';
-    g.font = '12px system-ui, sans-serif';
+    atKey ? g.fill() : (g.strokeStyle = T.tlKeyOffStroke, g.stroke());
+    g.fillStyle = T.tlPropName;
+    g.font = T.font.ui;
     g.fillText(PROP_DEFS[key].label + (l.props[key]?.expr ? '  =' : ''), ix + 30, cy);
     // current value
     const v = valueAt(l, key, st.time);
-    g.fillStyle = '#6aa3ff';
-    g.font = '11px ui-monospace, SFMono-Regular, Menlo, monospace';
+    g.fillStyle = T.tlValue;
+    g.font = T.font.monoSm;
     const txt = fmtValue(key, v);
     const tw = g.measureText(txt).width;
     g.fillText(txt, this.leftW - 12 - tw, cy);
@@ -500,11 +502,11 @@ export class Timeline {
       if (i < kf.length - 1 && kf[i].interp !== 'hold') {
         const x2 = this.tToX(kf[i + 1].t);
         const segSel = selected && st.keySelection.has(keyId(l.id, key, i + 1));
-        g.fillStyle = segSel ? 'rgba(76,141,255,0.8)' : kf[i].interp === 'spring' ? 'rgba(255,190,90,0.35)' : 'rgba(255,255,255,0.12)';
+        g.fillStyle = segSel ? T.tlSegmentSelected : kf[i].interp === 'spring' ? T.tlSegmentSpring : T.tlSegment;
         g.fillRect(Math.max(this.leftW, x), cy - (segSel ? 1 : 0.5), Math.max(0, Math.min(this.w, x2) - Math.max(this.leftW, x)), segSel ? 2 : 1);
       }
-      g.fillStyle = selected ? '#4c8dff' : '#d6d6dc';
-      g.strokeStyle = selected ? '#bcd4ff' : '#16161a';
+      g.fillStyle = selected ? T.tlKeySelected : T.tlKey;
+      g.strokeStyle = selected ? T.tlKeySelectedStroke : T.tlKeyStroke;
       g.lineWidth = 1;
       if (kf[i].interp === 'hold') { g.beginPath(); g.rect(x - 4, cy - 4, 8, 8); }
       else if (kf[i].interp === 'linear') diamond(g, x, cy, 5);
@@ -1051,7 +1053,7 @@ function drawTypeIcon(g: CanvasRenderingContext2D, type: Layer['type'], x: numbe
     case 'rect': g.rect(x - 4.5, y - 4.5, 9, 9); g.stroke(); break;
     case 'ellipse': g.arc(x, y, 5, 0, Math.PI * 2); g.stroke(); break;
     case 'group': g.rect(x - 5, y - 4, 10, 8); g.moveTo(x - 5, y - 1.5); g.lineTo(x + 5, y - 1.5); g.stroke(); break;
-    case 'text': g.font = 'bold 11px system-ui'; g.fillText('T', x - 3.5, y + 0.5); break;
+    case 'text': g.font = T.font.uiBoldSm; g.fillText('T', x - 3.5, y + 0.5); break;
     case 'image': g.rect(x - 5, y - 4, 10, 8); g.moveTo(x - 5, y + 3); g.lineTo(x - 1, y - 1); g.lineTo(x + 2, y + 2); g.stroke(); break;
     case 'path': g.moveTo(x - 5, y + 4); g.bezierCurveTo(x - 3, y - 6, x + 3, y + 6, x + 5, y - 4); g.stroke(); break;
     case 'precomp': g.rect(x - 5, y - 4, 10, 8); g.rect(x - 2.5, y - 1.5, 5, 3); g.stroke(); break;
