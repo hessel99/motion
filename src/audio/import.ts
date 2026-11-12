@@ -5,7 +5,7 @@
 import { editor } from '../app/editor';
 import { createLayer, uid, type Asset, type Layer } from '../core/model';
 import { ensureAnalysis } from './analysis-store';
-import { music, refreshAudioEnv } from './timing';
+import { music, refreshAudioEnv, isMusic } from './timing';
 import { musicalLengths, syncToMusic } from './sync';
 import { insertLayer, setCompSettings } from '../core/commands';
 
@@ -65,6 +65,7 @@ export async function offerAfterImport(l: Layer) {
   editor.emit('audio');
   const m = music(s);
   const { actionCard } = await import('../ui/audio/action-card');
+  if (!isMusic(a)) { toast(`Audio added (${a.duration.toFixed(1)} s, no steady beat to sync to)`); return; }
   const secs = a.sections.filter(x => x.label !== 'main').map(x => x.label);
   toast(`${Math.round(a.bpm)} BPM · ${a.meter}/4 · ${a.beats.length} beats${secs.length ? ' · ' + [...new Set(secs)].join(', ') : ''} (${Math.round(performance.now() - t0)} ms)`);
   if (m && m.layer.id === l.id) {

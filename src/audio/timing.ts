@@ -28,13 +28,16 @@ export function audioLayers(project: Pick<Project, 'layers'>, root: string[]): L
   return out;
 }
 
+/** a clip with a beat to follow (not a one-shot sound or a short stinger) */
+export function isMusic(a: AudioAnalysis): boolean { return a.duration >= 4 && a.beats.length >= 8; }
+
 /** the leading music layer of the active comp with its analysis (null without one, or while analysing) */
 export function music(store: Store): Music | null {
   const p = store.project;
   for (const l of audioLayers(p, store.comp.root)) {
     if (l.sfx || !l.visible) continue;
     const a = layerAnalysis(l, p.assets);
-    if (!a) continue;
+    if (!a || !isMusic(a)) continue;
     const start = l.startTime ?? 0;
     return { layer: l, a, start, grid: start + (l.audio?.gridOffset ?? 0), from: Math.max(l.inPoint, start), to: Math.min(l.outPoint, start + a.duration) };
   }

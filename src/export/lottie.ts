@@ -44,7 +44,8 @@ function bakeSprings(kf: Keyframe[], fr: number): Keyframe[] {
 function exportProp(p: Prop | undefined, def: number[], fr: number, conv: (v: number[]) => number[] = v => v, spatial = false): any {
   const r = exportPropInner(p, def, fr, conv, spatial);
   // expressions: our syntax is a subset of after effects / lottie-web javascript for the common cases
-  if (p?.expr) r.x = p.expr.startsWith('var ') ? p.expr : `var $bm_rt = ${p.expr};`;
+  // (audio() reads the editor's music analysis: lottie players have no music, so those keep their keys)
+  if (p?.expr && !/\baudio\s*\(/.test(p.expr)) r.x = p.expr.startsWith('var ') ? p.expr : `var $bm_rt = ${p.expr};`;
   return r;
 }
 

@@ -16,11 +16,11 @@ const page = await ctx.newPage();
 await page.addInitScript(() => { try { localStorage.setItem('motion.welcomed', '1'); } catch { /* */ } });
 const errs = [];
 page.on('pageerror', e => errs.push(e.message));
-page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') errs.push('console: ' + m.text().slice(0, 300)); });
+page.on('console', m => { if ((m.type() === 'error' || m.type() === 'warning') && !/GL Driver Message/.test(m.text())) errs.push('console: ' + m.text().slice(0, 300)); });
 await page.goto(`${URL}?nobridge&blank&theme=dark`);
 await page.waitForFunction(() => window.editor?.renderer && window.timeline);
 const results = {};
-await page.waitForTimeout(500); await page.screenshot({ path: '/tmp/claude-0/-home-user-motion/ca43b0e9-8003-5656-8c44-1c94f63bf032/scratchpad/blank.png' });
+
 const ok = (name, pass, info = '') => { results[name] = pass; console.log(`${pass ? 'PASS' : 'FAIL'} ${name} ${typeof info === 'string' ? info : JSON.stringify(info)}`); };
 const shot = async name => { await page.waitForTimeout(250); await page.screenshot({ path: `${OUT}/${name}.png` }); };
 
@@ -68,7 +68,6 @@ const info = await page.evaluate(async () => {
 });
 ok('analysis: 120 bpm, 4/4, drop at 16 s', Math.abs(info.bpm - 120) < 0.3 && info.meter === 4 && info.sections.some(s => s === 'drop@16.00'), info);
 await page.evaluate(() => { timeline.fitTime(); timeline.invalidate(); });
-console.log('rows', await page.evaluate(() => [document.elementsFromPoint(700, 800).map(e => e.tagName + '.' + e.className).join(' > '), document.elementsFromPoint(700, 300).map(e => e.tagName + '.' + e.className).join(' > '), timeline.rows.length, timeline.h, timeline.leftW, document.documentElement.dataset.theme, getComputedStyle(document.body).backgroundColor]));
 await shot('01-paste-offers');
 
 // ---- fit the comp to a phrase, then sync timing from the card

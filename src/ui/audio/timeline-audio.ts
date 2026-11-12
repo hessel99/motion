@@ -149,7 +149,7 @@ export function drawMusicRuler(g: CanvasRenderingContext2D, v: TlView, store: St
     if (s.label !== 'main' && b - a > 40) {
       g.fillStyle = col('--tl-sec-label', 'rgba(255,255,255,0.55)');
       g.font = '600 9px system-ui, sans-serif';
-      g.fillText(s.label.toUpperCase(), a + 3, H - 9);
+      g.fillText(s.label.toUpperCase(), a + 26, H - 9); // clear of the time label at the section start
     }
   }
   const bt = beats(m), br = bars(m);
@@ -169,6 +169,5 @@ export function drawMusicRuler(g: CanvasRenderingContext2D, v: TlView, store: St
     g.fillRect(x - 0.5, H - 10, 1.5, 10);
     g.fillStyle = col('--tl-bar-line', 'rgba(255,200,90,0.07)');
     g.fillRect(x - 0.5, H, 1, v.h - H);
-    if (barPx * every >= 24) { g.fillStyle = barTick; g.fillText(String(i + 1), x + 3, H - 15); }
   });
 }

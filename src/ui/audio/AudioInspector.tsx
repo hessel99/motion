@@ -115,14 +115,21 @@ export function TimingRow({ l, ids }: { l: Layer; ids: string[] }) {
   const s = st(), f = 1 / s.comp.fps;
   const setField = (k: 'startTime' | 'inPoint' | 'outPoint', n: number, label: string, mk?: string) => s.transact(label, tx => { for (const id of ids) { const x = s.layer(id); if (x) { tx.set(x, k, n); tx.touch(id); } } tx.recompile(); }, mk);
   return (
+    <>
     <div class="au-row">
-      <span class="au-label">Timing</span>
+      <span class="au-label">Start</span>
       <span class="au-grow">
-        <NumField label="Start" step={f} suffix="s" value={l.startTime ?? 0} title="When the clip starts (comp time); drag the waveform to move it" onChange={(n, mk) => setField('startTime', n, 'Audio start', mk)} />
+        <NumField label="at" step={f} suffix="s" value={l.startTime ?? 0} title="When the clip starts (comp time); drag the waveform to move it" onChange={(n, mk) => setField('startTime', n, 'Audio start', mk)} />
+      </span>
+    </div>
+    <div class="au-row">
+      <span class="au-label">Trim</span>
+      <span class="au-grow">
         <NumField label="In" step={f} min={0} suffix="s" value={Math.max(0, l.inPoint)} title="Trim: audible from" onChange={(n, mk) => setField('inPoint', Math.max(0, n), 'Trim audio', mk)} />
         <NumField label="Out" step={f} suffix="s" value={l.outPoint >= 1e8 ? s.comp.duration : l.outPoint} title="Trim: audible until" onChange={(n, mk) => setField('outPoint', n >= s.comp.duration - 1e-6 ? 1e9 : n, 'Trim audio', mk)} />
       </span>
     </div>
+    </>
   );
 }
 

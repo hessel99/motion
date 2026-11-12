@@ -322,6 +322,26 @@ export function runCheck(check, m, d) {
       return n >= 3;
     }
     case 'wipes': return L.some((l) => l.type === 'rect' && (propAnimated(l, 'size') || kfOf(l, 'scale').some((k) => Math.abs(k.v[0] - k.v[1]) > 5)));
+    // music briefs (brief.audio): moves land within ±frames of the generated track's beat grid
+    case 'onBeats': {
+      const fps = d.comp.fps, tol = (check.frames ?? 1) / fps + 1e-6, step = 60 / check.bpm, off = check.offset ?? 0;
+      const near = (t) => Math.abs((t - off) / step - Math.round((t - off) / step)) * step <= tol;
+      const ends = [...new Set(d.segs.filter((s) => d.byId[s.id]?.type !== 'audio').map((s) => +s.t1.toFixed(4)))];
+      return ends.length >= (check.minMoves ?? 4) && ends.filter(near).length / ends.length >= (check.min ?? 0.6);
+    }
+    case 'hitAt': {
+      const tol = (check.frames ?? 1) / d.comp.fps + 1e-6;
+      return d.segs.some((s) => d.byId[s.id]?.type !== 'audio' && (Math.abs(s.t1 - check.t) <= tol || (check.starts && Math.abs(s.t0 - check.t) <= tol)));
+    }
+    case 'notEveryBeat': {
+      // restraint: some beats in the range carry no landing
+      const step = 60 / check.bpm, tol = 1 / d.comp.fps + 1e-6;
+      const ends = d.segs.filter((s) => d.byId[s.id]?.type !== 'audio').map((s) => s.t1);
+      let empty = 0, n = 0;
+      for (let t = check.from ?? 0; t <= (check.to ?? d.comp.duration) + 1e-6; t += step) { n++; if (!ends.some((e) => Math.abs(e - t) <= tol)) empty++; }
+      return n > 0 && empty / n >= (check.min ?? 0.25);
+    }
+    case 'audioKept': return d.layers.some((l) => l.type === 'audio' && !l.sfx);
     case 'beatGrid': {
       if (m.markers >= 3) return true;
       const step = 60 / check.bpm, ts = d.segs.map((s) => s.t0);
