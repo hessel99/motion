@@ -18,6 +18,7 @@ import { variations } from './variations';
 import { addToken, BINDABLE, findToken, linkProp, prettyName, setTokenMode, setTokenValue, tokenUsage, tokenValue, linkOf } from '../core/tokens';
 import { toHex } from '../core/token-sync';
 import { createComponent, createInstance, instanceRootOf, instancesOf } from '../core/components';
+import { SHADER_TOOLS } from './shader-tools';
 
 export interface ToolDef {
   name: string;
@@ -704,6 +705,7 @@ export const TOOLS: ToolDef[] = [
     run: ({ id }) => { const v = variations.apply(st(), id); return text(`applied ${JSON.stringify(v.label)}`); },
   },
   ...STYLE_TOOLS,
+  ...SHADER_TOOLS,
 ];
 
 /** keyframes from the tool format ({t, v, ease, interp, sOut, sIn}) to the model format */

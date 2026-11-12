@@ -3,7 +3,7 @@
 import { evalProp } from './evaluate';
 import { EASE_PRESETS } from './easing';
 import {
-  createComp, createLayer, defaultEase, PROP_DEFS, uid,
+  createComp, createLayer, defaultEase, PROP_DEFS, propDef, uid,
   type Keyframe, type Layer, type LayerType, type Marker, type Prop, type PropKey, type Interp,
 } from './model';
 import type { Store, Tx } from './store';
@@ -13,11 +13,13 @@ const EPS = 1e-6;
 /** editor modes that affect editing commands */
 export const editMode = { autoKey: false };
 
-export function propDim(key: PropKey) { return PROP_DEFS[key].dim; }
+export function propDim(key: PropKey) { return propDef(key).dim; }
 
 export function valueAt(layer: Layer, key: PropKey, t: number): number[] {
-  const def = PROP_DEFS[key];
-  return evalProp(layer.props[key], t, def.dim, def.default as unknown as number[]);
+  const def = propDef(key);
+  const p = layer.props[key];
+  // shader params (`sh:` keys) have the dimension of their value
+  return evalProp(p, t, key.startsWith('sh:') && p ? p.v.length : def.dim, def.default as unknown as number[]);
 }
 
 export function isAnimated(layer: Layer, key: PropKey) {
@@ -25,7 +27,7 @@ export function isAnimated(layer: Layer, key: PropKey) {
 }
 
 function clampValue(key: PropKey, v: number[]): number[] {
-  const def = PROP_DEFS[key] as { min?: number; max?: number };
+  const def = propDef(key);
   if (def.min === undefined && def.max === undefined) return v;
   return v.map(x => Math.min(def.max ?? Infinity, Math.max(def.min ?? -Infinity, x)));
 }
@@ -341,13 +343,13 @@ export function setProp(store: Store, id: string, key: PropKey, value: number[],
   if (!l) return;
   const t = opts.time ?? store.time;
   const v = clampValue(key, value);
-  store.transact(`Change ${PROP_DEFS[key].label}`, tx => setPropTx(tx, l, key, v, t, !!opts.forceKey), opts.mergeKey);
+  store.transact(`Change ${propDef(key).label}`, tx => setPropTx(tx, l, key, v, t, !!opts.forceKey), opts.mergeKey);
 }
 
 export function setPropTx(tx: Tx, l: Layer, key: PropKey, value: number[], t: number, forceKey = false) {
   let p = l.props[key];
   if (!p) {
-    p = { v: (PROP_DEFS[key].default as unknown as number[]).slice() };
+    p = { v: (propDef(key).default as unknown as number[]).slice() };
     tx.set(l.props, key, p);
   }
   if ((p.kf && p.kf.length) || forceKey || editMode.autoKey) {
@@ -766,7 +768,7 @@ export function setExpr(store: Store, ids: string[], key: PropKey, src: string |
       const l = store.layer(id);
       if (!l) continue;
       let p = l.props[key];
-      if (!p) { p = { v: (PROP_DEFS[key].default as unknown as number[]).slice() }; tx.set(l.props, key, p); }
+      if (!p) { p = { v: (propDef(key).default as unknown as number[]).slice() }; tx.set(l.props, key, p); }
       tx.set(p, 'expr', src?.trim() ? src : undefined);
       tx.touch(id);
     }

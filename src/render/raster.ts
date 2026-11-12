@@ -125,7 +125,7 @@ function finishMask(out: Uint8Array) {
 }
 
 function hasComplexPaint(l: Layer) {
-  return !!l.paints && l.paints.some(p => p.type !== 'solid');
+  return !!l.paints && l.paints.some(p => p.type !== 'solid' && p.type !== 'shader'); // shader fills: drawn by the gpu over a coverage mask
 }
 
 /** trim (0..1 start/end, offset in turns) for strokes, applied with a dash pattern */

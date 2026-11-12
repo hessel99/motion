@@ -265,6 +265,7 @@ export async function exportVideoDetailed(opts: ExportVideoOptions = {}, onProgr
       r.render(t);
       // first-time rasters are spread over frames in the editor: for export, finish them now
       for (let k = 0; k < 50 && r.dirty; k++) r.render(t);
+      await r.settleShaders(t); // figma shaders: wait for this exact frame
       // capture synchronously: the drawing buffer is only valid until this task ends
       const frame = new VideoFrame(r.canvas, { timestamp: frameTimestampUs(i, fps), duration: frameDurationUs(i, fps) });
       encoder.encode(frame, { keyFrame: i % keyEvery === 0 });

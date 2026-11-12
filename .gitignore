@@ -13,3 +13,7 @@ undefined-*.png
 
 # update signing key (scripts/gen-update-key.mjs): never commit
 .update-key/
+
+# figma shader sources fetched for local tests (figma code: never commit)
+.figma-cache/
+bench/results/shaders/

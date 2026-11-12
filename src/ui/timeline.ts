@@ -10,7 +10,8 @@ import {
   isAnimated, keyId, layerKeyTimes, moveKeyframes, moveLayers, parseKeyId, renameLayer, setLayerField, valueAt,
   addKeyframe, deleteKeyframes, toggleAnimated, precompose, snapshotKeys, moveKeysFrom, type KeySnapshot,
 } from '../core/commands';
-import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
+import { PROP_DEFS, propDef, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
+import { shaderPropInfo, shaderPropKeys } from '../core/shaders';
 import { showContextMenu, type MenuItem } from './menu';
 import { createComponent, createInstance, detachInstance, instanceRootOf, overridesOf, resetOverrides } from '../core/components';
 import { GraphView } from './graph';
@@ -36,7 +37,13 @@ function propRowMask(l: Layer) {
   const keys = rowKeys(l.type);
   let m = 0;
   for (let i = 0; i < keys.length; i++) { const p = l.props[keys[i]]; if (p && (p.kf?.length || p.expr)) m |= 1 << i; }
+  // shader params (`sh:` keys): their count of animated rows, above the fixed-prop bits
+  if (l.paints || l.shaderEffects) { let n = 0; for (const k in l.props) if (k.startsWith('sh:')) { const p = l.props[k as PropKey]; if (p && (p.kf?.length || p.expr)) n++; } m += (n & 127) * 2 ** 24; }
   return m;
+}
+/** label of a prop row: fixed props, or "Shader · Param" */
+function propLabel(project: import('../core/model').Project, l: Layer, key: PropKey) {
+  return key.startsWith('sh:') ? shaderPropInfo(project, l, key)?.label ?? propDef(key).label : PROP_DEFS[key].label;
 }
 function hasAnim(l: Layer) {
   for (const k in l.props) { const p = l.props[k as PropKey]; if (p && (p.kf?.length || p.expr)) return true; }
@@ -292,6 +299,15 @@ export class Timeline {
             const p = l.props[keys[k]];
             if (p && (p.kf?.length || p.expr)) m |= 1 << k;
             if (p && (this.allProps || p.kf?.length || p.expr)) { rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: keys[k], hasChildren: false, mask: -1 }); }
+          }
+          if (l.paints || l.shaderEffects) {
+            let n = 0;
+            for (const sk of shaderPropKeys(st.project, l)) {
+              const p = l.props[sk as PropKey];
+              if (p && (p.kf?.length || p.expr)) n++;
+              if (p && (this.allProps || p.kf?.length || p.expr)) rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: sk as PropKey, hasChildren: false, mask: -1 });
+            }
+            m += (n & 127) * 2 ** 24;
           }
           row.mask = m;
           walk(l.children, depth + 1);
@@ -696,13 +712,13 @@ export class Timeline {
     atKey ? g.fill() : (g.strokeStyle = T.tlKeyOffStroke, g.stroke());
     g.fillStyle = T.tlPropName;
     g.font = T.font.ui;
-    g.fillText(PROP_DEFS[key].label + (l.props[key]?.expr ? '  =' : ''), ix + 30, cy);
+    g.fillText(propLabel(st.project, l, key) + (l.props[key]?.expr ? '  =' : ''), ix + 30, cy);
     // current value
     if (!this.hideValues) {
     const v = valueAt(l, key, st.time);
     g.fillStyle = T.tlValue;
     g.font = T.font.monoSm;
-    if (this.studio && PROP_DEFS[key].unit !== 'color' && v.length <= 2) {
+    if (this.studio && propDef(key).unit !== 'color' && v.length <= 2) {
       // two compact value columns ("242  150")
       const cols = v.length === 2 ? v : [v[0]];
       for (let c = 0; c < cols.length; c++) {
@@ -1357,7 +1373,7 @@ export function fmtTime(t: number, fps: number) {
   return f ? `${s}:${String(f).padStart(2, '0')}` : `${s}s`;
 }
 export function fmtValue(key: PropKey, v: number[]) {
-  const def = PROP_DEFS[key];
+  const def = propDef(key);
   if (def.unit === 'color') return '#' + v.slice(0, 3).map(c => Math.round(Math.min(1, Math.max(0, c)) * 255).toString(16).padStart(2, '0')).join('') + (v[3] < 1 ? ` ${Math.round(v[3] * 100)}%` : '');
   const r = (n: number) => (Math.abs(n) >= 100 ? n.toFixed(0) : n.toFixed(1)).replace(/\.0$/, '');
   if (key === 'radius' && v.every(x => x === v[0])) return r(v[0]);
