@@ -11,15 +11,24 @@ import { variations } from '../agent/variations';
 import { MentionInput, type Mention } from './agent/MentionInput';
 import { TurnReview } from './agent/TurnReview';
 import { VariationTray, installVariationThumbs } from './agent/VariationTray';
+import { agentPrefs, setAgentPref, CLAUDE_MODELS, PROVIDER_LABEL, modelLabel } from './agent/agent-prefs';
+import { showContextMenu, type MenuItem } from './menu';
+import { openSettings } from './chrome/ui-state';
+import { useChannels } from './hooks';
+import { Button } from './ui';
+import { ArrowUp, Check, ChevronDown, CircleX, File, LAYER_ICON, Layers, LoaderCircle, Plus, Sparkle, Square, SquarePen, X } from './chrome/icons';
+import type { ComponentChildren } from 'preact';
 import './agent/agent.css';
-
-const STORAGE = 'motion.agent';
-const pref = (k: string, d: string) => { try { return localStorage.getItem(STORAGE + '.' + k) || d; } catch { return d; } };
-const setPref = (k: string, v: string) => { try { localStorage.setItem(STORAGE + '.' + k, v); } catch { /* */ } };
 
 interface Turn { chatId: string; startedAt: number; activity: string; stopping: boolean; live: number; snap: DocSnapshot; startId: number }
 
-export function AgentPanel() {
+/**
+ * the left panel's agent: the conversation (when `chat`) or another tab's content (`children`)
+ * above the composer, which is always there. state (messages, the running turn) lives here so
+ * switching tabs never drops a conversation.
+ */
+export function AgentPanel(props: { chat: boolean; children?: ComponentChildren; onSent?: () => void }) {
+  useChannels([], ['agent-prefs']);
   const [, force] = useState(0);
   const key = useRef(projectKey(editor.store.project));
   const restored = useMemo(() => loadChat(key.current), []);
@@ -30,9 +39,7 @@ export function AgentPanel() {
   const [turn, setTurn] = useState<Turn | null>(null);
   const turnRef = useRef<Turn | null>(null);
   turnRef.current = turn;
-  const [mode, setMode] = useState<ChatMode>(() => (pref('mode', 'edit') === 'ask' ? 'ask' : 'edit'));
-  const [provider, setProvider] = useState<string>(() => pref('provider', 'claude'));
-  const [model, setModel] = useState<string>(() => pref('model', ''));
+  const { mode, provider, model } = agentPrefs;
   const list = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
   const [, tick] = useState(0);
@@ -208,108 +215,146 @@ export function AgentPanel() {
     else blocks.push({ kind: 'msg', m, i });
   });
 
+  const newChat = () => { session.current = {}; setMsgs([]); variations.clear(); };
+  const pickModel = (e: MouseEvent) => {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const list = providers.length ? providers : [{ id: 'claude', name: 'Claude Code', available: false }];
+    const items: MenuItem[] = [];
+    for (const p of list) {
+      if (p.id === 'claude') {
+        for (const m of CLAUDE_MODELS) items.push({ label: m.id ? m.label : 'Claude (default model)', hint: p.available ? m.hint : 'not installed', checked: provider === 'claude' && model === m.id, action: () => { setAgentPref('provider', 'claude'); setAgentPref('model', m.id); } });
+        items.push({ separator: true });
+      } else items.push({ label: PROVIDER_LABEL[p.id] ?? p.name, hint: p.available ? 'CLI' : 'not installed', checked: provider === p.id, action: () => setAgentPref('provider', p.id) });
+    }
+    items.push({ separator: true }, { label: 'Model settings…', action: () => openSettings('models') });
+    showContextMenu(r.left, r.top - 8, items);
+    // open upward: the composer sits at the bottom of the window
+    const m = document.querySelector('.ctx-menu') as HTMLElement | null;
+    if (m) m.style.top = Math.max(4, r.top - m.offsetHeight - 6) + 'px';
+  };
+  const attach = (e: MouseEvent) => {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    showContextMenu(r.left, r.top, [
+      { label: 'Mention a layer (@)', action: () => { setInput(input + (input && !input.endsWith(' ') ? ' @' : '@')); requestAnimationFrame(() => (document.querySelector('.agent-input textarea') as HTMLTextAreaElement | null)?.focus()); } },
+      { label: 'Quick actions', submenu: availableActions(selCount).map(a => ({ label: a.label, disabled: !ready, action: () => { props.onSent?.(); runQuick(a); } })) },
+      { separator: true },
+      { label: 'New conversation', disabled: !!turn, action: newChat },
+    ]);
+    const m = document.querySelector('.ctx-menu') as HTMLElement | null;
+    if (m) m.style.top = Math.max(4, r.top - m.offsetHeight - 6) + 'px';
+  };
+  const selLayer = selCount === 1 ? s.layer(s.selection[0]) : null;
+  const chipLabel = selCount ? (selLayer?.name ?? `${selCount} layers`) : s.comp.name;
+  const ChipIcon = selLayer ? LAYER_ICON[selLayer.type] : selCount ? Layers : File;
+  const placeholder = status !== 'connected' ? 'Agent offline: start the bridge to chat'
+    : mode === 'ask' ? (selCount ? 'Ask about the selection…' : 'Ask about this composition…')
+    : selCount ? 'What should happen to the selection?' : 'Describe an animation…';
+  const submit = () => { if (input.trim()) { props.onSent?.(); send(input); } };
+
   return (
     <div class="agent ag-panel">
-      <div class="agent-head">
-        <span class={'dot ' + status} title={`bridge: ${status}${status === 'connected' ? ` · port ${agentClient.port}` : ''}`} />
-        <select value={provider} title="Agent" onChange={e => { const v = (e.target as HTMLSelectElement).value; setProvider(v); setPref('provider', v); }}>
-          {(providers.length ? providers : [{ id: 'claude', name: 'Claude Code', available: false }]).map(p => (
-            <option value={p.id}>{p.name}{p.available ? '' : ' (not found)'}</option>
-          ))}
-        </select>
-        {provider === 'claude' && (
-          <select class="model-select" title="Model (uses your Claude subscription)" value={model} onChange={e => { const v = (e.target as HTMLSelectElement).value; setModel(v); setPref('model', v); }}>
-            <option value="">default</option><option value="opus">Opus</option><option value="sonnet">Sonnet</option><option value="haiku">Haiku</option>
-          </select>
-        )}
-        <button class="ghost" title="New conversation" disabled={!!turn} onClick={() => { session.current = {}; setMsgs([]); variations.clear(); }}>＋</button>
-      </div>
-      <div class="agent-list" ref={list} onScroll={e => { const el = e.currentTarget as HTMLDivElement; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40; }}>
-        {status !== 'connected' && (
-          <div class="agent-note">
-            <b>Agent bridge offline.</b> The desktop app starts it automatically. In the browser run <code>npm run bridge</code>.
-            The bridge uses the Claude Code / Codex / Gemini CLI on your computer, so your own subscription is used.
+      {props.chat ? (
+        <div class="agent-chat">
+          <div class="agent-head">
+            <span class="agent-title">Agent</span>
+            <span class={'dot ' + status} title={`Bridge: ${status}${status === 'connected' ? ` · port ${agentClient.port}` : ''}`} />
+            <span class="grow" />
+            <Button variant="ghost" icon size="sm" tip="New conversation" disabled={!!turn} onClick={newChat}><SquarePen /></Button>
           </div>
-        )}
-        {status === 'connected' && providers.length > 0 && !avail && (
-          <div class="agent-note">
-            The <b>{providers.find(p => p.id === provider)?.name ?? provider}</b> CLI was not found. Install it and log in (e.g. <code>npm i -g @anthropic-ai/claude-code</code> then <code>claude</code>).
-            <div><button class="ag-btn" onClick={() => agentClient.refreshProviders()}>Check again</button></div>
+          <div class="agent-list" ref={list} onScroll={e => { const el = e.currentTarget as HTMLDivElement; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40; }}>
+            {status !== 'connected' && (
+              <div class="agent-note">
+                <b>Agent bridge offline.</b> The desktop app starts it automatically. In the browser run <code>npm run bridge</code>.
+                The bridge uses the Claude Code / Codex / Gemini CLI on your computer, so your own subscription is used.
+              </div>
+            )}
+            {status === 'connected' && providers.length > 0 && !avail && (
+              <div class="agent-note">
+                The <b>{providers.find(p => p.id === provider)?.name ?? provider}</b> CLI was not found. Install it and log in (e.g. <code>npm i -g @anthropic-ai/claude-code</code> then <code>claude</code>).
+                <div><button class="ag-btn" onClick={() => agentClient.refreshProviders()}>Check again</button></div>
+              </div>
+            )}
+            {msgs.length === 0 && status === 'connected' && (
+              <div class="agent-empty">
+                <div>Direct the agent: describe an animation, or select layers and use the quick actions below. Type <code>@</code> to mention a layer.</div>
+                {['Make a logo reveal with 3 shapes popping in', 'Add a bouncy entrance to the selected layers', 'Critique my animation'].map(t => (
+                  <button class="suggest" onClick={() => setInput(t)}>{t}</button>
+                ))}
+                <button class="link" onClick={() => openSettings('connections')}>Connect other AI apps (MCP)…</button>
+              </div>
+            )}
+            {blocks.map(b => b.kind === 'tools' ? (
+              <ToolGroup items={b.items.map(x => x.m)} running={!!turn && b.items[b.items.length - 1].i === lastToolIndex(msgs)} layerName={layerName} />
+            ) : (() => {
+              const { m, i } = b;
+              if (m.role === 'review') return <TurnReview review={m.review!} busy={!!turn} onState={(st, note) => setReview(i, st, note)} />;
+              if (m.role === 'error') return (
+                <div class={'msg error ag-error ' + (m.errorKind ?? '')}>
+                  <div><b>{ERROR_TITLE[m.errorKind ?? ''] ?? 'Something went wrong'}</b></div>
+                  {m.hint && <div class="ag-hint"><Markdown text={m.hint} /></div>}
+                  <details><summary class="ag-muted">details</summary><div class="ag-small">{m.text}</div></details>
+                  <div class="ag-row">
+                    {m.retry && <button class="ag-btn" disabled={!ready} onClick={() => send(m.retry!, { mode: m.mode })}>Retry</button>}
+                    {m.errorKind === 'not_installed' && <button class="ag-btn" onClick={() => agentClient.refreshProviders()}>Check again</button>}
+                    {m.errorKind === 'auth' && <button class="ag-btn" title="Start a fresh agent session (after logging in)" onClick={() => { session.current[provider] = undefined; }}>Reset session</button>}
+                  </div>
+                </div>
+              );
+              if (m.role === 'user') return (
+                <div class={'msg user' + (m.mode === 'ask' ? ' ask' : '')}>
+                  {m.mode === 'ask' && <span class="ag-tag">Ask</span>}
+                  {m.chip ? <span title={m.text}><b>{m.chip}</b></span> : m.text}
+                </div>
+              );
+              return <div class={'msg ' + m.role}>{m.role === 'assistant' ? <Markdown text={m.text} /> : m.text}</div>;
+            })())}
+            {turn && (
+              <div class="ag-working" data-testid="agent-working">
+                <span class="ag-spinner" />
+                <span class="ag-grow">{turn.activity}{turn.live > 0 && <span class="ag-muted"> · {turn.live} layer{turn.live === 1 ? '' : 's'} changed</span>}</span>
+                <span class="ag-muted">{Math.floor((Date.now() - turn.startedAt) / 1000)}s</span>
+              </div>
+            )}
           </div>
-        )}
-        {msgs.length === 0 && status === 'connected' && <ConnectInfo port={agentClient.port} />}
-        {msgs.length === 0 && status === 'connected' && (
-          <div class="agent-empty">
-            <div>Direct the agent: describe an animation, or select layers and use the quick actions below. Type <code>@</code> to mention a layer.</div>
-            {['Make a logo reveal with 3 shapes popping in', 'Add a bouncy entrance to the selected layers', 'Critique my animation'].map(t => (
-              <button class="suggest" onClick={() => setInput(t)}>{t}</button>
+          <VariationTray />
+          <div class="ag-quick" role="toolbar" aria-label="Quick actions">
+            {availableActions(selCount).map(a => (
+              <button class={'ag-qchip' + (a.mode === 'ask' ? ' ask' : '')} disabled={!ready} title={`${a.title}${a.mode === 'ask' ? ' (read-only)' : ''}\nfor: ${selCount ? targetPhrase(s) : 'the whole animation'}`} onClick={() => runQuick(a)}>{a.label}</button>
             ))}
           </div>
-        )}
-        {blocks.map(b => b.kind === 'tools' ? (
-          <ToolGroup items={b.items.map(x => x.m)} running={!!turn && b.items[b.items.length - 1].i === lastToolIndex(msgs)} layerName={layerName} />
-        ) : (() => {
-          const { m, i } = b;
-          if (m.role === 'review') return <TurnReview review={m.review!} busy={!!turn} onState={(st, note) => setReview(i, st, note)} />;
-          if (m.role === 'error') return (
-            <div class={'msg error ag-error ' + (m.errorKind ?? '')}>
-              <div><b>{ERROR_TITLE[m.errorKind ?? ''] ?? 'Something went wrong'}</b></div>
-              {m.hint && <div class="ag-hint"><Markdown text={m.hint} /></div>}
-              <details><summary class="ag-muted">details</summary><div class="ag-small">{m.text}</div></details>
-              <div class="ag-row">
-                {m.retry && <button class="ag-btn" disabled={!ready} onClick={() => send(m.retry!, { mode: m.mode })}>Retry</button>}
-                {m.errorKind === 'not_installed' && <button class="ag-btn" onClick={() => agentClient.refreshProviders()}>Check again</button>}
-                {m.errorKind === 'auth' && <button class="ag-btn" title="Start a fresh agent session (after logging in)" onClick={() => { session.current[provider] = undefined; }}>Reset session</button>}
-              </div>
-            </div>
-          );
-          if (m.role === 'user') return (
-            <div class={'msg user' + (m.mode === 'ask' ? ' ask' : '')}>
-              {m.mode === 'ask' && <span class="ag-tag">Ask</span>}
-              {m.chip ? <span title={m.text}><b>{m.chip}</b></span> : m.text}
-            </div>
-          );
-          return <div class={'msg ' + m.role}>{m.role === 'assistant' ? <Markdown text={m.text} /> : m.text}</div>;
-        })())}
-        {turn && (
-          <div class="ag-working" data-testid="agent-working">
-            <span class="ag-spinner" />
-            <span class="ag-grow">{turn.activity}{turn.live > 0 && <span class="ag-muted"> · {turn.live} layer{turn.live === 1 ? '' : 's'} changed</span>}</span>
-            <span class="ag-muted">{Math.floor((Date.now() - turn.startedAt) / 1000)}s</span>
-          </div>
-        )}
-      </div>
-      <VariationTray />
-      <div class="ag-composer">
-        <div class="ag-context" onPointerEnter={e => { (e.currentTarget as HTMLElement).title = editorContext(s, mentioned); }}>
-          <span class="ag-muted">Context:</span>
-          {selCount ? <span class="ag-chip">{selCount === 1 ? s.layer(s.selection[0])?.name : `${selCount} selected`}</span> : <span class="ag-muted">no selection</span>}
-          {mentioned.map(l => <span class="ag-chip mention">@{l.name}</span>)}
-          <span class="ag-muted">· {s.time.toFixed(2)}s</span>
-          {(s.comp.markers?.length ?? 0) > 0 && <span class="ag-muted">· {s.comp.markers!.length} markers</span>}
         </div>
-        <div class="ag-quick" role="toolbar" aria-label="Quick actions">
-          {availableActions(selCount).map(a => (
-            <button class={'ag-qchip' + (a.mode === 'ask' ? ' ask' : '')} disabled={!ready} title={`${a.title}${a.mode === 'ask' ? ' — read-only' : ''}\n→ ${selCount ? targetPhrase(s) : 'whole animation'}`} onClick={() => runQuick(a)}>{a.label}</button>
-          ))}
+      ) : <div class="left-content">{props.children}</div>}
+      <div class="ag-composer composer">
+        <div class="ag-context" onPointerEnter={e => { (e.currentTarget as HTMLElement).title = editorContext(s, mentioned); }}>
+          <span class="ctx-chip" title={selCount ? 'The selection is sent as context' : 'The composition is sent as context'}>
+            <ChipIcon size={12} />
+            <span class="ctx-chip-name">{chipLabel}</span>
+            {selCount > 0 && <button type="button" class="ctx-chip-x" aria-label="Clear selection" onClick={() => s.select([])}><X size={12} /></button>}
+          </span>
+          {mentioned.map(l => <span class="ag-chip mention">@{l.name}</span>)}
         </div>
         <div class="agent-input">
           <MentionInput
             value={input}
             onInput={setInput}
-            onSubmit={() => send(input)}
+            onSubmit={submit}
             onEscape={stop}
             onMention={m => setMentions(x => [...x.filter(y => y.id !== m.id), m])}
-            placeholder={status !== 'connected' ? 'Bridge offline' : mode === 'ask' ? 'Ask about your animation (read-only)…' : selCount ? 'What should happen to the selection? (@ to mention)' : 'Describe an animation… (@ to mention a layer)'}
+            placeholder={placeholder}
           />
-          <div class="ag-send-col">
+          <div class="composer-foot">
+            <Button variant="ghost" icon size="sm" tip="Add context" tipSide="top" onClick={attach as any} aria-haspopup="menu"><Plus /></Button>
+            <button type="button" class="model-pick" aria-haspopup="menu" title="Agent and model" onClick={pickModel as any}>
+              <Sparkle size={14} /><span>{modelLabel(provider, model)}</span><ChevronDown size={12} />
+            </button>
             <div class="ag-mode" role="radiogroup" aria-label="Mode">
-              <button role="radio" aria-checked={mode === 'edit'} class={mode === 'edit' ? 'on' : ''} title="The agent edits your document" onClick={() => { setMode('edit'); setPref('mode', 'edit'); }}>Edit</button>
-              <button role="radio" aria-checked={mode === 'ask'} class={mode === 'ask' ? 'on' : ''} title="Read-only: critique / explain, no edits" onClick={() => { setMode('ask'); setPref('mode', 'ask'); }}>Ask</button>
+              <button role="radio" aria-checked={mode === 'edit'} class={mode === 'edit' ? 'on' : ''} title="The agent edits your document" onClick={() => setAgentPref('mode', 'edit')}>Edit</button>
+              <button role="radio" aria-checked={mode === 'ask'} class={mode === 'ask' ? 'on' : ''} title="Read-only: critique / explain, no edits" onClick={() => setAgentPref('mode', 'ask')}>Ask</button>
             </div>
+            <span class="grow" />
             {turn
-              ? <button class="ag-btn danger" title="Stop (Esc)" disabled={turn.stopping} onClick={stop}>{turn.stopping ? '…' : 'Stop'}</button>
-              : <button class="primary" disabled={!input.trim() || status !== 'connected'} onClick={() => send(input)}>Send</button>}
+              ? <button class="send-btn stop" title="Stop (Esc)" aria-label="Stop" disabled={turn.stopping} onClick={stop}><Square size={12} /></button>
+              : <button class="primary send-btn" aria-label="Send" title="Send (Enter)" disabled={!input.trim() || status !== 'connected'} onClick={submit}><ArrowUp /></button>}
           </div>
         </div>
       </div>
@@ -341,7 +386,7 @@ function ToolGroup(props: { items: Msg[]; running: boolean; layerName: (id: stri
     return (
       <details class={'ag-step ' + state}>
         <summary>
-          <span class="ag-step-icon">{state === 'run' ? '◌' : state === 'err' ? '✕' : '✓'}</span>
+          <span class="ag-step-icon">{state === 'run' ? <LoaderCircle size={12} /> : state === 'err' ? <CircleX size={12} /> : <Check size={12} />}</span>
           <span class="ag-grow">{toolLabel(t.name, t.input, props.layerName)}</span>
           {t.ms !== undefined && t.ms > 300 && <span class="ag-muted">{(t.ms / 1000).toFixed(1)}s</span>}
         </summary>
@@ -380,22 +425,4 @@ function Markdown({ text }: { text: string }) {
     if (h) return <div><b>{inline(h[1])}</b></div>;
     return line.trim() ? <div>{inline(line)}</div> : <div class="md-gap" />;
   })}</>;
-}
-
-/** how to connect any other MCP-capable AI app (Claude Desktop, Cursor, VS Code, ...) */
-function ConnectInfo({ port }: { port: number }) {
-  const url = `http://127.0.0.1:${port}/mcp`;
-  const json = JSON.stringify({ mcpServers: { motion: { type: 'http', url } } }, null, 2);
-  const [copied, setCopied] = useState('');
-  const copy = (what: string, text: string) => { navigator.clipboard?.writeText(text).then(() => { setCopied(what); setTimeout(() => setCopied(''), 1500); }); };
-  return (
-    <details class="connect-info">
-      <summary>Connect other AI apps (MCP)</summary>
-      <div class="small muted">While Motion is open, any MCP client can drive this document: Claude Desktop, Cursor, VS Code, Codex or your own agent. Read-only tools are marked with <code>readOnlyHint</code>.</div>
-      <div class="row"><code class="grow">{url}</code><button class="ghost" onClick={() => copy('url', url)}>{copied === 'url' ? '✓' : 'Copy'}</button></div>
-      <div class="row"><span class="small muted grow">MCP config JSON</span><button class="ghost" onClick={() => copy('json', json)}>{copied === 'json' ? '✓' : 'Copy'}</button></div>
-      <div class="small muted">Claude Code: <code>claude mcp add --transport http motion {url}</code></div>
-      <div class="small muted">Codex: <code>codex -c mcp_servers.motion.url="{url}"</code></div>
-    </details>
-  );
 }

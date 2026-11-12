@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
 import { reviewAtEnd, type ReviewInfo } from '../../agent/history';
 import { summarizeDiff, type LayerChange } from '../../agent/diff';
+import { Check, ChevronDown, ChevronRight, Play, Sparkles, Undo2 } from '../chrome/icons';
 
 export function TurnReview(props: { review: ReviewInfo; busy?: boolean; onState: (s: ReviewInfo['state'], note?: string) => void }) {
   const r = props.review;
@@ -68,12 +69,12 @@ export function TurnReview(props: { review: ReviewInfo; busy?: boolean; onState:
   return (
     <div class={'ag-review ' + r.state + (comparing ? ' comparing' : '')} data-testid="turn-review">
       <div class="ag-review-head">
-        <span class="ag-review-icon">{r.state === 'reverted' ? '↶' : r.state === 'kept' ? '✓' : '◆'}</span>
+        <span class="ag-review-icon">{r.state === 'reverted' ? <Undo2 size={14} /> : r.state === 'kept' ? <Check size={14} /> : <Sparkles size={14} />}</span>
         <span class="ag-grow">
           {r.state === 'reverted' ? 'Reverted: ' : ''}{summarizeDiff(r.diff)}
           <span class="ag-muted"> · {r.steps} step{r.steps === 1 ? '' : 's'}</span>
         </span>
-        {total > 0 && <button class="ag-icon-btn" title={open ? 'Hide details' : 'Show details'} onClick={() => setOpen(o => !o)}>{open ? '▾' : '▸'}</button>}
+        {total > 0 && <button class="ag-icon-btn" title={open ? 'Hide details' : 'Show details'} aria-expanded={open} onClick={() => setOpen(o => !o)}>{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</button>}
       </div>
       {open && total > 0 && (
         <div class="ag-diff">
@@ -97,7 +98,7 @@ export function TurnReview(props: { review: ReviewInfo; busy?: boolean; onState:
             onKeyDown={e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); startCompare(); } }}
             onKeyUp={e => { if (e.key === ' ' || e.key === 'Enter') endCompare(); }}
           >{comparing ? 'Showing before' : 'Hold to compare'}</button>
-          {r.range && <button class="ag-btn" title="Play the changed part" onClick={replay}>▶ Replay</button>}
+          {r.range && <button class="ag-btn" title="Play the changed part" onClick={replay}><Play size={11} /> Replay</button>}
           <span class="ag-grow" />
           <button
             class="ag-btn danger"

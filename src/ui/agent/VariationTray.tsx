@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
 import { variations, type Variation } from '../../agent/variations';
+import { Play, X } from '../chrome/icons';
 
 /** filmstrip thumbnails, rendered right when the agent saves a variation (the document is in that state then) */
 export function installVariationThumbs() {
@@ -39,12 +40,12 @@ export function VariationTray() {
     <div class="ag-variations" data-testid="variations">
       <div class="ag-var-head">
         <span class="ag-grow"><b>Variations</b> <span class="ag-muted">click to preview · pick one to keep</span></span>
-        <button class="ag-icon-btn" title="Close (keeps the current one)" onClick={() => variations.clear()}>✕</button>
+        <button class="ag-icon-btn" title="Close (keeps the current one)" aria-label="Close" onClick={() => variations.clear()}><X size={14} /></button>
       </div>
       <div class="ag-var-list">
         {variations.list.map(v => (
           <div class={'ag-var' + (v.id === variations.active ? ' on' : '')} onClick={() => preview(v)} title={v.note ?? v.label}>
-            <div class="ag-var-strip">{(v.thumbs ?? []).map(src => <img src={src} alt="" />)}{!v.thumbs?.length && <span class="ag-muted">▶</span>}</div>
+            <div class="ag-var-strip">{(v.thumbs ?? []).map(src => <img src={src} alt="" />)}{!v.thumbs?.length && <span class="ag-muted"><Play size={12} /></span>}</div>
             <div class="ag-var-label">{v.label}</div>
             {v.note && <div class="ag-var-note">{v.note}</div>}
           </div>

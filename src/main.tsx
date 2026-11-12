@@ -11,7 +11,7 @@ initTheme();
 
 if (q.has('styleguide')) {
   // living style guide (tokens + components in both themes): ?styleguide
-  import('./ui/StyleGuide').then(m => render(<m.StyleGuide />, document.getElementById('app')!));
+  Promise.all([import('./ui/StyleGuide'), import('./ui/chrome/icons')]).then(([m, i]) => render(<i.IconProvider><m.StyleGuide /></i.IconProvider>, document.getElementById('app')!));
 } else startEditor();
 
 function startEditor() {

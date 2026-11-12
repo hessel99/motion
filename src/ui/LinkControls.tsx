@@ -11,6 +11,7 @@ import { createInstance, detachInstance, FIELD_LABELS, instanceRootOf, instances
 import { PROP_DEFS, type Layer, type PropKey } from '../core/model';
 import { showContextMenu, type MenuItem } from './menu';
 import { NumField, Section, Button } from './ui';
+import { Component, Diamond, RotateCcw, SwatchBook, Unlink } from './chrome/icons';
 
 const st = () => editor.store;
 const css = (c: number[]) => `rgba(${Math.round(c[0] * 255)}, ${Math.round(c[1] * 255)}, ${Math.round(c[2] * 255)}, ${c[3] ?? 1})`;
@@ -22,7 +23,7 @@ export function sharedLink(layers: Layer[], key: PropKey): string | undefined {
   return first && layers.every(l => linkOf(l, key, t) === first) ? first : undefined;
 }
 
-/** "🔗 Brand / Primary  ✕" shown instead of the raw value when a property is linked */
+/** "Linked to Brand / Primary" + detach, shown instead of the raw value when a property is linked */
 export function LinkedChip({ layers, prop }: { layers: Layer[]; prop: PropKey }) {
   const s = st();
   const id = sharedLink(layers, prop)!;
@@ -38,7 +39,7 @@ export function LinkedChip({ layers, prop }: { layers: Layer[]; prop: PropKey })
       </button>
       <button type="button" class="linked-detach" aria-label={`Detach ${PROP_DEFS[prop].label} from ${prettyName(t.name)}`} data-tooltip="Detach (keep the current value)"
         onClick={() => linkProp(s, layers.map(l => l.id), prop, null)}>
-        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 7.5l3-3M3.5 5.5L2.3 6.7a1.8 1.8 0 002.5 2.5L6 8M8.5 6.5l1.2-1.2a1.8 1.8 0 00-2.5-2.5L6 4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" /><path d="M1.5 1.5l9 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" /></svg>
+        <Unlink size={14} />
       </button>
     </div>
   );
@@ -49,7 +50,7 @@ export function LinkButton({ layers, prop }: { layers: Layer[]; prop: PropKey })
   return (
     <button type="button" class="link-btn" tabIndex={-1} data-tooltip={PROP_DEFS[prop].unit === 'color' ? 'Use a color style' : 'Use a named number'} aria-label={`Link ${PROP_DEFS[prop].label} to a style`}
       onClick={e => pickStyle(e, layers, prop)}>
-      <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><rect x="1.5" y="1.5" width="4" height="4" rx="1" fill="currentColor" /><rect x="6.5" y="1.5" width="4" height="4" rx="1" fill="none" stroke="currentColor" /><rect x="1.5" y="6.5" width="4" height="4" rx="1" fill="none" stroke="currentColor" /><rect x="6.5" y="6.5" width="4" height="4" rx="1" fill="currentColor" /></svg>
+      <SwatchBook size={14} />
     </button>
   );
 }
@@ -66,7 +67,7 @@ function pickStyle(e: MouseEvent, layers: Layer[], prop: PropKey) {
   for (const t of list) { const g = t.name.includes('/') ? t.name.slice(0, t.name.lastIndexOf('/')) : ''; let a = groups.get(g); if (!a) groups.set(g, (a = [])); a.push(t); }
   const row = (t: (typeof list)[number], short: boolean) => {
     const v = tokenValue(lib!, t);
-    const label = `${t.type === 'color' ? '■' : '#'} ${short ? t.name.slice(t.name.lastIndexOf('/') + 1) : prettyName(t.name)}   ${t.type === 'color' ? toHex(v) : Math.round(v[0] * 100) / 100}`;
+    const label = `${short ? t.name.slice(t.name.lastIndexOf('/') + 1) : prettyName(t.name)}   ${t.type === 'color' ? toHex(v) : Math.round(v[0] * 100) / 100}`;
     return { label, action: () => { try { linkProp(s, ids, prop, t.id); } catch (err: any) { toast(err.message, 'error'); } } };
   };
   if (groups.size > 1 && list.length > 8) for (const [g, ts] of groups) items.push(g ? { label: prettyName(g), submenu: ts.map(t => row(t, true)) } : row(ts[0], false));
@@ -99,7 +100,7 @@ export function ComponentBox({ layer }: { layer: Layer }) {
     const c = P.components![layer.id];
     const n = instancesOf(P, layer.id).length;
     return (
-      <Section class="comp-box main" title={<><span class="comp-icon" aria-hidden="true">◆</span> Main component</>} right={<span class="insp-type">{n === 1 ? '1 instance' : `${n} instances`}</span>}>
+      <Section class="comp-box main" title={<><span class="comp-icon" aria-hidden="true"><Component size={14} /></span> Main component</>} right={<span class="insp-type">{n === 1 ? '1 instance' : `${n} instances`}</span>}>
         <p class="muted small">Changes and animation here show up in every instance of <b>{c.name}</b>.</p>
         <div class="row">
           <Button size="sm" onClick={() => createInstance(s, layer.id)}>Add instance</Button>
@@ -126,7 +127,7 @@ export function ComponentBox({ layer }: { layer: Layer }) {
     };
     const label = (f: string) => (PROP_DEFS as any)[f]?.label?.toLowerCase() ?? FIELD_LABELS[f] ?? f;
     return (
-      <Section class="comp-box" title={<><span class="comp-icon" aria-hidden="true">◇</span> Instance of {c.name}</>} right={<button class="ghost" onClick={goMain} title="Select the main component (switches composition if needed)">Go to main</button>}>
+      <Section class="comp-box" title={<><span class="comp-icon" aria-hidden="true"><Diamond size={13} /></span> Instance of {c.name}</>} right={<button class="ghost" onClick={goMain} title="Select the main component (switches composition if needed)">Go to main</button>}>
         {rootId === layer.id && (
           <div class="row">
             <NumField label="Delay" title="Start this instance's animation later (seconds)" step={1 / s.comp.fps} value={root.link?.dt ?? 0} suffix="s" onChange={(n, mk) => setInstanceDelay(s, rootId, n, mk)} />
@@ -135,7 +136,7 @@ export function ComponentBox({ layer }: { layer: Layer }) {
         {ov.length > 0 && (
           <div class="ov-list">
             <span class="muted small">Changed here:</span>
-            {ov.map(f => <button type="button" class="ov-chip" title={`Reset ${label(f)} to the main component's`} onClick={() => resetOverrides(s, layer.id, f)}>{label(f)} <span aria-hidden="true">↺</span></button>)}
+            {ov.map(f => <button type="button" class="ov-chip" title={`Reset ${label(f)} to the main component's`} onClick={() => resetOverrides(s, layer.id, f)}>{label(f)} <RotateCcw size={11} aria-hidden="true" /></button>)}
           </div>
         )}
         <div class="row">

@@ -18,6 +18,7 @@
 
 import type { ComponentChildren, JSX } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { X } from 'lucide-preact';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
 
@@ -60,7 +61,8 @@ export function Button({ variant = 'secondary', size = 'md', icon, active, tip, 
 
 // ---------------- number field (scrub label + input) ----------------
 export interface NumFieldProps {
-  label: string;
+  /** short text ("X", "W") or an icon */
+  label: ComponentChildren;
   value: number;
   step?: number;
   min?: number;
@@ -106,7 +108,7 @@ export function NumField(props: NumFieldProps) {
     <div class="num" title={props.title}>
       <span class="num-label" aria-hidden="true" onPointerDown={onScrub as any}>{props.label}</span>
       <input
-        aria-label={props.title ?? props.label}
+        aria-label={props.title ?? (typeof props.label === 'string' ? props.label : undefined)}
         inputMode="decimal"
         value={text ?? fmt(props.value) + (props.suffix ?? '')}
         onFocus={e => { editing.current = fmt(props.value); setText(editing.current); requestAnimationFrame(() => (e.target as HTMLInputElement).select()); }}
@@ -283,7 +285,7 @@ export function Dialog(props: {
         tabIndex={-1} style={props.width ? { width: typeof props.width === 'number' ? props.width + 'px' : props.width } : undefined} onKeyDown={onKeyDown as any}>
         <header class="dialog-header">
           <h2 class="dialog-title" id={id.current}>{props.title}</h2>
-          {props.onClose && (props.closeButton ?? true) && <Button variant="ghost" icon size="sm" tip="Close (Esc)" onClick={() => onClose.current?.()}>✕</Button>}
+          {props.onClose && (props.closeButton ?? true) && <Button variant="ghost" icon size="sm" tip="Close (Esc)" onClick={() => onClose.current?.()}><X size={14} /></Button>}
         </header>
         <div class="dialog-body">{props.children}</div>
         {props.actions && <footer class={cx('dialog-actions', props.actionsClass)}>{props.actions}</footer>}

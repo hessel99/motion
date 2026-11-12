@@ -10,6 +10,7 @@ import { Track } from '../core/evaluate';
 import { markSpacePanned } from '../app/actions';
 import { starGeometry } from '../core/shapes';
 import { T, onThemeChange } from './theme';
+import { prefs } from '../app/prefs';
 
 type Drag =
   | { kind: 'pan'; sx: number; sy: number; px: number; py: number }
@@ -49,6 +50,7 @@ export class ViewportController {
     const ro = new ResizeObserver(() => this.resize());
     ro.observe(host);
     this.resize();
+    ed.on('prefs', () => { this.overlayDirty = true; });
     host.addEventListener('pointerdown', e => this.down(e));
     host.addEventListener('pointermove', e => this.move(e));
     host.addEventListener('pointerup', e => this.up(e));
@@ -468,6 +470,8 @@ export class ViewportController {
         if (!(e.shiftKey && dx === 0)) { dx += sx.d; this.guides.x = sx.at; }
         if (!(e.shiftKey && dy === 0)) { dy += sy.d; this.guides.y = sy.at; }
       }
+      // Settings > Appearance > Snap to pixel grid: the selection's top-left lands on whole pixels
+      if (prefs.snapToPixels) { dx = Math.round(d.box[0] + dx) - d.box[0]; dy = Math.round(d.box[1] + dy) - d.box[1]; }
       st.transact('Move', tx => {
         for (const [id, s] of d.start) {
           const l = st.layer(id);
@@ -638,6 +642,17 @@ export class ViewportController {
     const [c0x, c0y] = this.toScreen(0, 0);
     const [c1x, c1y] = this.toScreen(comp.width, comp.height);
     g.strokeRect(snap(c0x - 0.5), snap(c0y - 0.5), snap(c1x + 0.5) - snap(c0x - 0.5), snap(c1y + 0.5) - snap(c0y - 0.5));
+    // pixel grid at 400% and above (Settings > Appearance): only the visible part of the comp, so
+    // the line count is bounded by the viewport size / zoom (<= ~500 lines per axis at 400%)
+    if (prefs.pixelGrid && this.zoom >= 4) {
+      const vw = this.overlay.width / dpr, vh = this.overlay.height / dpr;
+      const x0 = Math.max(0, Math.ceil((0 - this.panX) / this.zoom)), x1 = Math.min(comp.width, Math.floor((vw - this.panX) / this.zoom));
+      const y0 = Math.max(0, Math.ceil((0 - this.panY) / this.zoom)), y1 = Math.min(comp.height, Math.floor((vh - this.panY) / this.zoom));
+      const top = Math.max(0, c0y), bottom = Math.min(vh, c1y), left = Math.max(0, c0x), right = Math.min(vw, c1x);
+      g.fillStyle = T.vpPixelGrid;
+      for (let x = x0; x <= x1; x++) g.fillRect(snap(x * this.zoom + this.panX) - 0.5, top, 1, bottom - top);
+      for (let y = y0; y <= y1; y++) g.fillRect(left, snap(y * this.zoom + this.panY) - 0.5, right - left, 1);
+    }
     g.fillStyle = T.vpLabel;
     g.font = T.font.uiSm;
     g.fillText(`${comp.name}  ${comp.width}×${comp.height}`, c0x, c0y - 6);

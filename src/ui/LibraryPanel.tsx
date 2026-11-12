@@ -14,6 +14,7 @@ import type { PropKey, Token } from '../core/model';
 import { useChannels } from './hooks';
 import { showContextMenu, type MenuItem } from './menu';
 import { Button, ColorSwatch, Dialog, Section, Segmented } from './ui';
+import { ChevronDown, Component, Plus } from './chrome/icons';
 
 const st = () => editor.store;
 export const STYLE_MIME = 'application/x-motion-style';
@@ -47,7 +48,7 @@ export function LibraryPanel() {
 }
 
 // ---------------- colors + numbers ----------------
-function StylesSection() {
+export function StylesSection() {
   const s = st();
   const lib = s.project.tokens;
   const items = Object.values(lib?.items ?? {});
@@ -88,8 +89,8 @@ function StylesSection() {
     <>
       <Section title="Colors" right={
         <span class="lib-actions">
-          <Button variant="ghost" size="sm" tip="Save a new color (from the selected layer's fill)" aria-label="Add color" onClick={addColor}>＋</Button>
-          <Button variant="ghost" size="sm" tip="Import or update colors from a design library" onClick={syncMenu as any} aria-haspopup="menu">Sync ▾</Button>
+          <Button variant="ghost" size="sm" tip="Save a new color (from the selected layer's fill)" aria-label="Add color" icon onClick={addColor}><Plus /></Button>
+          <Button variant="ghost" size="sm" tip="Import or update colors from a design library" onClick={syncMenu as any} aria-haspopup="menu">Sync <ChevronDown size={12} /></Button>
         </span>}>
         {lib && lib.modes.length > 1 && (
           <div class="lib-modes" title="Light / dark (or other) versions of the same colors">
@@ -100,7 +101,7 @@ function StylesSection() {
         {!colors.length && (
           <div class="lib-empty">
             <p>No colors yet.</p>
-            <p class="muted small">Paste a design from Figma (its color styles and variables come along), import a tokens file, or select a layer and press ＋ to save its fill.</p>
+            <p class="muted small">Paste a design from Figma (its color styles and variables come along), import a tokens file, or select a layer and press + to save its fill.</p>
             <div class="row"><Button size="sm" onClick={() => importTokensFile()}>Import tokens file</Button><Button size="sm" variant="ghost" onClick={addColor}>Save a color</Button></div>
           </div>
         )}
@@ -112,7 +113,7 @@ function StylesSection() {
         ))}
         {src && <div class="lib-source muted small">From {src.label}{src.lastSync ? ` · ${ago(src.lastSync)}` : ''} · <button class="link" onClick={() => syncSource(src)}>Check for updates</button></div>}
       </Section>
-      <Section title="Numbers" right={<Button variant="ghost" size="sm" tip="Save a named number (corner radius, stroke width, opacity)" aria-label="Add number" onClick={addNumber}>＋</Button>}>
+      <Section title="Numbers" right={<Button variant="ghost" size="sm" tip="Save a named number (corner radius, stroke width, opacity)" aria-label="Add number" icon onClick={addNumber}><Plus /></Button>}>
         {!numbers.length && <p class="muted small lib-hint">Named numbers for corner radius, stroke width or opacity. Change one, every linked layer follows.</p>}
         {groups(numbers).map(([group, list]) => (
           <div class="lib-group">
@@ -191,7 +192,7 @@ function StyleRow({ t, used }: { t: Token; used: number }) {
 }
 
 // ---------------- components ----------------
-function ComponentsSection() {
+export function ComponentsSection() {
   const s = st();
   const P = s.project;
   const comps = Object.entries(P.components ?? {}).filter(([id]) => P.layers[id]);
@@ -204,8 +205,8 @@ function ComponentsSection() {
   const compOf = (id: string) => Object.values(P.comps).find(c => { let cur: string | null = id; while (cur) { const l: import("../core/model").Layer | undefined = P.layers[cur]; if (!l?.parent) return c.root.includes(cur); cur = l.parent; } return false; });
   const goMain = (id: string) => { const c = compOf(id); if (c) s.openComp(c.id); s.select([id]); };
   return (
-    <Section title="Components" right={<Button variant="ghost" size="sm" disabled={!canMake} tip="Make the selected layer a reusable component (⌥⌘K)" onClick={make}>＋ Make</Button>}>
-      {!comps.length && <p class="muted small lib-hint">A component is a layer you can reuse: animate it once, add instances anywhere, and changes to the main show up in every instance. Select a layer and press ＋ Make, or paste components from Figma.</p>}
+    <Section title="Components" right={<Button variant="ghost" size="sm" disabled={!canMake} tip="Make the selected layer a reusable component (⌥⌘K)" onClick={make}><Plus size={14} /> Make</Button>}>
+      {!comps.length && <p class="muted small lib-hint">A component is a layer you can reuse: animate it once, add instances anywhere, and changes to the main show up in every instance. Select a layer and press Make, or paste components from Figma.</p>}
       {comps.map(([id, c]) => {
         const n = instancesOf(P, id).length;
         return (
@@ -218,7 +219,7 @@ function ComponentsSection() {
               { separator: true },
               { label: 'Stop being a component', action: () => removeComponent(s, id) },
             ]); }}>
-            <span class="lib-comp-icon" aria-hidden="true">◆</span>
+            <span class="lib-comp-icon" aria-hidden="true"><Component size={14} /></span>
             <span class="lib-name">{c.name}{c.figmaKey ? <span class="muted small"> · Figma</span> : null}</span>
             <span class="lib-count" title={`${plural(n, 'instance')}`}>{n || ''}</span>
             <Button variant="ghost" size="sm" tip="Add an instance to this composition" onClick={() => { createInstance(s, id); }}>Add</Button>

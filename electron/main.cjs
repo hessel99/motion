@@ -225,9 +225,14 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1440,
     height: 900,
-    backgroundColor: '#1a1a1c',
+    backgroundColor: '#1e1e1e',
     show: false,
     title: 'Motion',
+    // the renderer draws its own tab strip; the macOS traffic lights sit inside it
+    // (src/ui/chrome/TabStrip.tsx reserves room for them and marks the drag regions)
+    ...(process.platform === 'darwin'
+      ? { titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 14, y: 13 } }
+      : {}),
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,

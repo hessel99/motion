@@ -17,128 +17,175 @@
      --text, --text-secondary and --text-muted must reach WCAG AA (4.5:1) on --surface-0..2.
    ===================================================================================== */
 
+/* Look: calm neutral grays, hairline borders, filled inputs, a purple accent for selection and
+   focus, green switches. Dark is the default, light is "paper white". */
 :root,
 [data-theme='dark'] {
   color-scheme: dark;
 
   /* ---------- surfaces (low = recessed, high = raised) ---------- */
-  --bg-app: #1a1a1c;          /* window background, behind panels */
-  --surface-0: #151517;       /* recessed: inputs, wells, curve editor */
-  --surface-1: #1f1f22;       /* panels: top bar, inspector, agent */
-  --surface-2: #26262a;       /* raised: buttons, cards, notes */
-  --surface-3: #2a2a30;       /* floating: toasts, kbd, tooltips */
-  --surface-overlay: #232327; /* menus / popovers */
-  --surface-code: #111113;
-  --surface-hover: rgba(255, 255, 255, 0.05);
-  --surface-pressed: rgba(255, 255, 255, 0.08);
+  --bg-app: #1e1e1e;          /* window: tab strip, behind panels */
+  --surface-0: #242424;       /* recessed: wells, curve editor */
+  --surface-1: #2c2c2c;       /* panels: left, right, timeline, settings */
+  --surface-2: #383838;       /* raised: cards, chips, active tab pill */
+  --surface-3: #424242;       /* floating: toasts, kbd, tooltips */
+  --surface-overlay: #303030; /* menus / popovers */
+  --surface-code: #232323;
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --surface-pressed: rgba(255, 255, 255, 0.1);
+  --surface-selected: #393939; /* selected nav row / list row */
   --backdrop: rgba(0, 0, 0, 0.5);
 
+  /* ---------- controls ---------- */
+  --input-bg: #383838;        /* filled inputs + selects (no visible border at rest) */
+  --input-bg-hover: #3e3e3e;
+  --btn-bg: #3d3d3d;          /* secondary buttons */
+  --btn-bg-hover: #474747;
+  --inverse-bg: #f3f3f3;      /* the inverse pill (Export) */
+  --inverse-bg-hover: #ffffff;
+  --inverse-text: #1e1e1e;
+  --toggle-on: #34c759;
+  --toggle-off: #4a4a4a;
+  --toggle-knob: #ffffff;
+  --avatar-bg: #a370f3;
+  --avatar-text: #ffffff;
+  --composer-bg: #383838;
+  --composer-border: #424242;
+  --tool-active: #464646;   /* active tool in the floating toolbar */
+  --settings-nav-bg: #1e1e1e;
+  --card-bg: #383838;       /* settings cards */
+  --card-border: #414141;
+  --card-divider: #464646;
+  --theme-card-on: #494949;
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a0a0a0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+
+  /* ---------- chrome: tab strip ---------- */
+  --tab-bg: transparent;
+  --tab-active-bg: #2c2c2c;
+  --tab-text: #9c9c9c;
+  --tab-active-text: #ededed;
+  --tab-divider: #2a2a2a;
+
   /* ---------- borders ---------- */
-  --border: #2e2e33;
-  --border-strong: #45454c;   /* hover */
-  --border-overlay: #38383e;  /* menus, toasts, dialogs */
+  --border: #3a3a3a;
+  --border-subtle: #333333;   /* panel dividers, section rules */
+  --border-strong: #4f4f4f;   /* hover */
+  --border-overlay: #444444;  /* menus, toasts, dialogs */
 
   /* ---------- text ---------- */
-  --text: #e4e4e8;
-  --text-secondary: #c9c9cf;
-  --text-muted: #8f8f99;      /* AA on surface-0..2 */
-  --text-disabled: #5a5a62;
+  --text: #ededed;
+  --text-secondary: #c8c8c8;
+  --text-muted: #a0a0a0;      /* AA on surface-0..2 */
+  --text-disabled: #6a6a6a;
   --text-on-accent: #ffffff;
 
   /* ---------- accent / selection ---------- */
-  --accent: #4c8dff;
-  --accent-hover: #6aa0ff;
-  --accent-pressed: #3a7bef;
-  /* filled accent surfaces carrying --text-on-accent (primary button, play, active tool,
-     menu highlight): darker than --accent so white text reaches AA (4.6:1) */
-  --accent-solid: #2f6fe8;
-  --accent-solid-hover: #2b68de;
-  --accent-solid-pressed: #2760cc;
-  --accent-text: #6aa3ff;     /* accent colored text on panels */
-  --accent-soft: rgba(76, 141, 255, 0.18);
-  --accent-soft-border: rgba(76, 141, 255, 0.5);
-  --accent-soft-text: #cfe0ff;
-  --selection-bg: rgba(76, 141, 255, 0.18);
-  --selection-strong: rgba(76, 141, 255, 0.30);
+  --accent: #a07cf5;
+  --accent-hover: #b294f7;
+  --accent-pressed: #8f68ee;
+  /* filled accent surfaces carrying --text-on-accent: darker so white text reaches AA */
+  --accent-solid: #7a4fdc;
+  --accent-solid-hover: #6f45d2;
+  --accent-solid-pressed: #643cc4;
+  --accent-text: #bba2ff;
+  --accent-soft: rgba(160, 124, 245, 0.18);
+  --accent-soft-border: rgba(160, 124, 245, 0.55);
+  --accent-soft-text: #e1d6ff;
+  --selection-bg: rgba(160, 124, 245, 0.16);
+  --selection-strong: rgba(160, 124, 245, 0.3);
 
   /* ---------- status ---------- */
-  --danger: #ff5a4f;
-  --danger-soft: rgba(255, 90, 79, 0.12);
-  --danger-border: rgba(255, 90, 79, 0.5);
+  --danger: #ff6159;
+  --danger-soft: rgba(255, 97, 89, 0.12);
+  --danger-border: rgba(255, 97, 89, 0.5);
   --danger-text: #ffb3ad;
   --warning: #e6b34a;
   --warning-text: #ffd27a;
-  --success: #3ecf6e;
-  --neutral-dot: #555559;
+  --success: #34c759;
+  --success-soft: rgba(52, 199, 89, 0.14);
+  --success-text: #6fe08f;
+  --neutral-dot: #6a6a6a;
 
   /* ---------- animation semantics (shared by inspector + timeline) ---------- */
-  --keyframe: #d6d6dc;
-  --keyframe-idle: #5a5a62;
-  --preset-in: #3ecf6e;
-  --preset-out: #ff5a4f;
-  --preset-loop: #c792ea;
+  --keyframe: #e6e6e6;
+  --keyframe-idle: #666666;
+  --preset-in: #34c759;
+  --preset-out: #ff6159;
+  --preset-loop: #b48cff;
   --curve-handle: #ffffff;
-  --curve-preview: #ff5a4f;
-  --curve-arm: #6a6a74;
-  --curve-guide: #2a2a30;
-  --record: #ff5a4f;
+  --curve-preview: #ffa31a;
+  --curve-arm: #6e6e6e;
+  --curve-guide: #3a3a3a;
+  --record: #ff6159;
 
   /* ---------- focus ---------- */
-  --focus-ring-color: #7aa9ff;
+  --focus-ring-color: #a98bf8;
 
   /* ---------- canvas: timeline ---------- */
-  --tl-bg: #161618;
-  --tl-bg-outside: #111113;       /* past the comp end */
-  --tl-ruler-bg: #1c1c1f;
-  --tl-divider: #2a2a2e;
-  --tl-row-line: rgba(255, 255, 255, 0.04);
+  --tl-bg: #2c2c2c;
+  --tl-bg-outside: #262626;       /* past the comp end */
+  --tl-ruler-bg: #2c2c2c;
+  --tl-divider: #383838;
+  --tl-row-line: rgba(255, 255, 255, 0.035);
   --tl-row-hover: rgba(255, 255, 255, 0.03);
-  --tl-tick: #3a3a40;
-  --tl-tick-minor: #2f2f35;
-  --tl-grid: rgba(255, 255, 255, 0.025);
-  --tl-ruler-text: #8a8a93;
-  --tl-layer-name: #d6d6dc;
+  --tl-tick: #4a4a4a;
+  --tl-tick-minor: #3c3c3c;
+  --tl-grid: rgba(255, 255, 255, 0.03);
+  --tl-ruler-text: #8f8f8f;
+  --tl-layer-name: #dcdcdc;
   --tl-layer-name-selected: #ffffff;
-  --tl-layer-name-hidden: #66666e;
-  --tl-prop-name: #b9b9c2;
-  --tl-icon: #b9b9c2;
-  --tl-icon-off: #55555c;
-  --tl-twirl: #9a9aa3;
-  --tl-control: #8a8a93;          /* eye */
-  --tl-control-off: #3a3a40;      /* solo / lock off */
-  --tl-control-on: #d6d6dc;       /* lock on */
+  --tl-layer-name-hidden: #6a6a6a;
+  --tl-prop-name: #b4b4b4;
+  --tl-icon: #b4b4b4;
+  --tl-icon-off: #5c5c5c;
+  --tl-twirl: #8f8f8f;
+  --tl-control: #8f8f8f;          /* eye */
+  --tl-control-off: #474747;      /* solo / lock off */
+  --tl-control-on: #dcdcdc;       /* lock on */
   --tl-solo: #ffcc00;
-  --tl-component: #c792ea;      /* main component / instance badge */
+  --tl-component: #b48cff;        /* main component / instance badge */
   --tl-bar: rgba(255, 255, 255, 0.06);
-  --tl-key-stroke: #16161a;
-  --tl-key-selected-stroke: #bcd4ff;
-  --tl-key-off-stroke: #7a7a82;
-  --tl-key-summary: #9a9aa3;
-  --tl-key-summary-selected: #cfe0ff;
+  --tl-key-stroke: #2c2c2c;
+  --tl-key-selected-stroke: #ffe1b0;
+  --tl-key-off-stroke: #7a7a7a;
+  --tl-key-summary: #9a9a9a;
+  --tl-key-summary-selected: #ffffff;
   --tl-segment: rgba(255, 255, 255, 0.12);
   --tl-segment-spring: rgba(255, 190, 90, 0.35);
-  --tl-segment-selected: rgba(76, 141, 255, 0.8);
-  --tl-hint: #6a6a72;
-  --tl-playhead: #ff5a4f;
+  --tl-segment-selected: rgba(255, 163, 26, 0.8);
+  --tl-hint: #6e6e6e;
+  --tl-playhead: #ffa31a;
   --tl-marker: #ffb040;
   --tl-marker-line: rgba(255, 176, 64, 0.18);
-  --tl-work-area: rgba(76, 141, 255, 0.35);
-  --tl-work-area-dim: rgba(0, 0, 0, 0.25);
+  --tl-work-area: rgba(160, 124, 245, 0.45);
+  --tl-work-area-dim: rgba(0, 0, 0, 0.22);
   --tl-scrollbar: rgba(255, 255, 255, 0.18);
-  --tl-marquee-fill: rgba(76, 141, 255, 0.1);
+  --tl-marquee-fill: rgba(160, 124, 245, 0.1);
   --tl-audio: rgba(80, 190, 140, 0.75);
   --tl-audio-selected: rgba(120, 220, 170, 0.9);
-  --tl-text-anim: rgba(199, 146, 234, 0.55);
+  --tl-text-anim: rgba(180, 140, 255, 0.55);
   --tl-text-anim-label: #f3e8ff;
-  --tl-tab: rgba(255, 255, 255, 0.04);
-  --tl-tab-text: #8a8a93;
-  --tl-tab-on: rgba(76, 141, 255, 0.25);
-  --tl-tab-on-text: #cfe0ff;
+  --tl-tab: transparent;
+  --tl-tab-text: #8f8f8f;
+  --tl-tab-on: #424242;
+  --tl-tab-on-text: #ededed;
+  /* per-layer label colors (bar + dot), the "hot" color of selected keys + playhead, the speed line */
+  --tl-label-1: #4a90e2;
+  --tl-label-2: #e8619d;
+  --tl-label-3: #3fa66a;
+  --tl-label-4: #e8833a;
+  --tl-label-5: #8b6cf0;
+  --tl-label-6: #2fa8b5;
+  --tl-label-7: #d9534f;
+  --tl-label-8: #c9a227;
+  --tl-label-key: rgba(255, 255, 255, 0.9); /* key diamonds drawn on a label bar */
+  --tl-hot: #ffa31a;
+  --tl-velocity: rgba(255, 255, 255, 0.14);
 
   /* ---------- canvas: graph editor ---------- */
-  --graph-bg: #141416;
+  --graph-bg: #262626;
   --graph-grid: rgba(255, 255, 255, 0.05);
-  --graph-label: #6a6a72;
+  --graph-label: #6e6e6e;
   --graph-key-tick: rgba(255, 255, 255, 0.35);
   --graph-key-selected: #ffffff;
   --graph-handle: #ffd34d;
@@ -147,24 +194,25 @@
   --axis-y: #4cd964;
   --axis-z: #4c8dff;
   --axis-w: #ffcc00;
-  --axis-scalar: #c792ea;
+  --axis-scalar: #b48cff;
 
   /* ---------- canvas: viewport overlay ---------- */
-  --vp-bg: #1a1a1c;               /* pasteboard (also the WebGL clear color) */
-  --vp-comp-outline: rgba(255, 255, 255, 0.12);
-  --vp-label: rgba(255, 255, 255, 0.45);
+  --vp-bg: #1c1c1c;               /* pasteboard (also the WebGL clear color) */
+  --vp-comp-outline: rgba(255, 255, 255, 0.1);
+  --vp-label: rgba(255, 255, 255, 0.5);
   --vp-handle: #ffffff;
   --vp-badge-text: #ffffff;
-  --vp-motion-path: rgba(76, 141, 255, 0.6);
+  --vp-motion-path: rgba(160, 124, 245, 0.7);
   --vp-tangent: rgba(255, 255, 255, 0.55);
   --vp-tangent-handle: #ffd34d;
   --vp-guide: #ff4d6d;
-  --vp-marquee-fill: rgba(76, 141, 255, 0.08);
+  --vp-marquee-fill: rgba(160, 124, 245, 0.08);
+  --vp-pixel-grid: rgba(255, 255, 255, 0.09);
   --vp-hud-bg: rgba(0, 0, 0, 0.65);
   --vp-hud-text: #9fe39f;
 
   /* ---------- elevation (shadows are theme dependent) ---------- */
-  --shadow-1: 0 6px 24px rgba(0, 0, 0, 0.4);   /* floating toolbars */
+  --shadow-1: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06); /* floating toolbar */
   --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.5);  /* menus, toasts, tooltips */
   --shadow-3: 0 20px 60px rgba(0, 0, 0, 0.6);  /* dialogs */
 }
@@ -172,113 +220,156 @@
 [data-theme='light'] {
   color-scheme: light;
 
-  --bg-app: #e9e9ec;
-  --surface-0: #ffffff;
-  --surface-1: #f5f5f7;
+  --bg-app: #f6f6f6;
+  --surface-0: #f5f5f5;
+  --surface-1: #ffffff;
   --surface-2: #ffffff;
   --surface-3: #ffffff;
   --surface-overlay: #ffffff;
-  --surface-code: #ececf0;
-  --surface-hover: rgba(0, 0, 0, 0.05);
-  --surface-pressed: rgba(0, 0, 0, 0.09);
-  --backdrop: rgba(20, 20, 30, 0.28);
+  --surface-code: #f2f2f2;
+  --surface-hover: rgba(0, 0, 0, 0.045);
+  --surface-pressed: rgba(0, 0, 0, 0.08);
+  --surface-selected: #eeeeee;
+  --backdrop: rgba(20, 20, 20, 0.25);
 
-  --border: #d6d6dc;
-  --border-strong: #b4b4bd;
-  --border-overlay: #d0d0d7;
+  --input-bg: #f5f5f5;
+  --input-bg-hover: #efefef;
+  --btn-bg: #f2f2f2;
+  --btn-bg-hover: #e9e9e9;
+  --inverse-bg: #1e1e1e;
+  --inverse-bg-hover: #333333;
+  --inverse-text: #ffffff;
+  --toggle-on: #34c759;
+  --toggle-off: #e3e3e3;
+  --toggle-knob: #ffffff;
+  --avatar-bg: #a74ad6;
+  --avatar-text: #ffffff;
+  --composer-bg: #ffffff;
+  --composer-border: #e6e6e6;
+  --tool-active: #ededed;
+  --settings-nav-bg: #ffffff;
+  --card-bg: #ffffff;
+  --card-border: #ebebeb;
+  --card-divider: #f0f0f0;
+  --theme-card-on: #faf8ff;
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6e6e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 
-  --text: #1c1c21;
-  --text-secondary: #3a3a42;
-  --text-muted: #62626c;
-  --text-disabled: #a5a5ae;
+  --tab-bg: transparent;
+  --tab-active-bg: #ffffff;
+  --tab-text: #6b6b6b;
+  --tab-active-text: #1e1e1e;
+  --tab-divider: #e8e8e8;
+
+  --border: #e6e6e6;
+  --border-subtle: #eeeeee;
+  --border-strong: #cfcfcf;
+  --border-overlay: #e0e0e0;
+
+  --text: #1e1e1e;
+  --text-secondary: #3d3d3d;
+  --text-muted: #6e6e6e;
+  --text-disabled: #b0b0b0;
   --text-on-accent: #ffffff;
 
-  --accent: #2563eb;
-  --accent-hover: #1d55d6;
-  --accent-pressed: #1747b8;
-  --accent-solid: #2563eb;
-  --accent-solid-hover: #1d55d6;
-  --accent-solid-pressed: #1747b8;
-  --accent-text: #1d55d6;
-  --accent-soft: rgba(37, 99, 235, 0.12);
-  --accent-soft-border: rgba(37, 99, 235, 0.45);
-  --accent-soft-text: #1747b8;
-  --selection-bg: rgba(37, 99, 235, 0.12);
-  --selection-strong: rgba(37, 99, 235, 0.24);
+  --accent: #7c4ddb;
+  --accent-hover: #6d3fcd;
+  --accent-pressed: #5f34b8;
+  --accent-solid: #7c4ddb;
+  --accent-solid-hover: #6d3fcd;
+  --accent-solid-pressed: #5f34b8;
+  --accent-text: #6a3cc8;
+  --accent-soft: rgba(124, 77, 219, 0.1);
+  --accent-soft-border: rgba(124, 77, 219, 0.45);
+  --accent-soft-text: #5a2fb3;
+  --selection-bg: rgba(124, 77, 219, 0.1);
+  --selection-strong: rgba(124, 77, 219, 0.22);
 
   --danger: #d92d20;
-  --danger-soft: rgba(217, 45, 32, 0.1);
+  --danger-soft: rgba(217, 45, 32, 0.08);
   --danger-border: rgba(217, 45, 32, 0.45);
   --danger-text: #b42318;
   --warning: #b7791f;
   --warning-text: #8a5a10;
-  --success: #16a34a;
-  --neutral-dot: #a5a5ae;
+  --success: #1f9d45;
+  --success-soft: rgba(52, 199, 89, 0.12);
+  --success-text: #157a35;
+  --neutral-dot: #a8a8a8;
 
-  --keyframe: #45454d;
-  --keyframe-idle: #a5a5ae;
-  --preset-in: #16a34a;
+  --keyframe: #3d3d3d;
+  --keyframe-idle: #a8a8a8;
+  --preset-in: #1f9d45;
   --preset-out: #d92d20;
-  --preset-loop: #9b51e0;
+  --preset-loop: #8e4fd6;
   --curve-handle: #ffffff;
-  --curve-preview: #d92d20;
-  --curve-arm: #9a9aa3;
-  --curve-guide: #d6d6dc;
+  --curve-preview: #e98a00;
+  --curve-arm: #9a9a9a;
+  --curve-guide: #e3e3e3;
   --record: #d92d20;
 
-  --focus-ring-color: #2563eb;
+  --focus-ring-color: #7c4ddb;
 
-  --tl-bg: #fbfbfc;
-  --tl-bg-outside: #efeff2;
-  --tl-ruler-bg: #f3f3f6;
-  --tl-divider: #dcdce1;
-  --tl-row-line: rgba(0, 0, 0, 0.05);
-  --tl-row-hover: rgba(0, 0, 0, 0.03);
-  --tl-tick: #c3c3ca;
-  --tl-tick-minor: #dadadf;
-  --tl-grid: rgba(0, 0, 0, 0.04);
-  --tl-ruler-text: #62626c;
-  --tl-layer-name: #2a2a31;
+  --tl-bg: #ffffff;
+  --tl-bg-outside: #f7f7f7;
+  --tl-ruler-bg: #ffffff;
+  --tl-divider: #ececec;
+  --tl-row-line: rgba(0, 0, 0, 0.04);
+  --tl-row-hover: rgba(0, 0, 0, 0.025);
+  --tl-tick: #cfcfcf;
+  --tl-tick-minor: #e3e3e3;
+  --tl-grid: rgba(0, 0, 0, 0.035);
+  --tl-ruler-text: #7a7a7a;
+  --tl-layer-name: #262626;
   --tl-layer-name-selected: #000000;
-  --tl-layer-name-hidden: #a5a5ae;
-  --tl-prop-name: #45454d;
-  --tl-icon: #55555e;
-  --tl-icon-off: #b4b4bd;
-  --tl-twirl: #70707a;
-  --tl-control: #70707a;
-  --tl-control-off: #cfcfd5;
-  --tl-control-on: #2a2a31;
+  --tl-layer-name-hidden: #ababab;
+  --tl-prop-name: #4a4a4a;
+  --tl-icon: #5a5a5a;
+  --tl-icon-off: #bdbdbd;
+  --tl-twirl: #7a7a7a;
+  --tl-control: #7a7a7a;
+  --tl-control-off: #d6d6d6;
+  --tl-control-on: #262626;
   --tl-solo: #d4a000;
-  --tl-component: #8e4fc0;
-  --tl-bar: rgba(0, 0, 0, 0.06);
+  --tl-component: #8e4fd6;
+  --tl-bar: rgba(0, 0, 0, 0.05);
   --tl-key-stroke: #ffffff;
-  --tl-key-selected-stroke: #1747b8;
-  --tl-key-off-stroke: #8a8a93;
-  --tl-key-summary: #70707a;
-  --tl-key-summary-selected: #1747b8;
-  --tl-segment: rgba(0, 0, 0, 0.18);
+  --tl-key-selected-stroke: #8a4d00;
+  --tl-key-off-stroke: #8f8f8f;
+  --tl-key-summary: #7a7a7a;
+  --tl-key-summary-selected: #1e1e1e;
+  --tl-segment: rgba(0, 0, 0, 0.16);
   --tl-segment-spring: rgba(214, 140, 20, 0.45);
-  --tl-segment-selected: rgba(37, 99, 235, 0.8);
-  --tl-hint: #85858f;
-  --tl-playhead: #e5372b;
+  --tl-segment-selected: rgba(233, 138, 0, 0.85);
+  --tl-hint: #8f8f8f;
+  --tl-playhead: #e98a00;
   --tl-marker: #e08a00;
   --tl-marker-line: rgba(224, 138, 0, 0.25);
-  --tl-work-area: rgba(37, 99, 235, 0.35);
-  --tl-work-area-dim: rgba(0, 0, 0, 0.06);
-  --tl-scrollbar: rgba(0, 0, 0, 0.22);
-  --tl-marquee-fill: rgba(37, 99, 235, 0.1);
+  --tl-work-area: rgba(124, 77, 219, 0.4);
+  --tl-work-area-dim: rgba(0, 0, 0, 0.05);
+  --tl-scrollbar: rgba(0, 0, 0, 0.2);
+  --tl-marquee-fill: rgba(124, 77, 219, 0.1);
   --tl-audio: rgba(22, 150, 90, 0.7);
   --tl-audio-selected: rgba(10, 130, 75, 0.9);
-  --tl-text-anim: rgba(155, 81, 224, 0.45);
+  --tl-text-anim: rgba(142, 79, 214, 0.45);
   --tl-text-anim-label: #ffffff;
-  --tl-tab: rgba(0, 0, 0, 0.04);
-  --tl-tab-text: #62626c;
-  --tl-tab-on: rgba(37, 99, 235, 0.14);
-  --tl-tab-on-text: #1747b8;
+  --tl-tab: transparent;
+  --tl-tab-text: #6e6e6e;
+  --tl-tab-on: #f0f0f0;
+  --tl-tab-on-text: #1e1e1e;
+  --tl-label-1: #4a8ee0;
+  --tl-label-2: #e06099;
+  --tl-label-3: #3b9e63;
+  --tl-label-4: #e48038;
+  --tl-label-5: #8466ea;
+  --tl-label-6: #2aa0ad;
+  --tl-label-7: #d4504c;
+  --tl-label-8: #c29c22;
+  --tl-label-key: rgba(255, 255, 255, 0.95);
+  --tl-hot: #f08c00;
+  --tl-velocity: rgba(0, 0, 0, 0.12);
 
-  --graph-bg: #ffffff;
+  --graph-bg: #fafafa;
   --graph-grid: rgba(0, 0, 0, 0.06);
-  --graph-label: #85858f;
+  --graph-label: #8f8f8f;
   --graph-key-tick: rgba(0, 0, 0, 0.35);
   --graph-key-selected: #000000;
   --graph-handle: #e0a800;
@@ -287,23 +378,24 @@
   --axis-y: #22a35a;
   --axis-z: #2563eb;
   --axis-w: #d4a000;
-  --axis-scalar: #9b51e0;
+  --axis-scalar: #8e4fd6;
 
-  --vp-bg: #dedee3;
-  --vp-comp-outline: rgba(0, 0, 0, 0.18);
+  --vp-bg: #d9d9d9;
+  --vp-comp-outline: rgba(0, 0, 0, 0.12);
   --vp-label: rgba(0, 0, 0, 0.55);
   --vp-handle: #ffffff;
-  --vp-motion-path: rgba(37, 99, 235, 0.7);
+  --vp-motion-path: rgba(124, 77, 219, 0.7);
   --vp-tangent: rgba(0, 0, 0, 0.5);
   --vp-tangent-handle: #e0a800;
   --vp-guide: #e5375a;
-  --vp-marquee-fill: rgba(37, 99, 235, 0.08);
+  --vp-marquee-fill: rgba(124, 77, 219, 0.08);
+  --vp-pixel-grid: rgba(0, 0, 0, 0.1);
   --vp-hud-bg: rgba(255, 255, 255, 0.85);
   --vp-hud-text: #11692f;
 
-  --shadow-1: 0 4px 16px rgba(20, 20, 40, 0.12);
-  --shadow-2: 0 8px 24px rgba(20, 20, 40, 0.16);
-  --shadow-3: 0 18px 50px rgba(20, 20, 40, 0.22);
+  --shadow-1: 0 2px 10px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-3: 0 18px 50px rgba(0, 0, 0, 0.18);
 }
 
 /* ---------- alias tokens ----------
@@ -343,10 +435,10 @@
 
   /* radii */
   --radius-xs: 3px;
-  --radius-sm: 5px;   /* inputs, small buttons */
-  --radius-md: 6px;   /* buttons */
-  --radius-lg: 8px;   /* menus, cards, toasts */
-  --radius-xl: 10px;  /* floating toolbar, dialogs */
+  --radius-sm: 6px;   /* small buttons, chips */
+  --radius-md: 8px;   /* buttons, inputs */
+  --radius-lg: 10px;  /* menus, cards, toasts */
+  --radius-xl: 14px;  /* floating toolbar, composer, dialogs */
   --radius-pill: 999px;
 
   /* type */
@@ -367,9 +459,17 @@
 
   /* control sizes (hit targets: >= 24px for primary controls, WCAG 2.5.8) */
   --control-h-sm: 20px;
-  --control-h-md: 24px;
-  --control-h-lg: 28px;
-  --icon-btn: 24px;
+  --control-h-md: 28px;
+  --control-h-lg: 32px;
+  --icon-btn: 28px;
+  --icon-size: 16px;  /* lucide icons, 1.5px stroke (see chrome/icons.tsx) */
+
+  /* app shell */
+  --tabstrip-h: 38px;
+  --left-w: 280px;
+  --right-w: 256px;
+  --timeline-h: 288px;
+  --transport-h: 36px;
 
   /* motion (UI transitions only: never on surfaces that repaint during playback) */
   --dur-instant: 0ms;
@@ -396,3 +496,5 @@
 @media (prefers-reduced-motion: reduce) {
   :root { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; }
 }
+/* Settings > Appearance > Reduce motion */
+:root[data-reduce-motion] { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; }

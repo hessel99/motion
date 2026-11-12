@@ -15,12 +15,13 @@ import { showContextMenu, type MenuItem } from './menu';
 import { createComponent, createInstance, detachInstance, instanceRootOf, overridesOf, resetOverrides } from '../core/components';
 import { GraphView } from './graph';
 import { T, onThemeChange } from './theme';
+import { Eye, EyeOff, LAYER_ICON, Lock, LockOpen, Square, strokeIcon } from './chrome/icons';
 import { audioDuration, audioFailed, audioPeaks } from '../audio/engine';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { setEase, setInterp, setSpring, updateMarker, deleteMarker, cloneLayers, deleteLayers } from '../core/commands';
 
-const HEADER_H = 28;
-const ROW_H = 24;
+export const HEADER_H = 28;
+export const ROW_H = 24;
 const INDENT = 14;
 
 /** prop rows a layer type can show, in row order (built once per type, not per layer per rebuild) */
@@ -120,6 +121,20 @@ export class Timeline {
   private graph: GraphView;
   /** layer name filter (search box in the header) */
   filter = '';
+  /** layout modes (src/ui/layouts): list only the selected layers (and their ancestors) */
+  focusSelection = false;
+  /** expanded layers list every property they have (score layout), not only the animated ones */
+  allProps = false;
+  /** prop rows skip the value text (a DOM overlay edits the values in place) */
+  hideValues = false;
+  /** studio look (the default): label-colored layer bars with a matching dot, per-component value
+   *  columns, faint velocity lines, hot (orange) playhead + selected keys. false: the classic look */
+  studio = true;
+  private labelRoot: string[] | null = null;
+  private labelRootLen = 0;
+  private labelSlot = new Map<string, number>();
+  /** called after the rows were redrawn (rows, scroll or selection changed; never during playback) */
+  onBase: (() => void) | null = null;
 
   constructor(private ed: Editor, private host: HTMLElement) {
     this.graph = new GraphView(ed.store);
@@ -146,7 +161,7 @@ export class Timeline {
       this.baseDirty = true;
       if (st.comp.duration !== lastDur) { lastDur = st.comp.duration; if (this.drag?.kind !== 'compEnd') this.fitTime(); }
     });
-    st.on('selection', () => { this.baseDirty = true; });
+    st.on('selection', () => { this.baseDirty = true; if (this.focusSelection) { this.rowsDirty = true; this.scrollY = 0; } });
     st.on('workarea', () => { this.baseDirty = true; });
     st.on('keys', () => { this.baseDirty = true; });
     st.on('time', () => { if (!st.playing) this.baseDirty = true; });
@@ -183,8 +198,20 @@ export class Timeline {
       c.style.height = r.height + 'px';
     }
     this.playheadDrawn = null; this.lastPlayheadX = -1;
+    if (r.height > HEADER_H + ROW_H) this.clampScroll();
     if (this.autoFit && r.width > 0) { this.fitTime(); this.autoFit = false; }
     this.baseDirty = true;
+  }
+
+  /** redraw the rows on the next frame */
+  invalidate() { this.baseDirty = true; }
+
+  /** the layout changed this timeline's modes or size: rebuild rows and re-fit the time scale */
+  relayout() {
+    this.rowsDirty = true;
+    this.baseDirty = true;
+    this.autoFit = true;
+    this.resize();
   }
 
   fitTime() {
@@ -233,6 +260,12 @@ export class Timeline {
       }
       this.matched = matched;
     }
+    // focus: only the selection (plus ancestors, so the tree still reads). nothing selected: every layer
+    if (this.focusSelection && st.selection.length) {
+      const k = new Set<string>();
+      for (const id of st.selection) { let cur: string | null = id; while (cur && !k.has(cur)) { k.add(cur); cur = L[cur]?.parent ?? null; } }
+      if (keep) { for (const id of keep) if (!k.has(id)) keep.delete(id); } else keep = k;
+    }
     const expanded = this.expanded;
     // all rows share one object shape (monomorphic access in the draw / hit-test loops)
     const walk = (ids: string[], depth: number) => {
@@ -248,7 +281,8 @@ export class Timeline {
           let m = 0;
           for (let k = 0; k < keys.length; k++) {
             const p = l.props[keys[k]];
-            if (p && (p.kf?.length || p.expr)) { m |= 1 << k; rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: keys[k], hasChildren: false, mask: -1 }); }
+            if (p && (p.kf?.length || p.expr)) m |= 1 << k;
+            if (p && (this.allProps || p.kf?.length || p.expr)) { rows.push({ kind: 'prop', id: l.id, layer: l, depth: depth + 1, prop: keys[k], hasChildren: false, mask: -1 }); }
           }
           row.mask = m;
           walk(l.children, depth + 1);
@@ -299,7 +333,8 @@ export class Timeline {
     // rows only change when an ancestor had to be expanded (or an edit is pending)
     if (this.rowsDirty) this.buildRows();
     const i = this.layerRowIndex(id);
-    if (i >= 0) {
+    // hidden (a summoned sheet that is closed): no viewport to scroll into
+    if (i >= 0 && this.h > HEADER_H + ROW_H) {
       const y = i * ROW_H;
       if (y < this.scrollY) this.scrollY = y;
       else if (y + ROW_H > this.scrollY + this.h - HEADER_H) this.scrollY = y + ROW_H - (this.h - HEADER_H);
@@ -317,7 +352,7 @@ export class Timeline {
   // ---------- drawing ----------
   private frame() {
     if (this.rowsDirty) { this.buildRows(); this.baseDirty = true; }
-    if (this.baseDirty) { this.drawBase(); this.baseDirty = false; }
+    if (this.baseDirty) { this.drawBase(); this.baseDirty = false; this.onBase?.(); }
     const px = Math.round(this.tToX(this.ed.store.time));
     if (px === this.lastPlayheadX) return;
     this.lastPlayheadX = px;
@@ -330,7 +365,7 @@ export class Timeline {
 
   private drawPlayhead(x: number) {
     const g = this.og;
-    g.fillStyle = T.tlPlayhead;
+    g.fillStyle = this.studio ? T.tlHot : T.tlPlayhead;
     g.fillRect(x - 0.5, HEADER_H - 6, 1, this.h);
     g.beginPath();
     g.moveTo(x - 6, 4); g.lineTo(x + 6, 4); g.lineTo(x + 6, HEADER_H - 10); g.lineTo(x, HEADER_H - 4); g.lineTo(x - 6, HEADER_H - 10);
@@ -493,21 +528,22 @@ export class Timeline {
     const cy = y + ROW_H / 2;
     const ix = 8 + r.depth * INDENT;
     const animated = hasAnim(l);
-    // twirl
-    if (r.hasChildren || animated) {
-      g.fillStyle = T.tlTwirl;
+    const label = this.studio ? this.labelColor(l) : '';
+    if (this.studio) { g.fillStyle = label; g.beginPath(); g.arc(4.5, cy, 3, 0, Math.PI * 2); g.fill(); }
+    // twirl (a chevron, like the layer tree)
+    if (r.hasChildren || animated || this.allProps) {
+      g.strokeStyle = T.tlTwirl;
+      g.lineWidth = 1.25;
+      g.lineCap = 'round'; g.lineJoin = 'round';
       g.beginPath();
-      if (this.expanded.has(l.id)) { g.moveTo(ix, cy - 2); g.lineTo(ix + 8, cy - 2); g.lineTo(ix + 4, cy + 3); }
-      else { g.moveTo(ix + 2, cy - 4); g.lineTo(ix + 7, cy); g.lineTo(ix + 2, cy + 4); }
-      g.closePath();
-      g.fill();
+      if (this.expanded.has(l.id)) { g.moveTo(ix + 1, cy - 1.5); g.lineTo(ix + 4, cy + 1.5); g.lineTo(ix + 7, cy - 1.5); }
+      else { g.moveTo(ix + 2.5, cy - 3); g.lineTo(ix + 5.5, cy); g.lineTo(ix + 2.5, cy + 3); }
+      g.stroke();
     }
     // type icon
-    const tx = ix + 14;
+    const tx = ix + 16;
     g.strokeStyle = l.visible ? T.tlIcon : T.tlIconOff;
-    g.fillStyle = g.strokeStyle;
-    g.lineWidth = 1.2;
-    drawTypeIcon(g, l.type, tx, cy);
+    strokeIcon(g, LAYER_ICON[l.type] ?? Square, tx, cy, 13, 1.2);
     // component badge: filled diamond = main component, hollow = instance
     const comps = st.project.components;
     if (comps && (comps[l.id] || (l.link && comps[l.link.main]))) {
@@ -527,16 +563,25 @@ export class Timeline {
     const soloed = st.solo.has(l.id);
     g.fillStyle = soloed ? T.tlSolo : T.tlControlOff;
     g.beginPath(); g.arc(this.leftW - 58, cy, soloed ? 4 : 3, 0, Math.PI * 2); g.fill();
-    g.fillStyle = l.visible ? T.tlControl : T.tlControlOff;
-    drawEye(g, this.leftW - 40, cy, l.visible);
-    g.fillStyle = l.locked ? T.tlControlOn : T.tlControlOff;
-    drawLock(g, this.leftW - 20, cy);
+    g.strokeStyle = l.visible ? T.tlControl : T.tlControlOff;
+    strokeIcon(g, l.visible ? Eye : EyeOff, this.leftW - 40, cy, 13, 1.2);
+    g.strokeStyle = l.locked ? T.tlControlOn : T.tlControlOff;
+    strokeIcon(g, l.locked ? Lock : LockOpen, this.leftW - 20, cy, 12, 1.2);
 
     // track: layer bar
     const comp = st.comp;
     const inX = Math.max(this.leftW, this.tToX(Math.max(0, l.inPoint)));
     const outX = Math.min(this.w, this.tToX(Math.min(comp.duration, l.outPoint)));
-    if (outX > inX) {
+    if (this.studio) {
+      // a saturated bar over the layer's life; past the comp end / out point a darker tint of it
+      const endX = this.tToX(Math.min(comp.duration, l.outPoint));
+      g.fillStyle = label;
+      g.globalAlpha = isSel ? 1 : 0.82;
+      if (outX > inX) { g.beginPath(); g.roundRect(inX, y + 2, outX - inX, ROW_H - 4, 2); g.fill(); }
+      const tailX = Math.max(this.leftW, endX);
+      if (tailX < this.w) { g.globalAlpha = 0.28; g.fillRect(tailX, y + 2, this.w - tailX, ROW_H - 4); }
+      g.globalAlpha = 1;
+    } else if (outX > inX) {
       g.fillStyle = isSel ? T.tlBarSelected : T.tlBar;
       g.beginPath();
       g.roundRect(inX, y + 4, outX - inX, ROW_H - 8, 3);
@@ -578,7 +623,7 @@ export class Timeline {
     if (!this.expanded.has(l.id) && animated) {
       let times = this.keyTimesCache.get(l.id);
       if (!times) this.keyTimesCache.set(l.id, (times = layerKeyTimes(l)));
-      g.fillStyle = isSel ? T.tlKeySummarySelected : T.tlKeySummary;
+      g.fillStyle = this.studio ? T.tlLabelKey : isSel ? T.tlKeySummarySelected : T.tlKeySummary;
       let lastX = -10;
       // only the keys inside the visible time range (times are sorted)
       const tMax = this.xToT(this.w);
@@ -605,19 +650,33 @@ export class Timeline {
     // keyframe nav: ◆ at current time indicator
     const kf = l.props[key]?.kf ?? [];
     const atKey = kf.some(k => Math.abs(k.t - st.time) < 1e-6);
-    g.fillStyle = atKey ? T.tlKeySelected : T.tlKeyOff;
-    diamond(g, ix + 18, cy, 4);
+    // studio: the add-key diamond sits right before the track
+    g.fillStyle = atKey ? (this.studio ? T.tlHot : T.tlKeySelected) : T.tlKeyOff;
+    diamond(g, this.studio ? this.leftW - 13 : ix + 18, cy, this.studio ? 3.5 : 4);
     atKey ? g.fill() : (g.strokeStyle = T.tlKeyOffStroke, g.stroke());
     g.fillStyle = T.tlPropName;
     g.font = T.font.ui;
     g.fillText(PROP_DEFS[key].label + (l.props[key]?.expr ? '  =' : ''), ix + 30, cy);
     // current value
+    if (!this.hideValues) {
     const v = valueAt(l, key, st.time);
     g.fillStyle = T.tlValue;
     g.font = T.font.monoSm;
+    if (this.studio && PROP_DEFS[key].unit !== 'color' && v.length <= 2) {
+      // two compact value columns ("242  150")
+      const cols = v.length === 2 ? v : [v[0]];
+      for (let c = 0; c < cols.length; c++) {
+        const t = fmtValue(key, [cols[c]]);
+        const right = this.leftW - 26 - (cols.length - 1 - c) * 46;
+        g.fillText(t, right - g.measureText(t).width, cy);
+      }
+    } else {
     const txt = fmtValue(key, v);
     const tw = g.measureText(txt).width;
-    g.fillText(txt, this.leftW - 12 - tw, cy);
+    g.fillText(txt, this.leftW - (this.studio ? 26 : 12) - tw, cy);
+    }
+    }
+    if (this.studio) this.drawVelocity(g, l, key, kf, cy);
     // keyframes: only the visible time range (keys are sorted by time)
     for (let i = lowerBound(kf, this.xToT(this.leftW - 6) - 1e-9); i < kf.length; i++) {
       const x = this.tToX(kf[i].t);
@@ -625,11 +684,18 @@ export class Timeline {
       if (x < this.leftW - 6) continue;
       const selected = st.keySelection.has(keyId(l.id, key, i));
       // segment line between keys when interpolated
-      if (i < kf.length - 1 && kf[i].interp !== 'hold') {
+      if (!this.studio && i < kf.length - 1 && kf[i].interp !== 'hold') {
         const x2 = this.tToX(kf[i + 1].t);
         const segSel = selected && st.keySelection.has(keyId(l.id, key, i + 1));
         g.fillStyle = segSel ? T.tlSegmentSelected : kf[i].interp === 'spring' ? T.tlSegmentSpring : T.tlSegment;
         g.fillRect(Math.max(this.leftW, x), cy - (segSel ? 1 : 0.5), Math.max(0, Math.min(this.w, x2) - Math.max(this.leftW, x)), segSel ? 2 : 1);
+      }
+      if (this.studio) {
+        // small diamonds; selected keys turn hot
+        g.fillStyle = selected ? T.tlHot : T.tlKey;
+        diamond(g, x, cy, selected ? 4.5 : 3.5);
+        g.fill();
+        continue;
       }
       g.fillStyle = selected ? T.tlKeySelected : T.tlKey;
       g.strokeStyle = selected ? T.tlKeySelectedStroke : T.tlKeyStroke;
@@ -640,6 +706,50 @@ export class Timeline {
       else easeShape(g, x, cy, 5);
       g.fill();
       g.stroke();
+    }
+  }
+
+  /** studio: label color of a layer = its top-level ancestor's slot in the comp (a group and its
+   *  children share a color) */
+  private labelColor(l: Layer) {
+    const st = this.ed.store;
+    let top = l;
+    while (top.parent) { const p = st.layer(top.parent); if (!p) break; top = p; }
+    const root = st.comp.root;
+    // slot per top-level layer, counted from the bottom (stable when layers are added on top).
+    // cached per root list: indexOf per row would be O(layers) on every redraw
+    if (this.labelRoot !== root || this.labelRootLen !== root.length) {
+      this.labelRoot = root; this.labelRootLen = root.length; this.labelSlot.clear();
+      for (let k = 0; k < root.length; k++) this.labelSlot.set(root[k], root.length - 1 - k);
+    }
+    const L = T.labels;
+    return L[(this.labelSlot.get(top.id) ?? 0) % L.length];
+  }
+
+  /** studio: a faint speed profile between keys, so the motion's feel is visible in the track */
+  private drawVelocity(g: CanvasRenderingContext2D, l: Layer, key: PropKey, kf: Keyframe[], cy: number) {
+    if (kf.length < 2) return;
+    const N = 18, H = 7;
+    g.fillStyle = T.tlVelocity;
+    for (let i = 0; i < kf.length - 1; i++) {
+      const a = kf[i], b = kf[i + 1];
+      const x0 = this.tToX(a.t), x1 = this.tToX(b.t);
+      if (x1 < this.leftW || x0 > this.w || x1 - x0 < 6 || a.interp === 'hold') continue;
+      const sp: number[] = [];
+      let prev = valueAt(l, key, a.t), max = 0;
+      for (let k = 1; k <= N; k++) {
+        const v = valueAt(l, key, a.t + ((b.t - a.t) * k) / N);
+        let d = 0;
+        for (let c = 0; c < v.length; c++) d += (v[c] - prev[c]) ** 2;
+        d = Math.sqrt(d); sp.push(d); if (d > max) max = d; prev = v;
+      }
+      if (max <= 1e-9) continue;
+      g.beginPath();
+      g.moveTo(x0, cy);
+      for (let k = 0; k < N; k++) g.lineTo(x0 + ((x1 - x0) * (k + 0.5)) / N, cy - (sp[k] / max) * H);
+      g.lineTo(x1, cy);
+      g.closePath();
+      g.fill();
     }
   }
 
@@ -762,7 +872,7 @@ export class Timeline {
         this.drag = { kind: 'rows', ids: st.selection.slice(), sy: y, y, moved: false };
       } else {
         // prop row: diamond toggles key at current time, else select layer
-        if (x >= ix + 10 && x <= ix + 26) {
+        if (this.studio ? x >= this.leftW - 22 && x < this.leftW - 4 : x >= ix + 10 && x <= ix + 26) {
           const kf = r.layer.props[r.prop!]?.kf ?? [];
           const idx = kf.findIndex(k => Math.abs(k.t - st.time) < 1e-6);
           if (idx >= 0) deleteKeyframes(st, [keyId(r.id, r.prop!, idx)]);
@@ -1134,7 +1244,7 @@ export class Timeline {
       if (r) {
         if (!st.selection.includes(r.id)) st.select([r.id]);
         const props = [...TRANSFORM_KEYS, ...TYPE_PROPS[r.layer.type]];
-        items.push({ label: 'Animate', submenu: props.map(p => ({ label: (isAnimated(r.layer, p) ? '✓ ' : '') + PROP_DEFS[p].label, action: () => { toggleAnimated(st, st.selection, p); this.expand(r.id); } })) });
+        items.push({ label: 'Animate', submenu: props.map(p => ({ label: PROP_DEFS[p].label, checked: isAnimated(r.layer, p), action: () => { toggleAnimated(st, st.selection, p); this.expand(r.id); } })) });
         items.push({ label: r.layer.visible ? 'Hide' : 'Show', action: () => setLayerField(st, st.selection, 'visible', !r.layer.visible) });
         items.push({ label: 'Rename', action: () => this.startRename(r, i) });
         items.push({ label: 'Duplicate', shortcut: '⌘D', action: () => { const ids = cloneLayers(st, st.selection); if (ids?.length) st.select(ids); } });
@@ -1170,36 +1280,6 @@ function easeShape(g: CanvasRenderingContext2D, x: number, y: number, r: number)
   g.beginPath();
   g.moveTo(x - r * 0.8, y - r); g.lineTo(x + r * 0.8, y - r); g.lineTo(x + r * 0.15, y); g.lineTo(x + r * 0.8, y + r); g.lineTo(x - r * 0.8, y + r); g.lineTo(x - r * 0.15, y);
   g.closePath();
-}
-function drawEye(g: CanvasRenderingContext2D, x: number, y: number, open: boolean) {
-  g.beginPath();
-  g.ellipse(x, y, 6, 3.5, 0, 0, Math.PI * 2);
-  g.strokeStyle = g.fillStyle as string;
-  g.lineWidth = 1.2;
-  g.stroke();
-  if (open) { g.beginPath(); g.arc(x, y, 1.6, 0, Math.PI * 2); g.fill(); }
-  else { g.beginPath(); g.moveTo(x - 6, y + 4); g.lineTo(x + 6, y - 4); g.stroke(); }
-}
-function drawLock(g: CanvasRenderingContext2D, x: number, y: number) {
-  g.fillRect(x - 4, y - 1, 8, 6);
-  g.strokeStyle = g.fillStyle as string;
-  g.lineWidth = 1.2;
-  g.beginPath();
-  g.arc(x, y - 2, 2.6, Math.PI, 0);
-  g.stroke();
-}
-function drawTypeIcon(g: CanvasRenderingContext2D, type: Layer['type'], x: number, y: number) {
-  g.beginPath();
-  switch (type) {
-    case 'rect': g.rect(x - 4.5, y - 4.5, 9, 9); g.stroke(); break;
-    case 'ellipse': g.arc(x, y, 5, 0, Math.PI * 2); g.stroke(); break;
-    case 'group': g.rect(x - 5, y - 4, 10, 8); g.moveTo(x - 5, y - 1.5); g.lineTo(x + 5, y - 1.5); g.stroke(); break;
-    case 'text': g.font = T.font.uiBoldSm; g.fillText('T', x - 3.5, y + 0.5); break;
-    case 'image': g.rect(x - 5, y - 4, 10, 8); g.moveTo(x - 5, y + 3); g.lineTo(x - 1, y - 1); g.lineTo(x + 2, y + 2); g.stroke(); break;
-    case 'path': g.moveTo(x - 5, y + 4); g.bezierCurveTo(x - 3, y - 6, x + 3, y + 6, x + 5, y - 4); g.stroke(); break;
-    case 'precomp': g.rect(x - 5, y - 4, 10, 8); g.rect(x - 2.5, y - 1.5, 5, 3); g.stroke(); break;
-    case 'audio': for (let k = -4; k <= 4; k += 2) { const hh = [2, 4, 5, 3, 2][(k + 4) / 2]; g.fillRect(x + k - 0.5, y - hh, 1.2, hh * 2); } break;
-  }
 }
 /** ellipsized labels by font + width + text: the visible names are re-measured on every redraw otherwise */
 const fitCache = new Map<string, string>();

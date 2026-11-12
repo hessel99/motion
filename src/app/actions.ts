@@ -274,9 +274,9 @@ export async function exportLottie() {
 }
 
 /** the current frame at full composition size */
-export async function exportFramePng() {
+export async function exportFramePng(scale = 1) {
   const s = st(), c = s.comp;
-  const url = editor.renderer.snapshot(s.time, Math.max(c.width, c.height));
+  const url = editor.renderer.snapshot(s.time, Math.round(Math.max(c.width, c.height) * scale));
   const blob = await (await fetch(url)).blob();
   const frame = Math.round(s.time * c.fps);
   download(`${s.project.name || 'frame'}_${String(frame).padStart(4, '0')}.png`, blob, 'image/png');

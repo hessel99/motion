@@ -1,156 +1,111 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Component, type ComponentChildren } from 'preact';
-import { editor, type Tool } from '../app/editor';
+import { editor } from '../app/editor';
 import { ViewportController } from './viewport-controller';
-import { Timeline, fmtTime } from './timeline';
-import { Inspector } from './Inspector';
-import { AgentPanel } from './AgentPanel';
-import { LibraryPanel, SyncReview, STYLE_MIME, applyStyle } from './LibraryPanel';
+import { Timeline } from './timeline';
+import { SyncReview, STYLE_MIME, applyStyle } from './LibraryPanel';
 import { useChannels } from './hooks';
 import { showContextMenu, type MenuItem } from './menu';
 import {
-  exportLottie, exportAeScript, exportFramePng, confirmDiscard, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, toast, runBenchmark, exportGifFile,
+  exportLottie, exportAeScript, exportFramePng, confirmDiscard, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, runBenchmark, exportGifFile,
 } from '../app/actions';
-import { setProjectName, editMode, newComposition, addPrecompLayer, renameComp, deleteLayers } from '../core/commands';
+import { deleteLayers } from '../core/commands';
 import { Button, Dialog, Kbd } from './ui';
-import { getTheme, setTheme } from './theme';
+import { IconProvider, PanelLeft } from './chrome/icons';
+import { TabStrip } from './chrome/TabStrip';
+import { LeftPanel } from './chrome/LeftPanel';
+import { RightPanel } from './chrome/RightPanel';
+import { Toolbar } from './chrome/Toolbar';
+import { Transport } from './chrome/Transport';
+import { SettingsPage } from './settings/Settings';
+import { ui, openSettings, setUi, toggleAgent } from './chrome/ui-state';
+import { view } from './chrome/view';
+import { SHORTCUTS } from './chrome/shortcuts';
 
 let vp: ViewportController | null = null;
 let tl: Timeline | null = null;
 
 export function App() {
-  const [agentOpen, setAgentOpen] = useState(() => { try { return localStorage.getItem('motion.agentOpen') !== '0'; } catch { return true; } });
-  useEffect(() => { try { localStorage.setItem('motion.agentOpen', agentOpen ? '1' : '0'); } catch { /* */ } requestAnimationFrame(() => { vp?.resize(); tl?.resize(); }); }, [agentOpen]);
+  useChannels([], ['ui']);
   useEffect(() => {
     setupShortcuts({
       fit: () => vp?.fit(),
       zoom: f => vp?.setZoom(vp.zoom * f),
-      toggleAgent: () => setAgentOpen(o => !o),
+      toggleAgent,
       editText: id => startTextEdit(id),
     });
+    // ⌘, opens Settings (like any mac app)
+    const onKey = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === ',') { e.preventDefault(); openSettings(); } };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
+  // the panels changed width: the canvases follow on the next frame (their ResizeObservers also
+  // fire, this only avoids one frame at the old size)
+  useEffect(() => { requestAnimationFrame(() => { vp?.resize(); tl?.resize(); }); }, [ui.leftOpen]);
+  const settings = ui.view === 'settings';
   return (
-    <div class={'app' + (agentOpen ? '' : ' no-agent')}>
-      <Guard name="Top bar"><TopBar agentOpen={agentOpen} toggleAgent={() => setAgentOpen(o => !o)} /></Guard>
-      {agentOpen && <aside class="left"><Guard name="Agent"><AgentPanel /></Guard></aside>}
-      <main class="center"><Viewport /></main>
-      <aside class="right"><RightPanel /></aside>
-      <section class="bottom"><TimelineHost /></section>
-      <Guard name="Sync"><SyncReview /></Guard>
-      <ShortcutHelp />
-      <Welcome />
-      <Benchmark />
-    </div>
-  );
-}
-
-// ---------------- right panel: inspector | library ----------------
-function RightPanel() {
-  useChannels([], ['library-tab']);
-  const tab = editor.rightTab;
-  const set = (t: 'design' | 'library') => { editor.rightTab = t; try { localStorage.setItem('motion.rightTab', t); } catch { /* */ } editor.emit('library-tab'); };
-  return (
-    <>
-      <div class="right-tabs" role="tablist" aria-label="Right panel">
-        <button type="button" role="tab" aria-selected={tab === 'design'} class={tab === 'design' ? 'on' : ''} onClick={() => set('design')}>Design</button>
-        <button type="button" role="tab" aria-selected={tab === 'library'} class={tab === 'library' ? 'on' : ''} onClick={() => set('library')} title="Colors, numbers and components of this project">Library</button>
+    <IconProvider>
+      <div class={'app' + (ui.leftOpen ? '' : ' no-left') + (settings ? ' show-settings' : '')}>
+        <Guard name="Tab strip"><TabStrip appMenu={appMenu} /></Guard>
+        {/* the editor stays mounted under Settings: its canvases and WebGL context live for the session */}
+        <aside class="left" aria-label="Agent and layers" hidden={!ui.leftOpen}><Guard name="Left panel"><LeftPanel /></Guard></aside>
+        <main class="center" aria-label="Canvas">
+          <Viewport />
+          {!ui.leftOpen && <Button variant="ghost" icon class="lp-reopen" tip="Show panel" onClick={() => setUi({ leftOpen: true })}><PanelLeft /></Button>}
+        </main>
+        <section class="bottom" aria-label="Timeline"><Guard name="Transport"><Transport /></Guard><TimelineHost /></section>
+        <aside class="right" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
+        {settings && <div class="settings-host"><Guard name="Settings"><SettingsPage /></Guard></div>}
+        <Guard name="Sync"><SyncReview /></Guard>
+        <ShortcutHelp />
+        <Welcome />
+        <Benchmark />
       </div>
-      {tab === 'design' ? <Guard name="Inspector"><Inspector /></Guard> : <Guard name="Library"><LibraryPanel /></Guard>}
-    </>
+    </IconProvider>
   );
 }
 
-// ---------------- top bar ----------------
-function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
-  useChannels(['doc', 'playing', 'history', 'comps'], ['view']);
+/** the app menu (home button in the tab strip) */
+export function appMenu(x: number, y: number) {
   const s = editor.store;
-  const time = useRef<HTMLSpanElement>(null);
-  useEffect(() => editor.onFrame((_n, t) => {
-    if (time.current) {
-      const txt = `${fmtTimecode(t, s.comp.fps)}`;
-      if (time.current.textContent !== txt) time.current.textContent = txt;
-    }
-  }), []);
-  const fileMenu = (e: MouseEvent) => {
-    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const items: MenuItem[] = [
-      { label: 'New', shortcut: '', action: () => { if (confirmDiscard()) newProject(); } },
-      { label: 'Open / Import…', shortcut: '⌘O', action: openFileDialog },
-      { label: 'Save', shortcut: '⌘S', action: () => saveProject(false) },
-      { label: 'Save As…', shortcut: '⇧⌘S', action: () => saveProject(true) },
-      { separator: true },
-      { label: 'Export Lottie JSON', action: exportLottie },
-      { label: 'Export for After Effects (.jsx)', action: exportAeScript },
-      { label: 'Export frame as PNG', action: () => { exportFramePng().catch(() => {}); } },
-      { label: 'Export GIF', action: () => { exportGifFile().catch(() => {}); } },
-      { label: 'Export video…', action: () => { import('./ExportDialog').then(m => m.openExportDialog()); } },
-      { separator: true },
-      { label: 'Load demo animation', action: () => { if (confirmDiscard()) loadDemo(); } },
-      {
-        label: 'Performance test', submenu: [
-          { label: '1,000 animated shapes', action: () => confirmDiscard() && loadStress(1000) },
-          { label: '5,000 animated shapes', action: () => confirmDiscard() && loadStress(5000) },
-          { label: '10,000 animated shapes', action: () => confirmDiscard() && loadStress(10000) },
-          { label: '25,000 animated shapes', action: () => confirmDiscard() && loadStress(25000) },
-          { label: '2,000 mixed (text, stars, shapes, groups)', action: () => confirmDiscard() && loadStress(2000, ['rect', 'ellipse', 'text', 'path'], true) },
-        ],
-      },
-      { label: 'Run performance benchmark', action: () => editor.emit('benchmark') },
-      { separator: true },
-      { label: editor.showHud ? 'Hide performance HUD' : 'Show performance HUD', action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
-      { label: getTheme() === 'light' ? 'Dark theme' : 'Light theme', action: () => setTheme(getTheme() === 'light' ? 'dark' : 'light') },
-      { label: editor.snapPlaybackToFrames ? 'Play smooth (display refresh)' : 'Play at composition fps', action: () => { editor.snapPlaybackToFrames = !editor.snapPlaybackToFrames; toast(editor.snapPlaybackToFrames ? 'Playback snaps to composition frames' : 'Playback is smooth (every display frame)'); } },
-    ];
-    showContextMenu(r.left, r.bottom + 4, items);
-  };
-  return (
-    <header class="topbar">
-      <div class="tb-left">
-        <Button variant="ghost" class="logo" onClick={fileMenu as any} aria-haspopup="menu" tip="Menu">◆ Motion ▾</Button>
-        <input class="filename" aria-label="Project name" value={s.project.name} onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
-          onChange={e => setProjectName(s, (e.target as HTMLInputElement).value || 'Untitled')} spellcheck={false} />
-        <Button variant="ghost" class="comp-switch" tip="Compositions" aria-haspopup="menu" onClick={(e: MouseEvent) => {
-          const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-          const comps = Object.values(s.project.comps);
-          showContextMenu(r.left, r.bottom + 4, [
-            ...comps.map(c => ({ label: (c.id === s.comp.id ? '● ' : '   ') + c.name, action: () => s.openComp(c.id) })),
-            { separator: true },
-            { label: 'New composition', action: () => { const c = newComposition(s); s.openComp(c.id); } },
-            ...(comps.length > 1 ? [{ label: 'Add composition as layer', submenu: comps.filter(c => c.id !== s.comp.id).map(c => ({ label: c.name, action: () => { try { addPrecompLayer(s, c.id); } catch (err: any) { toast(err.message, 'error'); } } })) }] : []),
-            { label: 'Rename composition…', action: () => { const n = prompt('Composition name', s.comp.name); if (n) renameComp(s, s.comp.id, n); } },
-          ]);
-        }}>▣ {s.comp.name} ▾</Button>
-        <span class="muted small tb-meta">{s.comp.width}×{s.comp.height} · {s.comp.fps}fps · {s.comp.duration}s</span>
-      </div>
-      <div class="tb-center">
-        <Button variant="ghost" icon tip="Go to start (Home)" onClick={() => s.setTime(0)}>⏮</Button>
-        <Button variant="ghost" icon tip="Previous frame (,)" onClick={() => editor.stepFrames(-1)}>◂</Button>
-        <Button class="play" tip={s.playing ? 'Pause (Space)' : 'Play (Space)'} aria-label={s.playing ? 'Pause' : 'Play'} onClick={() => editor.togglePlay()}>{s.playing ? '❚❚' : '▶'}</Button>
-        <Button variant="ghost" icon tip="Next frame (.)" onClick={() => editor.stepFrames(1)}>▸</Button>
-        <span class="timecode" ref={time} aria-label="Current time">00:00</span>
-        <button type="button" class={'ghost autokey' + (editMode.autoKey ? ' rec' : '')} aria-pressed={editMode.autoKey} title="Auto-keyframe: every change creates a keyframe at the playhead" onClick={() => { editMode.autoKey = !editMode.autoKey; editor.emit('view'); }}>● Auto-key</button>
-      </div>
-      <div class="tb-right">
-        <Button variant="ghost" icon disabled={!s.canUndo} aria-label="Undo" title={`Undo ${s.undoLabel ?? ''} (⌘Z) — right-click for history`} onClick={() => s.undo()} onContextMenu={e => {
-          // history: jump back several steps at once (newest first)
-          e.preventDefault();
-          const labels = s.historyLabels;
-          const items: MenuItem[] = labels.map((label, i) => ({ label: `${label}`, shortcut: i === labels.length - 1 ? 'last' : `${labels.length - i}`, action: () => s.undoTo(i + s.historyLength - labels.length) })).reverse().slice(0, 25);
-          if (items.length) showContextMenu(e.clientX, e.clientY + 8, items);
-        }}>↶</Button>
-        <Button variant="ghost" icon disabled={!s.canRedo} tip="Redo (⇧⌘Z)" onClick={() => s.redo()}>↷</Button>
-        <Button variant="ghost" class="zoom" tip="Zoom to fit (⌘0)" onClick={() => vp?.fit()}>{Math.round((vp?.zoom ?? 1) * 100)}%</Button>
-        <Button variant="ghost" active={props.agentOpen} tip="AI agent (⌘I)" onClick={props.toggleAgent}>✦ Agent</Button>
-      </div>
-    </header>
-  );
+  const items: MenuItem[] = [
+    { label: 'New', shortcut: '', action: () => { if (confirmDiscard()) newProject(); } },
+    { label: 'Open / Import…', shortcut: '⌘O', action: openFileDialog },
+    { label: 'Save', shortcut: '⌘S', action: () => saveProject(false) },
+    { label: 'Save As…', shortcut: '⇧⌘S', action: () => saveProject(true) },
+    { separator: true },
+    {
+      label: 'Export', submenu: [
+        { label: 'Video…', action: () => { import('./ExportDialog').then(m => m.openExportDialog()); } },
+        { label: 'GIF', action: () => { exportGifFile().catch(() => {}); } },
+        { label: 'Frame as PNG', action: () => { exportFramePng().catch(() => {}); } },
+        { label: 'Lottie JSON', action: exportLottie },
+        { label: 'After Effects (.jsx)', action: exportAeScript },
+      ],
+    },
+    { separator: true },
+    { label: 'Undo', shortcut: '⌘Z', disabled: !s.canUndo, action: () => s.undo() },
+    { label: 'Redo', shortcut: '⇧⌘Z', disabled: !s.canRedo, action: () => s.redo() },
+    { separator: true },
+    { label: 'Load demo animation', action: () => { if (confirmDiscard()) loadDemo(); } },
+    {
+      label: 'Performance test', submenu: [
+        { label: '1,000 animated shapes', action: () => confirmDiscard() && loadStress(1000) },
+        { label: '5,000 animated shapes', action: () => confirmDiscard() && loadStress(5000) },
+        { label: '10,000 animated shapes', action: () => confirmDiscard() && loadStress(10000) },
+        { label: '25,000 animated shapes', action: () => confirmDiscard() && loadStress(25000) },
+        { label: '2,000 mixed (text, stars, shapes, groups)', action: () => confirmDiscard() && loadStress(2000, ['rect', 'ellipse', 'text', 'path'], true) },
+      ],
+    },
+    { label: 'Run performance benchmark', action: () => editor.emit('benchmark') },
+    { label: editor.showHud ? 'Hide performance HUD' : 'Show performance HUD', action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
+    { separator: true },
+    { label: 'Keyboard shortcuts', shortcut: '?', action: () => editor.emit('help') },
+    { label: 'Settings…', shortcut: '⌘,', action: () => openSettings() },
+  ];
+  showContextMenu(x, y, items);
 }
 
-function fmtTimecode(t: number, fps: number) {
-  const s = Math.floor(t + 1e-6);
-  const f = Math.floor((t - s) * fps + 1e-6);
-  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}:${String(f).padStart(2, '0')}`;
-}
 
 // ---------------- viewport ----------------
 function Viewport() {
@@ -162,6 +117,7 @@ function Viewport() {
     host.current!.appendChild(canvas);
     editor.attachCanvas(canvas);
     vp = new ViewportController(editor, host.current!, canvas);
+    view.vp = vp;
     vp.onTextEdit = (id, fresh) => startTextEdit(id, fresh);
     (globalThis as any).viewport = vp;
   }, []);
@@ -184,28 +140,6 @@ function Viewport() {
       }}>
       <Toolbar />
       <Hud />
-    </div>
-  );
-}
-
-const TOOLS: { id: Tool; label: string; key: string; icon: string }[] = [
-  { id: 'select', label: 'Move', key: 'V', icon: '➤' },
-  { id: 'rect', label: 'Rectangle', key: 'R', icon: '▢' },
-  { id: 'ellipse', label: 'Ellipse', key: 'O', icon: '◯' },
-  { id: 'polygon', label: 'Polygon', key: '', icon: '⬠' },
-  { id: 'star', label: 'Star', key: '', icon: '☆' },
-  { id: 'text', label: 'Text', key: 'T', icon: 'T' },
-  { id: 'pen', label: 'Pen', key: 'P', icon: '✒' },
-  { id: 'hand', label: 'Hand', key: 'H', icon: '✋' },
-];
-
-function Toolbar() {
-  useChannels([], ['tool']);
-  return (
-    <div class="toolbar vp-ui" role="toolbar" aria-label="Tools">
-      {TOOLS.map(t => (
-        <Button variant="ghost" active={editor.tool === t.id} tip={t.key ? `${t.label} (${t.key})` : t.label} tipSide="top" aria-label={t.label} onClick={() => editor.setTool(t.id)}>{t.icon}</Button>
-      ))}
     </div>
   );
 }
@@ -236,6 +170,7 @@ function TimelineHost() {
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
     tl = new Timeline(editor, host.current!);
+    view.tl = tl;
     (globalThis as any).timeline = tl;
     editor.store.on('selection', () => { const s = editor.store.selection; if (s.length === 1) tl!.reveal(s[0]); });
   }, []);
@@ -280,15 +215,6 @@ function startTextEdit(id: string, fresh = false) {
   ta.addEventListener('blur', done);
 }
 
-const SHORTCUTS: [string, string][] = [
-  ['Space', 'Play / pause'], [', / .', 'Previous / next frame (shift: 10)'], ['J / K', 'Previous / next keyframe or marker'], ['M', 'Add marker at playhead (drag to move, double-click to name)'], ['Home / End', 'Start / end'],
-  ['V R O T P H', 'Move, rectangle, ellipse, text, pen, hand (polygon and star in the toolbar)'], ['⌘Z / ⇧⌘Z', 'Undo / redo'], ['⌘C ⌘V ⌘X', 'Copy, paste (also from Figma), cut — layers or keyframes'],
-  ['⌘D', 'Duplicate'], ['Alt-drag', 'Duplicate while moving'], ['⌘G / ⇧⌘G', 'Group / ungroup'], ['⇧⌘C', 'Pre-compose'],
-  ['⌘[ / ⌘]', 'Send backward / bring forward (alt: to back / front)'], ['Arrows', 'Nudge (shift: 10px)'], ['⇧P ⇧S ⇧A', 'Animate position / scale / anchor'],
-  ['F9', 'Easy ease on selected keys'], ['B / N', 'Preview range start / end at playhead (double-click its bar to clear)'], ['Delete', 'Delete layers or keyframes'], ['⌘0 / ⌘+ / ⌘−', 'Fit / zoom in / zoom out'],
-  ['⌘ while dragging', 'No snapping'], ['Shift while dragging', 'Constrain axis / keep aspect / 15° steps'], ['Alt while resizing', 'From center'],
-  ['Double-click', 'Edit text / enter group / edit path / open precomp'], ['⌘I', 'Toggle AI agent'], ['?', 'This help'],
-];
 
 function ShortcutHelp() {
   const [open, setOpen] = useState(false);
@@ -352,9 +278,9 @@ function Welcome() {
     <Dialog title="Welcome to Motion" class="help welcome" onClose={close} actions={<Button variant="primary" autofocus onClick={close}>Start</Button>}>
         <ol>
           <li><b>Paste from Figma</b>: select layers in Figma, ⌘C, then ⌘V here. A single frame becomes the composition.</li>
-          <li><b>Animate</b>: click a property's ◇ to add keyframes, or use <i>Animate</i> presets and <i>Text animation</i> in the right panel. Press F9 for easy ease.</li>
-          <li><b>AI agent</b> (left): describe an animation and Claude Code builds it in your file, with your own subscription. One click undoes everything it did.</li>
-          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video or Lottie from the ◆ menu.</li>
+          <li><b>Animate</b>: click a property's keyframe diamond to add keyframes, or use <i>Animate</i> presets and <i>Text animation</i> in the right panel. Press F9 for easy ease.</li>
+          <li><b>AI agent</b> (bottom left): describe an animation and Claude Code builds it in your file, with your own subscription. One click undoes everything it did.</li>
+          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video or Lottie from the Export button (top right) or the home menu.</li>
         </ol>
     </Dialog>
   );

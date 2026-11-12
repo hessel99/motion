@@ -16,6 +16,14 @@ import { EaseStudio, showClassicEase, studioEnabled, StudioSwitch } from './patt
 import { RhythmPanel } from './patterns/RhythmPanel';
 import { Checkbox, ColorSwatch, NumField, Section, Segmented, Slider } from './ui';
 import { ComponentBox, LinkButton, LinkedChip, sharedLink } from './LinkControls';
+import { exportAeScript, exportFramePng, exportGifFile, exportLottie } from '../app/actions';
+import { tokenUsage } from '../core/tokens';
+import {
+  AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignHorizontalDistributeCenter, AlignStartHorizontal,
+  AlignStartVertical, AlignVerticalDistributeCenter, ArrowRightLeft, ArrowUpRight, Blend, ChevronRight, Component as ComponentIcon, Hexagon, Minus,
+  RotateCw, SwatchBook, X,
+} from './chrome/icons';
+import { openLeft } from './chrome/ui-state';
 
 const st = () => editor.store;
 
@@ -27,7 +35,7 @@ export function Inspector() {
   return (
     <div class="inspector">
       {store.keySelection.size > 0 && <EasePanel />}
-      {sel.length === 0 && <CompPanel />}
+      {sel.length === 0 && <DocPanel />}
       {sel.length > 0 && <LayerPanel layers={sel} />}
     </div>
   );
@@ -118,7 +126,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
     <>
       <AlignBar ids={ids} />
       {layers.length === 1 && <ComponentBox layer={l} />}
-      <Section title={layers.length > 1 ? `${layers.length} layers` : l.name} right={<span class="insp-type">{layers.length > 1 ? 'mixed' : l.type}</span>}>
+      <Section title="Transform" right={layers.length > 1 ? <span class="insp-type">{layers.length} layers</span> : undefined}>
         <div class="row">
           <KeyButton layers={layers} prop="position" />
           <NumField label="X" value={pos[0]} onChange={(n, mk) => vecMulti('position', 0, n, mk)} />
@@ -138,9 +146,9 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
         </div>
         <div class="row">
           <KeyButton layers={layers} prop="rotation" />
-          <NumField label="↻" title="Rotation" value={rot} suffix="°" onChange={(n, mk) => set('rotation', [n], mk)} />
+          <NumField label={<RotateCw size={12} />} title="Rotation" value={rot} suffix="°" onChange={(n, mk) => set('rotation', [n], mk)} />
           <KeyButton layers={layers} prop="opacity" />
-          <NumField label="◐" title="Opacity" value={opa} min={0} max={100} suffix="%" onChange={(n, mk) => set('opacity', [n], mk)} />
+          <NumField label={<Blend size={12} />} title="Opacity" value={opa} min={0} max={100} suffix="%" onChange={(n, mk) => set('opacity', [n], mk)} />
         </div>
         {sharedLink(layers, 'opacity') && <div class="row"><LinkedChip layers={layers} prop="opacity" /></div>}
         <div class="row">
@@ -213,7 +221,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
         </Section>
       )}
       {layers.length === 1 && l.type === 'precomp' && l.compRef && (
-        <Section title="Composition" right={<button class="ghost" onClick={() => store.openComp(l.compRef!)}>Open ↗</button>}>
+        <Section title="Composition" right={<button class="ghost" onClick={() => store.openComp(l.compRef!)}>Open <ArrowUpRight size={14} /></button>}>
           <div class="row">
             <NumField label="Start" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={(n, mk) => store.transact('Precomp start', tx => { for (const id of ids) { const x = store.layer(id); if (x) { tx.set(x, 'startTime', n); tx.touch(id); } } tx.structure(); }, mk)} />
           </div>
@@ -346,7 +354,7 @@ function GradientEditor({ layer }: { layer: Layer }) {
           <option value="linear">Linear gradient</option>
           <option value="radial">Radial gradient</option>
         </select>
-        {kind === 'linear' && <NumField label="∠" value={angle} suffix="°" onChange={setAngle} title="Gradient angle" />}
+        {kind === 'linear' && <NumField label="Angle" value={angle} suffix="°" onChange={setAngle} title="Gradient angle" />}
       </div>
       {g && (
         <>
@@ -355,7 +363,7 @@ function GradientEditor({ layer }: { layer: Layer }) {
             <div class="row grad-stop">
               <NumField label="%" min={0} max={100} value={Math.round(s3.pos * 1000) / 10} onChange={(n, mk) => setStop(i, { pos: n / 100 }, mk)} />
               <ColorField value={s3.color} onChange={(c, mk) => setStop(i, { color: c as any }, mk)} />
-              <button type="button" class="ghost icon" title="Remove stop" aria-label="Remove stop" disabled={g.stops.length <= 2} onClick={() => write({ ...g, stops: g.stops.filter((_, j) => j !== i) })}>−</button>
+              <button type="button" class="ghost icon" title="Remove stop" aria-label="Remove stop" disabled={g.stops.length <= 2} onClick={() => write({ ...g, stops: g.stops.filter((_, j) => j !== i) })}><Minus /></button>
             </div>
           ))}
           <div class="row"><button type="button" class="ghost" onClick={() => {
@@ -397,31 +405,65 @@ function ColorField({ value, onChange }: { value: number[]; onChange: (c: number
 }
 
 // ---------------- composition ----------------
-function CompPanel() {
+/** nothing selected: the composition (size, timing, background), its styles and the export */
+function DocPanel() {
   const store = st();
   const c = store.comp;
+  const [scale, setScale] = useState(() => { try { return localStorage.getItem('motion.export.scale') || '1'; } catch { return '1'; } });
+  const [format, setFormat] = useState(() => { try { return localStorage.getItem('motion.export.format') || 'video'; } catch { return 'video'; } });
+  const remember = (k: string, v: string) => { try { localStorage.setItem('motion.export.' + k, v); } catch { /* */ } };
+  const items = Object.values(store.project.tokens?.items ?? {});
+  const colors = items.filter(t => t.type === 'color').length;
+  const numbers = items.filter(t => t.type === 'number').length;
+  const comps = Object.keys(store.project.components ?? {}).length;
+  // walks every layer: only when the file has styles at all
+  let linked = 0;
+  if (items.length) for (const u of tokenUsage(store.project).values()) linked += u.props;
+  const run = () => {
+    if (format === 'video') import('./ExportDialog').then(m => m.openExportDialog());
+    else if (format === 'gif') exportGifFile().catch(() => {});
+    else if (format === 'png') exportFramePng(+scale).catch(() => {});
+    else if (format === 'lottie') exportLottie();
+    else if (format === 'ae') exportAeScript();
+  };
+  const label: Record<string, string> = { video: 'Export video…', gif: 'Export GIF', png: 'Export frame', lottie: 'Export Lottie', ae: 'Export for After Effects' };
   return (
-    <Section title="Composition">
-      <div class="row">
-        <NumField label="W" min={1} value={c.width} onChange={n => setCompSettings(store, { width: Math.round(n) })} />
-        <NumField label="H" min={1} value={c.height} onChange={n => setCompSettings(store, { height: Math.round(n) })} />
-      </div>
-      <div class="row">
-        <NumField label="FPS" min={1} max={240} value={c.fps} onChange={n => setCompSettings(store, { fps: Math.round(n) })} />
-        <NumField label="Dur" min={0.1} step={0.1} value={c.duration} suffix="s" onChange={n => setCompSettings(store, { duration: n })} />
-      </div>
-      <div class="row">
-        <span class="field-label" style={{ width: '70px' }}>Background</span>
-        <ColorField value={c.background} onChange={col => setCompSettings(store, { background: col as any })} />
-      </div>
-      <div class="muted small hint">
-        Tip: copy layers in Figma and press ⌘V here. Drop .json (Lottie), .aep, .svg or images onto the canvas.
-      </div>
-    </Section>
+    <>
+      <Section title="Composition">
+        <div class="row">
+          <NumField label="W" min={1} value={c.width} onChange={n => setCompSettings(store, { width: Math.round(n) })} />
+          <NumField label="H" min={1} value={c.height} onChange={n => setCompSettings(store, { height: Math.round(n) })} />
+        </div>
+        <div class="row">
+          <NumField label="FPS" min={1} max={240} value={c.fps} onChange={n => setCompSettings(store, { fps: Math.round(n) })} />
+          <NumField label="Dur" min={0.1} step={0.1} value={c.duration} suffix="s" onChange={n => setCompSettings(store, { duration: n })} />
+        </div>
+      </Section>
+      <Section title="Background">
+        <div class="row"><ColorField value={c.background} onChange={col => setCompSettings(store, { background: col as any })} /></div>
+      </Section>
+      <Section title="Styles and variables">
+        <button type="button" class="list-row" onClick={() => openLeft('library')}><Hexagon /><span class="grow">Numbers</span><span class="count">{numbers}</span></button>
+        <button type="button" class="list-row" onClick={() => openLeft('library')}><SwatchBook /><span class="grow">Color styles</span><span class="count">{colors}</span></button>
+        <button type="button" class="list-row" onClick={() => openLeft('components')}><ComponentIcon /><span class="grow">Components</span><span class="count">{comps}</span></button>
+        {items.length > 0 && <div class="muted small list-foot">{linked ? `${linked} linked use${linked === 1 ? '' : 's'} in this file` : 'Not used by any layer yet'}<ChevronRight size={12} /></div>}
+      </Section>
+      <Section title="Export">
+        <div class="row">
+          <select class="grow" aria-label="Export scale" value={scale} disabled={format !== 'png'} title={format === 'png' ? 'Scale' : 'Scale (set in the video dialog)'} onChange={e => { const v = (e.target as HTMLSelectElement).value; setScale(v); remember('scale', v); }}>
+            {['0.5', '1', '2', '3', '4'].map(v => <option value={v}>{v}x</option>)}
+          </select>
+          <select class="grow" aria-label="Export format" value={format} onChange={e => { const v = (e.target as HTMLSelectElement).value; setFormat(v); remember('format', v); }}>
+            <option value="video">MP4 / WebM</option><option value="gif">GIF</option><option value="png">PNG frame</option><option value="lottie">Lottie</option><option value="ae">After Effects</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-block" onClick={run}>{label[format] ?? 'Export'}</button>
+        <div class="muted small hint">Paste layers from Figma with ⌘V, or drop Lottie, .aep, .svg or images onto the canvas.</div>
+      </Section>
+    </>
   );
 }
 
-// ---------------- easing editor ----------------
 function EasePanel() {
   const store = st();
   const keys = [...store.keySelection];
@@ -592,15 +634,15 @@ const parentInv = (id: string) => {
 
 function AlignBar({ ids }: { ids: string[] }) {
   const store = st();
-  const btn = (how: Align, title: string, icon: string) => (
-    <button class="ghost icon" title={title + (ids.length === 1 ? ' (to composition)' : '')} onClick={() => alignLayers(store, ids, how, vpBounds, parentInv)}>{icon}</button>
+  const btn = (how: Align, title: string, Icon: typeof AlignStartVertical) => (
+    <button class="ghost icon" title={title + (ids.length === 1 ? ' (to composition)' : '')} aria-label={title} onClick={() => alignLayers(store, ids, how, vpBounds, parentInv)}><Icon /></button>
   );
   return (
     <div class="align-bar">
-      {btn('left', 'Align left', '⇤')}{btn('hcenter', 'Align horizontal centers', '↔')}{btn('right', 'Align right', '⇥')}
-      {btn('top', 'Align top', '⤒')}{btn('vcenter', 'Align vertical centers', '↕')}{btn('bottom', 'Align bottom', '⤓')}
-      <button class="ghost icon" disabled={ids.length < 3} title="Distribute horizontally" onClick={() => distributeLayers(store, ids, 'x', vpBounds, parentInv)}>⋯</button>
-      <button class="ghost icon" disabled={ids.length < 3} title="Distribute vertically" onClick={() => distributeLayers(store, ids, 'y', vpBounds, parentInv)}>⋮</button>
+      {btn('left', 'Align left', AlignStartVertical)}{btn('hcenter', 'Align horizontal centers', AlignCenterVertical)}{btn('right', 'Align right', AlignEndVertical)}
+      {btn('top', 'Align top', AlignStartHorizontal)}{btn('vcenter', 'Align vertical centers', AlignCenterHorizontal)}{btn('bottom', 'Align bottom', AlignEndHorizontal)}
+      <button class="ghost icon" disabled={ids.length < 3} title="Distribute horizontally" aria-label="Distribute horizontally" onClick={() => distributeLayers(store, ids, 'x', vpBounds, parentInv)}><AlignHorizontalDistributeCenter /></button>
+      <button class="ghost icon" disabled={ids.length < 3} title="Distribute vertically" aria-label="Distribute vertically" onClick={() => distributeLayers(store, ids, 'y', vpBounds, parentInv)}><AlignVerticalDistributeCenter /></button>
     </div>
   );
 }
@@ -646,7 +688,7 @@ function SmartRow({ ids, dur }: { ids: string[]; dur: number }) {
   return (
     <div class="row" title="Matches layers by name inside the two selected layers and animates every difference from the start to the end state. The end layer is removed.">
       <button class="btn" style={{ flex: 1 }} onClick={run}>Smart animate {name(a)} → {name(b)}</button>
-      <button type="button" class="ghost icon" title="Swap start and end" aria-label="Swap start and end" onClick={() => setSwap(!swap)}>⇄</button>
+      <button type="button" class="ghost icon" title="Swap start and end" aria-label="Swap start and end" onClick={() => setSwap(!swap)}><ArrowRightLeft /></button>
     </div>
   );
 }
@@ -741,7 +783,7 @@ function ExprRow({ ids, k, src }: { ids: string[]; k: PropKey; src: string }) {
   const mk = useRef('expr' + Math.random());
   return (
     <div class="expr-row">
-      <div class="row small"><span>{PROP_DEFS[k].label}</span><span style={{ flex: 1 }} /><button type="button" class="ghost icon btn-sm" title="Remove expression" aria-label="Remove expression" onClick={() => setExpr(store, ids, k, undefined)}>✕</button></div>
+      <div class="row small"><span>{PROP_DEFS[k].label}</span><span style={{ flex: 1 }} /><button type="button" class="ghost icon btn-sm" title="Remove expression" aria-label="Remove expression" onClick={() => setExpr(store, ids, k, undefined)}><X size={14} /></button></div>
       <textarea class={'expr-edit' + (err ? ' bad' : '')} rows={2} value={text} spellcheck={false}
         onInput={e => { const v = (e.target as HTMLTextAreaElement).value; setText(v); if (!checkExpr(v, PROP_DEFS[k].dim)) setExpr(store, ids, k, v, mk.current); }}
         onFocus={() => { focused.current = true; }}

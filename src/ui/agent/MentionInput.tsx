@@ -1,10 +1,11 @@
 // prompt textarea with @-mentions of layers: type "@" and pick a layer; the agent gets its id.
 import { useMemo, useRef, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
+import { LAYER_ICON } from '../chrome/icons';
 
 export interface Mention { id: string; name: string }
 
-const TYPE_ICON: Record<string, string> = { rect: '▭', ellipse: '◯', text: 'T', group: '▣', path: '✎', image: '▨', precomp: '◫', audio: '♪' };
+
 
 export function mentionToken(name: string) { return /^[\w\-.]+$/.test(name) ? `@${name}` : `@[${name}]`; }
 
@@ -61,7 +62,7 @@ export function MentionInput(props: {
         <div class="ag-mentions" role="listbox">
           {matches.map((m, i) => (
             <div role="option" aria-selected={i === active} class={'ag-mention' + (i === active ? ' on' : '')} onMouseDown={e => { e.preventDefault(); pick(m); }} onMouseEnter={() => setActive(i)}>
-              <span class="ag-mention-icon">{TYPE_ICON[m.type] ?? '•'}</span>
+              <span class="ag-mention-icon">{(() => { const I = LAYER_ICON[m.type as keyof typeof LAYER_ICON]; return I ? <I size={13} /> : null; })()}</span>
               <span class="ag-grow">{m.name}</span>
               {m.sel && <span class="ag-muted">selected</span>}
             </div>

@@ -72,6 +72,11 @@ const COLOR_TOKENS = {
   tlTabText: '--tl-tab-text',
   tlTabOn: '--tl-tab-on',
   tlTabOnText: '--tl-tab-on-text',
+  tlLabel1: '--tl-label-1', tlLabel2: '--tl-label-2', tlLabel3: '--tl-label-3', tlLabel4: '--tl-label-4',
+  tlLabel5: '--tl-label-5', tlLabel6: '--tl-label-6', tlLabel7: '--tl-label-7', tlLabel8: '--tl-label-8',
+  tlLabelKey: '--tl-label-key',
+  tlHot: '--tl-hot',
+  tlVelocity: '--tl-velocity',
   // graph editor
   graphBg: '--graph-bg',
   graphGrid: '--graph-grid',
@@ -98,6 +103,7 @@ const COLOR_TOKENS = {
   vpTangentHandle: '--vp-tangent-handle',
   vpGuide: '--vp-guide',
   vpMarqueeFill: '--vp-marquee-fill',
+  vpPixelGrid: '--vp-pixel-grid',
 } as const;
 
 export type ColorToken = keyof typeof COLOR_TOKENS;
@@ -122,6 +128,8 @@ export type CanvasTheme = Record<ColorToken, string> & {
   vpBgRgb: [number, number, number];
   /** graph curve colors per vector component (x, y, z, w) */
   axes: [string, string, string, string];
+  /** timeline label colors (per top-level layer), in order */
+  labels: string[];
 };
 
 // dark fallbacks so the module works before styles load (tests, ssr-ish contexts)
@@ -135,7 +143,7 @@ function fonts(ui: string, mono: string): CanvasFonts {
 /** the live canvas theme. read fields at draw time (never cache them across theme changes). */
 export const T: CanvasTheme = Object.assign(
   Object.fromEntries(Object.keys(COLOR_TOKENS).map(k => [k, '#888'])) as Record<ColorToken, string>,
-  { name: 'dark' as ThemeName, font: fonts(FALLBACK_FONT_UI, FALLBACK_FONT_MONO), vpBgRgb: [0.1, 0.1, 0.11] as [number, number, number], axes: ['#f66', '#4c6', '#48f', '#fc0'] as [string, string, string, string] },
+  { name: 'dark' as ThemeName, font: fonts(FALLBACK_FONT_UI, FALLBACK_FONT_MONO), vpBgRgb: [0.1, 0.1, 0.11] as [number, number, number], axes: ['#f66', '#4c6', '#48f', '#fc0'] as [string, string, string, string], labels: ['#4a90e2', '#e8619d', '#3fa66a', '#e8833a'] },
 );
 
 const listeners = new Set<() => void>();
@@ -182,6 +190,7 @@ export function readCanvasTheme(scope: Element = document.documentElement): Canv
     out.name = scope.closest('[data-theme]')?.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
     out.vpBgRgb = parseRgb(r.resolve(out.vpBg));
     out.axes = [out.axisX, out.axisY, out.axisZ, out.axisW];
+    out.labels = [out.tlLabel1, out.tlLabel2, out.tlLabel3, out.tlLabel4, out.tlLabel5, out.tlLabel6, out.tlLabel7, out.tlLabel8];
   } finally { r.done(); }
   return out;
 }
@@ -205,15 +214,31 @@ export function getTheme(): ThemeName {
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 }
 
-const STORAGE = 'motion.theme';
+/** the user's choice: a fixed theme or follow the OS (Settings > Appearance) */
+export type ThemePref = ThemeName | 'system';
 
-/** switch the whole app's theme (persisted). dark is the default. */
-export function setTheme(name: ThemeName) {
+const STORAGE = 'motion.theme';
+let pref: ThemePref = 'dark';
+let mql: MediaQueryList | null = null;
+
+export function getThemePref(): ThemePref { return pref; }
+
+function apply(name: ThemeName) {
   const root = document.documentElement;
   if (name === 'dark') delete root.dataset.theme; else root.dataset.theme = name;
-  try { localStorage.setItem(STORAGE, name); } catch { /* private mode */ }
   // the mutation observer refreshes asynchronously; refresh now so callers can draw immediately
   refreshTheme();
+}
+
+function systemTheme(): ThemeName {
+  try { return matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; } catch { return 'dark'; }
+}
+
+/** switch the whole app's theme (persisted). dark is the default; 'system' follows the OS. */
+export function setTheme(name: ThemePref) {
+  pref = name;
+  try { localStorage.setItem(STORAGE, name); } catch { /* private mode */ }
+  apply(name === 'system' ? systemTheme() : name);
 }
 
 /**
@@ -225,9 +250,15 @@ export function initTheme() {
   observing = true;
   let wanted: string | null = null;
   try { wanted = new URLSearchParams(location.search).get('theme') ?? localStorage.getItem(STORAGE); } catch { /* */ }
-  if (wanted === 'light') document.documentElement.dataset.theme = 'light';
+  pref = wanted === 'light' || wanted === 'system' ? wanted : 'dark';
+  const initial = pref === 'system' ? systemTheme() : pref;
+  if (initial === 'light') document.documentElement.dataset.theme = 'light';
   refreshTheme();
   new MutationObserver(() => {
     if (document.documentElement.dataset.theme !== resolvedFor) refreshTheme();
   }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  try {
+    mql = matchMedia('(prefers-color-scheme: light)');
+    mql.addEventListener('change', () => { if (pref === 'system') apply(systemTheme()); });
+  } catch { /* no matchMedia (tests) */ }
 }

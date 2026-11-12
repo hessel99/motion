@@ -8,6 +8,7 @@ import { Button, Checkbox, ColorSwatch, Dialog, Kbd, NumField, Section, Segmente
 import { showContextMenu } from './menu';
 import { toast } from '../app/actions';
 import { getTheme, onThemeChange, readCanvasTheme, setTheme, type CanvasTheme, type ThemeName } from './theme';
+import { ChevronDown, MousePointer2, Play, Sparkles, Square, Type } from './chrome/icons';
 
 const COLOR_GROUPS: [string, string[]][] = [
   ['Surfaces', ['--bg-app', '--surface-0', '--surface-1', '--surface-2', '--surface-3', '--surface-overlay', '--surface-code', '--surface-hover', '--surface-pressed', '--backdrop']],
@@ -162,15 +163,15 @@ function Buttons() {
           <Button variant={v}>Medium</Button>
           <Button variant={v} size="lg">Large</Button>
           <Button variant={v} disabled>Disabled</Button>
-          <Button variant={v} icon tip="Icon button">✦</Button>
+          <Button variant={v} icon tip="Icon button"><Sparkles /></Button>
         </div>
       ))}
       <div class="sg-wrap">
         <code class="sg-tok">toggle</code>
         <Button active={on} onClick={() => setOn(!on)}>Active: {on ? 'on' : 'off'}</Button>
-        <Button variant="ghost" active={on} onClick={() => setOn(!on)}>✦ Agent</Button>
-        <Button class="play" tip="Play (Space)" aria-label="Play">▶</Button>
-        <div class="toolbar sg-toolbar"><Button variant="ghost" active tip="Move (V)" tipSide="top">➤</Button><Button variant="ghost" tip="Rectangle (R)" tipSide="top">▢</Button><Button variant="ghost" tip="Ellipse (O)" tipSide="top">◯</Button></div>
+        <Button variant="ghost" active={on} onClick={() => setOn(!on)}><Sparkles /> Agent</Button>
+        <Button variant="ghost" icon tip="Play (Space)" aria-label="Play"><Play /></Button>
+        <div class="toolbar sg-toolbar"><button type="button" class="tool on" aria-label="Move" data-tooltip="Move (V)" data-tooltip-side="top"><MousePointer2 size={18} /></button><button type="button" class="tool" aria-label="Rectangle" data-tooltip="Rectangle (R)" data-tooltip-side="top"><Square size={18} /><span class="tool-corner" /></button><button type="button" class="tool" aria-label="Text" data-tooltip="Text (T)" data-tooltip-side="top"><Type size={18} /></button></div>
       </div>
     </div>
   );
@@ -215,7 +216,7 @@ function Overlays() {
   return (
     <div class="sg-wrap">
       <span class="sg-tip-demo" data-tooltip="Tooltip via data-tooltip">Hover me</span>
-      <Button onClick={menu as any} aria-haspopup="menu">Open menu ▾</Button>
+      <Button onClick={menu as any} aria-haspopup="menu">Open menu <ChevronDown size={12} /></Button>
       <Button onClick={() => toast('Saved')}>Toast</Button>
       <Button variant="danger" onClick={() => toast('Something failed', 'error')}>Error toast</Button>
       <Button variant="primary" onClick={() => setOpen(true)}>Dialog</Button>

@@ -3,7 +3,9 @@
 // the item, a letter jumps to the next item starting with it, Escape closes.
 
 export type MenuItem =
-  | { label: string; action?: () => void; shortcut?: string; submenu?: MenuItem[]; disabled?: boolean; separator?: false }
+  | { label: string; action?: () => void; shortcut?: string; submenu?: MenuItem[]; disabled?: boolean; separator?: false;
+      /** a check mark column (radio-like choices). undefined: no column for this item */
+      checked?: boolean; hint?: string }
   | { separator: true };
 
 type Item = Exclude<MenuItem, { separator: true }>;
@@ -159,7 +161,10 @@ function build(items: MenuItem[], depth: number): Level {
     row.setAttribute('role', 'menuitem');
     if (item.disabled) row.setAttribute('aria-disabled', 'true');
     if (item.submenu) { row.setAttribute('aria-haspopup', 'menu'); row.setAttribute('aria-expanded', 'false'); }
-    row.innerHTML = `<span>${escapeHtml(item.label)}</span><span class="ctx-sc" aria-hidden="true">${item.submenu ? '›' : escapeHtml(item.shortcut ?? '')}</span>`;
+    if (item.checked !== undefined) { row.setAttribute('role', 'menuitemradio'); row.setAttribute('aria-checked', String(item.checked)); }
+    const check = item.checked === undefined ? '' : `<span class="ctx-check" aria-hidden="true">${item.checked ? CHECK_SVG : ''}</span>`;
+    const hint = item.hint ? `<span class="ctx-hint">${escapeHtml(item.hint)}</span>` : '';
+    row.innerHTML = `${check}<span class="ctx-label">${escapeHtml(item.label)}${hint}</span><span class="ctx-sc" aria-hidden="true">${item.submenu ? CHEVRON_SVG : escapeHtml(item.shortcut ?? '')}</span>`;
     row.addEventListener('pointerenter', () => {
       const cur = levels[depth];
       if (cur !== lv) return;
@@ -174,6 +179,11 @@ function build(items: MenuItem[], depth: number): Level {
   }
   return lv;
 }
+
+// lucide "check" / "chevron-right" (menus are plain dom for speed: inline svg, no components)
+const svg = (d: string) => `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const CHECK_SVG = svg('<path d="M20 6 9 17l-5-5"/>');
+const CHEVRON_SVG = svg('<path d="m9 18 6-6-6-6"/>');
 
 function place(el: HTMLElement, x: number, y: number) {
   el.style.left = '0px';
