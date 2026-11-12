@@ -15,11 +15,11 @@ import type { Store, Change } from '../core/store';
 import { Atlas, type AtlasEntry } from './atlas';
 import { newFxFrame, ShaderHost, type FxFrame, type ItemShaders } from './shader-host';
 import type { PathGeometry, PathKey } from '../core/model';
-import { loadBundledFonts } from './fonts';
+import { ensureFont, fontsPending, loadBundledFonts } from './fonts';
 import { EffectEval, hasEffects, needsBlendShader, type ResolvedEffect } from './effects';
 import { FxPipeline, BLEND_SHADER, type FxRegion } from './fx';
 import { cubicBezier, EASE_PRESETS, springAt } from '../core/easing';
-import { layoutText, textUnits, type TextUnit, rasterPath, rasterText, setImageLoadedHandler, drawPathMask, pathPlacement, rasterBox, imageMaxScale, rasterLayer, needsMainThread, needsShapeRaster, hasComplexPaint, setAssetLookup, type RasterClip, type RasterResult } from './raster';
+import { lineHeightPx, layoutText, textUnits, type TextUnit, rasterPath, rasterText, setImageLoadedHandler, drawPathMask, pathPlacement, rasterBox, imageMaxScale, rasterLayer, needsMainThread, needsShapeRaster, hasComplexPaint, setAssetLookup, type RasterClip, type RasterResult } from './raster';
 
 const F = 40; // floats per instance
 const KIND_RECT = 0, KIND_ELLIPSE = 1, KIND_MASK = 2, KIND_RGBA = 3, KIND_NONE = 4;
@@ -178,7 +178,12 @@ void main() {
     if (sw > 0.0) {
       float inner = vF.y < -0.5 ? -sw : (vF.y > 0.5 ? 0.0 : -sw * 0.5);
       float outer = inner + sw;
-      sc = clamp(0.5 - (d - outer) / w, 0.0, 1.0) - clamp(0.5 - (d - inner) / w, 0.0, 1.0);
+      if (kind < 0.5 || (kind > 4.5 && kind < 5.5)) {
+        // boxes: offset the box itself (miter joins: square corners stay square, round ones grow)
+        vec4 ro = max(vRadii + outer, 0.0) * step(0.001, vRadii), ri = max(vRadii + inner, 0.0) * step(0.001, vRadii);
+        float dO = sdRoundBox(p, h + outer, ro), dI = sdRoundBox(p, max(h + inner, vec2(0.0)), ri);
+        sc = clamp(0.5 - dO / w, 0.0, 1.0) - clamp(0.5 - dI / w, 0.0, 1.0);
+      } else sc = clamp(0.5 - (d - outer) / w, 0.0, 1.0) - clamp(0.5 - (d - inner) / w, 0.0, 1.0);
     }
     col = stroke * sc + fill * fc * (1.0 - stroke.a * sc);
     cv = max(fill.a > 0.0 || kind > 4.5 ? fc : 0.0, stroke.a > 0.0 ? sc : 0.0);
@@ -477,6 +482,8 @@ export class Renderer {
   }
   contextLost = false;
   contextRestores = 0;
+  /** bundled font families still loading (exports / tests wait for 0) */
+  get fontsPending() { return fontsPending; }
 
   private initGL() {
     const gl = this.gl;
@@ -822,7 +829,7 @@ export class Renderer {
     out.length = 0;
     const pv = this.store.previewProps.get(l.id);
     out.push(l.type, l.props, pv, l.paints, l.geometry, l.strokeGeometry, l.strokeAlign, l.text, l.textAnim, l.pathKf, l.trimOn, l.imageRef, l.mask, l.blend, this.fontGen,
-      l.strokePaints, l.dash, l.strokeCap, l.strokeJoin, l.miterLimit, l.strokeSides, l.smoothing, l.effects, l.maskType);
+      l.strokePaints, l.dash, l.strokeCap, l.strokeJoin, l.miterLimit, l.strokeSides, l.smoothing, l.effects, l.maskType, l.isolate);
     for (const key of SIG_KEYS) { const p = pv?.[key] ?? l.props[key]; out.push(p, p?.v, p?.kf, p?.expr); }
     if (l.shaderEffects || l.paints) {
       // shaders: their refs, the library entries and every param prop
@@ -932,8 +939,12 @@ export class Renderer {
         const lines = layoutText(l, sz[0] > 0 ? sz[0] : null);
         const os = i * ST;
         if (sz[0] <= 0) this.style[os] = Math.ceil(Math.max(1, ...lines.map(x => x.width)));
-        if (sz[1] <= 0) this.style[os + 1] = Math.ceil(lines.length * l.text.fontSize * l.text.lineHeight);
+        if (sz[1] <= 0) this.style[os + 1] = Math.ceil(lines.length * lineHeightPx(l));
       }
+    }
+    if (l.type === 'text' && l.text) {
+      // bundled families load on first use; text drawn meanwhile with a fallback is redrawn
+      for (const fam of [l.text.fontFamily, ...(l.text.runs ?? []).map(r => r.fontFamily ?? '')]) ensureFont(fam).then(now => { if (now) { this.invalidateText(); this.dirty = true; } });
     }
     if (l.type === 'text' && l.text && l.textAnim) {
       const ta = l.textAnim;
@@ -958,7 +969,10 @@ export class Renderer {
     it.fx = fxOn ? new EffectEval(l, key => this.store.renderProp(l, key)) : null;
     if (it.fx && !it.fx.list.length) it.fx = null;
     // a group's blend mode applies to its composite (figma, after effects): isolate it too
-    it.fxBlend = !l.mask && (needsBlendShader(l.blend) || ((it.fx || it.isoGroup) && l.blend && l.blend !== 'normal')) ? BLEND_SHADER[l.blend!] ?? 0 : 0;
+    // inside an isolated group the gpu multiply / lighten would see a transparent backdrop: shader
+    let inIso = false;
+    if (l.blend === 'multiply' || l.blend === 'lighten') for (let p = it.parent; p >= 0; p = this.items[p].parent) { const pl = this.items[p].layer; if (pl.isolate || this.items[p].fx) { inIso = true; break; } }
+    it.fxBlend = !l.mask && (needsBlendShader(l.blend) || inIso || ((it.fx || it.isoGroup) && l.blend && l.blend !== 'normal')) ? BLEND_SHADER[l.blend!] ?? 0 : 0;
     if (it.fx?.animated) it.animated = true;
     // shaders (fill and/or effects): results survive recompiles of the same layer occurrence
     const sk = `${l.id}@${it.tOff}`;
@@ -967,7 +981,7 @@ export class Renderer {
     else this.shdMap.set(sk, shd);
     it.shd = shd;
     const shdFill = !!shd?.fill && (it.kind === KIND_RECT || it.kind === KIND_ELLIPSE || it.kind === KIND_MASK);
-    this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0) | (it.fx || it.fxBlend ? 16 : 0) | (shdFill ? SB_SHD : 0) | (shd?.fx.length && !l.mask ? SB_FX : 0);
+    this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0) | (it.fx || it.fxBlend || (l.isolate && it.isoGroup) ? 16 : 0) | (l.clip && it.clip >= 0 && l.children.length ? 32 : 0) | (shdFill ? SB_SHD : 0) | (shd?.fx.length && !l.mask ? SB_FX : 0);
     this.sBlend[i] = it.fx || it.fxBlend ? 0 : l.blend ? BLEND_IDS[l.blend] ?? 0 : 0;
     this.sAlign[i] = l.strokeAlign === 'inside' ? -1 : l.strokeAlign === 'outside' ? 1 : 0;
   }
@@ -978,7 +992,7 @@ export class Renderer {
       case 'text': {
         const t = l.text!;
         const s = l.props.size?.v ?? [0, 0];
-        return `t${this.fontGen}|${t.content}|${t.fontFamily}|${t.fontWeight}|${t.fontStyle}|${t.fontSize}|${t.lineHeight}|${t.letterSpacing}|${t.align}|${Math.round(s[0])}x${Math.round(s[1])}|${oid(t)}|${oid(l.paints)}|${complex ? (l.props.fill?.v ?? []).join(',') : ''}`;
+        return `t${this.fontGen}|${t.content}|${t.fontFamily}|${t.fontWeight}|${t.fontStyle}|${t.fontSize}|${t.lineHeight}${t.lineHeightAuto ? 'a' : ''}|${t.letterSpacing}|${t.align}|${Math.round(s[0])}x${Math.round(s[1])}|${oid(t)}|${oid(l.paints)}|${l.props.strokeWidth?.v[0] ?? 0}${l.strokeAlign ?? ''}|${complex ? (l.props.fill?.v ?? []).join(',') + (l.props.stroke?.v ?? []).join(',') : ''}`;
       }
       case 'image': return `i${l.imageRef}`; // images stretch to the size box (see raster placement below)
       default: {
@@ -1829,7 +1843,7 @@ export class Renderer {
         const end = par >= 0 ? this.subEnd[par] : n;
         stack.push({ end, opacity: 1, div, maskStart: k, maskCount: 0, maskEnd: this.subEnd[i], box, fx: -1, kStart: k, mode: MASK_MODE[items[i].layer.maskType ?? 'alpha'] ?? 0 });
         isolated++;
-      } else if ((bits & 16) && !stack.some(r => r.maskEnd > i)) {
+      } else if (((bits & 16) || ((bits & 32) && !this.clipContained(i))) && !stack.some(r => r.maskEnd > i)) {
         // effects / backdrop blend: the layer (and its subtree) into its own target, composited by FxPipeline
         flush();
         const box = newBox();
@@ -2360,8 +2374,15 @@ export class Renderer {
     const dev = (x: number, y: number): [number, number] => [a * x + c * y + e, b * x + d * y + f];
     const R: (typeof this.fxFrame)[number] = {
       opacity, blend: it.fxBlend, shadows: [], inner: [], blur: null, bg: null, noise: [], inv, texture: null, glass: null,
-      pad: (it.fx ? it.fx.padding(list) : 0) * sc + 2, kStart: 0, kCount: 0,
+      pad: (it.fx ? it.fx.padding(list) : 0) * sc + 2, kStart: 0, kCount: 0, clip: null,
     };
+    const ci = this.sClip[i];
+    if (it.layer.clip && ci >= 0) {
+      const q = ci * 6;
+      const A = W[q] * z, B = W[q + 1] * z, C = W[q + 2] * z, D = W[q + 3] * z, E = W[q + 4] * z + this.panX * this.dpr, Fy = W[q + 5] * z + this.panY * this.dpr;
+      const dt = A * D - B * C || 1e-12;
+      R.clip = { inv: [D / dt, -B / dt, -C / dt, A / dt, (C * Fy - D * E) / dt, (B * E - A * Fy) / dt], w: S[ci * ST], h: S[ci * ST + 1], r: S[ci * ST + 2] };
+    }
     let seed = 0;
     for (const fx of list) {
       const sigma = (fx.radius / 2) * sc;
@@ -2405,6 +2426,24 @@ export class Renderer {
       }
     }
     return R;
+  }
+
+  /** clipping group i lies inside its own clipping ancestor (then the nearest clip is enough) */
+  private clipContained(i: number): boolean {
+    const c = this.sClip[i];
+    if (c < 0) return true;
+    const W = this.world, S = this.style, o = i * 6, q = c * 6;
+    const w = S[i * ST], h = S[i * ST + 1], cw = S[c * ST], ch = S[c * ST + 1], r = S[c * ST + 2];
+    const det = W[q] * W[q + 3] - W[q + 1] * W[q + 2] || 1e-12;
+    const ia = W[q + 3] / det, ib = -W[q + 1] / det, ic = -W[q + 2] / det, id = W[q] / det;
+    for (const [x, y] of [[0, 0], [w, 0], [w, h], [0, h]]) {
+      const X = W[o] * x + W[o + 2] * y + W[o + 4] - W[q + 4], Y = W[o + 1] * x + W[o + 3] * y + W[o + 5] - W[q + 5];
+      const u = ia * X + ic * Y, v = ib * X + id * Y;
+      if (u < -0.5 || v < -0.5 || u > cw + 0.5 || v > ch + 0.5) return false;
+      // inside the box but in a rounded corner
+      if (r > 0) { const dx = Math.max(r - u, u - (cw - r), 0), dy = Math.max(r - v, v - (ch - r), 0); if (dx > 0 && dy > 0 && Math.hypot(dx, dy) > r + 0.5) return false; }
+    }
+    return true;
   }
 
   /** run the effect pipeline for frame region fi (screen box at boxes[bi]) into the parent target */

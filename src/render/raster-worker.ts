@@ -3,7 +3,7 @@
 
 import { rasterLayer, type RasterClip, type RasterResult } from './raster';
 import type { Layer } from '../core/model';
-import { loadBundledFonts } from './fonts';
+import { ensureFont, loadBundledFonts } from './fonts';
 
 const fontsReady = loadBundledFonts(self.location.href);
 
@@ -20,7 +20,7 @@ export interface RasterJob {
 
 self.onmessage = async (ev: MessageEvent<RasterJob>) => {
   const j = ev.data;
-  if (j.layer.type === 'text') await fontsReady;
+  if (j.layer.type === 'text') { await fontsReady; await ensureFont(j.layer.text!.fontFamily, self.location.href); for (const r of j.layer.text!.runs ?? []) if (r.fontFamily) await ensureFont(r.fontFamily, self.location.href); }
   let r: RasterResult | null = null;
   try {
     r = rasterLayer(j.layer, j.bucket, j.size, j.radius, j.strokeWidth, j.clip);

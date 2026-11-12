@@ -143,7 +143,7 @@ const SETUP = async () => {
     for (const s of scales) {
       r.syncRaster = true;
       r.resize(W, H, s); r.setView(1, 0, 0);
-      for (let k = 0; k < 60; k++) { r.dirty = true; r.render(0); if (!r.asyncRasters && k > 2) break; await sleep(20); }
+      for (let k = 0; k < 60; k++) { r.dirty = true; r.render(0); if (!r.asyncRasters && !r.fontsPending && k > 2) break; await sleep(20); }
       r.dirty = true; r.render(0);
       // figma shaders render asynchronously (webgpu worker): wait for this exact frame
       if (r.settleShaders) { await r.settleShaders(0); r.render(0); }
