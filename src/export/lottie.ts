@@ -14,7 +14,7 @@ import { springAt } from '../core/easing';
 // known gaps: our group opacity multiplies into children but ae parenting does not inherit
 // opacity, so group opacity only affects the group's own fill; clip is not exported.
 
-import type { Composition, Keyframe, Layer, PathCmd, Project, Prop } from '../core/model';
+import type { Composition, Keyframe, Layer, Paint, PathCmd, Project, Prop } from '../core/model';
 
 const R = (x: number) => Math.round(x * 1e6) / 1e6;
 const WEIGHT_STYLE: Record<number, string> = { 100: 'Thin', 200: 'ExtraLight', 300: 'Light', 400: 'Regular', 500: 'Medium', 600: 'SemiBold', 700: 'Bold', 800: 'ExtraBold', 900: 'Black' };
@@ -95,11 +95,26 @@ const IDENTITY_TR = {
   sk: { a: 0, k: 0 }, sa: { a: 0, k: 0 }, nm: 'Transform',
 };
 
+/** our linear/radial paint -> lottie gradient fill (gf) in layer space */
+function gradientItem(l: Layer, p: Paint): any {
+  const sz = l.geomSize ?? (firstV(l.props.size, [100, 100]) as [number, number]);
+  const m = p.transform ?? [1, 0, 0, 1, 0, 0];
+  const map = (x: number, y: number) => [R((m[0] * x + m[2] * y + m[4]) * sz[0]), R((m[1] * x + m[3] * y + m[5]) * sz[1])];
+  const stops = (p.stops ?? []).slice().sort((a, b) => a.pos - b.pos);
+  const k: number[] = [];
+  for (const st of stops) k.push(R(st.pos), R(st.color[0]), R(st.color[1]), R(st.color[2]));
+  for (const st of stops) k.push(R(st.pos), R(st.color[3] ?? 1));
+  const [s0, e0] = p.type === 'linear' ? [map(0, 0.5), map(1, 0.5)] : [map(0.5, 0.5), map(1, 0.5)];
+  return { ty: 'gf', nm: 'Gradient Fill', t: p.type === 'linear' ? 1 : 2, r: 1, o: { a: 0, k: R((p.opacity ?? 1) * 100) }, s: { a: 0, k: s0 }, e: { a: 0, k: e0 }, g: { p: stops.length, k: { a: 0, k } }, h: { a: 0, k: 0 }, a: { a: 0, k: 0 } };
+}
+
 function paintItems(l: Layer, fr: number): any[] {
   const out: any[] = [];
+  const grad = l.paints?.find(p => (p.type === 'linear' || p.type === 'radial') && p.stops?.length);
+  if (grad) out.push(gradientItem(l, grad));
   const fill = l.props.fill;
   const fv = firstV(fill, [0, 0, 0, 0]);
-  if (fill && (fill.kf?.length || fv[3] > 0)) {
+  if (!grad && fill && (fill.kf?.length || fv[3] > 0)) {
     out.push({
       ty: 'fl', nm: 'Fill', r: l.geometry?.[0]?.fillRule === 'evenodd' ? 2 : 1,
       c: exportProp(mapPropValues(fill, v => [v[0], v[1], v[2], 1]), [0, 0, 0, 1], fr),
@@ -232,7 +247,7 @@ export function projectToLottie(project: Project): any {
         }
         case 'group': {
           const fv = firstV(l.props.fill, [0, 0, 0, 0]);
-          if (fv[3] > 0 || l.props.fill?.kf?.length) {
+          if (fv[3] > 0 || l.props.fill?.kf?.length || l.paints?.some(p => p.type === 'linear' || p.type === 'radial')) {
             const prim = { ty: 'rc', nm: 'Rectangle Path', d: 1, s: exportProp(l.props.size, [100, 100], fr), p: exportProp(mapPropValues(l.props.size, v => [v[0] / 2, v[1] / 2]), [50, 50], fr), r: exportProp(mapPropValues(l.props.radius, v => [v[0] ?? 0]), [0], fr) };
             layers.push({ ...base, ty: 4, shapes: [{ ty: 'gr', nm: 'Rectangle', it: [prim, ...paintItems(l, fr), IDENTITY_TR] }] });
           } else layers.push({ ...base, ty: 3 });

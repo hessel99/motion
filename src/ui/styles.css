@@ -192,3 +192,6 @@ kbd { font: 11px ui-monospace, Menlo, monospace; background: #2a2a30; border: 1p
 .connect-info .row { margin: 6px 0 0; }
 .connect-info code { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .grow { flex: 1; min-width: 0; }
+
+.grad-preview { height: 10px; border-radius: 3px; margin: 4px 0 6px; border: 1px solid var(--line); }
+.grad-stop > .num:first-child { flex: 0 0 64px; }

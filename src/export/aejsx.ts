@@ -113,6 +113,12 @@ function addItems(vecs, items) {
       setProp(p.property('ADBE Vector Fill Color'), it.c);
       setProp(p.property('ADBE Vector Fill Opacity'), it.o);
       try { p.property('ADBE Vector Fill Rule').setValue(it.r === 2 ? 2 : 1); } catch (e) {}
+    } else if (it.ty === 'gf') {
+      // ae scripting cannot set gradient colors: a solid fill with the first stop color
+      p = vecs.addProperty('ADBE Vector Graphic - Fill');
+      var gk = it.g.k.k;
+      try { p.property('ADBE Vector Fill Color').setValue([gk[1], gk[2], gk[3], 1]); } catch (e) {}
+      setProp(p.property('ADBE Vector Fill Opacity'), it.o);
     } else if (it.ty === 'st') {
       p = vecs.addProperty('ADBE Vector Graphic - Stroke');
       setProp(p.property('ADBE Vector Stroke Color'), it.c);

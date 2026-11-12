@@ -40,6 +40,9 @@ function Section(props: { title: string; children: any; right?: any }) {
 // ---------------- number field (scrub label + input) ----------------
 export function NumField(props: { label: string; value: number; step?: number; min?: number; max?: number; onChange: (v: number, mergeKey?: string) => void; suffix?: string; title?: string }) {
   const [text, setText] = useState<string | null>(null);
+  // the text being edited, readable synchronously (enter commits and then blurs in the same tick:
+  // the state closure would still hold the old text and commit twice)
+  const editing = useRef<string | null>(null);
   const fmt = (v: number) => (Math.round(v * 100) / 100).toString();
   const clamp = (v: number) => Math.min(props.max ?? Infinity, Math.max(props.min ?? -Infinity, v));
   const onScrub = (e: PointerEvent) => {
@@ -57,7 +60,9 @@ export function NumField(props: { label: string; value: number; step?: number; m
     el.addEventListener('pointerup', up);
   };
   const commit = () => {
+    const text = editing.current;
     if (text == null) return;
+    editing.current = null;
     setText(null);
     // focus + blur without editing must not touch the document (no rounding, no stray keyframe)
     if (text.trim() === fmt(props.value)) return;
@@ -69,18 +74,19 @@ export function NumField(props: { label: string; value: number; step?: number; m
       <span class="num-label" onPointerDown={onScrub as any}>{props.label}</span>
       <input
         value={text ?? fmt(props.value) + (props.suffix ?? '')}
-        onFocus={e => { setText(fmt(props.value)); requestAnimationFrame(() => (e.target as HTMLInputElement).select()); }}
-        onInput={e => setText((e.target as HTMLInputElement).value)}
+        onFocus={e => { editing.current = fmt(props.value); setText(editing.current); requestAnimationFrame(() => (e.target as HTMLInputElement).select()); }}
+        onInput={e => { editing.current = (e.target as HTMLInputElement).value; setText(editing.current); }}
         onBlur={commit}
         onKeyDown={e => {
           e.stopPropagation();
           if (e.key === 'Enter') { commit(); (e.target as HTMLInputElement).blur(); }
-          if (e.key === 'Escape') { setText(null); (e.target as HTMLInputElement).blur(); }
+          if (e.key === 'Escape') { editing.current = null; setText(null); (e.target as HTMLInputElement).blur(); }
           if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
             e.preventDefault();
             const d = (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 10 : 1);
             props.onChange(clamp(props.value + d));
-            setText(fmt(clamp(props.value + d)));
+            editing.current = fmt(clamp(props.value + d));
+            setText(editing.current);
           }
         }}
       />
@@ -218,11 +224,11 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
       )}
       {common.includes('fill') && (
         <Section title="Fill">
-          <div class="row">
+          {!(layers.length === 1 && l.paints?.some(p => p.type === 'linear' || p.type === 'radial')) && <div class="row">
             <KeyButton layers={layers} prop="fill" />
             <ColorField value={v('fill')} onChange={(c, mk) => set('fill', c, mk)} />
-          </div>
-          {l.paints?.some(p => p.type !== 'solid') && <div class="muted small">gradient fill (from import)</div>}
+          </div>}
+          {layers.length === 1 && l.type !== 'text' && <GradientEditor layer={l} />}
         </Section>
       )}
       {common.includes('stroke') && (
@@ -341,6 +347,67 @@ function TextPanel({ layer }: { layer: Layer }) {
 }
 
 // ---------------- color ----------------
+// ---------------- gradient fill ----------------
+type GradPaint = { type: 'linear' | 'radial'; stops: { pos: number; color: [number, number, number, number] }[]; transform?: number[]; opacity?: number };
+
+/** fill type (solid / linear / radial), angle and color stops. gradients are static (not keyframed) */
+function GradientEditor({ layer }: { layer: Layer }) {
+  const store = st();
+  const g = layer.paints?.find(p => p.type === 'linear' || p.type === 'radial') as GradPaint | undefined;
+  const kind = g?.type ?? 'solid';
+  const write = (paint: GradPaint | null, mk?: string) => store.transact(paint ? 'Gradient' : 'Solid fill', tx => {
+    const cur = store.layer(layer.id);
+    if (!cur) return;
+    tx.set(cur, 'paints', paint ? [{ ...paint, stops: paint.stops.slice() }] : undefined); // stop order is free (canvas sorts), so a dragged stop keeps its row
+    tx.touch(layer.id);
+  }, mk);
+  const setKind = (k: string) => {
+    if (k === 'solid') return write(null);
+    const fill = valueAt(layer, 'fill', store.time) as [number, number, number, number];
+    const stops = g?.stops ?? [{ pos: 0, color: fill }, { pos: 1, color: [fill[0] * 0.35, fill[1] * 0.35, fill[2] * 0.35, fill[3]] as [number, number, number, number] }];
+    write({ type: k as 'linear' | 'radial', stops, transform: g?.transform ?? [1, 0, 0, 1, 0, 0] });
+  };
+  // linear angle: rotation of the unit gradient space around its center
+  const m = g?.transform ?? [1, 0, 0, 1, 0, 0];
+  const angle = Math.round(Math.atan2(m[1], m[0]) * 180 / Math.PI * 10) / 10;
+  const setAngle = (deg: number, mk?: string) => {
+    const r = deg * Math.PI / 180, c = Math.cos(r), s2 = Math.sin(r);
+    write({ ...g!, transform: [c, s2, -s2, c, 0.5 - (c * 0.5 - s2 * 0.5), 0.5 - (s2 * 0.5 + c * 0.5)] }, mk);
+  };
+  const setStop = (i: number, patch: Partial<GradPaint['stops'][number]>, mk?: string) => write({ ...g!, stops: g!.stops.map((s3, j) => (j === i ? { ...s3, ...patch } : s3)) }, mk);
+  return (
+    <>
+      <div class="row">
+        <select value={kind} onChange={e => setKind((e.target as HTMLSelectElement).value)} title="Fill type">
+          <option value="solid">Solid</option>
+          <option value="linear">Linear gradient</option>
+          <option value="radial">Radial gradient</option>
+        </select>
+        {kind === 'linear' && <NumField label="∠" value={angle} suffix="°" onChange={setAngle} title="Gradient angle" />}
+      </div>
+      {g && (
+        <>
+          <div class="grad-preview" style={{ background: `linear-gradient(90deg, ${g.stops.map(s3 => `rgba(${s3.color[0] * 255 | 0},${s3.color[1] * 255 | 0},${s3.color[2] * 255 | 0},${s3.color[3]}) ${Math.round(s3.pos * 100)}%`).join(', ')})` }} />
+          {g.stops.map((s3, i) => (
+            <div class="row grad-stop">
+              <NumField label="%" min={0} max={100} value={Math.round(s3.pos * 1000) / 10} onChange={(n, mk) => setStop(i, { pos: n / 100 }, mk)} />
+              <ColorField value={s3.color} onChange={(c, mk) => setStop(i, { color: c as any }, mk)} />
+              <button class="ghost" title="Remove stop" disabled={g.stops.length <= 2} onClick={() => write({ ...g, stops: g.stops.filter((_, j) => j !== i) })}>−</button>
+            </div>
+          ))}
+          <div class="row"><button class="ghost" onClick={() => {
+            // new stop in the middle of the widest gap, with the blended color
+            const st2 = g.stops.slice().sort((a, b) => a.pos - b.pos);
+            let k = 0; for (let j = 1; j < st2.length - 1; j++) if (st2[j + 1].pos - st2[j].pos > st2[k + 1].pos - st2[k].pos) k = j;
+            const a = st2[k], b = st2[k + 1];
+            write({ ...g, stops: [...st2, { pos: (a.pos + b.pos) / 2, color: a.color.map((x, d) => (x + b.color[d]) / 2) as any }] });
+          }}>+ Add stop</button></div>
+        </>
+      )}
+    </>
+  );
+}
+
 function ColorField({ value, onChange }: { value: number[]; onChange: (c: number[], mk?: string) => void }) {
   const hex = '#' + value.slice(0, 3).map(c => Math.round(Math.min(1, Math.max(0, c)) * 255).toString(16).padStart(2, '0')).join('');
   const mk = useRef('color' + Math.random());
