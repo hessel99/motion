@@ -32,6 +32,20 @@ await page.keyboard.press(process.platform === 'darwin' ? 'Meta+z' : 'Control+z'
 const undone = await ev(() => editor.store.layer(editor.store.selection[0]).props.position.v.slice());
 check('undo move in one step', undone[0] === before[0] && undone[1] === before[1], `${undone}`);
 
+await page.waitForTimeout(100);
+// snapping: drag the rect so its center lands ~3px (screen) away from the comp center -> snaps exactly
+{
+  const r = await ev(() => { const id = editor.store.selection[0]; const c = editor.renderer.corners(id); return { cx: (c[0] + c[4]) / 2, cy: (c[1] + c[5]) / 2, z: viewport.zoom, px: viewport.panX, py: viewport.panY, W: editor.store.comp.width, H: editor.store.comp.height }; });
+  const sx = vp.x + r.px + r.cx * r.z, sy = vp.y + r.py + r.cy * r.z; // current screen center of the rect
+  const tx = vp.x + r.px + (r.W / 2) * r.z + 3, ty = vp.y + r.py + (r.H / 2 + 40) * r.z; // 3px right of comp center x
+  await page.mouse.move(sx, sy); await page.mouse.down(); await page.mouse.move(tx, ty, { steps: 6 });
+  const guides = await ev(() => viewport.guides.x.length);
+  await page.mouse.up();
+  const c2 = await ev(() => { const c = editor.renderer.corners(editor.store.selection[0]); return (c[0] + c[4]) / 2; });
+  check('snaps to comp center with guide', Math.abs(c2 - r.W / 2) < 0.01 && guides > 0, `center x ${c2}, guides ${guides} start ${JSON.stringify(r)} sx ${sx} tx ${tx}`);
+  await page.keyboard.press('Control+z');
+}
+
 // keyframe via inspector diamond (position), then move time and drag again -> 2 keyframes
 await page.locator('.inspector .keybtn').first().click();
 await ev(() => editor.store.setTime(1));

@@ -9,7 +9,7 @@ import { Track } from '../core/evaluate';
 
 type Drag =
   | { kind: 'pan'; sx: number; sy: number; px: number; py: number }
-  | { kind: 'move'; sx: number; sy: number; start: Map<string, { pos: number[]; inv: number[] }>; moved: boolean }
+  | { kind: 'move'; sx: number; sy: number; start: Map<string, { pos: number[]; inv: number[] }>; moved: boolean; box: number[]; xs: Float64Array; ys: Float64Array }
   | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: string[] }
   | { kind: 'create'; type: 'rect' | 'ellipse'; cx: number; cy: number; id: string | null }
   | { kind: 'resize'; id: string; handle: number; inv: number[]; size: number[]; anchor: number[]; local: number[]; shift: boolean }
@@ -238,6 +238,7 @@ export class ViewportController {
 
   private startMove(x: number, y: number) {
     const st = this.ed.store;
+    this.ed.renderer.render(st.time); // fresh bounds (e.g. right after alt-drag duplicate)
     const start = new Map<string, { pos: number[]; inv: number[] }>();
     for (const id of st.selection) {
       const l = st.layer(id);
@@ -247,8 +248,62 @@ export class ViewportController {
       const pw = l.parent ? this.ed.renderer.worldMatrix(l.parent) : [1, 0, 0, 1, 0, 0];
       start.set(id, { pos: valueAt(l, 'position', st.time), inv: invert(pw ?? [1, 0, 0, 1, 0, 0]) });
     }
-    this.drag = { kind: 'move', sx: x, sy: y, start, moved: false };
+    // snapping: selection bounds + candidate lines (comp edges/center, sibling layer edges/centers)
+    const box = this.boundsOf([...start.keys()]);
+    const xs: number[] = [], ys: number[] = [];
+    const comp = st.comp;
+    xs.push(0, comp.width / 2, comp.width);
+    ys.push(0, comp.height / 2, comp.height);
+    const moving = new Set<string>();
+    for (const id of start.keys()) { moving.add(id); for (const d of st.descendants(id)) moving.add(d); }
+    const first = st.layer([...start.keys()][0]);
+    const siblings = first ? st.siblings(first) : [];
+    // siblings plus the parent box (so children snap inside their frame); capped for huge scenes
+    const cands = [...siblings.slice(-2000), ...(first?.parent ? [first.parent] : [])];
+    for (const id of cands) {
+      if (moving.has(id)) continue;
+      const b = this.boundsOf([id]);
+      if (!b) continue;
+      xs.push(b[0], (b[0] + b[2]) / 2, b[2]);
+      ys.push(b[1], (b[1] + b[3]) / 2, b[3]);
+    }
+    this.drag = { kind: 'move', sx: x, sy: y, start, moved: false, box: box ?? [0, 0, 0, 0], xs: Float64Array.from(xs).sort(), ys: Float64Array.from(ys).sort() };
     st.beginGesture('move');
+  }
+
+  /** comp-space axis aligned bounds of layers [x0,y0,x1,y1] */
+  boundsOf(ids: string[]): number[] | null {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const id of ids) {
+      const c = this.ed.renderer.corners(id);
+      if (!c) continue;
+      for (let i = 0; i < 4; i++) {
+        x0 = Math.min(x0, c[i * 2]); x1 = Math.max(x1, c[i * 2]);
+        y0 = Math.min(y0, c[i * 2 + 1]); y1 = Math.max(y1, c[i * 2 + 1]);
+      }
+    }
+    return isFinite(x0) ? [x0, y0, x1, y1] : null;
+  }
+
+  /** active snap guides (comp coords) for the overlay */
+  private guides: { x: number[]; y: number[] } = { x: [], y: [] };
+
+  /** best snap offset for any of `vals` against sorted `lines` within `tol` */
+  private snap1(vals: number[], lines: Float64Array, tol: number): { d: number; at: number[] } {
+    let best = Infinity, d = 0;
+    for (const v of vals) {
+      // binary search nearest line
+      let lo = 0, hi = lines.length - 1;
+      while (lo < hi) { const m = (lo + hi) >> 1; if (lines[m] < v) lo = m + 1; else hi = m; }
+      for (const j of [lo - 1, lo]) {
+        if (j < 0 || j >= lines.length) continue;
+        const dd = lines[j] - v;
+        if (Math.abs(dd) < Math.abs(best) && Math.abs(dd) <= tol) { best = dd; d = dd; }
+      }
+    }
+    if (!isFinite(best)) return { d: 0, at: [] };
+    const at = vals.map(v => v + d).filter(v => { for (let j = 0; j < lines.length; j++) if (Math.abs(lines[j] - v) < 1e-6) return true; return false; });
+    return { d, at };
   }
 
   private move(e: PointerEvent) {
@@ -276,6 +331,15 @@ export class ViewportController {
       if (e.shiftKey) { if (Math.abs(dx) > Math.abs(dy)) dy = 0; else dx = 0; }
       if (!d.moved && Math.hypot(x - d.sx, y - d.sy) < 3) return;
       d.moved = true;
+      this.guides = { x: [], y: [] };
+      if (!(e.metaKey || e.ctrlKey)) {
+        const tol = 6 / this.zoom;
+        const b = d.box;
+        const sx = this.snap1([b[0] + dx, (b[0] + b[2]) / 2 + dx, b[2] + dx], d.xs, tol);
+        const sy = this.snap1([b[1] + dy, (b[1] + b[3]) / 2 + dy, b[3] + dy], d.ys, tol);
+        if (!(e.shiftKey && dx === 0)) { dx += sx.d; this.guides.x = sx.at; }
+        if (!(e.shiftKey && dy === 0)) { dy += sy.d; this.guides.y = sy.at; }
+      }
       st.transact('Move', tx => {
         for (const [id, s] of d.start) {
           const l = st.layer(id);
@@ -359,6 +423,7 @@ export class ViewportController {
   private up(e: PointerEvent) {
     const d = this.drag;
     this.drag = null;
+    this.guides = { x: [], y: [] };
     this.host.releasePointerCapture?.(e.pointerId);
     const st = this.ed.store;
     st.endGesture();
@@ -504,6 +569,13 @@ export class ViewportController {
         g.fillStyle = '#fff';
         g.fillText(label, bx - tw / 2 + 5, by + 21);
       }
+    }
+    if (this.guides.x.length || this.guides.y.length) {
+      g.strokeStyle = '#ff4d6d';
+      g.lineWidth = 1;
+      const H = this.overlay.height, W = this.overlay.width;
+      for (const gx of this.guides.x) { const [sx] = this.toScreen(gx, 0); g.beginPath(); g.moveTo(Math.round(sx) + 0.5, 0); g.lineTo(Math.round(sx) + 0.5, H); g.stroke(); }
+      for (const gy of this.guides.y) { const [, sy] = this.toScreen(0, gy); g.beginPath(); g.moveTo(0, Math.round(sy) + 0.5); g.lineTo(W, Math.round(sy) + 0.5); g.stroke(); }
     }
     const d = this.drag;
     if (d?.kind === 'marquee') {
