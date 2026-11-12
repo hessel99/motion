@@ -49,6 +49,61 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   const lot = await ev(() => ({ name: editor.store.project.name, n: editor.store.comp.root.length, tabs: document.querySelectorAll('.tb-tab').length }));
   check(`${w}: pasted Lottie opens in a tab named after it`, lot.name === 'Bounce' && lot.n === 1, JSON.stringify(lot));
 
+  // QA-3: effect field labels ("Spread", "Density") shrank and ran into their value ("Spread0")
+  await ev(async () => {
+    const M = await import('/src/core/model.ts');
+    const C = await import('/src/core/commands.ts');
+    const s = editor.store;
+    const l = M.createLayer('rect', { name: 'Fx', x: 0, y: 0, w: 100, h: 100 });
+    s.transact('add', tx => C.insertLayer(s, tx, l, null));
+    s.select([l.id]);
+  });
+  await page.waitForTimeout(200);
+  // every effect, through the section's "+" menu
+  for (let i = 0; i < 8 && await page.locator('button[aria-label="Add effect"]').count(); i++) {
+    await page.click('button[aria-label="Add effect"]');
+    await page.waitForTimeout(100);
+    await page.click('.ctx-menu .ctx-item >> nth=0').catch(() => {});
+    await page.waitForTimeout(100);
+  }
+  await page.waitForTimeout(200);
+  const clipped = await ev(() => [...document.querySelectorAll('.inspector .num-label')].filter(e => e.offsetParent && e.scrollWidth > e.clientWidth + 1).map(e => e.textContent));
+  check(`${w}: inspector field labels are not clipped`, clipped.length === 0, JSON.stringify(clipped));
+
+  // QA-4: reopening a recent file wiped its thumbnail (the open stored "no thumbnail")
+  if (w === 1440) {
+    await page.goto(`${base}?nobridge&theme=dark`);
+    await page.waitForFunction(() => window.editor?.renderer);
+    // (the Home "demo" button is dev-only now)
+    await ev(async () => (await import('/src/app/actions.ts')).loadDemo()); await page.waitForTimeout(600);
+    await ev(async () => { const D = await import('/src/app/documents.ts'); for (const d of [...D.documents()]) D.closeDoc(d.id, { force: true }); });
+    await page.waitForTimeout(2600); // the recent entry is written in idle time
+    await page.click('.recent-open >> nth=0'); await page.waitForTimeout(2600);
+    const thumb = await ev(async () => { const R = await import('/src/app/recent.ts'); return !!(await R.recentThumb(R.recentFiles()[0].key)); });
+    check('reopening a recent file keeps its thumbnail', thumb);
+  }
+
+  // QA-5: a precomp copied into another document pointed at a composition that wasn't there
+  if (w === 1440) {
+    // (still on the demo reopened from Recent above)
+    await page.waitForTimeout(500);
+    await ev(() => { const s = editor.store; s.select(s.comp.root.slice(0, 2)); });
+    await page.keyboard.press('Control+Shift+c'); await page.waitForTimeout(200);
+    await page.keyboard.press('Control+a'); await page.keyboard.press('Control+c');
+    await page.click('.tb-add'); await page.waitForTimeout(300);
+    await page.click('.preset-card >> nth=0').catch(() => {}); await page.waitForTimeout(300);
+    await page.keyboard.press('Control+v'); await page.waitForTimeout(500);
+    const pc = await ev(() => {
+      const s = editor.store, P = s.project;
+      const pre = s.comp.root.map(id => s.layer(id)).filter(l => l.type === 'precomp');
+      return { pre: pre.length, ok: pre.every(l => P.comps[l.compRef]?.root.every(id => P.layers[id])), inner: pre.map(l => P.comps[l.compRef]?.root.length), label: s.undoLabel };
+    });
+    check('precomp pasted into another document brings its composition', pc.pre === 1 && pc.ok && pc.inner[0] === 2 && pc.label === 'Paste', JSON.stringify(pc));
+    await page.keyboard.press('Control+z'); await page.waitForTimeout(200);
+    const undone = await ev(() => ({ n: editor.store.comp.root.length, comps: Object.keys(editor.store.project.comps).length }));
+    check('undoing that paste removes the composition too', undone.n === 0 && undone.comps === 1, JSON.stringify(undone));
+  }
+
   // no horizontal page overflow
   const overflow = await ev(() => document.documentElement.scrollWidth - innerWidth);
   check(`${w}: no horizontal page overflow`, overflow <= 0, `${overflow}px`);
@@ -254,7 +309,8 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
     window.__fx = l.id;
   });
   await page.waitForTimeout(200);
-  await page.locator('select[aria-label="Add effect"]').selectOption('Drop shadow');
+  await page.locator('button[aria-label="Add effect"]').click();
+  await page.locator('.ctx-menu [role=menuitem]', { hasText: 'Drop shadow' }).click();
   await page.waitForTimeout(150);
   const fx = () => ev(() => { const l = editor.store.layer(window.__fx); return { color: !!l.props.shadowColor, effects: l.effects ?? null }; });
   check('MD-10: Add effect adds a drop shadow', (await fx()).color, JSON.stringify(await fx()));

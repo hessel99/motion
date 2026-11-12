@@ -66,7 +66,7 @@ export function ShaderPanel({ layer }: { layer: Layer }) {
   return (
     <Section title="Shaders" right={keys.length ? (
       <select class="expr-add" value="" onChange={add} aria-label="Add shader">
-        <option value="">+ add</option>
+        <option value="">Add…</option>
         {keys.filter(k => lib[k].kind === 'fill').map(k => <option value={`fill|${k}`}>Fill: {lib[k].name}</option>)}
         {keys.filter(k => lib[k].kind === 'effect').map(k => <option value={`effect|${k}`}>Effect: {lib[k].name}</option>)}
       </select>

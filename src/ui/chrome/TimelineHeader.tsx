@@ -138,7 +138,7 @@ function Transport() {
         {s.playing ? <Pause size={14} /> : <Play size={14} />}
       </button>
       <Button variant="ghost" icon size="sm" tip="Next frame (.) · next key (K)" tipSide="top" onClick={() => editor.stepFrames(1)}><StepForward /></Button>
-      <Button variant="ghost" icon size="sm" class="tp-loop" active={s.loop} tip={s.loop ? 'Loop: on' : 'Loop: off'} tipSide="top"
+      <Button variant="ghost" icon size="sm" class="tp-loop" active={s.loop} tip="Loop" tipSide="top"
         onClick={() => { s.loop = !s.loop; editor.emit('view'); }}><Repeat /></Button>
       <Button variant="ghost" icon size="sm" tip="Full-screen preview (Esc to leave)" tipSide="top" onClick={() => startPreview()}><Maximize2 /></Button>
       <input ref={time} class="tp-time" aria-label="Current time (minutes:seconds:frames)" title="Current time: type 1:12, 2.5 (seconds) or 90f" spellcheck={false} defaultValue="00:00:00"
@@ -217,8 +217,27 @@ function Grip() {
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', up);
   };
-  return <div class="tl-grip" role="separator" aria-orientation="horizontal" aria-label="Resize timeline" title="Drag to resize the timeline (double-click: default)"
-    onPointerDown={down as any} onDblClick={() => { (document.querySelector('.app') as HTMLElement | null)?.style.removeProperty('--tl-h'); setUi({ tlH: 0 }); }} />;
+  const reset = () => { (document.querySelector('.app') as HTMLElement | null)?.style.removeProperty('--tl-h'); setUi({ tlH: 0 }); };
+  // keyboard: ↑ / ↓ grow / shrink by 16px (shift: 64px), Home / End: smallest / largest, Enter: default
+  const key = (e: KeyboardEvent) => {
+    const app = document.querySelector('.app') as HTMLElement | null;
+    const tl = document.querySelector('.bottom') as HTMLElement | null;
+    if (!app || !tl) return;
+    const max = Math.max(TL_MIN, window.innerHeight - STAGE_MIN - 60);
+    const h0 = tl.getBoundingClientRect().height, d = e.shiftKey ? 64 : 16;
+    let h: number | null = null;
+    if (e.key === 'ArrowUp') h = h0 + d; else if (e.key === 'ArrowDown') h = h0 - d;
+    else if (e.key === 'Home') h = TL_MIN; else if (e.key === 'End') h = max;
+    else if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); reset(); return; }
+    if (h === null) return;
+    e.preventDefault(); e.stopPropagation();
+    h = Math.round(Math.min(max, Math.max(TL_MIN, h)));
+    app.style.setProperty('--tl-h', h + 'px');
+    setUi({ tlH: h });
+  };
+  return <div class="tl-grip" role="separator" tabIndex={0} aria-orientation="horizontal" aria-label="Resize timeline" aria-valuemin={TL_MIN} aria-valuenow={ui.tlH || undefined}
+    title="Drag or use ↑ ↓ to resize the timeline (double-click: default)"
+    onPointerDown={down as any} onKeyDown={key as any} onDblClick={reset} />;
 }
 
 /** the timeline height as a css value for the app grid (0: the default from tokens) */

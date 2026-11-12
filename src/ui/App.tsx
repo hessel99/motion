@@ -14,7 +14,7 @@ import { SelectionBar, stopPreview } from './chrome/CanvasBars';
 import { openBrowserFile, setupShortcuts, runBenchmark, toast } from '../app/actions';
 import { DEV, prefs, setPref } from '../app/prefs';
 import { cloneLayers, deleteLayers } from '../core/commands';
-import { Button, Dialog, Kbd } from './ui';
+import { Button, Dialog, Kbd, trapTab } from './ui';
 import { IconProvider, X } from './chrome/icons';
 import { TopBar } from './chrome/TopBar';
 import { Rail } from './chrome/Rail';
@@ -98,7 +98,7 @@ function SettingsModal() {
   }, []);
   return (
     <div class="dialog-backdrop settings-backdrop" onPointerDown={e => { if (e.target === e.currentTarget) closeSettings(); }}>
-      <div ref={ref} class="settings-modal" role="dialog" aria-modal="true" aria-label="Settings" tabIndex={-1}>
+      <div ref={ref} class="settings-modal" role="dialog" aria-modal="true" aria-label="Settings" tabIndex={-1} onKeyDown={e => trapTab(e as any, ref.current!)}>
         <Guard name="Settings"><SettingsPage /></Guard>
         <Button variant="ghost" icon size="sm" class="settings-close" tip="Close (Esc)" onClick={closeSettings}><X size={14} /></Button>
       </div>

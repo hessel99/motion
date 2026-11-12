@@ -2,7 +2,6 @@
 // param is an ordinary animatable property: these tools read the schema, set values, keyframe them
 // (with eases) and attach / detach shaders. registered in agent/tools.ts.
 
-import { editor } from '../app/editor';
 import { setExpr, valueAt } from '../core/commands';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import type { Keyframe, Layer, PropKey } from '../core/model';
@@ -10,7 +9,7 @@ import { addShader, removeShader, setShaderEnabled, setShaderParam, setShaderPar
 import { componentLabels, isDiscrete, shaderPropKey, shaderRefs, unflattenValue, type ShaderAsset, type ShaderParamDef } from '../core/shaders';
 import type { ToolContent, ToolDef } from './tools';
 
-const st = () => editor.store;
+import { st } from './tool-kit';
 const text = (v: unknown): ToolContent[] => [{ type: 'text', text: typeof v === 'string' ? v : JSON.stringify(v) }];
 
 function need(id: string): Layer {

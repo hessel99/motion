@@ -1,9 +1,8 @@
-// the agent's provider / model / mode, shared by the composer's model picker and
-// Settings > Models. same storage keys as before (motion.agent.provider / .model / .mode).
+// the agent's provider / model / run preferences, shared by the composer's model picker and
+// Settings > Models. same storage keys as before (motion.agent.provider / .model). read-only turns are per message (critique asks), not a setting.
 // listeners: editor channel 'agent-prefs'.
 
 import { editor } from '../../app/editor';
-import type { ChatMode } from '../../agent/client';
 
 const STORAGE = 'motion.agent';
 const pref = (k: string, d: string) => { try { return localStorage.getItem(STORAGE + '.' + k) || d; } catch { return d; } };
@@ -13,14 +12,15 @@ export const agentPrefs = {
   provider: pref('provider', 'claude'),
   /** claude model alias ('' = the CLI's default) */
   model: pref('model', ''),
-  /** always 'edit': the read-only Ask mode left the ui (a question is just a message) */
-  mode: 'edit' as ChatMode,
   /** model "auto": the alias used for full pieces (storyboards, styles, multi-beat briefs) */
   autoFull: pref('autoFull', 'opus'),
   /** model "auto": the alias used for edits, quick actions and small builds */
   autoQuick: pref('autoQuick', 'sonnet'),
   /** storyboards: 'ask' = wait for the user's approval, 'auto' = build right away (read by src/agent/storyboard.ts) */
   storyboard: (pref('storyboard', 'ask') === 'auto' ? 'auto' : 'ask') as 'ask' | 'auto',
+  /** after a turn that animated something: 'play' the changed range once, park the playhead at its
+   *  'end', or leave it ('off'). see playResult in ../agent-bridge.ts */
+  afterTurn: ((v: string) => (v === 'end' || v === 'off' ? v : 'play'))(pref('afterTurn', 'play')) as 'play' | 'end' | 'off',
   /** max agentic turns per message ('' = the bridge default) */
   turns: pref('turns', ''),
 };

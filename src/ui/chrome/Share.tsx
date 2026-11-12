@@ -57,6 +57,6 @@ export function openShare(anchor: HTMLElement) {
       ? { label: 'Copy a preview link', hint: prov.name, action: () => { sharePreviewLink(); } }
       : { label: 'Set up link sharing…', hint: 'Settings', action: () => openSettings('connections') },
     { separator: true },
-    { label: 'Export a file…', shortcut: '⌘E', hint: 'MP4, GIF, PNG, Lottie, AE', action: openExport },
+    { label: 'Export a file…', shortcut: '⌘E', hint: 'MP4, GIF, PNG, Lottie', action: openExport },
   ], { align: 'right' });
 }
