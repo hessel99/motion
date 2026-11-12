@@ -155,6 +155,8 @@ export interface Layer {
   geomSize?: [number, number];
   /** animated path shape (overrides `geometry` over time) */
   pathKf?: PathKey[];
+  /** parametric shape a path was generated from (star / polygon tool): its geometry is rebuilt from it */
+  shape?: { kind: 'star' | 'polygon'; points: number; inner: number };
   /** trim paths on the stroke (values: props trimStart / trimEnd / trimOffset) */
   trimOn?: boolean;
   strokeGeometry?: PathGeometry[];

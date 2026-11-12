@@ -5,6 +5,7 @@ import {
   setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, addMarker,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
+import { starGeometry } from '../core/shapes';
 import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
 import { BLEND_MODES, PROP_DEFS, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
 import { useChannels } from './hooks';
@@ -222,6 +223,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
           </div>
         </Section>
       )}
+      {layers.length === 1 && l.shape && <ShapeParams layer={l} />}
       {common.includes('fill') && (
         <Section title="Fill">
           {!(layers.length === 1 && l.paints?.some(p => p.type === 'linear' || p.type === 'radial')) && <div class="row">
@@ -347,6 +349,29 @@ function TextPanel({ layer }: { layer: Layer }) {
 }
 
 // ---------------- color ----------------
+// ---------------- star / polygon parameters ----------------
+function ShapeParams({ layer }: { layer: Layer }) {
+  const store = st();
+  const sh = layer.shape!;
+  const set = (patch: Partial<NonNullable<Layer['shape']>>, mk?: string) => store.transact('Shape', tx => {
+    const cur = store.layer(layer.id);
+    if (!cur?.shape) return;
+    const next = { ...cur.shape, ...patch };
+    const gs = cur.geomSize ?? [100, 100];
+    tx.set(cur, 'shape', next);
+    tx.set(cur, 'geometry', starGeometry(next.kind, next.points, next.inner, gs[0], gs[1]));
+    tx.touch(layer.id);
+  }, mk);
+  return (
+    <Section title={sh.kind === 'star' ? 'Star' : 'Polygon'}>
+      <div class="row">
+        <NumField label={sh.kind === 'star' ? 'Points' : 'Sides'} min={3} max={100} value={sh.points} onChange={(n, mk) => set({ points: Math.round(n) }, mk)} />
+        {sh.kind === 'star' && <NumField label="Inner" min={1} max={100} value={Math.round(sh.inner * 100)} suffix="%" onChange={(n, mk) => set({ inner: n / 100 }, mk)} />}
+      </div>
+    </Section>
+  );
+}
+
 // ---------------- gradient fill ----------------
 type GradPaint = { type: 'linear' | 'radial'; stops: { pos: number; color: [number, number, number, number] }[]; transform?: number[]; opacity?: number };
 

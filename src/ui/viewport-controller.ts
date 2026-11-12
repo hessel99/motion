@@ -8,12 +8,13 @@ import { PenTool } from './pen';
 import type { Layer } from '../core/model';
 import { Track } from '../core/evaluate';
 import { markSpacePanned } from '../app/actions';
+import { starGeometry } from '../core/shapes';
 
 type Drag =
   | { kind: 'pan'; sx: number; sy: number; px: number; py: number }
   | { kind: 'move'; sx: number; sy: number; start: Map<string, { pos: number[]; inv: number[] }>; moved: boolean; box: number[]; xs: Float64Array; ys: Float64Array; dup?: boolean }
   | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: string[] }
-  | { kind: 'create'; type: 'rect' | 'ellipse'; cx: number; cy: number; id: string | null }
+  | { kind: 'create'; type: 'rect' | 'ellipse' | 'star' | 'polygon'; cx: number; cy: number; id: string | null }
   | { kind: 'resize'; id: string; handle: number; inv: number[]; size: number[]; anchor: number[]; local: number[]; shift: boolean }
   | { kind: 'rotate'; id: string; cx: number; cy: number; a0: number; r0: number }
   | { kind: 'pathkey'; id: string; idx: number; part: 'key' | 'out' | 'in'; inv: number[]; sx: number; sy: number; v0: number[] };
@@ -220,7 +221,7 @@ export class ViewportController {
     const [cx, cy] = this.toComp(x, y);
     if (tool === 'pen') { this.pen.down(cx, cy, this.zoom); return; }
     if (this.pen.editId && this.pen.editDown(x, y)) return;
-    if (tool === 'rect' || tool === 'ellipse') {
+    if (tool === 'rect' || tool === 'ellipse' || tool === 'star' || tool === 'polygon') {
       this.drag = { kind: 'create', type: tool, cx, cy, id: null };
       st.beginGesture('create');
       return;
@@ -301,6 +302,18 @@ export class ViewportController {
       this.drag = { kind: 'marquee', sx: x, sy: y, x, y, base: e.shiftKey ? st.selection.slice() : [] };
       if (!e.shiftKey) st.select([]);
     }
+  }
+
+  private createShape(type: 'rect' | 'ellipse' | 'star' | 'polygon', x: number, y: number, w: number, h: number) {
+    const st = this.ed.store;
+    const names = { rect: 'Rectangle', ellipse: 'Ellipse', star: 'Star', polygon: 'Polygon' };
+    if (type === 'rect' || type === 'ellipse') return addLayer(st, type, { x, y, w, h, name: uniqueName(st, names[type]), color: [0.85, 0.85, 0.85, 1] });
+    // star / polygon: a path generated in a 100x100 box (scaled to the layer size), parameters kept
+    const shape = { kind: type, points: type === 'star' ? 5 : 6, inner: 0.45 };
+    return addLayer(st, 'path', {
+      x, y, w, h, name: uniqueName(st, names[type]), color: [0.85, 0.85, 0.85, 1],
+      geometry: starGeometry(shape.kind, shape.points, shape.inner, 100, 100), geomSize: [100, 100], shape,
+    } as any);
   }
 
   private startMove(x: number, y: number, keepGesture = false) {
@@ -435,7 +448,7 @@ export class ViewportController {
       const aw = Math.max(1, xb - xa), ah = Math.max(1, yb - ya);
       if (!d.id) {
         if (Math.hypot(w, h) * this.zoom < 3) return;
-        const l = addLayer(st, d.type, { x: x0, y: y0, w: aw, h: ah, name: uniqueName(st, d.type === 'rect' ? 'Rectangle' : 'Ellipse'), color: [0.85, 0.85, 0.85, 1] });
+        const l = this.createShape(d.type, x0, y0, aw, ah);
         d.id = l.id;
         st.select([l.id]);
       } else {
@@ -524,7 +537,7 @@ export class ViewportController {
     if (d?.kind === 'create') {
       if (!d.id) {
         // click without drag: default sized shape
-        const l = addLayer(st, d.type, { x: Math.round(d.cx - 50), y: Math.round(d.cy - 50), w: 100, h: 100, name: uniqueName(st, d.type === 'rect' ? 'Rectangle' : 'Ellipse'), color: [0.85, 0.85, 0.85, 1] });
+        const l = this.createShape(d.type, Math.round(d.cx - 50), Math.round(d.cy - 50), 100, 100);
         st.select([l.id]);
       }
       this.ed.setTool('select');
