@@ -232,6 +232,15 @@ export class Atlas {
     this.generation++;
   }
 
+  /** after a webgl context loss: recreate the texture and re-upload every page from its shadow */
+  restore() {
+    this.tex = this.gl.createTexture()!;
+    const pages = this.pages;
+    this.pages = 0;
+    this.allocate(pages);
+    for (let p = 0; p < pages; p++) if (this.shadow[p]) this.dirty[p] = fullDirty(PAGE);
+  }
+
   /** bytes held by cpu shadows (for the hud) */
   get shadowBytes() { return this.shadow.reduce((s, p) => s + (p ? p.byteLength : 0), 0); }
 

@@ -252,13 +252,13 @@ export interface RenderStats {
 export class Renderer {
   readonly canvas: HTMLCanvasElement;
   readonly gl: WebGL2RenderingContext;
-  private prog: WebGLProgram;
-  private vao: WebGLVertexArrayObject;
-  private ibuf: WebGLBuffer;
+  private prog!: WebGLProgram;
+  private vao!: WebGLVertexArrayObject;
+  private ibuf!: WebGLBuffer;
   private icap = 0;
   private inst = new Float32Array(0);
-  private uView: WebGLUniformLocation;
-  private uRes: WebGLUniformLocation;
+  private uView!: WebGLUniformLocation;
+  private uRes!: WebGLUniformLocation;
   atlas: Atlas;
 
   items: Item[] = [];
@@ -308,6 +308,32 @@ export class Renderer {
     const gl = this.canvas.getContext('webgl2', { antialias: false, alpha: false, premultipliedAlpha: true, preserveDrawingBuffer: false, powerPreference: 'high-performance' });
     if (!gl) throw new Error('webgl2 not available');
     this.gl = gl;
+    this.atlas = new Atlas(gl);
+    this.initGL();
+
+    store.onChange(c => this.onChange(c));
+    // bundled fonts arrive async: re-raster text once they are loaded (no-op if already cached)
+    loadBundledFonts().then(() => { this.invalidateText(); });
+    setImageLoadedHandler(() => { for (const it of this.items) if (it.layer.type === 'image') { it.rasterKey = null; it.entry = null; } this.dirty = true; });
+    // gpu resets (macos gpu switch, sleep, driver crash): rebuild everything; atlas pages come back
+    // from their cpu shadow copies, so nothing has to be re-rasterized
+    this.canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.contextLost = true; });
+    this.canvas.addEventListener('webglcontextrestored', () => {
+      this.contextLost = false;
+      this.initGL();
+      this.atlas.restore();
+      this.fbos = [];
+      this.cprog = null;
+      this.icap = 0;
+      this.dirty = true;
+      this.contextRestores++;
+    });
+  }
+  contextLost = false;
+  contextRestores = 0;
+
+  private initGL() {
+    const gl = this.gl;
     this.prog = this.buildProgram();
     this.uView = gl.getUniformLocation(this.prog, 'uView')!;
     this.uRes = gl.getUniformLocation(this.prog, 'uRes')!;
@@ -326,15 +352,8 @@ export class Renderer {
       gl.vertexAttribDivisor(1 + k, 1);
     }
     gl.bindVertexArray(null);
-    this.atlas = new Atlas(gl);
     gl.useProgram(this.prog);
     gl.uniform1i(gl.getUniformLocation(this.prog, 'uTex'), 0);
-
-    store.onChange(c => this.onChange(c));
-    // bundled fonts arrive async: re-raster text once they are loaded (no-op if already cached)
-    loadBundledFonts().then(() => { this.invalidateText(); });
-    setImageLoadedHandler(() => { for (const it of this.items) if (it.layer.type === 'image') { it.rasterKey = null; it.entry = null; } this.dirty = true; });
-    this.canvas.addEventListener('webglcontextlost', e => e.preventDefault());
   }
 
   private buildProgram() {
@@ -836,6 +855,7 @@ export class Renderer {
   get hasAnimation() { return this.items.some(i => i.animated); }
 
   render(t: number, retry = false) {
+    if (this.contextLost) return;
     const f0 = performance.now();
     const compactions0 = this.atlas.compactions + this.atlas.generation;
     const store = this.store;
