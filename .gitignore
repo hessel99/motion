@@ -4,3 +4,7 @@ dist
 .DS_Store
 test-results
 release
+
+# test screenshots
+e2e.png
+electron.png
