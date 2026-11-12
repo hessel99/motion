@@ -1,0 +1,771 @@
+{
+ "date": "2026-11-12T08:35:38.208Z",
+ "commit": "c4a1c98",
+ "gl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+ "cpus": 4,
+ "quick": false,
+ "measureMs": 4000,
+ "soakSec": 180,
+ "results": {
+  "springs-10k": {
+   "kind": "play",
+   "setup": {
+    "buildMs": 97.5,
+    "loadMs": 21.600000000093132,
+    "firstFrameMs": 1163.7000000001863,
+    "layers": 10000,
+    "items": 10000,
+    "drawn": 9981,
+    "culled": 19,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 1000280,
+    "heapMB": 165.231364
+   },
+   "fps": 70.92,
+   "frameP50": 14.1,
+   "frameP95": 30.5,
+   "frameP99": 33.7,
+   "tickP50": 7.5,
+   "tickP95": 10.3,
+   "tickP99": 16.6,
+   "tickMax": 20,
+   "cpuP50": 7.5,
+   "cpuP95": 10.2,
+   "evalP50": 5.3,
+   "writeP50": 1.6,
+   "rasterP50": 0,
+   "rasterP95": 0,
+   "gpuP50": 0.3,
+   "longTasks": 0,
+   "longMax": 0,
+   "heapDeltaMB": -4.31,
+   "frames": 277,
+   "busyPct": 99.42,
+   "scriptPct": 51.11,
+   "gcPct": 0.21,
+   "profile": [
+    {
+     "fn": "eval src/core/trackpool.ts:105",
+     "ms": 1099.38,
+     "pct": 52.52
+    },
+    {
+     "fn": "render src/render/renderer.ts:1591",
+     "ms": 461.83,
+     "pct": 22.06
+    },
+    {
+     "fn": "evalItem src/render/renderer.ts:896",
+     "ms": 302.36,
+     "pct": 14.44
+    },
+    {
+     "fn": "evaluateRange src/render/renderer.ts:1042",
+     "ms": 85.7,
+     "pct": 4.09
+    },
+    {
+     "fn": "bufferSubData (native):0",
+     "ms": 64.55,
+     "pct": 3.08
+    },
+    {
+     "fn": "tick src/app/editor.ts:97",
+     "ms": 15.39,
+     "pct": 0.73
+    },
+    {
+     "fn": "(anon) src/ui/App.tsx:68",
+     "ms": 11.3,
+     "pct": 0.54
+    },
+    {
+     "fn": "(garbage collector)",
+     "ms": 9.04,
+     "pct": 0.43
+    }
+   ],
+   "after": {
+    "items": 10000,
+    "drawn": 9976,
+    "culled": 24,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 1000280,
+    "heapMB": 163.3366
+   },
+   "swFps": 3.95,
+   "swFrameP95": 301.6,
+   "swTickP50": 8.3,
+   "swLongTasks": 40,
+   "errors": [],
+   "load": 3.33,
+   "seconds": 19
+  },
+  "scrub-springs-10k": {
+   "kind": "scrub",
+   "setup": {
+    "buildMs": 93.60000000009313,
+    "loadMs": 5.5,
+    "firstFrameMs": 1311.1999999997206,
+    "layers": 10000,
+    "items": 10000,
+    "drawn": 9981,
+    "culled": 19,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 1000280,
+    "heapMB": 172.974053
+   },
+   "fps": 46.51,
+   "frameP50": 21.5,
+   "frameP95": 35.1,
+   "frameP99": 45,
+   "tickP50": 9.4,
+   "tickP95": 14.8,
+   "tickP99": 26.1,
+   "tickMax": 45.8,
+   "cpuP50": 8.2,
+   "cpuP95": 13.4,
+   "evalP50": 6,
+   "writeP50": 1.8,
+   "rasterP50": 0,
+   "rasterP95": 0,
+   "gpuP50": 0.3,
+   "longTasks": 1,
+   "longMax": 61,
+   "heapDeltaMB": 1.59,
+   "frames": 191,
+   "busyPct": 98.86,
+   "scriptPct": 45.16,
+   "gcPct": 0.48,
+   "profile": [
+    {
+     "fn": "eval src/core/trackpool.ts:105",
+     "ms": 898.2,
+     "pct": 43.35
+    },
+    {
+     "fn": "render src/render/renderer.ts:1591",
+     "ms": 346.21,
+     "pct": 16.71
+    },
+    {
+     "fn": "composeLocal src/render/renderer.ts:987",
+     "ms": 132.2,
+     "pct": 6.38
+    },
+    {
+     "fn": "evalItem src/render/renderer.ts:896",
+     "ms": 101.15,
+     "pct": 4.88
+    },
+    {
+     "fn": "evaluateRange src/render/renderer.ts:1042",
+     "ms": 79.88,
+     "pct": 3.86
+    },
+    {
+     "fn": "drawOverlay src/ui/viewport-controller.ts:624",
+     "ms": 56.89,
+     "pct": 2.75
+    },
+    {
+     "fn": "bufferSubData (native):0",
+     "ms": 48.15,
+     "pct": 2.32
+    },
+    {
+     "fn": "G node_modules/preact/dist/preact.module.js:1",
+     "ms": 33.61,
+     "pct": 1.62
+    }
+   ],
+   "after": {
+    "items": 10000,
+    "drawn": 9983,
+    "culled": 17,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 1000280,
+    "heapMB": 176.520052
+   },
+   "swFps": 3.97,
+   "swFrameP95": 282.1,
+   "swTickP50": 7.3,
+   "swLongTasks": 40,
+   "errors": [],
+   "load": 3.35,
+   "seconds": 18
+  },
+  "drag-play-10k": {
+   "kind": "drag",
+   "setup": {
+    "buildMs": 133,
+    "loadMs": 6,
+    "firstFrameMs": 1260.7000000001863,
+    "layers": 10000,
+    "items": 10000,
+    "drawn": 9981,
+    "culled": 19,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 1000280,
+    "heapMB": 166.176929
+   },
+   "fps": 62.5,
+   "frameP50": 16,
+   "frameP95": 34.2,
+   "frameP99": 36,
+   "tickP50": 8.8,
+   "tickP95": 11.5,
+   "tickP99": 13.6,
+   "tickMax": 16.1,
+   "cpuP50": 8.1,
+   "cpuP95": 10.5,
+   "evalP50": 5.7,
+   "writeP50": 2.1,
+   "rasterP50": 0,
+   "rasterP95": 0,
+   "gpuP50": 0.3,
+   "longTasks": 0,
+   "longMax": 0,
+   "heapDeltaMB": 5.26,
+   "frames": 244,
+   "busyPct": 99.78,
+   "scriptPct": 51.53,
+   "gcPct": 0.2,
+   "profile": [
+    {
+     "fn": "eval src/core/trackpool.ts:105",
+     "ms": 1015.88,
+     "pct": 44.98
+    },
+    {
+     "fn": "render src/render/renderer.ts:1591",
+     "ms": 477.13,
+     "pct": 21.13
+    },
+    {
+     "fn": "composeLocal src/render/renderer.ts:987",
+     "ms": 175.94,
+     "pct": 7.79
+    },
+    {
+     "fn": "evalItem src/render/renderer.ts:896",
+     "ms": 132.01,
+     "pct": 5.84
+    },
+    {
+     "fn": "evaluateRange src/render/renderer.ts:1042",
+     "ms": 96.35,
+     "pct": 4.27
+    },
+    {
+     "fn": "drawOverlay src/ui/viewport-controller.ts:624",
+     "ms": 76.37,
+     "pct": 3.38
+    },
+    {
+     "fn": "bufferSubData (native):0",
+     "ms": 62.66,
+     "pct": 2.77
+    },
+    {
+     "fn": "tick src/app/editor.ts:97",
+     "ms": 18.37,
+     "pct": 0.81
+    }
+   ],
+   "errors": [],
+   "load": 3.35,
+   "seconds": 8
+  },
+  "undo-storm-10k": {
+   "kind": "undo",
+   "setup": {
+    "buildMs": 100.29999999981374,
+    "loadMs": 21.100000000093132,
+    "firstFrameMs": 1141.5,
+    "layers": 10000,
+    "items": 10000,
+    "drawn": 9981,
+    "culled": 19,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 1000280,
+    "heapMB": 154.503964
+   },
+   "editP50": 0.1,
+   "editP95": 0.3,
+   "editFrameP50": 17.8,
+   "editFrameP95": 27.7,
+   "undoP50": 0.1,
+   "undoP95": 0.3,
+   "undoFrameP50": 30,
+   "undoFrameP95": 32.5,
+   "redoP50": 0,
+   "redoP95": 0.2,
+   "redoFrameP50": 28.9,
+   "redoFrameP95": 32.5,
+   "gcPct": 0.33,
+   "profile": [
+    {
+     "fn": "render src/render/renderer.ts:1591",
+     "ms": 309.1,
+     "pct": 36.96
+    },
+    {
+     "fn": "bufferSubData (native):0",
+     "ms": 62.55,
+     "pct": 7.48
+    },
+    {
+     "fn": "c src/render/renderer.ts:393",
+     "ms": 33.82,
+     "pct": 4.04
+    },
+    {
+     "fn": "G node_modules/preact/dist/preact.module.js:1",
+     "ms": 32.71,
+     "pct": 3.91
+    },
+    {
+     "fn": "L node_modules/preact/dist/preact.module.js:1",
+     "ms": 24.81,
+     "pct": 2.97
+    },
+    {
+     "fn": "N node_modules/preact/dist/preact.module.js:1",
+     "ms": 20.77,
+     "pct": 2.48
+    },
+    {
+     "fn": "ellipsize src/ui/timeline.ts:1208",
+     "ms": 17.97,
+     "pct": 2.15
+    },
+    {
+     "fn": "drawOverlay src/ui/viewport-controller.ts:624",
+     "ms": 15.89,
+     "pct": 1.9
+    }
+   ],
+   "errors": [],
+   "load": 3.53,
+   "seconds": 7
+  },
+  "ops-5k": {
+   "kind": "ops",
+   "setup": {
+    "buildMs": 61.39999999990687,
+    "loadMs": 2.3999999999068677,
+    "firstFrameMs": 565.2999999998137,
+    "layers": 5000,
+    "items": 5000,
+    "drawn": 4993,
+    "culled": 7,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 500480,
+    "heapMB": 98.113605
+   },
+   "ops": {
+    "selectAll": {
+     "ms": 0.20000000018626451,
+     "frameMs": 162.29999999981374,
+     "n": 5000
+    },
+    "applyPreset Pop (stagger)": {
+     "ms": 102.60000000009313,
+     "frameMs": 284.5,
+     "n": 5000
+    },
+    "setExpr wiggle": {
+     "ms": 6.100000000093132,
+     "frameMs": 184.90000000037253,
+     "n": 3000
+    },
+    "setTextAnim (non-text, no-op path)": {
+     "ms": 0.6000000000931323,
+     "frameMs": 3.7000000001862645,
+     "n": 1000
+    },
+    "duplicate 1000": {
+     "ms": 128.1999999997206,
+     "frameMs": 296.10000000009313,
+     "n": 1000
+    },
+    "group 2000": {
+     "ms": 431.29999999981374,
+     "frameMs": 553.5999999996275,
+     "n": 2000
+    },
+    "precompose 2000": {
+     "ms": 30.300000000279397,
+     "frameMs": 90.70000000018626,
+     "n": 2000
+    },
+    "delete 1000": {
+     "ms": 48.1999999997206,
+     "frameMs": 82.29999999981374,
+     "n": 1000
+    },
+    "undo x4": {
+     "ms": 4.600000000093132,
+     "frameMs": 96.60000000009313,
+     "n": 4
+    },
+    "serialize": {
+     "ms": 96.79999999981374,
+     "frameMs": 104.6999999997206,
+     "n": 1
+    }
+   },
+   "op:selectAll": 162.3,
+   "op:applyPreset Pop (stagger)": 284.5,
+   "op:setExpr wiggle": 184.9,
+   "op:setTextAnim (non-text, no-op path)": 3.7,
+   "op:duplicate 1000": 296.1,
+   "op:group 2000": 553.6,
+   "op:precompose 2000": 90.7,
+   "op:delete 1000": 82.3,
+   "op:undo x4": 96.6,
+   "op:serialize": 104.7,
+   "gcPct": 10.22,
+   "profile": [
+    {
+     "fn": "(garbage collector)",
+     "ms": 201.32,
+     "pct": 12.28
+    },
+    {
+     "fn": "tx src/core/commands.ts:172",
+     "ms": 147.25,
+     "pct": 8.98
+    },
+    {
+     "fn": "(anon) src/lab/index.ts:257",
+     "ms": 97.05,
+     "pct": 5.92
+    },
+    {
+     "fn": "add src/core/trackpool.ts:75",
+     "ms": 94.82,
+     "pct": 5.78
+    },
+    {
+     "fn": "c src/core/commands.ts:186",
+     "ms": 80.26,
+     "pct": 4.9
+    },
+    {
+     "fn": "(anon) src/ui/viewport-controller.ts:233",
+     "ms": 46.29,
+     "pct": 2.82
+    },
+    {
+     "fn": "isAncestor src/core/store.ts:430",
+     "ms": 45.68,
+     "pct": 2.79
+    },
+    {
+     "fn": "o src/core/commands.ts:95",
+     "ms": 45.2,
+     "pct": 2.76
+    }
+   ],
+   "errors": [],
+   "load": 3.53,
+   "seconds": 3
+  }
+ },
+ "regressions": [
+  {
+   "scenario": "springs-10k",
+   "metric": "tickP50",
+   "before": 5.6,
+   "after": 7.5,
+   "change": "34% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.47->3.33"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "cpuP50",
+   "before": 5.6,
+   "after": 7.5,
+   "change": "34% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.47->3.33"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "evalP50",
+   "before": 4.1,
+   "after": 5.3,
+   "change": "29% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.47->3.33"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "writeP50",
+   "before": 1.1,
+   "after": 1.6,
+   "change": "45% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.47->3.33"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "tickP50",
+   "before": 7.5,
+   "after": 9.4,
+   "change": "25% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.38->3.35"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "tickP95",
+   "before": 13.2,
+   "after": 14.8,
+   "change": "12% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.38->3.35"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "tickP99",
+   "before": 19.1,
+   "after": 26.1,
+   "change": "37% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.38->3.35"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "cpuP50",
+   "before": 6.7,
+   "after": 8.2,
+   "change": "22% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.38->3.35"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "cpuP95",
+   "before": 12.1,
+   "after": 13.4,
+   "change": "11% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.38->3.35"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "evalP50",
+   "before": 5,
+   "after": 6,
+   "change": "20% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.38->3.35"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "writeP50",
+   "before": 1.4,
+   "after": 1.8,
+   "change": "29% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.38->3.35"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "fps",
+   "before": 58.48,
+   "after": 46.51,
+   "change": "20% worse",
+   "baseline": "e861c6a",
+   "noisy": "load 5.38->3.35"
+  },
+  {
+   "scenario": "drag-play-10k",
+   "metric": "writeP50",
+   "before": 1.8,
+   "after": 2.1,
+   "change": "17% worse",
+   "baseline": "d09dd40",
+   "noisy": "load 7.7->3.35"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:selectAll",
+   "before": 132.3,
+   "after": 162.3,
+   "change": "23% worse",
+   "baseline": "e2e9f78",
+   "noisy": "load 5.1->3.53"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:applyPreset Pop (stagger)",
+   "before": 235.9,
+   "after": 284.5,
+   "change": "21% worse",
+   "baseline": "e2e9f78",
+   "noisy": "load 5.1->3.53"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:setExpr wiggle",
+   "before": 157.9,
+   "after": 184.9,
+   "change": "17% worse",
+   "baseline": "e2e9f78",
+   "noisy": "load 5.1->3.53"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:group 2000",
+   "before": 376.1,
+   "after": 553.6,
+   "change": "47% worse",
+   "baseline": "e2e9f78",
+   "noisy": "load 5.1->3.53"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:undo x4",
+   "before": 71.6,
+   "after": 96.6,
+   "change": "35% worse",
+   "baseline": "e2e9f78",
+   "noisy": "load 5.1->3.53"
+  }
+ ],
+ "improvements": [
+  {
+   "scenario": "springs-10k",
+   "metric": "tickP99",
+   "before": 18.7,
+   "after": 16.6,
+   "change": "11% better",
+   "baseline": "e861c6a",
+   "noisy": "load 5.47->3.33"
+  },
+  {
+   "scenario": "drag-play-10k",
+   "metric": "tickP95",
+   "before": 18,
+   "after": 11.5,
+   "change": "36% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.7->3.35"
+  },
+  {
+   "scenario": "drag-play-10k",
+   "metric": "tickP99",
+   "before": 21.4,
+   "after": 13.6,
+   "change": "36% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.7->3.35"
+  },
+  {
+   "scenario": "drag-play-10k",
+   "metric": "cpuP95",
+   "before": 13.4,
+   "after": 10.5,
+   "change": "22% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.7->3.35"
+  },
+  {
+   "scenario": "drag-play-10k",
+   "metric": "fps",
+   "before": 56.5,
+   "after": 62.5,
+   "change": "11% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.7->3.35"
+  },
+  {
+   "scenario": "undo-storm-10k",
+   "metric": "editFrameP50",
+   "before": 19.9,
+   "after": 17.8,
+   "change": "11% better",
+   "baseline": "e2e9f78",
+   "noisy": "load 5.37->3.53"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:setTextAnim (non-text, no-op path)",
+   "before": 4.5,
+   "after": 3.7,
+   "change": "18% better",
+   "baseline": "e2e9f78",
+   "noisy": "load 5.1->3.53"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:precompose 2000",
+   "before": 113.2,
+   "after": 90.7,
+   "change": "20% better",
+   "baseline": "e2e9f78",
+   "noisy": "load 5.1->3.53"
+  }
+ ],
+ "baselines": {
+  "springs-10k": "2026-11-12T08-24-56-partial.json",
+  "scrub-springs-10k": "2026-11-12T08-24-56-partial.json",
+  "undo-storm-10k": "2026-11-12T06-19-27-partial.json",
+  "ops-5k": "2026-11-12T06-19-27-partial.json",
+  "drag-play-10k": "2026-11-12T04-51-29.json"
+ }
+}
