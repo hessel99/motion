@@ -288,9 +288,10 @@ for (const scene of scenes) {
       const r = await page.evaluate(() => window.__parity.pngSequence({}));
       const files = unzipSync(Buffer.from(r.data, 'base64'));
       const names = Object.keys(files).filter(f => f.endsWith('.png')).sort();
-      const checks = [{ ok: names.length === n, msg: `png sequence has ${names.length} frames, expected ${n}` }];
-      const idx = pick(n).filter(i => i < names.length);
-      const ref = await refs(idx.map(tE));
+      const checks = [{ ok: names.length === nC, msg: `png sequence has ${names.length} frames, expected ${nC}` }];
+      // the sequence is at the comp frame rate
+      const idx = pick(nC).filter(i => i < names.length);
+      const ref = await refs(idx.map(tC));
       const frames = [];
       let last = null;
       idx.forEach((i, k) => { last = premul(decodeImage(Buffer.from(files[names[i]]))); frames.push({ i, ...compare(ref[k], last, W, H) }); });
