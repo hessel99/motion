@@ -654,8 +654,9 @@ export function cellHash(x: number, y: number, seed: number): number {
 
 /** noise grain over the box: cells of `size` px; `density` of them get the grain color */
 function drawNoise(c: Ctx, n: NoiseParams, bw: number, bh: number, T: number[]) {
-  const size = Math.max(0.25, n.size || 1);
-  // cells at most ~1 per device pixel
+  // same model as the noise effect (fx.ts, fitted to figma): cells of size / 2, grain with probability
+  // density^2 and strength (1 - r / D)^2, duo picks one of two colors per grain
+  const size = Math.max(0.25, (n.size || 1) / 2);
   const dev = Math.hypot(T[0], T[1]);
   const cell = Math.max(size, 1 / Math.max(dev, 1e-6));
   const cw = Math.min(2048, Math.ceil(bw / cell)), ch = Math.min(2048, Math.ceil(bh / cell));
@@ -663,15 +664,19 @@ function drawNoise(c: Ctx, n: NoiseParams, bw: number, bh: number, T: number[]) 
   const cv = newCanvas(cw, ch);
   const nc = cv.getContext('2d') as Ctx;
   const img = nc.createImageData(cw, ch);
-  const d = img.data, seed = n.seed ?? 0, dens = n.density;
+  const d = img.data, seed = n.seed ?? 0;
+  let D = n.density * n.density;
+  if (n.mode === 'duo') D = Math.min(D, 0.5);
   const c1 = n.color ?? [0, 0, 0, 1], c2 = n.secondary ?? [1, 1, 1, 1], op = n.opacity ?? 1;
+  const put = (o: number, c: number[], a: number) => { d[o] = c[0] * 255; d[o + 1] = c[1] * 255; d[o + 2] = c[2] * 255; d[o + 3] = a * 255; };
   for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {
     const o = (y * cw + x) * 4, r = cellHash(x, y, seed);
     if (n.mode === 'multi') {
-      if (r >= dens) continue;
-      d[o] = cellHash(x, y, seed + 1) * 255; d[o + 1] = cellHash(x, y, seed + 2) * 255; d[o + 2] = cellHash(x, y, seed + 3) * 255; d[o + 3] = op * 255;
-    } else if (r < dens) { d[o] = c1[0] * 255; d[o + 1] = c1[1] * 255; d[o + 2] = c1[2] * 255; d[o + 3] = (c1[3] ?? 1) * 255; }
-    else if (n.mode === 'duo') { d[o] = c2[0] * 255; d[o + 1] = c2[1] * 255; d[o + 2] = c2[2] * 255; d[o + 3] = (c2[3] ?? 1) * 255; }
+      if (r >= D) continue;
+      const t = (1 - r / D) ** 2;
+      put(o, [cellHash(x, y, seed + 1), cellHash(x, y, seed + 2), cellHash(x, y, seed + 3)], op * t);
+    } else if (r < D) put(o, c1, (c1[3] ?? 1) * (1 - r / D) ** 2);
+    else if (n.mode === 'duo' && r > 1 - D) put(o, c2, (c2[3] ?? 1) * (1 - (1 - r) / D) ** 2);
   }
   nc.putImageData(img, 0, 0);
   c.imageSmoothingEnabled = false;

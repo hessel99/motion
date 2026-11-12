@@ -160,15 +160,25 @@ vec4 noiseAt(int i, vec2 local) {
   vec4 c1 = i == 0 ? uN0[1] : uN1[1];
   vec4 c2 = i == 0 ? uN0[2] : uN1[2];
   float op = i == 0 ? uN0[3].x : uN1[3].x;
-  vec2 cell = local / max(p.y, 0.05);
+  // fitted to figma's renders: grain cells of noiseSize / 2 px, a cell gets grain with probability
+  // density^2 and a random strength (1 - r / D)^2; duo picks color 1 or 2 per grain (the rest of the
+  // surface stays as it was), multi uses a random color at opacity
+  vec2 cell = local / max(p.y * 0.5, 0.05);
   float r = rnd(cell, p.w, 0.0);
+  float D = p.z * p.z;
   if (p.x > 1.5) { // multi
-    if (r >= p.z) return vec4(0.0);
+    if (r >= D) return vec4(0.0);
+    float t = (1.0 - r / D); t *= t;
     vec3 c = vec3(rnd(cell, p.w, 1.0), rnd(cell, p.w, 2.0), rnd(cell, p.w, 3.0));
-    return vec4(c * op, op);
+    return vec4(c, 1.0) * op * t;
   }
-  if (r < p.z) return vec4(c1.rgb * c1.a, c1.a);
-  if (p.x > 0.5) return vec4(c2.rgb * c2.a, c2.a); // duo
+  if (p.x > 0.5) { // duo
+    D = min(D, 0.5);
+    if (r < D) { float t = 1.0 - r / D; t *= t; return vec4(c1.rgb * c1.a, c1.a) * t; }
+    if (r > 1.0 - D) { float t = 1.0 - (1.0 - r) / D; t *= t; return vec4(c2.rgb * c2.a, c2.a) * t; }
+    return vec4(0.0);
+  }
+  if (r < D) { float t = 1.0 - r / D; t *= t; return vec4(c1.rgb * c1.a, c1.a) * t; }
   return vec4(0.0);
 }
 
