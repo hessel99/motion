@@ -39,6 +39,12 @@ if (process.platform === 'linux') app.commandLine.appendSwitch('enable-unsafe-we
 /** @type {BrowserWindow | null} */
 let win = null;
 let bridge = null;
+/** figma shader sources: app-level cache in userData, sign-in tokens encrypted with the os keychain */
+function bridgeOpts() {
+  const { safeStorage } = require('electron');
+  const box = safeStorage.isEncryptionAvailable() ? { encrypt: (t) => safeStorage.encryptString(t), decrypt: (b) => safeStorage.decryptString(b) } : null;
+  return { dataDir: app.getPath('userData'), secretBox: box };
+}
 let bridgeReady = null;
 // per-launch secret: the packaged app loads file:// (Origin "null"), which websites can fake, so
 // the bridge additionally requires this token from such origins
@@ -50,9 +56,9 @@ function startBridge() {
     const mod = await import(pathToFileURL(path.join(__dirname, '..', 'bridge', 'server.mjs')).href);
     const preferred = Number(process.env.MOTION_BRIDGE_PORT || 7823);
     try {
-      bridge = await mod.startBridge({ port: preferred, token: BRIDGE_TOKEN });
+      bridge = await mod.startBridge({ port: preferred, token: BRIDGE_TOKEN, ...bridgeOpts() });
     } catch (e) {
-      if (e && e.code === 'EADDRINUSE') bridge = await mod.startBridge({ port: 0, token: BRIDGE_TOKEN }); // another instance owns 7823
+      if (e && e.code === 'EADDRINUSE') bridge = await mod.startBridge({ port: 0, token: BRIDGE_TOKEN, ...bridgeOpts() }); // another instance owns 7823
       else throw e;
     }
     return bridge.port;
