@@ -223,6 +223,28 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   check('MD-29: click + type replaces the value', (await ev(() => editor.store.comp.fps)) === 25, String(await ev(() => editor.store.comp.fps)));
   await ev(() => editor.store.undo());
 
+  // MD-38: an SVG imported into a comp the user chose keeps the comp; a brand-new untouched
+  // document takes the SVG's size and fits the view
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200"><rect x="20" y="20" width="160" height="160" fill="#f60"/><circle cx="300" cy="100" r="80" fill="#06f"/></svg>';
+  const chosen = await ev(async svg => {
+    const d = await import('/src/app/documents.ts'), a = await import('/src/app/actions.ts');
+    d.newDocument({ width: 1920, height: 1080 });
+    await a.openData('logo.svg', svg);
+    const c = editor.store.comp;
+    return { w: c.width, h: c.height, n: c.root.length };
+  }, svg);
+  check('MD-38: importing an SVG into a chosen 1920×1080 comp keeps the comp size', chosen.w === 1920 && chosen.h === 1080 && chosen.n === 1, JSON.stringify(chosen));
+  const fresh = await ev(async svg => {
+    const a = await import('/src/app/actions.ts');
+    a.newProject();
+    await a.openData('logo.svg', svg);
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const c = editor.store.comp, r = document.querySelector('.viewport').getBoundingClientRect();
+    const x1 = viewport.panX + c.width * viewport.zoom, y1 = viewport.panY + c.height * viewport.zoom;
+    return { w: c.width, h: c.height, fits: viewport.panX >= 0 && viewport.panY >= 0 && x1 <= r.width + 0.5 && y1 <= r.height + 0.5, centered: Math.abs(viewport.panX - (r.width - x1)) < 2 };
+  }, svg);
+  check('MD-38: a brand-new untouched document adopts the SVG size and fits the view', fresh.w === 400 && fresh.h === 200 && fresh.fits && fresh.centered, JSON.stringify(fresh));
+
   check('MD: no page errors', errors.length === 0, JSON.stringify(errors.slice(0, 5)));
   await ctx.close();
 }

@@ -12,7 +12,7 @@ import { demoProject, stressProject } from './demo';
 import { importFigmaDesign, type DesignImportResult } from '../core/design-import';
 import { createComponent } from '../core/components';
 import type { FigmaDesignData } from '../import/figma/convert';
-import { activeDoc, closeDoc, cycleDocs, documents, isDocDirty, newDocument, openProject, restoreSession, serializeSession } from './documents';
+import { activeDoc, closeDoc, compAdoptsImportSize, cycleDocs, documents, isDocDirty, newDocument, openProject, restoreSession, serializeSession } from './documents';
 import { rememberRecent } from './recent';
 
 // importers are loaded lazily (keeps startup fast; missing modules are simply unavailable)
@@ -418,7 +418,8 @@ export function insertLayers(res: { layers: Layer[]; roots: string[]; assets: As
   const comp = s.comp;
   let dx = 0, dy = 0;
   const single = res.roots.length === 1 ? byId.get(res.roots[0])! : null;
-  const frameToComp = opts.fitCompIfEmpty && wasEmpty && single && single.type === 'group' && single.children.length > 0;
+  // MD-38: only a brand-new untouched document takes the asset's size; a comp the user chose keeps its
+  const frameToComp = opts.fitCompIfEmpty && wasEmpty && compAdoptsImportSize() && single && single.type === 'group' && single.children.length > 0;
   if (frameToComp) {
     // pasting one frame into an empty project: the frame becomes the composition (figma motion style)
     const sz = single!.props.size!.v;
@@ -454,6 +455,8 @@ export function insertLayers(res: { layers: Layer[]; roots: string[]; assets: As
   const d = design as DesignImportResult | null;
   if (d && (d.linked || d.components)) { s.emit('tokens'); s.emit('components'); }
   s.select(res.roots);
+  // the comp changed size: show all of it
+  if (frameToComp) requestAnimationFrame(() => (globalThis as any).viewport?.fit?.());
   return design;
 }
 

@@ -22,6 +22,8 @@ export interface Doc {
   view: { zoom: number; panX: number; panY: number } | null;
   /** serialized project of a background document for autosave (background documents don't change) */
   json: string | null;
+  /** the user picked the comp size (Home size cards, the brief box): imports never resize it */
+  sizeChosen?: boolean;
 }
 
 let seq = 0;
@@ -31,6 +33,8 @@ let active: Doc | null = null;
 export let switching = false;
 /** the path the next load belongs to (openProject) */
 let pendingPath: string | null = null;
+/** the next load is a new document with a size the user chose */
+let pendingSizeChosen = false;
 
 const vp = () => (globalThis as any).viewport as { zoom: number; panX: number; panY: number; setView(z: number, x: number, y: number): void } | undefined;
 
@@ -55,14 +59,23 @@ function pristine(d: Doc) {
   return !d.state && !d.path && s.historyLength === 0 && Object.keys(s.project.layers).length === 0;
 }
 
+/** MD-38: may an import (svg, image, figma frame) set the comp size? only a brand-new, untouched
+ *  document whose size nobody picked (not a Home size card, no edits, not a file from disk) */
+export function compAdoptsImportSize(): boolean {
+  const d = active;
+  return !d || (!d.sizeChosen && pristine(d));
+}
+
 /** every editor.load() lands in the active tab (a new one when none is open) */
 export function setupDocuments() {
   editor.on('loaded', () => {
     if (switching) return;
     if (!active) { active = { id: 'd' + ++seq, state: null, path: null, savedAt: 0, view: null, json: null }; docs.push(active); }
     active.path = pendingPath;
+    active.sizeChosen = pendingSizeChosen;
     active.savedAt = editor.store.topEntryId;
     pendingPath = null;
+    pendingSizeChosen = false;
     emit();
     editor.emit('doc-open');
   });
@@ -97,6 +110,7 @@ export function newDocument(init?: { name?: string; width?: number; height?: num
   // always its own tab (opening a file may take the place of an untouched one: openProject)
   if (active) { park(); active = null; }
   pendingPath = null;
+  pendingSizeChosen = !!(init?.width || init?.height);
   editor.load(p);
 }
 
