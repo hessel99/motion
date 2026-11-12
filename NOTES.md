@@ -142,6 +142,13 @@ The current command list (DRAW / PUSH / MASK / BLEND / POP with an FBO stack) is
 7. **Velocity data**: the instance stream gets the previous-shutter matrix (6 floats; a second vertex buffer with divisor 1 as in the prototype, or part of the main record). It comes from a second evaluation at `t - shutter`; the incremental path makes that cheap for static layers.
 8. **Order of operations** follows AE: transform-independent effects (blur) apply in the layer's local space before its transform; others apply after it (motion blur, drop-shadow direction in comp space).
 
+### Layer effects (implemented, `src/render/effects.ts` + `src/render/fx.ts`)
+
+- Model: `Layer.effects` (Figma order) + effect props in `PROP_DEFS` (`shadowColor/Offset/Blur/Spread`, `innerShadow*`, `blur`, `backgroundBlur`, `noiseColor/Size/Density`). The first effect of each type reads the props (keyframable, expressions not yet), the rest use their static fields; props alone imply the effect (an agent can just set `shadowBlur`).
+- Compile: `hasEffects(l)` / a backdrop blend mode marks the item (`sBits & 16`, `EffectEval` with tracks for the animated params). Nothing changes for other items.
+- Frame: such an item opens a region like group opacity (`PUSH`), its subtree draws into an offscreen target, `FXPOP` runs `FxPipeline.run`: coverage draw of the region's instances (main shader `uCov` mode: shape coverage, fill opacity ignored) → shadows (offset, separable dilate / erode for spread, gaussian) → inner shadows → layer blur (three levels for progressive) → backdrop copy (`copyTexSubImage2D`) for background blur / glass / blend modes → one composite pass (noise, texture displacement, W3C blend formulas). Region boxes grow by the effect padding; every pass is scissored to them. Blurs run at ½ / ¼ resolution from σ 4 / 12 px, pooled targets (nothing allocated per frame).
+- Cost: scenes without effects are unchanged (`cpu-bench` 10k / 25k: 4.2 / 10.6-10.9 ms per frame before and after). Each effect region is a few fullscreen-scissored passes on the GPU and ~0.05 ms CPU.
+
 ## Renderer architecture (`src/render/`)
 
 - **One draw call**: every layer is an instance (40 floats) drawn as one `drawArraysInstanced`.
@@ -285,6 +292,13 @@ Current numbers from `scripts/cpu-bench.mjs` (the table above is older and came 
 - Pasting a single frame into an empty project makes the composition the size of that frame, Figma Motion style.
 - **Verified against real Figma clipboard captures**, including the 2025 format. The captures come from the test data of github.com/darknoon/figma-format-parse; run `scripts/figma-real-check.sh`, which downloads them on demand because that repo has no license. A real iPhone screen (51 layers: frames, component instances, text, emoji) pastes and renders correctly in under 50ms.
 - Newer clipboards can omit cached vector geometry and only carry the **vector network** blob. We decode that too (`src/import/figma/vectornet.ts`).
+- **Fidelity inventory: [docs/figma-fidelity.md](docs/figma-fidelity.md)** (every node type, paint, effect, stroke and text feature → supported / approximated / missing). Highlights:
+  - all paints with opacity + blend mode, stacked: angular / diamond gradients (in the instance shader like linear / radial), image fills on any shape (fill / fit / tile / crop, rotation, filters), noise fills, gradient strokes, per-region vector fills
+  - effects run on the gpu (below): drop / inner shadows, layer + background blur (also progressive), noise, texture and glass (best effort); the first of each type is animatable through layer props (`shadowBlur`, `blur`, `noiseDensity`, …), so the timeline, inspector (Effects section) and agent tools can keyframe them
+  - dashes, caps, joins, per-side strokes, squircle corners (corner smoothing), all 18 blend modes, luminance / vector masks, component properties
+  - text keeps **Figma's glyph outlines**: exact look (fonts that aren't installed, features, variable axes, wrapping, lists, decorations, per-run colors) until the text is edited
+  - shader paints / effects: `convertShaderPaint` / `convertShaderEffect` from `src/import/figma/shaders.ts` when that module exists (shader runtime), otherwise skipped with a warning; warnings land in `design.warnings`
+- **Debugging pastes**: Import menu → *Save last Figma paste for debugging…* (also Settings → Figma import) writes one `.figcapture.json` (raw clipboard html + decoded node tree). `MOTION_FIGMA_CAPTURE_DIR=/dir` (desktop) / `VITE_FIGMA_CAPTURE_DIR=/dir npm run dev` auto-save every paste. Captures hold real designs: git-ignored, never commit them.
 - Unit tests also cover a synthetic payload. Some rarer fields are still educated guesses (listed in `src/import/figma/convert.ts`).
 
 ## After Effects `.aep`
@@ -361,7 +375,7 @@ The look is token driven, so a visual pass should only need to edit `tokens.css`
 
 ## Known limitations / next
 
-- **Effects: none yet, on purpose.** The renderer is prepared (effect-pipeline design + motion blur / gaussian blur prototypes, see "Architecture decisions"); effects get added one by one after v0.5, in the order of `docs/research-2026-11.md` (drop shadow, blur, motion blur, glow, …).
+- **Effects**: drop / inner shadow, layer blur (incl. progressive), background blur, noise, texture, glass and backdrop blend modes are real (`src/render/effects.ts` + `fx.ts`, see "Layer effects (implemented)"). Not yet: motion blur (prototype only), glow, effect result caching for static subtrees, bounds-sized offscreen targets.
 - **Design pass** still to do: the design system (`src/ui/tokens.css`, `?styleguide`) is ready to be re-themed by changing tokens only, once the visual direction is set.
 - Layers that animate their path shape (morph, trim) are not tiled: at deep zoom they are capped at one 2040 px raster per frame. Per-glyph text animation units are not tiled either.
 - Zoomed-in playback of many big layers that animate their *scale* still re-tiles them as they grow (bounded: 6 tile jobs in flight, LRU within the byte budget). GPU text/path rendering (see decisions) would make that free.

@@ -452,8 +452,7 @@ class Converter {
       if (key) this.refs.push({ layer: layer.id, prop, key });
     };
     if (!layer.paints && layer.type !== 'image') solidRef(n.fillPaints, n.styleIdForFill, 'fill');
-    if (layer.strokePaints) return;
-    if (num(n.strokeWeight, 0) > 0) solidRef(n.strokePaints, n.styleIdForStrokeFill, 'stroke');
+    if (!layer.strokePaints && num(n.strokeWeight, 0) > 0) solidRef(n.strokePaints, n.styleIdForStrokeFill, 'stroke');
     const entries = n.variableConsumptionMap?.entries;
     if (!Array.isArray(entries)) return;
     for (const e of entries) {

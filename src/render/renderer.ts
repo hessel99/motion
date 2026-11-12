@@ -897,7 +897,8 @@ export class Renderer {
     const fxOn = !l.mask && l.type !== 'audio' && hasEffects(l);
     it.fx = fxOn ? new EffectEval(l, key => this.store.renderProp(l, key)) : null;
     if (it.fx && !it.fx.list.length) it.fx = null;
-    it.fxBlend = !l.mask && (needsBlendShader(l.blend) || (it.fx && l.blend && l.blend !== 'normal')) ? BLEND_SHADER[l.blend!] ?? 0 : 0;
+    // a group's blend mode applies to its composite (figma, after effects): isolate it too
+    it.fxBlend = !l.mask && (needsBlendShader(l.blend) || ((it.fx || it.isoGroup) && l.blend && l.blend !== 'normal')) ? BLEND_SHADER[l.blend!] ?? 0 : 0;
     if (it.fx?.animated) it.animated = true;
     this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0) | (it.fx || it.fxBlend ? 16 : 0);
     this.sBlend[i] = it.fx || it.fxBlend ? 0 : l.blend ? BLEND_IDS[l.blend] ?? 0 : 0;
@@ -2033,7 +2034,7 @@ export class Renderer {
         if (!e || !r) {
           if (u.entry && !u.entry.dead && performance.now() > budgetEnd) { this.pendingUpgrade = true; }
           else {
-            const fake = { ...l, text: { ...l.text!, content: u.unit.text, align: 'left' as const, lists: undefined, runs: undefined, truncate: false, valign: undefined, paragraphIndent: undefined, outline: undefined } };
+            const fake = { ...l, paints: undefined, text: { ...l.text!, content: u.unit.text, align: 'left' as const, lists: undefined, runs: undefined, truncate: false, valign: undefined, paragraphIndent: undefined, outline: undefined } };
             r = rasterText(fake, bucket, [0, 0]);
             e = this.atlas.alloc(key, r.pw, r.ph) ?? undefined;
             if (e) { this.atlas.upload(e, r.data); r.data = undefined as any; this.rasterMeta.set(key, r); }
