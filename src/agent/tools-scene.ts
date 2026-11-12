@@ -252,19 +252,21 @@ function buildLayer(ctx: Ctx, s: any, parent: string | null, compId: string, inh
   }
 
   // ---- static props ----
+  // auto-sized text (w/h 0): pivots and centering use the measured box
+  const [bw, bh] = L.type === 'text' && (w <= 0 || h <= 0) ? layerSize(store, L, 0) : [w, h];
   const statics: Partial<Record<PropKey, number[]>> = {};
   const sizeChanged = created || s.w !== undefined || s.h !== undefined || !!fitted;
   if (sizeChanged && L.props.size) statics.size = [w, h];
   // anchor: named (default center for new layers) or [x, y] px in the box
   let an: number[] = valueAt(L, 'anchor', store.time);
   if (s.anchor !== undefined) {
-    if (typeof s.anchor === 'string') { const f = ANCHORS[s.anchor]; if (!f) throw new Error(`anchor must be [x,y] or one of ${Object.keys(ANCHORS).join(', ')}`); an = [f[0] * w, f[1] * h]; }
+    if (typeof s.anchor === 'string') { const f = ANCHORS[s.anchor]; if (!f) throw new Error(`anchor must be [x,y] or one of ${Object.keys(ANCHORS).join(', ')}`); an = [f[0] * bw, f[1] * bh]; }
     else an = toValue('anchor', s.anchor);
     statics.anchor = an;
-  } else if (created || (sizeChanged && cur && Math.abs(an[0] - (curSize![0]) / 2) < 0.5 && Math.abs(an[1] - curSize![1] / 2) < 0.5)) { an = [w / 2, h / 2]; statics.anchor = an; }
+  } else if (created || (sizeChanged && cur && Math.abs(an[0] - (curSize![0]) / 2) < 0.5 && Math.abs(an[1] - curSize![1] / 2) < 0.5)) { an = [bw / 2, bh / 2]; statics.anchor = an; }
   // position: x/y = top-left of the box (rotation/scale about the anchor), center = [cx, cy], or position
   if (s.position !== undefined) statics.position = toValue('position', s.position);
-  else if (s.center !== undefined) { const c = toValue('position', s.center); statics.position = [c[0] - w / 2 + an[0], c[1] - h / 2 + an[1]]; }
+  else if (s.center !== undefined) { const c = toValue('position', s.center); statics.position = [c[0] - bw / 2 + an[0], c[1] - bh / 2 + an[1]]; }
   else if (s.x !== undefined || s.y !== undefined || fitted || created || statics.anchor) {
     const p0 = valueAt(L, 'position', comp.duration / 2), a0 = cur ? valueAt(cur, 'anchor', comp.duration / 2) : [0, 0];
     const x = fitted && s.x === undefined ? fitted[0] : s.x !== undefined ? num(s.x, 'x') : cur ? p0[0] - a0[0] : 0;

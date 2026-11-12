@@ -178,6 +178,19 @@ function movingIn(l: Layer, t0: number, t1: number): boolean {
   return false;
 }
 
+/** "a: msg", "b: msg", "c: msg", "d: msg" -> "a, b, c +1: msg" (split text pieces share problems) */
+function collapse(lines: string[]): string[] {
+  const by = new Map<string, string[]>();
+  const order: string[] = [];
+  for (const x of lines) {
+    const i = x.indexOf(': ');
+    const name = i > 0 ? x.slice(0, i) : x, msg = i > 0 ? x.slice(i + 2) : '';
+    if (!by.has(msg)) { by.set(msg, []); order.push(msg); }
+    by.get(msg)!.push(name);
+  }
+  return order.map(m => { const n = by.get(m)!; return m ? `${n.slice(0, 3).join(', ')}${n.length > 3 ? ` +${n.length - 3}` : ''}: ${m}` : n.join(', '); });
+}
+
 export const ANALYSIS_TOOLS: ToolDef[] = [
   {
     name: 'inspect_motion',
@@ -215,7 +228,7 @@ export const ANALYSIS_TOOLS: ToolDef[] = [
       const only = ids?.length ? (ids as string[]).flatMap(id => { need(id); return [id, ...s.descendants(id)]; }) : null;
       const out: string[] = [];
       for (const t of ts) {
-        const iss = checkAt(t, safe, only);
+        const iss = collapse(checkAt(t, safe, only));
         out.push(`${fmtTime(t)}: ${iss.length ? '' : 'ok'}`.trimEnd() + (iss.length ? '\n' + iss.map(x => '  ' + x).join('\n') : ''));
       }
       return text(out.join('\n'));
