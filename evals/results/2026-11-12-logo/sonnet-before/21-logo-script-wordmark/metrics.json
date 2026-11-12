@@ -1,0 +1,207 @@
+{
+ "run": {
+  "id": "21-logo-script-wordmark",
+  "name": "21-logo-script-wordmark",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 94,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin"
+    ],
+    "ms": 4.6
+   },
+   "after": {
+    "score": 94,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 84,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 16,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:thin"
+    ],
+    "ms": 4.6
+   }
+  },
+  "wallMs": 37943,
+  "timedOut": false,
+  "turns": 6,
+  "costUsd": 0.1224354,
+  "durationMs": 37224,
+  "usage": {
+   "input": 281963,
+   "cached": 268794,
+   "output": 4290
+  },
+  "errors": [],
+  "toolCalls": 5,
+  "toolErrors": 0,
+  "toolsAvailable": 83,
+  "finalText": "The Bloom sting is built: 6 s on a cream background (#F7F1E3), in deep green ink (#1F4D36). It ends on the finished lockup. I checked it on a contact sheet at six points but did not run the critique.\n\n- **Wordmark:** \"bloom\" is drawn as one continuous monoline script stroke. It writes on left to right from 0.4 s to 3.0 s with a slow Sine In Out.\n- **Leaf:** a short stem draws up above the first o. The leaf then grows from its base with a gentle spring and a small sway, finishing by 4.0 s.\n- **Tagline:** a thin \"FLORIST\" line fades up softly at 4.0 s. You didn't ask for it; it is the layer named **tag**, so delete it if you want the wordmark alone.\n- **Hold:** the finished lockup stays on screen from about 5.2 s to the end at 6 s.\n\nThe script is a hand-built path rather than a font, so letter shapes are slightly irregular in places. The stem and leaf sit a little loosely against the o. I can refine the curves, tighten the leaf placement, or add a subtle breathing motion to the hold."
+ },
+ "metrics": {
+  "layers": 4,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "path": 3,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 4,
+  "keys": 16,
+  "segments": 8,
+  "easesUsed": {
+   "Sine In Out": 3,
+   "Sine Out": 3,
+   "Spring 0.1": 2
+  },
+  "distinctEases": 3,
+  "easeFamilies": 2,
+  "overshootSegments": 2,
+  "keyedOvershoots": 1,
+  "springSegments": 2,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "pathLayers": 3,
+  "gradientLayers": 0,
+  "paletteSize": 2,
+  "palette": [
+   "#1f4d36",
+   "#f7f1e3"
+  ],
+  "keyCoverage": 0.8,
+  "visualActivity": 0.234,
+  "firstMotion": 3.2,
+  "lastMotion": 5,
+  "endHold": 1,
+  "longestHold": 0.268,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 4,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.011,
+  "midLuma": 0.937,
+  "toolErrors": 0,
+  "toolCalls": 5
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"bloom\" present",
+    "type": "textOrLetters",
+    "pass": false
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "blank lead-in: first motion between 0.1 and 0.5 s",
+    "type": "firstMotionBetween",
+    "pass": false
+   },
+   {
+    "text": "wordmark arrives after the mark, within the build (first visible 0.8-3.2 s)",
+    "type": "textFirstVisibleBetween",
+    "pass": false
+   },
+   {
+    "text": "final lockup held still ≥ 1.2 s (≥ 3 identical end frames)",
+    "type": "lockupHoldMin",
+    "pass": true
+   },
+   {
+    "text": "sting length 4.5-7.5 s",
+    "type": "durationBetween",
+    "pass": true
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "one idea that comes from the mark itself (you can name its verb: opens, assembles, writes, becomes); not a generic pop/fade",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "wordmark enters from the mark (slides out from behind it under a mask, grows from a glyph, or is built from the same parts) and the mark makes room",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "snap and settle: hard decelerations (expo / spring), a small final move, one easing family",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "a stroke writes on (animated trim)",
+    "type": "trimAnimated",
+    "pass": true
+   }
+  ],
+  "hits": 5,
+  "checkable": 8,
+  "total": 11
+ },
+ "video": null
+}

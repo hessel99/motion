@@ -1,0 +1,227 @@
+{
+ "run": {
+  "id": "19-logo-house-door",
+  "name": "19-logo-house-door",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 70,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 70,
+    "sub": {
+     "timing": 100,
+     "easing": 93,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 84,
+     "richness": 54,
+     "technical": 100,
+     "brand": 100,
+     "music": 100,
+     "logo": 84.4
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 7,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 16,
+     "richness": 46,
+     "technical": 0,
+     "brand": 0,
+     "music": 0,
+     "logo": 15.600000000000001
+    },
+    "issues": [
+     "high:one-move",
+     "medium:no-secondary",
+     "medium:thin",
+     "medium:logo-wordmark-entry",
+     "low:entrance-ease",
+     "low:logo-final-move"
+    ],
+    "ms": 8.5
+   },
+   "after": {
+    "score": 89,
+    "sub": {
+     "timing": 100,
+     "easing": 93,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100,
+     "logo": 87.2
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 7,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0,
+     "logo": 12.8
+    },
+    "issues": [
+     "medium:logo-wordmark-entry",
+     "low:entrance-ease"
+    ],
+    "ms": 3.3
+   }
+  },
+  "wallMs": 26401,
+  "timedOut": false,
+  "turns": 9,
+  "costUsd": 0.1271583,
+  "durationMs": 24611,
+  "usage": {
+   "input": 153951,
+   "cached": 150001,
+   "output": 2022
+  },
+  "errors": [],
+  "toolCalls": 7,
+  "toolErrors": 0,
+  "toolsAvailable": 83,
+  "finalText": "I built the Hearth sting: a 5 s comp at 1920×1080 and 60 fps that ends on the full lockup. I checked it on a contact sheet, and the house now draws as a clean outline. I haven't run the critic.\n\n- **Look:** the background is dark warm brown (`#1c1410`) with a single amber accent (`#ff8a3d`) on the house and door. The wordmark is cream.\n- **Motion:**\n  - From 0.3 s the **House outline** draws itself on.\n  - At about 1.3 s the **Door** swings open from its left edge, easing out hard.\n  - At 1.9 s the **Wordmark** \"Hearth\" slides in to the right of the mark and settles by about 2.6 s.\n  - The lockup then holds still until 5 s.\n- **Shortcut:** I skipped the storyboard step and built the door-opens idea directly, since you'd already described the mark.\n\nThe door is a flat swing rather than a hinged 3D open, and the wordmark slides in from the left rather than emerging from behind the house. I can add a warm light glow behind the door, tighten the whole sting to about 4 s, or make the wordmark emerge from the house if you want any of those.\nI added overshoot to the **Door** and **Wordmark** and shortened the comp to 4.5 s, which lifted the critic's score from 70 to 89. Two small notes remain: the wordmark could slide out from behind the mark, and the door's scale ease could be Quart Out. I left both."
+ },
+ "metrics": {
+  "layers": 3,
+  "drawableLayers": 3,
+  "layerTypes": {
+   "path": 1,
+   "rect": 1,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 3,
+  "keys": 15,
+  "segments": 9,
+  "easesUsed": {
+   "Cubic In Out": 2,
+   "Sine In Out": 4,
+   "Ease Out": 1,
+   "Expo Out": 2
+  },
+  "distinctEases": 4,
+  "easeFamilies": 4,
+  "overshootSegments": 0,
+  "keyedOvershoots": 2,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#ff8a3d",
+   "#f5e9dc",
+   "#1c1410"
+  ],
+  "keyCoverage": 0.573,
+  "visualActivity": 0.279,
+  "firstMotion": 1.257,
+  "lastMotion": 2.846,
+  "endHold": 1.654,
+  "longestHold": 0.264,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 4,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.013,
+  "midLuma": 0.097,
+  "toolErrors": 0,
+  "toolCalls": 7
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"Hearth\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "blank lead-in: first motion between 0.1 and 0.5 s",
+    "type": "firstMotionBetween",
+    "pass": false
+   },
+   {
+    "text": "wordmark arrives after the mark, within the build (first visible 0.8-3.2 s)",
+    "type": "textFirstVisibleBetween",
+    "pass": true
+   },
+   {
+    "text": "final lockup held still ≥ 1.2 s (≥ 3 identical end frames)",
+    "type": "lockupHoldMin",
+    "pass": true
+   },
+   {
+    "text": "sting length 4.5-7.5 s",
+    "type": "durationBetween",
+    "pass": true
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "one idea that comes from the mark itself (you can name its verb: opens, assembles, writes, becomes); not a generic pop/fade",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "wordmark enters from the mark (slides out from behind it under a mask, grows from a glyph, or is built from the same parts) and the mark makes room",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "snap and settle: hard decelerations (expo / spring), a small final move, one easing family",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "the door moves on its hinge (pivot at an edge, scale/rotation)",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 7,
+  "total": 11
+ },
+ "video": null
+}

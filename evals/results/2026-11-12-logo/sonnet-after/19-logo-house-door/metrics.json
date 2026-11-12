@@ -1,0 +1,216 @@
+{
+ "run": {
+  "id": "19-logo-house-door",
+  "name": "19-logo-house-door",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 82,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 68,
+     "technical": 100,
+     "brand": 100,
+     "music": 100,
+     "logo": 87.2
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 32,
+     "technical": 0,
+     "brand": 0,
+     "music": 0,
+     "logo": 12.8
+    },
+    "issues": [
+     "medium:thin",
+     "medium:one-move",
+     "medium:logo-wordmark-timing"
+    ],
+    "ms": 14.8
+   },
+   "after": {
+    "score": 82,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 100,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 68,
+     "technical": 100,
+     "brand": 100,
+     "music": 100,
+     "logo": 87.2
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 0,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 32,
+     "technical": 0,
+     "brand": 0,
+     "music": 0,
+     "logo": 12.8
+    },
+    "issues": [
+     "medium:thin",
+     "medium:one-move",
+     "medium:logo-wordmark-timing"
+    ],
+    "ms": 14.8
+   }
+  },
+  "wallMs": 33559,
+  "timedOut": false,
+  "turns": 8,
+  "costUsd": 0.2836438,
+  "durationMs": 32376,
+  "usage": {
+   "input": 365416,
+   "cached": 310698,
+   "output": 3373
+  },
+  "errors": [],
+  "toolCalls": 7,
+  "toolErrors": 0,
+  "toolsAvailable": 83,
+  "finalText": "The Hearth sting is built: 5 s, ending on the full lockup. I checked it with contact sheets only. I didn't run the critique or play it back.\n\n- **Mark:** a cream house outline draws itself on, starting at 0.25 s. The amber door (`#ff9a3c`) fades in, hinges open at 1.5 s with a warm glow behind it, then swings shut again by 3.5 s.\n- **Wordmark:** \"Hearth\" slides out to the right of the mark at 2.1 s and settles by about 3 s.\n- **Hold:** the finished lockup stays still from about 3.5 s to 5 s, on a dark warm brown background.\n\nTwo things I noticed in the frames. The door is a thin sliver at 3.0 s, still mid-swing back, and fully closed by 4.5 s. The warm glow behind it is hard to see because the door covers most of it. I can make the glow stronger or the door swing wider if you want.\n\nAll motion uses Expo easing, and the only accent colour is the amber door."
+ },
+ "metrics": {
+  "layers": 4,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "path": 1,
+   "rect": 2,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 4,
+  "keys": 15,
+  "segments": 7,
+  "easesUsed": {
+   "Expo Out": 7
+  },
+  "distinctEases": 1,
+  "easeFamilies": 1,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 4,
+  "palette": [
+   "#f6e7d2",
+   "#ffb15c",
+   "#ff9a3c",
+   "#1f1410"
+  ],
+  "keyCoverage": 0.65,
+  "visualActivity": 0.348,
+  "firstMotion": 1.267,
+  "lastMotion": 3.267,
+  "endHold": 1.733,
+  "longestHold": 0.201,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 4,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.021,
+  "midLuma": 0.109,
+  "toolErrors": 0,
+  "toolCalls": 7
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"Hearth\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "blank lead-in: first motion between 0.1 and 0.5 s",
+    "type": "firstMotionBetween",
+    "pass": false
+   },
+   {
+    "text": "wordmark arrives after the mark, within the build (first visible 0.8-3.2 s)",
+    "type": "textFirstVisibleBetween",
+    "pass": true
+   },
+   {
+    "text": "final lockup held still ≥ 1.2 s (≥ 3 identical end frames)",
+    "type": "lockupHoldMin",
+    "pass": true
+   },
+   {
+    "text": "sting length 4.5-7.5 s",
+    "type": "durationBetween",
+    "pass": true
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "one idea that comes from the mark itself (you can name its verb: opens, assembles, writes, becomes); not a generic pop/fade",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "wordmark enters from the mark (slides out from behind it under a mask, grows from a glyph, or is built from the same parts) and the mark makes room",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "snap and settle: hard decelerations (expo / spring), a small final move, one easing family",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "the door moves on its hinge (pivot at an edge, scale/rotation)",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 7,
+  "total": 11
+ },
+ "video": null
+}

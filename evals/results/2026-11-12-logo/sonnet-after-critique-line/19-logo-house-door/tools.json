@@ -1,0 +1,192 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 824,
+  "ok": true,
+  "ms": 105,
+  "editorMs": 5,
+  "input": {
+   "comp": {
+    "background": "#1c1410",
+    "duration": 5,
+    "name": "Hearth sting"
+   },
+   "layers": [
+    {
+     "key": "house",
+     "name": "House outline",
+     "type": "path",
+     "x": 545,
+     "y": 440,
+     "w": 200,
+     "h": 200,
+     "d": "M100 10 L190 84 L190 190 L10 190 L10 84 Z",
+     "stroke": "#ff8a3d",
+     "strokeWidth": 14,
+     "drawOn": {
+      "t": 0.3,
+      "duration": 1,
+      "ease": "Cubic In Out"
+     }
+    },
+    {
+     "key": "door",
+     "name": "Door",
+     "type": "rect",
+     "x": 623,
+     "y": 552,
+     "w": 44,
+     "h": 82,
+     "radius": 4,
+     "fill": "#ff8a3d",
+     "anchor": "left",
+     "animate": {
+      "scale": [
+       {
+        "t": 1.3,
+        "v": [
+         0,
+         100
+        ]
+       },
+       {
+        "t": 1.9,
+        "v": [
+         100,
+         100
+        ],
+        "ease": "Expo Out"
+       }
+      ],
+      "opacity": [
+       {
+        "t": 1.3,
+        "v": 0
+       },
+       {
+        "t": 1.4,
+        "v": 100
+       }
+      ]
+     }
+    },
+    {
+     "key": "word",
+     "name": "Wordmark",
+     "type": "text",
+     "x": 805,
+     "y": 455,
+     "w": 620,
+     "h": 180,
+     "text": {
+      "content": "Hearth",
+      "fontFamily": "Inter",
+      "fontSize": 160,
+      "fontWeight": 600,
+      "align": "left"
+     },
+     "fill": "#f5e9dc",
+     "enter": {
+      "t": 1.9,
+      "duration": 0.7,
+      "ease": "Expo Out",
+      "from": {
+       "opacity": 0,
+       "dx": -50
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"3 created, 0 updated, 6 keyframe tracks; animation ends 2.6s\",\"ids\":{\"house\":\"l_03jm2\",\"door\":\"l_03jm3\",\"word\":\"l_03jm4\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 29,
+  "ok": true,
+  "ms": 115,
+  "editorMs": 100,
+  "input": {
+   "times": [
+    0.5,
+    1,
+    1.5,
+    2,
+    2.6,
+    4
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 1s, 1.5s, 2s, 2.6s, 4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/40523483-76be-4846-ab6e-3106d611ab15/tool-results/mcp-motion-blob-1794518889766-tviz8p.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 43,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 2,
+  "input": {
+   "id": "l_03jm2",
+   "props": {
+    "fill": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 25,
+  "ok": true,
+  "ms": 68,
+  "editorMs": 56,
+  "input": {
+   "times": [
+    0.6,
+    1.2,
+    1.6,
+    4
+   ]
+  },
+  "result": "4 frames left→right, top→bottom at 0.6s, 1.2s, 1.6s, 4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/40523483-76be-4846-ab6e-3106d611ab15/tool-results/mcp-motion-blob-1794518891828-xdprr4.jpg]"
+ },
+ {
+  "name": "secondary_motion",
+  "argsBytes": 66,
+  "ok": true,
+  "ms": 22,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm4",
+    "l_03jm3"
+   ],
+   "overshoot": 0.1,
+   "segments": "\"all\""
+  },
+  "result": "added overshoot 10% to Wordmark (1 moves), Door (1 moves)"
+ },
+ {
+  "name": "set_composition",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "duration": 4.5
+  },
+  "result": "ok"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 3,
+  "input": {},
+  "result": "score 89/100 (easing 93, logo 87)\nlogo sting: lockup complete at 2.08s, held 2.42s (aim: idea done by ~2.5 s, hold 1.5-2 s; recipes: get_guide \"logo-recipes\")\n1. [medium] the wordmark fades in with a small nudge beside the mark: let it come out of the mark (slide out from behind it under a mask while the mark makes room, grow from a glyph, or build from the same parts)\n   → rig {\"kind\":\"reveal-fro…"
+ }
+]

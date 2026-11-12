@@ -1,0 +1,6 @@
+Logo sting for "Mesh", a community platform. The mark is five dots connected by thin lines (a small network), build it from shapes. Wordmark "Mesh" next to it. Friendly and modern, light background, one accent colour. End on the clean lockup.
+
+<editor_context>
+comp "Main" 1920x1080 60fps 6s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 5,
+  "style_match": 6,
+  "timing_easing": 5,
+  "composition": 6,
+  "richness": 4,
+  "polish": 5
+ },
+ "overall": 5.17,
+ "critique": [
+  "The comp is 4s instead of the briefed 6s, so the sting is cut short. The final lockup holds for only about 0.6s, the house sits still from 1.2s to 1.9s, and the wordmark only fades and nudges in rather than coming out from the mark.",
+  "Extend the comp to 6s with a lockup hold of at least 1.5s. Pivot the door scale on its hinge edge so it clearly swings open with the glow spilling out. Then reveal 'Hearth' from behind the door or mark under a mask as the mark expo-slides left, finishing with one shared spring settle."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0512278,
+ "ms": 11838,
+ "raw": "```json\n{\"brief_fit\": 5, \"style_match\": 6, \"timing_easing\": 5, \"composition\": 6, \"richness\": 4, \"polish\": 5,\n \"critique\": [\"The comp is 4s instead of the briefed 6s, so the sting is cut short. The final lockup holds for only about 0.6s, the house sits still from 1.2s to 1.9s, and the wordmark only fades and nudges in rather than coming out from the mark.\", \"Extend the comp to 6s with a lockup hold of at least 1.5s. Pivot the door scale on its hinge edge so it clearly swings open with the glow spilling out. Then reveal 'Hearth' from behind the door or mark under a mask as the mark expo-slides left, finishing with one shared spring settle.\"]}\n```"
+}

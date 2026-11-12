@@ -1,0 +1,213 @@
+{
+ "run": {
+  "id": "20-logo-network-dots",
+  "name": "20-logo-network-dots",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [],
+  "critic": {
+   "before": {
+    "score": 92,
+    "sub": {
+     "timing": 80.8,
+     "easing": 100,
+     "choreography": 95.8,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 19.2,
+     "easing": 0,
+     "choreography": 4.2,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:end-hold",
+     "low:lead-late"
+    ],
+    "ms": 14
+   },
+   "after": {
+    "score": 92,
+    "sub": {
+     "timing": 80.8,
+     "easing": 100,
+     "choreography": 95.8,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100
+    },
+    "penalties": {
+     "timing": 19.2,
+     "easing": 0,
+     "choreography": 4.2,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0
+    },
+    "issues": [
+     "medium:end-hold",
+     "low:lead-late"
+    ],
+    "ms": 14
+   }
+  },
+  "wallMs": 30681,
+  "timedOut": false,
+  "turns": 4,
+  "costUsd": 0.2611937,
+  "durationMs": 29659,
+  "usage": {
+   "input": 152663,
+   "cached": 99117,
+   "output": 3711
+  },
+  "errors": [],
+  "toolCalls": 3,
+  "toolErrors": 0,
+  "toolsAvailable": 83,
+  "finalText": "I've built the Mesh sting as a 6 s, 60 fps comp, and it ends on the clean lockup. The contact sheet shows the timing and lockup working, and I haven't run the critic or an export.\n\n- **Mark:** five coral dots (**Dot A–E**) spring in one after another, staggered, on a warm off-white background (#F7F5F0). Seven thin ink-coloured lines (**Line A-B** and the rest) then draw on between them, from about 1.0 to 2.4 s, so the network links up.\n- **Wordmark:** the **Mark** group slides from the right to centre while **Wordmark** (\"Mesh\", Inter semibold) fades and slides out beside it, from about 2.5 to 3.4 s.\n- **Lockup:** from about 3.4 s the lockup holds still to 6 s. I skipped the gentle node pulse the storyboard planned for the hold, so nothing moves in that stretch.\n\nThe accent is coral (#FF5A4E) and the ink is #1F2430.\n\nI can make the mark larger relative to the word, add that node pulse during the hold, or switch to the \"pulse through the mesh\" concept."
+ },
+ "metrics": {
+  "layers": 14,
+  "drawableLayers": 13,
+  "layerTypes": {
+   "group": 1,
+   "path": 7,
+   "ellipse": 5,
+   "text": 1
+  },
+  "groups": 1,
+  "animatedLayers": 14,
+  "keys": 39,
+  "segments": 15,
+  "easesUsed": {
+   "Cubic In Out": 2,
+   "Cubic Out": 7,
+   "Custom(0.22,1.12,0.36,1)": 5,
+   "Ease Out": 1
+  },
+  "distinctEases": 4,
+  "easeFamilies": 3,
+  "overshootSegments": 5,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "pathLayers": 7,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#1f2430",
+   "#ff5a4e",
+   "#f7f5f0"
+  ],
+  "keyCoverage": 0.567,
+  "visualActivity": 0.313,
+  "firstMotion": 0,
+  "lastMotion": 3.333,
+  "endHold": 2.667,
+  "longestHold": 1.474,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.016,
+  "midLuma": 0.945,
+  "toolErrors": 0,
+  "toolCalls": 3
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"Mesh\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "blank lead-in: first motion between 0.1 and 0.5 s",
+    "type": "firstMotionBetween",
+    "pass": false
+   },
+   {
+    "text": "wordmark arrives after the mark, within the build (first visible 0.8-3.2 s)",
+    "type": "textFirstVisibleBetween",
+    "pass": true
+   },
+   {
+    "text": "final lockup held still ≥ 1.2 s (≥ 3 identical end frames)",
+    "type": "lockupHoldMin",
+    "pass": true
+   },
+   {
+    "text": "sting length 4.5-7.5 s",
+    "type": "durationBetween",
+    "pass": true
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "one idea that comes from the mark itself (you can name its verb: opens, assembles, writes, becomes); not a generic pop/fade",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "wordmark enters from the mark (slides out from behind it under a mask, grows from a glyph, or is built from the same parts) and the mark makes room",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "snap and settle: hard decelerations (expo / spring), a small final move, one easing family",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "dots are separate ellipses (≥4)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 8,
+  "total": 11
+ },
+ "video": null
+}

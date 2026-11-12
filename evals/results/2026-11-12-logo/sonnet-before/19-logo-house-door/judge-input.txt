@@ -1,0 +1,73 @@
+You are a senior motion designer and art director reviewing a junior's animation against the client brief.
+You cannot play the animation: you see a contact sheet (frames over time, each labeled with its time) and a
+precise text dump of every layer and keyframe (times, values, eases, springs, expressions, text animators).
+Use the frames for what it LOOKS like (layout, type, color, hierarchy, polish) and the timeline for how it
+MOVES (timing, easing, overlap, rhythm, holds). Do not reward effort or intent: judge the result.
+
+Score each criterion from 1 to 10 (integers). Anchors: 1-2 broken or missing; 3-4 weak, clearly amateur;
+5-6 acceptable but generic; 7-8 good, a client would accept it with small notes; 9-10 excellent, portfolio work.
+Be strict and consistent: a plain "shapes fade/slide in with one ease" piece is a 4-5, not a 7.
+
+- brief_fit: does it deliver what was asked (content, structure, beats, text, duration)? Check the checklist.
+- style_match: does it read as the requested style/mood (palette, type, shapes, motion language)?
+- timing_easing: are durations, eases, overlaps, staggers, holds and rhythm appropriate and intentional?
+  Penalize linear/default eases where they don't belong, everything moving at once, dead time, rushed endings.
+- composition: layout, hierarchy, alignment, spacing, safe areas, legibility; nothing clipped or colliding
+  by accident; frames look designed at every point in time.
+- richness: complexity and craft depth appropriate to the brief (secondary motion, layering, detail,
+  transitions between states). A 3-beat brief built as 3 layers fading in is poor richness.
+- polish: finish quality: consistent details, no glitches, no leftover default shapes/colors, clean endings.
+
+Then write exactly two lines of critique: line 1 = the biggest problem, line 2 = the single most valuable fix.
+
+BRIEF (19-logo-house-door, 1920x1080, 6s @60fps):
+Logo sting for "Hearth", a home-rental app. Build the mark yourself from shapes: a simple house outline (pentagon) with a door in it. Then the wordmark "Hearth" to the right of the mark. Warm and welcoming, dark warm background, one warm accent. A short sting that ends on the full lockup.
+
+CHECKLIST (what the client expects; automatic check results in brackets, "?" = not machine-checkable):
+- wordmark "Hearth" present [yes]
+- mark built from shapes (≥2 non-text layers) [yes]
+- blank lead-in: first motion between 0.1 and 0.5 s [NO]
+- wordmark arrives after the mark, within the build (first visible 0.8-3.2 s) [yes]
+- final lockup held still ≥ 1.2 s (≥ 3 identical end frames) [NO]
+- sting length 4.5-7.5 s [NO]
+- palette of ≤4 colors [yes]
+- one idea that comes from the mark itself (you can name its verb: opens, assembles, writes, becomes); not a generic pop/fade [?]
+- wordmark enters from the mark (slides out from behind it under a mask, grows from a glyph, or is built from the same parts) and the mark makes room [?]
+- snap and settle: hard decelerations (expo / spring), a small final move, one easing family [?]
+- the door moves on its hinge (pivot at an edge, scale/rotation) [?]
+
+LAYERS (draw order, bottom first; box = x,y,w,h at mid-time; fill hex):
+- mark [group] #ffffff a0
+  - glow [rect] box 933,550,50,80 #ffd9a0
+  - house [path] box 858,440,200,200 #000000 a0 stroke #f6e7d3 10px
+  - door [rect] box 933,550,9,80 #f2a65a
+- word [text] box 725,425,700,230 #f6e7d3 "Hearth" Inter 190px w600
+
+TIMELINE:
+comp 1920x1080 4s @60fps, background #2a1a14
+"mark" (group l_03jm2)
+  position: 0s [960,540] ─Cubic In Out→ 1.9s [960,540] ─Expo In Out→ 2.8s [602.5,540] ─Sine In Out→ 2.98s [649.63,540] ─Sine In Out→ 3.16s [635,540]
+"glow" (rect l_03jm3)
+  opacity: 0s 0 ─Ease In→ 1.2s 0 ─Ease Out→ 1.8s 100
+"house" (path l_03jm4)
+  trimStart: 0.2s 0
+  trimEnd: 0.2s 0 ─Expo Out→ 1.2s 100
+"door" (rect l_03jm5)
+  scale: 1.3s 100 ─Cubic In Out→ 1.9s [18,100]
+  opacity: 0s 0 ─Ease In→ 1.1s 0 ─Ease Out→ 1.3s 100
+"word" (text l_03jm6)
+  position: 2.3s [1075,540] ─Expo Out→ 3.1s [1141,540] ─Sine In Out→ 3.26s [1132.3,540] ─Sine In Out→ 3.42s [1135,540]
+  opacity: 2.3s 0 ─Ease Out→ 2.7s 100
+
+AUTOMATIC METRICS:
+layers 4 drawable (group 1, rect 2, path 1, text 1), 22 keys, 11 moving segments
+eases: Expo In Out×1, Sine In Out×4, Ease Out×3, Expo Out×2, Cubic In Out×1; springs 0, overshooting 0, hold 0
+expressions 0, text animators 0, precomps 0, paths 1, gradients 0
+palette (4): #ffd9a0 #f6e7d3 #f2a65a #2a1a14
+motion from 1.067s to 3.4s (end hold 0.6s, longest still 0.067s), visual activity 57% of the comp
+fonts that did not load (rendered in a fallback): none; trim keys that cannot render: none
+partially off-canvas 0s; text-on-text overlap 0s; layers never visible: none
+
+Answer with a fenced ```json block only, no other text:
+{"brief_fit": n, "style_match": n, "timing_easing": n, "composition": n, "richness": n, "polish": n,
+ "critique": ["<biggest problem>", "<most valuable fix>"]}

@@ -1,0 +1,17 @@
+- House [path] box 510,400,280,280 #000000 a0 stroke #f6e7d2 14px
+- Door glow [rect] box 610,550,80,130 #ffb15c
+- Door [rect] box 610,550,18,130 #ff9a3c
+- Wordmark [text] box 847,430,620,220 #f6e7d2 "Hearth" Inter 190px w600
+
+comp 1920x1080 5s @60fps, background #1f1410
+"House" (path l_03jm2)
+  trimStart: 0.25s 0
+  trimEnd: 0.25s 0 ─Expo Out→ 1.35s 100
+"Door glow" (rect l_03jm3)
+  opacity: 1.5s 0 ─Expo Out→ 2.2s 100
+"Door" (rect l_03jm4)
+  scale: 1.5s 100 ─Expo Out→ 2.3s [22,100] ─Expo In Out→ 2.9s [22,100] ─Expo Out→ 3.5s 100
+  opacity: 1.3s 0 ─Expo Out→ 1.6s 100
+"Wordmark" (text l_03jm5)
+  position: 2.1s [1070,540] ─Expo Out→ 3s [1160,540]
+  opacity: 2.1s 0 ─Expo Out→ 2.55s 100

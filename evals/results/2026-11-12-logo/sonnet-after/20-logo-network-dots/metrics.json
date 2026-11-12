@@ -1,0 +1,227 @@
+{
+ "run": {
+  "id": "20-logo-network-dots",
+  "name": "20-logo-network-dots",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 79,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 79,
+    "sub": {
+     "timing": 64,
+     "easing": 100,
+     "choreography": 95.8,
+     "composition": 100,
+     "readability": 100,
+     "polish": 68,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100,
+     "logo": 94.4
+    },
+    "penalties": {
+     "timing": 36,
+     "easing": 0,
+     "choreography": 4.2,
+     "composition": 0,
+     "readability": 0,
+     "polish": 32,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0,
+     "logo": 5.6000000000000005
+    },
+    "issues": [
+     "high:end-hold",
+     "medium:default-fill",
+     "medium:default-fill",
+     "low:logo-wordmark-timing",
+     "low:lead-late"
+    ],
+    "ms": 14.9
+   },
+   "after": {
+    "score": 92,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 95.8,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100,
+     "logo": 94.4
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 4.2,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0,
+     "logo": 5.6000000000000005
+    },
+    "issues": [
+     "low:logo-wordmark-timing",
+     "low:lead-late"
+    ],
+    "ms": 3.6
+   }
+  },
+  "wallMs": 33690,
+  "timedOut": false,
+  "turns": 12,
+  "costUsd": 0.5453342000000001,
+  "durationMs": 31696,
+  "usage": {
+   "input": 154450,
+   "cached": 101589,
+   "output": 2776
+  },
+  "errors": [],
+  "toolCalls": 10,
+  "toolErrors": 0,
+  "toolsAvailable": 83,
+  "finalText": "I built the Mesh logo sting as a 6 s composition at 1920×1080. I checked it on a contact sheet: the animation reads correctly and it ends on the clean lockup. I did not run the critic and I did not propose a storyboard first, since your brief already fixed the concept.\n\n- **Look:** a warm off-white background (#F7F5F0). The single accent is indigo (#5B4BFF) for the mark. The wordmark is dark ink (#1F2430), set in Inter Bold.\n- **Mark:** five dots and six thin links, all drawn from shapes. The larger hub dot (**Dot 4 hub**) is the centre of the network.\n- **Motion:** the hub pops in first, then the other four dots follow with a bouncy overshoot (0.15–1.1 s). The six links then draw themselves between the dots, one after another (0.7–1.7 s).\n- **Wordmark:** **Wordmark** slides out from the left and fades in at 1.7–2.4 s. It uses an Expo Out ease.\n- **Hold:** the lockup is still from about 2.4 s to the end of the 6 s.\n\nThe five dots and six links are separate layers, so you can retime or restyle them one by one. I can also add a small pulse through the network just before the wordmark, or make a dark-theme version.\nI fixed the three issues, and the critic now scores 92/100. The wordmark gets a slow 4% push from 2.4 s to 6 s, and I cleared the default blue fill on all six link layers, not only the two it flagged. The critic's two remaining low-priority notes say the wordmark enters too late; I left that timing as it was."
+ },
+ "metrics": {
+  "layers": 12,
+  "drawableLayers": 12,
+  "layerTypes": {
+   "path": 6,
+   "ellipse": 5,
+   "text": 1
+  },
+  "groups": 0,
+  "animatedLayers": 12,
+  "keys": 44,
+  "segments": 19,
+  "easesUsed": {
+   "Cubic Out": 6,
+   "Back Out": 5,
+   "Ease Out": 5,
+   "Expo Out": 2,
+   "Sine In Out": 1
+  },
+  "distinctEases": 5,
+  "easeFamilies": 5,
+  "overshootSegments": 5,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "pathLayers": 6,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#5b4bff",
+   "#1f2430",
+   "#f7f5f0"
+  ],
+  "keyCoverage": 0.975,
+  "visualActivity": 0.234,
+  "firstMotion": 0.133,
+  "lastMotion": 2.133,
+  "endHold": 3.867,
+  "longestHold": 0.603,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 6.097,
+  "exits": 0,
+  "beats": 3,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.019,
+  "midLuma": 0.942,
+  "toolErrors": 0,
+  "toolCalls": 10
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"Mesh\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "blank lead-in: first motion between 0.1 and 0.5 s",
+    "type": "firstMotionBetween",
+    "pass": true
+   },
+   {
+    "text": "wordmark arrives after the mark, within the build (first visible 0.8-3.2 s)",
+    "type": "textFirstVisibleBetween",
+    "pass": true
+   },
+   {
+    "text": "final lockup held still ≥ 1.2 s (≥ 3 identical end frames)",
+    "type": "lockupHoldMin",
+    "pass": true
+   },
+   {
+    "text": "sting length 4.5-7.5 s",
+    "type": "durationBetween",
+    "pass": true
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "one idea that comes from the mark itself (you can name its verb: opens, assembles, writes, becomes); not a generic pop/fade",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "wordmark enters from the mark (slides out from behind it under a mask, grows from a glyph, or is built from the same parts) and the mark makes room",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "snap and settle: hard decelerations (expo / spring), a small final move, one easing family",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "dots are separate ellipses (≥4)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 11
+ },
+ "video": null
+}

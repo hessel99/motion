@@ -57,6 +57,9 @@ export function feel(): Feel {
   const s = `${storyboards.current?.style ?? ''} ${lastStyle}`;
   return FEELS.find(f => f.match.test(s))?.feel ?? NEUTRAL;
 }
+/** the feel as the logo critic's pace (timing ranges of logo stings) */
+export function logoPace(): 'fast' | 'medium' | 'calm' { const n = feel().name; return n === 'calm' ? 'calm' : n === 'snappy' ? 'fast' : 'medium'; }
+
 /** an ease name of the feel as the tool format accepts it */
 export function easeArg(e: string): any { return e === 'Settle' ? SETTLE_CURVE : e; }
 
@@ -113,7 +116,7 @@ export interface PolishPlan { message: string; count: number; score: number; iss
 /** the follow-up for polishing round `round` (1-based), or null when the piece is good enough */
 export function polishPlan(store: Store, round: number, opts: { fontOk?: (f: string) => boolean } = {}): PolishPlan | null {
   if (round > POLISH.maxRounds) return null;
-  const c = critique(store, { max: 20, fontOk: opts.fontOk });
+  const c = critique(store, { max: 20, fontOk: opts.fontOk, pace: logoPace() });
   if (!c.stats.animated) return null;
   const high = c.issues.filter(i => i.severity === 'high');
   if (c.score >= POLISH.threshold && !high.length) return null;
@@ -133,7 +136,7 @@ export function polishPlan(store: Store, round: number, opts: { fontOk?: (f: str
 /** a short critic note for one storyboard beat (appended to update_progress "done") */
 export function beatNote(store: Store, range: [number, number]): string {
   if (!tasteOn()) return '';
-  const c = critique(store, { range, max: 3 });
+  const c = critique(store, { range, max: 3, pace: logoPace() });
   const worst = c.issues.filter(i => i.severity !== 'low').slice(0, 2);
   if (!worst.length) return '';
   return `\ncritic on this beat (${Math.round(range[0] * 100) / 100}–${Math.round(range[1] * 100) / 100}s): ${worst.map(i => `[${i.severity}] ${i.message}${i.fix[0] ? ` → ${i.fix[0].tool} ${JSON.stringify(i.fix[0].args)}` : ''}`).join(' | ')}. Fix before the next beat if it is quick.`;

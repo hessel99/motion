@@ -126,8 +126,10 @@ Only when the model leaves a value out (explicit values always win), and only wi
 
 ## 4. Gold examples
 
-13 examples in `src/agent/guides/examples/`: logo reveals with three meanings (door opens, playful drop,
-elegant draw + reveal), two UI micro-interactions (toggle, button → success), a staggered feature list in a brand
+21 examples in `src/agent/guides/examples/`: 11 logo stings (door opens, playful drop, elegant draw + reveal, and
+8 from the logo study, one per top concept family: dots converge + the wordmark out from behind a moving mark,
+monoline write-on + brush-mask wordmark, one dot splits into the mark, blocks morph into letters, giant crop
+pull-back, letters as eyes, spin-open bloom, mirrored exit loop), two UI micro-interactions (toggle, button → success), a staggered feature list in a brand
 style, a kinetic quote, kinetic type to music, a bar chart, an explainer beat (problem → solution match
 transition), a vertical social promo, a seamless loop, a lower third.
 
@@ -141,7 +143,10 @@ lists them. The system prompt tells the agent to fetch them before building a pi
 Verification: `npx vite-node scripts/gold-examples.ts` replays each one headless and prints the critic's
 score; `node scripts/gold-examples-shots.mjs --url <dev server>` replays them in the real editor (music examples
 get the generated 120 BPM track) and saves a 12-frame contact sheet each; `tests/critic.test.ts` requires every
-example to replay with only real tools, score ≥ 85 and have no high-severity issue. All 13 score 85–100 (12 ≥ 95).
+example to replay with only real tools, score ≥ 85 and have no high-severity issue; `tests/logo.test.ts` requires
+every logo example to be detected as a logo sting and score ≥ 90 with no medium/high logo issue. All 21 score 93–100.
+`node scripts/tool-sheet.mjs calls.json out.jpg --url <dev server> [--times a,b]` renders any tool-call list (a draft
+example) as a contact sheet with the critic's verdict.
 
 ### Adding a gold example (owner)
 
@@ -152,7 +157,54 @@ example to replay with only real tools, score ≥ 85 and have no high-severity i
 4. `node scripts/gold-examples-shots.mjs --url http://localhost:<port>/ --only <name>`: look at the contact sheet.
    Restart the dev server after editing an example (the guide glob is cached).
 5. Add retrieval tags people would use in a brief; add a line to the retrieval test if it's a new category.
-6. Keep 10–15 examples: replace weaker ones rather than piling up.
+6. Keep ≤ 22 examples: replace weaker ones rather than piling up.
+
+### Logo mode (from a study of 249 professional logo animations)
+
+`critique` switches to the logo rubric when the piece looks like a logo sting: one mark (shapes) plus one big,
+short wordmark (≥ 80 px, ≤ 3 words; taglines ≤ 0.65 of it; hand-set letters on one baseline count as one word)
+forming one lockup near the centre, ≤ 10 s, no card behind the word (layer / comp names with "logo", "wordmark",
+"sting" relax this). `logo: false | true` forces it; `pace: fast | medium | calm` (from the style's feel in the
+app) sets the ranges. The `logo` category (weight 1) holds:
+
+| rule | measures | the study's number |
+|---|---|---|
+| `logo-generic` (w 1.6) | ≥ 70 % of the mark's animated parts only pop (uniform centred scale) or fade; no draw-on, morph, mask reveal, pivoted turn, travel, squash, parent move | all 20 top-rated pieces have one idea from the mark |
+| `logo-lead-in` | first keyed motion on frame 0 | median first motion 0.27 s |
+| `logo-lock` | lockup complete (every lockup part within 3 % of its rest state, idle expressions ignored) later than the build budget | build 1.5–3 s, lock ~2.7 s |
+| `logo-hold` | the still lockup < 1.2 s (high < 0.6), measured before a mirrored exit when there is one; or > 3.1 s (calm 3.6) after the last real move | hold 1.5–2 s, elegant 2.5 |
+| `logo-length` | total outside 4–7.5 s (fast 3.5–6.5, calm 4.5–9) | median 6.0 s |
+| `logo-wordmark-timing` | wordmark starts > 0.6 s before the mark lands, or > 1.6 s after | 0.7 s after (IQR 0.5–1.1) |
+| `logo-wordmark-entry` | the wordmark isn't masked / clipped, built letter by letter, or travelling ≥ 110 px out of the mark: a fade (+ nudge) is medium | 11 of 123 slide out from behind the mark: the polished ones |
+| `logo-snap` | ≥ 60 % of the mark's arrivals drift in symmetrically, no spring (not for calm pieces) | snappy Expo / Quart arrivals, dead holds |
+| `logo-final-move` | every move ending at the lock is big (≥ 300 px / Δ60 %) without a settle | the final move is a 20–60 px nudge |
+| `logo-ease-family` | ≥ 3 easing families each ≥ 20 % of ≥ 6 arrivals | one family per piece |
+
+The text output adds `logo sting: lockup complete at Xs, held Ys`. Calibration: the 8 logo-study gold examples
+and the 3 older logo examples score 100 (two 94–97: no logo issue); generic fixtures (`tests/logo-fixtures.ts`:
+parts that pop in with Back Out + a faded wordmark, everything fading in, a slow zoom-in) score 60, 29 and 20.
+Over the 136 saved eval documents the critic–judge correlation stays at r = 0.52 (within-brief 0.45; the logo
+category alone 0.08: those briefs were judged without this rubric). Related fixes: animated masks count as motion
+(a draw-on mask is a reveal), and blinks / camera crops / a parent's nudge no longer trip `grow-middle`,
+`hard-stop` and `off-canvas`.
+
+Eval (4 logo briefs `19`–`22`, synthetic marks, default model `sonnet`, taste on, one run each, `--no-video`;
+`evals/results/2026-11-12-logo/`; agent + judge $3.77 in total):
+
+| run | briefs | judge overall | checklist (machine items) | critic | notes |
+|---|---|---|---|---|---|
+| before (0.6.0) | 19–22 | 5.58 (5.17, 5.33, 6.0, 5.83) | 71 % | 94 (old critic) | |
+| after: guides + examples + logo critic | 19–22 | 5.25 (5.33, 5.67, 4.67, 5.33) | 87 % | 90 (logo mode) | 0 `get_guide` calls in 3 of 4 runs |
+| + logo defaults in the storyboard result | 19, 20 | 5.25 (4.83, 5.67) | 80 % | 94 | the model skipped the storyboard: no effect |
+| + logo line in `critique` output, stricter wordmark entry | 19, 20 | 5.42 (5.33, 5.5) | 93 % | 92 | both runs loaded guides |
+
+Reading: the machine checklist (lead-in, lockup hold, length, wordmark timing) improves 71 → 87–93 %; the judge
+does not move beyond noise (single runs, ±0.5 per brief; 21 dropped because the model's hand-drawn script was
+illegible, not a timing issue). The default model mostly builds logos straight away without loading guides or
+examples, so the study's knowledge reaches it through the critic (polishing round + `critique` output) more than
+through the guides; the judge's remaining complaints are exactly the logo rules (wordmark fades in beside the mark,
+the mark never makes room, mixed eases). Next lever: a `logo_sting` macro tool (mark ids + family → the recipe's
+calls), or the polishing round handing over the matching recipe when `logo-generic` / `logo-wordmark-entry` fire.
 
 ### Adding a rule (owner)
 

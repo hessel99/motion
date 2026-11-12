@@ -1,0 +1,213 @@
+[
+ {
+  "name": "get_guide",
+  "argsBytes": 151,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 1,
+  "input": {
+   "name": "examples",
+   "brief": "Logo sting for a florist, monoline script wordmark drawn on as one stroke, leaf above the o, cream background, deep green"
+  },
+  "result": "# Example: Elegant logo reveal, the line draws the mark and the wordmark slides out from behind it\n> tags: logo, reveal, elegant, minimal, luxury, corporate, line, stroke, draw, draw-on, trim, wordmark, mask, behind, monogram, calm\n\n## Brief\n\"Logo reveal for NOVA (a circle monogram with a slash). Calm and premium, dark background, 4 s.\"\n\n## Tool calls\n```json\n[\n  {\"tool\": \"build_scene\", \"args\": {\n…"
+ },
+ {
+  "name": "get_guide",
+  "argsBytes": 19,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 0,
+  "input": {
+   "name": "concepts"
+  },
+  "result": "# Concept-driven motion\n> Read the artwork and the brand before animating: what each part depicts, the brand's personality, then a metaphor → motion recipe (door opens, leaf grows, rocket launches…). Plus anti-patterns.\n\nMotion should say what the mark *means*. A door that opens, a leaf that unfurls, a rocket that lifts off is remembered; the same shapes popping in one by one is forgettable. Pop/f…"
+ },
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1208,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 0,
+  "input": {
+   "title": "Bloom logo sting",
+   "duration": 6,
+   "style": "Calm elegant minimal (Sine In Out / Cubic Out, no overshoot except leaf settle)",
+   "styleReason": "Florist brand: calm, handwritten, organic",
+   "concepts": [
+    {
+     "name": "Signature drawn",
+     "idea": "One continuous green stroke writes 'bloom' like a signature, then a leaf grows from a short stem above the o.",
+     "why": "Hand-made, personal florist feel; the pen is the brand."
+    },
+    {
+     "name": "Bud opens",
+     "idea": "The o opens like a bud: the leaf unfurls from the o's top while the word draws.",
+     "why": "Literal bloom, but busier."
+    },
+    {
+     "name": "Soft fade-in",
+     "idea": "Wordmark fades and rises gently with the leaf sprouting.",
+     "why": "Safest, but generic."
+    }
+   ],
+   "recommended": 0,
+   "beats": [
+    {
+     "name": "Write",
+     "start": 0.4,
+     "end": 3,
+     "description": "Monoline 'bloom' draws on as one continuous stroke, left to right, slow Sine In Out.",
+     "style": "deep green #1F4D36 on cream #F7F1E3"
+    },
+    {
+     "name": "Grow",
+     "start": 2.6,
+     "end": 3.9,
+     "description": "Stem draws up above the o, leaf scales from its base with a gentle spring and tiny sway.",
+     "style": "spring Gentle"
+    },
+    {
+     "name": "Settle",
+     "start": 3.9,
+     "end": 6,
+     "description": "Finished lockup holds with a very subtle breathing and a small thin tagline fade.",
+     "style": "Sine Out"
+    }
+   ]
+  },
+  "result": "storyboard \"Bloom logo sting\" shown to the user (3 beats, 6s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1609,
+  "ok": true,
+  "ms": 153,
+  "editorMs": 7,
+  "input": {
+   "comp": {
+    "duration": 6,
+    "background": "#F7F1E3"
+   },
+   "layers": [
+    {
+     "key": "word",
+     "type": "path",
+     "d": "M 560 630 C 610 600 660 440 668 380 C 672 350 645 352 640 385 C 625 480 610 580 625 615 C 650 540 720 480 750 530 C 775 580 720 630 670 620 C 700 622 735 600 770 560 C 800 500 830 400 845 375 C 855 355 830 350 825 380 C 805 470 780 590 830 620 C 860 636 880 600 900 560 C 920 520 950 495 985 505 C 1030 520 1025 618 975 622 C 925 625 915 530 985 505 C 1010 490 1050 510 1075 510 C 1120 515 1130 620 1080 622 C 1030 625 1040 530 1075 510 C 1100 495 1130 500 1150 505 C 1148 540 1140 590 1140 620 C 1145 540 1170 500 1195 505 C 1225 510 1215 580 1215 620 C 1218 540 1240 500 1268 505 C 1298 510 1290 590 1295 620 C 1330 640 1350 590 1365 560",
+     "stroke": "#1F4D36",
+     "strokeWidth": 10,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 0.4,
+      "duration": 2.6,
+      "ease": "Sine In Out"
+     }
+    },
+    {
+     "key": "stem",
+     "type": "path",
+     "d": "M 975 472 C 975 460 975 448 975 432",
+     "stroke": "#1F4D36",
+     "strokeWidth": 7,
+     "fill": "#00000000",
+     "drawOn": {
+      "t": 3,
+      "duration": 0.4,
+      "ease": "Sine Out"
+     }
+    },
+    {
+     "key": "leaf",
+     "type": "path",
+     "d": "M 0 60 C 0 20 30 0 72 0 C 72 40 42 62 0 60 Z",
+     "x": 975,
+     "y": 372,
+     "w": 72,
+     "h": 62,
+     "anchor": "bottom-left",
+     "fill": "#1F4D36",
+     "animate": {
+      "scale": [
+       {
+        "t": 3.2,
+        "v": [
+         0,
+         0
+        ],
+        "ease": "spring Gentle"
+       },
+       {
+        "t": 4,
+        "v": [
+         100,
+         100
+        ]
+       }
+      ],
+      "rotation": [
+       {
+        "t": 3.2,
+        "v": -30,
+        "ease": "spring Gentle"
+       },
+       {
+        "t": 4,
+        "v": 0,
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 4.6,
+        "v": -3,
+        "ease": "Sine In Out"
+       },
+       {
+        "t": 5.2,
+        "v": 0
+       }
+      ]
+     }
+    },
+    {
+     "key": "tag",
+     "text": "FLORIST",
+     "fontSize": 30,
+     "fontWeight": 400,
+     "tracking": 18,
+     "x": 780,
+     "y": 730,
+     "w": 360,
+     "align": "center",
+     "fill": "#1F4D36",
+     "enter": {
+      "t": 4,
+      "duration": 0.9,
+      "from": {
+       "opacity": 0,
+       "dy": 10
+      },
+      "ease": "Sine Out"
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"4 created, 0 updated, 8 keyframe tracks; animation ends 5.2s\",\"ids\":{\"word\":\"l_03jm2\",\"stem\":\"l_03jm3\",\"leaf\":\"l_03jm4\",\"tag\":\"l_03jm5\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 46,
+  "ok": true,
+  "ms": 215,
+  "editorMs": 148,
+  "input": {
+   "times": [
+    1.2,
+    2.2,
+    3.1,
+    3.6,
+    4.4,
+    5.5
+   ],
+   "cell": 400
+  },
+  "result": "6 frames left→right, top→bottom at 1.2s, 2.2s, 3.1s, 3.6s, 4.4s, 5.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/fe82911e-d3c8-4d4e-896e-17d4ca89435f/tool-results/mcp-motion-blob-1794516817256-vs4uqf.jpg]"
+ }
+]

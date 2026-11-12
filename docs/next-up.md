@@ -40,8 +40,17 @@ then what a first-time user hits in the first 5 minutes, then pro workflow, then
 - Pre-compose part of a pasted frame (MD-08); multi-selection transform handles + anchor drag on canvas (MD-06/07); track mattes and clearer masks (MD-09); separate X/Y (MD-17); font picker with missing-font warning (MD-33)
 - AE-style shortcuts: U, [ ], Alt+[ ], I/O, split layer (MD-14); export the preview range (MD-44); alpha output (MD-45)
 
+- Logo-study gaps, top 5 (counts = how many of the 165 hand-studied professional logo animations used it; `src/agent/guides/logo-recipes.md`):
+  1. **True 3D rotation with perspective** (23): a card / coin / letter turns in depth (y-rotation with a vanishing point, back face). Today: scale-x fakes and the hinge rig's taper.
+  2. **Path deformers: bend / stretch / wave / mesh warp** (15 elastic letter deformation): letters that stretch and snap, a word that waves. Today: `morph` to a stretched copy.
+  3. **Glow / bloom / light sweep / flash** (17): additive blur pass + a moving highlight band. Today: a blurred shape with `blend: "add"`.
+  4. **Particle dissolve / coalesce** (10): the mark breaks into or forms from many particles. Today: `split_shape` + `rig assemble` on a few parts.
+  5. **Path-following heads, ribbons, variable-width brush strokes** (10): a dot riding a trim end on any path, tapered strokes. Today: a circle-only trick (rotate a group with the draw-on) and the draw-on mask (recipe 3).
+  6. Glitch slices / RGB split (9): horizontal slice offsets + channel shift as an effect (close sixth).
+
 ## Later
-- Parenting / nulls (MD-50), video layers (MD-51), more effect types (MD-11)
+- Parenting / nulls (MD-50), video layers (MD-51, also 19 of 165 logo pieces used photo / footage plates), more effect types (MD-11)
+- Logo-study gaps, the rest: look-at rig for eyes (pupils follow a point, 10), directional motion blur on fast arrivals (6; the velocity blur in "Effect pipeline"), liquid / metaball merge (5)
 - Cheaper trivial turns (AIUX-31), cost visible in turn details
 - Exact Figma noise pattern, Roboto Flex named instances, glass rim, SVG markers, radial focal points
 - Mouse-driven shader pointer in the preview player

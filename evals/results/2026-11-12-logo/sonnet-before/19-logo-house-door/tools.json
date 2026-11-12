@@ -1,0 +1,550 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 768,
+  "ok": true,
+  "ms": 38,
+  "editorMs": 1,
+  "input": {
+   "title": "Hearth logo sting",
+   "duration": 4,
+   "style": "Warm minimal, Expo Out easing",
+   "concepts": [
+    {
+     "name": "Door opens, hearth lights",
+     "idea": "House outline draws on, the door hinges open and a warm glow spills out, then the wordmark slides out from the mark.",
+     "why": "The door is the welcome: a home-rental app invites you in."
+    }
+   ],
+   "recommended": 0,
+   "beats": [
+    {
+     "name": "Draw",
+     "start": 0,
+     "end": 1.2,
+     "description": "House outline draws on in cream stroke on dark warm brown."
+    },
+    {
+     "name": "Door opens",
+     "start": 1,
+     "end": 2.2,
+     "description": "Door fills amber and hinges open with a glow behind it."
+    },
+    {
+     "name": "Wordmark",
+     "start": 1.9,
+     "end": 3,
+     "description": "'Hearth' slides out from the mark, mark shifts left to balance."
+    },
+    {
+     "name": "Resolve",
+     "start": 3,
+     "end": 4,
+     "description": "Full lockup holds."
+    }
+   ]
+  },
+  "result": "storyboard \"Hearth logo sting\" shown to the user (4 beats, 4s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1130,
+  "ok": true,
+  "ms": 103,
+  "editorMs": 6,
+  "input": {
+   "comp": {
+    "background": "#2a1a14",
+    "duration": 4,
+    "fps": 60,
+    "name": "Hearth sting"
+   },
+   "layers": [
+    {
+     "key": "mark",
+     "type": "group",
+     "x": 535,
+     "y": 440,
+     "w": 200,
+     "h": 200,
+     "animate": {
+      "position": [
+       {
+        "t": 0,
+        "v": [
+         960,
+         540
+        ]
+       },
+       {
+        "t": 1.9,
+        "v": [
+         960,
+         540
+        ],
+        "ease": "Expo In Out"
+       },
+       {
+        "t": 2.8,
+        "v": [
+         635,
+         540
+        ]
+       }
+      ]
+     },
+     "children": [
+      {
+       "key": "glow",
+       "type": "rect",
+       "x": 75,
+       "y": 110,
+       "w": 50,
+       "h": 80,
+       "fill": "#ffd9a0",
+       "animate": {
+        "opacity": [
+         {
+          "t": 0,
+          "v": 0
+         },
+         {
+          "t": 1.2,
+          "v": 0
+         },
+         {
+          "t": 1.8,
+          "v": 100,
+          "ease": "Cubic Out"
+         }
+        ]
+       }
+      },
+      {
+       "key": "house",
+       "type": "path",
+       "d": "M10 90 L100 10 L190 90 L190 190 L10 190 Z",
+       "w": 200,
+       "h": 200,
+       "stroke": "#f6e7d3",
+       "strokeWidth": 10,
+       "closed": true,
+       "drawOn": {
+        "t": 0.2,
+        "duration": 1,
+        "ease": "Expo Out"
+       }
+      },
+      {
+       "key": "door",
+       "type": "rect",
+       "x": 75,
+       "y": 110,
+       "w": 50,
+       "h": 80,
+       "fill": "#f2a65a",
+       "anchor": "left",
+       "animate": {
+        "opacity": [
+         {
+          "t": 0,
+          "v": 0
+         },
+         {
+          "t": 1.1,
+          "v": 0
+         },
+         {
+          "t": 1.3,
+          "v": 100
+         }
+        ],
+        "scale": [
+         {
+          "t": 1.3,
+          "v": [
+           100,
+           100
+          ]
+         },
+         {
+          "t": 1.9,
+          "v": [
+           18,
+           100
+          ],
+          "ease": "Expo Out"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "key": "word",
+     "type": "text",
+     "text": {
+      "content": "Hearth",
+      "fontFamily": "Inter",
+      "fontSize": 190,
+      "fontWeight": 600,
+      "align": "left"
+     },
+     "x": 785,
+     "y": 425,
+     "w": 700,
+     "h": 230,
+     "fill": "#f6e7d3",
+     "enter": {
+      "t": 2,
+      "duration": 0.8,
+      "ease": "Expo Out",
+      "from": {
+       "dx": -80,
+       "opacity": 0
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"5 created, 0 updated, 8 keyframe tracks; animation ends 2.8s\",\"ids\":{\"glow\":\"l_03jm3\",\"house\":\"l_03jm4\",\"door\":\"l_03jm5\",\"mark\":\"l_03jm2\",\"word\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 12,
+  "ok": true,
+  "ms": 144,
+  "editorMs": 128,
+  "input": {
+   "frames": 8
+  },
+  "result": "8 frames left→right, top→bottom at 0s, 0.57s, 1.15s, 1.72s, 2.28s, 2.85s, 3.43s, 4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/6f0aad42-38e3-42bd-952b-a994b9b36392/tool-results/mcp-motion-blob-1794516755935-ywzqtk.jpg]"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 141,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "key": "house",
+     "fill": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "key": "word",
+     "enter": {
+      "t": 2.3,
+      "duration": 0.8,
+      "ease": "Expo Out",
+      "from": {
+       "dx": -60,
+       "opacity": 0
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 2 updated, 2 keyframe tracks; animation ends 3.1s\",\"ids\":{\"house\":\"l_03jm4\",\"word\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 101,
+  "editorMs": 85,
+  "input": {
+   "times": [
+    0.6,
+    1.5,
+    2.3,
+    2.6,
+    3.2,
+    4
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.6s, 1.5s, 2.3s, 2.6s, 3.2s, 4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/6f0aad42-38e3-42bd-952b-a994b9b36392/tool-results/mcp-motion-blob-1794516760965-ep6yew.jpg]"
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 1085,
+  "ok": true,
+  "ms": 20,
+  "editorMs": 2,
+  "input": {
+   "layers": [
+    {
+     "key": "mark",
+     "type": "group",
+     "x": 535,
+     "y": 440,
+     "w": 200,
+     "h": 200,
+     "animate": {
+      "position": [
+       {
+        "t": 0,
+        "v": [
+         960,
+         540
+        ]
+       },
+       {
+        "t": 1.9,
+        "v": [
+         960,
+         540
+        ],
+        "ease": "Expo In Out"
+       },
+       {
+        "t": 2.8,
+        "v": [
+         635,
+         540
+        ]
+       }
+      ]
+     },
+     "children": [
+      {
+       "key": "glow",
+       "type": "rect",
+       "x": 75,
+       "y": 110,
+       "w": 50,
+       "h": 80,
+       "fill": "#ffd9a0",
+       "animate": {
+        "opacity": [
+         {
+          "t": 0,
+          "v": 0
+         },
+         {
+          "t": 1.2,
+          "v": 0
+         },
+         {
+          "t": 1.8,
+          "v": 100,
+          "ease": "Cubic Out"
+         }
+        ]
+       }
+      },
+      {
+       "key": "house",
+       "type": "path",
+       "d": "M10 90 L100 10 L190 90 L190 190 L10 190 Z",
+       "x": 0,
+       "y": 0,
+       "w": 200,
+       "h": 200,
+       "fill": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "stroke": "#f6e7d3",
+       "strokeWidth": 10,
+       "closed": true,
+       "drawOn": {
+        "t": 0.2,
+        "duration": 1,
+        "ease": "Expo Out"
+       }
+      },
+      {
+       "key": "door",
+       "type": "rect",
+       "x": 75,
+       "y": 110,
+       "w": 50,
+       "h": 80,
+       "fill": "#f2a65a",
+       "anchor": "left",
+       "animate": {
+        "opacity": [
+         {
+          "t": 0,
+          "v": 0
+         },
+         {
+          "t": 1.1,
+          "v": 0
+         },
+         {
+          "t": 1.3,
+          "v": 100
+         }
+        ],
+        "scale": [
+         {
+          "t": 1.3,
+          "v": [
+           100,
+           100
+          ]
+         },
+         {
+          "t": 1.9,
+          "v": [
+           18,
+           100
+          ],
+          "ease": "Expo Out"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "key": "word",
+     "type": "text",
+     "text": {
+      "content": "Hearth",
+      "fontFamily": "Inter",
+      "fontSize": 190,
+      "fontWeight": 600,
+      "align": "left"
+     },
+     "x": 785,
+     "y": 425,
+     "w": 700,
+     "h": 230,
+     "fill": "#f6e7d3",
+     "enter": {
+      "t": 2.3,
+      "duration": 0.8,
+      "ease": "Expo Out",
+      "from": {
+       "dx": -60,
+       "opacity": 0
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"0 created, 5 updated, 8 keyframe tracks; animation ends 3.1s\",\"ids\":{\"glow\":\"l_03jm3\",\"house\":\"l_03jm4\",\"door\":\"l_03jm5\",\"mark\":\"l_03jm2\",\"word\":\"l_03jm6\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 91,
+  "editorMs": 70,
+  "input": {
+   "times": [
+    0.6,
+    1.5,
+    2.3,
+    2.6,
+    3.2,
+    4
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.6s, 1.5s, 2.3s, 2.6s, 3.2s, 4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/6f0aad42-38e3-42bd-952b-a994b9b36392/tool-results/mcp-motion-blob-1794516766232-6e4zs6.jpg]"
+ },
+ {
+  "name": "get_layer",
+  "argsBytes": 16,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 0,
+  "input": {
+   "id": "l_03jm6"
+  },
+  "result": "{\"id\":\"l_03jm6\",\"name\":\"word\",\"type\":\"text\",\"parent\":null,\"children\":[],\"visible\":true,\"locked\":false,\"inPoint\":0,\"outPoint\":1000000000,\"props\":{\"anchor\":{\"v\":[350,115]},\"position\":{\"v\":[1135,540],\"kf\":[{\"t\":2.3,\"v\":[1075,540],\"interp\":\"bezier\",\"out\":[0.16,1],\"in\":[0.667,1]},{\"t\":3.0999999999999996,\"v\":[1135,540],\"interp\":\"bezier\",\"out\":[0.333,0],\"in\":[0.3,1]}]},\"scale\":{\"v\":[100,100]},\"rotation\":…"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 112,
+  "ok": true,
+  "ms": 33,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm6",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 2.3,
+       "v": 0
+      },
+      {
+       "t": 2.7,
+       "v": 100,
+       "ease": "Expo Out"
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 25,
+  "ok": true,
+  "ms": 80,
+  "editorMs": 59,
+  "input": {
+   "times": [
+    2.3,
+    2.6,
+    3.2,
+    4
+   ]
+  },
+  "result": "4 frames left→right, top→bottom at 2.3s, 2.6s, 3.2s, 4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/6f0aad42-38e3-42bd-952b-a994b9b36392/tool-results/mcp-motion-blob-1794516770507-8q2t2f.jpg]"
+ },
+ {
+  "name": "secondary_motion",
+  "argsBytes": 66,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 2,
+  "input": {
+   "ids": [
+    "l_03jm6",
+    "l_03jm2"
+   ],
+   "overshoot": 0.1,
+   "props": [
+    "position"
+   ]
+  },
+  "result": "added overshoot 10% to word (1 moves), mark (1 moves)"
+ },
+ {
+  "name": "set_pivot",
+  "argsBytes": 28,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "at": "left"
+  },
+  "result": "{\"id\":\"l_03jm5\",\"name\":\"door\",\"anchor\":[0,40],\"pivotInComp\":[935,590]}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 6,
+  "input": {},
+  "result": "score 90/100 (composition 81, richness 84)\n1. [medium] \"door\" grows left and right from its middle: pin it to the left edge so it grows from the baseline\n   → set_pivot {\"id\":\"l_03jm5\",\"at\":\"left\"}\n2. [medium] 3 of 4 elements move once and stop: give the hero a second beat (an accent, a settle, a transition) and overlap follow-through on the others\n   → secondary_motion {\"ids\":[\"l_03jm6\"],\"oversho…"
+ }
+]

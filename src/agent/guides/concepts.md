@@ -1,5 +1,5 @@
 # Concept-driven motion
-> Read the artwork and the brand before animating: what each part depicts, the brand's personality, then a metaphor → motion recipe (door opens, leaf grows, rocket launches…). Plus anti-patterns.
+> Read the artwork and the brand before animating: what each part depicts, the brand's personality; the 11 logo concept families ranked by a study of 249 professional logo animations; metaphor → motion recipes (door opens, leaf grows, rocket launches…); anti-patterns.
 
 Motion should say what the mark *means*. A door that opens, a leaf that unfurls, a rocket that lifts off is remembered; the same shapes popping in one by one is forgettable. Pop/fade/scale-in are secondary motion only (supporting parts, wordmark settle), never the idea.
 
@@ -10,13 +10,32 @@ Motion should say what the mark *means*. A door that opens, a leaf that unfurls,
 4. Read the brand: name (literal meanings: "Orbit", "Haven", "Sprout"), colours (warm/cool, saturated/muted, dark/light), type (geometric sans = modern/tech, serif = heritage/editorial, rounded = friendly, heavy = bold), shape language (rounded vs sharp, symmetric vs dynamic), and the brief (audience, product, tone words).
 5. Write it down in one line each: "Parts: house outline, door (rect, left hinge), window dot, wordmark 'Haven'. Brand: warm, trustworthy, home rental, rounded sans."
 
-## 2. Concepts: 2–3 ideas rooted in meaning
-- Each concept = the idea + why it fits the brand, one line. E.g. "Door opens: light spills out, the wordmark walks out of the doorway — Haven is about welcome and arriving home."
-- Make them genuinely different: a literal action of the depicted object; a transformation (one part becomes another: a dot becomes the i's tittle, a line becomes the horizon); a brand-attribute feel (precise / playful / calm) applied to the same parts.
-- Recommend one, then build it, unless the user already said what they want. In the director flow pass them as `concepts` (with `recommended`) to `propose_storyboard`; the user picks on the card.
-- Personality decides the execution of the same metaphor: a door opens with `spring Gentle` for a cosy brand, with `Expo Out` and a hard light flash for a security brand.
+## 2. Concept families for logos (what professionals do, best first)
+From a study of 249 professional logo animations (165 analysed by hand, craft rated 1–5). **All 20 top-rated pieces have ONE clear idea taken from the mark's own form or meaning; the weakest are idea-less (fades, montages, background changes).** Pick the family from the mark, then the recipe (get_guide "logo-recipes", numbers below).
 
-## 3. Metaphor → motion library (recipes)
+| # | family (pieces, avg rating) | the idea | pick it when the mark… | recipes |
+|---|---|---|---|---|
+| 1 | **Assemble / converge** (25, 4.0, the best) | dots, petals, modules come together and snap into the mark | is made of repeated parts (dots, modules, petals); community, network, platform brands | 1, 6, 14 |
+| 2 | **Literal action / personification** (27, 3.9) | the mark does what it depicts: the door opens, the eyes look, the bubble pops from its tail | depicts an object, a creature or a gesture | 9, 10, 11, §4 below |
+| 3 | **Line & stroke** (22, 3.9) | the mark is drawn: monoline write-on, handwriting, a comet trail, a dot drawing a ring | is a line, a monogram, a script or rounded wordmark | 3, 4, 5 |
+| 4 | **Transformation** (27, 3.8) | one form becomes another: a dot splits into the mark, blocks become letters, a word collapses into its monogram | has a simple base shape, a monogram, a dot / glyph that can stand in for something | 6, 7, 8, 19, 20 |
+| 5 | **Kinetic wordmark** (17, 3.8) | the letters themselves move: rise from the baseline, slice in, stretch, cycle words | is a wordmark only, or the type is the brand | 12, 15, 18, 21 |
+| 6 | **Camera & scale** (13, 3.6) | a giant crop of a detail pulls back, or the camera dives through the mark into the next beat | is bold and simple (reads from a crop); confident, editorial brands | 16, 17 |
+| 7 | **3D object** (8, 3.5) | the mark turns in depth like a coin or a card | has a thickness / object reading (needs 3D: fake with scale-x and shading for now) | 11 (hinge) |
+| 8 | **Mark as stage** (14, 3.1) | the mark stays; colours or images change behind / inside it | must stay perfectly still (secondary layer, never the only idea) | 22, 23 |
+| 9 | **Glitch / pixel** (4, 3.0) | the mark resolves out of digital noise | is pixel / tech / gaming | 18, stepped keys |
+| 10 | **Light & fade** (4, 2.5) | a glow or fade reveals it | — avoid as the idea | — |
+| 11 | **Brand film** (4, 2.0) | a montage that ends on the logo | — not a sting | — |
+
+Wordmark: after the mark settles, as its own beat (48 of 123 stings), or the wordmark IS the mark (33); the polished pieces slide it out from behind the mark under a mask while the mark moves aside (recipe 2). 50 of 123 also animate back out (a mirror of the build, recipe 25).
+
+## 3. Concepts: 2–3 ideas rooted in meaning
+- Each concept = the idea + why it fits the brand, one line, and its verb ("assembles", "opens", "writes", "becomes"); if you can't name the verb, it is not a concept. E.g. "Door opens: light spills out, the wordmark walks out of the doorway — Haven is about welcome and arriving home."
+- Take them from 2–3 DIFFERENT families above (best-rated first when the mark allows): e.g. the object's literal action, a transformation (a dot becomes the i's tittle, a line becomes the horizon), assemble / draw.
+- Recommend one, then build it, unless the user already said what they want. In the director flow pass them as `concepts` (with `recommended`) to `propose_storyboard`; the user picks on the card.
+- Personality decides the execution of the same idea (one easing family per piece, logo-recipes "Easing families"): a door opens with `spring Gentle` for a cosy brand, with `Expo Out` and a hard light flash for a security brand.
+
+## 4. Metaphor → motion library (the literal-action family)
 Pivot = `set_pivot` (or `update_layer` anchor + position so nothing moves). Rigs = `rig` presets when available. Times for a 2–3 s logo build.
 - **Door opens** (house, home, entry, welcome, access): pivot at the hinge edge. Fake 3D: animate scale x 100 → 15–25 (`Cubic In Out` 0.6 s) while a darker inner rect (the opening) shows behind it; optional light: a warm rect/ellipse behind the door, opacity 0 → 100 and scale 80 → 110 as the door opens. `rig` "hinge"/"door-open". Then something comes out (wordmark slides from the doorway 0.1 s after).
 - **Leaf grows from its stem** (eco, growth, health): stem path draws on (`trimEnd` 0 → 100, `Sine In Out` 0.6 s), leaf pivot at its base, scale 0 → 100 + rotation −25° → 0 (`spring Gentle`, starts when the stem is 70 % drawn), a tiny settle sway (rotation ±3°). `rig` "grow-from-base".
@@ -53,16 +72,20 @@ Pivot = `set_pivot` (or `update_layer` anchor + position so nothing moves). Rigs
 - **Unfold / origami / map**: panels rotate (scale x from an edge pivot) one after another. `rig` "unfold".
 - **Draw then fill** (hand-made, craft, signature): outlines draw on (stroke, fill transparent), then fill fades/wipes in. `rig` "draw-then-fill".
 
-## 4. Choreograph the concept
+## 5. Choreograph the concept
 - One hero action carries the idea (the door opening); everything else supports it and comes after (wordmark, tagline).
-- Anticipation before the hero action; follow-through after (the door swings 5° past and settles; the leaf sways).
-- 2–3 s for a logo build, then hold ≥ 1 s on the finished lockup. The final frame is the exact brand lockup, unchanged.
+- Anticipation before the hero action; follow-through after (the door swings 5° past and settles; the leaf sways). Accelerate into a transformation, snap out of it.
+- Timing (the study's medians): a 0.2–0.3 s blank lead-in; the idea done by ~2.5 s (build 1.5–3 s); the wordmark 0.5–0.7 s after the mark lands; hold the finished lockup still 1.5–2 s (≥ 3 identical frames of a 12-frame sheet); total ~5–6 s, ~4 s for social, ≤ 7.5 s elegant. Table by pace: get_guide "logo-recipes" section "Timing".
+- The final move is small (a 20–60 px nudge, a settle), then full rest. The final frame is the exact brand lockup, unchanged.
 - Keep geometry honest: parts end exactly at their original positions, rotations, scales and colours.
 
-## 5. Anti-patterns (fix these when you see them)
+## 6. Anti-patterns (fix these when you see them)
 - Generic pop / fade / scale-in applied to every part — the "PowerPoint build".
 - Everything at once, or every part with the same ease and duration.
 - Motion that contradicts the meaning: a door that scales from its center instead of swinging on its hinge; a leaf that drops from the sky; a rocket that fades in; a lock that bounces playfully for a bank.
 - Animating the artwork without looking at it; animating "Path 1..12" without knowing what they are.
 - Breaking the mark: parts left rotated/offset at the end, colours changed, the wordmark retyped in another font.
 - Overloading: more than one metaphor fighting for attention in a 3 s logo.
+- An idea taken from the background (colour washes, a montage) instead of the mark; light / fade reveals (the lowest-rated families).
+- The wordmark faded in on top of the finished mark, or arriving together with the mark instead of as its own beat.
+- A build that drags past ~3.5 s, a hold under 1.2 s, or a static hold over 3 s.

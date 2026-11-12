@@ -1,0 +1,392 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 2067,
+  "ok": true,
+  "ms": 100,
+  "editorMs": 10,
+  "input": {
+   "comp": {
+    "background": "#F7F5F0",
+    "duration": 6,
+    "fps": 60
+   },
+   "layers": [
+    {
+     "key": "l1",
+     "name": "Line A-B",
+     "d": "M625 460 L785 430",
+     "stroke": "#5B5BF0",
+     "strokeWidth": 5,
+     "drawOn": {
+      "t": 1,
+      "duration": 0.5,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "l2",
+     "name": "Line A-C",
+     "d": "M625 460 L725 540",
+     "stroke": "#5B5BF0",
+     "strokeWidth": 5,
+     "drawOn": {
+      "t": 1.1,
+      "duration": 0.5,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "l3",
+     "name": "Line B-C",
+     "d": "M785 430 L725 540",
+     "stroke": "#5B5BF0",
+     "strokeWidth": 5,
+     "drawOn": {
+      "t": 1.2,
+      "duration": 0.5,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "l4",
+     "name": "Line C-D",
+     "d": "M725 540 L825 620",
+     "stroke": "#5B5BF0",
+     "strokeWidth": 5,
+     "drawOn": {
+      "t": 1.3,
+      "duration": 0.5,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "l5",
+     "name": "Line C-E",
+     "d": "M725 540 L645 640",
+     "stroke": "#5B5BF0",
+     "strokeWidth": 5,
+     "drawOn": {
+      "t": 1.4,
+      "duration": 0.5,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "l6",
+     "name": "Line A-E",
+     "d": "M625 460 L645 640",
+     "stroke": "#5B5BF0",
+     "strokeWidth": 5,
+     "drawOn": {
+      "t": 1.5,
+      "duration": 0.5,
+      "ease": "Cubic Out"
+     }
+    },
+    {
+     "key": "dC",
+     "name": "Dot C",
+     "type": "ellipse",
+     "x": 697,
+     "y": 512,
+     "w": 56,
+     "h": 56,
+     "fill": "#5B5BF0",
+     "enter": {
+      "t": 0.25,
+      "duration": 0.6,
+      "ease": "Back Out",
+      "from": {
+       "scale": 0,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "dA",
+     "name": "Dot A",
+     "type": "ellipse",
+     "x": 603,
+     "y": 438,
+     "w": 44,
+     "h": 44,
+     "fill": "#5B5BF0",
+     "enter": {
+      "t": 0.4,
+      "duration": 0.6,
+      "ease": "Back Out",
+      "from": {
+       "scale": 0,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "dB",
+     "name": "Dot B",
+     "type": "ellipse",
+     "x": 763,
+     "y": 408,
+     "w": 44,
+     "h": 44,
+     "fill": "#5B5BF0",
+     "enter": {
+      "t": 0.52,
+      "duration": 0.6,
+      "ease": "Back Out",
+      "from": {
+       "scale": 0,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "dD",
+     "name": "Dot D",
+     "type": "ellipse",
+     "x": 803,
+     "y": 598,
+     "w": 44,
+     "h": 44,
+     "fill": "#5B5BF0",
+     "enter": {
+      "t": 0.64,
+      "duration": 0.6,
+      "ease": "Back Out",
+      "from": {
+       "scale": 0,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "dE",
+     "name": "Dot E",
+     "type": "ellipse",
+     "x": 623,
+     "y": 618,
+     "w": 44,
+     "h": 44,
+     "fill": "#5B5BF0",
+     "enter": {
+      "t": 0.76,
+      "duration": 0.6,
+      "ease": "Back Out",
+      "from": {
+       "scale": 0,
+       "opacity": 0
+      }
+     }
+    },
+    {
+     "key": "word",
+     "name": "Wordmark",
+     "type": "text",
+     "text": {
+      "content": "Mesh",
+      "fontFamily": "Inter",
+      "fontSize": 220,
+      "fontWeight": 700,
+      "align": "left"
+     },
+     "x": 935,
+     "y": 410,
+     "w": 560,
+     "h": 260,
+     "fill": "#1E1B3A",
+     "enter": {
+      "t": 1.9,
+      "duration": 0.8,
+      "ease": "Expo Out",
+      "from": {
+       "opacity": 0,
+       "dx": -70
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"12 created, 0 updated, 24 keyframe tracks; animation ends 2.7s\",\"ids\":{\"l1\":\"l_03jm2\",\"l2\":\"l_03jm3\",\"l3\":\"l_03jm4\",\"l4\":\"l_03jm5\",\"l5\":\"l_03jm6\",\"l6\":\"l_03jm7\",\"dC\":\"l_03jm8\",\"dA\":\"l_03jm9\",\"dB\":\"l_03jma\",\"dD\":\"l_03jmb\",\"dE\":\"l_03jmc\",\"word\":\"l_03jmd\"}}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 22,
+  "input": {},
+  "result": "score 65/100 (timing 64, choreography 96, polish 38, logo 75)\nlogo sting: lockup complete at 2.08s, held 3.92s (aim: idea done by ~2.5 s, hold 1.5-2 s; recipes: get_guide \"logo-recipes\")\n1. [high] nothing moves for the last 3.3 s (motion ends 2.7s of 6s): keep the brief's length and carry the hold with a slow push / idle motion, or extend the build\n   → animate {\"tracks\":[{\"id\":\"l_03jmd\",\"prop\":\"s…"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 15,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm2",
+   "props": {
+    "fill": "#00000000"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm3",
+   "props": {
+    "fill": "#00000000"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 28,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm4",
+   "props": {
+    "fill": "#00000000"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "props": {
+    "fill": "#00000000"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm6",
+   "props": {
+    "fill": "#00000000"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm7",
+   "props": {
+    "fill": "#00000000"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 34,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jmd"
+   ],
+   "offset": -0.35
+  },
+  "result": "retimed 1 layers; animation now ends at 2.35s"
+ },
+ {
+  "name": "set_composition",
+  "argsBytes": 14,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "duration": 5
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 31,
+  "ok": true,
+  "ms": 169,
+  "editorMs": 140,
+  "input": {
+   "times": [
+    0.5,
+    1,
+    1.5,
+    2,
+    2.5,
+    4.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 1s, 1.5s, 2s, 2.5s, 4.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/5fe402cd-d8e6-4cb6-9ccf-0a971ee6beba/tool-results/mcp-motion-blob-1794518898038-qoyzh8.jpg]"
+ },
+ {
+  "name": "retime",
+  "argsBytes": 52,
+  "ok": true,
+  "ms": 25,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm9",
+    "l_03jmb"
+   ],
+   "scale": 1.25,
+   "pivot": 0
+  },
+  "result": "retimed 2 layers; animation now ends at 1.55s"
+ },
+ {
+  "name": "rig",
+  "argsBytes": 93,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 4,
+  "input": {
+   "kind": "reveal-from",
+   "ids": [
+    "l_03jmd"
+   ],
+   "t0": 1.3,
+   "duration": 0.7,
+   "options": {
+    "from": "l_03jm8"
+   }
+  },
+  "result": "{\"kind\":\"reveal-from\",\"t0\":1.3,\"end\":2.35,\"layers\":[{\"id\":\"l_03jmd\",\"name\":\"Wordmark\",\"keys\":{\"position\":3,\"opacity\":2}},{\"id\":\"l_03jm8\",\"name\":\"Dot C\",\"keys\":{\"position\":3}}],\"created\":[{\"id\":\"l_03jme\",\"name\":\"Reveal\",\"role\":\"group: mask + revealed layers\"},{\"id\":\"l_03jmf\",\"name\":\"Reveal mask\",\"role\":\"mask (edge at the from layer)\"}]}"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 9,
+  "input": {},
+  "result": "score 94/100 (choreography 96, logo 97)\nlogo sting: lockup complete at 2.25s, held 2.75s (aim: idea done by ~2.5 s, hold 1.5-2 s; recipes: get_guide \"logo-recipes\")\n1. [low] the hero \"Wordmark\" enters at 1.3s, after 5 smaller elements: the lead should move first (or at least early)\n   → retime {\"ids\":[\"l_03jmd\"],\"offset\":-1.05}\n2. [low] the lockup ends on a big move (\"Wordmark\".position): finish w…"
+ }
+]

@@ -111,9 +111,9 @@ describe('motion critic', () => {
 });
 
 describe('gold examples', () => {
-  it(`ship ${EXAMPLES.length} examples (10-15) that replay cleanly and score high`, async () => {
+  it(`ship ${EXAMPLES.length} examples (10-22) that replay cleanly and score high`, async () => {
     expect(EXAMPLES.length).toBeGreaterThanOrEqual(10);
-    expect(EXAMPLES.length).toBeLessThanOrEqual(15);
+    expect(EXAMPLES.length).toBeLessThanOrEqual(22);
     for (const g of EXAMPLES) {
       expect(g.summary, g.name).toMatch(/^tags: /);
       expect(g.text, g.name).toMatch(/## Brief[\s\S]*## Tool calls[\s\S]*## Why it works/);

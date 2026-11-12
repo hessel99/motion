@@ -26,7 +26,7 @@ for (const g of EXAMPLES.filter(e => !only || e.name.includes(only))) {
   try {
     await replayExample(g, run);
     const c = critique(editor.store, { max: 12 });
-    console.log(`${g.name.padEnd(40)} ${c.score}`);
+    console.log(`${g.name.padEnd(40)} ${c.score}${c.stats.logo ? '  (logo mode)' : ''}`);
     if (verbose || c.score < 85) console.log(formatCritique(c, { max: 12 }).split('\n').map(l => '   ' + l).join('\n'));
   } catch (e: any) { console.log(`${g.name.padEnd(40)} FAILED ${e.message}`); }
 }

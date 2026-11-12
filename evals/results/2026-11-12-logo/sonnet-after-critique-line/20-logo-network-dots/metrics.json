@@ -1,0 +1,231 @@
+{
+ "run": {
+  "id": "20-logo-network-dots",
+  "name": "20-logo-network-dots",
+  "model": "sonnet",
+  "seed": 1,
+  "taste": true,
+  "polish": [
+   {
+    "round": 1,
+    "scoreBefore": 82,
+    "fixes": 3,
+    "timedOut": false
+   }
+  ],
+  "critic": {
+   "before": {
+    "score": 82,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 95.8,
+     "composition": 100,
+     "readability": 100,
+     "polish": 70,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100,
+     "logo": 87.2
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 4.2,
+     "composition": 0,
+     "readability": 0,
+     "polish": 30,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0,
+     "logo": 12.8
+    },
+    "issues": [
+     "high:copy-paste",
+     "medium:logo-wordmark-entry",
+     "low:lead-late"
+    ],
+    "ms": 11.7
+   },
+   "after": {
+    "score": 94,
+    "sub": {
+     "timing": 100,
+     "easing": 100,
+     "choreography": 95.8,
+     "composition": 100,
+     "readability": 100,
+     "polish": 100,
+     "richness": 100,
+     "technical": 100,
+     "brand": 100,
+     "music": 100,
+     "logo": 97.2
+    },
+    "penalties": {
+     "timing": 0,
+     "easing": 0,
+     "choreography": 4.2,
+     "composition": 0,
+     "readability": 0,
+     "polish": 0,
+     "richness": 0,
+     "technical": 0,
+     "brand": 0,
+     "music": 0,
+     "logo": 2.8000000000000003
+    },
+    "issues": [
+     "low:lead-late",
+     "low:logo-final-move"
+    ],
+    "ms": 4.8
+   }
+  },
+  "wallMs": 34591,
+  "timedOut": false,
+  "turns": 16,
+  "costUsd": 0.20243850000000002,
+  "durationMs": 32869,
+  "usage": {
+   "input": 211002,
+   "cached": 204968,
+   "output": 3292
+  },
+  "errors": [],
+  "toolCalls": 14,
+  "toolErrors": 0,
+  "toolsAvailable": 83,
+  "finalText": "Fix the fills, bring the wordmark in sooner, and shorten the comp.\nI built the \"Mesh\" logo sting: a 5 s, 60 fps comp on a warm off-white background, with one indigo accent (#5B5BF0) and a dark navy wordmark. I checked it on a contact sheet at six times. I didn't re-run the critique after the fixes.\n\n- **Mark:** five dots, **Dot A–E**, pop in one after another with a Back Out overshoot, starting with the larger centre hub **Dot C**. Six thin lines, **Line A-B** through **Line A-E**, then draw themselves on between them, so the network forms.\n- **Wordmark:** **Wordmark** is \"Mesh\" in Inter Bold. It slides in from the left and fades up with Expo Out, about 0.5 s after the mark completes.\n- **Ending:** the finished lockup is centred and holds still from about 2.4 s to the end.\n\nThe wordmark slides in beside the mark. It doesn't reveal from behind it, which is what the critique suggested. The five dots also share the same entrance animation, and I didn't vary them.\n\nI can make the wordmark emerge from behind the mark, vary the dot motion, or change the accent colour.\nI varied the dot timing and made the wordmark emerge from behind **Dot C**; the critic now scores 94/100, with only two low-priority notes left."
+ },
+ "metrics": {
+  "layers": 14,
+  "drawableLayers": 13,
+  "layerTypes": {
+   "path": 6,
+   "ellipse": 5,
+   "text": 1,
+   "group": 1,
+   "rect": 1
+  },
+  "groups": 1,
+  "animatedLayers": 12,
+  "keys": 46,
+  "segments": 21,
+  "easesUsed": {
+   "Cubic Out": 6,
+   "Quad Out": 1,
+   "Spring 0.4": 1,
+   "Back Out": 5,
+   "Ease Out": 5,
+   "Expo Out": 2,
+   "Custom(0.33,0,0.3,1)": 1
+  },
+  "distinctEases": 7,
+  "easeFamilies": 7,
+  "overshootSegments": 6,
+  "keyedOvershoots": 0,
+  "springSegments": 1,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "pathLayers": 6,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#5b5bf0",
+   "#1e1b3a",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.42,
+  "visualActivity": 0.402,
+  "firstMotion": 0.2,
+  "lastMotion": 2.333,
+  "endHold": 2.667,
+  "longestHold": 0.134,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 5.092,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [
+   "Reveal mask"
+  ],
+  "loopDiff": 0.021,
+  "midLuma": 0.939,
+  "toolErrors": 0,
+  "toolCalls": 14
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "wordmark \"Mesh\" present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "mark built from shapes (≥2 non-text layers)",
+    "type": "nonTextLayersMin",
+    "pass": true
+   },
+   {
+    "text": "blank lead-in: first motion between 0.1 and 0.5 s",
+    "type": "firstMotionBetween",
+    "pass": true
+   },
+   {
+    "text": "wordmark arrives after the mark, within the build (first visible 0.8-3.2 s)",
+    "type": "textFirstVisibleBetween",
+    "pass": true
+   },
+   {
+    "text": "final lockup held still ≥ 1.2 s (≥ 3 identical end frames)",
+    "type": "lockupHoldMin",
+    "pass": true
+   },
+   {
+    "text": "sting length 4.5-7.5 s",
+    "type": "durationBetween",
+    "pass": true
+   },
+   {
+    "text": "palette of ≤4 colors",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "one idea that comes from the mark itself (you can name its verb: opens, assembles, writes, becomes); not a generic pop/fade",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "wordmark enters from the mark (slides out from behind it under a mask, grows from a glyph, or is built from the same parts) and the mark makes room",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "snap and settle: hard decelerations (expo / spring), a small final move, one easing family",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "dots are separate ellipses (≥4)",
+    "type": "layersOfTypeMin",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 11
+ },
+ "video": null
+}

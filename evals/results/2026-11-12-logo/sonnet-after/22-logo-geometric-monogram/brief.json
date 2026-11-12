@@ -1,0 +1,89 @@
+{
+  "id": "22-logo-geometric-monogram",
+  "title": "Logo sting: geometric monogram",
+  "complexity": "medium",
+  "style": [
+    "brand",
+    "precise"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 60,
+    "duration": 6
+  },
+  "prompt": "Logo sting for \"Kobalt Studio\", an architecture studio. The mark is a geometric monogram \"K\" built from three simple shapes (a vertical bar and two diagonal bars or triangles); the wordmark \"KOBALT\" with a smaller \"STUDIO\" under it. Precise and confident, dark blue background, white plus one accent. End on the lockup.",
+  "checklist": [
+    {
+      "text": "wordmark \"KOBALT\" present",
+      "check": {
+        "type": "textContains",
+        "text": "KOBALT"
+      }
+    },
+    {
+      "text": "mark built from shapes (≥2 non-text layers)",
+      "check": {
+        "type": "nonTextLayersMin",
+        "min": 2
+      }
+    },
+    {
+      "text": "blank lead-in: first motion between 0.1 and 0.5 s",
+      "check": {
+        "type": "firstMotionBetween",
+        "min": 0.1,
+        "max": 0.5
+      }
+    },
+    {
+      "text": "wordmark arrives after the mark, within the build (first visible 0.8-3.2 s)",
+      "check": {
+        "type": "textFirstVisibleBetween",
+        "min": 0.8,
+        "max": 3.2
+      }
+    },
+    {
+      "text": "final lockup held still ≥ 1.2 s (≥ 3 identical end frames)",
+      "check": {
+        "type": "lockupHoldMin",
+        "seconds": 1.2
+      }
+    },
+    {
+      "text": "sting length 4.5-7.5 s",
+      "check": {
+        "type": "durationBetween",
+        "min": 4.5,
+        "max": 7.5
+      }
+    },
+    {
+      "text": "palette of ≤4 colors",
+      "check": {
+        "type": "paletteMax",
+        "max": 4
+      }
+    },
+    {
+      "text": "one idea that comes from the mark itself (you can name its verb: opens, assembles, writes, becomes); not a generic pop/fade",
+      "check": null
+    },
+    {
+      "text": "wordmark enters from the mark (slides out from behind it under a mask, grows from a glyph, or is built from the same parts) and the mark makes room",
+      "check": null
+    },
+    {
+      "text": "snap and settle: hard decelerations (expo / spring), a small final move, one easing family",
+      "check": null
+    },
+    {
+      "text": "STUDIO line present",
+      "check": {
+        "type": "textContains",
+        "text": "STUDIO"
+      }
+    }
+  ]
+}

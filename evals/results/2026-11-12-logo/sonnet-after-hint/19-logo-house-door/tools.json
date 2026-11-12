@@ -1,0 +1,121 @@
+[
+ {
+  "name": "build_scene",
+  "argsBytes": 776,
+  "ok": true,
+  "ms": 165,
+  "editorMs": 6,
+  "input": {
+   "comp": {
+    "background": "#1d1411",
+    "duration": 5,
+    "width": 1920,
+    "height": 1080,
+    "fps": 60
+   },
+   "layers": [
+    {
+     "key": "house",
+     "name": "House outline",
+     "d": "M575 530 L670 452 L765 530 L765 625 L575 625 Z",
+     "stroke": "#ff9a3c",
+     "strokeWidth": 14,
+     "fill": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "drawOn": {
+      "t": 0.3,
+      "duration": 1,
+      "ease": "Cubic Out",
+      "from": "start"
+     }
+    },
+    {
+     "key": "door",
+     "name": "Door",
+     "type": "rect",
+     "x": 642,
+     "y": 548,
+     "w": 56,
+     "h": 70,
+     "radius": [
+      28,
+      28,
+      0,
+      0
+     ],
+     "fill": "#ff9a3c",
+     "enter": {
+      "t": 1.2,
+      "duration": 0.6,
+      "ease": "Back Out",
+      "from": {
+       "opacity": 0,
+       "scale": [
+        60,
+        60
+       ]
+      }
+     }
+    },
+    {
+     "key": "word",
+     "name": "Wordmark",
+     "type": "text",
+     "text": {
+      "content": "Hearth",
+      "fontFamily": "Inter",
+      "fontSize": 150,
+      "fontWeight": 700,
+      "align": "left"
+     },
+     "x": 835,
+     "y": 455,
+     "w": 560,
+     "h": 170,
+     "fill": "#f6e6d4",
+     "enter": {
+      "t": 1.7,
+      "duration": 0.8,
+      "ease": "Expo Out",
+      "from": {
+       "opacity": 0,
+       "dx": -70
+      }
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"3 created, 0 updated, 6 keyframe tracks; animation ends 2.5s\",\"ids\":{\"house\":\"l_03jm2\",\"door\":\"l_03jm3\",\"word\":\"l_03jm4\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 29,
+  "ok": true,
+  "ms": 143,
+  "editorMs": 107,
+  "input": {
+   "times": [
+    0.5,
+    1,
+    1.5,
+    2,
+    2.6,
+    4
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.5s, 1s, 1.5s, 2s, 2.6s, 4s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/03042c83-9706-438e-9955-4d077fa22c57/tool-results/mcp-motion-blob-1794518447419-5x221x.jpg]"
+ },
+ {
+  "name": "critique",
+  "argsBytes": 2,
+  "ok": true,
+  "ms": 86,
+  "editorMs": 56,
+  "input": {},
+  "result": "score 94/100 (richness 84)\n1. [medium] 3 elements and 3 moves for 5s: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch\n   → secondary_motion {\"ids\":[\"l_03jm4\"],\"overshoot\":0.1,\"segments\":\"all\"}"
+ }
+]

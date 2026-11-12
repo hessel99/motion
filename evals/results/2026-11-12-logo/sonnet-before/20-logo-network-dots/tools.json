@@ -1,0 +1,382 @@
+[
+ {
+  "name": "propose_storyboard",
+  "argsBytes": 1527,
+  "ok": true,
+  "ms": 25,
+  "editorMs": 1,
+  "input": {
+   "title": "Mesh logo sting",
+   "duration": 6,
+   "style": "Friendly modern minimal",
+   "styleReason": "Light background, one accent colour, soft springs and clean geometry suit a community platform.",
+   "concepts": [
+    {
+     "name": "Network connects",
+     "idea": "Dots pop in one by one, and each line draws itself between them as the network links up.",
+     "why": "The mark is a network; connection is the brand's action."
+    },
+    {
+     "name": "Community gathers",
+     "idea": "Dots drift in from the edges and settle into the mesh, lines snapping taut on arrival.",
+     "why": "Suggests people coming together."
+    },
+    {
+     "name": "Pulse through the mesh",
+     "idea": "Dots appear, then a pulse of light travels along the lines from node to node.",
+     "why": "Shows the network is alive."
+    }
+   ],
+   "recommended": 0,
+   "beats": [
+    {
+     "name": "Dots appear",
+     "start": 0,
+     "end": 1.2,
+     "description": "Five coral dots spring in on a light background, staggered, with a slight overshoot.",
+     "style": "spring Bouncy, stagger 0.1s"
+    },
+    {
+     "name": "Lines connect",
+     "start": 1,
+     "end": 2.4,
+     "description": "Thin lines draw on between the dots; nodes give a small pulse as each line reaches them.",
+     "style": "Cubic Out draw-on, stagger 0.1s"
+    },
+    {
+     "name": "Wordmark",
+     "start": 2.2,
+     "end": 3.4,
+     "description": "The mark shifts left; 'Mesh' slides out from beside it with a soft fade.",
+     "style": "Expo Out, 0.7s"
+    },
+    {
+     "name": "Lockup hold",
+     "start": 3.4,
+     "end": 6,
+     "description": "Clean lockup holds still, with one gentle node pulse as polish.",
+     "style": "Resolve on the exact lockup"
+    }
+   ],
+   "notes": "Palette: background #F7F5F0, ink #1F2430, accent coral #FF5A4E. Font: Inter, semibold."
+  },
+  "result": "storyboard \"Mesh logo sting\" shown to the user (4 beats, 6s). Auto-approved: build it now, beat by beat (update_progress {beat:1, status:\"active\"} … {status:\"done\"})."
+ },
+ {
+  "name": "build_scene",
+  "argsBytes": 2463,
+  "ok": true,
+  "ms": 98,
+  "editorMs": 6,
+  "input": {
+   "comp": {
+    "background": "#F7F5F0",
+    "duration": 6,
+    "fps": 60,
+    "name": "Mesh sting"
+   },
+   "layers": [
+    {
+     "key": "mark",
+     "type": "group",
+     "name": "Mark",
+     "animate": {
+      "position": [
+       {
+        "t": 0,
+        "v": [
+         1255,
+         540
+        ]
+       },
+       {
+        "t": 2.2,
+        "v": [
+         1255,
+         540
+        ]
+       },
+       {
+        "t": 3,
+        "v": [
+         960,
+         540
+        ],
+        "ease": "Expo Out"
+       }
+      ]
+     },
+     "children": [
+      {
+       "key": "l1",
+       "name": "Line A-B",
+       "points": "550,450 710,420",
+       "stroke": "#1F2430",
+       "strokeWidth": 4,
+       "drawOn": {
+        "t": 1,
+        "duration": 0.5,
+        "ease": "Cubic Out"
+       }
+      },
+      {
+       "key": "l2",
+       "name": "Line B-C",
+       "points": "710,420 780,560",
+       "stroke": "#1F2430",
+       "strokeWidth": 4,
+       "drawOn": {
+        "t": 1.15,
+        "duration": 0.5,
+        "ease": "Cubic Out"
+       }
+      },
+      {
+       "key": "l3",
+       "name": "Line C-D",
+       "points": "780,560 640,650",
+       "stroke": "#1F2430",
+       "strokeWidth": 4,
+       "drawOn": {
+        "t": 1.3,
+        "duration": 0.5,
+        "ease": "Cubic Out"
+       }
+      },
+      {
+       "key": "l4",
+       "name": "Line D-E",
+       "points": "640,650 580,570",
+       "stroke": "#1F2430",
+       "strokeWidth": 4,
+       "drawOn": {
+        "t": 1.45,
+        "duration": 0.5,
+        "ease": "Cubic Out"
+       }
+      },
+      {
+       "key": "l5",
+       "name": "Line E-A",
+       "points": "580,570 550,450",
+       "stroke": "#1F2430",
+       "strokeWidth": 4,
+       "drawOn": {
+        "t": 1.6,
+        "duration": 0.5,
+        "ease": "Cubic Out"
+       }
+      },
+      {
+       "key": "l6",
+       "name": "Line B-E",
+       "points": "710,420 580,570",
+       "stroke": "#1F2430",
+       "strokeWidth": 4,
+       "drawOn": {
+        "t": 1.75,
+        "duration": 0.5,
+        "ease": "Cubic Out"
+       }
+      },
+      {
+       "key": "l7",
+       "name": "Line B-D",
+       "points": "710,420 640,650",
+       "stroke": "#1F2430",
+       "strokeWidth": 4,
+       "drawOn": {
+        "t": 1.9,
+        "duration": 0.5,
+        "ease": "Cubic Out"
+       }
+      },
+      {
+       "key": "dA",
+       "name": "Dot A",
+       "type": "ellipse",
+       "x": 526,
+       "y": 426,
+       "w": 48,
+       "h": 48,
+       "fill": "#FF5A4E",
+       "animate": {
+        "scale": [
+         {
+          "t": 0,
+          "v": 0
+         },
+         {
+          "t": 0.7,
+          "v": 100,
+          "ease": "spring Bouncy"
+         }
+        ]
+       }
+      },
+      {
+       "key": "dB",
+       "name": "Dot B",
+       "type": "ellipse",
+       "x": 680,
+       "y": 390,
+       "w": 60,
+       "h": 60,
+       "fill": "#FF5A4E",
+       "animate": {
+        "scale": [
+         {
+          "t": 0.1,
+          "v": 0
+         },
+         {
+          "t": 0.8,
+          "v": 100,
+          "ease": "spring Bouncy"
+         }
+        ]
+       }
+      },
+      {
+       "key": "dC",
+       "name": "Dot C",
+       "type": "ellipse",
+       "x": 756,
+       "y": 536,
+       "w": 48,
+       "h": 48,
+       "fill": "#FF5A4E",
+       "animate": {
+        "scale": [
+         {
+          "t": 0.2,
+          "v": 0
+         },
+         {
+          "t": 0.9,
+          "v": 100,
+          "ease": "spring Bouncy"
+         }
+        ]
+       }
+      },
+      {
+       "key": "dD",
+       "name": "Dot D",
+       "type": "ellipse",
+       "x": 616,
+       "y": 626,
+       "w": 48,
+       "h": 48,
+       "fill": "#FF5A4E",
+       "animate": {
+        "scale": [
+         {
+          "t": 0.3,
+          "v": 0
+         },
+         {
+          "t": 1,
+          "v": 100,
+          "ease": "spring Bouncy"
+         }
+        ]
+       }
+      },
+      {
+       "key": "dE",
+       "name": "Dot E",
+       "type": "ellipse",
+       "x": 562,
+       "y": 552,
+       "w": 36,
+       "h": 36,
+       "fill": "#FF5A4E",
+       "animate": {
+        "scale": [
+         {
+          "t": 0.4,
+          "v": 0
+         },
+         {
+          "t": 1.1,
+          "v": 100,
+          "ease": "spring Bouncy"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "key": "word",
+     "name": "Wordmark",
+     "text": {
+      "content": "Mesh",
+      "fontFamily": "Inter",
+      "fontSize": 200,
+      "fontWeight": 600
+     },
+     "fill": "#1F2430",
+     "x": 900,
+     "y": 410,
+     "w": 560,
+     "h": 240,
+     "animate": {
+      "opacity": [
+       {
+        "t": 0,
+        "v": 0
+       },
+       {
+        "t": 2.5,
+        "v": 0
+       },
+       {
+        "t": 3.1,
+        "v": 100,
+        "ease": "Cubic Out"
+       }
+      ],
+      "position": [
+       {
+        "t": 2.5,
+        "v": [
+         1140,
+         530
+        ]
+       },
+       {
+        "t": 3.4,
+        "v": [
+         1180,
+         530
+        ],
+        "ease": "Expo Out"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "result": "{\"summary\":\"14 created, 0 updated, 22 keyframe tracks; animation ends 3.4s\",\"ids\":{\"l1\":\"l_03jm3\",\"l2\":\"l_03jm4\",\"l3\":\"l_03jm5\",\"l4\":\"l_03jm6\",\"l5\":\"l_03jm7\",\"l6\":\"l_03jm8\",\"l7\":\"l_03jm9\",\"dA\":\"l_03jma\",\"dB\":\"l_03jmb\",\"dC\":\"l_03jmc\",\"dD\":\"l_03jmd\",\"dE\":\"l_03jme\",\"mark\":\"l_03jm2\",\"word\":\"l_03jmf\"}}"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 33,
+  "ok": true,
+  "ms": 164,
+  "editorMs": 139,
+  "input": {
+   "times": [
+    0.6,
+    1.5,
+    2.4,
+    3,
+    3.6,
+    5.5
+   ]
+  },
+  "result": "6 frames left→right, top→bottom at 0.6s, 1.5s, 2.4s, 3s, 3.6s, 5.5s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/d201a7fc-1580-44a1-b0b2-36d15d58ec84/tool-results/mcp-motion-blob-1794516764311-dlykoz.jpg]"
+ }
+]
