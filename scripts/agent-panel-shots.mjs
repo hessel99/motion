@@ -33,6 +33,8 @@ await page.locator('aside.left').screenshot({ path: `${out}/21b-agent-storyboard
 await page.click('.ag-sb .ag-btn.primary');
 await idle();
 await page.evaluate(() => editor.store.select([]));
+await page.waitForTimeout(800);
+await page.evaluate(() => document.querySelector('.agent-list')?.scrollTo({ top: 1e9 }));
 await shot('23-agent-finished-review');
 // a running turn (the fake waits on "slow"): status line, stop button; the panel collapsed shows the pill in the timeline header
 await send('slow: tighten the timing of the reveal');

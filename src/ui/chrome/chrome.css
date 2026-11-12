@@ -432,3 +432,7 @@
 
 .left-panel .ag-btn.primary { background: var(--primary-bg); border-color: transparent; color: var(--primary-text); border-radius: var(--radius-pill); padding: 4px 12px; }
 .left-panel .ag-btn { border-radius: var(--radius-pill); }
+.left-panel .ag-review-actions { flex-wrap: nowrap; align-items: center; gap: 4px; }
+.left-panel .ag-icon-only { width: 28px; height: 28px; padding: 0; display: inline-grid; place-items: center; }
+.agent-list > * { flex-shrink: 0; }
+.left-panel .ag-result { height: auto; min-height: 0; }

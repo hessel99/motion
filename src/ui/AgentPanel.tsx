@@ -380,11 +380,11 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
               if (m.role === 'review') return (
                 <>
                   <TurnReview review={m.review!} busy={!!turn} onState={(st, note) => setReview(i, st, note)}>
-                    {toolsOf(i).length > 0 && <ToolGroup items={toolsOf(i)} running={false} layerName={layerName} />}
+                    {toolsOf(i).length > 0 && <ToolGroup items={toolsOf(i)} running={false} shots={false} layerName={layerName} />}
                   </TurnReview>
                   {/* below the card: arriving late, it must not shift the card's buttons */}
                   {m.preview === 'pending' && <div class="ag-result pending" style={{ aspectRatio: previewAspect() }} />}
-                  {m.preview && m.preview !== 'pending' && <button type="button" class="ag-result" title="Replay the result" onClick={() => { const r = m.review!.range; s.setTime(Math.max(0, (r?.[0] ?? 0) - 0.1)); editor.play(); }}><img src={m.preview} alt="Result: frames over time" data-testid="result-preview" /></button>}
+                  {m.preview && m.preview !== 'pending' && <button type="button" class="ag-result" title="Replay the result" onClick={() => { const r = m.review!.range; s.setTime(Math.max(0, (r?.[0] ?? 0) - 0.1)); editor.play(); }}><img src={m.preview} alt="Result: frames over time" data-testid="result-preview" onLoad={() => { if (stick.current) list.current?.scrollTo({ top: 1e9 }); }} /></button>}
                 </>
               );
               if (m.role === 'error') return (
@@ -507,7 +507,7 @@ function lastToolIndex(msgs: Msg[]) { for (let i = msgs.length - 1; i >= 0; i--)
 
 /** a run of tool steps as one quiet row ("Worked through 12 steps"; while running: the current
  *  step) that expands into the steps; what the agent looked at stays visible */
-function ToolGroup(props: { items: Msg[]; running: boolean; layerName: (id: string) => string | undefined }) {
+function ToolGroup(props: { items: Msg[]; running: boolean; shots?: boolean; layerName: (id: string) => string | undefined }) {
   const { items, running } = props;
   const errors = items.filter(m => m.tool?.isError).length;
   const steps = items.map(m => {
@@ -542,7 +542,7 @@ function ToolGroup(props: { items: Msg[]; running: boolean; layerName: (id: stri
         </summary>
         {steps}
       </details>
-      {images.length > 0 && <div class="ag-shots">{images.slice(-2).map(src => <img src={src} alt="What the agent looked at" title="What the agent looked at" />)}</div>}
+      {props.shots !== false && images.length > 0 && <div class="ag-shots">{images.slice(-2).map(src => <img src={src} alt="What the agent looked at" title="What the agent looked at" />)}</div>}
     </div>
   );
 }
