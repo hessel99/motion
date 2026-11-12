@@ -787,9 +787,14 @@ export function fontMetrics(l: Layer): { asc: number; desc: number } {
   const key = fontString(l, { fontSize: 1000 });
   let m = metricsCache.get(key);
   if (!m) {
+    // the measuring context is shared: callers (layoutText) keep measuring with their own font
+    // afterwards, so it is restored (it used to stay at 1000 px: the first layout of a font after a
+    // load wrapped every word onto its own line, found by the export parity harness)
     const c = mctx();
+    const prev = c.font;
     c.font = key;
     const mt = c.measureText('Hg') as TextMetrics & { fontBoundingBoxAscent?: number; fontBoundingBoxDescent?: number };
+    c.font = prev;
     const fs = 1000;
     m = mt.fontBoundingBoxAscent ? { asc: mt.fontBoundingBoxAscent / fs, desc: (mt.fontBoundingBoxDescent ?? 0) / fs } : { asc: 0.9, desc: 0.25 };
     if (metricsCache.size > 256) metricsCache.clear();
