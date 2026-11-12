@@ -82,9 +82,9 @@ export function newProject() {
 
 export function loadDemo() { editor.load(demoProject()); currentPath = null; }
 
-export function loadStress(count: number, kinds?: any[], nested = false) {
+export function loadStress(count: number, kinds?: any[], nested = false, animated?: number) {
   const t0 = performance.now();
-  editor.load(stressProject({ count, kinds, nested }));
+  editor.load(stressProject({ count, kinds, nested, animated }));
   currentPath = null;
   toast(`${count} animated layers generated in ${Math.round(performance.now() - t0)}ms`);
 }

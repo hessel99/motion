@@ -17,9 +17,9 @@ if (q.has('styleguide')) {
 function startEditor() {
   render(<App />, document.getElementById('app')!);
 
-  // startup: url params for testing (?stress=5000, ?demo, ?hud), else restore autosave, else demo
+  // startup: url params for testing (?stress=5000[&animated=0.1], ?demo, ?hud), else restore autosave, else demo
   requestAnimationFrame(async () => {
-    if (q.has('stress')) loadStress(+(q.get('stress') || 1000), q.get('kinds')?.split(',') as any, q.has('nested'));
+    if (q.has('stress')) loadStress(+(q.get('stress') || 1000), q.get('kinds')?.split(',') as any, q.has('nested'), q.has('animated') ? +q.get('animated')! : undefined);
     else if (q.has('demo') || (!q.has('blank') && !(await restoreAutosaveNative()) && !restoreAutosave())) loadDemo();
     if (q.has('hud')) { editor.showHud = true; editor.emit('hud'); }
     if (q.has('play')) editor.play();

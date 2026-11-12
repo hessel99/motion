@@ -179,12 +179,9 @@ interface Item {
   parent: number;
   clip: number; // index of nearest clipping ancestor
   kind: number;
-  tracks: Track[]; // indexed by TR_* constants
   animated: boolean;
-  /** bitmask of animated tracks (bit = TR_* index) */
+  /** bitmask of animated tracks (bit = TR_* index); pool handles live in Renderer.sH */
   animMask: number;
-  /** track pool handles for animated tracks (indexed by TR_*) */
-  h: Int32Array;
   /** has children: opacity < 1 needs group isolation */
   isoGroup: boolean;
   /** time offset (precomp start times): local time = comp time - tOff */
@@ -215,6 +212,7 @@ const TR_KEYS: PropKey[] = ['anchor', 'position', 'scale', 'rotation', 'opacity'
 const TR_ANCHOR = 0, TR_POS = 1, TR_SCALE = 2, TR_ROT = 3, TR_OPA = 4, TR_SIZE = 5, TR_RAD = 6, TR_FILL = 7, TR_STROKE = 8, TR_SW = 9;
 const ST = 15; // style floats per item: size2 radius4 fill4 stroke4 sw1
 
+const ZERO4 = [0, 0, 0, 0];
 const defaultTracks = new Map<PropKey, Track>();
 function defaultTrack(k: PropKey) {
   let t = defaultTracks.get(k);
@@ -248,6 +246,8 @@ export interface RenderStats {
   atlasPages: number;
   drawCalls: number;
   culled: number;
+  /** instance bytes uploaded this frame */
+  uploadBytes: number;
 }
 
 export class Renderer {
@@ -301,8 +301,14 @@ export class Renderer {
   private needsCompile = true;
   private dirtyLayers = new Set<string>();
   dirty = true;
-  stats: RenderStats = { instances: 0, layers: 0, evalMs: 0, writeMs: 0, rasterMs: 0, gpuSubmitMs: 0, frameMs: 0, atlasEntries: 0, atlasPages: 0, drawCalls: 0, culled: 0 };
+  stats: RenderStats = { instances: 0, layers: 0, evalMs: 0, writeMs: 0, rasterMs: 0, gpuSubmitMs: 0, frameMs: 0, atlasEntries: 0, atlasPages: 0, drawCalls: 0, culled: 0, uploadBytes: 0 };
   private rasterBudgetMs = 6;
+  private ranges: number[] = [];
+  /** item index of each instance written last frame (effects: per-layer velocity, lookups) */
+  instItem = new Int32Array(0);
+  /** skip unchanged instances during playback (off = rewrite + upload everything, for a/b tests) */
+  incremental = true;
+  private lastCull = true;
   private pendingUpgrade = false;
   lastTime = -1;
 
@@ -448,11 +454,28 @@ export class Renderer {
       this.style = new Float64Array(cap * ST);
       this.xf = new Float64Array(cap * 8);
       this.drawnMask = new Uint8Array(cap);
+      this.sPar = new Int32Array(cap);
+      this.sTOff = new Float64Array(cap);
+      this.sIn = new Float64Array(cap);
+      this.sOut = new Float64Array(cap);
+      this.sEnd = new Float64Array(cap);
+      this.sFlags = new Uint8Array(cap);
+      this.sMask = new Int32Array(cap);
+      this.sExpr = new Int32Array(cap);
+      this.sH = new Int32Array(cap * 10);
+      this.chg = new Uint8Array(cap);
+      this.vis = new Uint8Array(cap);
+      this.lastK = new Int32Array(cap);
+      this.sKind = new Uint8Array(cap);
+      this.sBits = new Uint8Array(cap);
+      this.sBlend = new Uint8Array(cap);
+      this.sAlign = new Int8Array(cap);
+      this.sClip = new Int32Array(cap);
     }
     for (let i = 0; i < n; i++) {
       const { layer, parent, tOff, owner, tEnd } = entries[i];
       const it: Item = {
-        id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10), isoGroup: layer.children.length > 0 || layer.type === 'precomp',
+        id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, animated: false, animMask: 0, isoGroup: layer.children.length > 0 || layer.type === 'precomp',
         hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden) || (!!soloKeep && entries[i].local && !soloKeep.has(layer.id)),
         rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
         tOff, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null,
@@ -463,6 +486,7 @@ export class Renderer {
         it.clip = p.layer.clip || p.layer.type === 'precomp' ? parent : p.clip;
       }
       this.items[i] = it;
+      this.sPar[i] = parent; this.sTOff[i] = tOff; this.sEnd[i] = tEnd; this.sClip[i] = it.clip;
       this.compileItem(i);
     }
     this.needsCompile = false;
@@ -485,12 +509,12 @@ export class Renderer {
     const it = this.items[i];
     const l = it.layer;
     let mask = 0;
+    // animated props go into the track pool; static ones are written once below (no Track
+    // objects: at 10k layers building 100k of them dominated load time and garbage)
     for (let k = 0; k < TR_KEYS.length; k++) {
       const key = TR_KEYS[k];
       const p = l.props[key];
-      const tr = p ? new Track(p, PROP_DEFS[key].dim, key === 'position') : defaultTrack(key);
-      it.tracks[k] = tr;
-      if (tr.animated) { mask |= 1 << k; it.h[k] = this.pool.add(p!, PROP_DEFS[key].dim, key === 'position'); }
+      if (p?.kf && p.kf.length > 1) { mask |= 1 << k; this.sH[i * 10 + k] = this.pool.add(p, PROP_DEFS[key].dim, key === 'position'); }
     }
     // expressions: evaluated every frame on top of the keyframed/static value
     let emask = 0;
@@ -501,7 +525,7 @@ export class Renderer {
       const c = compileExpr(p.expr);
       if (!c.node) continue;
       if (!it.exprs) it.exprs = new Array(TR_KEYS.length).fill(null);
-      it.exprs[k] = { node: c.node, track: it.tracks[k], keyTimes: (p.kf ?? []).map(f => f.t) };
+      it.exprs[k] = { node: c.node, track: p ? new Track(p, PROP_DEFS[TR_KEYS[k]].dim, k === TR_POS) : defaultTrack(TR_KEYS[k]), keyTimes: (p.kf ?? []).map(f => f.t) };
       emask |= 1 << k;
     }
     it.exprMask = emask;
@@ -535,6 +559,10 @@ export class Renderer {
       };
       it.animated = true; // re-render every frame while it changes
     }
+    // struct-of-arrays mirror of what the per-frame loops read (no object pointer chasing)
+    this.sIn[i] = l.inPoint; this.sOut[i] = l.outPoint;
+    this.sMask[i] = mask & ~emask; this.sExpr[i] = emask;
+    this.sFlags[i] = (it.animated ? 1 : 0) | (it.hidden ? 2 : 0);
     this.evalItem(i, 0, true);
     this.unitCount -= it.units?.length ?? 0;
     it.units = null;
@@ -564,6 +592,10 @@ export class Renderer {
       it.units = units.map((u, j) => ({ unit: u, delay: order[j] * ta.stagger, ease, entry: null, raster: null, scale: 0 }));
       this.unitCount += n;
     }
+    this.sKind[i] = it.kind;
+    this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0);
+    this.sBlend[i] = l.blend ? BLEND_IDS[l.blend] ?? 0 : 0;
+    this.sAlign[i] = l.strokeAlign === 'inside' ? -1 : l.strokeAlign === 'outside' ? 1 : 0;
   }
 
   private rasterBase(l: Layer, complex: boolean): string | null {
@@ -590,42 +622,51 @@ export class Renderer {
   /** evaluate local transform + style of item i at time t (static items only once).
    *  cached transform components let us skip static tracks entirely. */
   private evalItem(i: number, t: number, force = false) {
-    const it = this.items[i];
     const X = this.xf, o8 = i * 8, os = i * ST, S = this.style;
     if (force) {
-      // compile time: evaluate everything once with the track objects (static values)
-      const tr = it.tracks;
-      tr[TR_ANCHOR].eval(t, X, o8);
-      tr[TR_POS].eval(t, X, o8 + 2);
-      tr[TR_SCALE].eval(t, X, o8 + 4);
-      X[o8 + 6] = tr[TR_ROT].eval1(t) * (Math.PI / 180);
-      this.lopa[i] = Math.min(1, Math.max(0, tr[TR_OPA].eval1(t) / 100));
-      tr[TR_SIZE].eval(t, S, os);
-      tr[TR_RAD].eval(t, S, os + 2);
-      tr[TR_FILL].eval(t, S, os + 6);
-      tr[TR_STROKE].eval(t, S, os + 10);
-      tr[TR_SW].eval(t, S, os + 14);
+      // compile time: every prop once (animated ones from the pool, static ones from the model)
+      const l = this.items[i].layer;
+      const val = (k: number, out: Float64Array, off: number) => {
+        const key = TR_KEYS[k], dim = PROP_DEFS[key].dim, p = l.props[key];
+        if (p?.kf && p.kf.length > 1) { this.pool.eval(this.sH[i * 10 + k], t, out, off); return; }
+        // same values a static Track would produce: a single key wins over v, missing -> default
+        const v = p ? (p.kf && p.kf.length === 1 ? p.kf[0].v : p.v) : key === 'fill' ? ZERO4 : (PROP_DEFS[key].default as unknown as number[]);
+        for (let d = 0; d < dim; d++) out[off + d] = v[d] ?? 0;
+      };
+      const tmp = this.scratch;
+      val(TR_ANCHOR, X, o8);
+      val(TR_POS, X, o8 + 2);
+      val(TR_SCALE, X, o8 + 4);
+      val(TR_ROT, tmp, 0); X[o8 + 6] = tmp[0] * (Math.PI / 180);
+      val(TR_OPA, tmp, 0); this.lopa[i] = Math.min(1, Math.max(0, tmp[0] / 100));
+      val(TR_SIZE, S, os);
+      val(TR_RAD, S, os + 2);
+      val(TR_FILL, S, os + 6);
+      val(TR_STROKE, S, os + 10);
+      val(TR_SW, S, os + 14);
       this.composeLocal(i);
       return;
     }
-    const m = it.animMask & ~it.exprMask;
-    if (it.exprMask) this.evalExprs(i, t);
-    if (!m) { if (it.exprMask & 0x0f) this.composeLocal(i); return; }
-    const h = it.h, P = this.pool;
+    const m = this.sMask[i], em = this.sExpr[i];
+    if (em) this.evalExprs(i, t);
+    if (!m) { if (em & 0x0f) this.composeLocal(i); return; }
+    const H = this.sH, h = i * 10, P = this.pool;
     if (m & 0x0f) {
-      if (m & (1 << TR_ANCHOR)) P.eval(h[TR_ANCHOR], t, X, o8);
-      if (m & (1 << TR_POS)) P.eval(h[TR_POS], t, X, o8 + 2);
-      if (m & (1 << TR_SCALE)) P.eval(h[TR_SCALE], t, X, o8 + 4);
-      if (m & (1 << TR_ROT)) { P.eval(h[TR_ROT], t, X, o8 + 6); X[o8 + 6] *= Math.PI / 180; }
+      if (m & (1 << TR_ANCHOR)) P.eval(H[h + TR_ANCHOR], t, X, o8);
+      if (m & (1 << TR_POS)) P.eval(H[h + TR_POS], t, X, o8 + 2);
+      if (m & (1 << TR_SCALE)) P.eval(H[h + TR_SCALE], t, X, o8 + 4);
+      if (m & (1 << TR_ROT)) { P.eval(H[h + TR_ROT], t, X, o8 + 6); X[o8 + 6] *= Math.PI / 180; }
     }
     // transform changed by keyframes and/or expressions
-    if ((m | it.exprMask) & 0x0f) this.composeLocal(i);
-    if (m & (1 << TR_OPA)) { P.eval(h[TR_OPA], t, X, o8 + 7); this.lopa[i] = Math.min(1, Math.max(0, X[o8 + 7] / 100)); }
-    if (m & (1 << TR_SIZE)) P.eval(h[TR_SIZE], t, S, os);
-    if (m & (1 << TR_RAD)) P.eval(h[TR_RAD], t, S, os + 2);
-    if (m & (1 << TR_FILL)) P.eval(h[TR_FILL], t, S, os + 6);
-    if (m & (1 << TR_STROKE)) P.eval(h[TR_STROKE], t, S, os + 10);
-    if (m & (1 << TR_SW)) P.eval(h[TR_SW], t, S, os + 14);
+    if ((m | em) & 0x0f) this.composeLocal(i);
+    if (m & (1 << TR_OPA)) { P.eval(H[h + TR_OPA], t, X, o8 + 7); const v = X[o8 + 7] / 100; this.lopa[i] = v < 0 ? 0 : v > 1 ? 1 : v; }
+    if (m & 0x3e0) {
+      if (m & (1 << TR_SIZE)) P.eval(H[h + TR_SIZE], t, S, os);
+      if (m & (1 << TR_RAD)) P.eval(H[h + TR_RAD], t, S, os + 2);
+      if (m & (1 << TR_FILL)) P.eval(H[h + TR_FILL], t, S, os + 6);
+      if (m & (1 << TR_STROKE)) P.eval(H[h + TR_STROKE], t, S, os + 10);
+      if (m & (1 << TR_SW)) P.eval(H[h + TR_SW], t, S, os + 14);
+    }
   }
 
   private exprCtx: ExprContext = { time: 0, value: 0, index: 0, fps: 30, duration: 1, inPoint: 0, valueAt: () => 0, keyTimes: [], seed: 0 };
@@ -691,18 +732,50 @@ export class Renderer {
   private subEnd = new Int32Array(0);
 
   /** compute world matrices and opacities for all items at time t */
-  evaluate(t: number) { this.evaluateRange(t, 0, this.items.length); }
+  evaluate(t: number, all = true) { this.evaluateRange(t, 0, this.items.length, all); }
 
-  private evaluateRange(t: number, from: number, to: number) {
-    const items = this.items, W = this.world, L = this.local, O = this.opa, LO = this.lopa;
+  // struct-of-arrays copies of the item fields the per-frame loops need
+  private sPar = new Int32Array(0);
+  private sTOff = new Float64Array(0);
+  private sIn = new Float64Array(0);
+  private sOut = new Float64Array(0);
+  private sEnd = new Float64Array(0);
+  /** bit 0 animated, bit 1 hidden */
+  private sFlags = new Uint8Array(0);
+  private sMask = new Int32Array(0);
+  private sExpr = new Int32Array(0);
+  private sH = new Int32Array(0);
+  /** world matrix / opacity / visibility of item i changed in the last evaluation */
+  private chg = new Uint8Array(0);
+  private vis = new Uint8Array(0);
+  /** instance slot item i was written to last frame (-1 = not drawn) */
+  private lastK = new Int32Array(0);
+  // what the instance writer needs per item without touching the item / layer objects
+  // (at 25k layers those pointer chases were most of the write time: cache misses)
+  private sKind = new Uint8Array(0);
+  /** bit 0 layer is a mask, 1 isolation group, 2 per-unit text, 3 per-frame path raster */
+  private sBits = new Uint8Array(0);
+  private sBlend = new Uint8Array(0);
+  private sAlign = new Int8Array(0);
+  private sClip = new Int32Array(0);
+
+  /** evaluates [from, to). items that are static, keep their visibility and whose parent did not
+   *  change keep last frame's world matrix (all = recompute everything, e.g. after edits). */
+  private evaluateRange(t: number, from: number, to: number, all: boolean) {
+    const W = this.world, L = this.local, O = this.opa, LO = this.lopa;
+    const PAR = this.sPar, TOFF = this.sTOff, IN = this.sIn, OUT = this.sOut, END = this.sEnd, FL = this.sFlags, CHG = this.chg, VIS = this.vis;
     for (let i = from; i < to; i++) {
-      const it = items[i];
-      const tl = t - it.tOff;
-      if (it.animated) this.evalItem(i, tl);
+      const tl = t - TOFF[i];
+      const fl = FL[i];
+      let c = all;
+      if (fl & 1) { this.evalItem(i, tl); c = true; }
+      const vis = (fl & 2) || tl < IN[i] || tl >= OUT[i] || t >= END[i] ? 0 : 1;
+      if (vis !== VIS[i]) { VIS[i] = vis; c = true; }
+      const p = PAR[i];
+      if (p >= 0 && CHG[p]) c = true;
+      if (!c) { CHG[i] = 0; continue; }
+      CHG[i] = 1;
       const o = i * 6;
-      const p = it.parent;
-      const l = it.layer;
-      const vis = it.hidden || tl < l.inPoint || tl >= l.outPoint || t >= it.tEnd ? 0 : 1;
       if (p < 0) {
         W[o] = L[o]; W[o + 1] = L[o + 1]; W[o + 2] = L[o + 2]; W[o + 3] = L[o + 3]; W[o + 4] = L[o + 4]; W[o + 5] = L[o + 5];
         O[i] = LO[i] * vis;
@@ -882,11 +955,26 @@ export class Renderer {
     this.dirty = true;
   }
 
+  /** render into this framebuffer instead of the canvas (effects, offscreen comps). the caller
+   *  sets the view so the comp maps into it. null = canvas */
+  target: { fb: WebGLFramebuffer; w: number; h: number } | null = null;
+  setTarget(t: { fb: WebGLFramebuffer; w: number; h: number } | null) {
+    if (t === this.target || (t && this.target && t.fb === this.target.fb && t.w === this.target.w && t.h === this.target.h)) return;
+    this.target = t;
+    this.dirty = true;
+  }
+  private targetW() { return this.target ? this.target.w : this.canvas.width; }
+  private targetH() { return this.target ? this.target.h : this.canvas.height; }
+
   get hasAnimation() { return this.items.some(i => i.animated); }
 
   render(t: number, retry = false) {
     if (this.contextLost) return;
     const f0 = performance.now();
+    // anything but the time moving (edits, view, rasters arriving, context restore) sets dirty:
+    // then every instance is rewritten. during plain playback only changed items are.
+    let full = !this.incremental || this.dirty || retry || this.syncRaster || this.cullOffscreen !== this.lastCull || this.needsCompile || this.dirtyLayers.size > 0;
+    this.lastCull = this.cullOffscreen;
     const compactions0 = this.atlas.compactions + this.atlas.generation;
     const store = this.store;
     if (this.needsCompile) this.compile();
@@ -906,9 +994,9 @@ export class Renderer {
     const e0 = performance.now();
     // same time + only a few layers edited (dragging while paused): re-evaluate just their subtrees
     if (t === this.evalTime && !this.evalAll && this.dirtyIdx.length && this.dirtyIdx.length < 64) {
-      for (const i of this.dirtyIdx) this.evaluateRange(t, i, this.subEnd[i]);
+      for (const i of this.dirtyIdx) this.evaluateRange(t, i, this.subEnd[i], true);
     } else if (t !== this.evalTime || this.evalAll || this.dirtyIdx.length) {
-      this.evaluate(t);
+      this.evaluate(t, this.evalAll || this.dirtyIdx.length > 0);
     }
     this.evalTime = t;
     this.evalAll = false;
@@ -917,7 +1005,17 @@ export class Renderer {
 
     const items = this.items, n = items.length;
     const need = (n + 1 + this.unitCount) * F;
-    if (this.inst.length < need) this.inst = new Float32Array(Math.max(need, this.inst.length * 2));
+    if (this.inst.length < need) { this.inst = new Float32Array(Math.max(need, this.inst.length * 2)); full = true; }
+    if (this.icap < this.inst.byteLength) full = true; // gpu buffer gets reallocated below
+    const CHG = this.chg, lastK = this.lastK;
+    if (this.instItem.length < this.inst.length / F) this.instItem = new Int32Array(this.inst.length / F);
+    const IIT = this.instItem;
+    const KIND = this.sKind, BITS = this.sBits, BLEND = this.sBlend, ALIGN = this.sAlign, CLIP = this.sClip;
+    const frame = this.atlas.frame;
+    // instance ranges written this frame (uploaded with bufferSubData per range)
+    const ranges = this.ranges;
+    ranges.length = 0;
+    let rs = 0, re = 0;
     const I = this.inst, W = this.world, S = this.style, O = this.opa;
     const comp = store.comp;
     const z = this.zoom * this.dpr;
@@ -929,7 +1027,7 @@ export class Renderer {
     let k = 0;
     let culled = 0;
     const cullOn = this.cullOffscreen;
-    const px0 = this.panX * this.dpr, py0 = this.panY * this.dpr, cw0 = this.canvas.width, ch0 = this.canvas.height;
+    const px0 = this.panX * this.dpr, py0 = this.panY * this.dpr, cw0 = this.targetW(), ch0 = this.targetH();
     const mask = this.drawnMask;
     const cmds = this.cmds;
     cmds.length = 0;
@@ -954,18 +1052,18 @@ export class Renderer {
       }
       const top = stack[stack.length - 1];
       if (i === n) break;
-      const it = items[i];
       mask[i] = 0;
-      const l = it.layer;
-      if (O[i] <= 0.0005) continue;
-      if (l.mask && !(top && top.maskEnd > i)) {
+      if (O[i] <= 0.0005) { lastK[i] = -1; continue; }
+      const bits = BITS[i], kind = KIND[i];
+      if ((bits & 1) && !(top && top.maskEnd > i)) {
         // masks the following siblings: region = rest of the parent's subtree
         flush();
         cmds.push(CMD_PUSH, 0, 0);
-        const end = it.parent >= 0 ? this.subEnd[it.parent] : n;
+        const par = this.sPar[i];
+        const end = par >= 0 ? this.subEnd[par] : n;
         stack.push({ end, opacity: 1, div, maskStart: k, maskCount: 0, maskEnd: this.subEnd[i] });
         isolated++;
-      } else if (it.isoGroup && this.lopa[i] < 0.999 && this.subEnd[i] > i + 1 && !stack.some(r => r.maskEnd > i)) {
+      } else if ((bits & 2) && this.lopa[i] < 0.999 && this.subEnd[i] > i + 1 && !stack.some(r => r.maskEnd > i)) {
         // group opacity: render the group into its own layer, then composite once with its opacity
         flush();
         cmds.push(CMD_PUSH, 0, 0);
@@ -973,19 +1071,37 @@ export class Renderer {
         div = O[i];
         isolated++;
       }
-      if (it.kind === KIND_NONE) continue;
+      if (kind === KIND_NONE) continue;
       // blend mode changes split the draw (only when used)
-      const bm = l.blend ? BLEND_IDS[l.blend] ?? 0 : 0;
+      const bm = BLEND[i];
       if (bm !== curBlend) { flush(); cmds.push(CMD_BLEND, bm, 0); curBlend = bm; }
-      if (it.units) {
+      if (bits & 4) {
         const r0 = performance.now();
+        const k0 = k;
         k = this.writeUnits(i, k, t, div !== 1 ? O[i] / div : O[i], budgetEnd);
         rasterMs += performance.now() - r0;
         mask[i] = 1;
+        lastK[i] = -1;
+        for (let u = k0; u < k; u++) IIT[u] = i;
+        if (k > k0) { if (k0 !== re) { if (re > rs) ranges.push(rs, re); rs = k0; } re = k; }
         continue;
       }
+      // unchanged since last frame and still in the same slot: the instance data in the cpu
+      // array and in the gpu buffer is still valid. skip the write and the upload.
+      if (!full && !CHG[i] && !(bits & 8)) {
+        const lk = lastK[i];
+        if (lk < 0) continue;
+        if (lk === k) {
+          if (kind >= KIND_MASK) { const en = items[i].entry; if (en) en.lastUsed = frame; } // keep its raster alive in the atlas lru
+          mask[i] = 1;
+          IIT[k] = i;
+          k++;
+          continue;
+        }
+      }
+      lastK[i] = -1;
       const os = i * ST, o6 = i * 6;
-      if (it.kind === KIND_RECT || it.kind === KIND_ELLIPSE) {
+      if (kind === KIND_RECT || kind === KIND_ELLIPSE) {
         if (S[os + 9] <= 0 && (S[os + 14] <= 0 || S[os + 13] <= 0)) continue;
       }
       let a = W[o6], b = W[o6 + 1], c = W[o6 + 2], d = W[o6 + 3], e = W[o6 + 4], f = W[o6 + 5];
@@ -993,19 +1109,16 @@ export class Renderer {
       let u0 = 0, v0 = 0, u1 = 0, v1 = 0, page = 0;
       // viewport culling: skip layers whose (padded) box is completely off-screen.
       // saves rasterization + atlas space for raster layers and fill work for everything.
-      if (cullOn && !l.mask) {
+      if (cullOn && !(bits & 1)) {
         const pad = Math.max(w, h) * 0.25 + (S[os + 14] || 0) + 4 / z;
-        const x0 = -pad, y0 = -pad, x1 = w + pad, y1 = h + pad;
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        for (let q = 0; q < 4; q++) {
-          const lx = q & 1 ? x1 : x0, ly = q & 2 ? y1 : y0;
-          const sx = (a * lx + c * ly + e) * z + px0, sy = (b * lx + d * ly + f) * z + py0;
-          if (sx < minX) minX = sx; if (sx > maxX) maxX = sx;
-          if (sy < minY) minY = sy; if (sy > maxY) maxY = sy;
-        }
-        if (maxX < 0 || maxY < 0 || minX > cw0 || minY > ch0) { culled++; continue; }
+        // screen aabb of the padded box: center +- the absolute extents (same as its 4 corners)
+        const hx = w / 2 + pad, hy = h / 2 + pad, mx = w / 2, my = h / 2;
+        const cx = (a * mx + c * my + e) * z + px0, cy = (b * mx + d * my + f) * z + py0;
+        const ex = (Math.abs(a) * hx + Math.abs(c) * hy) * z, ey = (Math.abs(b) * hx + Math.abs(d) * hy) * z;
+        if (cx + ex < 0 || cy + ey < 0 || cx - ex > cw0 || cy - ey > ch0) { culled++; continue; }
       }
-      if (it.dyn) {
+      if (bits & 8 && items[i].dyn) {
+        const it = items[i] as Item & { dyn: NonNullable<Item['dyn']> };
         const fr = Math.round((t - it.tOff) * this.store.comp.fps);
         if (it.dyn.stale) { it.dyn.stale = false; it.entry = null; }
         if (fr !== it.dyn.frame) {
@@ -1016,7 +1129,8 @@ export class Renderer {
           it.entry = null;
         }
       }
-      if (it.kind >= KIND_MASK) {
+      if (kind >= KIND_MASK) {
+        const it = items[i], l = it.layer;
         // raster space -> local box: paths scale geometry space by size/geomSize
         let gx = 1, gy = 1;
         if (l.type === 'path' && l.geomSize) {
@@ -1048,19 +1162,24 @@ export class Renderer {
       I[o] = a; I[o + 1] = b; I[o + 2] = c; I[o + 3] = d;
       I[o + 4] = e; I[o + 5] = f; I[o + 6] = w; I[o + 7] = h;
       I[o + 8] = S[os + 2]; I[o + 9] = S[os + 3]; I[o + 10] = S[os + 4]; I[o + 11] = S[os + 5];
-      if (it.kind === KIND_RGBA) { I[o + 12] = 1; I[o + 13] = 1; I[o + 14] = 1; I[o + 15] = 1; }
+      if (kind === KIND_RGBA) { I[o + 12] = 1; I[o + 13] = 1; I[o + 14] = 1; I[o + 15] = 1; }
       else { I[o + 12] = S[os + 6]; I[o + 13] = S[os + 7]; I[o + 14] = S[os + 8]; I[o + 15] = S[os + 9]; }
       I[o + 16] = S[os + 10]; I[o + 17] = S[os + 11]; I[o + 18] = S[os + 12]; I[o + 19] = S[os + 13];
-      I[o + 20] = it.kind === KIND_MASK ? 0 : S[os + 14];
-      I[o + 21] = l.strokeAlign === 'inside' ? -1 : l.strokeAlign === 'outside' ? 1 : 0;
+      I[o + 20] = kind === KIND_MASK ? 0 : S[os + 14];
+      I[o + 21] = ALIGN[i];
       I[o + 22] = div !== 1 ? O[i] / div : O[i];
-      I[o + 23] = it.kind;
+      I[o + 23] = kind;
       I[o + 24] = u0; I[o + 25] = v0; I[o + 26] = u1; I[o + 27] = v1;
       I[o + 28] = page;
-      this.writeClip(I, o, it.clip);
+      this.writeClip(I, o, CLIP[i]);
       mask[i] = 1;
+      lastK[i] = k;
+      IIT[k] = i;
+      if (k !== re) { if (re > rs) ranges.push(rs, re); rs = k; }
+      re = k + 1;
       k++;
     }
+    if (re > rs) ranges.push(rs, re);
     flush();
     this.isolatedLastFrame = isolated;
     const w1 = performance.now();
@@ -1070,7 +1189,8 @@ export class Renderer {
     // ---- gpu ----
     const gl = this.gl;
     this.atlas.flush(); // all raster uploads of this frame: at most one call per atlas page
-    const cw = this.canvas.width, ch = this.canvas.height;
+    const cw = this.targetW(), ch = this.targetH();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.target?.fb ?? null);
     gl.viewport(0, 0, cw, ch);
     gl.disable(gl.SCISSOR_TEST);
     gl.clearColor(this.editorBg[0], this.editorBg[1], this.editorBg[2], 1);
@@ -1095,12 +1215,26 @@ export class Renderer {
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.ibuf);
-    const bytes = k * F * 4;
     if (this.icap < this.inst.byteLength) {
       gl.bufferData(gl.ARRAY_BUFFER, this.inst.byteLength, gl.DYNAMIC_DRAW);
       this.icap = this.inst.byteLength;
     }
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.inst, 0, k * F);
+    let bytes = 0;
+    if (full) { if (k) gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.inst, 0, k * F); bytes = k * F * 4; }
+    else {
+      // merge ranges separated by small gaps (fewer calls), fall back to one union range when fragmented
+      const GAP = 32;
+      let a = -1, b = -1, calls = 0;
+      const many = ranges.length > 128;
+      for (let r = 0; r < ranges.length; r += 2) {
+        const x = ranges[r], y = ranges[r + 1];
+        if (a >= 0 && (many || x - b <= GAP)) { b = y; continue; }
+        if (a >= 0) { gl.bufferSubData(gl.ARRAY_BUFFER, a * F * 4, this.inst, a * F, (b - a) * F); bytes += (b - a) * F * 4; calls++; }
+        a = x; b = y;
+      }
+      if (a >= 0) { gl.bufferSubData(gl.ARRAY_BUFFER, a * F * 4, this.inst, a * F, (b - a) * F); bytes += (b - a) * F * 4; calls++; }
+      void calls;
+    }
     if (cmds.length === 3 && cmds[0] === CMD_DRAW && cmds[1] === 0) {
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, k); // common case: the whole scene in one call
     } else {
@@ -1108,7 +1242,6 @@ export class Renderer {
     }
     gl.bindVertexArray(null);
     const g1 = performance.now();
-    void bytes;
 
     const st = this.stats;
     st.instances = k;
@@ -1122,6 +1255,7 @@ export class Renderer {
     st.atlasPages = this.atlas.pages;
     st.drawCalls = 1;
     st.culled = culled;
+    st.uploadBytes = bytes;
     this.lastTime = t;
     this.dirty = this.pendingUpgrade;
   }
@@ -1229,7 +1363,7 @@ export class Renderer {
 
   private fbo(depth: number) {
     const gl = this.gl;
-    const w = this.canvas.width, h = this.canvas.height;
+    const w = this.targetW(), h = this.targetH();
     let f = this.fbos[depth];
     if (!f || f.w !== w || f.h !== h) {
       if (f) { gl.deleteFramebuffer(f.fb); gl.deleteTexture(f.tex); }
@@ -1267,7 +1401,8 @@ export class Renderer {
   private runCommands(cmds: number[]) {
     const gl = this.gl;
     let depth = 0; // 0 = canvas
-    const targets: (WebGLFramebuffer | null)[] = [null];
+    const base = this.target?.fb ?? null;
+    const targets: (WebGLFramebuffer | null)[] = [base];
     const masks: (WebGLTexture | null)[] = [];
     for (let c = 0; c < cmds.length; c += 3) {
       const type = cmds[c], a = cmds[c + 1], b = cmds[c + 2];
@@ -1312,7 +1447,7 @@ export class Renderer {
         gl.useProgram(this.prog);
       }
     }
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, base);
     for (let a = 0; a < 10; a++) gl.vertexAttribPointer(1 + a, 4, gl.FLOAT, false, F * 4, a * 16); // back to the fast path layout
     this.setBlend(0);
   }

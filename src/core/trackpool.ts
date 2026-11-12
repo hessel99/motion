@@ -33,7 +33,30 @@ export class TrackPool {
     this.data = next;
   }
 
+  // params -> lut index memo with a numeric hash: building string keys for every keyframe
+  // (easeLUT's cache) was a large part of compiling big scenes
+  private memo = new Map<number, number>();
+  private memoParams: number[] = [];
+
   private lut(x1: number, y1: number, x2: number, y2: number, spring?: number): number {
+    const sp = spring ?? -1;
+    const hk = hash5(x1, y1, x2, y2, sp);
+    const m = this.memo.get(hk);
+    if (m !== undefined) {
+      const P = this.memoParams, o = m * 5;
+      if (P[o] === x1 && P[o + 1] === y1 && P[o + 2] === x2 && P[o + 3] === y2 && P[o + 4] === sp) return this.memoIndex[m];
+    }
+    const idx = this.lutSlow(x1, y1, x2, y2, spring);
+    if (m === undefined) {
+      this.memo.set(hk, this.memoIndex.length);
+      this.memoIndex.push(idx);
+      this.memoParams.push(x1, y1, x2, y2, sp);
+    }
+    return idx;
+  }
+  private memoIndex: number[] = [];
+
+  private lutSlow(x1: number, y1: number, x2: number, y2: number, spring?: number): number {
     const t = spring !== undefined ? springLUT(spring) : easeLUT(x1, y1, x2, y2);
     let i = this.lutIndex.get(t);
     if (i !== undefined) return i;
@@ -109,4 +132,15 @@ export class TrackPool {
     const b = a + dim;
     for (let d = 0; d < dim; d++) out[off + d] = D[a + d] + (D[b + d] - D[a + d]) * p;
   }
+}
+
+const hf = new Float64Array(1), hi = new Int32Array(hf.buffer);
+function hash5(a: number, b: number, c: number, d: number, e: number) {
+  let h = 0x811c9dc5;
+  hf[0] = a; h = Math.imul(Math.imul(h ^ hi[0], 0x01000193) ^ hi[1], 0x01000193);
+  hf[0] = b; h = Math.imul(Math.imul(h ^ hi[0], 0x01000193) ^ hi[1], 0x01000193);
+  hf[0] = c; h = Math.imul(Math.imul(h ^ hi[0], 0x01000193) ^ hi[1], 0x01000193);
+  hf[0] = d; h = Math.imul(Math.imul(h ^ hi[0], 0x01000193) ^ hi[1], 0x01000193);
+  hf[0] = e; h = Math.imul(Math.imul(h ^ hi[0], 0x01000193) ^ hi[1], 0x01000193);
+  return h;
 }
