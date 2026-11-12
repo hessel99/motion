@@ -21,6 +21,8 @@ type Drag =
   | { kind: 'pathkey'; id: string; idx: number; part: 'key' | 'out' | 'in'; inv: number[]; sx: number; sy: number; v0: number[] };
 
 const HANDLE = 8;
+/** zoom limits: 1% .. 25600% */
+export const MIN_ZOOM = 0.01, MAX_ZOOM = 256;
 
 export class ViewportController {
   overlay: HTMLCanvasElement;
@@ -53,6 +55,11 @@ export class ViewportController {
     host.addEventListener('pointercancel', e => this.up(e));
     host.addEventListener('dblclick', e => this.dbl(e));
     host.addEventListener('wheel', e => this.wheel(e), { passive: false });
+    // safari trackpad pinch (chrome/firefox send pinches as ctrl+wheel)
+    let g0 = 1;
+    host.addEventListener('gesturestart', (e: any) => { e.preventDefault(); g0 = this.zoom; });
+    host.addEventListener('gesturechange', (e: any) => { e.preventDefault(); const [x, y] = this.local(e); this.zoomAnim = null; this.setZoom(g0 * e.scale, x, y); });
+    host.addEventListener('gestureend', (e: any) => e.preventDefault());
     window.addEventListener('keydown', e => { if (e.code === 'Space' && !isTyping(e)) { this.spaceDown = true; this.updateCursor(); } });
     window.addEventListener('keyup', e => { if (e.code === 'Space') { this.spaceDown = false; this.updateCursor(); } });
     const st = ed.store;
@@ -95,7 +102,8 @@ export class ViewportController {
     const r = this.host.getBoundingClientRect();
     const comp = this.ed.store.comp;
     const z = Math.min((r.width - 80) / comp.width, (r.height - 80) / comp.height);
-    this.zoom = Math.max(0.02, z);
+    this.zoomAnim = null;
+    this.zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
     this.panX = (r.width - comp.width * this.zoom) / 2;
     this.panY = (r.height - comp.height * this.zoom) / 2;
     this.applyView();
@@ -104,12 +112,31 @@ export class ViewportController {
   setZoom(z: number, cx?: number, cy?: number) {
     const r = this.host.getBoundingClientRect();
     cx ??= r.width / 2; cy ??= r.height / 2;
-    z = Math.min(64, Math.max(0.02, z));
+    z = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
     const wx = (cx - this.panX) / this.zoom, wy = (cy - this.panY) / this.zoom;
     this.zoom = z;
     this.panX = cx - wx * z;
     this.panY = cy - wy * z;
     this.applyView();
+  }
+
+  private zoomAnim: { target: number; x: number; y: number } | null = null;
+  /** ease the zoom toward a target (anchored at x, y) over a few frames */
+  private glideZoom(target: number, x: number, y: number) {
+    target = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, target));
+    const running = !!this.zoomAnim;
+    this.zoomAnim = { target, x, y };
+    if (running) return;
+    const step = () => {
+      const a = this.zoomAnim;
+      if (!a) return;
+      const lz = Math.log(this.zoom), lt = Math.log(a.target);
+      const done = Math.abs(lt - lz) < 0.002;
+      this.setZoom(done ? a.target : Math.exp(lz + (lt - lz) * 0.35), a.x, a.y);
+      if (done) { this.zoomAnim = null; return; }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 
   private applyView() {
@@ -130,9 +157,12 @@ export class ViewportController {
     e.preventDefault();
     const [x, y] = this.local(e);
     if (e.ctrlKey || e.metaKey) {
-      // pinch / ctrl+wheel zoom
-      const f = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0025));
-      this.setZoom(this.zoom * f, x, y);
+      // pinch / ctrl+wheel zoom, anchored at the cursor. trackpad pinches (many small deltas) apply
+      // directly; mouse wheel notches (big deltas) glide to their target over a few frames.
+      const dy = e.deltaMode === 1 ? e.deltaY * 20 : e.deltaMode === 2 ? e.deltaY * 400 : e.deltaY;
+      const f = Math.exp(-Math.max(-300, Math.min(300, dy)) * 0.0025);
+      if (Math.abs(dy) < 40) { this.zoomAnim = null; this.setZoom(this.zoom * f, x, y); }
+      else this.glideZoom((this.zoomAnim?.target ?? this.zoom) * f, x, y);
     } else {
       this.panX -= e.deltaX;
       this.panY -= e.deltaY;
@@ -588,11 +618,15 @@ export class ViewportController {
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     const st = this.ed.store, r = this.ed.renderer;
     const comp = st.comp;
+    // 1px (css) lines land on device pixel centers at any zoom / dpr: odd device widths sit on .5
+    const off = (Math.round(dpr) % 2) * 0.5;
+    const snap = (v: number) => (Math.round(v * dpr - off) + off) / dpr;
     // comp frame outline
     g.strokeStyle = T.vpCompOutline;
     g.lineWidth = 1;
     const [c0x, c0y] = this.toScreen(0, 0);
-    g.strokeRect(Math.round(c0x) - 0.5, Math.round(c0y) - 0.5, Math.round(comp.width * this.zoom) + 1, Math.round(comp.height * this.zoom) + 1);
+    const [c1x, c1y] = this.toScreen(comp.width, comp.height);
+    g.strokeRect(snap(c0x - 0.5), snap(c0y - 0.5), snap(c1x + 0.5) - snap(c0x - 0.5), snap(c1y + 0.5) - snap(c0y - 0.5));
     g.fillStyle = T.vpLabel;
     g.font = T.font.uiSm;
     g.fillText(`${comp.name}  ${comp.width}×${comp.height}`, c0x, c0y - 6);
@@ -600,8 +634,11 @@ export class ViewportController {
     const accent = T.vpSelection;
     const poly = (c: number[]) => {
       g.beginPath();
+      // axis-aligned boxes snap to device pixels (crisp outline at any zoom); rotated ones stay exact
+      const p = [0, 1, 2, 3].map(i => this.toScreen(c[i * 2], c[i * 2 + 1]));
+      const aligned = Math.abs(p[0][1] - p[1][1]) < 0.01 || Math.abs(p[0][0] - p[1][0]) < 0.01;
       for (let i = 0; i < 4; i++) {
-        const [sx, sy] = this.toScreen(c[i * 2], c[i * 2 + 1]);
+        const sx = aligned ? snap(p[i][0]) : p[i][0], sy = aligned ? snap(p[i][1]) : p[i][1];
         i ? g.lineTo(sx, sy) : g.moveTo(sx, sy);
       }
       g.closePath();
@@ -680,7 +717,7 @@ export class ViewportController {
         g.strokeStyle = accent;
         for (const [hx, hy] of pts) {
           g.beginPath();
-          g.rect(Math.round(hx) - 3.5, Math.round(hy) - 3.5, 7, 7);
+          g.rect(Math.round(hx * dpr) / dpr - 3.5, Math.round(hy * dpr) / dpr - 3.5, 7, 7);
           g.fill();
           g.stroke();
         }

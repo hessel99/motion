@@ -16,7 +16,7 @@ import { Atlas, type AtlasEntry } from './atlas';
 import type { PathGeometry, PathKey } from '../core/model';
 import { loadBundledFonts } from './fonts';
 import { cubicBezier, EASE_PRESETS, springAt } from '../core/easing';
-import { layoutText, textUnits, type TextUnit, rasterImage, rasterPath, rasterShapePaint, rasterText, setImageLoadedHandler, drawPathMask, pathPlacement, type RasterResult } from './raster';
+import { layoutText, textUnits, type TextUnit, rasterImage, rasterPath, rasterShapePaint, rasterText, setImageLoadedHandler, drawPathMask, pathPlacement, rasterBox, imageMaxScale, type RasterClip, type RasterResult } from './raster';
 
 const F = 40; // floats per instance
 const KIND_RECT = 0, KIND_ELLIPSE = 1, KIND_MASK = 2, KIND_RGBA = 3, KIND_NONE = 4;
@@ -26,6 +26,17 @@ const KIND_GRECT = 5, KIND_GELL = 6;
 const RAMP_W = 256;
 /** max raster area (px) the anticipatory max-scale boost may produce: 1/8 of an atlas page */
 const BOOST_AREA = 2048 * 2048 / 8;
+/** viewport tiles (layers whose raster at screen resolution would be too big): tile size in raster px */
+const TILE = 512;
+/** max tile instances per layer (bounded by the screen, this only guards degenerate views) */
+const MAX_TILES = 160;
+/** tile raster jobs in flight (nearest-to-visible first; keeps the worker queues short so a fast
+ *  pan/zoom never waits behind stale jobs) */
+const MAX_INFLIGHT = 6;
+/** a zoom gesture counts as active until the zoom stopped changing for this long (ms) */
+const ZOOM_SETTLE = 180;
+/** tile levels: quarter octaves, so a settled view samples tiles at 1..1.19x screen resolution */
+function tileLevel(s: number) { return Math.pow(2, Math.ceil(Math.log2(Math.max(s, 1 / 64)) * 4) / 4); }
 
 const VS = `#version 300 es
 precision highp float;
@@ -221,6 +232,11 @@ interface Item {
   maxScale: number; // largest |scale| (factor) reached by this layer's scale keyframes
   rasterGen: number; // atlas generation the raster belongs to
   entry: import('./atlas').AtlasEntry | null;
+  /** viewport tiles: level (raster scale) currently shown; null = one whole raster */
+  tile?: { level: number } | null;
+  /** unscaled raster box cache (rasterBox), keyed by what it depends on */
+  boxKey?: string;
+  box?: [number, number, number, number];
 }
 
 const TR_KEYS: PropKey[] = ['anchor', 'position', 'scale', 'rotation', 'opacity', 'size', 'radius', 'fill', 'stroke', 'strokeWidth'];
@@ -342,6 +358,15 @@ export class Renderer {
   dirty = true;
   stats: RenderStats = { instances: 0, layers: 0, evalMs: 0, writeMs: 0, rasterMs: 0, gpuSubmitMs: 0, frameMs: 0, atlasEntries: 0, atlasPages: 0, drawCalls: 0, culled: 0, uploadBytes: 0 };
   private rasterBudgetMs = 6;
+  /** last time the zoom changed (gesture detection: rasters keep their resolution while it is active) */
+  private zoomAt = -1e9;
+  private gestureAt = -1e9;
+  private zooming = false;
+  /** tile jobs wanted this frame: [priority, item, level, tx, ty] (dispatched nearest first) */
+  private tileWant: { p: number; i: number; key: string; L: number; clip: RasterClip }[] = [];
+  private tileReserve = 0;
+  private tileInstances = 0;
+  tilesOn = true;
   private ranges: number[] = [];
   private boxes: number[] = [];
   /** screen aabb (device px, top-left origin) of each instance slot, NaN = unknown */
@@ -1067,6 +1092,13 @@ export class Renderer {
       it.entry.lastUsed = this.atlas.frame;
       return true;
     }
+    // zoom gesture in progress: keep drawing what we have (scaled) and re-raster once it settles,
+    // unless it got more than 2x too soft (then upgrade progressively, jobs are capped per frame)
+    if (this.zooming && it.entry && !it.entry.dead && it.rasterScale >= scale * 0.5) {
+      it.entry.lastUsed = this.atlas.frame;
+      this.pendingUpgrade = true;
+      return true;
+    }
     const bucket = this.bucketOf(scale);
     const key = `${it.rasterBase}@${bucket}`;
     const hit = this.atlas.get(key);
@@ -1086,7 +1118,7 @@ export class Renderer {
     // off the main thread: resolution upgrades, and anything beyond this frame's raster budget.
     // first-time rasters within budget stay synchronous so edits (typing, drawing) never flicker.
     if (l.type !== 'image' && this.workersOk && !this.syncRaster && (hasOld || performance.now() > budgetEnd)) {
-      this.requestAsync(key, l, bucket, [S[os], S[os + 1]], [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], S[os + 14]);
+      this.requestAsync(key, l, bucket, [S[os], S[os + 1]], [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], S[os + 14], undefined, hasOld);
       return hasOld;
     }
     if (!hasOld && performance.now() > budgetEnd + 24) { this.pendingUpgrade = true; return false; }
@@ -1104,8 +1136,8 @@ export class Renderer {
         r = asset ? rasterImage(asset, bk, size) : null;
       } else r = rasterShapePaint(l, bk, size, [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], S[os + 14]);
       if (!r) return hasOld;
-      const e = this.atlas.alloc(k2, r.pw, r.ph);
-      if (!e) { if (bk === bucket) this.failed.set(key, this.atlas.frame); continue; }
+      const e = this.atlas.alloc(k2, r.pw, r.ph, hasOld);
+      if (!e) { if (bk === bucket) this.failed.set(key, this.atlas.frame); if (hasOld) return true; continue; }
       this.atlas.upload(e, r.data);
       r.data = undefined as any; // free memory, keep placement
       this.rasterMeta.set(k2, r);
@@ -1130,6 +1162,182 @@ export class Renderer {
     return false;
   }
   private rasterMeta = new Map<string, RasterResult>();
+
+  // ---------------- viewport tiles ----------------
+  // a layer whose raster at screen resolution would be big (deep zoom, huge layers) is drawn as
+  // tiles of its raster at screen resolution, only where it is visible: texture memory follows the
+  // screen size, not the zoom. tiles of one level share one pixel grid and carry a 1px apron of real
+  // content, so linear filtering across tile seams is exact. missing tiles are drawn from the
+  // whole-layer raster (a lower resolution of the same content, as a sub-rectangle of it), so a
+  // layer never disappears; during a zoom gesture the current level is kept and drawn scaled.
+
+  /** writes the tile instances of item i at k; returns the new k, or -1 if the item isn't tiled */
+  private writeTiles(i: number, k: number, a: number, b: number, c: number, d: number, e: number, f: number, scale: number, boosted: number, opacity: number, budgetEnd: number): number {
+    const it = this.items[i], l = it.layer, S = this.style, os = i * ST;
+    const size = [S[os], S[os + 1]], sw = S[os + 14];
+    const bk = `${it.rasterBase}|${size[0]}|${size[1]}|${sw}`;
+    if (it.boxKey !== bk) { it.boxKey = bk; it.box = rasterBox(l, size, sw); }
+    const [bx, by, bw, bh] = it.box!;
+    if (!(bw > 0 && bh > 0)) return -1;
+    let maxL = Infinity;
+    if (l.type === 'image') {
+      const asset = l.imageRef ? this.store.project.assets[l.imageRef] : undefined;
+      maxL = asset ? imageMaxScale(asset, size) : 0;
+      if (!maxL) return -1;
+    }
+    const z = this.zoom * this.dpr, px0 = this.panX * this.dpr, py0 = this.panY * this.dpr;
+    const cw = this.targetW(), ch = this.targetH();
+    const sN = Math.min(scale, maxL);
+    const fw = bw * sN, fh = bh * sN;
+    // visible share of the layer's screen box
+    const A = a * z, B = b * z, C = c * z, D = d * z, E = e * z + px0, Fy = f * z + py0;
+    const mx = bx + bw / 2, my = by + bh / 2;
+    const cx = A * mx + C * my + E, cy = B * mx + D * my + Fy;
+    const ex = (Math.abs(A) * bw + Math.abs(C) * bh) / 2, ey = (Math.abs(B) * bw + Math.abs(D) * bh) / 2;
+    const vis = Math.max(0, Math.min(cw, cx + ex) - Math.max(0, cx - ex)) * Math.max(0, Math.min(ch, cy + ey) - Math.max(0, cy - ey)) / Math.max(1e-9, 4 * ex * ey);
+    const big = Math.max(fw, fh), area = fw * fh;
+    const tiled = it.tile ? big > 1600 || (area > 700_000 && vis < 0.7) : big > 2040 || (area > 1 << 20 && vis < 0.5);
+    if (!tiled) { it.tile = null; return -1; }
+    const det = A * D - B * C;
+    if (Math.abs(det) < 1e-12) return k;
+
+    // fallback: the whole layer, small (cheap, stays resident while tiles come in)
+    this.resolveRaster(i, Math.min(scale, 1024 / Math.max(bw, bh)), budgetEnd);
+    const fe = it.entry && !it.entry.dead ? it.entry : null, fr = fe ? it.raster : null;
+
+    // level: exact (quarter octaves) once settled; during a zoom gesture the current level stays
+    // while it is within 2x of the screen resolution
+    const ref = Math.min(boosted, maxL);
+    // layers animating their scale get headroom (fewer re-tiles while they grow)
+    const scaleAnim = (it.animMask & (1 << TR_SCALE)) !== 0;
+    const want0 = Math.min(tileLevel(scaleAnim ? ref * 1.5 : ref), maxL);
+    let want = want0;
+    const ts = it.tile;
+    if (ts) {
+      const lo = this.zooming ? 0.5 : 0.999, hi = this.zooming || scaleAnim ? 2.83 : 1.2;
+      if (ts.level >= ref * lo && ts.level <= ref * hi) want = ts.level;
+    }
+    // inverse view: device px -> raster space
+    const ia = D / det, ib = -B / det, ic = -C / det, id = A / det;
+    const ie = -(ia * E + ic * Fy), iff = -(ib * E + id * Fy);
+    const M = 64; // device px margin (antialiasing, small pans)
+    let rx0 = Infinity, ry0 = Infinity, rx1 = -Infinity, ry1 = -Infinity;
+    for (let q = 0; q < 4; q++) {
+      const sx = q & 1 ? cw + M : -M, sy = q & 2 ? ch + M : -M;
+      const X = ia * sx + ic * sy + ie, Y = ib * sx + id * sy + iff;
+      if (X < rx0) rx0 = X; if (X > rx1) rx1 = X; if (Y < ry0) ry0 = Y; if (Y > ry1) ry1 = Y;
+    }
+    const grid = (L: number) => {
+      const gx0 = Math.floor(bx * L) - 2, gy0 = Math.floor(by * L) - 2;
+      const PW = Math.ceil((bx + bw) * L) + 2 - gx0, PH = Math.ceil((by + bh) * L) + 2 - gy0;
+      const nx = Math.ceil(PW / TILE), ny = Math.ceil(PH / TILE);
+      const tx0 = Math.max(0, Math.floor((rx0 * L - gx0) / TILE)), tx1 = Math.min(nx - 1, Math.floor((rx1 * L - gx0) / TILE));
+      const ty0 = Math.max(0, Math.floor((ry0 * L - gy0) / TILE)), ty1 = Math.min(ny - 1, Math.floor((ry1 * L - gy0) / TILE));
+      return { L, gx0, gy0, PW, PH, nx, ny, tx0, tx1, ty0, ty1, count: Math.max(0, tx1 - tx0 + 1) * Math.max(0, ty1 - ty0 + 1) };
+    };
+    let g = grid(want);
+    // the max-scale boost (or a held level) must not blow up the tile count: go to screen resolution
+    while (g.count > MAX_TILES && want > 1 / 64) { want = Math.min(want / 2, want0); g = grid(want); }
+    const base = `${bk}@T`;
+    const tkey = (L: number, tx: number, ty: number) => `${base}${L}:${tx},${ty}`;
+    // request what is missing: visible tiles nearest the screen center first, then a 1 tile ring
+    const scx = cw / 2, scy = ch / 2, rg = this.syncRaster ? 0 : 1, w0 = this.tileWant.length;
+    for (let ty = Math.max(0, g.ty0 - rg); ty <= Math.min(g.ny - 1, g.ty1 + rg); ty++) for (let tx = Math.max(0, g.tx0 - rg); tx <= Math.min(g.nx - 1, g.tx1 + rg); tx++) {
+      const key = tkey(g.L, tx, ty);
+      const en = this.atlas.get(key);
+      if (en && !en.dead) continue;
+      if (this.pendingKeys.has(key) || this.failed.get(key)! > this.atlas.frame - 30) continue;
+      const x0 = g.gx0 + tx * TILE, y0 = g.gy0 + ty * TILE;
+      const tw = Math.min(TILE, g.PW - tx * TILE), th = Math.min(TILE, g.PH - ty * TILE);
+      const X = (x0 + tw / 2) / g.L, Y = (y0 + th / 2) / g.L;
+      const dx = A * X + C * Y + E - scx, dy = B * X + D * Y + Fy - scy;
+      const ring = tx < g.tx0 || tx > g.tx1 || ty < g.ty0 || ty > g.ty1;
+      this.tileWant.push({ p: Math.hypot(dx, dy) + (ring ? 1e7 : 0), i, key, L: g.L, clip: { x: x0 - 1, y: y0 - 1, pw: tw + 2, ph: th + 2 } });
+    }
+    // exports / snapshots: everything now
+    if (this.syncRaster && this.tileWant.length > w0) { this.dispatchTiles(Infinity); this.tileWant.length = w0; }
+    // all visible tiles of the wanted level resident?
+    let ready = true;
+    for (let ty = g.ty0; ty <= g.ty1 && ready; ty++) for (let tx = g.tx0; tx <= g.tx1; tx++) {
+      const en = this.atlas.get(tkey(g.L, tx, ty));
+      if (!en || en.dead) { ready = false; break; }
+    }
+    // what to draw: the wanted level once complete; until then the level shown so far (if any)
+    if (ready || !ts) it.tile = { level: g.L };
+    else if (ts.level !== g.L) { const g2 = grid(ts.level); if (g2.count <= MAX_TILES) g = g2; else it.tile = { level: g.L }; }
+    this.tileInstances += g.count;
+    if (k + g.count + (this.items.length - i) + this.unitCount >= this.inst.length / F) return -1; // no room: next frame reserves it
+
+    const I = this.inst, kind = this.sKind[i];
+    for (let ty = g.ty0; ty <= g.ty1; ty++) for (let tx = g.tx0; tx <= g.tx1; tx++) {
+      const x0 = g.gx0 + tx * TILE, y0 = g.gy0 + ty * TILE;
+      const tw = Math.min(TILE, g.PW - tx * TILE), th = Math.min(TILE, g.PH - ty * TILE);
+      let X0 = x0 / g.L, Y0 = y0 / g.L, X1 = (x0 + tw) / g.L, Y1 = (y0 + th) / g.L;
+      let u0: number, v0: number, u1: number, v1: number, page: number;
+      const en = this.atlas.get(tkey(g.L, tx, ty));
+      if (en && !en.dead) {
+        u0 = (en.x + 1) / 2048; v0 = (en.y + 1) / 2048; u1 = (en.x + 1 + tw) / 2048; v1 = (en.y + 1 + th) / 2048; page = en.page;
+      } else {
+        if (!fe || !fr) continue;
+        // the same region out of the whole-layer raster
+        X0 = Math.max(X0, fr.x); Y0 = Math.max(Y0, fr.y); X1 = Math.min(X1, fr.x + fr.w); Y1 = Math.min(Y1, fr.y + fr.h);
+        if (X1 <= X0 || Y1 <= Y0) continue;
+        const sx = fr.pw / fr.w, sy = fr.ph / fr.h;
+        u0 = (fe.x + (X0 - fr.x) * sx) / 2048; u1 = (fe.x + (X1 - fr.x) * sx) / 2048;
+        v0 = (fe.y + (Y0 - fr.y) * sy) / 2048; v1 = (fe.y + (Y1 - fr.y) * sy) / 2048;
+        page = fe.page;
+      }
+      const o = k * F;
+      I[o] = a; I[o + 1] = b; I[o + 2] = c; I[o + 3] = d;
+      I[o + 4] = e + a * X0 + c * Y0; I[o + 5] = f + b * X0 + d * Y0; I[o + 6] = X1 - X0; I[o + 7] = Y1 - Y0;
+      I[o + 8] = S[os + 2]; I[o + 9] = S[os + 3]; I[o + 10] = S[os + 4]; I[o + 11] = S[os + 5];
+      if (kind === KIND_RGBA) { I[o + 12] = 1; I[o + 13] = 1; I[o + 14] = 1; I[o + 15] = 1; }
+      else { I[o + 12] = S[os + 6]; I[o + 13] = S[os + 7]; I[o + 14] = S[os + 8]; I[o + 15] = S[os + 9]; }
+      I[o + 16] = S[os + 10]; I[o + 17] = S[os + 11]; I[o + 18] = S[os + 12]; I[o + 19] = S[os + 13];
+      I[o + 20] = kind === KIND_MASK ? 0 : S[os + 14];
+      I[o + 38] = this.sGrad[i * 8 + 7];
+      I[o + 21] = this.sAlign[i];
+      I[o + 22] = opacity;
+      I[o + 23] = kind;
+      I[o + 24] = u0; I[o + 25] = v0; I[o + 26] = u1; I[o + 27] = v1;
+      I[o + 28] = page;
+      this.writeClip(I, o, this.sClip[i]);
+      k++;
+    }
+    if (!ready) this.pendingUpgrade = true;
+    return k;
+  }
+
+  /** start this frame's tile rasters: nearest the screen center first, a few in flight at a time
+   *  (workers), or synchronously within the frame budget (images, no workers, exports) */
+  private dispatchTiles(budgetEnd: number) {
+    const W = this.tileWant;
+    W.sort((x, y) => x.p - y.p);
+    const S = this.style;
+    for (const t of W) {
+      if (this.pendingKeys.has(t.key) || this.atlas.has(t.key)) continue;
+      const it = this.items[t.i], l = it.layer, os = t.i * ST;
+      const size = [S[os], S[os + 1]], radius = [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], sw = S[os + 14];
+      if (l.type !== 'image' && this.workersOk && !this.syncRaster) {
+        if (this.pending.size >= MAX_INFLIGHT) break;
+        this.requestAsync(t.key, l, t.L, size, radius, sw, t.clip, true);
+        continue;
+      }
+      if (performance.now() > budgetEnd) break;
+      let r: RasterResult | null = null;
+      if (l.type === 'path') r = rasterPath(l, t.L, sw, undefined, t.clip);
+      else if (l.type === 'text') r = rasterText(l, t.L, size, t.clip);
+      else if (l.type === 'image') {
+        const asset = l.imageRef ? this.store.project.assets[l.imageRef] : undefined;
+        r = asset ? rasterImage(asset, t.L, size, t.clip) : null;
+      } else r = rasterShapePaint(l, t.L, size, radius, sw, t.clip);
+      if (!r) continue;
+      const e = this.atlas.alloc(t.key, r.pw, r.ph, true);
+      if (!e) { this.failed.set(t.key, this.atlas.frame); continue; }
+      this.atlas.upload(e, r.data);
+    }
+    this.pendingUpgrade = true; // the next frame draws what arrived and asks for the rest
+  }
 
   // ---------------- per-frame shapes (path morphs, trim paths) ----------------
   // drawn straight into a dedicated canvas that doubles as their texture (nothing to read back with
@@ -1288,13 +1496,13 @@ export class Renderer {
   // ---------------- async raster workers ----------------
   private workers: Worker[] = [];
   private workersOk = typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined';
-  private pending = new Map<number, string>(); // job id -> atlas key
+  private pending = new Map<number, { key: string; optional: boolean }>(); // job id -> atlas key
   private pendingKeys = new Set<string>();
   private nextJob = 1;
   asyncRasters = 0;
   workerErrors: string[] = [];
 
-  private requestAsync(key: string, l: Layer, bucket: number, size: number[], radius: number[], strokeWidth: number) {
+  private requestAsync(key: string, l: Layer, bucket: number, size: number[], radius: number[], strokeWidth: number, clip?: RasterClip, optional = false) {
     if (this.pendingKeys.has(key)) return;
     if (this.failed.get(key)! > this.atlas.frame - 30) return; // did not fit recently
     if (!this.workers.length) {
@@ -1317,22 +1525,23 @@ export class Renderer {
       } catch { this.workersOk = false; return; }
     }
     const id = this.nextJob++;
-    this.pending.set(id, key);
+    this.pending.set(id, { key, optional });
     this.pendingKeys.add(key);
     // plain data only (structured clone): strip nothing, layers are json
-    this.workers[id % this.workers.length].postMessage({ id, layer: l, bucket, size, radius, strokeWidth });
+    this.workers[id % this.workers.length].postMessage({ id, layer: l, bucket, size, radius, strokeWidth, clip });
   }
 
   private onRasterDone(msg: { id: number; result?: RasterResult | null; error?: string }) {
-    const key = this.pending.get(msg.id);
+    const job = this.pending.get(msg.id);
     this.pending.delete(msg.id);
-    if (!key) return;
+    if (!job) return;
+    const key = job.key;
     this.pendingKeys.delete(key);
     if (msg.error) this.workerErrors.push(msg.error);
     const r = msg.result;
     if (!r) return;
     if (this.atlas.has(key)) return;
-    const e = this.atlas.alloc(key, r.pw, r.ph);
+    const e = this.atlas.alloc(key, r.pw, r.ph, job.optional);
     if (!e) { this.failed.set(key, this.atlas.frame); this.dirty = true; return; }
     this.atlas.upload(e, r.data);
     r.data = undefined as any;
@@ -1356,6 +1565,12 @@ export class Renderer {
   /** css px view transform setters */
   setView(zoom: number, panX: number, panY: number) {
     if (zoom === this.zoom && panX === this.panX && panY === this.panY) return;
+    if (zoom !== this.zoom) {
+      // a gesture = zoom changes in quick succession (a single jump, e.g. zoom to fit, re-rasters at once)
+      const now = performance.now();
+      if (now - this.zoomAt < ZOOM_SETTLE) this.gestureAt = now;
+      this.zoomAt = now;
+    }
     this.zoom = zoom; this.panX = panX; this.panY = panY;
     this.dirty = true;
   }
@@ -1398,6 +1613,10 @@ export class Renderer {
     }
     this.atlas.frame++;
     this.dynMaintain();
+    this.zooming = !this.syncRaster && f0 - this.gestureAt < ZOOM_SETTLE;
+    this.tileWant.length = 0;
+    this.tileReserve = Math.max(this.tileReserve, this.tileInstances + 64);
+    this.tileInstances = 0;
     const e0 = performance.now();
     // same time + only a few layers edited (dragging while paused): re-evaluate just their subtrees
     if (t === this.evalTime && !this.evalAll && this.dirtyIdx.length && this.dirtyIdx.length < 64) {
@@ -1411,7 +1630,7 @@ export class Renderer {
     const e1 = performance.now();
 
     const items = this.items, n = items.length;
-    const need = (n + 1 + this.unitCount) * F;
+    const need = (n + 1 + this.unitCount + this.tileReserve) * F;
     if (this.inst.length < need) { this.inst = new Float32Array(Math.max(need, this.inst.length * 2)); full = true; }
     if (this.icap < this.inst.byteLength) full = true; // gpu buffer gets reallocated below
     const CHG = this.chg, lastK = this.lastK;
@@ -1518,7 +1737,7 @@ export class Renderer {
       }
       // unchanged since last frame and still in the same slot: the instance data in the cpu
       // array and in the gpu buffer is still valid. skip the write and the upload.
-      if (!full && !CHG[i] && !(bits & 8)) {
+      if (!full && !CHG[i] && !(bits & 8) && !items[i].tile) {
         const lk = lastK[i];
         if (lk < 0) continue;
         // (a raster evicted from the atlas meanwhile must be resolved again: fall through)
@@ -1569,6 +1788,7 @@ export class Renderer {
           gy = l.geomSize[1] ? h / l.geomSize[1] : 1;
         }
         let scale = Math.sqrt(Math.abs(a * d - b * c) * Math.abs(gx * gy)) * z;
+        const scale0 = scale;
         // raster once at the largest scale the animation reaches: no re-rasters during playback
         if (it.maxScale > 0) {
           const o8 = i * 8, cur = Math.max(Math.abs(this.xf[o8 + 4]), Math.abs(this.xf[o8 + 5])) / 100;
@@ -1581,6 +1801,19 @@ export class Renderer {
           }
         }
         const r0 = performance.now();
+        if (this.tilesOn && !it.dyn) {
+          // big on screen: draw only the visible part, as tiles at screen resolution
+          const k1 = this.writeTiles(i, k, a * gx, b * gx, c * gy, d * gy, e, f, scale0, scale, div !== 1 ? O[i] / div : O[i], budgetEnd);
+          if (k1 >= 0) {
+            rasterMs += performance.now() - r0;
+            for (let u = k; u < k1; u++) { IIT[u] = i; IB[u * 4] = NaN; if (stack.length) addBox(u); }
+            if (k1 > k) { if (k !== re) { if (re > rs) ranges.push(rs, re); rs = k; } re = k1; }
+            mask[i] = 1;
+            lastK[i] = -1;
+            k = k1;
+            continue;
+          }
+        }
         const ok = this.resolveRaster(i, scale, budgetEnd);
         rasterMs += performance.now() - r0;
         if (!ok || !it.raster || !it.entry || it.entry.dead) continue;
@@ -1636,6 +1869,7 @@ export class Renderer {
     if (re > rs) ranges.push(rs, re);
     flush();
     this.isolatedLastFrame = isolated;
+    if (this.tileWant.length) this.dispatchTiles(budgetEnd);
     const w1 = performance.now();
     // atlas was repacked while writing instances: earlier uvs are stale, redo the frame once
     if (!retry && this.atlas.compactions + this.atlas.generation !== compactions0) { this.render(t, true); return; }
