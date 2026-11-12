@@ -373,6 +373,21 @@ export class Timeline {
       g.roundRect(inX, y + 4, outX - inX, ROW_H - 8, 3);
       g.fill();
     }
+    // text animation range (per-unit reveal) as a bar
+    if (l.textAnim && l.text) {
+      const ta = l.textAnim;
+      const units = ta.by === 'char' ? [...l.text.content].filter(c => c.trim()).length : ta.by === 'word' ? l.text.content.split(/\s+/).filter(Boolean).length : l.text.content.split('\n').length;
+      const t0 = l.inPoint + ta.start;
+      const t1 = t0 + ta.duration + ta.stagger * Math.max(0, units - 1);
+      const x0 = Math.max(this.leftW, this.tToX(t0)), x1 = Math.min(this.w, this.tToX(t1));
+      if (x1 > x0) {
+        g.fillStyle = 'rgba(199,146,234,0.55)';
+        g.beginPath(); g.roundRect(x0, y + 7, x1 - x0, ROW_H - 14, 3); g.fill();
+        g.fillStyle = '#f3e8ff';
+        g.font = '10px system-ui, sans-serif';
+        if (x1 - x0 > 60) g.fillText(`text ${ta.by}`, x0 + 5, cy);
+      }
+    }
     // keyframe summary (collapsed) — union of key times
     if (!this.expanded.has(l.id) && animated) {
       const times = layerKeyTimes(l);

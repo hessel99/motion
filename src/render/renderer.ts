@@ -919,7 +919,7 @@ export class Renderer {
       if (!u.entry || u.entry.dead || !u.raster) continue;
       u.entry.lastUsed = this.atlas.frame;
       // progress of this unit
-      let p = (lt - ta.start - u.delay) / Math.max(1e-3, ta.duration);
+      let p = (lt - l.inPoint - ta.start - u.delay) / Math.max(1e-3, ta.duration); // start is relative to the layer in point
       p = p <= 0 ? 0 : p >= 1 ? 1 : p;
       const e = u.ease(p);
       const f = ta.mode === 'in' ? 1 - e : e; // amount of the "from" state
