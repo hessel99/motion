@@ -10,17 +10,15 @@ import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
 import { BLEND_MODES, PROP_DEFS, propDef, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
 import { ShaderPanel } from './ShaderPanel';
 import { useChannels } from './hooks';
-import { menuFrom, type MenuItem } from './menu';
-import { ANIM_PRESETS, alignLayers, applyPreset, distributeLayers, setTextAnim, TEXT_ANIM_PRESETS, type Align } from '../core/presets';
+import { alignLayers, distributeLayers, setTextAnim, TEXT_ANIM_PRESETS, type Align } from '../core/presets';
 import { invert } from './viewport-controller';
 import { toast } from '../app/actions';
-import { EaseStudio, showClassicEase, studioEnabled, StudioSwitch } from './patterns/EaseStudio';
 import { AudioInspector } from './audio/AudioInspector';
 import { Button, Checkbox, ColorSwatch, FieldRow, NumField, Section, Segmented, Slider, Toggle } from './ui';
 import { ComponentBox, LinkButton, LinkedChip, sharedLink } from './LinkControls';
 import {
   AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignHorizontalDistributeCenter, AlignStartHorizontal,
-  AlignStartVertical, AlignVerticalDistributeCenter, ArrowRightLeft, ArrowUpRight, Blend, ChevronLeft, ChevronRight, Minus,
+  AlignStartVertical, AlignVerticalDistributeCenter, ArrowUpRight, Blend, ChevronLeft, ChevronRight, Minus,
   RotateCw, X, Clock, Gauge, SquareRoundCorner, ALargeSmall,
 } from './chrome/icons';
 
@@ -240,7 +238,6 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
         </Section>
       )}
       {common.includes('shadowColor') && <EffectsPanel layers={layers} />}
-      <AnimatePanel ids={ids} />
       <Section title="Timing">
         <FieldRow label="Visible">
           <NumField label="In" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
@@ -504,9 +501,7 @@ function EasePanel() {
   const cur: [number, number, number, number] = a && b ? (a.interp === 'linear' ? [0, 0, 1, 1] : [a.out[0], a.out[1], b.in[0], b.in[1]]) : [0.333, 0, 0.667, 1];
   const active = EASE_PRESETS.find(p => p.v.every((x, i) => Math.abs(x - cur[i]) < 1e-3));
   return (
-    <Section title={`Easing · ${keys.length} key${keys.length > 1 ? 's' : ''}`} right={<span class="row" style={{ margin: 0 }}>{seg && <span class="insp-type">{propDef(seg.key).label}</span>}<StudioSwitch /></span>}>
-      {studioEnabled() && <EaseStudio />}
-      {showClassicEase() && <>
+    <Section title={`Easing · ${keys.length} key${keys.length > 1 ? 's' : ''}`} right={<span class="row" style={{ margin: 0 }}>{seg && <span class="insp-type">{propDef(seg.key).label}</span>}</span>}>
       {a && b && seg && a.interp === 'spring' && <SpringView bounce={a.bounce ?? 0.3} onChange={v => setSpring(store, keys, v)} />}
       {a && b && seg && a.interp !== 'hold' && a.interp !== 'spring' && (
         <CurveEditor value={cur} onChange={(v, mk) => setSegmentHandles(store, seg!.layerId, seg!.key, seg!.i, [v[0], v[1]], [v[2], v[3]], mk)} />
@@ -518,8 +513,6 @@ function EasePanel() {
         </div>
       )}
       {a?.interp === 'hold' && <div class="muted small">Hold keyframe (no interpolation)</div>}
-      {/* the studio has its own swatches: the preset chips are the classic editor's (studio off) */}
-      {!studioEnabled() && <>
       <div class="ease-group label-xs">Springs</div>
       <div class="ease-presets">
         {SPRING_PRESETS.map(p => (
@@ -538,8 +531,6 @@ function EasePanel() {
           </button>
         ))}
       </div>
-      </>}
-      </>}
       {/* footer: what the segment really is (a spring's handles are meaningless) */}
       {a?.interp === 'spring' ? <div class="row small muted">spring · bounce {Math.round((a.bounce ?? 0.3) * 100)}%</div>
         : a?.interp === 'hold' ? null
@@ -648,7 +639,7 @@ function CurveEditor({ value, onChange }: { value: [number, number, number, numb
 import { cubicBezier } from '../core/easing';
 function bez(v: number[]) { return cubicBezier(v[0], v[1], v[2], v[3]); }
 
-// ---------------- align / animate ----------------
+// ---------------- align ----------------
 const vpBounds = (id: string) => (globalThis as any).viewport?.boundsOf([id]) ?? null;
 const parentInv = (id: string) => {
   const l = st().layer(id);
@@ -667,58 +658,6 @@ export function AlignBar({ ids }: { ids: string[] }) {
       {btn('top', 'Align top', AlignStartHorizontal)}{btn('vcenter', 'Align vertical centers', AlignCenterHorizontal)}{btn('bottom', 'Align bottom', AlignEndHorizontal)}
       <button class="ghost icon" disabled={ids.length < 3} title="Distribute horizontally" aria-label="Distribute horizontally" onClick={() => distributeLayers(store, ids, 'x', vpBounds, parentInv)}><AlignHorizontalDistributeCenter /></button>
       <button class="ghost icon" disabled={ids.length < 3} title="Distribute vertically" aria-label="Distribute vertically" onClick={() => distributeLayers(store, ids, 'y', vpBounds, parentInv)}><AlignVerticalDistributeCenter /></button>
-    </div>
-  );
-}
-
-function AnimatePanel({ ids }: { ids: string[] }) {
-  const store = st();
-  const [dur, setDur] = useState(0.6);
-  const [stagger, setStagger] = useState(0.08);
-  const apply = (name: string) => {
-    try { applyPreset(store, ids, name, { duration: dur, stagger: ids.length > 1 ? stagger : 0 }); (globalThis as any).timeline?.expand(ids[0], true); }
-    catch (e: any) { toast(e.message, 'error'); }
-  };
-  // presets live in one compact menu (in / out / loop); the agent does the rest (⌘K, the chat)
-  const menu = (e: MouseEvent) => {
-    const group = (kind: string) => ANIM_PRESETS.filter(p => p.kind === kind).map(p => ({ label: p.name, hint: kind === 'out' ? 'ends at playhead' : undefined, action: () => apply(p.name) }));
-    const items: MenuItem[] = [...group('in'), { separator: true }, ...group('out')];
-    const loops = group('loop');
-    if (loops.length) items.push({ separator: true }, ...loops);
-    menuFrom(e.currentTarget as Element, items);
-  };
-  return (
-    <Section title="Animate">
-      <FieldRow label="Preset" title="Adds keys at the playhead">
-        <button type="button" class="btn preset-pick" aria-haspopup="menu" onClick={menu as any}>Choose…</button>
-        <NumField label={<Clock size={13} />} title="Duration" step={0.05} min={0.05} value={dur} suffix="s" onChange={setDur} />
-      </FieldRow>
-      {ids.length > 1 && <FieldRow label="Stagger"><NumField label={<Clock size={13} />} title="Stagger: delay between layers" step={0.01} min={0} value={stagger} suffix="s" onChange={setStagger} /></FieldRow>}
-      {ids.length === 2 && <SmartRow key={ids.join(',')} ids={ids} dur={dur} />}
-    </Section>
-  );
-}
-
-/** two selected versions of a design (e.g. two pasted figma frames): animate from one to the other */
-function SmartRow({ ids, dur }: { ids: string[]; dur: number }) {
-  const store = st();
-  const [swap, setSwap] = useState(false);
-  const [a, b] = swap ? [ids[1], ids[0]] : ids;
-  const name = (id: string) => store.layer(id)?.name ?? '?';
-  const run = async () => {
-    const { smartAnimate } = await import('../core/smart');
-    try {
-      const r = smartAnimate(store, a, b, { duration: dur });
-      store.select([a]);
-      (globalThis as any).timeline?.expand(a, true);
-      if (!r.props) toast('Smart animate: the two versions have no differences inside them (the frames’ own positions are not animated). Undo to get the second one back.', 'error');
-      else toast(`Smart animate: ${r.matched} matched layers, ${r.props} animated properties` + (r.fadedIn + r.fadedOut ? `, ${r.fadedIn} fade in, ${r.fadedOut} fade out` : ''));
-    } catch (e: any) { toast(e.message, 'error'); }
-  };
-  return (
-    <div class="row" title="Matches layers by name inside the two selected layers and animates every difference from the start to the end state. The end layer is removed.">
-      <button class="btn" style={{ flex: 1 }} onClick={run}>Smart animate {name(a)} → {name(b)}</button>
-      <button type="button" class="ghost icon" title="Swap start and end" aria-label="Swap start and end" onClick={() => setSwap(!swap)}><ArrowRightLeft /></button>
     </div>
   );
 }

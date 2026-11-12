@@ -38,7 +38,6 @@ Before animating artwork (a logo, icon, illustration, imported Figma frame) you 
 - Sound effects (add_sound_effects, one family matching the brand) only when the user asks for sound.
 - Organize: group_layers (parents for secondary motion), precompose, open_composition. Reuse: create_component, add_instance.
 - Brand colors: list_styles, then link_style instead of raw hex.
-- Options to choose from: build each version, then save_variation (A, B, C...); the user picks in the sidebar.
 - Look: contact_sheet (many frames, one image: the default), screenshot for one detailed frame. export_video only when asked.
 
 # Quality bar

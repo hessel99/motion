@@ -7,7 +7,6 @@ import { addLayer, valueAt } from '../src/core/commands';
 import { snapshotDoc, diffDocs, summarizeDiff, diffIsEmpty } from '../src/agent/diff';
 import { describeTrack, easeName, fmtValue } from '../src/agent/describe';
 import { editorContext, resolveMentions, composeMessage } from '../src/agent/context';
-import { variations } from '../src/agent/variations';
 import { serializeChat, reviewAtEnd, type ReviewInfo } from '../src/agent/history';
 import { agentClient } from '../src/agent/client';
 import { availableActions, targetPhrase, QUICK_ACTIONS } from '../src/agent/quick';
@@ -89,8 +88,8 @@ describe('agent tool schemas', () => {
     const ro = READ_ONLY_TOOLS();
     expect(ro).toContain('contact_sheet');
     expect(ro).toContain('get_editor_context');
-    for (const bad of ['add_layer', 'update_layer', 'animate', 'retime', 'delete_layers', 'set_keyframes', 'save_variation']) expect(ro).not.toContain(bad);
-    for (const name of ['animate', 'retime', 'stagger', 'contact_sheet', 'get_animation', 'save_variation']) expect(AGENT_SYSTEM_PROMPT).toContain(name);
+    for (const bad of ['add_layer', 'update_layer', 'animate', 'retime', 'delete_layers', 'set_keyframes']) expect(ro).not.toContain(bad);
+    for (const name of ['animate', 'retime', 'stagger', 'contact_sheet', 'get_animation']) expect(AGENT_SYSTEM_PROMPT).toContain(name);
   });
 });
 
@@ -104,7 +103,6 @@ const run = async (name: string, args: any) => {
 
 function fresh() {
   editor.store.load(createProject());
-  variations.clear();
   const s = editor.store;
   const a = addLayer(s, 'rect', { x: 0, y: 0, w: 100, h: 100, name: 'Logo' });
   const b = addLayer(s, 'ellipse', { x: 200, y: 0, w: 100, h: 100, name: 'Big title' });
@@ -177,23 +175,6 @@ describe('agent tools', () => {
     expect(a.props.opacity!.kf!.map(k => +k.t.toFixed(6))).toEqual([0, 0.3, 0.6]);
     expect(() => tool('stagger').run({ ids: [a.id, b.id], step: 0.1, start: -0.5 })).toThrow(/before 0/);
     expect(() => tool('retime').run({ ids: [a.id], scale: NaN })).toThrow();
-  });
-
-  it('variations capture and re-apply animation state (undoable)', async () => {
-    const s = editor.store;
-    const [a] = s.comp.root.map(id => s.layer(id)!);
-    await run('animate', { tracks: [{ id: a.id, prop: 'scale', keyframes: [{ t: 0, v: 0 }, { t: 0.4, v: 100 }] }] });
-    await run('save_variation', { ids: [a.id], label: 'A · Snappy' });
-    await run('animate', { tracks: [{ id: a.id, prop: 'scale', keyframes: [{ t: 0, v: 0, ease: 'spring Bouncy' }, { t: 1, v: 100 }] }] });
-    const r = await run('save_variation', { ids: [a.id], label: 'B · Bouncy' });
-    expect(r).toMatch(/2 variations/);
-    const [va, vb] = variations.list;
-    expect(variations.active).toBe(vb.id);
-    variations.apply(s, va.id);
-    expect(a.props.scale!.kf!.map(k => k.t)).toEqual([0, 0.4]);
-    expect(variations.range(va)).toEqual([0, 0.4]);
-    s.undo();
-    expect(a.props.scale!.kf!.map(k => k.t)).toEqual([0, 1]);
   });
 
   it('get_layer summarizes big geometry unless full', async () => {

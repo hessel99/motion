@@ -52,4 +52,4 @@ Fix the worst issues (targeted edits: `set_easing`, `retime`, `stagger`, `update
 - Every requested element present, every text spelled exactly as given.
 - If a tool errors, read the message, fix the arguments, retry once; don't loop.
 - Iteration on selection: "make this more X" changes only the selected layers/keys.
-- Variations ("give me options"): build distinct ideas, `save_variation` each (see the prompt).
+- Options ("give me options"): build the strongest idea, then offer the others in one line each; undo makes trying another cheap.
