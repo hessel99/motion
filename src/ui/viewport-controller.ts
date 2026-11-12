@@ -701,11 +701,18 @@ export class ViewportController {
         const bx = [0, 2, 4, 6].reduce((s, i) => s + this.toScreen(c[i], 0)[0], 0) / 4;
         g.font = T.font.uiSm;
         const tw = g.measureText(label).width + 10;
+        // below the box, unless that is under the floating tool dock at the bottom: then above it
+        const dockTop = this.host.clientHeight - 72;
+        let y0 = by + 8;
+        if (y0 + 18 > dockTop) {
+          const top = Math.min(...[1, 3, 5, 7].map(i => this.toScreen(0, c[i])[1]));
+          y0 = Math.max(4, Math.min(dockTop - 22, top - 26));
+        }
         g.fillStyle = T.vpBadge;
-        roundRect(g, bx - tw / 2, by + 8, tw, 18, 3);
+        roundRect(g, bx - tw / 2, y0, tw, 18, 3);
         g.fill();
         g.fillStyle = T.vpBadgeText;
-        g.fillText(label, bx - tw / 2 + 5, by + 21);
+        g.fillText(label, bx - tw / 2 + 5, y0 + 13);
       }
     }
     if (this.guides.x.length || this.guides.y.length) {

@@ -580,10 +580,12 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (e.code !== 'Space' || !spaceTap) return;
     const tap = spaceTap;
     spaceTap = null;
-    if (!tap.panned && !isTypingTarget(e.target)) editor.togglePlay();
+    if (!tap.panned && !isTypingTarget(e.target) && !document.querySelector('[aria-modal="true"]')) editor.togglePlay();
   });
   window.addEventListener('keydown', e => {
     if (isTyping(e)) return;
+    // a modal dialog is open: editor shortcuts stay off (the dialog handles its own keys)
+    if (document.querySelector('[aria-modal="true"]')) return;
     const s = st();
     const mod = e.metaKey || e.ctrlKey;
     const k = e.key.toLowerCase();

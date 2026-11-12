@@ -77,9 +77,8 @@
 .ag-context { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; padding: 6px 8px 0; font-size: 11px; cursor: help; }
 .ag-chip { background: rgba(255,255,255,.07); border-radius: 4px; padding: 0 5px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ag-chip.mention { background: color-mix(in srgb, var(--ag-accent) 22%, transparent); }
-.ag-quick { display: flex; gap: 4px; padding: 6px 8px 0; overflow-x: auto; scrollbar-width: none; }
-.ag-quick::-webkit-scrollbar { display: none; }
-.ag-qchip { flex: none; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ag-line); background: transparent; color: #c9c9cf; cursor: pointer; white-space: nowrap; }
+.ag-quick { display: flex; gap: 4px; padding: 6px 8px 0; flex-wrap: wrap; }
+.ag-qchip { flex: none; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ag-line); background: transparent; color: var(--text-secondary, #c9c9cf); cursor: pointer; white-space: nowrap; }
 .ag-qchip:hover:not(:disabled) { border-color: var(--ag-accent); color: var(--ag-text); }
 .ag-qchip.ask { border-style: dashed; }
 .ag-qchip:disabled { opacity: .45; cursor: default; }

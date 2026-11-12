@@ -607,7 +607,7 @@ function AnimatePanel({ ids }: { ids: string[] }) {
       </div>
       <div class="row">
         <NumField label="Dur" step={0.05} min={0.05} value={dur} suffix="s" onChange={setDur} />
-        {ids.length > 1 && <NumField label="Stagger" step={0.01} min={0} value={stagger} suffix="s" onChange={setStagger} />}
+        {ids.length > 1 && <NumField label="Delay" title="Stagger: delay between layers" step={0.01} min={0} value={stagger} suffix="s" onChange={setStagger} />}
       </div>
       {ids.length === 2 && <SmartRow key={ids.join(',')} ids={ids} dur={dur} />}
     </Section>

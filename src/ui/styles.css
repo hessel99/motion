@@ -343,7 +343,7 @@ kbd, .kbd {
 .connect-info { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
 .connect-info summary { cursor: pointer; color: var(--text-secondary); }
 .connect-info .row { margin: var(--space-3) 0 0; }
-.connect-info code { font-size: var(--text-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.connect-info code { font-size: var(--text-xs); white-space: pre-wrap; word-break: break-all; user-select: all; }
 
 /* ================= dialogs: export video, help, benchmark, welcome ================= */
 .xv-dialog { width: 380px; max-width: calc(100vw - 32px); gap: var(--space-6); }

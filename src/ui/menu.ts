@@ -46,7 +46,10 @@ export function showContextMenu(x: number, y: number, items: MenuItem[]) {
   // capture phase + stop: menu keys must not reach the editor (escape must not also clear the selection)
   const keys = (e: KeyboardEvent) => {
     if (current !== mine) return;
-    if (onKey(e)) { e.stopImmediatePropagation(); e.preventDefault(); }
+    // while a menu is open no key reaches the editor (delete, arrows = nudge, ...). tab closes it.
+    if (e.key === 'Tab') { closeMenu(); return; }
+    if (onKey(e)) e.preventDefault();
+    e.stopImmediatePropagation();
   };
   const t = setTimeout(() => window.addEventListener('pointerdown', off, true));
   window.addEventListener('keydown', keys, true);

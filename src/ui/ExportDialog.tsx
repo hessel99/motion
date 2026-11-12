@@ -112,9 +112,10 @@ export function ExportDialog(props: { onClose: () => void }) {
   cancelRef.current = cancel;
   // modal: keep editor shortcuts (space = play, delete, ...) away while the dialog is open
   useEffect(() => {
+    // editor shortcuts skip themselves while an aria-modal dialog is open; don't stop propagation
+    // here, it would also starve the dialog's own focus trap and segmented-control arrow keys
     const onKey = (e: KeyboardEvent) => {
-      e.stopPropagation();
-      if (e.key === 'Escape') { e.preventDefault(); cancelRef.current(); }
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cancelRef.current(); }
     };
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);
