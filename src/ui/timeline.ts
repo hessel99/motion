@@ -12,7 +12,7 @@ import { showContextMenu, type MenuItem } from './menu';
 import { GraphView } from './graph';
 import { audioDuration, audioFailed, audioPeaks } from '../audio/engine';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
-import { setEase, setInterp, setSpring, updateMarker, deleteMarker } from '../core/commands';
+import { setEase, setInterp, setSpring, updateMarker, deleteMarker, cloneLayers, deleteLayers } from '../core/commands';
 
 const HEADER_H = 28;
 const ROW_H = 24;
@@ -30,7 +30,7 @@ interface Row {
 type Drag =
   | { kind: 'scrub' }
   | { kind: 'keys'; sx: number; t0: number; moved: boolean; dt: number; key: string; snap: KeySnapshot }
-  | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: Set<string> }
+  | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: Set<string>; seg?: string[]; shift?: boolean }
   | { kind: 'rows'; ids: string[]; sy: number; y: number; moved: boolean }
   | { kind: 'split'; sx: number; w0: number }
   | { kind: 'graph' }
@@ -651,7 +651,14 @@ export class Timeline {
     }
     // track area
     const k = this.keyAt(x, y);
-    const summary = k ? [] : this.summaryKeysAt(x, y);
+    // a collapsed layer's summary key on the bar edge: the outer side of the edge trims
+    let edgeTrim = false;
+    if (!k && i >= 0 && this.rows[i].kind === 'layer') {
+      const l = this.rows[i].layer;
+      const inX = this.tToX(Math.max(0, l.inPoint)), outX = this.tToX(Math.min(st.comp.duration, l.outPoint));
+      edgeTrim = (x <= inX && inX - x < 5) || (x >= outX && x - outX < 5);
+    }
+    const summary = k || edgeTrim ? [] : this.summaryKeysAt(x, y);
     if (k || summary.length) {
       const keys = k ? [k] : summary;
       const already = keys.every(kk => st.keySelection.has(kk));
@@ -667,11 +674,10 @@ export class Timeline {
       st.beginGesture('keys');
       return;
     }
+    // a click (no drag) on the line between two keys selects that segment; a drag is a marquee
     const segKeys = this.segmentAt(x, y);
     if (segKeys.length) {
-      st.keySelection = new Set(e.shiftKey ? [...st.keySelection, ...segKeys] : segKeys);
-      if (!st.selection.includes(this.rows[i].id)) st.select([this.rows[i].id]);
-      st.emit('keys');
+      this.drag = { kind: 'marquee', sx: x, sy: y, x, y, base: e.shiftKey ? new Set(st.keySelection) : new Set(), seg: segKeys, shift: e.shiftKey };
       return;
     }
     // layer bar drag (move / trim in-out)
@@ -834,6 +840,12 @@ export class Timeline {
       const tgt = this.dropTarget(d.y);
       if (tgt) { moveLayers(st, d.ids, tgt.parent, tgt.index, { keepWorld: true }); if (tgt.parent) this.expand(tgt.parent); }
     }
+    if (d?.kind === 'marquee' && d.seg && Math.abs(d.x - d.sx) < 3 && Math.abs(d.y - d.sy) < 3) {
+      st.keySelection = new Set(d.shift ? [...st.keySelection, ...d.seg] : d.seg);
+      const r = this.rows[this.rowAtY(d.sy)];
+      if (r && !st.selection.includes(r.id)) st.select([r.id]);
+      st.emit('keys');
+    }
     if (d?.kind === 'rows' && !d.moved && !(e.metaKey || e.ctrlKey || e.shiftKey)) {
       const i = this.rowAtY(d.sy);
       if (i >= 0) st.select([this.rows[i].id]);
@@ -992,6 +1004,8 @@ export class Timeline {
         items.push({ label: 'Animate', submenu: props.map(p => ({ label: (isAnimated(r.layer, p) ? '✓ ' : '') + PROP_DEFS[p].label, action: () => { toggleAnimated(st, st.selection, p); this.expand(r.id); } })) });
         items.push({ label: r.layer.visible ? 'Hide' : 'Show', action: () => setLayerField(st, st.selection, 'visible', !r.layer.visible) });
         items.push({ label: 'Rename', action: () => this.startRename(r, i) });
+        items.push({ label: 'Duplicate', shortcut: '⌘D', action: () => { const ids = cloneLayers(st, st.selection); if (ids?.length) st.select(ids); } });
+        items.push({ label: 'Delete', shortcut: '⌫', action: () => deleteLayers(st, st.selection) });
         items.push({ label: 'Pre-compose', shortcut: '⇧⌘C', action: () => { try { precompose(st, st.selection); } catch (err: any) { alert(err.message); } } });
         if (r.layer.type === 'precomp' && r.layer.compRef) items.push({ label: 'Open composition', action: () => st.openComp(r.layer.compRef!) });
       }

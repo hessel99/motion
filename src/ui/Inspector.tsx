@@ -479,8 +479,12 @@ function MiniCurve({ v }: { v: number[] }) {
 
 function CurveEditor({ value, onChange }: { value: [number, number, number, number]; onChange: (v: [number, number, number, number], mk?: string) => void }) {
   const W = 236, H = 180, pad = 18;
-  // y range shows overshoot room
-  const ymin = Math.min(-0.25, value[1] - 0.1, value[3] - 0.1), ymax = Math.max(1.25, value[1] + 0.1, value[3] + 0.1);
+  // y range shows overshoot room. it is frozen while a handle is dragged, so the handle stays
+  // under the cursor (it is re-fitted on release)
+  const frozen = useRef<[number, number] | null>(null);
+  const [, refit] = useState(0);
+  const fit: [number, number] = [Math.min(-0.25, value[1] - 0.1, value[3] - 0.1), Math.max(1.25, value[1] + 0.1, value[3] + 0.1)];
+  const [ymin, ymax] = frozen.current ?? fit;
   const X = (x: number) => pad + x * (W - 2 * pad);
   const Y = (y: number) => H - pad - ((y - ymin) / (ymax - ymin)) * (H - 2 * pad);
   const svg = useRef<SVGSVGElement>(null);
@@ -497,16 +501,20 @@ function CurveEditor({ value, onChange }: { value: [number, number, number, numb
     const el = svg.current!;
     const r = el.getBoundingClientRect();
     const mk = 'curve' + Math.random();
+    // keep extra room so the handle can be pulled beyond the current range
+    const r0: [number, number] = [Math.min(ymin, -1), Math.max(ymax, 2)];
+    frozen.current = r0;
+    refit(n => n + 1);
     (e.target as Element).setPointerCapture(e.pointerId);
     const move = (ev: PointerEvent) => {
       const x = Math.min(1, Math.max(0, (ev.clientX - r.left - pad) / (W - 2 * pad)));
-      const y = ymin + ((H - pad - (ev.clientY - r.top)) / (H - 2 * pad)) * (ymax - ymin);
+      const y = Math.min(r0[1], Math.max(r0[0], r0[0] + ((H - pad - (ev.clientY - r.top)) / (H - 2 * pad)) * (r0[1] - r0[0])));
       const v = value.slice() as [number, number, number, number];
       v[which * 2] = Math.round(x * 1000) / 1000;
       v[which * 2 + 1] = Math.round(y * 1000) / 1000;
       onChange(v, mk);
     };
-    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); frozen.current = null; refit(n => n + 1); };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
   };

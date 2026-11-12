@@ -10,7 +10,7 @@ import { showContextMenu, type MenuItem } from './menu';
 import {
   exportLottie, exportAeScript, exportFramePng, confirmDiscard, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, toast, runBenchmark, exportGifFile,
 } from '../app/actions';
-import { setProjectName, editMode, newComposition, addPrecompLayer, renameComp } from '../core/commands';
+import { setProjectName, editMode, newComposition, addPrecompLayer, renameComp, deleteLayers } from '../core/commands';
 
 let vp: ViewportController | null = null;
 let tl: Timeline | null = null;
@@ -135,7 +135,7 @@ function Viewport() {
     host.current!.appendChild(canvas);
     editor.attachCanvas(canvas);
     vp = new ViewportController(editor, host.current!, canvas);
-    vp.onTextEdit = id => startTextEdit(id);
+    vp.onTextEdit = (id, fresh) => startTextEdit(id, fresh);
     (globalThis as any).viewport = vp;
   }, []);
   return (
@@ -202,7 +202,7 @@ function TimelineHost() {
 }
 
 // ---------------- text editing overlay ----------------
-function startTextEdit(id: string) {
+function startTextEdit(id: string, fresh = false) {
   const s = editor.store;
   const l = s.layer(id);
   if (!l?.text || !vp) return;
@@ -221,7 +221,19 @@ function startTextEdit(id: string) {
     const v = ta.value;
     ta.remove();
     const cur = s.layer(id);
-    if (cur?.text && v !== cur.text.content) s.transact('Edit text', tx => { tx.set(cur, 'text', { ...cur.text!, content: v }); tx.touch(id); });
+    if (!cur?.text) return;
+    // a new text layer that was never typed into (or emptied) is removed again
+    if (fresh && (v.trim() === '' || v === cur.text.content)) { deleteLayers(s, [id]); return; }
+    if (v.trim() === '' && !fresh) return;
+    if (v !== cur.text.content) {
+      const oldName = cur.name, oldContent = cur.text.content;
+      s.transact('Edit text', tx => {
+        tx.set(cur, 'text', { ...cur.text!, content: v });
+        // a layer still named after its (old) content follows the text, like figma
+        if (oldName === 'Text' || oldName === oldContent.slice(0, 40).replace(/\s+/g, ' ').trim()) tx.set(cur, 'name', v.slice(0, 40).replace(/\s+/g, ' ').trim());
+        tx.touch(id);
+      }, fresh ? 'text-create' : undefined);
+    }
   };
   ta.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape' || (e.key === 'Enter' && (e.metaKey || e.ctrlKey))) ta.blur(); });
   ta.addEventListener('blur', done);

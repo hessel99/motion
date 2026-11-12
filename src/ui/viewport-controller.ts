@@ -33,7 +33,7 @@ export class ViewportController {
   private fitted = false;
   private lastSelKey = '';
   private mouse = { x: 0, y: 0 };
-  onTextEdit: ((id: string) => void) | null = null;
+  onTextEdit: ((id: string, fresh?: boolean) => void) | null = null;
   pen: PenTool;
 
   constructor(private ed: Editor, private host: HTMLElement, private canvas: HTMLCanvasElement) {
@@ -235,7 +235,7 @@ export class ViewportController {
       st.select([l.id]);
       this.ed.setTool('select');
       e.preventDefault(); // keep focus for the text editor that opens after this event
-      setTimeout(() => this.onTextEdit?.(l.id), 0);
+      setTimeout(() => this.onTextEdit?.(l.id, true), 0);
       return;
     }
     // select tool: motion path keys / tangents first
@@ -428,11 +428,14 @@ export class ViewportController {
       const [cx, cy] = this.toComp(x, y);
       let w = cx - d.cx, h = cy - d.cy;
       if (e.shiftKey) { const m = Math.max(Math.abs(w), Math.abs(h)); w = Math.sign(w || 1) * m; h = Math.sign(h || 1) * m; }
-      const x0 = Math.min(d.cx, d.cx + w), y0 = Math.min(d.cy, d.cy + h);
-      const aw = Math.max(1, Math.abs(w)), ah = Math.max(1, Math.abs(h));
+      // whole pixels (like figma): round the corners, not the size, so edges land on the grid
+      const xa = Math.round(Math.min(d.cx, d.cx + w)), ya = Math.round(Math.min(d.cy, d.cy + h));
+      const xb = Math.round(Math.max(d.cx, d.cx + w)), yb = Math.round(Math.max(d.cy, d.cy + h));
+      const x0 = xa, y0 = ya;
+      const aw = Math.max(1, xb - xa), ah = Math.max(1, yb - ya);
       if (!d.id) {
         if (Math.hypot(w, h) * this.zoom < 3) return;
-        const l = addLayer(st, d.type, { x: x0, y: y0, w: aw, h: ah, name: d.type === 'rect' ? 'Rectangle' : 'Ellipse', color: [0.85, 0.85, 0.85, 1] });
+        const l = addLayer(st, d.type, { x: x0, y: y0, w: aw, h: ah, name: uniqueName(st, d.type === 'rect' ? 'Rectangle' : 'Ellipse'), color: [0.85, 0.85, 0.85, 1] });
         d.id = l.id;
         st.select([l.id]);
       } else {
@@ -521,7 +524,7 @@ export class ViewportController {
     if (d?.kind === 'create') {
       if (!d.id) {
         // click without drag: default sized shape
-        const l = addLayer(st, d.type, { x: d.cx - 50, y: d.cy - 50, w: 100, h: 100, name: d.type === 'rect' ? 'Rectangle' : 'Ellipse', color: [0.85, 0.85, 0.85, 1] });
+        const l = addLayer(st, d.type, { x: Math.round(d.cx - 50), y: Math.round(d.cy - 50), w: 100, h: 100, name: uniqueName(st, d.type === 'rect' ? 'Rectangle' : 'Ellipse'), color: [0.85, 0.85, 0.85, 1] });
         st.select([l.id]);
       }
       this.ed.setTool('select');
@@ -720,6 +723,15 @@ export function localMatrix(l: Layer, t: number) {
   const cs = Math.cos(r), sn = Math.sin(r);
   const A = cs * s[0] / 100, B = sn * s[0] / 100, C = -sn * s[1] / 100, D = cs * s[1] / 100;
   return [A, B, C, D, p[0] - (A * a[0] + C * a[1]), p[1] - (B * a[0] + D * a[1])];
+}
+
+/** "Rectangle 2", "Rectangle 3"… so new rows can be told apart in the timeline */
+export function uniqueName(st: Editor['store'], base: string): string {
+  const names = new Set(Object.values(st.project.layers).map(l => l.name));
+  if (!names.has(base)) return base;
+  let n = 2;
+  while (names.has(`${base} ${n}`)) n++;
+  return `${base} ${n}`;
 }
 
 function isTyping(e: KeyboardEvent) {

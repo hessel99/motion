@@ -3,7 +3,7 @@
 import { editor } from './editor';
 import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
-  setCompSettings, toggleAnimated, parseKeyId, precompose, addMarker,
+  setCompSettings, toggleAnimated, parseKeyId, precompose, addMarker, keyId,
 } from '../core/commands';
 import { createProject, uid, type Asset, type Layer, type Project } from '../core/model';
 import { boundsOf } from '../agent/tools';
@@ -410,6 +410,7 @@ function pasteKeys(text: string) {
   const byProp = JSON.parse(text.slice(KEYS_PREFIX.length)) as Record<string, any[]>;
   if (!s.selection.length) { toast('Select a layer to paste keyframes onto', 'error'); return; }
   let n = 0;
+  const pasted: { id: string; key: string; times: number[] }[] = [];
   s.transact('Paste keyframes', tx => {
     for (const id of s.selection) {
       const l = s.layer(id);
@@ -422,10 +423,19 @@ function pasteKeys(text: string) {
         const rest = (p.kf ?? []).filter(k => !incoming.some(n2 => Math.abs(n2.t - k.t) < 1e-6));
         tx.set(p, 'kf', [...rest, ...incoming].sort((a, b) => a.t - b.t));
         n += incoming.length;
+        pasted.push({ id, key, times: incoming.map(f => f.t) });
       }
       tx.touch(id);
     }
   });
+  // select what was pasted (so it can be moved as a block right away)
+  const sel = new Set<string>();
+  for (const { id, key, times } of pasted) {
+    const kf = s.layer(id)?.props[key as keyof Layer['props']]?.kf ?? [];
+    kf.forEach((k, j) => { if (times.some(t => Math.abs(t - k.t) < 1e-6)) sel.add(keyId(id, key as any, j)); });
+  }
+  s.keySelection = sel;
+  s.emit('keys');
   toast(`Pasted ${n} keyframes`);
 }
 

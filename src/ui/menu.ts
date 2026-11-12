@@ -21,7 +21,14 @@ export function showContextMenu(x: number, y: number, items: MenuItem[]) {
     if (current && !current.contains(e.target as Node)) { closeMenu(); window.removeEventListener('pointerdown', off, true); }
   };
   setTimeout(() => window.addEventListener('pointerdown', off, true));
-  window.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { closeMenu(); window.removeEventListener('keydown', esc); } });
+  // capture phase + stop: escape only closes the menu (it must not also clear the selection)
+  const mine = root;
+  window.addEventListener('keydown', function esc(e) {
+    if (e.key !== 'Escape') return;
+    window.removeEventListener('keydown', esc, true);
+    if (current !== mine) return; // this menu was already closed: let escape through
+    e.stopImmediatePropagation(); e.preventDefault(); closeMenu();
+  }, true);
 }
 
 function build(items: MenuItem[]): HTMLElement {
