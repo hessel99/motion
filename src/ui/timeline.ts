@@ -5,6 +5,7 @@
 // rows are rebuilt lazily (once per frame at most) and incrementally: edits that don't change
 // the row structure (key drags, value edits) don't walk the layer tree at all.
 
+import { effectivePlay, instanceComp, instanceSpan } from '../core/motion-components';
 import type { Editor } from '../app/editor';
 import {
   isAnimated, keyId, layerKeyTimes, moveKeyframes, moveLayers, parseKeyId, renameLayer, setLayerField, valueAt,
@@ -633,6 +634,13 @@ export class Timeline {
       g.beginPath();
       g.roundRect(inX, y + 4, outX - inX, ROW_H - 8, 3);
       g.fill();
+    }
+    // component instance: where it actually plays (start .. start + its timed span)
+    const ic = instanceComp(st.project, l);
+    if (ic) {
+      const t0 = Math.max(l.inPoint, l.startTime ?? 0), t1 = Math.min(l.outPoint, comp.duration, (l.startTime ?? 0) + instanceSpan(ic, effectivePlay(st.project, l)));
+      const x0 = Math.max(this.leftW, this.tToX(t0)), x1 = Math.min(this.w, this.tToX(t1));
+      if (x1 > x0) { g.fillStyle = T.tlKeySelected; g.globalAlpha = 0.7; g.beginPath(); g.roundRect(x0, y + ROW_H - 9, x1 - x0, 3, 1.5); g.fill(); g.globalAlpha = 1; }
     }
     // audio waveform (cached tiles, see ui/audio/timeline-audio.ts)
     if (l.type === 'audio' && l.imageRef) {

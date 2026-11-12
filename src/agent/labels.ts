@@ -16,6 +16,15 @@ export function toolLabel(rawName: string, input: any, layerName: (id: string) =
     case 'set_style_mode': return `Switch to ${q(a.mode)} mode`;
     case 'create_component': return `Make ${ln(a.id)} a component`;
     case 'add_instance': return `Add ${q(a.component)} instance`;
+    case 'list_components': return 'Read components';
+    case 'make_component': return `Make component ${q(a.name)}`;
+    case 'expose_property': return `Expose ${q(a.name)} on ${q(a.component)}`;
+    case 'set_component_parts': return `Name parts of ${q(a.component)}`;
+    case 'add_variant': return `Add ${a.formats ? a.formats.join(', ') : q(a.name)} variant${a.formats?.length > 1 ? 's' : ''} of ${q(a.component)}`;
+    case 'edit_variant': return a.variant ? `Edit ${q(a.variant)} variant` : 'Back to the base variant';
+    case 'add_component_instance': return `Add ${q(a.component)}`;
+    case 'set_instance': return `Edit ${lns(a.ids)}${a.values ? ' · ' + Object.keys(a.values).join(', ') : ''}`;
+    case 'build_sequence': return `Sequence of ${plural(a.items?.length ?? 0, q(a.component) + ' instance')}`;
     case 'get_layer': return `Inspect ${ln(a.id)}`;
     case 'get_animation': return `Read animation${a.ids?.length ? ' of ' + lns(a.ids) : ''}`;
     case 'get_editor_context': return 'Check selection & playhead';

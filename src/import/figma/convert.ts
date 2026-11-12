@@ -47,13 +47,19 @@ export function isShaderThing(x: any): boolean {
 /** a layer property that was linked to a figma variable or style */
 export interface FigmaRef { layer: string; prop: 'fill' | 'stroke' | 'opacity' | 'radius' | 'strokeWidth'; key: string }
 /** a pasted component instance (root layer) and the component it came from */
-export interface FigmaInstance { layer: string; key: string; name: string }
+export interface FigmaInstance { layer: string; key: string; name: string; values?: Record<string, string | boolean> }
+/** a component's figma properties (componentPropDefs) with the layers bound to them, and the
+ *  component set it belongs to (variant values parsed from "Theme=Dark, Size=L") */
+export interface FigmaComponentMeta {
+  props: { id: string; name: string; type: string; default?: string | boolean; targets: { layer: string; field: string }[] }[];
+  set?: { key: string; name: string; values: Record<string, string> };
+}
 export interface FigmaDesignData {
   tokens: IncomingToken[];
   refs: FigmaRef[];
   instances: FigmaInstance[];
   /** component definitions (main components) by key: root layer id; their layers are in `defLayers` */
-  defs: { key: string; name: string; root: string }[];
+  defs: { key: string; name: string; root: string; meta?: FigmaComponentMeta }[];
   defLayers: Layer[];
   /** the variable mode the pasted layers were showing (e.g. "Dark") */
   mode?: string;
@@ -320,7 +326,9 @@ class Converter {
   refs: FigmaRef[] = [];
   tokens = new Map<string, IncomingToken>();
   instances: (FigmaInstance & { inInstance: boolean; sym: any })[] = [];
-  defs = new Map<string, { key: string; name: string; root: string }>();
+  defs = new Map<string, { key: string; name: string; root: string; meta?: FigmaComponentMeta }>();
+  /** layers bound to component properties while a definition is converted (key -> refs) */
+  private propRefs = new Map<string, { layer: string; def: string; field: string }[]>();
   defLayers: Layer[] = [];
   mode?: string;
   private byKey = new Map<string, any>();
@@ -388,7 +396,7 @@ class Converter {
       this.defStack.push(inst.key);
       const root = this.emit(inst.sym, null, [], 0);
       this.defStack.pop();
-      if (root) this.defs.set(inst.key, { key: inst.key, name: inst.name, root });
+      if (root) this.defs.set(inst.key, { key: inst.key, name: inst.name, root, meta: componentMeta(inst.sym, this.nodes, this.propRefs.get(inst.key) ?? []) });
     }
     this.layers = main;
     return roots;
@@ -486,6 +494,13 @@ class Converter {
     if (n.type === 'BOOLEAN_OPERATION') return layer.id; // operands are baked into fillGeometry
 
     this.collectRefs(layer, n);
+    // inside a component definition: layers bound to its properties (text, visibility)
+    if (this.defStack.length && Array.isArray(raw.componentPropRefs) && this.instanceDepth === 0) {
+      const k = this.defStack[this.defStack.length - 1];
+      let a = this.propRefs.get(k);
+      if (!a) this.propRefs.set(k, (a = []));
+      for (const r of raw.componentPropRefs) if (r?.defID && !r.isDeleted) a.push({ layer: layer.id, def: gkey(r.defID), field: r.componentPropNodeField === 'VISIBLE' ? 'visible' : r.componentPropNodeField === 'TEXT_DATA' ? 'text' : 'other' });
+    }
     let kids = this.children.get(gkey(raw.guid));
     let childLevels = levels;
     let isInstance = false;
@@ -495,7 +510,7 @@ class Converter {
       const sym = symId ? this.nodes.get(symId) : undefined;
       if (sym) {
         const key = (typeof sym.componentKey === 'string' && sym.componentKey) || n.sharedSymbolReference?.componentKey || `figma:${symId}`;
-        if (!this.defStack.includes(key)) this.instances.push({ layer: layer.id, key, name: typeof sym.name === 'string' && sym.name ? sym.name : layer.name, inInstance: this.instanceDepth > 0, sym });
+        if (!this.defStack.includes(key)) this.instances.push({ layer: layer.id, key, name: typeof sym.name === 'string' && sym.name ? sym.name : layer.name, inInstance: this.instanceDepth > 0, sym, values: propValues(n.componentPropAssignments) });
         isInstance = true;
         kids = this.children.get(symId);
         const map = new Map<string, any[]>();
@@ -1114,11 +1129,49 @@ export function figmaMessageToLayers(message: any, opts: FigmaConvertOptions = {
     tokens: [...c.tokens.values()],
     refs: c.refs,
     // an instance nested in another pasted instance follows its outer instance (one link per layer)
-    instances: c.instances.filter(i => !i.inInstance).map(i => ({ layer: i.layer, key: i.key, name: i.name })),
+    instances: c.instances.filter(i => !i.inInstance).map(i => ({ layer: i.layer, key: i.key, name: i.name, ...(i.values ? { values: i.values } : {}) })),
     defs: [...c.defs.values()],
     defLayers: c.defLayers,
     ...(c.mode ? { mode: c.mode } : {}),
     ...(c.warnings.size ? { warnings: [...c.warnings].map(([m, k]) => (k > 1 ? `${m} (${k}x)` : m)) } : {}),
   };
   return { layers: c.layers, roots, assets: c.assets, design };
+}
+
+// ---------------- component properties / sets (motion components, core/figma-components.ts) ----------------
+
+function propValue(v: any): string | boolean | undefined {
+  if (!v) return undefined;
+  if (typeof v.boolValue === 'boolean') return v.boolValue;
+  if (v.textValue?.characters != null) return String(v.textValue.characters);
+  return undefined;
+}
+
+/** an instance's component property values (text, boolean) by property id */
+function propValues(list: any): Record<string, string | boolean> | undefined {
+  if (!Array.isArray(list)) return undefined;
+  const out: Record<string, string | boolean> = {};
+  for (const a of list) { const v = a?.defID ? propValue(a.value) : undefined; if (v !== undefined) out[gkey(a.defID)] = v; }
+  return Object.keys(out).length ? out : undefined;
+}
+
+/** "Theme=Dark, Size=L" -> { Theme: 'Dark', Size: 'L' } (null when it is not a variant name) */
+function variantValues(name: unknown): Record<string, string> | null {
+  if (typeof name !== 'string' || !name.includes('=')) return null;
+  const out: Record<string, string> = {};
+  for (const part of name.split(',')) { const i = part.indexOf('='); if (i <= 0) return null; out[part.slice(0, i).trim()] = part.slice(i + 1).trim(); }
+  return out;
+}
+
+function componentMeta(sym: any, nodes: Map<string, any>, refs: { layer: string; def: string; field: string }[]): FigmaComponentMeta | undefined {
+  const defs: any[] = Array.isArray(sym?.componentPropDefs) ? sym.componentPropDefs : [];
+  const parent = nodes.get(gkey(sym?.parentIndex?.guid));
+  const props = defs.filter(d => d?.id && !d.isDeleted && d.type !== 'VARIANT').map(d => ({
+    id: gkey(d.id), name: String(d.name ?? 'Property'), type: String(d.type ?? ''),
+    ...(propValue(d.initialValue) !== undefined ? { default: propValue(d.initialValue) } : {}),
+    targets: refs.filter(r => r.def === gkey(d.id) && r.field !== 'other').map(r => ({ layer: r.layer, field: r.field })),
+  })).filter(p => p.targets.length);
+  const values = variantValues(sym?.name);
+  const set = parent && (parent.isStateGroup || parent.type === 'COMPONENT_SET') && values ? { key: String(parent.key || gkey(parent.guid)), name: String(parent.name ?? 'Component set'), values } : undefined;
+  return props.length || set ? { props, ...(set ? { set } : {}) } : undefined;
 }

@@ -1,3 +1,4 @@
+import { effectivePlay, instancePlan, instanceSpan, resolvedLayers, timeRemapKeys } from '../core/motion-components';
 import { springAt } from '../core/easing';
 // export our model to lottie / bodymovin json (v5 schema).
 //
@@ -207,8 +208,9 @@ export function projectToLottie(project: Project): any {
   const assets: any[] = [];
   const assetIds = new Map<string, string>();
   const fonts = new Map<string, any>();
-  const buildLayers = (comp: Composition, stack: string[]): any[] => {
-    const L = project.layers;
+  const buildLayers = (comp: Composition, stack: string[], view?: Record<string, Layer>): any[] => {
+    // view: a component instance's layers (its property values / variants applied)
+    const L = view ?? project.layers;
     // draw order (bottom -> top), parents before children
     const order: string[] = [];
     const walk = (ids: string[]) => { for (const id of ids) { const l = L[id]; if (!l) continue; order.push(id); walk(l.children); } };
@@ -272,12 +274,24 @@ export function projectToLottie(project: Project): any {
         case 'precomp': {
           const inner = l.compRef ? project.comps[l.compRef] : undefined;
           if (inner && !stack.includes(inner.id)) {
-            const refId = 'comp_' + inner.id;
+            // component instances that change something get their own asset; timing becomes a time remap
+            const plan = inner.component ? instancePlan(project, l, inner) : null;
+            const refId = 'comp_' + inner.id + (plan ? '_' + l.id : '');
             if (!assets.some(a => a.id === refId)) {
-              const sub = buildLayers(inner, [...stack, inner.id]);
+              const view = plan ? { ...project.layers, ...Object.fromEntries(resolvedLayers(project, l)) } : undefined;
+              const sub = buildLayers(inner, [...stack, inner.id], view);
               assets.push({ id: refId, nm: inner.name, fr, layers: sub });
             }
-            layers.push({ ...base, ty: 0, refId, w: inner.width, h: inner.height, st: R((l.startTime ?? 0) * fr) });
+            const play = inner.component ? effectivePlay(project, l) : l.play;
+            const pl: any = { ...base, ty: 0, refId, w: inner.width, h: inner.height, st: R((l.startTime ?? 0) * fr) };
+            if (play) {
+              const st0 = l.startTime ?? 0, span = instanceSpan(inner, play);
+              const keys = timeRemapKeys(inner, play, Math.min(span, comp.duration - st0 + 1));
+              pl.tm = { a: 1, k: keys.map(([t, v], i) => (i < keys.length - 1 ? { t: R((st0 + t) * fr), s: [v], i: { x: [1], y: [1] }, o: { x: [0], y: [0] } } : { t: R((st0 + t) * fr), s: [v] })) };
+              if (play.hold !== 'first' && play.hold !== 'both') pl.ip = Math.max(pl.ip, R(st0 * fr));
+              if (Number.isFinite(span)) pl.op = Math.min(pl.op, Math.max(pl.ip + 1, R((st0 + span) * fr)));
+            }
+            layers.push(pl);
           } else layers.push({ ...base, ty: 3 });
           break;
         }
