@@ -203,6 +203,32 @@ Current numbers from `scripts/cpu-bench.mjs` (the table above is older and came 
 - Isolation/mask offscreen passes are scissored to the region's screen bounds; each draw range binds one cached vertex array.
 - Stress lab, CPU mode: mixed-10k 105 → 25 ms, camera-mixed-10k 106 → 27 ms, rasters-500 79 → 0.4 ms per frame.
 
+### Timeline at scale (`scripts/timeline-bench.mjs`, `scripts/timeline-profile.mjs`)
+
+- The bench drives the canvas timeline with synthetic wheel / pointer / input events in `?stress=N[&nested]` scenes and times each step (event handlers incl. every store listener + the timeline frame hook). `TALL=700` makes the timeline 700px high (28 visible rows) instead of the default 300px.
+- How it stays cheap:
+  - The rows are drawn straight into the visible canvas, only when something changed. The playhead is on a separate transparent overlay canvas (`.tl-overlay`, no pointer events): moving it clears and redraws a 16px strip. The old design copied an offscreen "base" canvas into the visible one on every redraw, and that `drawImage` forced a synchronous flush of the whole canvas: ~3 ms of a ~3.5 ms scroll step.
+  - Rows are rebuilt lazily (at most once per frame) and only when the row structure can have changed. `Store.onChange` gives the touched layers; for those it compares the prop-row mask of expanded layers (and the search match) with the last build. Dragging keys or editing values does not walk the tree any more.
+  - `reveal()` runs on every single-layer selection. It reuses the rows plus a lazy id → row index, instead of rebuilding them and doing a `findIndex`.
+  - Keys are sorted by time, so prop rows, collapsed summaries and the marquee binary-search into the visible time range. Collapsed-row summaries are cached per layer until the layer changes.
+  - Graph editor: `pick()` stops once it has found the 12 curves it shows. Before, it split every selected key id on each redraw (25-30 ms with 40k selected keys).
+  - Search: match sets are cached per filter string until the document changes. Backspace reuses an earlier result, and typing more characters only rescans the matches of the longest cached shorter filter. Lower-cased names are cached too. Ellipsized layer names are cached per font, width and text.
+- Results (production build, 700px timeline, mean / p95 ms per step, before → after; quiet-machine numbers vary ±30%):
+
+| step (25k layers, flat) | before | after |
+|---|---|---|
+| wheel scroll / ctrl+wheel zoom | 4.3 / 11.4, 4.2 / 11.8 | 0.6 / 0.9, 0.6 / 1.0 |
+| row hover | 4.3 / 11.9 | 0.5 / 0.8 |
+| click a row (selection + reveal) | 7.8 / 14.0 | 0.9 / 5.8 |
+| marquee (per move) | 4.8 / 12.0 | 0.8 / 2.3 |
+| drag ~6k selected keys (per move) | 16.0 / 29.0 | 5.5 / 13.5 |
+| graph editor redraw, 40k selected keys | 33.7 / 46.4 | 1.6 / 3.1 |
+| search typing (per key) | 24.7 / 38.1 | 13.0 / 35.7 |
+| expand / collapse all (150k rows) | 30.1 / 55.7 | 22.0 / 37.8 |
+| playback frame hook | 0.1 | 0.05 (no full-canvas copy per frame any more) |
+
+- What is left: expanding everything still allocates one object per row (150k rows ≈ 20-35 ms, once). Most of a key-drag step is now `moveKeysFrom` and the other store listeners, not the timeline. A search that matches most layers still rebuilds a row list of that size on each keystroke. Toggling visibility is a structural change (the renderer recompiles), so it still rebuilds the rows (~3 ms at 25k).
+
 ## Lessons learned (performance)
 
 1. **Do not use `desynchronized: true` on the WebGL canvas.** It removed compositor backpressure, so the page queued frames faster than the GPU drew them. Memory grew ~15 MB/s until the browser was killed. Removing it made memory flat.
@@ -212,6 +238,7 @@ Current numbers from `scripts/cpu-bench.mjs` (the table above is older and came 
 5. UI frameworks stay out of the playback loop. The single `requestAnimationFrame` loop in `src/app/editor.ts` drives the WebGL canvas, the overlay and the timeline; panels only re-render when paused.
 6. **Measure what the renderer stats don't show.** At 10k layers the audio engine's per-frame tree walk cost about a third of the evaluation. It only showed up in a whole-page CPU profile (`profile-play.mjs`).
 7. **Object graphs are cache misses.** Moving the per-item fields the frame loops read into typed arrays halved evaluation at 25k layers. After that, the remaining write cost was the first touch of each layer object, so the writer now reads typed arrays too.
+8. **An offscreen 2D canvas "cache" is not free.** Copying it into the visible canvas with `drawImage` forces the offscreen canvas's pending drawing to be flushed synchronously, and on every redraw that copy cost more than drawing the rows themselves. Use stacked canvases (static content + a small overlay) instead.
 
 ## Figma paste
 
