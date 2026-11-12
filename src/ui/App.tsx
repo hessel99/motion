@@ -316,7 +316,7 @@ function Welcome() {
           <li><b>Paste from Figma</b>: select layers in Figma, ⌘C, then ⌘V here. A single frame becomes the composition.</li>
           <li><b>Animate</b>: click a property's keyframe diamond to add keyframes, or use <i>Animate</i> presets and <i>Text animation</i> in the right panel. Press F9 for easy ease.</li>
           <li><b>AI agent</b> (left panel, ⌘I): describe an animation and Claude Code builds it in your file, with your own subscription. One click undoes everything it did.</li>
-          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video, GIF, Lottie or After Effects from the Export button (top right, ⌘E).</li>
+          <li><b>Everything else</b>: press <Kbd>?</Kbd> for shortcuts. Export video, GIF or Lottie from the Export button (top right, ⌘E).</li>
         </ol>
     </Dialog>
   );
