@@ -28,9 +28,12 @@ export function resolveMentions(store: Store, message: string, picked: { id: str
     const l = store.layer(p.id);
     if (l && (message.includes('@' + p.name) || message.includes(`@[${p.name}]`))) out.set(l.id, l);
   }
-  const layers = Object.values(store.project.layers);
+  // the agent panel resolves its draft on every render: no '@', no scan over every layer
+  if (!message.includes('@')) return [...out.values()];
+  let layers: Layer[] | null = null;
   for (const m of message.matchAll(/@\[([^\]]+)\]|@([\w\-.]+)/g)) {
     const name = (m[1] ?? m[2]).trim();
+    layers ??= Object.values(store.project.layers);
     const l = layers.find(x => x.name === name) ?? layers.find(x => x.name.toLowerCase() === name.toLowerCase());
     if (l) out.set(l.id, l);
   }

@@ -37,7 +37,8 @@ export function markSaved() { savedAt = st().topEntryId; updateTitle(); }
 export function isDirty() { return st().topEntryId !== savedAt; }
 function updateTitle() {
   const name = st().project.name || 'Untitled';
-  document.title = `${isDirty() ? '● ' : ''}${name} — Motion`;
+  const t = `${isDirty() ? '● ' : ''}${name} — Motion`;
+  if (document.title !== t) document.title = t; // runs on every edit step: only touch the dom when it changes
 }
 export function setupTitle() {
   st().on('history', updateTitle);
@@ -536,10 +537,20 @@ export function setupAutosave() {
       else warnAutosave();
     } catch { warnAutosave(); /* quota */ }
   };
+  // save when the user pauses editing (1.2s without an edit), in idle time. a drag emits 'doc' on
+  // every pointer move: just stamp the time there, and let one pending timer re-arm itself until the
+  // edits have stopped (instead of clearTimeout + setTimeout per edit)
+  const QUIET = 1200;
+  let lastEdit = 0;
+  const due = () => {
+    const wait = lastEdit + QUIET - performance.now();
+    if (wait > 1) { timer = window.setTimeout(due, wait); return; }
+    timer = 0;
+    'requestIdleCallback' in window ? (window as any).requestIdleCallback(save, { timeout: 3000 }) : save();
+  };
   st().on('doc', () => {
-    clearTimeout(timer);
-    // save when the user pauses editing, in idle time
-    timer = window.setTimeout(() => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(save, { timeout: 3000 }) : save()), 1200);
+    lastEdit = performance.now();
+    if (!timer) timer = window.setTimeout(due, QUIET);
   });
 }
 export async function restoreAutosaveNative(): Promise<boolean> {

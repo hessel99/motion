@@ -11,6 +11,9 @@ export interface Change {
   layers: Set<string>; // layers whose props/data changed
   meta: boolean; // project name etc
   assets: boolean;
+  /** with `structure`: the renderer must recompile, but the layer tree itself (membership, order,
+   *  parents) is unchanged (visibility, clip/mask flags, start time). the timeline keeps its rows */
+  sameTree?: boolean;
 }
 
 type Op = () => void; // inverse operation
@@ -30,6 +33,11 @@ interface Entry {
   selection: string[];
   /** what the transaction(s) of this step changed: undo/redo invalidate exactly that */
   change: Change;
+  /** merged steps (drags): index of the LAST redo op per written slot (obj, key). a later merge that
+   *  writes the same slot replaces that redo op and drops its undo op, so a 100-move drag of 6k keys
+   *  keeps one undo/redo pair per slot instead of 100 (same result: undo restores the first old value,
+   *  redo writes the last new value, and ops on different slots commute) */
+  slots?: WeakMap<object, Map<PropertyKey, number>>;
 }
 
 export type Listener = (c: Change) => void;
@@ -37,6 +45,9 @@ export type Listener = (c: Change) => void;
 export class Tx {
   undo: Op[] = [];
   redo: Op[] = [];
+  /** the slot (obj, key) each undo/redo pair writes */
+  slotObj: object[] = [];
+  slotKey: PropertyKey[] = [];
   change: Change = { structure: false, comp: false, layers: new Set(), meta: false, assets: false };
 
   /** set obj[key] = value, recording the inverse */
@@ -46,6 +57,7 @@ export class Tx {
     obj[key] = value;
     this.undo.push(() => { if (had) obj[key] = old; else delete obj[key]; });
     this.redo.push(() => { obj[key] = value; });
+    this.slotObj.push(obj); this.slotKey.push(key);
   }
 
   del<T extends object, K extends keyof T>(obj: T, key: K) {
@@ -54,12 +66,15 @@ export class Tx {
     delete obj[key];
     this.undo.push(() => { obj[key] = old; });
     this.redo.push(() => { delete obj[key]; });
+    this.slotObj.push(obj); this.slotKey.push(key);
   }
 
   touch(layerId: string) { this.change.layers.add(layerId); }
   /** set by commands that keep keyframe indices valid (easing edits, value edits of existing keys) */
   keepKeys = false;
-  structure() { this.change.structure = true; }
+  structure() { this.change.structure = true; this.change.sameTree = false; }
+  /** a structural change for the renderer that leaves the layer tree as it is (see Change.sameTree) */
+  recompile() { if (!this.change.structure) { this.change.structure = true; this.change.sameTree = true; } }
   comp() { this.change.comp = true; }
 }
 
@@ -161,15 +176,38 @@ export class Store {
     const top = this.undoStack[this.undoStack.length - 1];
     const mk = mergeKey ?? this.gesture ?? undefined;
     if (mk && top && top.mergeKey === mk) {
-      top.undo.push(...tx.undo);
-      top.redo.push(...tx.redo);
+      const slots = top.slots ??= new WeakMap();
+      for (let i = 0; i < tx.undo.length; i++) {
+        const o = tx.slotObj[i], k = tx.slotKey[i];
+        if (o === undefined) { top.undo.push(tx.undo[i]); top.redo.push(tx.redo[i]); continue; } // op pushed by hand
+        let m = slots.get(o);
+        const j = m?.get(k);
+        if (j !== undefined) { top.redo[j] = tx.redo[i]; continue; }
+        if (!m) slots.set(o, (m = new Map()));
+        m.set(k, top.redo.length);
+        top.undo.push(tx.undo[i]);
+        top.redo.push(tx.redo[i]);
+      }
       top.id = ++entrySeq;
       const c = top.change, d = tx.change;
-      c.structure ||= d.structure; c.comp ||= d.comp; c.meta ||= d.meta; c.assets ||= d.assets;
+      const sameTree = (!c.structure || !!c.sameTree) && (!d.structure || !!d.sameTree);
+      c.structure ||= d.structure;
+      c.sameTree = c.structure && sameTree; c.comp ||= d.comp; c.meta ||= d.meta; c.assets ||= d.assets;
       for (const id of d.layers) c.layers.add(id);
     } else {
       const d = tx.change;
-      this.undoStack.push({ id: ++entrySeq, label, mergeKey: mk, undo: tx.undo, redo: tx.redo, selection: this.selection.slice(), change: { ...d, layers: new Set(d.layers) } });
+      let slots: Entry['slots'];
+      if (mk) {
+        slots = new WeakMap();
+        for (let i = 0; i < tx.undo.length; i++) {
+          const o = tx.slotObj[i];
+          if (o === undefined) continue;
+          let m = slots.get(o);
+          if (!m) slots.set(o, (m = new Map()));
+          m.set(tx.slotKey[i], i); // last write wins
+        }
+      }
+      this.undoStack.push({ id: ++entrySeq, label, mergeKey: mk, undo: tx.undo, redo: tx.redo, selection: this.selection.slice(), change: { ...d, layers: new Set(d.layers) }, slots });
       if (this.undoStack.length > 500) { this.undoStack.shift(); this.dropped++; }
     }
     this.emitChange(tx.change);
@@ -271,7 +309,7 @@ export class Store {
     // each undo a full recompile: ~350ms per undo in a 10k layer scene (stress lab undo-storm).
     const c = e.change;
     if (compSwitched) this.emitChange({ structure: true, comp: true, layers: new Set(Object.keys(this.project.layers)), meta: true, assets: true });
-    else this.emitChange({ structure: c.structure, comp: c.comp, layers: new Set(c.layers), meta: c.meta, assets: c.assets });
+    else this.emitChange({ structure: c.structure, sameTree: c.sameTree, comp: c.comp, layers: new Set(c.layers), meta: c.meta, assets: c.assets });
     this.emit('selection');
     this.emit('keys');
     this.emit('history');

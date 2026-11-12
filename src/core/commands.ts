@@ -151,7 +151,7 @@ export function setLayerField<K extends keyof Layer>(store: Store, ids: string[]
       tx.set(l, key, value);
       tx.touch(id);
     }
-    if (key === 'visible' || key === 'clip' || key === 'mask' || key === 'startTime' || key === 'trimOn') tx.structure();
+    if (key === 'visible' || key === 'clip' || key === 'mask' || key === 'startTime' || key === 'trimOn') tx.recompile();
   });
 }
 
@@ -460,36 +460,80 @@ export function moveKeyframes(store: Store, keys: Iterable<string>, dt: number, 
   return newSel;
 }
 
-export interface KeySnapshot { groups: { layerId: string; key: PropKey; orig: Keyframe[]; sel: Set<number> }[]; minT: number }
+export interface KeySnapshot {
+  groups: {
+    layerId: string; key: PropKey; orig: Keyframe[]; sel: Set<number>;
+    /** every key of the prop is selected: a drag keeps their order, so indices (and key ids) never change */
+    all: boolean;
+    /** `${layerId}|${key}|` */
+    prefix: string;
+    /** new index of each selected key (in sel order) after the last move, and its key id */
+    idx: Int32Array; ids: string[];
+    /** the prop still existed at the last move */
+    live: boolean;
+  }[];
+  minT: number;
+  /** the key selection the last move produced (reused while no index changes) */
+  lastSel?: Set<string>;
+}
 
 /** remember selected keys + their props at drag start (drags apply a TOTAL offset to this snapshot) */
 export function snapshotKeys(store: Store, keys: Iterable<string>): KeySnapshot {
-  const groups = groupKeySel(store, keys).map(g => ({ layerId: g.layer.id, key: g.key, orig: g.prop.kf!.map(k => ({ ...k })), sel: new Set(g.idx) }));
+  const groups = groupKeySel(store, keys).map(g => {
+    const orig = g.prop.kf!.map(k => ({ ...k }));
+    const sel = new Set([...g.idx].sort((a, b) => a - b));
+    const prefix = g.layer.id + '|' + g.key + '|';
+    return { layerId: g.layer.id, key: g.key, orig, sel, all: sel.size === orig.length, prefix, idx: Int32Array.from(sel), ids: [...sel].map(i => prefix + i), live: true };
+  });
   let minT = Infinity;
   for (const g of groups) for (const i of g.sel) minT = Math.min(minT, g.orig[i].t);
   return { groups, minT: isFinite(minT) ? minT : 0 };
 }
 
-/** move snapshot keys by dt (relative to the snapshot, so crossing other keys never deletes them mid-drag) */
+/** move snapshot keys by dt (relative to the snapshot, so crossing other keys never deletes them mid-drag).
+ *  per move: one new keyframe array per prop, key ids only for keys whose index changed, and the
+ *  previous key selection object again when no index changed (dragging thousands of keys). */
 export function moveKeysFrom(store: Store, snap: KeySnapshot, dt: number, mergeKey?: string) {
   dt = Math.max(-snap.minT, dt);
-  const newSel = new Set<string>();
+  let changed = !snap.lastSel || store.keySelection !== snap.lastSel;
   store.transact('Move keyframes', tx => {
+    tx.keepKeys = true; // the key selection is rebuilt below (transact would clear it on every move)
     for (const g of snap.groups) {
       const l = store.layer(g.layerId);
       const p = l?.props[g.key];
-      if (!l || !p) continue;
-      const moved = g.orig.map((k, i) => ({ k: { ...k, t: g.sel.has(i) ? k.t + dt : k.t }, sel: g.sel.has(i) }));
-      const movedTimes = moved.filter(e => e.sel).map(e => e.k.t);
-      const kept = moved.filter(e => e.sel || !movedTimes.some(t => Math.abs(t - e.k.t) < EPS));
-      kept.sort((a, b) => a.k.t - b.k.t);
-      tx.set(p, 'kf', kept.map(e => e.k));
-      kept.forEach((e, i) => { if (e.sel) newSel.add(keyId(g.layerId, g.key, i)); });
+      if (!l || !p) { if (g.live) { g.live = false; changed = true; } continue; }
+      if (!g.live) { g.live = true; changed = true; }
+      const o = g.orig;
+      if (g.all) {
+        // all keys move together: order and indices stay
+        const kf: Keyframe[] = new Array(o.length);
+        for (let i = 0; i < o.length; i++) kf[i] = { ...o[i], t: o[i].t + dt };
+        tx.set(p, 'kf', kf);
+      } else {
+        const moved = o.map((k, i) => ({ k: g.sel.has(i) ? { ...k, t: k.t + dt } : k, sel: g.sel.has(i), i }));
+        const movedTimes: number[] = [];
+        for (const e of moved) if (e.sel) movedTimes.push(e.k.t);
+        const kept = moved.filter(e => e.sel || !movedTimes.some(t => Math.abs(t - e.k.t) < EPS));
+        kept.sort((a, b) => a.k.t - b.k.t);
+        // unselected keys are shared with the snapshot: copy them so the document never aliases it
+        tx.set(p, 'kf', kept.map(e => (e.sel ? e.k : { ...e.k })));
+        let n = 0;
+        for (let i = 0; i < kept.length; i++) {
+          if (!kept[i].sel) continue;
+          if (g.idx[n] !== i) { g.idx[n] = i; g.ids[n] = g.prefix + i; changed = true; }
+          n++;
+        }
+      }
       tx.touch(g.layerId);
     }
   }, mergeKey);
-  store.keySelection = newSel;
-  store.emit('keys');
+  if (changed || store.keySelection.size !== snap.lastSel!.size) {
+    const newSel = new Set<string>();
+    for (const g of snap.groups) if (g.live) for (const id of g.ids) newSel.add(id);
+    snap.lastSel = newSel;
+    store.keySelection = newSel;
+    store.emit('keys');
+  }
 }
 
 /** apply an ease to selected keyframes (affects the segment leaving each selected key and the arriving handle) */
