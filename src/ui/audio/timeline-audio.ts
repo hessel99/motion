@@ -26,8 +26,10 @@ export function snapMusicTime(store: Store, t: number, pxPerSec: number, px = 6,
 
 // ---------------------------------------------------------------- colors (css custom properties)
 let colors: Record<string, string> | null = null;
-onThemeChange(() => { colors = null; });
+let watching = false;
 function col(name: string, fallback: string): string {
+  // subscribe lazily: onThemeChange initializes the theme, which must not happen at import time
+  if (!watching) { watching = true; onThemeChange(() => { colors = null; }); }
   if (!colors) colors = {};
   let c = colors[name];
   if (c === undefined) {
