@@ -194,6 +194,15 @@ Current numbers from `scripts/cpu-bench.mjs` (the table above is older and came 
 - **Load** (compile + first render of a big project): 10k layers 249-349 → 48-102 ms; 25k layers 438-725 → 100-120 ms.
 - **Partly animated** (`&animated=0.1`: 10% of layers move, scattered): at 25k layers, incremental writes take the frame from 4.7 to 4.1 ms (eval 1.2 ms). Scattered changes still upload the whole buffer, because the ranges merge; clustered changes (e.g. one animated group) upload only their range.
 
+
+### Atlas and gradients (after the stress lab)
+
+- Plain linear/radial gradients on rects, ellipses and groups are drawn in the instance shader (SDF shape + a 256-texel color ramp row + inverse paint transform per instance): no raster, no atlas space, free size/radius animation.
+- The atlas reuses freed slots, evicts least-recently-used entries one at a time (never what the current frame draws), compacts in place uploading only moved entries, and prunes raster metadata on eviction. Rasters are capped at 1/8 page; a raster that doesn't fit falls back to a lower resolution, so **layers never disappear** (rasters-500: 77 → 500 of 500 drawn).
+- Per-frame path shapes (morph, trim) draw into a ring-allocated canvas texture: no getImageData, no per-frame atlas keys (metadata no longer grows with comp length).
+- Isolation/mask offscreen passes are scissored to the region's screen bounds; each draw range binds one cached vertex array.
+- Stress lab, CPU mode: mixed-10k 105 → 25 ms, camera-mixed-10k 106 → 27 ms, rasters-500 79 → 0.4 ms per frame.
+
 ## Lessons learned (performance)
 
 1. **Do not use `desynchronized: true` on the WebGL canvas.** It removed compositor backpressure, so the page queued frames faster than the GPU drew them. Memory grew ~15 MB/s until the browser was killed. Removing it made memory flat.
