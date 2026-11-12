@@ -76,6 +76,14 @@ export function toolLabel(rawName: string, input: any, layerName: (id: string) =
     case 'split_shape': return `Split ${ln(a.id)} into ${a.mode === 'subpaths' ? 'contours' : 'parts'}`;
     case 'set_pivot': return `Move pivot of ${a.id ? ln(a.id) : lns(a.ids)}${typeof a.at === 'string' ? ' to ' + a.at : ''}`;
     case 'rig': return `Rig ${a.kind ?? ''} on ${lns(a.ids)}`;
+    case 'get_audio_analysis': return a.from !== undefined || a.to !== undefined ? `Listen to ${a.from ?? 0}–${a.to ?? 'end'}s` : 'Listen to the music';
+    case 'sync_to_audio': return `Sync ${a.ids?.length ? lns(a.ids) : 'animation'} to the ${a.mode ?? 'beats'}`;
+    case 'audio_reactive': return `${a.prop ?? ''} of ${lns(a.ids)} follows the ${a.band ?? 'music'}`;
+    case 'place_on_beats': return a.what === 'markers' ? `Markers on ${a.pattern ?? 'beats'}` : `Entrances on ${a.pattern ?? 'beats'}`;
+    case 'list_sfx_families': return 'Sound families';
+    case 'preview_sfx': return `Preview ${q(a.family ?? '')} sounds`;
+    case 'add_sound_effects': return `Sound effects · ${a.family ?? ''}`;
+    case 'set_sfx_family': return `Sound family → ${q(a.family ?? '')}`;
     default: return name.replace(/_/g, ' ');
   }
 }

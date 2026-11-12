@@ -1,45 +1,21 @@
-// simple onset ("beat") detection for audio layers: energy flux of a low-passed signal with an
-// adaptive threshold. good enough to drop markers on kicks / claps of typical music.
+// onsets / beats of an AudioBuffer. replaced by the full music analysis (analysis.ts: tempo, beat
+// grid, bars, sections, accents, envelopes); kept as a small convenience wrapper over it.
+import { analyzeAudio } from './analysis';
 
-/** onset times in seconds of buffer time */
-export function detectOnsets(buf: AudioBuffer, opts: { minGap?: number; sensitivity?: number } = {}): number[] {
-  const minGap = opts.minGap ?? 0.18;
-  const k = 1.5 - (opts.sensitivity ?? 0.5); // threshold in local std-devs
-  const sr = buf.sampleRate, hop = Math.round(sr * 0.01), win = hop * 2;
-  const n = buf.length, chs = buf.numberOfChannels;
-  const data = Array.from({ length: chs }, (_, c) => buf.getChannelData(c));
-  const frames = Math.max(0, Math.floor((n - win) / hop));
-  if (frames < 3) return [];
-  // energy per frame (mono mix) and its positive log difference (flux)
-  const energy = new Float32Array(frames);
-  for (let f = 0; f < frames; f++) {
-    let e = 0;
-    const a = f * hop;
-    for (let c = 0; c < chs; c++) { const d = data[c]; for (let i = a; i < a + win; i += 2) e += d[i] * d[i]; }
-    energy[f] = Math.log(1e-9 + e / (win / 2) / chs);
-  }
-  const flux = new Float32Array(frames);
-  for (let f = 1; f < frames; f++) flux[f] = Math.max(0, energy[f] - energy[f - 1]);
-  // a sound that starts on the first sample is an onset too: rise from the clip's quietest level,
-  // capped at the largest real rise so it can't distort the adaptive threshold
-  let minE = Infinity, maxF = 0;
-  for (let f = 0; f < frames; f++) { if (energy[f] < minE) minE = energy[f]; if (flux[f] > maxF) maxF = flux[f]; }
-  flux[0] = Math.min(maxF, Math.max(0, energy[0] - minE));
-  // adaptive threshold over ±0.5 s
-  const W = 50;
-  const out: number[] = [];
-  let last = -Infinity;
-  let sum = 0, sum2 = 0, cnt = 0, lo = 0, hi = 0;
-  for (let f = 0; f < frames - 1; f++) {
-    while (hi < Math.min(frames, f + W)) { sum += flux[hi]; sum2 += flux[hi] * flux[hi]; cnt++; hi++; }
-    while (lo < f - W) { sum -= flux[lo]; sum2 -= flux[lo] * flux[lo]; cnt--; lo++; }
-    const mean = sum / cnt, sd = Math.sqrt(Math.max(0, sum2 / cnt - mean * mean));
-    const v = flux[f];
-    if (v > mean + k * sd && v > 0.3 && (f === 0 || v >= flux[f - 1]) && v >= flux[f + 1]) {
-      // window f spans [f*hop, f*hop + 2*hop]: a rise first shows in its second half (clip start: 0)
-      const t = f === 0 ? 0 : ((f + 1) * hop) / sr;
-      if (t - last >= minGap) { out.push(t); last = t; }
-    }
-  }
+function mono(buf: AudioBuffer): Float32Array {
+  const n = buf.length, ch = buf.numberOfChannels, out = new Float32Array(n);
+  for (let c = 0; c < ch; c++) { const d = buf.getChannelData(c); for (let i = 0; i < n; i++) out[i] += d[i] / ch; }
   return out;
 }
+
+/** onset times in seconds of buffer time (strength ≥ 1 - sensitivity, default all clear onsets) */
+export function detectOnsets(buf: AudioBuffer, opts: { minGap?: number; sensitivity?: number } = {}): number[] {
+  const a = analyzeAudio(mono(buf), buf.sampleRate);
+  const min = 1 - (opts.sensitivity ?? 0.85), gap = opts.minGap ?? 0;
+  const out: number[] = [];
+  a.onsets.forEach((t, i) => { if (a.onsetStrength[i] >= min && (!out.length || t - out[out.length - 1] >= gap)) out.push(t); });
+  return out;
+}
+
+/** the beat grid (seconds of buffer time) */
+export function detectBeats(buf: AudioBuffer): number[] { return Array.from(analyzeAudio(mono(buf), buf.sampleRate).beats); }

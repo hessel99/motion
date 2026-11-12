@@ -860,7 +860,7 @@ export class Renderer {
       if (!it.exprs) it.exprs = new Array(TR_KEYS.length).fill(null);
       const dim = PROP_DEFS[TR_KEYS[k]].dim, track = new Track(p, dim, k === TR_POS);
       // the frame object, seed and valueAt are made once here, not per frame
-      const fr: ExprFrame = { time: 0, index: i, fps: 30, duration: 1, inPoint: 0, seed: (hashStr(it.id) + k * 31) % 9973, keyTimes: (p.kf ?? []).map(f => f.t), value: new Float64Array(4), valueAt: (tt, o) => track.eval(tt, o, 0), calls: 0 };
+      const fr: ExprFrame = { time: 0, index: i, fps: 30, duration: 1, inPoint: 0, seed: (hashStr(it.id) + k * 31) % 9973, keyTimes: (p.kf ?? []).map(f => f.t), value: new Float64Array(4), valueAt: (tt, o) => track.eval(tt, o, 0), calls: 0, tOff: 0 };
       it.exprs[k] = { prog: compileProgram(c.node, dim), track, fr };
       emask |= 1 << k;
     }
@@ -1049,6 +1049,7 @@ export class Renderer {
       c.fps = comp.fps;
       c.duration = comp.duration;
       c.inPoint = it.layer.inPoint;
+      c.tOff = it.tOff;
       switch (k) {
         case TR_ANCHOR: runProgram(P, c, X, o8); break;
         case TR_POS: runProgram(P, c, X, o8 + 2); break;
