@@ -18,7 +18,8 @@ const shots = await page.evaluate(async () => {
   const b = createLayer('path', { x: 1100, y: 340, w: 400, h: 400, color: [0, 0, 0, 0], name: 'Trim' });
   b.geometry = [{ cmds: circ, fillRule: 'nonzero' }]; b.geomSize = [400, 400];
   b.props.stroke = { v: [1, 0.8, 0.2, 1] }; b.props.strokeWidth = { v: [24] };
-  b.trim = { start: { v: [0] }, end: { v: [0], kf: [{ t: 0, v: [0], interp: 'bezier', out: [0.42, 0], in: [0.58, 1] }, { t: 2, v: [100], interp: 'linear', out: [0, 0], in: [1, 1] }] }, offset: { v: [0] } };
+  b.trimOn = true;
+  b.props.trimEnd = { v: [0], kf: [{ t: 0, v: [0], interp: 'bezier', out: [0.42, 0], in: [0.58, 1] }, { t: 2, v: [100], interp: 'linear', out: [0, 0], in: [1, 1] }] };
   st.transact('x', tx => { insertLayer(st, tx, a, null); insertLayer(st, tx, b, null); });
   const out = [];
   for (const t of [0, 0.7, 1.3, 2]) { editor.renderer.render(t); out.push(editor.renderer.snapshot(t, 700)); }

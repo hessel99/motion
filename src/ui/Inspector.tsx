@@ -200,6 +200,24 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
         </Section>
       )}
       {layers.length === 1 && l.type === 'text' && <TextPanel layer={l} />}
+      {layers.every(x => x.type === 'path') && (
+        <Section title="Trim paths" right={<label class="check small"><input type="checkbox" checked={!!l.trimOn} onChange={e => setLayerField(store, ids, 'trimOn', (e.target as HTMLInputElement).checked, 'Trim paths')} /> on</label>}>
+          {l.trimOn && (
+            <>
+              <div class="row">
+                <KeyButton layers={layers} prop="trimStart" />
+                <NumField label="Start" min={0} max={100} value={v('trimStart')[0]} suffix="%" onChange={(n, mk) => set('trimStart', [n], mk)} />
+                <KeyButton layers={layers} prop="trimEnd" />
+                <NumField label="End" min={0} max={100} value={v('trimEnd')[0]} suffix="%" onChange={(n, mk) => set('trimEnd', [n], mk)} />
+              </div>
+              <div class="row">
+                <KeyButton layers={layers} prop="trimOffset" />
+                <NumField label="Offset" value={v('trimOffset')[0]} suffix="°" onChange={(n, mk) => set('trimOffset', [n], mk)} />
+              </div>
+            </>
+          )}
+        </Section>
+      )}
       {layers.every(x => x.type === 'text') && <TextAnimPanel layers={layers} />}
       {layers.length === 1 && l.type === 'group' && (
         <Section title="Frame">

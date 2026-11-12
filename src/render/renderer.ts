@@ -487,11 +487,11 @@ export class Renderer {
     it.rasterKey = null;
     it.entry = null;
     it.dyn = null;
-    if (l.type === 'path' && ((l.pathKf?.length ?? 0) >= 2 || l.trim)) {
+    if (l.type === 'path' && ((l.pathKf?.length ?? 0) >= 2 || l.trimOn)) {
       const pkf = l.pathKf && l.pathKf.length >= 2 ? l.pathKf : null;
       it.dyn = {
         base: it.rasterBase!,
-        trim: l.trim ? [new Track(l.trim.start, 1), new Track(l.trim.end, 1), new Track(l.trim.offset, 1)] : null,
+        trim: l.trimOn ? [new Track(l.props.trimStart ?? { v: [0] }, 1), new Track(l.props.trimEnd ?? { v: [100] }, 1), new Track(l.props.trimOffset ?? { v: [0] }, 1)] : null,
         pkf,
         eases: pkf ? pkf.map((k, j) => (j < pkf.length - 1 && k.interp === 'bezier' ? cubicBezier(k.out[0], k.out[1], pkf[j + 1].in[0], pkf[j + 1].in[1]) : (x: number) => x)) : [],
         frame: NaN, t: 0,

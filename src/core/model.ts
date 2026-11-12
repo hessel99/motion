@@ -44,6 +44,9 @@ export const PROP_DEFS = {
   fill: { label: 'Fill', dim: 4, default: [1, 1, 1, 1], unit: 'color' },
   stroke: { label: 'Stroke', dim: 4, default: [0, 0, 0, 0], unit: 'color' },
   strokeWidth: { label: 'Stroke Width', dim: 1, default: [0], unit: 'px', min: 0 },
+  trimStart: { label: 'Trim Start', dim: 1, default: [0], unit: '%', min: 0, max: 100 },
+  trimEnd: { label: 'Trim End', dim: 1, default: [100], unit: '%', min: 0, max: 100 },
+  trimOffset: { label: 'Trim Offset', dim: 1, default: [0], unit: '°' },
 } as const;
 
 export type PropKey = keyof typeof PROP_DEFS;
@@ -55,7 +58,7 @@ export const TYPE_PROPS: Record<LayerType, PropKey[]> = {
   group: ['size', 'radius', 'fill', 'stroke', 'strokeWidth'],
   rect: ['size', 'radius', 'fill', 'stroke', 'strokeWidth'],
   ellipse: ['size', 'fill', 'stroke', 'strokeWidth'],
-  path: ['size', 'fill', 'stroke', 'strokeWidth'],
+  path: ['size', 'fill', 'stroke', 'strokeWidth', 'trimStart', 'trimEnd', 'trimOffset'],
   text: ['size', 'fill'],
   image: ['size'],
   precomp: ['size'],
@@ -104,16 +107,6 @@ export interface PathKey {
   in: [number, number];
 }
 
-/** after effects / lottie "trim paths" on a path layer's stroke (and fill outline) */
-export interface Trim {
-  /** 0..100 */
-  start: Prop;
-  /** 0..100 */
-  end: Prop;
-  /** degrees (360 = one full path length) */
-  offset: Prop;
-}
-
 /** parametric per-unit text animation (text reveal), evaluated in the renderer */
 export interface TextAnim {
   by: 'char' | 'word' | 'line';
@@ -156,8 +149,8 @@ export interface Layer {
   geomSize?: [number, number];
   /** animated path shape (overrides `geometry` over time) */
   pathKf?: PathKey[];
-  /** trim paths (stroke drawing on/off) */
-  trim?: Trim;
+  /** trim paths on the stroke (values: props trimStart / trimEnd / trimOffset) */
+  trimOn?: boolean;
   strokeGeometry?: PathGeometry[];
   text?: TextData;
   textAnim?: TextAnim;
