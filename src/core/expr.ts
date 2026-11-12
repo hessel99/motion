@@ -661,8 +661,15 @@ export function checkExpr(src: string, dim: number): string | null {
   if (c.error) return c.error;
   const value = dim === 1 ? 0 : new Array(dim).fill(0);
   try {
-    const v = evalExpr(c.node!, { time: 1, value, index: 0, fps: 30, duration: 5, inPoint: 0, valueAt: () => value, keyTimes: [0, 1], seed: 1 });
-    if (typeof v !== 'number' && !Array.isArray(v)) return 'expression must produce a number or [x, y]';
+    // two sample times: a value that is only infinite at one instant (1 / (time - 1)) is allowed
+    let bad = 0;
+    for (const time of [0.5, 1.37]) {
+      const v = evalExpr(c.node!, { time, value, index: 0, fps: 30, duration: 5, inPoint: 0, valueAt: () => value, keyTimes: [0, 1], seed: 1 });
+      if (typeof v !== 'number' && !Array.isArray(v)) return 'expression must produce a number or [x, y]';
+      if (Array.isArray(v) && dim > 1 && v.length < dim) return `this property needs ${dim} values, like [${['x', 'y', 'z', 'w'].slice(0, dim).join(', ')}]`;
+      if ((typeof v === 'number' ? [v] : v).some(x => !Number.isFinite(x))) bad++;
+    }
+    if (bad === 2) return 'the result is not a finite number (division by zero?)';
     return null;
   } catch (e: any) { return String(e?.message ?? e); }
 }

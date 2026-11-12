@@ -316,7 +316,9 @@ kbd, .kbd {
 .expr-chips { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); }
 .expr-chips button { font: var(--text-2xs) var(--font-mono); padding: 0 var(--space-3); min-height: var(--control-h-sm); color: var(--text-muted); }
 .grad-preview { height: 10px; border-radius: var(--radius-xs); margin: var(--space-2) 0 var(--space-3); border: 1px solid var(--border); }
-.grad-stop > .num:first-child { flex: 0 0 64px; }
+.grad-stop > .num:first-child { flex: 0 0 54px; }
+.grad-stop .color-field .hex { width: 58px; }
+.grad-stop .color-field .num { max-width: none; flex: 0 0 58px; }
 .field-label { color: var(--text-muted); font-size: var(--text-xs); flex: none; }
 
 /* ================= agent panel ================= */

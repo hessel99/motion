@@ -725,7 +725,10 @@ function ExprPanel({ layers }: { layers: Layer[] }) {
 function ExprRow({ ids, k, src }: { ids: string[]; k: PropKey; src: string }) {
   const store = st();
   const [text, setText] = useState(src);
-  useEffect(() => setText(src), [src]);
+  // follow outside changes (undo, agent, chips) but never while the user is typing: the store
+  // lags behind the keystrokes (invalid partial input isn't committed) and would overwrite them
+  const focused = useRef(false);
+  useEffect(() => { if (!focused.current) setText(src); }, [src]);
   const err = checkExpr(text, PROP_DEFS[k].dim);
   const mk = useRef('expr' + Math.random());
   return (
@@ -733,7 +736,8 @@ function ExprRow({ ids, k, src }: { ids: string[]; k: PropKey; src: string }) {
       <div class="row small"><span>{PROP_DEFS[k].label}</span><span style={{ flex: 1 }} /><button type="button" class="ghost icon btn-sm" title="Remove expression" aria-label="Remove expression" onClick={() => setExpr(store, ids, k, undefined)}>✕</button></div>
       <textarea class={'expr-edit' + (err ? ' bad' : '')} rows={2} value={text} spellcheck={false}
         onInput={e => { const v = (e.target as HTMLTextAreaElement).value; setText(v); if (!checkExpr(v, PROP_DEFS[k].dim)) setExpr(store, ids, k, v, mk.current); }}
-        onBlur={() => { mk.current = 'expr' + Math.random(); }}
+        onFocus={() => { focused.current = true; }}
+        onBlur={() => { focused.current = false; mk.current = 'expr' + Math.random(); }}
         onKeyDown={e => e.stopPropagation()} />
       {err && <div class="expr-err">{err}</div>}
       <div class="expr-chips">{(EXPR_SUGGEST[k] ?? []).map(sug => <button class="ghost small" onClick={() => setExpr(store, ids, k, sug)}>{sug}</button>)}</div>
