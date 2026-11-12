@@ -6,6 +6,9 @@ A fast motion design editor (After Effects / Figma Motion style) with an AI agen
 - Timeline with keyframes, easing curves and springs
 - Paste from Figma (just ⌘C → ⌘V), import Lottie, SVG, After Effects `.aep`
 - Agent sidebar: Claude Code / Codex / Gemini CLI with your own subscription, driving the editor via MCP
+- Smart animate between two pasted Figma frames, animation presets, text animators, expressions (safe subset)
+- Precomps, masks, blend modes, gradients, star/polygon/pen tools, markers, audio layers (beat markers)
+- Export: video (MP4/WebM with audio), GIF, PNG frame, Lottie (text as glyphs), After Effects script (.jsx)
 
 ```bash
 npm install
