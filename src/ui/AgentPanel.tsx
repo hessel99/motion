@@ -3,8 +3,11 @@ import { agentClient, type ChatEvent } from '../agent/client';
 import { editor } from '../app/editor';
 
 interface Msg {
-  role: 'user' | 'assistant' | 'tool' | 'error' | 'info';
+  role: 'user' | 'assistant' | 'tool' | 'error' | 'info' | 'revert';
   text: string;
+  marker?: number;
+  steps?: number;
+  endMarker?: number;
   tool?: { name: string; input: any; result?: string; isError?: boolean; id: string };
 }
 
@@ -20,6 +23,7 @@ export function AgentPanel() {
   const list = useRef<HTMLDivElement>(null);
 
   useEffect(() => agentClient.on(() => force(x => x + 1)), []);
+  useEffect(() => editor.store.on('history', () => force(x => x + 1)), []);
   useEffect(() => { list.current?.scrollTo({ top: 1e9 }); }, [msgs]);
 
   const send = () => {
@@ -29,6 +33,7 @@ export function AgentPanel() {
     const sel = editor.store.selection;
     const ctx = sel.length ? `\n\n[editor context: selected layer ids: ${sel.join(', ')}; playhead at ${editor.store.time.toFixed(2)}s]` : `\n\n[editor context: playhead at ${editor.store.time.toFixed(2)}s]`;
     setMsgs(m => [...m, { role: 'user', text }]);
+    const marker = editor.store.historyLength;
     let assistantIdx = -1;
     const append = (fn: (m: Msg[]) => Msg[]) => setMsgs(fn);
     const id = agentClient.chat({ provider, message: text + ctx, sessionId: session.current[provider] }, (e: ChatEvent) => {
@@ -59,10 +64,13 @@ export function AgentPanel() {
           append(m => m.map(x => (x.tool?.id === e.id ? { ...x, tool: { ...x.tool!, result: e.summary, isError: e.isError } } : x)));
           break;
         case 'error': append(m => [...m, { role: 'error', text: e.message }]); break;
-        case 'done':
+        case 'done': {
           setBusy(null);
-          if (e.costUsd) append(m => [...m, { role: 'info', text: `done · ${(e.durationMs / 1000).toFixed(1)}s` }]);
+          const steps = editor.store.historyLength - marker;
+          if (steps > 0) append(m => [...m, { role: 'revert', text: '', marker, steps, endMarker: editor.store.historyLength }]);
+          if (e.durationMs) append(m => [...m, { role: 'info', text: `done · ${(e.durationMs / 1000).toFixed(1)}s` }]);
           break;
+        }
       }
     });
     setBusy(id);
@@ -101,8 +109,16 @@ export function AgentPanel() {
             ))}
           </div>
         )}
-        {msgs.map(m => (
-          m.role === 'tool' ? (
+        {msgs.map((m, mi) => (
+          m.role === 'revert' ? (
+            <div class="msg revert">
+              <span class="muted small">{m.steps} change{m.steps === 1 ? '' : 's'} by the agent</span>
+              <button class="ghost" disabled={editor.store.historyLength !== m.endMarker} title={editor.store.historyLength !== m.endMarker ? 'You made changes after this turn; use Undo (⌘Z) instead' : ''} onClick={() => {
+                const n = editor.store.undoTo(m.marker!);
+                setMsgs(all => all.map((x, j) => (j === mi ? { ...x, role: 'info', text: `reverted ${n} change${n === 1 ? '' : 's'}` } : x)));
+              }}>Undo agent changes</button>
+            </div>
+          ) : m.role === 'tool' ? (
             <details class={'msg tool' + (m.tool?.isError ? ' err' : '')}>
               <summary>{m.tool!.result === undefined ? '⋯' : m.tool!.isError ? '✕' : '✓'} {m.tool!.name.replace(/^mcp__motion__/, '')}</summary>
               <pre>{JSON.stringify(m.tool!.input, null, 1)}</pre>

@@ -139,6 +139,14 @@ export class Store {
   }
 
   get canUndo() { return this.undoStack.length > 0; }
+  /** marker for "undo everything since" (agent turns) */
+  get historyLength() { return this.undoStack.length; }
+  /** undo until the undo stack is back at `marker`. returns steps undone */
+  undoTo(marker: number) {
+    let n = 0;
+    while (this.undoStack.length > marker) { this.undo(); n++; }
+    return n;
+  }
   get canRedo() { return this.redoStack.length > 0; }
   get undoLabel() { return this.undoStack[this.undoStack.length - 1]?.label; }
 

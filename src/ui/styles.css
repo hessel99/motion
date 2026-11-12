@@ -157,3 +157,4 @@ code { background: #111; padding: 1px 4px; border-radius: 3px; }
 .xv-bar > div { height: 100%; background: var(--accent); transition: width .1s linear; }
 .xv-stat { display: flex; justify-content: space-between; font-size: 11px; margin-top: 4px; font-variant-numeric: tabular-nums; }
 .xv-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.msg.revert { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #17171a; border: 1px solid var(--line); border-radius: 6px; padding: 4px 4px 4px 8px; }
