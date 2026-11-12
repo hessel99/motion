@@ -13,6 +13,7 @@ import { compileExpr, runExpr, type ExprContext } from '../core/expr';
 import { PROP_DEFS, type Layer, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
 import { Atlas, type AtlasEntry } from './atlas';
+import { loadBundledFonts } from './fonts';
 import { cubicBezier, EASE_PRESETS, springAt } from '../core/easing';
 import { layoutText, textUnits, type TextUnit, rasterImage, rasterPath, rasterShapePaint, rasterText, setImageLoadedHandler, type RasterResult } from './raster';
 
@@ -324,6 +325,8 @@ export class Renderer {
     gl.uniform1i(gl.getUniformLocation(this.prog, 'uTex'), 0);
 
     store.onChange(c => this.onChange(c));
+    // bundled fonts arrive async: re-raster text once they are loaded (no-op if already cached)
+    loadBundledFonts().then(() => { this.invalidateText(); });
     setImageLoadedHandler(() => { for (const it of this.items) if (it.layer.type === 'image') { it.rasterKey = null; it.entry = null; } this.dirty = true; });
     this.canvas.addEventListener('webglcontextlost', e => e.preventDefault());
   }
@@ -352,6 +355,14 @@ export class Renderer {
   }
 
   invalidate() { this.dirty = true; }
+
+  /** drop cached text rasters (fonts changed) */
+  invalidateText() {
+    for (const it of this.items) if (it.layer.type === 'text') { it.rasterBase = (it.rasterBase ?? '') + '~f'; it.entry = null; it.rasterKey = null; it.units = it.units?.map(u => ({ ...u, entry: null, raster: null })) ?? null; }
+    this.fontGen++;
+    this.dirty = true;
+  }
+  private fontGen = 0;
 
   // ---------------- compile ----------------
 
@@ -500,7 +511,7 @@ export class Renderer {
       case 'text': {
         const t = l.text!;
         const s = l.props.size?.v ?? [0, 0];
-        return `t${t.content}|${t.fontFamily}|${t.fontWeight}|${t.fontStyle}|${t.fontSize}|${t.lineHeight}|${t.letterSpacing}|${t.align}|${Math.round(s[0])}x${Math.round(s[1])}`;
+        return `t${this.fontGen}|${t.content}|${t.fontFamily}|${t.fontWeight}|${t.fontStyle}|${t.fontSize}|${t.lineHeight}|${t.letterSpacing}|${t.align}|${Math.round(s[0])}x${Math.round(s[1])}`;
       }
       case 'image': return `i${l.imageRef}`; // images stretch to the size box (see raster placement below)
       default: {
@@ -714,6 +725,7 @@ export class Renderer {
   private pendingKeys = new Set<string>();
   private nextJob = 1;
   asyncRasters = 0;
+  workerErrors: string[] = [];
 
   private requestAsync(key: string, l: Layer, bucket: number, size: number[], radius: number[], strokeWidth: number) {
     if (this.pendingKeys.has(key)) return;
@@ -722,7 +734,7 @@ export class Renderer {
         for (let w = 0; w < 2; w++) {
           const worker = new Worker(new URL('./raster-worker.ts', import.meta.url), { type: 'module' });
           worker.onmessage = ev => this.onRasterDone(ev.data);
-          worker.onerror = () => { this.workersOk = false; };
+          worker.onerror = (ev) => { this.workersOk = false; this.workerErrors.push(String((ev as ErrorEvent).message ?? 'worker error')); };
           this.workers.push(worker);
         }
       } catch { this.workersOk = false; return; }
@@ -739,6 +751,7 @@ export class Renderer {
     this.pending.delete(msg.id);
     if (!key) return;
     this.pendingKeys.delete(key);
+    if (msg.error) this.workerErrors.push(msg.error);
     const r = msg.result;
     if (!r) return;
     if (this.atlas.has(key)) return;

@@ -3,6 +3,9 @@
 
 import { rasterPath, rasterShapePaint, rasterText, type RasterResult } from './raster';
 import type { Layer } from '../core/model';
+import { loadBundledFonts } from './fonts';
+
+const fontsReady = loadBundledFonts(self.location.href);
 
 export interface RasterJob {
   id: number;
@@ -13,8 +16,9 @@ export interface RasterJob {
   strokeWidth: number;
 }
 
-self.onmessage = (ev: MessageEvent<RasterJob>) => {
+self.onmessage = async (ev: MessageEvent<RasterJob>) => {
   const j = ev.data;
+  if (j.layer.type === 'text') await fontsReady;
   let r: RasterResult | null = null;
   try {
     const l = j.layer;

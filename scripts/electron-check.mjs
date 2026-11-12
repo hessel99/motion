@@ -16,7 +16,15 @@ const info = await win.evaluate(async () => ({
   layers: Object.keys(editor.store.project.layers).length,
 }));
 console.log(JSON.stringify(info));
-await win.evaluate(() => editor.store.setTime(2));
+const w = await win.evaluate(async () => {
+  const { loadStress } = await import('./assets/' + [...document.scripts].map(s => s.src).find(x => x.includes('index'))?.split('/').pop()).catch(() => ({}));
+  void loadStress;
+  editor.store.setTime(2); await new Promise(r => setTimeout(r, 300)); viewport.setZoom(viewport.zoom * 4);
+  await new Promise(r => setTimeout(r, 2500));
+  const R = editor.renderer; return { workersOk: R.workersOk, asyncRasters: R.asyncRasters, workers: R.workers.length, pending: R.pending.size, errs: R.workerErrors, fonts: [...document.fonts].filter(f => f.family === 'Inter' && f.status === 'loaded').length };
+});
+console.log('workers/fonts:', JSON.stringify(w));
+await win.evaluate(() => { viewport.fit(); editor.store.setTime(2); });
 await win.waitForTimeout(300);
 await win.screenshot({ path: process.argv[2] || 'electron.png' });
 console.log(errs.length ? errs : 'no errors');
