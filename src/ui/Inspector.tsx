@@ -7,7 +7,8 @@ import {
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { starGeometry } from '../core/shapes';
 import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
-import { BLEND_MODES, PROP_DEFS, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
+import { BLEND_MODES, PROP_DEFS, propDef, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
+import { ShaderPanel } from './ShaderPanel';
 import { useChannels } from './hooks';
 import { menuFrom, type MenuItem } from './menu';
 import { ANIM_PRESETS, alignLayers, applyPreset, distributeLayers, setTextAnim, TEXT_ANIM_PRESETS, type Align } from '../core/presets';
@@ -42,7 +43,7 @@ export function Inspector() {
 export { NumField };
 
 // ---------------- keyframe toggle ----------------
-function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
+export function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
   const store = st();
   const animated = props.layers.some(l => isAnimated(l, props.prop));
   const atKey = props.layers.some(l => l.props[props.prop]?.kf?.some(k => Math.abs(k.t - store.time) < 1e-6));
@@ -57,7 +58,7 @@ function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
     (globalThis as any).timeline?.expand(ids[0], true);
   };
   return (
-    <button type="button" tabIndex={-1} class={'keybtn' + (animated ? ' animated' : '') + (atKey ? ' at' : '')} title={animated ? 'Add/remove keyframe (alt: stop animating)' : 'Animate this property'} aria-label={(atKey ? 'Remove keyframe: ' : 'Add keyframe: ') + PROP_DEFS[props.prop].label} onClick={click}>
+    <button type="button" tabIndex={-1} class={'keybtn' + (animated ? ' animated' : '') + (atKey ? ' at' : '')} title={animated ? 'Add/remove keyframe (alt: stop animating)' : 'Animate this property'} aria-label={(atKey ? 'Remove keyframe: ' : 'Add keyframe: ') + propDef(props.prop).label} onClick={click}>
       <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0.8 L9.2 5 L5 9.2 L0.8 5 Z" /></svg>
     </button>
   );
@@ -65,7 +66,7 @@ function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
 
 /** keyframe navigation of one property, after effects style: previous key, add / remove a key
  *  at the playhead (the diamond), next key. the arrows show once the property is animated */
-function KeyNav(props: { layers: Layer[]; prop: PropKey }) {
+export function KeyNav(props: { layers: Layer[]; prop: PropKey }) {
   const store = st();
   const animated = props.layers.some(l => isAnimated(l, props.prop));
   const t = store.time;
@@ -74,7 +75,7 @@ function KeyNav(props: { layers: Layer[]; prop: PropKey }) {
     if (k.t < t - 1e-6 && k.t > prev) prev = k.t;
     if (k.t > t + 1e-6 && k.t < next) next = k.t;
   }
-  const label = PROP_DEFS[props.prop].label;
+  const label = propDef(props.prop).label;
   return (
     <span class={'keynav' + (animated ? ' animated' : '')}>
       <button type="button" tabIndex={-1} class="keynav-step" disabled={!animated || prev === -Infinity} aria-label={`Previous ${label} keyframe`} title="Previous keyframe" onClick={() => store.setTime(prev)}><ChevronLeft size={12} /></button>
@@ -243,6 +244,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
           </>}
         </Section>
       )}
+      {layers.length === 1 && l.type !== 'audio' && <ShaderPanel layer={l} />}
       {layers.length === 1 && l.type === 'text' && <TextPanel layer={l} />}
       {layers.every(x => x.type === 'path') && (
         <Section title="Trim paths" right={<Toggle checked={!!l.trimOn} label={<span class="sr-only">Trim paths</span>} onChange={on => setLayerField(store, ids, 'trimOn', on, 'Trim paths')} />}>
@@ -451,7 +453,7 @@ function GradientEditor({ layer }: { layer: Layer }) {
   );
 }
 
-function ColorField({ value, onChange }: { value: number[]; onChange: (c: number[], mk?: string) => void }) {
+export function ColorField({ value, onChange }: { value: number[]; onChange: (c: number[], mk?: string) => void }) {
   const hex = '#' + value.slice(0, 3).map(c => Math.round(Math.min(1, Math.max(0, c)) * 255).toString(16).padStart(2, '0')).join('');
   const mk = useRef('color' + Math.random());
   return (
@@ -545,7 +547,7 @@ function EasePanel() {
   const cur: [number, number, number, number] = a && b ? (a.interp === 'linear' ? [0, 0, 1, 1] : [a.out[0], a.out[1], b.in[0], b.in[1]]) : [0.333, 0, 0.667, 1];
   const active = EASE_PRESETS.find(p => p.v.every((x, i) => Math.abs(x - cur[i]) < 1e-3));
   return (
-    <Section title={`Easing · ${keys.length} key${keys.length > 1 ? 's' : ''}`} right={<span class="row" style={{ margin: 0 }}>{seg && <span class="insp-type">{PROP_DEFS[seg.key].label}</span>}<StudioSwitch /></span>}>
+    <Section title={`Easing · ${keys.length} key${keys.length > 1 ? 's' : ''}`} right={<span class="row" style={{ margin: 0 }}>{seg && <span class="insp-type">{propDef(seg.key).label}</span>}<StudioSwitch /></span>}>
       {studioEnabled() && <EaseStudio />}
       {showClassicEase() && <>
       {a && b && seg && a.interp === 'spring' && <SpringView bounce={a.bounce ?? 0.3} onChange={v => setSpring(store, keys, v)} />}
@@ -834,7 +836,7 @@ function ExprPanel({ layers }: { layers: Layer[] }) {
     <Section title="Expressions" right={
       <select class="expr-add" value="" onChange={add}>
         <option value="">+ add</option>
-        {keys.filter(k => !withExpr.includes(k)).map(k => <option value={k}>{PROP_DEFS[k].label}</option>)}
+        {keys.filter(k => !withExpr.includes(k)).map(k => <option value={k}>{propDef(k).label}</option>)}
       </select>
     }>
       {withExpr.length === 0 && <div class="muted small">e.g. wiggle(2, 20), time * 90, loopOut('cycle')</div>}
@@ -850,13 +852,13 @@ function ExprRow({ ids, k, src }: { ids: string[]; k: PropKey; src: string }) {
   // lags behind the keystrokes (invalid partial input isn't committed) and would overwrite them
   const focused = useRef(false);
   useEffect(() => { if (!focused.current) setText(src); }, [src]);
-  const err = checkExpr(text, PROP_DEFS[k].dim);
+  const err = checkExpr(text, propDef(k).dim);
   const mk = useRef('expr' + Math.random());
   return (
     <div class="expr-row">
-      <div class="row small"><span>{PROP_DEFS[k].label}</span><span style={{ flex: 1 }} /><button type="button" class="ghost icon btn-sm" title="Remove expression" aria-label="Remove expression" onClick={() => setExpr(store, ids, k, undefined)}><X size={14} /></button></div>
+      <div class="row small"><span>{propDef(k).label}</span><span style={{ flex: 1 }} /><button type="button" class="ghost icon btn-sm" title="Remove expression" aria-label="Remove expression" onClick={() => setExpr(store, ids, k, undefined)}><X size={14} /></button></div>
       <textarea class={'expr-edit' + (err ? ' bad' : '')} rows={2} value={text} spellcheck={false}
-        onInput={e => { const v = (e.target as HTMLTextAreaElement).value; setText(v); if (!checkExpr(v, PROP_DEFS[k].dim)) setExpr(store, ids, k, v, mk.current); }}
+        onInput={e => { const v = (e.target as HTMLTextAreaElement).value; setText(v); if (!checkExpr(v, propDef(k).dim)) setExpr(store, ids, k, v, mk.current); }}
         onFocus={() => { focused.current = true; }}
         onBlur={() => { focused.current = false; mk.current = 'expr' + Math.random(); }}
         onKeyDown={e => e.stopPropagation()} />

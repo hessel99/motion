@@ -18,6 +18,9 @@ figma-captures/
 # update signing key (scripts/gen-update-key.mjs): never commit
 .update-key/
 
+# figma shader sources fetched for local tests (figma code: never commit)
+.figma-cache/
+bench/results/shaders/
 # agent eval: transcoder intermediates (results are committed, mp4s are kept < 2 MB)
 evals/results/**/*.raw.*
 # figma / svg fidelity harness (scripts/figma-fidelity.mjs): ground truth renders, node dumps and

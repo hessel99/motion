@@ -13,6 +13,7 @@ import { compileExpr, compileProgram, runProgram, type ExprFrame, type ExprProgr
 import { PROP_DEFS, type Layer, type Paint, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
 import { Atlas, type AtlasEntry } from './atlas';
+import { ShaderHost, type FxFrame, type ItemShaders } from './shader-host';
 import type { PathGeometry, PathKey } from '../core/model';
 import { loadBundledFonts } from './fonts';
 import { EffectEval, hasEffects, needsBlendShader, type ResolvedEffect } from './effects';
@@ -25,6 +26,10 @@ const KIND_RECT = 0, KIND_ELLIPSE = 1, KIND_MASK = 2, KIND_RGBA = 3, KIND_NONE =
 // rect / ellipse with one linear or radial gradient paint: sdf shape, gradient evaluated in the
 // shader from a ramp texture (no raster, no atlas space; size / radius animate for free)
 const KIND_GRECT = 5, KIND_GELL = 6;
+// shader fills (instance kinds only: the item keeps its rect / ellipse / mask kind for everything else)
+const KIND_SHD_RECT = 7, KIND_SHD_ELL = 8, KIND_SHD_MASK = 9;
+/** sBits: the item has a shader fill / shader effects */
+const SB_SHD = 64, SB_FX = 128;
 const RAMP_W = 256;
 /** gradient kinds the instance shader draws (vJ.z): linear, radial, angular, diamond */
 const GRAD_MODE: Partial<Record<Paint['type'], number>> = { linear: 0, radial: 1, angular: 2, diamond: 3 };
@@ -72,7 +77,7 @@ void main() {
   vec2 size = iB.zw;
   float kind = iF.w;
   vec2 lp;
-  if (kind >= 1.5 && kind < 4.5) {
+  if ((kind >= 1.5 && kind < 4.5) || kind > 8.5) {
     lp = q * size;
     vUV = mix(iUV.xy, iUV.zw, q);
   } else {
@@ -84,7 +89,7 @@ void main() {
     vec2 pad = aa + vec2(ext);
     lp = -pad + q * (size + 2.0 * pad);
     // gradient kinds: gradient-space coordinate (affine, so interpolation is exact)
-    vUV = kind > 4.5 ? mat2(iFill.xy, iFill.zw) * lp + iUV.xy : vec2(0.0);
+    vUV = kind > 4.5 && kind < 6.5 ? mat2(iFill.xy, iFill.zw) * lp + iUV.xy : vec2(0.0);
   }
   vec2 w = mat2(iA.xy, iA.zw) * lp + iB.xy;
   vec2 s = w * uView.x + uView.yz;
@@ -110,6 +115,7 @@ uniform sampler2D uRamp;
 uniform float uRampH;
 uniform sampler2D uDyn;
 uniform float uDynH;
+uniform sampler2D uShd;
 // coverage mode (effects: shadow source, knock-out, backdrop clip; vector masks): shape coverage, no color
 uniform float uCov;
 in vec2 vLocal;
@@ -148,8 +154,11 @@ void main() {
   vec4 stroke = vec4(vStroke.rgb * vStroke.a, vStroke.a);
   vec4 col;
   float cv = 0.0;
-  if (kind < 1.5 || kind > 4.5) {
-    if (kind > 4.5) {
+  if (kind < 1.5 || (kind > 4.5 && kind < 8.5)) {
+    if (kind > 6.5) {
+      // shader fill: the layer's shader result (premultiplied) spans the box
+      fill = textureLod(uShd, mix(vFill.xy, vFill.zw, clamp(vLocal / max(vSize, vec2(1e-6)), 0.0, 1.0)), 0.0) * vJ.w;
+    } else if (kind > 4.5) {
       float gt;
       if (vJ.z < 0.5) gt = vUV.x;
       else if (vJ.z < 1.5) gt = length(vUV - 0.5) * 2.0;
@@ -159,7 +168,7 @@ void main() {
     }
     vec2 h = vSize * 0.5;
     vec2 p = vLocal - h;
-    float d = (kind < 0.5 || (kind > 4.5 && kind < 5.5)) ? sdRoundBox(p, h, vRadii) : sdEllipse(p, h);
+    float d = (kind < 0.5 || (kind > 4.5 && kind < 5.5) || (kind > 6.5 && kind < 7.5)) ? sdRoundBox(p, h, vRadii) : sdEllipse(p, h);
     float w = max(fwidth(d), 1e-4);
     float fc = clamp(0.5 - d / w, 0.0, 1.0);
     float sw = vF.x;
@@ -174,7 +183,13 @@ void main() {
   } else {
     // page -1: per-frame shapes (their own canvas texture, 2048 wide, uDynH tall)
     vec4 t = vH.x < -0.5 ? textureLod(uDyn, vec2(vUV.x, vUV.y * 2048.0 / uDynH), 0.0) : textureLod(uTex, vec3(vUV, vH.x), 0.0);
-    if (kind < 2.5) {
+    if (kind > 8.5) {
+      // shader fill through a coverage raster (paths, text): vRadii maps the quad to the layer box
+      vec2 suv = clamp(vLocal * vRadii.xy + vRadii.zw, 0.0, 1.0);
+      vec4 sc = textureLod(uShd, mix(vFill.xy, vFill.zw, suv), 0.0) * vJ.w;
+      col = stroke * t.g + sc * t.r * (1.0 - stroke.a * t.g);
+      cv = max(t.r, stroke.a > 0.0 ? t.g : 0.0);
+    } else if (kind < 2.5) {
       col = stroke * t.g + fill * t.r * (1.0 - stroke.a * t.g);
       cv = max(fill.a > 0.0 ? t.r : 0.0, stroke.a > 0.0 ? t.g : 0.0);
     } else {
@@ -213,6 +228,8 @@ void main() {
 // command list for one frame (offscreen isolation for group opacity + masks)
 const CMD_DRAW = 0, CMD_PUSH = 1, CMD_POP = 2, CMD_MASK = 3, CMD_BLEND = 4, CMD_FXPOP = 5, CMD_MASKMODE = 6;
 const MASK_MODE: Record<string, number> = { alpha: 0, luminance: 1, vector: 2 };
+// figma shader fills / effects (render/shader-host.ts)
+const CMD_SHD = 7, CMD_SFXPOP = 8;
 const BLEND_IDS: Record<string, number> = { normal: 0, multiply: 1, screen: 2, add: 3, darken: 4, lighten: 5 };
 
 interface UnitState { unit: TextUnit; delay: number; ease: (p: number) => number; entry: AtlasEntry | null; raster: RasterResult | null; scale: number }
@@ -258,6 +275,8 @@ interface Item {
   /** unscaled raster box cache (rasterBox), keyed by what it depends on */
   boxKey?: string;
   box?: [number, number, number, number];
+  /** shader fill / effects (render/shader-host.ts) */
+  shd?: ItemShaders | null;
 }
 
 const TR_KEYS: PropKey[] = ['anchor', 'position', 'scale', 'rotation', 'opacity', 'size', 'radius', 'fill', 'stroke', 'strokeWidth'];
@@ -402,11 +421,26 @@ export class Renderer {
   private pendingUpgrade = false;
   lastTime = -1;
 
+  /** figma shaders: fills, effects, the sandboxed webgpu worker */
+  readonly shaders: ShaderHost;
+  /** shader state per layer occurrence (layer id @ time offset): survives recompiles */
+  private shdMap = new Map<string, ItemShaders>();
+  /** effect frame of each isolated region (by box index), this frame */
+  private fxOf = new Map<number, FxFrame>();
+  /** textures bound by CMD_SHD this frame */
+  private shdTex: WebGLTexture[] = [];
+  /** document edits (effect inputs depend on everything below them) */
+  private editGen = 0;
+  /** a shader result arrived: draw again (no instance rewrite needed) */
+  redraw = false;
+
   constructor(private store: Store, canvas?: HTMLCanvasElement) {
     this.canvas = canvas ?? document.createElement('canvas');
     const gl = this.canvas.getContext('webgl2', { antialias: false, alpha: false, premultipliedAlpha: true, preserveDrawingBuffer: false, powerPreference: 'high-performance' });
     if (!gl) throw new Error('webgl2 not available');
     this.gl = gl;
+    this.shaders = new ShaderHost(gl, store);
+    this.shaders.onResult = () => { this.redraw = true; };
     this.atlas = new Atlas(gl);
     this.atlas.onEvict = key => { this.rasterMeta.delete(key); };
     this.initGL();
@@ -418,7 +452,7 @@ export class Renderer {
     setAssetLookup(id => this.store.project.assets[id]);
     // gpu resets (macos gpu switch, sleep, driver crash): rebuild everything; atlas pages come back
     // from their cpu shadow copies, so nothing has to be re-rasterized
-    this.canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.contextLost = true; });
+    this.canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.contextLost = true; this.shaders.contextLost(); });
     this.canvas.addEventListener('webglcontextrestored', () => {
       this.contextLost = false;
       this.initGL();
@@ -427,6 +461,8 @@ export class Renderer {
       this.cprog = null;
       this.fxp = null;
       this.icap = 0;
+      this.shaders.contextRestored();
+      for (const sd of this.shdMap.values()) { sd.f.tex = sd.e.tex = null; sd.f.shown = sd.e.shown = -1; }
       this.dirty = true;
       this.contextRestores++;
     });
@@ -461,6 +497,7 @@ export class Renderer {
     gl.uniform1i(gl.getUniformLocation(this.prog, 'uRamp'), 3);
     this.uRampH = gl.getUniformLocation(this.prog, 'uRampH')!;
     gl.uniform1i(gl.getUniformLocation(this.prog, 'uDyn'), 4);
+    gl.uniform1i(gl.getUniformLocation(this.prog, 'uShd'), 5);
     this.uDynH = gl.getUniformLocation(this.prog, 'uDynH')!;
     this.uCov = gl.getUniformLocation(this.prog, 'uCov')!;
     gl.uniform1f(this.uCov, 0);
@@ -571,6 +608,7 @@ export class Renderer {
   }
 
   private onChange(c: Change) {
+    this.editGen++;
     for (const id of c.layers) this.changedLayers.add(id);
     if (c.structure || c.comp) this.needsCompile = true;
     else for (const id of c.layers) this.dirtyLayers.add(id);
@@ -730,6 +768,13 @@ export class Renderer {
       SRC[i] = src >= 0 && !this.sExpr[i] && !this.sExpr[src] ? src : -1;
     }
     this.lastReused = reused;
+    if (this.shdMap.size) {
+      // re-key by the items' current occurrence (reused items may have moved) and free the rest
+      const next = new Map<string, ItemShaders>(), live = new Set<ItemShaders>();
+      for (const it of this.items) if (it.shd) { next.set(`${it.id}@${it.tOff}`, it.shd); live.add(it.shd); }
+      for (const sd of this.shdMap.values()) if (!live.has(sd)) this.shaders.detach(sd);
+      this.shdMap = next;
+    }
     this.needsCompile = false;
     this.forceFull = false;
     this.dirtyLayers.clear();
@@ -770,6 +815,12 @@ export class Renderer {
     out.push(l.type, l.props, pv, l.paints, l.geometry, l.strokeGeometry, l.strokeAlign, l.text, l.textAnim, l.pathKf, l.trimOn, l.imageRef, l.mask, l.blend, this.fontGen,
       l.strokePaints, l.dash, l.strokeCap, l.strokeJoin, l.miterLimit, l.strokeSides, l.smoothing, l.effects, l.maskType);
     for (const key of SIG_KEYS) { const p = pv?.[key] ?? l.props[key]; out.push(p, p?.v, p?.kf, p?.expr); }
+    if (l.shaderEffects || l.paints) {
+      // shaders: their refs, the library entries and every param prop
+      out.push(l.shaderEffects, this.store.project.shaders);
+      const P = l.props as Record<string, import('../core/model').Prop | undefined>;
+      for (const key in P) if (key.startsWith('sh:')) { const p = P[key]; out.push(p, p?.v, p?.kf, p?.expr); }
+    }
     return out;
   }
   private sigSame(l: Layer) {
@@ -900,7 +951,14 @@ export class Renderer {
     // a group's blend mode applies to its composite (figma, after effects): isolate it too
     it.fxBlend = !l.mask && (needsBlendShader(l.blend) || ((it.fx || it.isoGroup) && l.blend && l.blend !== 'normal')) ? BLEND_SHADER[l.blend!] ?? 0 : 0;
     if (it.fx?.animated) it.animated = true;
-    this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0) | (it.fx || it.fxBlend ? 16 : 0);
+    // shaders (fill and/or effects): results survive recompiles of the same layer occurrence
+    const sk = `${l.id}@${it.tOff}`;
+    const shd = (l.paints || l.shaderEffects) ? this.shaders.attach(l, i, this.shdMap.get(sk) ?? null) : null;
+    if (!shd) { const old = this.shdMap.get(sk); if (old) { this.shaders.detach(old); this.shdMap.delete(sk); } }
+    else this.shdMap.set(sk, shd);
+    it.shd = shd;
+    const shdFill = !!shd?.fill && (it.kind === KIND_RECT || it.kind === KIND_ELLIPSE || it.kind === KIND_MASK);
+    this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0) | (it.fx || it.fxBlend ? 16 : 0) | (shdFill ? SB_SHD : 0) | (shd?.fx.length && !l.mask ? SB_FX : 0);
     this.sBlend[i] = it.fx || it.fxBlend ? 0 : l.blend ? BLEND_IDS[l.blend] ?? 0 : 0;
     this.sAlign[i] = l.strokeAlign === 'inside' ? -1 : l.strokeAlign === 'outside' ? 1 : 0;
   }
@@ -1619,6 +1677,9 @@ export class Renderer {
     // anything but the time moving (edits, view, rasters arriving, context restore) sets dirty:
     // then every instance is rewritten. during plain playback only changed items are.
     let full = !this.incremental || this.dirty || retry || this.syncRaster || this.cullOffscreen !== this.lastCull || this.needsCompile || this.dirtyLayers.size > 0;
+    // shader effects re-capture their input after edits / raster arrivals (not while settling an export frame)
+    this.fxDirty = !this.settling && (this.dirty || this.needsCompile || this.dirtyLayers.size > 0);
+    this.fxEval = false;
     this.lastCull = this.cullOffscreen;
     const compactions0 = this.atlas.compactions + this.atlas.generation;
     const store = this.store;
@@ -1638,6 +1699,9 @@ export class Renderer {
     }
     this.atlas.frame++;
     this.dynMaintain();
+    this.redraw = false;
+    const shd = this.shdMap.size > 0;
+    if (shd) { this.shaders.unsettled = 0; this.shaders.poll(); this.fxOf.clear(); this.shdTex.length = 0; }
     this.zooming = !this.syncRaster && f0 - this.gestureAt < ZOOM_SETTLE;
     this.tileWant.length = 0;
     this.tileReserve = Math.max(this.tileReserve, this.tileInstances + 64);
@@ -1646,8 +1710,10 @@ export class Renderer {
     // same time + only a few layers edited (dragging while paused): re-evaluate just their subtrees
     if (t === this.evalTime && !this.evalAll && this.dirtyIdx.length && this.dirtyIdx.length < 64) {
       for (const i of this.dirtyIdx) this.evaluateRange(t, i, this.subEnd[i], true);
+      this.fxEval = true;
     } else if (t !== this.evalTime || this.evalAll || this.dirtyIdx.length) {
       this.evaluate(t, this.evalAll || this.dirtyIdx.length > 0);
+      this.fxEval = true;
     }
     this.evalTime = t;
     this.evalAll = false;
@@ -1684,7 +1750,7 @@ export class Renderer {
     cmds.length = 0;
     let pending = 0; // first instance not yet covered by a DRAW command
     // open isolation regions: end index, composite opacity, divisor to restore, optional mask range
-    const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number; box: number; fx: number; kStart: number; mode: number }[] = [];
+    const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number; box: number; fx: number; kStart: number; mode: number; sfx?: boolean }[] = [];
     const fxFrame = this.fxFrame;
     fxFrame.length = 0;
     // screen bounds (device px) of what each isolated region draws: its offscreen clear and its
@@ -1721,7 +1787,7 @@ export class Renderer {
           R.kStart = r.kStart; R.kCount = k - r.kStart;
           if (boxes[bi] <= boxes[bi + 2]) { boxes[bi] -= R.pad; boxes[bi + 1] -= R.pad; boxes[bi + 2] += R.pad; boxes[bi + 3] += R.pad; }
           cmds.push(CMD_FXPOP, r.box, r.fx);
-        } else cmds.push(CMD_POP, r.box, r.opacity);
+        } else cmds.push(r.sfx ? CMD_SFXPOP : CMD_POP, r.box, r.opacity);
         if (stack.length) {
           // the composite lands inside the parent region
           const pb = stack[stack.length - 1].box, cb = r.box;
@@ -1763,10 +1829,31 @@ export class Renderer {
         div = O[i];
         isolated++;
       }
+      let fxf: FxFrame | null = null;
+      if ((bits & SB_FX) && !stack.some(r => r.maskEnd > i) && (fxf = this.planFx(i, t, z, px0, py0, cw0, ch0))) {
+        // shader effects: render the layer (with its children) offscreen, then the effect chain
+        // runs on it (render/shader-host.ts) and its result is composited (CMD_SFXPOP). nested inside
+        // the effect pipeline's region / group opacity when the layer has those too (they apply on top)
+        flush();
+        const box = newBox();
+        boxes[box] = fxf.sx0; boxes[box + 1] = fxf.sy0; boxes[box + 2] = fxf.sx1; boxes[box + 3] = fxf.sy1;
+        this.fxOf.set(box, fxf);
+        cmds.push(CMD_PUSH, box, 0);
+        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box, fx: -1, kStart: k, mode: 0, sfx: true });
+        div = O[i];
+        isolated++;
+      }
       if (kind === KIND_NONE) continue;
       // blend mode changes split the draw (only when used)
       const bm = BLEND[i];
       if (bm !== curBlend) { flush(); cmds.push(CMD_BLEND, bm, 0); curBlend = bm; }
+      if ((bits & SB_SHD) && !(bits & 4)) {
+        const tex = this.shaderFill(i, t, z, px0, py0, cw0, ch0, cullOn);
+        if (!tex) { lastK[i] = -1; culled++; continue; }
+        flush();
+        cmds.push(CMD_SHD, this.shdTex.length, 0);
+        this.shdTex.push(tex);
+      }
       if (bits & 4) {
         const r0 = performance.now();
         const k0 = k;
@@ -1796,12 +1883,13 @@ export class Renderer {
       }
       lastK[i] = -1;
       const os = i * ST, o6 = i * 6;
-      if (kind === KIND_RECT || kind === KIND_ELLIPSE) {
+      if ((kind === KIND_RECT || kind === KIND_ELLIPSE) && !(bits & SB_SHD)) {
         if (S[os + 9] <= 0 && (S[os + 14] <= 0 || S[os + 13] <= 0)) continue;
       }
       let a = W[o6], b = W[o6 + 1], c = W[o6 + 2], d = W[o6 + 3], e = W[o6 + 4], f = W[o6 + 5];
       let w = S[os], h = S[os + 1];
       let u0 = 0, v0 = 0, u1 = 0, v1 = 0, page = 0;
+      let shA = 0, shB = 0, shC = 0, shD = 0;
       // viewport culling: skip layers whose (padded) box is completely off-screen.
       // saves rasterization + atlas space for raster layers and fill work for everything.
       if (cullOn && !(bits & 1)) {
@@ -1844,7 +1932,7 @@ export class Renderer {
           }
         }
         const r0 = performance.now();
-        if (this.tilesOn && !it.dyn) {
+        if (this.tilesOn && !it.dyn && !(bits & SB_SHD)) {
           // big on screen: draw only the visible part, as tiles at screen resolution
           const k1 = this.writeTiles(i, k, a * gx, b * gx, c * gy, d * gy, e, f, scale0, scale, div !== 1 ? O[i] / div : O[i], budgetEnd);
           if (k1 >= 0) {
@@ -1862,6 +1950,11 @@ export class Renderer {
         if (!ok || !it.raster || !it.entry || it.entry.dead) continue;
         const ent = it.entry;
         const r = it.raster;
+        if (bits & SB_SHD) {
+          // quad (raster space) -> layer box uv, for the shader fill (instance radii slots)
+          const lw = S[os] || 1, lh = S[os + 1] || 1;
+          shA = gx / lw; shB = gy / lh; shC = r.x * gx / lw; shD = r.y * gy / lh;
+        }
         // matrix = W * S(gx,gy) * T(r.x, r.y)
         a *= gx; b *= gx; c *= gy; d *= gy;
         e += a * r.x + c * r.y;
@@ -1890,6 +1983,13 @@ export class Renderer {
       I[o + 23] = kind;
       I[o + 24] = u0; I[o + 25] = v0; I[o + 26] = u1; I[o + 27] = v1;
       I[o + 28] = page;
+      if (bits & SB_SHD) {
+        // shader fill: whole result texture, paint opacity in iJ.w
+        I[o + 12] = 0; I[o + 13] = 0; I[o + 14] = 1; I[o + 15] = 1;
+        I[o + 39] = items[i].shd!.fillOpacity;
+        if (kind === KIND_MASK) { I[o + 23] = KIND_SHD_MASK; I[o + 8] = shA; I[o + 9] = shB; I[o + 10] = shC; I[o + 11] = shD; }
+        else I[o + 23] = kind === KIND_ELLIPSE ? KIND_SHD_ELL : KIND_SHD_RECT;
+      }
       this.writeClip(I, o, CLIP[i]);
       {
         // screen aabb of the quad (+ sdf aa / stroke padding), for scissoring isolated regions
@@ -1995,6 +2095,79 @@ export class Renderer {
     st.uploadBytes = bytes;
     this.lastTime = t;
     this.dirty = this.pendingUpgrade;
+  }
+
+  /** shader fill of item i: request its frame, return the texture to draw (null = off-screen) */
+  private shaderFill(i: number, t: number, z: number, px0: number, py0: number, cw: number, ch: number, cull: boolean): WebGLTexture | null {
+    const sd = this.items[i].shd!, W = this.world, S = this.style, o6 = i * 6, os = i * ST;
+    const a = W[o6], b = W[o6 + 1], c = W[o6 + 2], d = W[o6 + 3], e = W[o6 + 4], f = W[o6 + 5];
+    const w = S[os], h = S[os + 1];
+    if (cull) {
+      const hx = w / 2, hy = h / 2;
+      const cx = (a * hx + c * hy + e) * z + px0, cy = (b * hx + d * hy + f) * z + py0;
+      const ex = (Math.abs(a) * hx + Math.abs(c) * hy) * z + 2, ey = (Math.abs(b) * hx + Math.abs(d) * hy) * z + 2;
+      if (cx + ex < 0 || cy + ey < 0 || cx - ex > cw || cy - ey > ch) return null;
+    }
+    const rs = Math.sqrt(Math.abs(a * d - b * c)) * z;
+    return this.shaders.fill(sd, w, h, rs, t - this.sTOff[i], this.store.comp, this.sIn[i]);
+  }
+
+  /** shader effects of item i: its screen region and whether it must be captured this frame.
+   *  null = no region (off-screen, or effects can't run: then the layer draws unchanged) */
+  private fxDirty = false;
+  private fxEval = false;
+  private settling = false;
+  private planFx(i: number, t: number, z: number, px0: number, py0: number, cw: number, ch: number): FxFrame | null {
+    const sd = this.items[i].shd;
+    if (!sd || !sd.fx.length) return null;
+    const W = this.world, S = this.style, o6 = i * 6, os = i * ST;
+    const a = W[o6], b = W[o6 + 1], c = W[o6 + 2], d = W[o6 + 3], e = W[o6 + 4], f = W[o6 + 5];
+    const w = S[os], h = S[os + 1];
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (let k = 0; k < 4; k++) {
+      const X = k & 1 ? w : 0, Y = k & 2 ? h : 0;
+      const sx = (a * X + c * Y + e) * z + px0, sy = (b * X + d * Y + f) * z + py0;
+      if (sx < x0) x0 = sx; if (sx > x1) x1 = sx; if (sy < y0) y0 = sy; if (sy > y1) y1 = sy;
+    }
+    // clamp to the target (and to the comp when it clips: the offscreen target is only cleared there)
+    let lx = 0, ly = 0, hx = cw, hy = ch;
+    if (this.clipToComp) { const comp = this.store.comp; lx = Math.max(0, Math.round(px0)); ly = Math.max(0, Math.round(py0)); hx = Math.min(cw, Math.round(px0 + comp.width * z)); hy = Math.min(ch, Math.round(py0 + comp.height * z)); }
+    const sx0 = Math.max(lx, Math.floor(x0)), sy0 = Math.max(ly, Math.floor(y0)), sx1 = Math.min(hx, Math.ceil(x1)), sy1 = Math.min(hy, Math.ceil(y1));
+    if (sx1 - sx0 < 1 || sy1 - sy0 < 1) return null;
+    const fr = sd.frame ?? (sd.frame = { item: i, shaders: sd, key: 0, capture: false, sx0: 0, sy0: 0, sx1: 0, sy1: 0, cw: 0, ch: 0, rs: 1, rect: [0, 0, 0, 0], time: 0 });
+    fr.item = i; fr.shaders = sd;
+    fr.sx0 = sx0; fr.sy0 = sy0; fr.sx1 = sx1; fr.sy1 = sy1;
+    const pw = sx1 - sx0, ph = sy1 - sy0;
+    const q = Math.min(1, Math.sqrt(2048 * 2048 / (pw * ph)));
+    fr.cw = Math.max(1, Math.round(pw * q)); fr.ch = Math.max(1, Math.round(ph * q));
+    fr.rs = Math.sqrt(Math.abs(a * d - b * c)) * z * q;
+    fr.rect[0] = (sx0 - px0) / z; fr.rect[1] = (sy0 - py0) / z; fr.rect[2] = (sx1 - px0) / z; fr.rect[3] = (sy1 - py0) / z;
+    // what the effect input depends on: edits / animation below it (changed flags), async rasters
+    // (dirty frames) and the shader results of the layers inside
+    let changed = this.fxDirty, sig = 0;
+    const end = this.subEnd[i], CHG = this.chg, ev = this.fxEval;
+    for (let j = i; j < end; j++) {
+      if (ev && CHG[j]) changed = true;
+      const cs = this.items[j].shd;
+      if (cs) sig = (Math.imul(sig, 31) + cs.f.shown + (j > i ? cs.e.shown : 0)) | 0;
+    }
+    if (sig !== sd.childSig) { sd.childSig = sig; changed = true; }
+    if (changed) sd.contentGen++;
+    if (!this.shaders.fxPlan(fr, sd, t - this.sTOff[i], sd.contentGen, this.store.comp, this.sIn[i])) return null;
+    return fr;
+  }
+
+  /** wait until every shader layer shows the result of time t (exports): renders t again as results arrive */
+  async settleShaders(t: number, timeoutMs = 30000): Promise<void> {
+    if (!this.shdMap.size) return;
+    const end = performance.now() + timeoutMs;
+    this.settling = true;
+    try {
+      while ((this.shaders.unsettled > 0 || this.shaders.inflight > 0) && performance.now() < end) {
+        await this.shaders.nextResult(250);
+        this.render(t);
+      }
+    } finally { this.settling = false; }
   }
 
   private writeClip(I: Float32Array, o: number, clip: number) {
@@ -2277,6 +2450,11 @@ export class Renderer {
       const type = cmds[c], a = cmds[c + 1], b = cmds[c + 2];
       if (type === CMD_DRAW) this.drawRange(a, b);
       else if (type === CMD_BLEND) this.setBlend(a);
+      else if (type === CMD_SHD) {
+        gl.activeTexture(gl.TEXTURE5);
+        gl.bindTexture(gl.TEXTURE_2D, this.shdTex[a]);
+        gl.activeTexture(gl.TEXTURE0);
+      }
       else if (type === CMD_PUSH) {
         const f = this.fbo(depth);
         depth++;
@@ -2317,6 +2495,32 @@ export class Renderer {
         masks[depth] = mf.tex;
         maskModes[depth] = maskMode;
         maskMode = 0;
+      } else if (type === CMD_SFXPOP) {
+        // shader effects: capture the isolated layer for the worker, draw the last result over it
+        const src = this.fbos[depth - 1];
+        depth--;
+        targets.pop();
+        const parentFb = targets[targets.length - 1];
+        sc.pop();
+        const fr = this.fxOf.get(a)!;
+        if (fr.capture) {
+          this.shaders.capture(fr, src.tex, cw, ch, this.syncRaster);
+          gl.bindFramebuffer(gl.FRAMEBUFFER, parentFb);
+        }
+        gl.bindFramebuffer(gl.FRAMEBUFFER, parentFb);
+        setSc(sc[sc.length - 1]);
+        if (!this.shaders.composite(fr.shaders, { z: this.zoom * this.dpr, px: this.panX * this.dpr, py: this.panY * this.dpr, w: cw, h: ch }, b)) {
+          // no result yet (or no webgpu): the layer as it is
+          gl.useProgram(this.compositeProgram());
+          gl.uniform1f(this.cuOpacity, b);
+          gl.uniform1f(this.cuUseMask, 0);
+          gl.activeTexture(gl.TEXTURE1);
+          gl.bindTexture(gl.TEXTURE_2D, src.tex);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+          gl.bindTexture(gl.TEXTURE_2D, null);
+          gl.activeTexture(gl.TEXTURE0);
+        }
+        gl.useProgram(this.prog);
       } else if (type === CMD_POP) {
         const src = this.fbos[depth - 1];
         const maskTex = masks[depth];

@@ -18,6 +18,7 @@ import { variations } from './variations';
 import { addToken, BINDABLE, findToken, linkProp, prettyName, setTokenMode, setTokenValue, tokenUsage, tokenValue, linkOf } from '../core/tokens';
 import { toHex } from '../core/token-sync';
 import { createComponent, createInstance, instanceRootOf, instancesOf } from '../core/components';
+import { SHADER_TOOLS } from './shader-tools';
 import { GUIDE_TOOLS } from './tools-guides';
 
 import type { ToolDef } from './tool-kit';
@@ -653,6 +654,7 @@ export const TOOLS: ToolDef[] = [
   ...PREVIEW_TOOLS,
   ...GUIDE_TOOLS,
   ...CONCEPT_TOOLS,
+  ...SHADER_TOOLS,
 ];
 
 export { AGENT_SYSTEM_PROMPT, ASK_MODE_PROMPT } from './prompt';

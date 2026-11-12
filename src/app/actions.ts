@@ -549,7 +549,12 @@ export async function handlePaste(e: ClipboardEvent) {
       const t0 = performance.now();
       const res = m?.parseFigmaClipboard(html);
       if (res && res.roots.length) {
-        const d = insertLayers(res, { label: 'Paste from Figma', fitCompIfEmpty: true });
+        const d = st().batch('figma-paste', () => {
+          const d = insertLayers(res, { label: 'Paste from Figma', fitCompIfEmpty: true });
+          // figma shaders: their sources go into the document's shader library
+          (m as { hoistShaderAssets?: (s: unknown, ids: string[]) => void }).hoistShaderAssets?.(st(), res.layers.map((l: { id: string }) => l.id));
+          return d;
+        }, 'Paste from Figma');
         imported('artwork', res.roots, 'the Figma design');
         const extra = [
           d?.linked ? `${d.linked} linked to styles` : '',

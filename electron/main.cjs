@@ -33,6 +33,8 @@ if (process.platform !== 'win32') {
 app.commandLine.appendSwitch('enable-gpu-rasterization');
 app.commandLine.appendSwitch('ignore-gpu-blocklist');
 app.commandLine.appendSwitch('enable-zero-copy');
+// figma shaders run on webgpu (render/shader-worker.ts): chromium still gates it behind a flag on linux
+if (process.platform === 'linux') app.commandLine.appendSwitch('enable-unsafe-webgpu');
 
 /** @type {BrowserWindow | null} */
 let win = null;

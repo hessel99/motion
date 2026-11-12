@@ -25,6 +25,7 @@ export async function exportGif(opts: GifOptions = {}, onProgress?: (done: numbe
   const read = async (t: number) => {
     // let async rasters settle so early frames are complete
     for (let k = 0; k < 30; k++) { r.render(t); if (!r.dirty) break; await new Promise(z => setTimeout(z, 16)); }
+    await r.settleShaders(t); // figma shaders: wait for this exact frame
     gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
     // flip vertically (webgl origin is bottom-left)
     const out = new Uint8Array(w * h * 4);

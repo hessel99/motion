@@ -125,7 +125,7 @@ export function needsShapeRaster(l: Layer): boolean {
 
 /** fills / strokes that must be baked into an rgba raster (not a tintable coverage mask) */
 export function hasComplexPaint(l: Layer): boolean {
-  if (l.paints && l.paints.some(p => p.type !== 'solid' || (p.blend && p.blend !== 'normal'))) return true;
+  if (l.paints && l.paints.some(p => (p.type !== 'solid' && p.type !== 'shader') || (p.blend && p.blend !== 'normal'))) return true;
   if (l.strokePaints?.length) return true;
   if (l.geometry?.some(g => g.paints)) return true;
   if (l.type === 'text' && l.text) return textNeedsRgba(l);
@@ -819,7 +819,7 @@ export function layoutText(l: Layer, boxWidth: number | null): TextLine[] {
 /** live text needs an rgba raster when runs have their own colors or the text has paints */
 function textNeedsRgba(l: Layer): boolean {
   const t = l.text!;
-  if (l.paints?.some(p => p.type !== 'solid' || (p.blend && p.blend !== 'normal'))) return true;
+  if (l.paints?.some(p => (p.type !== 'solid' && p.type !== 'shader') || (p.blend && p.blend !== 'normal'))) return true;
   if (outlineValid(l)) return t.outline!.groups.some(g => g.fill);
   return !!t.runs?.some(r => r.fill);
 }
@@ -870,7 +870,7 @@ export function rasterText(l: Layer, scale: number, size: number[], clip?: Raste
   const base = l.props.fill?.v ?? [0, 0, 0, 1];
   const place = clip ? { x: clip.x / s, y: clip.y / s } : { x: box.x, y: box.y };
   // gradient / image fills: glyph coverage first, the paints go inside it below
-  const painted = !!l.paints?.some(p => p.type !== 'solid' || (p.blend && p.blend !== 'normal'));
+  const painted = !!l.paints?.some(p => (p.type !== 'solid' && p.type !== 'shader') || (p.blend && p.blend !== 'normal'));
   const colored = rgba && !painted;
   if (outlineValid(l)) {
     for (const g of t.outline!.groups) {

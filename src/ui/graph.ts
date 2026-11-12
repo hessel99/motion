@@ -4,7 +4,7 @@
 
 import type { Store } from '../core/store';
 import { Track } from '../core/evaluate';
-import { PROP_DEFS, type Keyframe, type Layer, type PropKey } from '../core/model';
+import { PROP_DEFS, propDef, type Keyframe, type Layer, type PropKey } from '../core/model';
 import { keyId, setSegmentHandles } from '../core/commands';
 import { T } from './theme';
 
@@ -38,7 +38,8 @@ export class GraphView {
       const k = l.id + key;
       if (seen.has(k) || !l.props[key]?.kf?.length) return;
       seen.add(k);
-      const dim = PROP_DEFS[key].unit === 'color' ? 3 : key === 'radius' ? 1 : PROP_DEFS[key].dim;
+      const def = propDef(key), sh = key.startsWith('sh:');
+      const dim = sh ? Math.min(4, l.props[key]!.v.length) : def.unit === 'color' ? 3 : key === 'radius' ? 1 : def.dim;
       // bezier handles go on the dimension that changes the most (a flat curve can't show easing)
       const kf = l.props[key]!.kf!;
       let best = 0, bestSpan = -1;
@@ -47,7 +48,7 @@ export class GraphView {
         for (const k of kf) { lo = Math.min(lo, k.v[d]); hi = Math.max(hi, k.v[d]); }
         if (hi - lo > bestSpan) { bestSpan = hi - lo; best = d; }
       }
-      for (let d = 0; d < dim; d++) out.push({ layer: l, key, dim: d, handles: d === best, color: PROP_DEFS[key].unit === 'color' || dim > 1 ? T.axes[d] : T.axisScalar });
+      for (let d = 0; d < dim; d++) out.push({ layer: l, key, dim: d, handles: d === best, color: def.unit === 'color' || dim > 1 ? T.axes[d % T.axes.length] : T.axisScalar });
     };
     // only the first MAX curves are shown: stop as soon as they are found. with tens of thousands
     // of selected keys, scanning (and splitting) every key id on each redraw cost ~25ms
@@ -103,7 +104,7 @@ export class GraphView {
     const tmp = new Float64Array(4);
     for (const c of curves) {
       const p = c.layer.props[c.key]!;
-      const dimN = PROP_DEFS[c.key].dim;
+      const dimN = c.key.startsWith('sh:') ? p.v.length : propDef(c.key).dim;
       const tr = new Track(p, dimN, c.key === 'position');
       const arr = new Float64Array(steps + 1);
       if (this.speed) {

@@ -99,7 +99,13 @@ if (ONLY.has('paste') && existsSync(PASTES)) {
 if (!cases.length) { console.log('nothing to run: no figma truth in', TRUTH, '(see docs/figma-fidelity-report.md)'); stop(); process.exit(0); }
 
 // ---------------- browser ----------------
-const browser = await chromium.launch({ args: ['--ignore-gpu-blocklist', '--font-render-hinting=none'] });
+const browser = await chromium.launch({ args: ['--ignore-gpu-blocklist', '--font-render-hinting=none', '--enable-unsafe-webgpu'] });
+// figma shader sources (figma payloads never carry them): the local mcp cache, gitignored
+const SHADER_CACHE = join(ROOT, '.figma-cache');
+const shaderSources = existsSync(SHADER_CACHE) ? readdirSync(SHADER_CACHE).filter(d => existsSync(join(SHADER_CACHE, d, 'main.ts'))).map(d => {
+  const m = JSON.parse(readFileSync(join(SHADER_CACHE, d, 'meta.json'), 'utf8'));
+  return { id: m.id, name: m.name, kind: m.type, version: m.version, files: { 'main.ts': readFileSync(join(SHADER_CACHE, d, 'main.ts'), 'utf8'), 'features.json': readFileSync(join(SHADER_CACHE, d, 'features.json'), 'utf8') } };
+}) : [];
 const pageErrors = [];
 let page = null, pageUses = 0;
 async function freshPage() {
@@ -110,6 +116,7 @@ async function freshPage() {
   await page.goto(`${BASE}?nobridge&blank`);
   await page.waitForFunction(() => window.editor?.renderer, null, { timeout: 60000 });
   await page.evaluate(SETUP);
+  if (shaderSources.length) await page.evaluate(list => window.__fidShaders(list), shaderSources);
 }
 // installed in the page: window.__fid (render through motion's importers, compare)
 const SETUP = async () => {
@@ -138,6 +145,8 @@ const SETUP = async () => {
       r.resize(W, H, s); r.setView(1, 0, 0);
       for (let k = 0; k < 60; k++) { r.dirty = true; r.render(0); if (!r.asyncRasters && k > 2) break; await sleep(20); }
       r.dirty = true; r.render(0);
+      // figma shaders render asynchronously (webgpu worker): wait for this exact frame
+      if (r.settleShaders) { await r.settleShaders(0); r.render(0); }
       out[s] = r.canvas.toDataURL('image/png');
     }
     r.syncRaster = false;
@@ -145,6 +154,7 @@ const SETUP = async () => {
     return { shots: out, w: W, h: H, layers: layers.length, types: layers.map(l => l.type).join(',') };
   }
 
+  window.__fidShaders = list => figma.registerShaderSources?.(list);
   window.__fid = {
     async figma(node, images, format, w, h, scales) {
       const msg = format === 'rest' ? rest.restNodesToMessage([node], images) : rest.pluginNodesToMessage([node], images);

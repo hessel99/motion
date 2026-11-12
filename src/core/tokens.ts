@@ -9,7 +9,7 @@
 // which runs inside every transaction (see Store.transact).
 
 import type { Keyframe, Layer, Project, Prop, PropKey, Token, TokenLibrary } from './model';
-import { PROP_DEFS, uid } from './model';
+import { PROP_DEFS, propDef, uid } from './model';
 import type { Store, Tx } from './store';
 
 /** properties a token can drive, by token type */
@@ -33,8 +33,8 @@ export function tokenValue(lib: TokenLibrary, t: Token, mode = lib.mode): number
 
 /** the value a property gets from a token (numbers fill every component: radius → 4 corners) */
 export function valueForProp(key: PropKey, raw: number[]): number[] {
-  const dim = PROP_DEFS[key].dim;
-  if (PROP_DEFS[key].unit === 'color') return [raw[0] ?? 0, raw[1] ?? 0, raw[2] ?? 0, raw[3] ?? 1];
+  const dim = propDef(key).dim;
+  if (propDef(key).unit === 'color') return [raw[0] ?? 0, raw[1] ?? 0, raw[2] ?? 0, raw[3] ?? 1];
   return new Array(dim).fill(raw[0] ?? 0);
 }
 

@@ -2,6 +2,8 @@
 // sent to agents and diffed. hot-path evaluation lives in evaluate.ts and works
 // on compiled typed-array tracks, never on these objects directly.
 
+import type { ShaderAsset, ShaderRef } from './shaders';
+
 export type Interp = 'bezier' | 'linear' | 'hold' | 'spring';
 
 export interface Keyframe {
@@ -126,7 +128,7 @@ export interface ImageFilters {
   exposure?: number; contrast?: number; saturation?: number; temperature?: number; tint?: number; highlights?: number; shadows?: number;
 }
 
-export type PaintType = 'solid' | 'linear' | 'radial' | 'angular' | 'diamond' | 'image' | 'noise' | 'pattern';
+export type PaintType = 'solid' | 'linear' | 'radial' | 'angular' | 'diamond' | 'image' | 'noise' | 'pattern' | 'shader';
 export interface Paint {
   type: PaintType;
   color?: [number, number, number, number];
@@ -137,6 +139,7 @@ export interface Paint {
   transform?: number[];
   imageRef?: string;
   opacity?: number;
+  shader?: ShaderRef;
   /** blend mode of this paint over the paints below it (same layer) */
   blend?: BlendMode;
   /** image paints: how the image covers the box */
@@ -302,6 +305,8 @@ export interface Layer {
   props: Partial<Record<PropKey, Prop>>;
   /** fills beyond a single solid color (gradients) make the layer render through the raster path */
   paints?: Paint[];
+  /** figma shader effects, applied in order to the rendered layer (with its children) */
+  shaderEffects?: ShaderRef[];
   strokeAlign?: 'inside' | 'center' | 'outside';
   /** stroke paints beyond one color (gradients, images); strokeWidth still sets the width */
   strokePaints?: Paint[];
@@ -428,6 +433,8 @@ export interface Project {
   tokens?: TokenLibrary;
   /** main components by main layer id */
   components?: Record<string, ComponentInfo>;
+  /** shader sources the document uses (embedded: files stay self-contained), see core/shaders.ts */
+  shaders?: Record<string, ShaderAsset>;
 }
 
 let idCounter = 0;
@@ -499,4 +506,13 @@ export function createProject(name = 'Untitled'): Project {
 
 export function getPropValue(layer: Layer, key: PropKey): number[] {
   return layer.props[key]?.v ?? (PROP_DEFS[key].default as unknown as number[]);
+}
+
+/** definition of any prop key: the fixed ones, or a shader param (`sh:<slot>:<param>`), whose
+ *  label / range need the project (core/shaders.ts shaderPropInfo); here it gets a generic def */
+export function propDef(key: string): { label: string; dim: number; default: readonly number[]; unit: string; min?: number; max?: number } {
+  const d = (PROP_DEFS as Record<string, { label: string; dim: number; default: readonly number[]; unit: string; min?: number; max?: number }>)[key];
+  if (d) return d;
+  const i = key.lastIndexOf(':');
+  return { label: i >= 0 ? key.slice(i + 1) : key, dim: 1, default: [0], unit: '' };
 }

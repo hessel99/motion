@@ -117,7 +117,7 @@ export class Editor {
     }
     const r = this.renderer;
     // isolate failures: one broken frame or hook must never stop the loop or the other hooks
-    try { if (r.dirty || r.lastTime !== store.time) r.render(store.time); } catch (e) { this.report('render', e); r.dirty = false; }
+    try { if (r.dirty || r.redraw || r.lastTime !== store.time) r.render(store.time); } catch (e) { this.report('render', e); r.dirty = false; }
     for (const h of this.hooks) { try { h(now, store.time, store.playing); } catch (e) { this.report('frame hook', e); } }
   }
 
