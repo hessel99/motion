@@ -16,7 +16,6 @@
 .au-row > .au-grow { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
 .au-row > .au-grow > :not(button):not(label):not(select) { flex: 1 1 72px; min-width: 72px; }
 .au-stat { color: var(--text-secondary); font-variant-numeric: tabular-nums; font-size: var(--font-sm, 12px); }
-.au-chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px; border-radius: 999px; background: var(--surface-2); color: var(--text-secondary); font-size: 11px; }
 .au-sections { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--surface-0); }
 .au-sections > span { display: block; height: 100%; }
 .au-btn { background: var(--btn-bg); color: var(--text); border: 0; border-radius: var(--radius-md, 6px); padding: 3px 8px; cursor: pointer; font: inherit; font-size: 12px; white-space: nowrap; }

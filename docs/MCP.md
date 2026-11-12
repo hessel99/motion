@@ -51,7 +51,7 @@ Worked examples for the higher-level tools are in `docs/agent-tools-cookbook.md`
 
 | tool | read-only | what it does |
 |---|---|---|
-| `get_editor_context` | yes | Composition, playhead, work area, markers, selected layers/keyframes — what "this" means |
+| `get_editor_context` | yes | Composition, playhead, work area, selected layers/keyframes — what "this" means |
 | `get_document` | yes | Composition settings + layer tree |
 | `get_layer` | yes | One layer as JSON (large path geometry summarized unless `full`) |
 | `get_animation` | yes | Compact keys/eases per layer: `scale: 0.2s 0 ─Back Out→ 0.8s 100` |
@@ -63,8 +63,7 @@ Worked examples for the higher-level tools are in `docs/agent-tools-cookbook.md`
 | `set_keyframes`, `set_easing` | | One property's keys / eases (presets, springs, cubic-bezier) |
 | `retime`, `stagger` | | Scale/shift timing; offset layers one after another |
 | `apply_preset`, `set_text_animation`, `set_expression`, `smart_animate` | | Higher-level animation |
-| `save_variation`, `apply_variation` | | A/B/C versions the user previews and picks in the sidebar |
-| `set_composition`, `set_markers`, `open_composition` | | Composition |
+| `set_composition`, `open_composition` | | Composition |
 | `export_video` | | MP4/WebM/GIF render |
 | `undo` | | Undo the last change |
 | **Scene** | | |
@@ -80,7 +79,7 @@ Worked examples for the higher-level tools are in `docs/agent-tools-cookbook.md`
 | `secondary_motion` | | Overshoot + settle oscillations and anticipation on existing moves |
 | `loop` | | Seamless cycle / pingpong / offset loops (closing keys + `loopOut`), `fitComp` |
 | `camera_rig` | | Depth groups + pan/zoom keys for parallax |
-| `align_to_beats` | | Snap animation starts / ends / keys to markers, beat times or a bpm grid |
+| `align_to_beats` | | Snap animation starts / ends / keys to beat times, a bpm grid or the music's beats |
 | **Typography** | | |
 | `type_layout` | | Eyebrow / headline / subline / body / caption stack with a type scale, tracking, fit-to-width; idempotent by key |
 | `split_text` | | Text → one layer per char / word / line in a group that keeps the transform; optional staggered preset |
