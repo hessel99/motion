@@ -6,8 +6,12 @@
 //    texSubImage3D per dirty page per frame uploads the changed rows (flush()).
 //    many small uploads into a texture that the gpu is still reading forced drivers to stall
 //    or copy the whole array per call (llvmpipe: ~170ms frames and finally an oom crash).
-//  - compaction (dropping stale entries) and growth happen on the shadows, no gpu read-back.
-//  - pages are packed with a shelf allocator.
+//  - compaction and growth happen on the shadows, no gpu read-back.
+//  - pages are packed with a shelf allocator. freed slots become free spans on their shelf and are
+//    reused. when space runs out the least recently used entries are evicted one by one, never
+//    everything, and never an entry drawn this frame (callers fall back to a lower resolution).
+//  - compaction repacks in place through one reusable scratch buffer and uploads only the entries
+//    that moved (it used to allocate fresh pages and re-upload all of them: up to 200 MB).
 
 export interface AtlasEntry {
   key: string;
@@ -16,9 +20,12 @@ export interface AtlasEntry {
   lastUsed: number;
   /** evicted: holders must re-resolve */
   dead?: boolean;
+  /** shelf the slot lives on (internal) */
+  shelf?: Shelf;
 }
 
-interface Shelf { y: number; h: number; x: number }
+/** fixed-height row; `x` = end of the used prefix, `free` = released spans [x, w, ...], `live` = entries on it */
+interface Shelf { y: number; h: number; x: number; free: number[]; live: number }
 interface Dirty { x0: number; y0: number; x1: number; y1: number; rects: number[]; area: number }
 
 export const PAGE = 2048;
@@ -35,7 +42,11 @@ export class Atlas {
   /** bumped when everything was evicted */
   generation = 0;
   compactions = 0;
+  evictions = 0;
   uploadsLastFlush = 0;
+  /** called with the key of every evicted entry (holders drop their metadata) */
+  onEvict: ((key: string) => void) | null = null;
+  private scratch = new Uint8Array(0);
 
   constructor(private gl: WebGL2RenderingContext) {
     this.tex = gl.createTexture()!;
@@ -82,47 +93,124 @@ export class Atlas {
   has(key: string) { return this.entries.has(key); }
   get size() { return this.entries.size; }
 
-  /** reserve space; returns null if it can't fit even after compaction/eviction */
+  /** reserve space; returns null if it can't fit without evicting entries drawn this frame
+   *  (the caller then tries a lower resolution or keeps what it has) */
   alloc(key: string, w: number, h: number): AtlasEntry | null {
     w = Math.ceil(w) + 2; // 1px gutter each side
     h = Math.ceil(h) + 2;
     if (w > PAGE || h > PAGE) return null;
+    const old = this.entries.get(key);
+    if (old) this.evict(old);
     let slot = this.findSlot(w, h);
     if (!slot) {
-      if (this.compact(120)) slot = this.findSlot(w, h);
+      // 1. evict entries nobody drew for a while (oldest first), 2. grow, 3. evict anything not drawn
+      // this frame, 4. defragment what is left. entries drawn this frame always stay.
+      slot = this.evictUntilFits(w, h, 120);
       if (!slot && this.pages < MAX_PAGES) {
         this.allocate(Math.min(MAX_PAGES, this.pages * 2));
         slot = this.findSlot(w, h);
       }
-      if (!slot && this.compact(1)) slot = this.findSlot(w, h);
-      if (!slot) {
-        this.evictAll();
-        slot = this.findSlot(w, h);
-        if (!slot) return null;
-      }
+      if (!slot) slot = this.evictUntilFits(w, h, 0);
+      if (!slot && this.freeArea() >= w * h * 2 && this.compact(0)) slot = this.findSlot(w, h);
+      if (!slot) return null;
     }
-    const e: AtlasEntry = { key, page: slot.page, x: slot.x + 1, y: slot.y + 1, w: w - 2, h: h - 2, lastUsed: this.frame };
+    const e: AtlasEntry = { key, page: slot.page, x: slot.x + 1, y: slot.y + 1, w: w - 2, h: h - 2, lastUsed: this.frame, shelf: slot.shelf };
     this.entries.set(key, e);
     return e;
   }
 
-  private findSlot(w: number, h: number) {
+  /** evict entries unused for more than `maxAge` frames, oldest first, until a w x h slot exists */
+  private evictUntilFits(w: number, h: number, maxAge: number) {
+    const cands: AtlasEntry[] = [];
+    for (const e of this.entries.values()) if (this.frame - e.lastUsed > maxAge) cands.push(e);
+    if (!cands.length) return null;
+    cands.sort((a, b) => a.lastUsed - b.lastUsed);
+    let freed = 0;
+    const need = w * h;
+    for (let i = 0; i < cands.length; i++) {
+      const e = cands[i];
+      this.evict(e);
+      freed += (e.w + 2) * (e.h + 2);
+      if (freed >= need || i === cands.length - 1) {
+        const slot = this.findSlot(w, h);
+        if (slot) return slot;
+        freed = 0;
+      }
+    }
+    return null;
+  }
+
+  private evict(e: AtlasEntry) {
+    this.release(e);
+    e.dead = true;
+    this.evictions++;
+    this.onEvict?.(e.key);
+  }
+
+  /** drop an entry (its holder no longer needs it) */
+  remove(key: string) {
+    const e = this.entries.get(key);
+    if (e) this.evict(e);
+  }
+
+  /** give an entry's slot back to its shelf */
+  private release(e: AtlasEntry) {
+    this.entries.delete(e.key);
+    const sh = e.shelf;
+    e.shelf = undefined;
+    if (!sh) return;
+    const x = e.x - 1, w = e.w + 2;
+    if (--sh.live <= 0) { sh.live = 0; sh.x = 0; sh.free.length = 0; this.trimShelves(e.page); return; }
+    if (x + w === sh.x) sh.x = x; // end of the used prefix: shrink it
+    else sh.free.push(x, w);
+    // free spans that now touch the prefix end fold into it
+    for (let again = true; again && sh.free.length;) {
+      again = false;
+      for (let i = 0; i < sh.free.length; i += 2) {
+        if (sh.free[i] + sh.free[i + 1] === sh.x) { sh.x = sh.free[i]; sh.free.splice(i, 2); again = true; break; }
+      }
+    }
+  }
+
+  /** empty shelves at the top of a page go away, so that space can take any height again */
+  private trimShelves(p: number) {
+    const shelves = this.shelves[p];
+    while (shelves.length && shelves[shelves.length - 1].live === 0) shelves.pop();
+  }
+
+  private freeArea() {
+    let used = 0;
+    for (const e of this.entries.values()) used += (e.w + 2) * (e.h + 2);
+    return this.pages * PAGE * PAGE - used;
+  }
+
+  private findSlot(w: number, h: number): { page: number; x: number; y: number; shelf: Shelf } | null {
     for (let p = 0; p < this.pages; p++) {
       const shelves = this.shelves[p];
-      let best: Shelf | null = null;
+      let best: Shelf | null = null, bestSpan = -1;
       for (const s of shelves) {
-        if (s.h >= h && s.h <= h * 1.5 + 8 && PAGE - s.x >= w && (!best || s.h < best.h)) best = s;
+        // an empty shelf takes anything that fits under it; a used one only similar heights
+        if (s.h < h || (s.live > 0 && s.h > h * 1.5 + 8)) continue;
+        if (best && s.h >= best.h) continue;
+        if (PAGE - s.x >= w) { best = s; bestSpan = -1; continue; }
+        for (let i = 0; i < s.free.length; i += 2) if (s.free[i + 1] >= w) { best = s; bestSpan = i; break; }
       }
       if (best) {
-        const x = best.x;
-        best.x += w;
-        return { page: p, x, y: best.y };
+        let x: number;
+        if (bestSpan >= 0) {
+          x = best.free[bestSpan];
+          const rest = best.free[bestSpan + 1] - w;
+          if (rest > 0) { best.free[bestSpan] = x + w; best.free[bestSpan + 1] = rest; }
+          else best.free.splice(bestSpan, 2);
+        } else { x = best.x; best.x += w; }
+        best.live++;
+        return { page: p, x, y: best.y, shelf: best };
       }
       const top = this.usedHeight(p);
       if (top + h <= PAGE) {
-        const sh = Math.min(PAGE - top, Math.ceil(h / 8) * 8);
-        shelves.push({ y: top, h: sh, x: w });
-        return { page: p, x: 0, y: top };
+        const shelf: Shelf = { y: top, h: Math.min(PAGE - top, Math.ceil(h / 8) * 8), x: w, free: [], live: 1 };
+        shelves.push(shelf);
+        return { page: p, x: 0, y: top, shelf };
       }
     }
     return null;
@@ -132,17 +220,22 @@ export class Atlas {
   upload(e: AtlasEntry, src: Uint8Array) {
     const s = this.page(e.page);
     const rowBytes = e.w * 4;
-    // clear the 1px gutter so neighbours never bleed under linear filtering
-    this.clearRect(s, e.x - 1, e.y - 1, e.w + 2, e.h + 2);
+    // clear the 1px gutter ring so neighbours never bleed under linear filtering (the inside is overwritten)
+    this.clearGutter(s, e);
     for (let r = 0; r < e.h; r++) s.set(src.subarray(r * rowBytes, r * rowBytes + rowBytes), ((e.y + r) * PAGE + e.x) * 4);
     this.markDirty(e.page, e.x - 1, e.y - 1, e.x + e.w + 1, e.y + e.h + 1);
   }
 
-  private clearRect(s: Uint8Array, x: number, y: number, w: number, h: number) {
-    if (x < 0) { w += x; x = 0; }
-    if (y < 0) { h += y; y = 0; }
-    w = Math.min(PAGE - x, w); h = Math.min(PAGE - y, h);
-    for (let r = 0; r < h; r++) s.fill(0, ((y + r) * PAGE + x) * 4, ((y + r) * PAGE + x + w) * 4);
+  private clearGutter(s: Uint8Array, e: AtlasEntry) {
+    const x0 = Math.max(0, e.x - 1), x1 = Math.min(PAGE, e.x + e.w + 1);
+    if (e.y - 1 >= 0) s.fill(0, ((e.y - 1) * PAGE + x0) * 4, ((e.y - 1) * PAGE + x1) * 4);
+    if (e.y + e.h < PAGE) s.fill(0, ((e.y + e.h) * PAGE + x0) * 4, ((e.y + e.h) * PAGE + x1) * 4);
+    const l = e.x - 1 >= 0, r = e.x + e.w < PAGE;
+    for (let y = 0; y < e.h; y++) {
+      const row = (e.y + y) * PAGE;
+      if (l) s.fill(0, (row + e.x - 1) * 4, (row + e.x) * 4);
+      if (r) s.fill(0, (row + e.x + e.w) * 4, (row + e.x + e.w + 1) * 4);
+    }
   }
 
   private markDirty(p: number, x0: number, y0: number, x1: number, y1: number) {
@@ -174,7 +267,7 @@ export class Atlas {
         gl.pixelStorei(gl.UNPACK_IMAGE_HEIGHT, PAGE);
       }
       const unionArea = (d.x1 - d.x0) * (d.y1 - d.y0);
-      const rects = d.rects.length / 4 <= 24 && unionArea > d.area * 3 ? d.rects : [d.x0, d.y0, d.x1, d.y1];
+      const rects = d.rects.length / 4 <= 32 && unionArea > d.area * 2 ? d.rects : [d.x0, d.y0, d.x1, d.y1];
       for (let i = 0; i < rects.length; i += 4) {
         const x0 = rects[i], y0 = rects[i + 1], w = rects[i + 2] - x0, h = rects[i + 3] - y0;
         if (w <= 0 || h <= 0) continue;
@@ -193,39 +286,47 @@ export class Atlas {
     this.uploadsLastFlush = n;
   }
 
-  /** repack entries used within `maxAge` frames on the cpu shadows; entries keep their identity
-   *  (x/y/page updated in place) and stale ones are marked dead. returns true if it freed anything. */
+  /** repack entries used within `maxAge` frames in place: live pixels go through one reusable
+   *  scratch buffer (no new pages). entries keep their identity (x/y/page updated in place), stale
+   *  ones are evicted, and only entries that moved are uploaded. returns true if anything changed. */
   compact(maxAge: number): boolean {
-    const live: AtlasEntry[] = [];
-    for (const e of this.entries.values()) if (this.frame - e.lastUsed <= maxAge) live.push(e);
-    if (live.length === this.entries.size) return false;
-    const oldShadow = this.shadow;
-    this.shadow = [];
-    for (let p = 0; p < this.pages; p++) this.shelves[p] = [];
-    live.sort((a, b) => b.h - a.h);
-    const keep = new Map<string, AtlasEntry>();
-    for (const e of live) {
-      const slot = this.findSlot(e.w + 2, e.h + 2);
-      if (!slot) continue;
-      const src = oldShadow[e.page];
-      const dst = this.page(slot.page);
-      const nx = slot.x + 1, ny = slot.y + 1;
-      if (src) for (let r = 0; r < e.h; r++) {
-        const so = ((e.y + r) * PAGE + e.x) * 4;
-        dst.set(src.subarray(so, so + e.w * 4), ((ny + r) * PAGE + nx) * 4);
-      }
-      e.page = slot.page; e.x = nx; e.y = ny;
-      keep.set(e.key, e);
+    const live: AtlasEntry[] = [], stale: AtlasEntry[] = [];
+    for (const e of this.entries.values()) (this.frame - e.lastUsed <= maxAge ? live : stale).push(e);
+    for (const e of stale) this.evict(e);
+    let bytes = 0;
+    for (const e of live) bytes += e.w * e.h * 4;
+    if (this.scratch.length < bytes) this.scratch = new Uint8Array(Math.max(bytes, (this.scratch.length * 1.5) | 0));
+    const tmp = this.scratch, old = new Float64Array(live.length * 4);
+    let o = 0;
+    for (let i = 0; i < live.length; i++) {
+      const e = live[i], src = this.shadow[e.page];
+      if (src) for (let r = 0; r < e.h; r++) { const so = ((e.y + r) * PAGE + e.x) * 4; tmp.set(src.subarray(so, so + e.w * 4), o + r * e.w * 4); }
+      old[i * 4] = o; old[i * 4 + 1] = e.page; old[i * 4 + 2] = e.x; old[i * 4 + 3] = e.y;
+      o += e.w * e.h * 4;
     }
-    for (const e of this.entries.values()) if (!keep.has(e.key)) e.dead = true;
-    this.entries = keep;
-    for (let p = 0; p < this.pages; p++) this.dirty[p] = this.shadow[p] ? fullDirty(this.usedHeight(p)) : null;
+    for (let p = 0; p < this.pages; p++) this.shelves[p] = [];
+    const order = live.map((_, i) => i).sort((a, b) => live[b].h - live[a].h);
+    let moved = 0;
+    for (const i of order) {
+      const e = live[i];
+      e.shelf = undefined;
+      const slot = this.findSlot(e.w + 2, e.h + 2);
+      if (!slot) { this.evict(e); continue; }
+      e.page = slot.page; e.x = slot.x + 1; e.y = slot.y + 1; e.shelf = slot.shelf;
+      if (e.page === old[i * 4 + 1] && e.x === old[i * 4 + 2] && e.y === old[i * 4 + 3]) continue;
+      const dst = this.page(e.page), so = old[i * 4];
+      for (let r = 0; r < e.h; r++) dst.set(tmp.subarray(so + r * e.w * 4, so + (r + 1) * e.w * 4), ((e.y + r) * PAGE + e.x) * 4);
+      this.clearGutter(dst, e);
+      this.markDirty(e.page, e.x - 1, e.y - 1, e.x + e.w + 1, e.y + e.h + 1);
+      moved++;
+    }
+    if (!moved && !stale.length) return false;
     this.compactions++;
     return true;
   }
 
   evictAll() {
-    for (const e of this.entries.values()) e.dead = true;
+    for (const e of [...this.entries.values()]) { e.dead = true; e.shelf = undefined; this.onEvict?.(e.key); }
     this.entries.clear();
     for (let p = 0; p < this.pages; p++) { this.shelves[p] = []; this.dirty[p] = null; }
     this.shadow = [];

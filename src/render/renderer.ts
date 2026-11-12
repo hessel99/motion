@@ -10,16 +10,22 @@
 import { Track } from '../core/evaluate';
 import { TrackPool } from '../core/trackpool';
 import { compileExpr, runExpr, type ExprContext } from '../core/expr';
-import { PROP_DEFS, type Layer, type PropKey } from '../core/model';
+import { PROP_DEFS, type Layer, type Paint, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
 import { Atlas, type AtlasEntry } from './atlas';
 import type { PathGeometry, PathKey } from '../core/model';
 import { loadBundledFonts } from './fonts';
 import { cubicBezier, EASE_PRESETS, springAt } from '../core/easing';
-import { layoutText, textUnits, type TextUnit, rasterImage, rasterPath, rasterShapePaint, rasterText, setImageLoadedHandler, type RasterResult } from './raster';
+import { layoutText, textUnits, type TextUnit, rasterImage, rasterPath, rasterShapePaint, rasterText, setImageLoadedHandler, drawPathMask, pathPlacement, type RasterResult } from './raster';
 
 const F = 40; // floats per instance
 const KIND_RECT = 0, KIND_ELLIPSE = 1, KIND_MASK = 2, KIND_RGBA = 3, KIND_NONE = 4;
+// rect / ellipse with one linear or radial gradient paint: sdf shape, gradient evaluated in the
+// shader from a ramp texture (no raster, no atlas space; size / radius animate for free)
+const KIND_GRECT = 5, KIND_GELL = 6;
+const RAMP_W = 256;
+/** max raster area (px) the anticipatory max-scale boost may produce: 1/8 of an atlas page */
+const BOOST_AREA = 2048 * 2048 / 8;
 
 const VS = `#version 300 es
 precision highp float;
@@ -46,12 +52,12 @@ flat out vec4 vStroke;
 flat out vec4 vF;
 flat out vec4 vH;
 flat out vec4 vI;
-flat out vec2 vJ;
+flat out vec4 vJ;
 void main() {
   vec2 size = iB.zw;
   float kind = iF.w;
   vec2 lp;
-  if (kind >= 1.5) {
+  if (kind >= 1.5 && kind < 4.5) {
     lp = q * size;
     vUV = mix(iUV.xy, iUV.zw, q);
   } else {
@@ -62,7 +68,8 @@ void main() {
     float ext = iF.y > 0.5 ? sw : (iF.y < -0.5 ? 0.0 : sw * 0.5);
     vec2 pad = aa + vec2(ext);
     lp = -pad + q * (size + 2.0 * pad);
-    vUV = vec2(0.0);
+    // gradient kinds: gradient-space coordinate (affine, so interpolation is exact)
+    vUV = kind > 4.5 ? mat2(iFill.xy, iFill.zw) * lp + iUV.xy : vec2(0.0);
   }
   vec2 w = mat2(iA.xy, iA.zw) * lp + iB.xy;
   vec2 s = w * uView.x + uView.yz;
@@ -77,13 +84,17 @@ void main() {
   vF = iF;
   vH = iH;
   vI = iI;
-  vJ = iJ.xy;
+  vJ = iJ;
 }`;
 
 const FS = `#version 300 es
 precision highp float;
 precision highp sampler2DArray;
 uniform sampler2DArray uTex;
+uniform sampler2D uRamp;
+uniform float uRampH;
+uniform sampler2D uDyn;
+uniform float uDynH;
 in vec2 vLocal;
 in vec2 vWorld;
 in vec2 vUV;
@@ -94,7 +105,7 @@ flat in vec4 vStroke;
 flat in vec4 vF;
 flat in vec4 vH;
 flat in vec4 vI;
-flat in vec2 vJ;
+flat in vec4 vJ;
 out vec4 o;
 
 float sdRoundBox(vec2 p, vec2 b, vec4 r) {
@@ -119,10 +130,14 @@ void main() {
   vec4 fill = vec4(vFill.rgb * vFill.a, vFill.a);
   vec4 stroke = vec4(vStroke.rgb * vStroke.a, vStroke.a);
   vec4 col;
-  if (kind < 1.5) {
+  if (kind < 1.5 || kind > 4.5) {
+    if (kind > 4.5) {
+      float gt = vJ.z > 0.5 ? length(vUV - 0.5) * 2.0 : vUV.x;
+      fill = textureLod(uRamp, vec2(clamp(gt, 0.0, 1.0), (vH.x + 0.5) / uRampH), 0.0);
+    }
     vec2 h = vSize * 0.5;
     vec2 p = vLocal - h;
-    float d = kind < 0.5 ? sdRoundBox(p, h, vRadii) : sdEllipse(p, h);
+    float d = (kind < 0.5 || (kind > 4.5 && kind < 5.5)) ? sdRoundBox(p, h, vRadii) : sdEllipse(p, h);
     float w = max(fwidth(d), 1e-4);
     float fc = clamp(0.5 - d / w, 0.0, 1.0);
     float sw = vF.x;
@@ -134,7 +149,8 @@ void main() {
     }
     col = stroke * sc + fill * fc * (1.0 - stroke.a * sc);
   } else {
-    vec4 t = texture(uTex, vec3(vUV, vH.x));
+    // page -1: per-frame shapes (their own canvas texture, 2048 wide, uDynH tall)
+    vec4 t = vH.x < -0.5 ? textureLod(uDyn, vec2(vUV.x, vUV.y * 2048.0 / uDynH), 0.0) : textureLod(uTex, vec3(vUV, vH.x), 0.0);
     if (kind < 2.5) {
       col = stroke * t.g + fill * t.r * (1.0 - stroke.a * t.g);
     } else {
@@ -143,7 +159,7 @@ void main() {
   }
   col *= opacity;
   if (vH.z >= 0.0) {
-    vec2 cp = mat2(vI.xy, vI.zw) * vWorld + vJ;
+    vec2 cp = mat2(vI.xy, vI.zw) * vWorld + vJ.xy;
     vec2 ch = vH.zw * 0.5;
     col *= cov(sdRoundBox(cp - ch, ch, vec4(vH.y)));
   }
@@ -193,8 +209,7 @@ interface Item {
   /** per-unit text animation state */
   units: UnitState[] | null;
   /** per-frame raster (animated path shape / trim paths) */
-  prevEntry?: AtlasEntry | null; prevRaster?: RasterResult | null; prevScale?: number;
-  dyn: { base: string; stale?: boolean; trim: Track[] | null; pkf: PathKey[] | null; eases: ((p: number) => number)[]; frame: number; t: number } | null;
+  dyn: { base: string; need: boolean; trim: Track[] | null; pkf: PathKey[] | null; eases: ((p: number) => number)[]; frame: number; t: number } | null;
   /** properties driven by expressions (bit = TR_* index) + their compiled programs */
   exprMask: number;
   exprs: ({ node: any; track: Track; keyTimes: number[] } | null)[] | null;
@@ -304,6 +319,11 @@ export class Renderer {
   stats: RenderStats = { instances: 0, layers: 0, evalMs: 0, writeMs: 0, rasterMs: 0, gpuSubmitMs: 0, frameMs: 0, atlasEntries: 0, atlasPages: 0, drawCalls: 0, culled: 0, uploadBytes: 0 };
   private rasterBudgetMs = 6;
   private ranges: number[] = [];
+  private boxes: number[] = [];
+  /** screen aabb (device px, top-left origin) of each instance slot, NaN = unknown */
+  private instBox = new Float32Array(0);
+  /** the comp clip scissor of this frame (gl coords) or null */
+  private baseScissor: number[] | null = null;
   /** item index of each instance written last frame (effects: per-layer velocity, lookups) */
   instItem = new Int32Array(0);
   /** skip unchanged instances during playback (off = rewrite + upload everything, for a/b tests) */
@@ -318,6 +338,7 @@ export class Renderer {
     if (!gl) throw new Error('webgl2 not available');
     this.gl = gl;
     this.atlas = new Atlas(gl);
+    this.atlas.onEvict = key => { this.rasterMeta.delete(key); };
     this.initGL();
 
     store.onChange(c => this.onChange(c));
@@ -349,6 +370,8 @@ export class Renderer {
     this.vao = gl.createVertexArray()!;
     gl.bindVertexArray(this.vao);
     const qb = gl.createBuffer();
+    this.qbuf = qb!;
+    this.rangeVaos.clear();
     gl.bindBuffer(gl.ARRAY_BUFFER, qb);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
@@ -363,6 +386,83 @@ export class Renderer {
     gl.bindVertexArray(null);
     gl.useProgram(this.prog);
     gl.uniform1i(gl.getUniformLocation(this.prog, 'uTex'), 0);
+    gl.uniform1i(gl.getUniformLocation(this.prog, 'uRamp'), 3);
+    this.uRampH = gl.getUniformLocation(this.prog, 'uRampH')!;
+    gl.uniform1i(gl.getUniformLocation(this.prog, 'uDyn'), 4);
+    this.uDynH = gl.getUniformLocation(this.prog, 'uDynH')!;
+    this.dynTex = null; this.dynTexStale = true;
+    this.rampTex = null; // (re)created from the cpu copy on the next frame
+  }
+
+  // ---------------- gradient ramps ----------------
+  // one row of RAMP_W premultiplied texels per distinct gradient (stops + paint opacity), drawn by
+  // the 2d canvas once so the colors match what a raster of the gradient would show.
+  private uRampH!: WebGLUniformLocation;
+  private rampTex: WebGLTexture | null = null;
+  private rampRows = new Map<string, number>();
+  private rampData = new Uint8Array(RAMP_W * 4 * 64);
+  private rampH = 64;
+  private rampDirty = true;
+  private rampCtx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D | null = null;
+
+  private rampRow(p: Paint): number {
+    const stops = p.stops!;
+    let key = `${p.type === 'radial' ? 'r' : 'l'}${p.opacity ?? 1}`;
+    for (const st of stops) key += `|${st.pos},${st.color.join(',')}`;
+    let row = this.rampRows.get(key);
+    if (row !== undefined) return row;
+    row = this.rampRows.size;
+    if (row >= this.rampH) {
+      if (this.rampH >= 4096) { this.rampRows.clear(); row = 0; } // pathological: start over (rows get rebuilt as items recompile)
+      else {
+        const d = new Uint8Array(RAMP_W * 4 * this.rampH * 2);
+        d.set(this.rampData);
+        this.rampData = d;
+        this.rampH *= 2;
+      }
+    }
+    if (!this.rampCtx) {
+      const cv = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(RAMP_W, 1) : Object.assign(document.createElement('canvas'), { width: RAMP_W, height: 1 });
+      this.rampCtx = cv.getContext('2d', { willReadFrequently: true }) as any;
+    }
+    const c = this.rampCtx!;
+    c.globalAlpha = 1;
+    c.clearRect(0, 0, RAMP_W, 1);
+    const g = c.createLinearGradient(0, 0, RAMP_W, 0);
+    for (const st of stops) g.addColorStop(Math.min(1, Math.max(0, st.pos)), `rgba(${(st.color[0] * 255) | 0},${(st.color[1] * 255) | 0},${(st.color[2] * 255) | 0},${st.color[3] ?? 1})`);
+    c.globalAlpha = p.opacity ?? 1;
+    c.fillStyle = g;
+    c.fillRect(0, 0, RAMP_W, 1);
+    const img = c.getImageData(0, 0, RAMP_W, 1).data;
+    const out = this.rampData, o = row * RAMP_W * 4;
+    for (let i = 0; i < img.length; i += 4) {
+      const a = img[i + 3];
+      out[o + i] = (img[i] * a + 127) / 255;
+      out[o + i + 1] = (img[i + 1] * a + 127) / 255;
+      out[o + i + 2] = (img[i + 2] * a + 127) / 255;
+      out[o + i + 3] = a;
+    }
+    this.rampRows.set(key, row);
+    this.rampDirty = true;
+    return row;
+  }
+
+  private bindRamps() {
+    const gl = this.gl;
+    gl.activeTexture(gl.TEXTURE3);
+    if (!this.rampTex || this.rampDirty) {
+      if (!this.rampTex) this.rampTex = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D, this.rampTex);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, RAMP_W, this.rampH, 0, gl.RGBA, gl.UNSIGNED_BYTE, this.rampData);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      this.rampDirty = false;
+    } else gl.bindTexture(gl.TEXTURE_2D, this.rampTex);
+    gl.uniform1f(this.uRampH, this.rampH);
+    gl.activeTexture(gl.TEXTURE0);
   }
 
   private buildProgram() {
@@ -471,6 +571,7 @@ export class Renderer {
       this.sBlend = new Uint8Array(cap);
       this.sAlign = new Int8Array(cap);
       this.sClip = new Int32Array(cap);
+      this.sGrad = new Float64Array(cap * 8);
     }
     for (let i = 0; i < n; i++) {
       const { layer, parent, tOff, owner, tEnd } = entries[i];
@@ -534,10 +635,23 @@ export class Renderer {
     const sp = l.props.scale;
     it.maxScale = sp?.kf?.length ? Math.max(...sp.kf.map(k => Math.max(Math.abs(k.v[0]), Math.abs(k.v[1])))) / 100 : 1;
     it.animated = mask !== 0;
-    const complex = !!l.paints?.some(p => p.type !== 'solid');
+    let complex = !!l.paints?.some(p => p.type !== 'solid');
+    const gp = l.paints?.length === 1 ? l.paints[0] : null;
+    const shaderGrad = complex && !!gp && (gp.type === 'linear' || gp.type === 'radial') && !!gp.stops?.length && (l.type === 'rect' || l.type === 'group' || l.type === 'ellipse');
+    if (shaderGrad) {
+      const m = gp!.transform ?? [1, 0, 0, 1, 0, 0];
+      const [a, b, c, d, e, f] = m;
+      const det = a * d - b * c || 1e-9;
+      const G = this.sGrad, og = i * 8;
+      G[og] = d / det; G[og + 1] = -b / det; G[og + 2] = -c / det; G[og + 3] = a / det;
+      G[og + 4] = (c * f - d * e) / det; G[og + 5] = (b * e - a * f) / det;
+      G[og + 6] = this.rampRow(gp!);
+      G[og + 7] = gp!.type === 'radial' ? 1 : 0;
+      complex = false; // no raster
+    }
     switch (l.type) {
-      case 'rect': case 'group': it.kind = complex ? KIND_RGBA : KIND_RECT; break;
-      case 'ellipse': it.kind = complex ? KIND_RGBA : KIND_ELLIPSE; break;
+      case 'rect': case 'group': it.kind = shaderGrad ? KIND_GRECT : complex ? KIND_RGBA : KIND_RECT; break;
+      case 'ellipse': it.kind = shaderGrad ? KIND_GELL : complex ? KIND_RGBA : KIND_ELLIPSE; break;
       case 'path': it.kind = complex ? KIND_RGBA : KIND_MASK; break;
       case 'text': it.kind = KIND_MASK; break;
       case 'image': it.kind = KIND_RGBA; break;
@@ -555,7 +669,7 @@ export class Renderer {
         trim: l.trimOn ? [new Track(l.props.trimStart ?? { v: [0] }, 1), new Track(l.props.trimEnd ?? { v: [100] }, 1), new Track(l.props.trimOffset ?? { v: [0] }, 1)] : null,
         pkf,
         eases: pkf ? pkf.map((k, j) => (j < pkf.length - 1 && k.interp === 'bezier' ? cubicBezier(k.out[0], k.out[1], pkf[j + 1].in[0], pkf[j + 1].in[1]) : (x: number) => x)) : [],
-        frame: NaN, t: 0,
+        frame: NaN, t: 0, need: true,
       };
       it.animated = true; // re-render every frame while it changes
     }
@@ -758,6 +872,8 @@ export class Renderer {
   private sBlend = new Uint8Array(0);
   private sAlign = new Int8Array(0);
   private sClip = new Int32Array(0);
+  /** gradient kinds: inverse paint transform (6), ramp row, radial flag */
+  private sGrad = new Float64Array(0);
 
   /** evaluates [from, to). items that are static, keep their visibility and whose parent did not
    *  change keep last frame's world matrix (all = recompute everything, e.g. after edits). */
@@ -796,16 +912,19 @@ export class Renderer {
 
   // ---------------- raster resolution ----------------
 
+  private bucketOf(scale: number) { return Math.min(16, Math.max(1 / 16, Math.pow(2, Math.ceil(Math.log2(Math.max(scale, 1e-3)) * 2) / 2))); }
+
   private resolveRaster(i: number, scale: number, budgetEnd: number): boolean {
     const it = this.items[i];
     const l = it.layer;
+    if (it.dyn) return this.resolveDyn(i, scale, budgetEnd);
     // fast path (no allocation): current raster is sharp enough and not wastefully large.
     // the 1x..2.83x window is hysteresis so animated scale doesn't thrash re-rasters.
     if (it.entry && !it.entry.dead && it.rasterScale >= scale * 0.999 && it.rasterScale <= scale * 2.83) {
       it.entry.lastUsed = this.atlas.frame;
       return true;
     }
-    const bucket = Math.min(16, Math.max(1 / 16, Math.pow(2, Math.ceil(Math.log2(Math.max(scale, 1e-3)) * 2) / 2)));
+    const bucket = this.bucketOf(scale);
     const key = `${it.rasterBase}@${bucket}`;
     const hit = this.atlas.get(key);
     if (hit && this.rasterMeta.has(key)) {
@@ -815,32 +934,12 @@ export class Renderer {
       return true;
     }
     // shrinking but the current raster is still sharp: keep it (a smaller one is only nicer, not needed)
-    if (it.entry && !it.entry.dead && it.rasterScale >= scale && performance.now() > budgetEnd) { this.pendingUpgrade = true; return true; }
+    if (it.entry && !it.entry.dead && it.rasterScale >= scale && performance.now() > budgetEnd) { this.pendingUpgrade = true; it.entry.lastUsed = this.atlas.frame; return true; }
     // have an older resolution? keep it and upgrade when time allows
-    const hasOld = !!it.entry && !it.entry.dead;
+    let hasOld = !!it.entry && !it.entry.dead;
+    if (!hasOld) hasOld = this.lowerResFallback(it, bucket);
+    else it.entry!.lastUsed = this.atlas.frame;
     const S = this.style, os = i * ST;
-    if (it.dyn) {
-      // per-frame shape: draw now within budget, otherwise keep showing the previous frame
-      if (performance.now() > budgetEnd + 8 && it.prevEntry && !it.prevEntry.dead) {
-        // show the previous frame this time only; force a real raster on the next render
-        it.entry = it.prevEntry; it.raster = it.prevRaster!; it.rasterScale = it.prevScale!;
-        it.dyn.stale = true;
-        this.pendingUpgrade = true;
-        return true;
-      }
-      const d = it.dyn;
-      const geo = d.pkf ? interpPathKeys(d.pkf, d.eases, d.t) : l.geometry;
-      const tv = d.trim ? { start: d.trim[0].eval1(d.t) / 100, end: d.trim[1].eval1(d.t) / 100, offset: d.trim[2].eval1(d.t) / 360 } : undefined;
-      const r = rasterPath(geo === l.geometry ? l : { ...l, geometry: geo }, bucket, S[os + 14], tv);
-      if (!r) return hasOld;
-      const e = this.atlas.alloc(key, r.pw, r.ph);
-      if (!e) return hasOld;
-      this.atlas.upload(e, r.data);
-      r.data = undefined as any;
-      this.rasterMeta.set(key, r);
-      it.rasterKey = key; it.raster = r; it.entry = e; it.rasterScale = bucket; it.rasterGen = this.atlas.generation;
-      return true;
-    }
     // off the main thread: resolution upgrades, and anything beyond this frame's raster budget.
     // first-time rasters within budget stay synchronous so edits (typing, drawing) never flicker.
     if (l.type !== 'image' && this.workersOk && !this.syncRaster && (hasOld || performance.now() > budgetEnd)) {
@@ -849,31 +948,199 @@ export class Renderer {
     }
     if (!hasOld && performance.now() > budgetEnd + 24) { this.pendingUpgrade = true; return false; }
     if (hasOld && performance.now() > budgetEnd) { this.pendingUpgrade = true; return true; }
-    let r: RasterResult | null = null;
+    if (this.failed.get(key)! > this.atlas.frame - 30) return hasOld;
     const size = [S[os], S[os + 1]];
-    if (l.type === 'path') r = rasterPath(l, bucket, S[os + 14]);
-    else if (l.type === 'text') r = rasterText(l, bucket, size);
-    else if (l.type === 'image') {
-      const asset = l.imageRef ? this.store.project.assets[l.imageRef] : undefined;
-      r = asset ? rasterImage(asset, bucket, size) : null;
-    } else r = rasterShapePaint(l, bucket, size, [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], S[os + 14]);
-    if (!r) return !!hasOld;
-    const e = this.atlas.alloc(key, r.pw, r.ph);
-    if (!e) return !!hasOld;
-    if (this.atlasGen !== this.atlas.generation) {
-      this.rasterMeta.clear();
-      this.atlasGen = this.atlas.generation;
-      for (const x of this.items) { x.rasterKey = null; x.entry = null; }
+    // no room at this resolution (the atlas never evicts what this frame draws): go lower
+    for (let bk = bucket; bk >= 1 / 16; bk /= 2) {
+      const k2 = bk === bucket ? key : `${it.rasterBase}@${bk}`;
+      let r: RasterResult | null = null;
+      if (l.type === 'path') r = rasterPath(l, bk, S[os + 14]);
+      else if (l.type === 'text') r = rasterText(l, bk, size);
+      else if (l.type === 'image') {
+        const asset = l.imageRef ? this.store.project.assets[l.imageRef] : undefined;
+        r = asset ? rasterImage(asset, bk, size) : null;
+      } else r = rasterShapePaint(l, bk, size, [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], S[os + 14]);
+      if (!r) return hasOld;
+      const e = this.atlas.alloc(k2, r.pw, r.ph);
+      if (!e) { if (bk === bucket) this.failed.set(key, this.atlas.frame); continue; }
+      this.atlas.upload(e, r.data);
+      r.data = undefined as any; // free memory, keep placement
+      this.rasterMeta.set(k2, r);
+      it.rasterKey = k2;
+      it.raster = r;
+      it.entry = e; it.rasterScale = bk; it.rasterGen = this.atlas.generation;
+      if (bk !== bucket) this.pendingUpgrade = true;
+      return true;
     }
-    this.atlas.upload(e, r.data);
-    r.data = undefined as any; // free memory, keep placement
-    this.rasterMeta.set(key, r);
-    it.rasterKey = key;
-    it.raster = r;
-    it.entry = e; it.rasterScale = bucket; it.rasterGen = this.atlas.generation;
-    return true;
+    return hasOld;
+  }
+  /** keys whose raster did not fit the atlas recently (frame): don't retry every frame */
+  private failed = new Map<string, number>();
+
+  /** no usable raster: show a lower resolution of the same content if the atlas has one */
+  private lowerResFallback(it: Item, bucket: number): boolean {
+    for (let bk = bucket / Math.SQRT2; bk >= 1 / 16; bk /= Math.SQRT2) {
+      const k2 = `${it.rasterBase}@${this.bucketOf(bk)}`;
+      const e = this.atlas.get(k2), r = e && this.rasterMeta.get(k2);
+      if (e && r) { it.rasterKey = k2; it.raster = r; it.entry = e; it.rasterScale = this.bucketOf(bk); it.rasterGen = this.atlas.generation; return true; }
+    }
+    return false;
   }
   private rasterMeta = new Map<string, RasterResult>();
+
+  // ---------------- per-frame shapes (path morphs, trim paths) ----------------
+  // drawn straight into a dedicated canvas that doubles as their texture (nothing to read back with
+  // getImageData, no atlas key per frame, nothing to prune). slots come from a ring allocator: what
+  // is drawn in one frame lands in one contiguous band of rows, so the upload is one or two
+  // texSubImage2D calls of just those rows. a slot is reused while the shape still fits in it.
+  private dynCanvas: OffscreenCanvas | null = null;
+  private dynCtx: OffscreenCanvasRenderingContext2D | null = null;
+  private dynTex: WebGLTexture | null = null;
+  private dynH = 0;
+  /** ring cursor: current row (y, height) and x within it; lap counts wrap-arounds */
+  private dynX = 0; private dynY = 0; private dynRowH = 0; private dynLap = 0;
+  /** live slots in allocation order (oldest first) */
+  private dynQueue: (AtlasEntry & { lap: number })[] = [];
+  private dynQHead = 0;
+  private dynBands: number[] = []; // dirty row bands [y0, y1, ...]
+  private dynGrow = false;
+  private dynTexStale = true;
+  dynResets = 0;
+  /** shapes drawn this frame, and the measured cost (ms) per shape of drawing + uploading them */
+  private dynDrawn = 0;
+  private dynCost = 0.03;
+  private dynOk = typeof OffscreenCanvas !== 'undefined';
+
+  private dynSlot(w: number, h: number): AtlasEntry | null {
+    const W = 2048;
+    if (!this.dynCanvas) {
+      this.dynH = 1024;
+      this.dynCanvas = new OffscreenCanvas(W, this.dynH);
+      // cpu-backed: the same rasterizer as the worker / atlas path, so the pixels match
+      this.dynCtx = this.dynCanvas.getContext('2d', { willReadFrequently: true }) as OffscreenCanvasRenderingContext2D;
+      this.dynTexStale = true;
+    }
+    if (w > W || h > this.dynH) return null;
+    if (this.dynX + w > W) { this.dynY += this.dynRowH; this.dynX = 0; this.dynRowH = 0; }
+    if (this.dynY + h > this.dynH) { this.dynY = 0; this.dynX = 0; this.dynRowH = 0; this.dynLap++; }
+    const x = this.dynX, y = this.dynY;
+    const rowEnd = y + Math.max(this.dynRowH, h);
+    // slots of the previous lap under the new one are taken over (their layers redraw when reached).
+    // a slot drawn this frame can't be: then the canvas is too small (grow before the next frame).
+    const Q = this.dynQueue;
+    while (this.dynQHead < Q.length) {
+      const e = Q[this.dynQHead];
+      if (e.dead) { this.dynQHead++; continue; }
+      if (e.lap >= this.dynLap || e.y - 1 >= rowEnd) break;
+      if (e.lastUsed === this.atlas.frame) { this.dynGrow = true; return null; }
+      e.dead = true;
+      this.dynQHead++;
+    }
+    if (this.dynQHead > 4096 && this.dynQHead * 2 > Q.length) { Q.splice(0, this.dynQHead); this.dynQHead = 0; }
+    this.dynX += w;
+    this.dynRowH = Math.max(this.dynRowH, h);
+    const e = { key: '', page: -1, x: x + 1, y: y + 1, w: w - 2, h: h - 2, lastUsed: this.atlas.frame, lap: this.dynLap };
+    Q.push(e);
+    return e;
+  }
+
+  /** between frames: grow the canvas when one frame's shapes did not fit (every shape redraws) */
+  private dynMaintain() {
+    if (this.failed.size > 4096) this.failed.clear();
+    if (!this.dynGrow) return;
+    this.dynGrow = false;
+    if (!this.dynCanvas || this.dynH >= 4096) return;
+    for (let q = this.dynQHead; q < this.dynQueue.length; q++) this.dynQueue[q].dead = true;
+    this.dynQueue = []; this.dynQHead = 0;
+    this.dynX = this.dynY = this.dynRowH = 0;
+    this.dynH *= 2;
+    this.dynCanvas.height = this.dynH; // clears it
+    this.dynTexStale = true;
+    this.dynResets++;
+  }
+
+  private resolveDyn(i: number, scale: number, budgetEnd: number): boolean {
+    const it = this.items[i], d = it.dyn!, l = it.layer;
+    const alive = !!it.entry && !it.entry.dead;
+    if (!d.need && alive && it.rasterScale >= scale * 0.999 && it.rasterScale <= scale * 2.83) { it.entry!.lastUsed = this.atlas.frame; return true; }
+    // over budget: keep showing the last drawn frame, draw for real on the next render
+    // (a shape with nothing to show is always drawn: layers never disappear)
+    // (canvas drawing is deferred until the upload, so count what this frame drew at last frame's cost)
+    if (alive && performance.now() + this.dynDrawn * this.dynCost > budgetEnd + 8) { it.entry!.lastUsed = this.atlas.frame; this.pendingUpgrade = true; return true; }
+    const bucket = this.bucketOf(scale);
+    const S = this.style, os = i * ST, sw = S[os + 14];
+    const geo = d.pkf ? interpPathKeys(d.pkf, d.eases, d.t) : l.geometry;
+    const tv = d.trim ? { start: d.trim[0].eval1(d.t) / 100, end: d.trim[1].eval1(d.t) / 100, offset: d.trim[2].eval1(d.t) / 360 } : undefined;
+    const gl2 = geo === l.geometry ? l : { ...l, geometry: geo };
+    if (it.kind === KIND_MASK && this.dynOk) {
+      const pl = pathPlacement(gl2, bucket, sw, tv);
+      let e = it.entry && it.entry.page === -1 && !it.entry.dead ? it.entry : null;
+      // a slot drawn in an earlier frame is rewritten in place only if it is inside the band being
+      // uploaded anyway; otherwise take a fresh slot from the ring (keeps the upload contiguous)
+      if (!e || e.w < pl.pw || e.h < pl.ph || e.lastUsed !== this.atlas.frame) e = this.dynSlot(pl.pw + 2, pl.ph + 2);
+      if (e) {
+        drawPathMask(this.dynCtx!, pl, e.x, e.y, gl2, sw, tv);
+        this.dynDrawn++;
+        const B = this.dynBands, y0 = e.y - 1, y1 = e.y + pl.ph + 1;
+        const n = B.length;
+        if (n && y0 <= B[n - 1] && y1 >= B[n - 2]) { B[n - 2] = Math.min(B[n - 2], y0); B[n - 1] = Math.max(B[n - 1], y1); }
+        else B.push(y0, y1);
+        it.raster = { kind: 'mask', pw: pl.pw, ph: pl.ph, x: pl.x, y: pl.y, w: pl.pw / pl.s, h: pl.ph / pl.s, data: undefined as any };
+        it.entry = e; it.rasterScale = bucket; it.rasterKey = null;
+        e.lastUsed = this.atlas.frame;
+        d.need = false;
+        return true;
+      }
+      this.pendingUpgrade = true; // canvas too small: grows before the next frame; atlas meanwhile
+    }
+    // rgba paints (or no room): the atlas, under one key per layer (its slot is replaced each frame)
+    const key = `${d.base}@dyn`;
+    const r = rasterPath(gl2, bucket, sw, tv);
+    if (!r) return alive;
+    const e = this.atlas.alloc(key, r.pw, r.ph);
+    if (!e) return alive;
+    this.atlas.upload(e, r.data);
+    r.data = undefined as any;
+    it.rasterKey = key; it.raster = r; it.entry = e; it.rasterScale = bucket; it.rasterGen = this.atlas.generation;
+    d.need = false;
+    return true;
+  }
+
+  /** upload the rows per-frame shapes drew this frame and bind their texture */
+  private flushDyn() {
+    const gl = this.gl;
+    if (!this.dynCanvas) return;
+    gl.activeTexture(gl.TEXTURE4);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    if (!this.dynTex || this.dynTexStale) {
+      if (!this.dynTex) this.dynTex = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D, this.dynTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, this.dynCanvas as any);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      this.dynTexStale = false;
+    } else {
+      gl.bindTexture(gl.TEXTURE_2D, this.dynTex);
+      const B = this.dynBands, t0 = performance.now();
+      for (let b = 0; b < B.length; b += 2) {
+        const y0 = Math.max(0, B[b]), y1 = Math.min(this.dynH, B[b + 1]);
+        if (y1 <= y0) continue;
+        // whole rows: a dom source is uploaded from its top-left, rows below are selected with skip rows
+        gl.pixelStorei(gl.UNPACK_SKIP_ROWS, y0);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, y0, 2048, y1 - y0, gl.RGBA, gl.UNSIGNED_BYTE, this.dynCanvas as any);
+      }
+      gl.pixelStorei(gl.UNPACK_SKIP_ROWS, 0);
+      if (this.dynDrawn >= 8) this.dynCost = this.dynCost * 0.7 + 0.3 * ((performance.now() - t0) / this.dynDrawn);
+    }
+    this.dynDrawn = 0;
+    this.dynBands.length = 0;
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.uniform1f(this.uDynH, this.dynH);
+    gl.activeTexture(gl.TEXTURE0);
+  }
+  private uDynH!: WebGLUniformLocation;
 
   // ---------------- async raster workers ----------------
   private workers: Worker[] = [];
@@ -886,6 +1153,7 @@ export class Renderer {
 
   private requestAsync(key: string, l: Layer, bucket: number, size: number[], radius: number[], strokeWidth: number) {
     if (this.pendingKeys.has(key)) return;
+    if (this.failed.get(key)! > this.atlas.frame - 30) return; // did not fit recently
     if (!this.workers.length) {
       try {
         for (let w = 0; w < 2; w++) {
@@ -922,19 +1190,13 @@ export class Renderer {
     if (!r) return;
     if (this.atlas.has(key)) return;
     const e = this.atlas.alloc(key, r.pw, r.ph);
-    if (!e) return;
-    if (this.atlasGen !== this.atlas.generation) {
-      this.rasterMeta.clear();
-      this.atlasGen = this.atlas.generation;
-      for (const x of this.items) { x.rasterKey = null; x.entry = null; }
-    }
+    if (!e) { this.failed.set(key, this.atlas.frame); this.dirty = true; return; }
     this.atlas.upload(e, r.data);
     r.data = undefined as any;
     this.rasterMeta.set(key, r);
     this.asyncRasters++;
     this.dirty = true; // items pick the new key up on the next frame
   }
-  private atlasGen = 0;
 
   // ---------------- frame ----------------
 
@@ -991,6 +1253,7 @@ export class Renderer {
       this.dirtyLayers.clear();
     }
     this.atlas.frame++;
+    this.dynMaintain();
     const e0 = performance.now();
     // same time + only a few layers edited (dragging while paused): re-evaluate just their subtrees
     if (t === this.evalTime && !this.evalAll && this.dirtyIdx.length && this.dirtyIdx.length < 64) {
@@ -1033,7 +1296,22 @@ export class Renderer {
     cmds.length = 0;
     let pending = 0; // first instance not yet covered by a DRAW command
     // open isolation regions: end index, composite opacity, divisor to restore, optional mask range
-    const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number }[] = [];
+    const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number; box: number }[] = [];
+    // screen bounds (device px) of what each isolated region draws: its offscreen clear and its
+    // composite are scissored to them (they used to clear + composite the whole canvas)
+    const boxes = this.boxes;
+    boxes.length = 0;
+    const IB = this.instBox.length >= this.inst.length / F * 4 ? this.instBox : (this.instBox = new Float32Array(this.inst.length / F * 4).fill(NaN));
+    const addBox = (kk: number) => {
+      const bi = stack[stack.length - 1].box, o4 = kk * 4;
+      const x0 = IB[o4];
+      if (x0 !== x0) { boxes[bi] = -1e9; boxes[bi + 1] = -1e9; boxes[bi + 2] = 1e9; boxes[bi + 3] = 1e9; return; } // unknown: whole target
+      if (x0 < boxes[bi]) boxes[bi] = x0;
+      if (IB[o4 + 1] < boxes[bi + 1]) boxes[bi + 1] = IB[o4 + 1];
+      if (IB[o4 + 2] > boxes[bi + 2]) boxes[bi + 2] = IB[o4 + 2];
+      if (IB[o4 + 3] > boxes[bi + 3]) boxes[bi + 3] = IB[o4 + 3];
+    };
+    const newBox = () => { const bi = boxes.length; boxes.push(1e9, 1e9, -1e9, -1e9); return bi; };
     let div = 1; // opacity already applied by the enclosing isolated group (instances inside divide it out)
     let curBlend = 0;
     let isolated = 0;
@@ -1047,7 +1325,13 @@ export class Renderer {
         flush();
         if (r.maskCount > 0) cmds.push(CMD_MASK, r.maskStart, r.maskCount);
         if (curBlend !== 0) { cmds.push(CMD_BLEND, 0, 0); curBlend = 0; }
-        cmds.push(CMD_POP, 0, r.opacity);
+        cmds.push(CMD_POP, r.box, r.opacity);
+        if (stack.length) {
+          // the composite lands inside the parent region
+          const pb = stack[stack.length - 1].box, cb = r.box;
+          boxes[pb] = Math.min(boxes[pb], boxes[cb]); boxes[pb + 1] = Math.min(boxes[pb + 1], boxes[cb + 1]);
+          boxes[pb + 2] = Math.max(boxes[pb + 2], boxes[cb + 2]); boxes[pb + 3] = Math.max(boxes[pb + 3], boxes[cb + 3]);
+        }
         div = r.div;
       }
       const top = stack[stack.length - 1];
@@ -1058,16 +1342,18 @@ export class Renderer {
       if ((bits & 1) && !(top && top.maskEnd > i)) {
         // masks the following siblings: region = rest of the parent's subtree
         flush();
-        cmds.push(CMD_PUSH, 0, 0);
+        const box = newBox();
+        cmds.push(CMD_PUSH, box, 0);
         const par = this.sPar[i];
         const end = par >= 0 ? this.subEnd[par] : n;
-        stack.push({ end, opacity: 1, div, maskStart: k, maskCount: 0, maskEnd: this.subEnd[i] });
+        stack.push({ end, opacity: 1, div, maskStart: k, maskCount: 0, maskEnd: this.subEnd[i], box });
         isolated++;
       } else if ((bits & 2) && this.lopa[i] < 0.999 && this.subEnd[i] > i + 1 && !stack.some(r => r.maskEnd > i)) {
         // group opacity: render the group into its own layer, then composite once with its opacity
         flush();
-        cmds.push(CMD_PUSH, 0, 0);
-        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1 });
+        const box = newBox();
+        cmds.push(CMD_PUSH, box, 0);
+        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box });
         div = O[i];
         isolated++;
       }
@@ -1082,7 +1368,7 @@ export class Renderer {
         rasterMs += performance.now() - r0;
         mask[i] = 1;
         lastK[i] = -1;
-        for (let u = k0; u < k; u++) IIT[u] = i;
+        for (let u = k0; u < k; u++) { IIT[u] = i; IB[u * 4] = NaN; if (stack.length) addBox(u); }
         if (k > k0) { if (k0 !== re) { if (re > rs) ranges.push(rs, re); rs = k0; } re = k; }
         continue;
       }
@@ -1091,10 +1377,13 @@ export class Renderer {
       if (!full && !CHG[i] && !(bits & 8)) {
         const lk = lastK[i];
         if (lk < 0) continue;
-        if (lk === k) {
-          if (kind >= KIND_MASK) { const en = items[i].entry; if (en) en.lastUsed = frame; } // keep its raster alive in the atlas lru
+        // (a raster evicted from the atlas meanwhile must be resolved again: fall through)
+        let alive = true;
+        if (kind >= KIND_MASK && kind <= KIND_RGBA) { const en = items[i].entry; if (en) { if (en.dead) alive = false; else en.lastUsed = frame; } } // keep its raster alive in the atlas lru
+        if (lk === k && alive) {
           mask[i] = 1;
           IIT[k] = i;
+          if (stack.length) addBox(k);
           k++;
           continue;
         }
@@ -1120,16 +1409,14 @@ export class Renderer {
       if (bits & 8 && items[i].dyn) {
         const it = items[i] as Item & { dyn: NonNullable<Item['dyn']> };
         const fr = Math.round((t - it.tOff) * this.store.comp.fps);
-        if (it.dyn.stale) { it.dyn.stale = false; it.entry = null; }
         if (fr !== it.dyn.frame) {
+          // same slot every frame (no per-frame atlas keys): just mark it for a redraw
           it.dyn.frame = fr;
           it.dyn.t = t - it.tOff;
-          it.rasterBase = `${it.dyn.base}|f${fr}`;
-          if (it.entry) { it.prevEntry = it.entry; it.prevRaster = it.raster; it.prevScale = it.rasterScale; }
-          it.entry = null;
+          it.dyn.need = true;
         }
       }
-      if (kind >= KIND_MASK) {
+      if (kind >= KIND_MASK && kind <= KIND_RGBA) {
         const it = items[i], l = it.layer;
         // raster space -> local box: paths scale geometry space by size/geomSize
         let gx = 1, gy = 1;
@@ -1141,7 +1428,13 @@ export class Renderer {
         // raster once at the largest scale the animation reaches: no re-rasters during playback
         if (it.maxScale > 0) {
           const o8 = i * 8, cur = Math.max(Math.abs(this.xf[o8 + 4]), Math.abs(this.xf[o8 + 5])) / 100;
-          if (cur > 1e-3) scale *= Math.min(8, Math.max(1, it.maxScale / cur));
+          if (cur > 1e-3) {
+            let boost = Math.min(8, Math.max(1, it.maxScale / cur));
+            // ...but never beyond a share of an atlas page: big layers raster near their on-screen
+            // size and upgrade (off-thread, old raster shown meanwhile) when they actually grow
+            if (boost > 1) boost = Math.max(1, Math.min(boost, Math.sqrt(BOOST_AREA / Math.max(1, Math.abs(a * d - b * c) * w * h * z * z))));
+            scale *= boost;
+          }
         }
         const r0 = performance.now();
         const ok = this.resolveRaster(i, scale, budgetEnd);
@@ -1163,15 +1456,32 @@ export class Renderer {
       I[o + 4] = e; I[o + 5] = f; I[o + 6] = w; I[o + 7] = h;
       I[o + 8] = S[os + 2]; I[o + 9] = S[os + 3]; I[o + 10] = S[os + 4]; I[o + 11] = S[os + 5];
       if (kind === KIND_RGBA) { I[o + 12] = 1; I[o + 13] = 1; I[o + 14] = 1; I[o + 15] = 1; }
-      else { I[o + 12] = S[os + 6]; I[o + 13] = S[os + 7]; I[o + 14] = S[os + 8]; I[o + 15] = S[os + 9]; }
+      else if (kind >= KIND_GRECT) {
+        // local box -> gradient space: inv(paint transform) * diag(1/w, 1/h)
+        const G = this.sGrad, og = i * 8, iw = w ? 1 / w : 0, ih = h ? 1 / h : 0;
+        I[o + 12] = G[og] * iw; I[o + 13] = G[og + 1] * iw; I[o + 14] = G[og + 2] * ih; I[o + 15] = G[og + 3] * ih;
+        u0 = G[og + 4]; v0 = G[og + 5]; page = G[og + 6];
+      } else { I[o + 12] = S[os + 6]; I[o + 13] = S[os + 7]; I[o + 14] = S[os + 8]; I[o + 15] = S[os + 9]; }
       I[o + 16] = S[os + 10]; I[o + 17] = S[os + 11]; I[o + 18] = S[os + 12]; I[o + 19] = S[os + 13];
       I[o + 20] = kind === KIND_MASK ? 0 : S[os + 14];
+      I[o + 38] = this.sGrad[i * 8 + 7];
       I[o + 21] = ALIGN[i];
       I[o + 22] = div !== 1 ? O[i] / div : O[i];
       I[o + 23] = kind;
       I[o + 24] = u0; I[o + 25] = v0; I[o + 26] = u1; I[o + 27] = v1;
       I[o + 28] = page;
       this.writeClip(I, o, CLIP[i]);
+      {
+        // screen aabb of the quad (+ sdf aa / stroke padding), for scissoring isolated regions
+        let pad = 2 / Math.max(1e-6, z * Math.sqrt(Math.abs(a * d - b * c)));
+        if (kind < KIND_MASK || kind >= KIND_GRECT) pad += S[os + 14] > 0 ? S[os + 14] : 0;
+        const hx = w / 2 + pad, hy = h / 2 + pad;
+        const cx = (a * w / 2 + c * h / 2 + e) * z + px0, cy = (b * w / 2 + d * h / 2 + f) * z + py0;
+        const ex = (Math.abs(a) * hx + Math.abs(c) * hy) * z + 2, ey = (Math.abs(b) * hx + Math.abs(d) * hy) * z + 2;
+        const o4 = k * 4;
+        IB[o4] = cx - ex; IB[o4 + 1] = cy - ey; IB[o4 + 2] = cx + ex; IB[o4 + 3] = cy + ey;
+        if (stack.length) addBox(k);
+      }
       mask[i] = 1;
       lastK[i] = k;
       IIT[k] = i;
@@ -1200,7 +1510,9 @@ export class Renderer {
       const x1 = x0 + comp.width * z, y1 = y0 + comp.height * z;
       const sx = Math.max(0, Math.round(x0)), sy = Math.max(0, Math.round(ch - y1));
       gl.enable(gl.SCISSOR_TEST);
-      gl.scissor(sx, sy, Math.max(0, Math.round(Math.min(cw, x1)) - sx), Math.max(0, Math.round(Math.min(ch, ch - y0)) - sy));
+      const sw0 = Math.max(0, Math.round(Math.min(cw, x1)) - sx), sh0 = Math.max(0, Math.round(Math.min(ch, ch - y0)) - sy);
+      gl.scissor(sx, sy, sw0, sh0);
+      this.baseScissor = this.clipToComp ? [sx, sy, sw0, sh0] : null;
       const bg = comp.background;
       gl.clearColor(bg[0] * bg[3] + this.editorBg[0] * (1 - bg[3]), bg[1] * bg[3] + this.editorBg[1] * (1 - bg[3]), bg[2] * bg[3] + this.editorBg[2] * (1 - bg[3]), 1);
       gl.clear(gl.COLOR_BUFFER_BIT);
@@ -1211,6 +1523,8 @@ export class Renderer {
     gl.uniform2f(this.uRes, cw, ch);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.atlas.tex);
+    this.bindRamps();
+    this.flushDyn();
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.bindVertexArray(this.vao);
@@ -1238,6 +1552,7 @@ export class Renderer {
     if (cmds.length === 3 && cmds[0] === CMD_DRAW && cmds[1] === 0) {
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, k); // common case: the whole scene in one call
     } else {
+      this.boundVao = this.vao;
       this.runCommands(cmds);
     }
     gl.bindVertexArray(null);
@@ -1286,7 +1601,7 @@ export class Renderer {
     const a0 = W[o6], b0 = W[o6 + 1], c0 = W[o6 + 2], d0 = W[o6 + 3], e0 = W[o6 + 4], f0 = W[o6 + 5];
     const z = this.zoom * this.dpr;
     const scale = Math.sqrt(Math.abs(a0 * d0 - b0 * c0)) * z * Math.max(1, ta.from.scale / 100);
-    const bucket = Math.min(16, Math.max(1 / 16, Math.pow(2, Math.ceil(Math.log2(Math.max(scale, 1e-3)) * 2) / 2)));
+    const bucket = this.bucketOf(scale);
     const lt = t - it.tOff;
     for (const u of units) {
       // raster per unit (cached in the atlas like any other raster)
@@ -1354,12 +1669,33 @@ export class Renderer {
     }
   }
 
-  /** draw instances [start, start+count) by pointing the attributes at that range (no baseInstance in webgl2) */
+  /** draw instances [start, start+count). webgl2 has no baseInstance, so the attributes have to
+   *  point at the range: one cached vertex array per range start (one bind instead of re-pointing
+   *  10 attributes per range; ranges are stable from frame to frame during playback) */
   private drawRange(start: number, count: number) {
     const gl = this.gl;
-    for (let a = 0; a < 10; a++) gl.vertexAttribPointer(1 + a, 4, gl.FLOAT, false, F * 4, start * F * 4 + a * 16);
+    let v = start === 0 ? this.vao : this.rangeVaos.get(start);
+    if (!v) {
+      if (this.rangeVaos.size >= 4096) { for (const x of this.rangeVaos.values()) gl.deleteVertexArray(x); this.rangeVaos.clear(); }
+      v = gl.createVertexArray()!;
+      gl.bindVertexArray(v);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.qbuf);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.ibuf);
+      for (let a = 0; a < 10; a++) {
+        gl.enableVertexAttribArray(1 + a);
+        gl.vertexAttribPointer(1 + a, 4, gl.FLOAT, false, F * 4, start * F * 4 + a * 16);
+        gl.vertexAttribDivisor(1 + a, 1);
+      }
+      this.rangeVaos.set(start, v);
+    }
+    if (v !== this.boundVao) { gl.bindVertexArray(v); this.boundVao = v; }
     gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, count);
   }
+  private qbuf!: WebGLBuffer;
+  private rangeVaos = new Map<number, WebGLVertexArrayObject>();
+  private boundVao: WebGLVertexArrayObject | null = null;
 
   private fbo(depth: number) {
     const gl = this.gl;
@@ -1404,6 +1740,17 @@ export class Renderer {
     const base = this.target?.fb ?? null;
     const targets: (WebGLFramebuffer | null)[] = [base];
     const masks: (WebGLTexture | null)[] = [];
+    // scissor per depth: the comp clip intersected with each open region's screen bounds
+    const ch = this.targetH(), cw = this.targetW(), B = this.boxes;
+    const bs = this.baseScissor ?? [0, 0, cw, ch];
+    const sc: number[][] = [bs];
+    const setSc = (r: number[]) => { gl.enable(gl.SCISSOR_TEST); gl.scissor(r[0], r[1], r[2], r[3]); };
+    const regionSc = (bi: number, parent: number[]) => {
+      // device px top-left box -> gl scissor (bottom-left), intersected with the parent scissor
+      const x0 = Math.max(parent[0], Math.floor(B[bi])), x1 = Math.min(parent[0] + parent[2], Math.ceil(B[bi + 2]));
+      const y0 = Math.max(parent[1], Math.floor(ch - B[bi + 3])), y1 = Math.min(parent[1] + parent[3], Math.ceil(ch - B[bi + 1]));
+      return [x0, y0, Math.max(0, x1 - x0), Math.max(0, y1 - y0)];
+    };
     for (let c = 0; c < cmds.length; c += 3) {
       const type = cmds[c], a = cmds[c + 1], b = cmds[c + 2];
       if (type === CMD_DRAW) this.drawRange(a, b);
@@ -1413,6 +1760,9 @@ export class Renderer {
         depth++;
         targets.push(f.fb);
         gl.bindFramebuffer(gl.FRAMEBUFFER, f.fb);
+        const r = regionSc(a, sc[sc.length - 1]);
+        sc.push(r);
+        setSc(r);
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
       } else if (type === CMD_MASK) {
@@ -1432,6 +1782,8 @@ export class Renderer {
         depth--;
         targets.pop();
         gl.bindFramebuffer(gl.FRAMEBUFFER, targets[targets.length - 1]);
+        // composite only the region's bounds, then back to the parent's scissor for its draws
+        setSc(sc.pop()!);
         // composite the layer with a fullscreen quad
         gl.useProgram(this.compositeProgram());
         gl.uniform1f(this.cuOpacity, b);
@@ -1445,10 +1797,13 @@ export class Renderer {
         if (maskTex) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, null); }
         gl.activeTexture(gl.TEXTURE0);
         gl.useProgram(this.prog);
+        setSc(sc[sc.length - 1]);
       }
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, base);
-    for (let a = 0; a < 10; a++) gl.vertexAttribPointer(1 + a, 4, gl.FLOAT, false, F * 4, a * 16); // back to the fast path layout
+    if (this.baseScissor) setSc(this.baseScissor); else gl.disable(gl.SCISSOR_TEST);
+    gl.bindVertexArray(this.vao);
+    this.boundVao = this.vao;
     this.setBlend(0);
   }
 

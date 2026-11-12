@@ -107,7 +107,13 @@ function hasComplexPaint(l: Layer) {
 export interface TrimValues { start: number; end: number; offset: number }
 
 /** split a geometry into subpaths (each starts with M) with their measured lengths */
+const subpathCache = new WeakMap<PathGeometry, { path: Path2D; len: number }[]>();
 function subpaths(g: PathGeometry): { path: Path2D; len: number }[] {
+  let c = subpathCache.get(g);
+  if (!c) subpathCache.set(g, (c = measureSubpaths(g)));
+  return c;
+}
+function measureSubpaths(g: PathGeometry): { path: Path2D; len: number }[] {
   const out: { path: Path2D; len: number }[] = [];
   let cur: Path2D | null = null, len = 0, x = 0, y = 0, sx = 0, sy = 0;
   const flush = () => { if (cur) out.push({ path: cur, len }); };
@@ -190,6 +196,45 @@ export function rasterPath(l: Layer, scale: number, strokeWidth: number, trimArg
   }
   finishMask(out);
   return { kind: 'mask', pw, ph, x, y, w: pw / s, h: ph / s, data: out };
+}
+
+/** where a path mask raster goes (same math as rasterPath) */
+export interface PathPlacement { x: number; y: number; s: number; pw: number; ph: number }
+export function pathPlacement(l: Layer, scale: number, strokeWidth: number, trimArg?: TrimValues): PathPlacement {
+  const geoms = l.geometry ?? [];
+  const strokeGeoms = trimArg ? undefined : l.strokeGeometry;
+  const [bx, by, bw, bh] = geometryBounds(strokeGeoms ? [...geoms, ...strokeGeoms] : geoms);
+  const pad = (strokeGeoms ? 0 : strokeWidth) + 2 / scale;
+  const x = bx - pad, y = by - pad, w = bw + pad * 2, h = bh + pad * 2;
+  const s = fitScale(w, h, scale);
+  return { x, y, s, pw: Math.max(1, Math.ceil(w * s)), ph: Math.max(1, Math.ceil(h * s)) };
+}
+
+/** draw a path coverage mask straight into a canvas at (ox, oy): R = fill, G = stroke coverage
+ *  (premultiplied, so a premultiplied upload of the canvas gives exactly the mask that rasterPath
+ *  reads back with getImageData, without the read-back). clears the 1px gutter around it. */
+export function drawPathMask(c: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, pl: PathPlacement, ox: number, oy: number, l: Layer, strokeWidth: number, trimArg?: TrimValues) {
+  const geoms = l.geometry ?? [];
+  const strokeGeoms = trimArg ? undefined : l.strokeGeometry;
+  trim = trimArg;
+  const { x, y, s, pw, ph } = pl;
+  c.save();
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.clearRect(ox - 1, oy - 1, pw + 2, ph + 2);
+  c.beginPath();
+  c.rect(ox, oy, pw, ph);
+  c.clip();
+  c.setTransform(s, 0, 0, s, ox - x * s, oy - y * s);
+  c.globalCompositeOperation = 'source-over';
+  c.globalAlpha = 1;
+  c.fillStyle = '#f00';
+  for (const g of geoms) c.fill(toPath2D(g), g.fillRule);
+  if (strokeWidth > 0 || strokeGeoms) {
+    c.globalCompositeOperation = 'lighter';
+    strokeGeom(c, l, geoms, strokeGeoms, strokeWidth, '#0f0');
+  }
+  c.restore();
+  trim = undefined;
 }
 
 let trim: TrimValues | undefined;
