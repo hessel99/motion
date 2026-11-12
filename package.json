@@ -20,6 +20,7 @@
     "stress:quick": "vite build && node scripts/stress-lab.mjs --quick",
     "fidelity": "node scripts/figma-fidelity.mjs",
     "qa": "node scripts/qa-flows.mjs",
+    "qa:electron": "xvfb-run -a node scripts/qa-electron.mjs",
     "release:local": "npm run build && node scripts/release.mjs --out release/updates",
     "release:local:mac": "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac zip --publish never && node scripts/release.mjs --out release/updates",
     "release:serve": "node scripts/serve-release.mjs release/updates",

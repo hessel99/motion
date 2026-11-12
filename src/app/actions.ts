@@ -561,7 +561,8 @@ export async function handlePaste(e: ClipboardEvent) {
     for (const it of cd.items ?? []) { const f = it.kind === 'file' ? it.getAsFile() : null; if (f && (f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name))) return openBrowserFile(f); }
     if (textData.trim().startsWith('{')) {
       const json = JSON.parse(textData);
-      if (json.layers && (json.v || json.fr)) return openData('clipboard.json', textData);
+      // the new tab is named after the animation (lottie "nm"), not "clipboard"
+      if (json.layers && (json.v || json.fr)) return openData(`${String(json.nm || 'Pasted Lottie').replace(/[\\/]/g, ' ')}.json`, textData);
     }
     if (memClipboard && !textData) return memClipboard.startsWith(KEYS_PREFIX) ? pasteKeys(memClipboard) : pasteMotion(memClipboard);
     if (html && /figma/i.test(html)) toast('Figma data found but could not be decoded', 'error');
