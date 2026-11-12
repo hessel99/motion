@@ -238,14 +238,12 @@ describe('describe', () => {
 });
 
 describe('editor context + mentions', () => {
-  it('includes selection, playhead, markers and mentioned layers', async () => {
+  it('includes selection, playhead and mentioned layers', async () => {
     const { s, a, b } = fresh();
-    await run('set_markers', { add: [{ t: 0.5, label: 'beat' }] });
     s.select([a.id]);
     s.setTime(1.25);
     const ctx = editorContext(s, resolveMentions(s, 'move it next to @[Big title]'));
     expect(ctx).toContain('playhead 1.25s');
-    expect(ctx).toContain('markers: 0.5s "beat"');
     expect(ctx).toContain(`"Logo" rect id=${a.id}`);
     expect(ctx).toContain('mentioned:');
     expect(ctx).toContain(`id=${b.id}`);

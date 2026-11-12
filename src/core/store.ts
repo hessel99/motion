@@ -356,6 +356,8 @@ export class Store {
   /** replace the whole document (open file) */
   load(project: Project) {
     this.project = project;
+    // fields of removed features (0.4: timeline markers) are dropped from older files
+    for (const c of Object.values(project.comps)) delete (c as { markers?: unknown }).markers;
     for (const id in project.components ?? {}) rememberTree(project, id);
     this.ensureActiveComp();
     this.workArea = null;

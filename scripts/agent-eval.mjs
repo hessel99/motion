@@ -79,7 +79,7 @@ function judgeInput(brief, rec) {
   const metrics = [
     `layers ${m.drawableLayers} drawable (${Object.entries(m.layerTypes).map(([k, v]) => `${k} ${v}`).join(', ')}), ${m.keys} keys, ${m.segments} moving segments`,
     `eases: ${Object.entries(m.easesUsed).map(([k, v]) => `${k}×${v}`).join(', ') || 'none'}; springs ${m.springSegments}, overshooting ${m.overshootSegments}, hold ${m.holdKeys}`,
-    `expressions ${m.expressions}, text animators ${m.textAnimators}, precomps ${m.precomps}, paths ${m.pathLayers}, gradients ${m.gradientLayers}, markers ${m.markers}`,
+    `expressions ${m.expressions}, text animators ${m.textAnimators}, precomps ${m.precomps}, paths ${m.pathLayers}, gradients ${m.gradientLayers}`,
     `palette (${m.paletteSize}): ${m.palette.join(' ')}`,
     `motion from ${m.firstMotion}s to ${m.lastMotion}s (end hold ${m.endHold}s, longest still ${m.longestHold}s), visual activity ${Math.round(m.visualActivity * 100)}% of the comp`,
     `fonts that did not load (rendered in a fallback): ${m.missingFonts?.join(', ') || 'none'}; trim keys that cannot render: ${m.deadTrimLayers?.join(', ') || 'none'}`,
@@ -195,7 +195,7 @@ async function probe(page) {
       const extra = [l.text ? `"${l.text.content.slice(0, 60)}" ${l.text.fontFamily} ${l.text.fontSize}px w${l.text.fontWeight}` : '', l.shape ? l.shape.kind : '', l.props.strokeWidth && valueAt(l, 'strokeWidth', 0)[0] > 0 ? `stroke ${hex(valueAt(l, 'stroke', 0))} ${valueAt(l, 'strokeWidth', 0)[0]}px` : ''].filter(Boolean).join(' ');
       return `${'  '.repeat(depth)}- ${l.name} [${l.type}]${box ? ` box ${Math.round(box[1])},${Math.round(box[2])},${Math.round(box[3] - box[1])},${Math.round(box[4] - box[2])}` : ''} ${fill} ${extra}`.trimEnd();
     }).filter(Boolean).join('\n');
-    const timeline = [`comp ${c.width}x${c.height} ${D}s @${c.fps}fps, background ${hex(c.background)}${(c.markers ?? []).length ? `, markers ${c.markers.map((m) => m.t + (m.label ? ' ' + m.label : '')).join(', ')}` : ''}`,
+    const timeline = [`comp ${c.width}x${c.height} ${D}s @${c.fps}fps, background ${hex(c.background)}`,
       ...order.map((id) => { const l = st.layer(id); return l ? describeLayerAnimation(l) : ''; }).filter(Boolean)].join('\n');
     // which requested font families actually render (else the text silently falls back to Inter/system)
     const fonts = {};

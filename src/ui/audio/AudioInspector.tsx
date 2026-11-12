@@ -1,6 +1,6 @@
 // inspector for audio layers. small self-contained rows (each reads the store itself) so they drop into
 // any inspector layout: analysis summary, volume (keyframable), fades, timing (start / trim), mute and
-// snapping, tempo (bpm override, tap tempo, grid / downbeat nudge), music actions (sync, markers, fit),
+// snapping, tempo (bpm override, tap tempo, grid / downbeat nudge), music actions (sync, fit),
 // and the opt-in sound effects picker.
 import { useRef, useState } from 'preact/hooks';
 import './audio.css';
@@ -11,7 +11,7 @@ import { useChannels } from '../hooks';
 import { Checkbox, NumField, Section } from '../ui';
 import { layerAnalysis, analysisFailed } from '../../audio/analysis-store';
 import { music, sections, beats } from '../../audio/timing';
-import { musicalLengths, syncToMusic, patternTimes, markersOnBeats, type SyncMode } from '../../audio/sync';
+import { musicalLengths, syncToMusic, type SyncMode } from '../../audio/sync';
 import { musicSnap } from './timeline-audio';
 import { SFX_FAMILIES, renderAudition, type SfxFamily } from '../../audio/sfx';
 import { addSoundEffects, setSfxFamily, sfxLayers, hasMotion } from '../../audio/sfx-place';
@@ -212,8 +212,6 @@ export function MusicActionsRow() {
       <div class="au-row">
         <span class="au-label"></span>
         <span class="au-grow">
-          <button type="button" class="au-btn" title="A timeline marker on every bar" onClick={() => { const t = patternTimes(m, 'bar', 0, s.comp.duration); markersOnBeats(s, t, 'bar'); toast(`${t.length} bar markers`); }}>Markers on bars</button>
-          <button type="button" class="au-btn" title="Markers on the strongest hits" onClick={() => { const t = patternTimes(m, 'accents', 0, s.comp.duration); markersOnBeats(s, t, 'accent'); toast(`${t.length} hit markers`); }}>On hits</button>
           {Math.abs(lens.full - s.comp.duration) > 0.05 && <button type="button" class="au-btn" title="Composition length = the music" onClick={() => setCompSettings(s, { duration: Math.round(lens.full * s.comp.fps) / s.comp.fps })}>Fit {lens.full.toFixed(1)} s</button>}
           {lens.phrase && Math.abs(lens.phrase - s.comp.duration) > 0.05 && lens.phrase < lens.full && <button type="button" class="au-btn" title="End on the next 4-bar phrase" onClick={() => setCompSettings(s, { duration: Math.round(lens.phrase! * s.comp.fps) / s.comp.fps })}>Phrase {lens.phrase.toFixed(1)} s</button>}
         </span>

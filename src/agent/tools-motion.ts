@@ -11,6 +11,7 @@ import { animRange, fmtTime } from './describe';
 import { centerOf, inv, apply, worldMatrix, rng, samplePath, layerSize } from './motion-math';
 import { orderDelays } from './tools-scene';
 import { parseD } from './shape-lib';
+import { music, beats as musicBeats } from '../audio/timing';
 import { transformCmds } from '../import/svg';
 
 const r2 = (x: number) => Math.round(x * 100) / 100;
@@ -420,12 +421,12 @@ export const MOTION_TOOLS: ToolDef[] = [
   },
   {
     name: 'align_to_beats',
-    description: 'Snap animation to beats: the comp markers (default), explicit times, or a bpm grid. mode start: each layer\'s animation starts on the nearest beat; sequence: layer i starts on beat fromBeat+i (one hit per beat); end: each animation lands (last key) on the nearest beat; keys: every key within tolerance snaps to its nearest beat (key spacing changes).',
+    description: 'Snap animation to beats: explicit times, a bpm grid, or (default) the beats of the analysed music layer. mode start: each layer\'s animation starts on the nearest beat; sequence: layer i starts on beat fromBeat+i (one hit per beat); end: each animation lands (last key) on the nearest beat; keys: every key within tolerance snaps to its nearest beat (key spacing changes).',
     inputSchema: {
       type: 'object',
       properties: {
         ids: idsSchema, mode: { enum: ['start', 'sequence', 'end', 'keys'] },
-        beats: { type: 'array', items: { type: 'number' }, description: 'beat times (default: markers)' },
+        beats: { type: 'array', items: { type: 'number' }, description: 'beat times (default: the music\'s beats)' },
         bpm: { type: 'number' }, offset: { type: 'number', description: 'bpm grid: first beat time' },
         fromBeat: { type: 'number', description: 'sequence: index of the first beat (default 0)' },
         tolerance: { type: 'number', description: 'keys mode: max snap distance in seconds (default 0.25)' },
@@ -437,8 +438,8 @@ export const MOTION_TOOLS: ToolDef[] = [
       const list = members(a.ids, 'align');
       let beats: number[] = a.beats?.map(Number) ?? [];
       if (!beats.length && a.bpm) { const step = 60 / a.bpm; for (let t = a.offset ?? 0; t <= s.comp.duration + 1e-9; t += step) beats.push(Math.round(t * 1000) / 1000); }
-      if (!beats.length) beats = (s.comp.markers ?? []).map(m => m.t);
-      if (!beats.length) throw new Error('no beats: add markers (set_markers), or pass beats [...] or bpm');
+      if (!beats.length) { const m = music(s); if (m) beats = musicBeats(m); }
+      if (!beats.length) throw new Error('no beats: add a music layer (analysed), or pass beats [...] or bpm');
       beats.sort((x, y) => x - y);
       const near = (t: number) => beats.reduce((b, x) => (Math.abs(x - t) < Math.abs(b - t) ? x : b), beats[0]);
       const mode = a.mode ?? 'start';

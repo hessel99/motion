@@ -93,7 +93,6 @@ export function computeMetrics(doc, probe) {
   const exprs = layers.flatMap((l) => Object.entries(l.props ?? {}).filter(([, p]) => p.expr).map(([k, p]) => ({ id: l.id, prop: k, expr: p.expr })));
   const textAnims = layers.filter((l) => l.textAnim).map((l) => ({ id: l.id, ...l.textAnim }));
   const precomps = layers.filter((l) => l.type === 'precomp').length;
-  const markers = Object.values(doc.comps).reduce((n, c) => n + (c.markers?.length ?? 0), 0);
   const paths = layers.filter((l) => l.type === 'path').length;
   const gradients = layers.filter((l) => (l.paints ?? []).some((p) => p.type === 'linear' || p.type === 'radial')).length;
   // ---- palette (fills/strokes of drawable layers + gradient stops + comp background)
@@ -194,7 +193,7 @@ export function computeMetrics(doc, probe) {
     animatedLayers: layers.filter((l) => animatedProps(l).length || l.textAnim).length,
     keys, segments, easesUsed: easeCount, distinctEases: Object.keys(easeCount).length, easeFamilies: easeFamilies.size,
     overshootSegments: overshootSegs, keyedOvershoots, springSegments: springSegs, holdKeys, linearSegments: linearSegs,
-    expressions: exprs.length, textAnimators: textAnims.length, precomps, markers, pathLayers: paths, gradientLayers: gradients,
+    expressions: exprs.length, textAnimators: textAnims.length, precomps, pathLayers: paths, gradientLayers: gradients,
     paletteSize: palette.length, palette: palette.map(hex),
     keyCoverage: r3(keyCoverage), visualActivity: r3(D ? active / D : 0),
     firstMotion: r3(firstChange ?? 0), lastMotion: r3(lastChange), endHold: r3(Math.max(0, D - lastChange)), longestHold: r3(longestHold),
@@ -352,7 +351,6 @@ export function runCheck(check, m, d) {
     }
     case 'audioKept': return d.layers.some((l) => l.type === 'audio' && !l.sfx);
     case 'beatGrid': {
-      if (m.markers >= 3) return true;
       const step = 60 / check.bpm, ts = d.segs.map((s) => s.t0);
       return ts.length >= 4 && ts.filter((t) => Math.abs(t / step - Math.round(t / step)) * step < 0.04).length / ts.length >= 0.6;
     }

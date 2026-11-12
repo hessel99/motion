@@ -15,7 +15,6 @@ beforeEach(() => { editor.store.load(createProject()); });
 describe('build_scene', () => {
   const spec = () => ({
     comp: { duration: 4, background: '#101018' },
-    markers: [{ t: 1, label: 'hit' }],
     layers: [
       { key: 'bg', type: 'rect', x: 0, y: 0, w: 1920, h: 1080, fill: { type: 'linear', stops: ['#111133', '#331111'], angle: 90 } },
       { key: 'title', text: 'Hello', fontSize: 120, x: 200, y: 300, fill: '#ffffff', enter: { t: 0.2, duration: 0.8, from: { opacity: 0, dy: 60 } } },
@@ -48,7 +47,6 @@ describe('build_scene', () => {
     expect(chk.props.stroke!.v.slice(0, 3)).toEqual([0x22 / 255, 0xcc / 255, 0x88 / 255]);
     expect(s.layer(r.ids.spin)!.props.rotation!.expr).toBe('time*90');
     expect(s.comp.duration).toBe(4);
-    expect(s.comp.markers!.map(m => m.label)).toEqual(['hit']);
     s.undo();
     expect(Object.keys(s.project.layers)).toHaveLength(0);
   });
