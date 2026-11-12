@@ -11,6 +11,7 @@
 
 import { createLayer, uid, type Asset, type Composition, type Keyframe, type Layer, type LayerType, type Paint, type PathCmd, type PathGeometry, type Project, type Prop, type PropKey } from '../core/model';
 import { evalProp } from '../core/evaluate';
+import { cubicBezier } from '../core/easing';
 
 // ======================================================================================
 // prop helpers
@@ -111,12 +112,22 @@ export type ShapeNode =
   | { kind: 'group'; name: string; tr: TR; items: ShapeNode[] }
   | { kind: 'rect'; name: string; size: Prop; position: Prop; roundness: Prop }
   | { kind: 'ellipse'; name: string; size: Prop; position: Prop }
-  | { kind: 'path'; name: string; cmds: PathCmd[] }
+  | { kind: 'path'; name: string; cmds: PathCmd[]; keys?: PathAnimKey[] }
   | { kind: 'fill'; name: string; color: Prop; opacity: Prop; rule: 'nonzero' | 'evenodd' }
   | { kind: 'stroke'; name: string; color: Prop; opacity: Prop; width: Prop }
-  | { kind: 'gfill'; name: string; gtype: 'linear' | 'radial'; stops: { pos: number; color: [number, number, number, number] }[]; start: number[]; end: number[]; opacity: Prop; rule: 'nonzero' | 'evenodd' };
+  | { kind: 'gfill'; name: string; gtype: 'linear' | 'radial'; stops: { pos: number; color: [number, number, number, number] }[]; start: number[]; end: number[]; opacity: Prop; rule: 'nonzero' | 'evenodd' }
+  /** trim paths modifier: applies to the primitives above it (same group and nested groups), like paints */
+  | { kind: 'trim'; name: string; start: Prop; end: Prop; offset: Prop };
+
+/** one key of an animated path (time in seconds; easing like Keyframe: segment k->k+1 uses k.out, (k+1).in) */
+export interface PathAnimKey { t: number; cmds: PathCmd[]; interp: Keyframe['interp']; out: [number, number]; in: [number, number] }
+
+/** a path source: static commands, optionally animated by keys (keys[0].cmds == cmds) */
+export interface PathSrc { cmds: PathCmd[]; keys?: PathAnimKey[] }
 
 type PaintNode = Extract<ShapeNode, { kind: 'fill' | 'stroke' | 'gfill' }>;
+type TrimNode = Extract<ShapeNode, { kind: 'trim' }>;
+type ModNode = PaintNode | TrimNode;
 type PrimNode = Extract<ShapeNode, { kind: 'rect' | 'ellipse' | 'path' }>;
 
 export class BuildCtx {
@@ -209,11 +220,64 @@ function translateCmds(cmds: PathCmd[], dx: number, dy: number): PathCmd[] {
   });
 }
 
-function primCmds(p: PrimNode): PathCmd[] {
-  if (p.kind === 'path') return p.cmds;
-  const s = firstValue(p.size), c = firstValue(p.position);
-  if (p.kind === 'rect') return rectCmds(c[0] - s[0] / 2, c[1] - s[1] / 2, s[0], s[1], firstValue(p.roundness)[0] ?? 0);
-  return ellipseCmds(c[0], c[1], s[0] / 2, s[1] / 2);
+function primCmdsAt(kind: 'rect' | 'ellipse', v: number[]): PathCmd[] {
+  const [w, h, x, y, r] = v;
+  if (kind === 'rect') return rectCmds(x - w / 2, y - h / 2, w, h, r ?? 0);
+  return ellipseCmds(x, y, w / 2, h / 2);
+}
+
+/** a primitive as a path source; animated rect / ellipse parameters become path keys */
+function primSrc(p: PrimNode): PathSrc {
+  if (p.kind === 'path') return { cmds: p.cmds, keys: p.keys };
+  const props = p.kind === 'rect' ? [p.size, p.position, p.roundness] : [p.size, p.position];
+  const all = combineProps(props, props.map((_, i) => (i < 2 ? 2 : 1)), vals => [vals[0][0], vals[0][1], vals[1][0], vals[1][1], vals[2]?.[0] ?? 0]);
+  const cmds = primCmdsAt(p.kind, firstValue(all));
+  if (!all.kf || all.kf.length < 2) return { cmds };
+  return { cmds, keys: all.kf.map(k => ({ t: k.t, cmds: primCmdsAt(p.kind as 'rect' | 'ellipse', k.v), interp: k.interp, out: [k.out[0], k.out[1]], in: [k.in[0], k.in[1]] })) };
+}
+
+function lerpCmds(a: PathCmd[], b: PathCmd[], p: number): PathCmd[] {
+  if (a.length !== b.length) return p < 0.5 ? a : b;
+  return a.map((ca, i) => {
+    const cb = b[i];
+    if (ca[0] !== cb[0]) return p < 0.5 ? ca : cb;
+    return ca.map((v, k) => (k === 0 ? v : (v as number) + (((cb as any)[k] as number) - (v as number)) * p)) as PathCmd;
+  });
+}
+
+/** evaluate an animated path source at time t (same easing semantics as the renderer) */
+export function pathSrcAt(src: PathSrc, t: number): PathCmd[] {
+  const kf = src.keys;
+  if (!kf || kf.length < 2) return src.cmds;
+  if (t <= kf[0].t) return kf[0].cmds;
+  const last = kf[kf.length - 1];
+  if (t >= last.t) return last.cmds;
+  let i = 0;
+  while (i < kf.length - 2 && kf[i + 1].t <= t) i++;
+  const a = kf[i], b = kf[i + 1];
+  if (a.interp === 'hold') return a.cmds;
+  let p = (t - a.t) / (b.t - a.t || 1);
+  if (a.interp !== 'linear') p = cubicBezier(a.out[0], a.out[1], b.in[0], b.in[1])(p);
+  return lerpCmds(a.cmds, b.cmds, p);
+}
+
+/**
+ * combine several path sources into keyed geometry lists. exact when at most one source is
+ * animated or all animated sources share key times (easing from the first); otherwise keys
+ * at the union of times, sampled, with the first source's easing where it has a key.
+ */
+function combinePathSrcs(srcs: PathSrc[]): { t: number; paths: PathCmd[][]; interp: Keyframe['interp']; out: [number, number]; in: [number, number] }[] | null {
+  const anim = srcs.filter(s => s.keys && s.keys.length > 1);
+  if (!anim.length) return null;
+  const lead = anim[0].keys!;
+  const same = anim.every(s => s.keys!.length === lead.length && s.keys!.every((k, i) => Math.abs(k.t - lead[i].t) < 1e-6));
+  if (same) return lead.map((k, i) => ({ t: k.t, paths: srcs.map(s => (s.keys && s.keys.length > 1 ? s.keys[i].cmds : s.cmds)), interp: k.interp, out: k.out, in: k.in }));
+  const times = Array.from(new Set(anim.flatMap(s => s.keys!.map(k => Math.round(k.t * 1e6) / 1e6)))).sort((a, b) => a - b);
+  const leadAt = new Map(lead.map(k => [Math.round(k.t * 1e6) / 1e6, k]));
+  return times.map(t => {
+    const lk = leadAt.get(t);
+    return { t, paths: srcs.map(s => pathSrcAt(s, t)), interp: lk ? lk.interp : 'linear', out: lk ? lk.out : [0, 0], in: lk ? lk.in : [1, 1] };
+  });
 }
 
 // ---------------- shape tree -> layers ----------------
@@ -269,25 +333,48 @@ function primLayer(ctx: BuildCtx, p: PrimNode, fill?: PaintNode, stroke?: PaintN
     applyPaints(ctx, l, fill, stroke, [c[0] - s[0] / 2, c[1] - s[1] / 2, s[0], s[1]]);
     return l;
   }
-  return pathLayer(ctx, p.name, [p.cmds], fill, stroke);
+  return pathLayer(ctx, p.name, [primSrc(p)], fill, stroke);
 }
 
-function pathLayer(ctx: BuildCtx, name: string, paths: PathCmd[][], fill?: PaintNode, stroke?: PaintNode): Layer {
-  const all = paths.flat();
-  const [bx, by, bw, bh] = cmdsBounds(all);
+/**
+ * a path layer from one or more path sources (all in the same space). animated sources
+ * become pathKf; the geometry space is the union bounds over every key.
+ */
+export function pathLayer(ctx: BuildCtx, name: string, srcs: PathSrc[], fill?: PaintNode, stroke?: PaintNode, trim?: TrimNode, ruleOverride?: 'nonzero' | 'evenodd'): Layer {
+  const keyed = combinePathSrcs(srcs);
+  const first = keyed ? keyed[0].paths : srcs.map(s => s.cmds);
+  let [bx, by, bw, bh] = cmdsBounds(first.flat());
+  if (keyed) {
+    let x1 = bx + bw, y1 = by + bh;
+    for (const k of keyed) {
+      const [kx, ky, kw, kh] = cmdsBounds(k.paths.flat());
+      if (kw === 0 && kh === 0 && kx === 0 && ky === 0) continue;
+      bx = Math.min(bx, kx); by = Math.min(by, ky); x1 = Math.max(x1, kx + kw); y1 = Math.max(y1, ky + kh);
+    }
+    bw = x1 - bx; bh = y1 - by;
+  }
   const tr = identityTR();
   tr.position = sprop([bx, by]);
   const l = ctx.make('path', name, tr);
   delete l.props.radius;
-  const rule = fill && (fill.kind === 'fill' || fill.kind === 'gfill') ? fill.rule : 'nonzero';
-  l.geometry = paths.map(cmds => ({ cmds: translateCmds(cmds, -bx, -by), fillRule: rule } as PathGeometry));
+  const rule = ruleOverride ?? (fill && (fill.kind === 'fill' || fill.kind === 'gfill') ? fill.rule : 'nonzero');
+  const geo = (paths: PathCmd[][]) => paths.map(cmds => ({ cmds: translateCmds(cmds, -bx, -by), fillRule: rule } as PathGeometry));
+  l.geometry = geo(first);
+  if (keyed) l.pathKf = keyed.map(k => ({ t: k.t, geometry: geo(k.paths), interp: k.interp, out: [k.out[0], k.out[1]], in: [k.in[0], k.in[1]] }));
   l.geomSize = [bw, bh];
   l.props.size = sprop([bw, bh]);
   applyPaints(ctx, l, fill, stroke, [bx, by, bw, bh]);
+  if (trim) {
+    l.trimOn = true;
+    l.props.trimStart = trim.start;
+    l.props.trimEnd = trim.end;
+    l.props.trimOffset = trim.offset;
+  }
   return l;
 }
 
 function isPaint(n: ShapeNode): n is PaintNode { return n.kind === 'fill' || n.kind === 'stroke' || n.kind === 'gfill'; }
+function isMod(n: ShapeNode): n is ModNode { return isPaint(n) || n.kind === 'trim'; }
 function isPrim(n: ShapeNode): n is PrimNode { return n.kind === 'rect' || n.kind === 'ellipse' || n.kind === 'path'; }
 
 /**
@@ -295,20 +382,25 @@ function isPrim(n: ShapeNode): n is PrimNode { return n.kind === 'rect' || n.kin
  * order (first = bottom). paints apply to every primitive above them in the same group
  * and in nested groups above them (ae semantics); we take the nearest fill and stroke.
  */
-function groupItems(ctx: BuildCtx, items: ShapeNode[], inherited: PaintNode[]): Layer[] {
+function groupItems(ctx: BuildCtx, items: ShapeNode[], inherited: ModNode[]): Layer[] {
   const out: Layer[] = []; // top -> bottom, reversed at the end
-  // paints after index i (nearest first), computed right-to-left in one pass
-  const after: PaintNode[][] = new Array(items.length);
+  // paints / modifiers after index i (nearest first), computed right-to-left in one pass
+  const after: ModNode[][] = new Array(items.length);
   let acc = inherited;
   for (let i = items.length - 1; i >= 0; i--) {
     after[i] = acc;
     const it = items[i];
-    if (isPaint(it)) acc = [it, ...acc];
+    if (isMod(it)) acc = [it, ...acc];
   }
-  const pick = (ps: PaintNode[]) => ({
-    fill: ps.find(p => p.kind === 'fill' || (p.kind === 'gfill' && !(p as any).stroke)),
-    stroke: ps.find(p => p.kind === 'stroke'),
-  });
+  const pick = (ps: ModNode[]) => {
+    // a trim only affects the primitives above it: paints listed before the trim (nearer) still
+    // apply, the trim applies to all of them in after effects (trim sits above the paints)
+    return {
+      fill: ps.find(p => p.kind === 'fill' || (p.kind === 'gfill' && !(p as any).stroke)) as PaintNode | undefined,
+      stroke: ps.find(p => p.kind === 'stroke') as PaintNode | undefined,
+      trim: ps.find(p => p.kind === 'trim') as TrimNode | undefined,
+    };
+  };
   let i = 0;
   while (i < items.length) {
     if (ctx.count > ctx.maxLayers) break;
@@ -327,10 +419,10 @@ function groupItems(ctx: BuildCtx, items: ShapeNode[], inherited: PaintNode[]): 
       let j = i + 1;
       while (j < items.length && isPrim(items[j])) j++;
       const run = items.slice(i, j) as PrimNode[];
-      const { fill, stroke } = pick(after[j - 1]);
+      const { fill, stroke, trim } = pick(after[j - 1]);
       if (fill || stroke) {
-        if (run.length > 1 && run.some(r => r.kind === 'path')) {
-          out.push(pathLayer(ctx, run[0].name, run.map(primCmds), fill, stroke));
+        if (trim || (run.length > 1 && run.some(r => r.kind === 'path'))) {
+          out.push(pathLayer(ctx, run[0].name, run.map(primSrc), fill, stroke, trim));
         } else for (const r of run) out.push(primLayer(ctx, r, fill, stroke));
       }
       i = j;

@@ -105,7 +105,8 @@ code { background: #111; padding: 1px 4px; border-radius: 3px; }
 /* agent */
 .agent { display: flex; flex-direction: column; height: 100%; }
 .agent-head { display: flex; gap: 6px; align-items: center; padding: 8px; border-bottom: 1px solid var(--line); }
-.agent-head select { flex: 1; }
+.agent-head select { flex: 1; min-width: 0; }
+.agent-head button { flex: none; }
 .dot { width: 8px; height: 8px; border-radius: 4px; background: #555; flex: none; }
 .dot.connected { background: #3ecf6e; }
 .dot.connecting { background: #e6b34a; }
@@ -180,5 +181,5 @@ kbd { font: 11px ui-monospace, Menlo, monospace; background: #2a2a30; border: 1p
 .expr-err { color: #ffb3ad; font-size: 11px; margin-top: 2px; }
 .expr-chips { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 4px; }
 .expr-chips button { font: 10px ui-monospace, Menlo, monospace; padding: 1px 5px; color: var(--muted); }
-.model-select { width: 84px; flex: none !important; }
+.model-select { width: 78px; flex: none !important; }
 .tl-search { position: absolute; left: 6px; top: 4px; width: 150px; height: 20px; font-size: 11px; padding: 1px 6px; z-index: 2; background: #121214; }

@@ -95,7 +95,7 @@ export function AgentPanel() {
             <option value="">default</option><option value="opus">Opus</option><option value="sonnet">Sonnet</option><option value="haiku">Haiku</option>
           </select>
         )}
-        <button class="ghost" title="New conversation" onClick={() => { session.current[provider] = undefined; setMsgs([]); }}>New</button>
+        <button class="ghost" title="New conversation" onClick={() => { session.current[provider] = undefined; setMsgs([]); }}>＋</button>
       </div>
       <div class="agent-list" ref={list}>
         {status !== 'connected' && (
