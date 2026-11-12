@@ -66,6 +66,8 @@ export interface AepStream {
   value: number[] | null;
   keyframes: AepKeyframe[] | null;
   expression?: string;
+  /** tdb4 0x77 bit 0: the expression is switched off (kept, not evaluated) */
+  expressionDisabled?: boolean;
 }
 
 export interface AepPathValue {
@@ -89,7 +91,12 @@ export interface AepGroup {
   name?: string;
   enabled: boolean;
   children: AepNode[];
+  /** mask settings (mkif) when this group is an 'ADBE Mask Atom' */
+  mask?: AepMaskInfo;
 }
+
+/** mkif: mode 0 none, 1 add, 2 subtract, 3 intersect, 4 lighten, 5 darken, 6 difference */
+export interface AepMaskInfo { inverted: boolean; mode: number }
 
 export type AepNode = AepGroup | AepStream | AepPathProp | AepTextProp | AepGradientProp | AepOther;
 
@@ -107,7 +114,9 @@ export interface AepLayer {
   matteLayerId: number;
   quality: number;
   label: number;
+  /** ldta 0x63, the AE SDK PF_Xfer value: 2 normal, 4 add, 5 multiply, 6 screen, 10 darken, 11 lighten, ... */
   blendMode: number;
+  /** 0 none, 1 alpha, 2 alpha inverted, 3 luma, 4 luma inverted */
   trackMatte: number;
   /** composition seconds */
   startTime: number;
@@ -373,7 +382,12 @@ class P {
     }
     // mask atom: mkif then LIST:tdgp
     const sub = body.find(k => k.tag === 'LIST' && k.list === 'tdgp');
-    if (sub) return this.group(sub, mn, tb, depth + 1);
+    if (sub) {
+      const g = this.group(sub, mn, tb, depth + 1);
+      const mk = body.find(k => k.tag === 'mkif');
+      if (mk && mk.len >= 8) g.mask = { inverted: this.r.u1(mk.off) === 1, mode: this.r.u4(mk.off + 4) };
+      return g;
+    }
     return { kind: 'other', matchName: mn, tag: first.tag };
   }
 
@@ -399,6 +413,7 @@ class P {
       s.arcAccuracy = r.f8(o + 0x10);
       s.valueless = !!(r.u2(o + 0x38) & 1);
       s.color = !!(r.u1(o + 0x3b) & 1) || (s.dims === 4 && s.singleEase && !s.spatial && !s.valueless);
+      if (t4.len >= 0x7c && r.u4(o + 0x78) && (r.u1(o + 0x77) & 1)) s.expressionDisabled = true;
     }
     const cdat = find(c, 'cdat');
     const kl = findList(c, 'list');

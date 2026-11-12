@@ -136,7 +136,8 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
   - A Lottie-tutorial thermometer (shape paths + keyframed position/scale) renders correctly and animates as intended.
   - A 4 MB broadcast template parses in 130 ms (21 comps, 267 layers, 139 keyframes; text, nested comps and timing come through).
   - Footage (video/PSD) is not inside .aep files, so it becomes placeholders.
-- Skipped: effects, masks, mattes, expressions, 3D, cameras, lights.
+- Also imported (checked on real files from py-aep and lottie-android, pixel-compared with their official Lottie exports): blend modes, solo, **expressions** on transforms (only those our safe language accepts), **track mattes** (alpha / inverted) and **masks** (add, subtract, intersect, difference, inverted, opacity, animated paths), polystars, trim paths, animated shape paths.
+- Skipped: effects, luma mattes (treated as alpha), mask feather/expansion, repeaters, merge paths, time remap, 3D, cameras, lights.
 - **Lottie** import/export is the reliable interchange format today (round-trip tested).
 - **Lottie import is measured against the official lottie-web player** on 11 real files (`scripts/lottie-compare.mjs`, `REF_RENDERER=svg`).
   - 9 of 11 have a mean pixel error under 2.2 of 255. Supported: masks (add, subtract, intersect), track mattes, animated paths, trim paths, compound paths, AE stacking order with parenting, precomp time stretch/remap, simple expressions, blend modes.

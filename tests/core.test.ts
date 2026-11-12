@@ -367,7 +367,7 @@ describe('parent changes keep the on-screen transform', () => {
     const s = new Store();
     const a = addLayer(s, 'rect', { x: 100, y: 100, w: 50, h: 50 } as any);
     const b = addLayer(s, 'rect', { x: 300, y: 150, w: 40, h: 20 } as any);
-    const g = groupLayers(s, [a.id, b.id], { x: 100, y: 100, w: 240, h: 70 });
+    const g = groupLayers(s, [a.id, b.id], { x: 100, y: 100, w: 240, h: 70 })!;
     setProp(s, g.id, 'rotation', [30]);
     setProp(s, g.id, 'scale', [150, 150]);
     setProp(s, g.id, 'opacity', [50]);
@@ -381,7 +381,7 @@ describe('parent changes keep the on-screen transform', () => {
     const { moveLayers } = await import('../src/core/commands');
     const s = new Store();
     const a = addLayer(s, 'rect', { x: 0, y: 0, w: 50, h: 50 } as any);
-    const g = groupLayers(s, [a.id], { x: 0, y: 0, w: 50, h: 50 });
+    const g = groupLayers(s, [a.id], { x: 0, y: 0, w: 50, h: 50 })!;
     setProp(s, g.id, 'position', [400, 300]);
     setProp(s, g.id, 'rotation', [90]);
     const r = addLayer(s, 'rect', { x: 1000, y: 500, w: 60, h: 40 } as any);
