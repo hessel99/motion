@@ -183,7 +183,6 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
 .swatch-row { display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-h-md); background: var(--input-bg); border-radius: var(--radius-md); padding: 0 var(--space-4) 0 var(--space-2); }
 .swatch-row-label { flex: 1; min-width: 0; }
 .swatch-row-value { color: var(--text-muted); font-variant-numeric: tabular-nums; }
-.panel-header { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border-bottom: 1px solid var(--border); min-height: 40px; }
 .label-xs, .ease-group { font-size: var(--text-xs); color: var(--text-muted); margin: var(--space-4) 0 var(--space-2); }
 
 /* ---------------- tooltip (css only: [data-tooltip]) ----------------
@@ -273,7 +272,6 @@ kbd, .kbd {
 /* ================= inspector ================= */
 .inspector { padding-bottom: 40px; }
 .insp-empty { padding: var(--space-7); color: var(--text-muted); }
-.hint-text { line-height: var(--leading-loose); }
 .name-input { font-weight: var(--weight-medium); }
 .insp-type { font-weight: var(--weight-regular); color: var(--text-muted); font-size: var(--text-xs); }
 .row { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }

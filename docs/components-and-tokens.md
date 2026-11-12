@@ -12,7 +12,6 @@ Two features let you build a motion design from a design system rather than from
 ### Colors and numbers (Library tab, left panel)
 - **Get styles in**:
   - paste a design from Figma (its color styles and variables come along)
-  - or **Sync ▾ → Import tokens file**
   - or select a layer and press **＋** to save its fill as a color
 - **Palette**: colors are grouped by name ("Brand / Primary" sits in the *Brand* group). The number on the right of each color is how many layers use it.
 - **Click a color** to select every layer that uses it in this composition.
@@ -54,31 +53,14 @@ Two features let you build a motion design from a design system rather than from
 ![Main component](shots/20-inspector-main.png)
 
 ### Keeping styles in sync with a design library
-- **Sync ▾** → *Import tokens file*, *Sync from a URL*, *Sync Figma variables (API)*, and *Update from …* for each source used before.
-- A sync never applies on its own. You first see a review ("3 styles changed, 1 color new") with each change as before → after and how many layers use it. **Update** applies everything as **one undo step**.
-
-![Sync review](shots/20-sync-review.png)
-
+- Pasting from an updated Figma library updates the styles as part of the paste's undo step (the toast says e.g. "library: 1 color changed").
 - A style that disappeared from the library:
   - if layers still use it, it is kept, marked *removed* and struck through, and those layers keep their look
   - if nothing uses it, it is deleted
-- A style renamed in the library is renamed here, as long as it keeps its id (Figma variable key or token path). It is not removed and re-added.
-- **Desktop app**: a token file you picked is watched. Saving it (for example a Tokens Studio sync in git, or an export script) opens the review automatically.
+- A style renamed in the library is renamed here, as long as it keeps its Figma variable / style key. It is not removed and re-added.
+- 0.4 removed the other sources (W3C / Tokens Studio files, URLs, the Figma variables REST API), the Sync ▾ menu, the review dialog and the tokens-file export. Old files keep their styles; their remembered sources are ignored.
 
 ![Dark mode](shots/20-dark-mode.png)
-
-## Sync options, compared
-
-| path | what it carries | needs | when it updates |
-|---|---|---|---|
-| **Figma paste** (⌘C in Figma, ⌘V here) | variable and color-style ids, names, values, modes (variables); component definitions and instance overrides | nothing | every paste: pasting from an updated library updates the styles (the toast says e.g. "library: 1 color changed"), and this is part of the paste's undo step |
-| **Tokens file** (W3C Design Tokens / DTCG, Tokens Studio, Figma's variables export) | names, values, modes (Tokens Studio sets named light/dark/…), aliases (`{brand.blue}`) | a file (from git, Tokens Studio, a plugin export) | *Update from …*, or automatically when the watched file changes (desktop) |
-| **URL** (e.g. a raw GitHub link to the tokens file) | same as a file | a reachable URL (CORS) | *Update from …* |
-| **Figma variables REST API** (`GET /v1/files/:key/variables/local`) | variables with collections, modes, aliases, stable keys | a personal access token with `file_variables:read`. **Enterprise plans only**, so it is optional | *Update from Figma variables* |
-
-The Figma token is stored only in that browser's local storage. It is never written to the project file.
-
-**Export**: *Sync ▾ → Export as tokens file* writes the library as W3C Design Tokens (DTCG) JSON. Importing that file again round-trips without changes, which the tests check.
 
 ## Design
 
@@ -157,17 +139,13 @@ Variable nodes in real clipboards could not be checked against a capture (none o
 
 ### Sync
 `src/core/token-sync.ts`:
-- **Parsers** produce `IncomingToken { key, name, type, values: {mode: v}, kind }`:
-  - DTCG (`$value` / `$type`, with type inherited from groups, aliases, and 2025 color objects)
-  - Tokens Studio (`value` / `type`; multi-set files, where sets named light/dark/… become modes)
-  - the Figma REST variables response (resolves aliases per mode)
-- `planSync(project, incoming, { from, removeMissing })` matches each incoming token by its library key first, then by name and type. It returns `{ changed (before/after per mode, rename), added, removed (with usage), unchanged }`. This is pure data: the review dialog shows it, and `summarizePlan` writes "2 colors changed, 1 new".
+- The Figma paste (`import/figma/convert.ts`) produces `IncomingToken { key, name, type, values: {mode: v}, kind }`.
+- `planSync(project, incoming, { from, removeMissing })` matches each incoming token by its library key first, then by name and type. It returns `{ changed (before/after per mode, rename), added, removed (with usage), unchanged }`. This is pure data; `summarizePlan` writes "2 colors changed, 1 new".
 - `applySync` / `applySyncTx`:
   - one transaction
   - merges modes (a library that only had the placeholder "Default" mode adopts the incoming modes)
   - rewrites linked values
   - keeps used removed styles as `missing`
-  - remembers the source for *Update from …*
 
 ### Agent tools
 - `list_styles` (read-only): styles with values in the active mode and usage counts, the modes, components with instance counts
@@ -190,7 +168,7 @@ Variable nodes in real clipboards could not be checked against a capture (none o
   - sync diff (changed/new/removed/unchanged, the summary text), applied as one undo step that rewrites linked values
   - a removed style that is still used is kept as missing
   - a rename by key
-  - color parsing, aliases, Tokens Studio multi-set files, DTCG export round-trip
+  - color parsing
 - `tests/components.test.ts`:
   - an instance is a linked copy
   - propagation as one undo step
@@ -215,4 +193,3 @@ Variable nodes in real clipboards could not be checked against a capture (none o
 - Deleting a layer inside an instance is allowed, and it comes back only when the main's structure changes. Hide layers instead of deleting them.
 - Component variants (Figma component sets) paste as separate components.
 - Browser builds cannot re-read a picked file without asking. The desktop app re-reads and watches it.
-- The REST API path has only been tested with recorded responses, not live, because it needs an Enterprise plan.
