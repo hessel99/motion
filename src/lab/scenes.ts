@@ -125,7 +125,7 @@ export function nested(o: { n?: number; depth?: number; fanout?: number; iso?: b
 }
 
 /** `comps` precomps, each instanced `inst` times in the main comp (comps*inst precomp layers) */
-export function precomps(o: { comps?: number; inst?: number; inner?: number; seed?: number } = {}): Project {
+export function precomps(o: { comps?: number; inst?: number; inner?: number; seed?: number; offsets?: number } = {}): Project {
   const c = base('precomps', o.seed);
   const nComps = o.comps ?? 200, inst = o.inst ?? 50, inner = o.inner ?? 4;
   const compIds: string[] = [];
@@ -144,6 +144,8 @@ export function precomps(o: { comps?: number; inst?: number; inner?: number; see
     const l = createLayer('precomp', { name: `inst ${j}`, w: 160, h: 160, x, y });
     l.compRef = ref;
     l.startTime = -c.r() * 2;
+    // offsets = k: instances start at one of k times (instances of a comp then share evaluations)
+    if (o.offsets) l.startTime = -(Math.floor(j / nComps) % o.offsets) * (2 / o.offsets);
     const times = [0, c.D / 2, c.D];
     l.props.position = { v: [x + 80, y + 80], kf: keys(c.r, times, () => [x + 80 + (c.r() - 0.5) * 200, y + 80 + (c.r() - 0.5) * 200], 2) };
     l.props.scale = { v: [100, 100], kf: keys(c.r, times, () => { const s = 40 + c.r() * 80; return [s, s]; }) };

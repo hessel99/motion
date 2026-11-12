@@ -182,6 +182,55 @@ const lab = {
     return res;
   },
 
+  /** exactness of incremental compile + shared precomp evaluation (scripts/compile-check.mjs): after each
+   *  edit, the frame from the incrementally compiled items vs a full recompile with shared evaluation off.
+   *  compares evaluated arrays and the fully rewritten instance buffer bit for bit. */
+  compileCheck(times = [0.3, 1.1, 2.7]) {
+    editor.pause();
+    const st = editor.store, R = editor.renderer as any;
+    const snap = (t: number) => {
+      R.dirty = true; R.render(t);
+      const n = R.items.length, k = R.stats.instances;
+      return { n, k, reused: R.lastReused, world: R.world.slice(0, n * 6), opa: R.opa.slice(0, n), style: R.style.slice(0, n * 15), inst: R.inst.slice(0, (k + 1) * 40) };
+    };
+    // inst: atlas placement (uv rect + page, floats 24-28) may differ after a full recompile: fresh
+    // items re-resolve their rasters into other slots, and raster quads (kinds 2, 3) depend on the
+    // raster scale chosen (hysteresis: reused items keep theirs, as layers edited in place always did)
+    const same = (a: ArrayLike<number>, b: ArrayLike<number>, inst = false) => {
+      if (a.length !== b.length) return `length ${a.length} vs ${b.length}`;
+      for (let i = 0; i < a.length; i++) if (!Object.is(a[i], b[i]) && !(inst && ((i % 40 >= 24 && i % 40 <= 28) || a[i - (i % 40) + 23] === 2 || a[i - (i % 40) + 23] === 3))) return `index ${i}: ${a[i]} vs ${b[i]}` + (inst ? ` (item ${R.instItem[(i / 40) | 0]}: ${R.items[R.instItem[(i / 40) | 0]]?.layer.type}${R.items[R.instItem[(i / 40) | 0]]?.units ? ' units' : ''})` : '');
+      return '';
+    };
+    const out: Record<string, string> = {};
+    const check = (label: string) => {
+      for (const t of times) {
+        const a = snap(t);
+        R.incrementalCompile = false; R.sharedEval = false; R.needsCompile = true;
+        const b = snap(t);
+        R.incrementalCompile = true; R.sharedEval = true; R.needsCompile = true;
+        snap(t); // back to an incrementally compiled state (everything reused)
+        let err = '';
+        for (const key of ['world', 'opa', 'style', 'inst'] as const) { const e = same(a[key], b[key], key === 'inst'); if (e) err += `${key} ${e}; `; }
+        out[`${label} @${t}`] = err || `ok (${a.n} items, ${a.reused} reused, ${a.k} instances)`;
+      }
+    };
+    const root = () => st.comp.root.slice();
+    check('loaded');
+    const all = root();
+    setExpr(st, all.slice(0, 50), 'rotation', 'wiggle(3, 20)'); check('setExpr');
+    cloneLayers(st, all.slice(0, 100)); check('duplicate');
+    groupLayers(st, root().slice(0, 200), { x: 0, y: 0, w: 1920, h: 1080 }); check('group');
+    precompose(st, root().slice(-200)); check('precompose');
+    deleteLayers(st, root().slice(0, Math.max(1, root().length >> 2))); check('delete');
+    for (let i = 0; i < 3; i++) st.undo();
+    check('undo x3');
+    for (let i = 0; i < 2; i++) st.redo();
+    check('redo x2');
+    st.toggleSolo(root()[3]); check('solo');
+    st.toggleSolo(root()[3]);
+    return out;
+  },
+
   /** bulk editing commands on the loaded scene (each one undoable step), sync time + next finished frame */
   async ops() {
     editor.pause();

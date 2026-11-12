@@ -40,6 +40,7 @@ const SCENARIOS = [
   play('nested-8deep-5k', 'nested', { n: 5000, depth: 8, fanout: 2 }, { desc: 'groups 8 levels deep (255 animated groups), 5k leaves' }),
   play('iso-fbo-stack', 'nested', { n: 2000, depth: 6, fanout: 2, iso: true }, { desc: '63 nested groups with opacity<1 => offscreen isolation stack' }),
   play('precomps-200x50', 'precomps', { comps: 200, inst: 50, inner: 4 }, { desc: '200 precomps x 50 instances (10k precomp layers, 50k items)' }),
+  play('precomps-200x50-sync', 'precomps', { comps: 200, inst: 50, inner: 4, offsets: 5 }, { desc: 'same, instances start at 5 distinct times (shared evaluation)' }),
   play('text-anim-2k', 'textAnim', { n: 2000 }, { desc: '2k text layers, per-char/word animators' }),
   play('path-morph-trim-1k', 'pathMorph', { n: 1000 }, { desc: '1k pathKf morphs + animated trim paths' }),
   play('expr-3k', 'expressions', { n: 3000 }, { desc: '3k layers x 4 expressions (wiggle, loopOut, time math)' }),

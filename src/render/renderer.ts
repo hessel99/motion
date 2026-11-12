@@ -228,6 +228,30 @@ const TR_ANCHOR = 0, TR_POS = 1, TR_SCALE = 2, TR_ROT = 3, TR_OPA = 4, TR_SIZE =
 const ST = 15; // style floats per item: size2 radius4 fill4 stroke4 sw1
 
 const ZERO4 = [0, 0, 0, 0];
+/** props compileItem reads (TR_KEYS + trim paths): their identity is part of the reuse signature */
+const SIG_KEYS: PropKey[] = [...TR_KEYS, 'trimStart', 'trimEnd', 'trimOffset'];
+
+/** per-item arrays filled by compileItem / evalItem (double-buffered so compile can reuse items) */
+type F64 = Float64Array<ArrayBuffer>;
+interface Soa {
+  xf: F64; local: F64; lopa: F64; style: F64; sH: Int32Array<ArrayBuffer>; sGrad: F64;
+  sIn: F64; sOut: F64; sMask: Int32Array<ArrayBuffer>; sExpr: Int32Array<ArrayBuffer>; sKind: Uint8Array<ArrayBuffer>; sBits: Uint8Array<ArrayBuffer>; sBlend: Uint8Array<ArrayBuffer>; sAlign: Int8Array<ArrayBuffer>;
+}
+function newSoa(cap: number): Soa {
+  return {
+    xf: new Float64Array(cap * 8), local: new Float64Array(cap * 6), lopa: new Float64Array(cap), style: new Float64Array(cap * ST), sH: new Int32Array(cap * 10), sGrad: new Float64Array(cap * 8),
+    sIn: new Float64Array(cap), sOut: new Float64Array(cap), sMask: new Int32Array(cap), sExpr: new Int32Array(cap), sKind: new Uint8Array(cap), sBits: new Uint8Array(cap), sBlend: new Uint8Array(cap), sAlign: new Int8Array(cap),
+  };
+}
+function copySoa(a: Soa, j: number, b: Soa, i: number) {
+  b.xf.set(a.xf.subarray(j * 8, j * 8 + 8), i * 8);
+  b.local.set(a.local.subarray(j * 6, j * 6 + 6), i * 6);
+  b.style.set(a.style.subarray(j * ST, j * ST + ST), i * ST);
+  b.sH.set(a.sH.subarray(j * 10, j * 10 + 10), i * 10);
+  b.sGrad.set(a.sGrad.subarray(j * 8, j * 8 + 8), i * 8);
+  b.lopa[i] = a.lopa[j]; b.sIn[i] = a.sIn[j]; b.sOut[i] = a.sOut[j]; b.sMask[i] = a.sMask[j]; b.sExpr[i] = a.sExpr[j];
+  b.sKind[i] = a.sKind[j]; b.sBits[i] = a.sBits[j]; b.sBlend[i] = a.sBlend[j]; b.sAlign[i] = a.sAlign[j];
+}
 const defaultTracks = new Map<PropKey, Track>();
 function defaultTrack(k: PropKey) {
   let t = defaultTracks.get(k);
@@ -413,7 +437,7 @@ export class Renderer {
     if (row !== undefined) return row;
     row = this.rampRows.size;
     if (row >= this.rampH) {
-      if (this.rampH >= 4096) { this.rampRows.clear(); row = 0; } // pathological: start over (rows get rebuilt as items recompile)
+      if (this.rampH >= 4096) { this.rampRows.clear(); row = 0; this.forceFull = true; this.needsCompile = true; } // pathological: start over (rows get rebuilt as items recompile)
       else {
         const d = new Uint8Array(RAMP_W * 4 * this.rampH * 2);
         d.set(this.rampData);
@@ -444,14 +468,28 @@ export class Renderer {
     }
     this.rampRows.set(key, row);
     this.rampDirty = true;
+    this.rampLo = Math.min(this.rampLo, row); this.rampHi = Math.max(this.rampHi, row + 1);
     return row;
   }
 
+  /** height of the uploaded ramp texture and the rows written since the last upload */
+  private rampTexH = 0;
+  private rampLo = Infinity;
+  private rampHi = 0;
   private bindRamps() {
     const gl = this.gl;
     gl.activeTexture(gl.TEXTURE3);
-    if (!this.rampTex || this.rampDirty) {
+    if (this.rampTex && this.rampDirty && this.rampTexH === this.rampH && this.rampHi > this.rampLo) {
+      // only the rows added since the last upload (a new row used to re-upload the whole texture)
+      gl.bindTexture(gl.TEXTURE_2D, this.rampTex);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, this.rampLo, RAMP_W, this.rampHi - this.rampLo, gl.RGBA, gl.UNSIGNED_BYTE, this.rampData.subarray(this.rampLo * RAMP_W * 4, this.rampHi * RAMP_W * 4));
+      this.rampDirty = false;
+      this.rampLo = Infinity; this.rampHi = 0;
+    } else if (!this.rampTex || this.rampDirty) {
       if (!this.rampTex) this.rampTex = gl.createTexture()!;
+      this.rampTexH = this.rampH;
+      this.rampLo = Infinity; this.rampHi = 0;
       gl.bindTexture(gl.TEXTURE_2D, this.rampTex);
       gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, RAMP_W, this.rampH, 0, gl.RGBA, gl.UNSIGNED_BYTE, this.rampData);
@@ -483,6 +521,7 @@ export class Renderer {
   }
 
   private onChange(c: Change) {
+    for (const id of c.layers) this.changedLayers.add(id);
     if (c.structure || c.comp) this.needsCompile = true;
     else for (const id of c.layers) this.dirtyLayers.add(id);
     this.dirty = true;
@@ -494,7 +533,8 @@ export class Renderer {
   invalidateText() {
     for (const it of this.items) if (it.layer.type === 'text') { it.rasterBase = (it.rasterBase ?? '') + '~f'; it.entry = null; it.rasterKey = null; it.units = it.units?.map(u => ({ ...u, entry: null, raster: null })) ?? null; }
     this.fontGen++;
-    this.needsCompile = true; // auto-sized text boxes were measured with fallback metrics
+    this.needsCompile = true;
+    this.forceFull = true; // auto-sized text boxes were measured with fallback metrics
     this.dirty = true;
   }
   private fontGen = 0;
@@ -506,24 +546,28 @@ export class Renderer {
     const L = store.project.layers;
     // flatten the layer tree depth-first; precomp layers expand the referenced comp inline
     // (each expanded item gets its own time offset). items outside the active comp are not indexed.
-    const entries: { layer: Layer; parent: number; tOff: number; local: boolean; owner: number; tEnd: number }[] = [];
+    const entries: { layer: Layer; parent: number; tOff: number; local: boolean; owner: number; tEnd: number; end: number }[] = [];
     let tEndCur = Infinity;
     const walk = (ids: string[], parent: number, tOff: number, local: boolean, owner: number, depth: number, stack: string[]) => {
       for (const id of ids) {
         const layer = L[id];
         if (!layer) continue;
         const idx = entries.length;
-        entries.push({ layer, parent, tOff, local, owner: local ? idx : owner, tEnd: tEndCur });
+        const e = { layer, parent, tOff, local, owner: local ? idx : owner, tEnd: tEndCur, end: 0 };
+        entries.push(e);
         if (layer.children.length) walk(layer.children, idx, tOff, local, local ? idx : owner, depth, stack);
         if (layer.type === 'precomp' && layer.compRef && depth < 16 && !stack.includes(layer.compRef)) {
           const comp = store.project.comps[layer.compRef];
           if (comp) {
             const prevEnd = tEndCur;
             tEndCur = Math.min(prevEnd, tOff + (layer.startTime ?? 0) + comp.duration);
-            walk(comp.root, idx, tOff + (layer.startTime ?? 0), false, local ? idx : owner, depth + 1, [...stack, layer.compRef]);
+            stack.push(layer.compRef);
+            walk(comp.root, idx, tOff + (layer.startTime ?? 0), false, local ? idx : owner, depth + 1, stack);
+            stack.pop();
             tEndCur = prevEnd;
           }
         }
+        e.end = entries.length; // depth-first: the subtree of idx is [idx, end)
       }
     };
     walk(store.comp.root, -1, 0, true, -1, 0, [store.comp.id]);
@@ -540,82 +584,168 @@ export class Renderer {
         for (const d of store.descendants(id)) soloKeep.add(d);
       }
     }
-    this.pool.reset();
+    // incremental: items of layers that did not change since the last compile are reused as they
+    // are (pool handles, rasters, units, expressions, static values); only their place in the tree
+    // is recomputed. full rebuild the first time, when the pool is mostly garbage, or after fonts /
+    // gradient ramps were reset.
+    const prevItems = this.items, prevN = prevItems.length;
+    const full = this.forceFull || !prevN || !this.incrementalCompile || (this.pool.used > 1_000_000 && this.pool.used > this.poolLive * 3);
+    // old items per layer id, in order (several for layers inside precomps instanced more than once)
+    let head: Map<string, number> | null = null, nextOcc: Int32Array | null = null;
+    if (!full) {
+      head = new Map();
+      nextOcc = new Int32Array(prevN);
+      for (let j = prevN - 1; j >= 0; j--) { const id = prevItems[j].id; const h = head.get(id); nextOcc[j] = h ?? -1; head.set(id, j); }
+    }
+    if (full) this.pool.reset();
     this.unitCount = 0;
     this.items = new Array(n);
     this.index.clear();
     for (let i = 0; i < n; i++) if (entries[i].local) this.index.set(entries[i].layer.id, i);
+    // the arrays compileItem / evalItem fill are double-buffered: reused items copy from the previous set
+    const prev = this.soa();
+    const cap = this.world.length < n * 6 ? Math.max(64, n * 2) : this.world.length / 6;
     if (this.world.length < n * 6) {
-      const cap = Math.max(64, n * 2);
       this.world = new Float64Array(cap * 6);
-      this.local = new Float64Array(cap * 6);
       this.opa = new Float64Array(cap);
-      this.lopa = new Float64Array(cap);
-      this.style = new Float64Array(cap * ST);
-      this.xf = new Float64Array(cap * 8);
       this.drawnMask = new Uint8Array(cap);
       this.sPar = new Int32Array(cap);
       this.sTOff = new Float64Array(cap);
-      this.sIn = new Float64Array(cap);
-      this.sOut = new Float64Array(cap);
       this.sEnd = new Float64Array(cap);
       this.sFlags = new Uint8Array(cap);
-      this.sMask = new Int32Array(cap);
-      this.sExpr = new Int32Array(cap);
-      this.sH = new Int32Array(cap * 10);
       this.chg = new Uint8Array(cap);
       this.vis = new Uint8Array(cap);
       this.lastK = new Int32Array(cap);
-      this.sKind = new Uint8Array(cap);
-      this.sBits = new Uint8Array(cap);
-      this.sBlend = new Uint8Array(cap);
-      this.sAlign = new Int8Array(cap);
       this.sClip = new Int32Array(cap);
-      this.sGrad = new Float64Array(cap * 8);
+      this.sSrc = new Int32Array(cap);
+      this.sEvT = new Float64Array(cap);
     }
+    let next = this.spare;
+    if (!next || next.lopa.length < cap) next = newSoa(cap);
+    this.spare = prev.lopa.length >= cap ? prev : null;
+    this.setSoa(next);
+    // first item of each layer that lives inside a precomp: later instances share its pool tracks
+    // and, when they sample the same local time, its evaluated values
+    const first = new Map<Layer, number>();
+    const okLayer = new Map<Layer, boolean>();
+    const changed = this.changedLayers;
+    const SRC = this.sSrc, EVT = this.sEvT;
+    let reused = 0;
     for (let i = 0; i < n; i++) {
-      const { layer, parent, tOff, owner, tEnd } = entries[i];
-      const it: Item = {
-        id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, animated: false, animMask: 0, isoGroup: layer.children.length > 0 || layer.type === 'precomp',
-        hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden) || (!!soloKeep && entries[i].local && !soloKeep.has(layer.id)),
-        rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
-        tOff, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null,
-      };
-      if (parent >= 0) {
-        const p = this.items[parent];
-        // precomps clip to their composition bounds (after effects)
-        it.clip = p.layer.clip || p.layer.type === 'precomp' ? parent : p.clip;
+      const en = entries[i];
+      const { layer, parent, tOff, owner, tEnd } = en;
+      let src = -1;
+      if (!en.local) {
+        const f = first.get(layer);
+        if (f === undefined) first.set(layer, i); else src = f;
       }
-      this.items[i] = it;
-      this.sPar[i] = parent; this.sTOff[i] = tOff; this.sEnd[i] = tEnd; this.sClip[i] = it.clip;
-      this.compileItem(i);
+      const pit = parent >= 0 ? this.items[parent] : null;
+      const hidden = !layer.visible || (!!pit && pit.hidden) || (!!soloKeep && en.local && !soloKeep.has(layer.id));
+      // precomps clip to their composition bounds (after effects)
+      const clip = pit ? (pit.layer.clip || pit.layer.type === 'precomp' ? parent : pit.clip) : -1;
+      const isoGroup = layer.children.length > 0 || layer.type === 'precomp';
+      let j = -1;
+      if (head) {
+        const h = head.get(layer.id);
+        if (h !== undefined && prevItems[h].layer === layer && !changed.has(layer.id)) {
+          let ok = okLayer.get(layer);
+          if (ok === undefined) { ok = this.sigSame(layer); okLayer.set(layer, ok); }
+          if (ok) { j = h; const nx = nextOcc![h]; if (nx >= 0) head.set(layer.id, nx); else head.delete(layer.id); }
+        }
+      }
+      this.sPar[i] = parent; this.sTOff[i] = tOff; this.sEnd[i] = tEnd; this.sClip[i] = clip;
+      EVT[i] = NaN;
+      if (j >= 0) {
+        const it = prevItems[j];
+        it.parent = parent; it.clip = clip; it.isoGroup = isoGroup; it.hidden = hidden; it.tOff = tOff; it.owner = owner; it.tEnd = tEnd;
+        this.items[i] = it;
+        copySoa(prev, j, next, i);
+        this.sIn[i] = layer.inPoint; this.sOut[i] = layer.outPoint;
+        this.sFlags[i] = (it.animated ? 1 : 0) | (hidden ? 2 : 0);
+        this.sBits[i] = (this.sBits[i] & ~3) | (layer.mask ? 1 : 0) | (isoGroup ? 2 : 0);
+        this.sBlend[i] = layer.blend ? BLEND_IDS[layer.blend] ?? 0 : 0;
+        this.sAlign[i] = layer.strokeAlign === 'inside' ? -1 : layer.strokeAlign === 'outside' ? 1 : 0;
+        this.unitCount += it.units?.length ?? 0;
+        reused++;
+      } else {
+        const it: Item = {
+          id: layer.id, layer, parent, clip, kind: KIND_NONE, animated: false, animMask: 0, isoGroup, hidden,
+          rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
+          tOff, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null,
+        };
+        this.items[i] = it;
+        this.compileItem(i, src);
+      }
+      // shared evaluation only for items without expressions (they read their own item index)
+      SRC[i] = src >= 0 && !this.sExpr[i] && !this.sExpr[src] ? src : -1;
     }
+    this.lastReused = reused;
     this.needsCompile = false;
+    this.forceFull = false;
     this.dirtyLayers.clear();
-    this.poolLive = this.pool.used;
-    this.subEnd = new Int32Array(n);
-    for (let i = n - 1; i >= 0; i--) {
-      // end of subtree: first following item whose parent chain doesn't include i
-      let e = i + 1;
-      while (e < n && this.isInside(e, i)) e = this.subEnd[e];
-      this.subEnd[i] = e;
-    }
+    changed.clear();
+    if (full) this.poolLive = this.pool.used;
+    if (this.subEnd.length < n) this.subEnd = new Int32Array(cap);
+    for (let i = 0; i < n; i++) this.subEnd[i] = entries[i].end;
     this.evalAll = true;
+  }
+  /** precomp instances at the same local time copy the values of the first one (off = evaluate each, a/b checks) */
+  sharedEval = true;
+  /** items reused by the last compile (stats / tests) */
+  lastReused = 0;
+  /** structural edits reuse the compiled items of unchanged layers (off = rebuild everything, for a/b checks) */
+  incrementalCompile = true;
+  private forceFull = true;
+  /** layers whose content changed since the last compile (structural changes carry them too) */
+  private changedLayers = new Set<string>();
+  private spare: Soa | null = null;
+  /** sSrc[i] = earlier item of the same precomp layer whose evaluated values item i may copy (-1 = none) */
+  private sSrc = new Int32Array(0);
+  /** local time item i was last evaluated at (NaN = not since it was compiled) */
+  private sEvT = new Float64Array(0);
+  private soa(): Soa {
+    return { xf: this.xf, local: this.local, lopa: this.lopa, style: this.style, sH: this.sH, sGrad: this.sGrad, sIn: this.sIn, sOut: this.sOut, sMask: this.sMask, sExpr: this.sExpr, sKind: this.sKind, sBits: this.sBits, sBlend: this.sBlend, sAlign: this.sAlign };
+  }
+  private setSoa(s: Soa) {
+    this.xf = s.xf; this.local = s.local; this.lopa = s.lopa; this.style = s.style; this.sH = s.sH; this.sGrad = s.sGrad;
+    this.sIn = s.sIn; this.sOut = s.sOut; this.sMask = s.sMask; this.sExpr = s.sExpr; this.sKind = s.sKind; this.sBits = s.sBits; this.sBlend = s.sBlend; this.sAlign = s.sAlign;
+  }
+  /** what compileItem read from each layer, by identity: a reused item must see the same objects
+   *  (edits replace props / arrays through tx.set). backs up the change sets of the store. */
+  private sigs = new WeakMap<Layer, unknown[]>();
+  private sigScratch: unknown[] = [];
+  private sigOf(l: Layer, out: unknown[]) {
+    out.length = 0;
+    const pv = this.store.previewProps.get(l.id);
+    out.push(l.type, l.props, pv, l.paints, l.geometry, l.strokeGeometry, l.strokeAlign, l.text, l.textAnim, l.pathKf, l.trimOn, l.imageRef, l.mask, l.blend, this.fontGen);
+    for (const key of SIG_KEYS) { const p = pv?.[key] ?? l.props[key]; out.push(p, p?.v, p?.kf, p?.expr); }
+    return out;
+  }
+  private sigSame(l: Layer) {
+    const old = this.sigs.get(l);
+    if (!old) return false;
+    const cur = this.sigOf(l, this.sigScratch);
+    if (cur.length !== old.length) return false;
+    for (let k = 0; k < cur.length; k++) if (cur[k] !== old[k]) return false;
+    return true;
   }
   private poolLive = 0;
   private unitCount = 0;
   private dynRev = 0;
 
-  private compileItem(i: number) {
+  /** src >= 0: an earlier item of the same layer (precomp instances) whose pool tracks are shared */
+  private compileItem(i: number, src = -1) {
     const it = this.items[i];
     const l = it.layer;
+    if (src < 0) this.sigs.set(l, this.sigOf(l, []));
+    this.sEvT[i] = NaN;
     let mask = 0;
     // animated props go into the track pool; static ones are written once below (no Track
     // objects: at 10k layers building 100k of them dominated load time and garbage)
     for (let k = 0; k < TR_KEYS.length; k++) {
       const key = TR_KEYS[k];
       const p = this.store.renderProp(l, key); // preview overrides (hover swatch, Perform) win
-      if (p?.kf && p.kf.length > 1) { mask |= 1 << k; this.sH[i * 10 + k] = this.pool.add(p, PROP_DEFS[key].dim, key === 'position'); }
+      if (p?.kf && p.kf.length > 1) { mask |= 1 << k; this.sH[i * 10 + k] = src >= 0 ? this.sH[src * 10 + k] : this.pool.add(p, PROP_DEFS[key].dim, key === 'position'); }
     }
     // expressions: evaluated every frame on top of the keyframed/static value
     let emask = 0;
@@ -651,7 +781,7 @@ export class Renderer {
       G[og + 6] = this.rampRow(gp!);
       G[og + 7] = gp!.type === 'radial' ? 1 : 0;
       complex = false; // no raster
-    }
+    } else this.sGrad.fill(0, i * 8, i * 8 + 8); // (otherwise the slot keeps what an earlier item left there)
     switch (l.type) {
       case 'rect': case 'group': it.kind = shaderGrad ? KIND_GRECT : complex ? KIND_RGBA : KIND_RECT; break;
       case 'ellipse': it.kind = shaderGrad ? KIND_GELL : complex ? KIND_RGBA : KIND_ELLIPSE; break;
@@ -816,6 +946,18 @@ export class Renderer {
     }
   }
 
+  /** item d takes the evaluated local values of item s (same layer, same local time) */
+  private copyEval(s: number, d: number) {
+    const X = this.xf, Lm = this.local, S = this.style;
+    let a = s * 8, b = d * 8;
+    for (let k = 0; k < 8; k++) X[b + k] = X[a + k];
+    a = s * 6; b = d * 6;
+    for (let k = 0; k < 6; k++) Lm[b + k] = Lm[a + k];
+    a = s * ST; b = d * ST;
+    for (let k = 0; k < ST; k++) S[b + k] = S[a + k];
+    this.lopa[d] = this.lopa[s];
+  }
+
   /** local matrix = T(pos) R S T(-anchor) from cached components */
   private composeLocal(i: number) {
     const X = this.xf, o8 = i * 8;
@@ -874,12 +1016,18 @@ export class Renderer {
    *  change keep last frame's world matrix (all = recompute everything, e.g. after edits). */
   private evaluateRange(t: number, from: number, to: number, all: boolean) {
     const W = this.world, L = this.local, O = this.opa, LO = this.lopa;
-    const PAR = this.sPar, TOFF = this.sTOff, IN = this.sIn, OUT = this.sOut, END = this.sEnd, FL = this.sFlags, CHG = this.chg, VIS = this.vis;
+    const PAR = this.sPar, TOFF = this.sTOff, IN = this.sIn, OUT = this.sOut, END = this.sEnd, FL = this.sFlags, CHG = this.chg, VIS = this.vis, SRC = this.sharedEval ? this.sSrc : null, EVT = this.sEvT;
     for (let i = from; i < to; i++) {
       const tl = t - TOFF[i];
       const fl = FL[i];
       let c = all;
-      if (fl & 1) { this.evalItem(i, tl); c = true; }
+      if (fl & 1) {
+        // precomp instances sampling the same local time as an earlier instance copy its values
+        const s = SRC ? SRC[i] : -1;
+        if (s >= 0 && EVT[s] === tl) this.copyEval(s, i); else this.evalItem(i, tl);
+        EVT[i] = tl;
+        c = true;
+      }
       const vis = (fl & 2) || tl < IN[i] || tl >= OUT[i] || t >= END[i] ? 0 : 1;
       if (vis !== VIS[i]) { VIS[i] = vis; c = true; }
       const p = PAR[i];
@@ -1245,6 +1393,7 @@ export class Renderer {
         const i = this.index.get(id);
         if (i !== undefined) { this.items[i].layer = store.project.layers[id]; this.compileItem(i); this.dirtyIdx.push(i); }
       }
+      for (const id of this.dirtyLayers) this.changedLayers.delete(id);
       this.dirtyLayers.clear();
     }
     this.atlas.frame++;
