@@ -14,7 +14,6 @@ import { ANIM_PRESETS, alignLayers, applyPreset, distributeLayers, setTextAnim, 
 import { invert } from './viewport-controller';
 import { toast } from '../app/actions';
 import { EaseStudio, showClassicEase, studioEnabled, StudioSwitch } from './patterns/EaseStudio';
-import { RhythmPanel } from './patterns/RhythmPanel';
 import { Button, Checkbox, ColorSwatch, FieldRow, NumField, Section, Segmented, Slider, Toggle } from './ui';
 import { ComponentBox, LinkButton, LinkedChip, sharedLink } from './LinkControls';
 import {
@@ -273,7 +272,6 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
       )}
       {common.includes('shadowColor') && <EffectsPanel layers={layers} />}
       <AnimatePanel ids={ids} />
-      <RhythmPanel ids={ids} />
       <Section title="Timing">
         <FieldRow label="Visible">
           <NumField label="In" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
