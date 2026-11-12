@@ -33,6 +33,8 @@ export interface FxRegion {
   inv: number[];
   texture: { size: number; amp: number; seed: number } | null;
   glass: { refraction: number; depth: number; light: number; angle: number; dispersion: number } | null;
+  /** clip the composite to a rounded box: device px -> clip box space (a..f), box size, corner radius */
+  clip?: { inv: number[]; w: number; h: number; r: number } | null;
 }
 
 /** shader ids of the blend modes (model BlendMode -> int) */
@@ -137,6 +139,9 @@ uniform vec4 uN1[4];
 uniform vec4 uTex; // size, amp (device px), seed, 0
 uniform vec4 uGl;  // refraction, depth, light, angle
 uniform float uGlD;
+uniform int uClipOn;
+uniform vec4 uClipA; uniform vec2 uClipB; uniform vec3 uClipBox;
+float sdBox(vec2 p, vec2 b, float r) { r = min(r, min(b.x, b.y)); vec2 q = abs(p) - b + r; return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r; }
 
 uint hash(uvec3 v) {
   v = v * 1664525u + 1013904223u;
@@ -267,6 +272,15 @@ void main() {
     under = hl + under * (1.0 - hl.a);
   }
   vec4 x = (s + under * (1.0 - s.a)) * uOpacity;
+  if (uClipOn == 1) {
+    // nested clip: the region is clipped by its own clipping ancestor (the instances inside are
+    // clipped by the inner one)
+    vec2 cp = mat2(uClipA.xy, uClipA.zw) * dev + uClipB;
+    vec2 ch = uClipBox.xy * 0.5;
+    float d = sdBox(cp - ch, ch, uClipBox.z);
+    float w = max(fwidth(d), 1e-4);
+    x *= clamp(0.5 - d / w, 0.0, 1.0);
+  }
   if (uBlend > 0) {
     vec4 B = texture(uBack, uv);
     vec3 cb = B.a > 0.0 ? B.rgb / B.a : vec3(0.0), cs = x.a > 0.0 ? x.rgb / x.a : vec3(0.0);
@@ -329,6 +343,7 @@ export class FxPipeline {
       f1: (n: string, v: number) => gl.uniform1f(loc(n), v),
       i1: (n: string, v: number) => gl.uniform1i(loc(n), v),
       f2: (n: string, a: number, b: number) => gl.uniform2f(loc(n), a, b),
+      f3: (n: string, a: number, b: number, c: number) => gl.uniform3f(loc(n), a, b, c),
       f4: (n: string, a: number, b: number, c: number, d: number) => gl.uniform4f(loc(n), a, b, c, d),
       f4v: (n: string, v: Float32Array) => gl.uniform4fv(loc(n), v),
       tex: (n: string, unit: number, t: WebGLTexture | null) => { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t); gl.uniform1i(loc(n), unit); },
@@ -577,6 +592,8 @@ export class FxPipeline {
     }
     u.i1('uTexOn', R.texture ? 1 : 0);
     if (R.texture) u.f4('uTex', R.texture.size, R.texture.amp, R.texture.seed, 0);
+    u.i1('uClipOn', R.clip ? 1 : 0);
+    if (R.clip) { u.f4('uClipA', R.clip.inv[0], R.clip.inv[1], R.clip.inv[2], R.clip.inv[3]); u.f2('uClipB', R.clip.inv[4], R.clip.inv[5]); u.f3('uClipBox', R.clip.w, R.clip.h, R.clip.r); }
     u.i1('uGlass', R.glass ? 1 : 0);
     if (R.glass) { u.f4('uGl', R.glass.refraction, R.glass.depth, R.glass.light, R.glass.angle); u.f1('uGlD', R.glass.dispersion); }
     this.draw();

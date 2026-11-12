@@ -700,10 +700,6 @@ class Converter {
 
   private applyStroke(layer: Layer, n: any, isPath: boolean) {
     const weight = num(n.strokeWeight, 0);
-    if (layer.type === 'text') {
-      if (weight > 0 && (n.strokePaints ?? []).some(visiblePaint)) this.warn('text stroke: not drawn yet');
-      return;
-    }
     const vis = (n.strokePaints ?? []).filter(visiblePaint);
     const paints: Paint[] = [];
     for (const p of vis) { const x = this.paint(p, n, layer); if (x) paints.push(x); }

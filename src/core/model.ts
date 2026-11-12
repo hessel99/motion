@@ -99,7 +99,7 @@ export const TYPE_PROPS: Record<LayerType, PropKey[]> = {
   rect: ['size', 'radius', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
   ellipse: ['size', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
   path: ['size', 'fill', 'stroke', 'strokeWidth', 'trimStart', 'trimEnd', 'trimOffset', ...EFFECT_KEYS],
-  text: ['size', 'fill', ...EFFECT_KEYS],
+  text: ['size', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
   image: ['size', ...EFFECT_KEYS],
   audio: [],
   precomp: ['size', ...EFFECT_KEYS],

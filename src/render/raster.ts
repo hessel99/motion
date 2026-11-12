@@ -919,13 +919,14 @@ function textMetrics(l: Layer, size: number[]) {
 
 function textBox(l: Layer, size: number[]): { x: number; y: number; w: number; h: number } {
   const t = l.text!;
-  const pad = t.fontSize * 0.5;
+  const pad = t.fontSize * 0.5 + 2 * (l.props.strokeWidth?.v[0] ?? 0);
   if (outlineValid(l)) {
     const all: PathGeometry[] = [];
     for (const g of t.outline!.groups) all.push(...g.geometry);
     const [bx, by, bw, bh] = geometryBounds(all);
     const x0 = Math.min(0, bx), y0 = Math.min(0, by), x1 = Math.max(size[0], bx + bw), y1 = Math.max(size[1], by + bh);
-    return { x: x0 - 2, y: y0 - 2, w: x1 - x0 + 4, h: y1 - y0 + 4 };
+    const e = 2 + 2 * (l.props.strokeWidth?.v[0] ?? 0);
+    return { x: x0 - e, y: y0 - e, w: x1 - x0 + 2 * e, h: y1 - y0 + 2 * e };
   }
   const m = textMetrics(l, size);
   const maxW = Math.max(size[0], ...m.lines.map(x => x.width + (x.indent ?? 0)));
@@ -960,15 +961,47 @@ export function rasterText(l: Layer, scale: number, size: number[], clip?: Raste
     paintFill(c, T, l.paints!, [full], ['nonzero'], size[0] > 0 ? size : [box.w, box.h], pw, ph, 1);
     c.globalCompositeOperation = 'source-over';
   }
-  if (rgba) return { kind: 'rgba', pw, ph, ...place, w: pw / s, h: ph / s, data: rgbaData(c, pw, ph) };
+  // text stroke (align: centered on the outline, or doubled and cut against the glyphs)
+  const sw = l.props.strokeWidth?.v[0] ?? 0, sv = l.props.stroke?.v;
+  const stroked = sw > 0 && !!sv && sv[3] > 0;
+  const strokeGlyphs = (cx: Ctx, style: string) => {
+    const align = l.strokeAlign ?? 'center';
+    const w = align === 'center' ? sw : sw * 2;
+    cx.strokeStyle = style; cx.lineWidth = w; cx.lineJoin = l.strokeJoin ?? 'miter'; cx.miterLimit = l.miterLimit ?? 4;
+    if (outlineValid(l)) { for (const g of t.outline!.groups) for (const geo of g.geometry) cx.stroke(toPath2D(geo)); }
+    else drawLiveText(cx, l, size, null, w);
+    if (align === 'center') return;
+    // cut with the glyphs' fill coverage
+    cx.globalCompositeOperation = align === 'outside' ? 'destination-out' : 'destination-in';
+    cx.fillStyle = '#fff';
+    if (outlineValid(l)) { for (const g of t.outline!.groups) for (const geo of g.geometry) cx.fill(toPath2D(geo), geo.fillRule); }
+    else drawLiveText(cx, l, size, null);
+    cx.globalCompositeOperation = 'source-over';
+  };
+  if (rgba) {
+    if (stroked) {
+      const sc = scratchCtx(0, pw, ph);
+      sc.setTransform(T[0], T[1], T[2], T[3], T[4], T[5]);
+      strokeGlyphs(sc, cssColor(sv!));
+      c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(sc.canvas as CanvasImageSource, 0, 0, pw, ph, 0, 0, pw, ph); c.restore();
+    }
+    return { kind: 'rgba', pw, ph, ...place, w: pw / s, h: ph / s, data: rgbaData(c, pw, ph) };
+  }
   const out = new Uint8Array(pw * ph * 4);
   alphaInto(c, pw, ph, out, 0);
+  if (stroked) {
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.clearRect(0, 0, pw, ph);
+    c.setTransform(T[0], T[1], T[2], T[3], T[4], T[5]);
+    strokeGlyphs(c, '#fff');
+    alphaInto(c, pw, ph, out, 1);
+  }
   finishMask(out);
   return { kind: 'mask', pw, ph, ...place, w: pw / s, h: ph / s, data: out };
 }
 
 /** live layout: lines, alignment (incl. justify), runs (font / color / decoration), paragraph spacing */
-function drawLiveText(c: Ctx, l: Layer, size: number[], color: number[] | null) {
+function drawLiveText(c: Ctx, l: Layer, size: number[], color: number[] | null, strokeW = 0) {
   const t = l.text!;
   const { lines, ps, y0 } = textMetrics(l, size);
   setFont(c, l);
@@ -983,7 +1016,7 @@ function drawLiveText(c: Ctx, l: Layer, size: number[], color: number[] | null) 
     const lw = width - ind;
     let x = ind + (t.align === 'center' ? (lw - line.width) / 2 : t.align === 'right' ? lw - line.width : 0);
     if (line.paraStart && t.paragraphIndent && t.align !== 'center' && t.align !== 'right') x += t.paragraphIndent;
-    if (line.marker) {
+    if (line.marker && !strokeW) {
       setFont(c, l);
       c.fillStyle = color ? cssColor(runAt(line.start)?.fill ?? color) : '#fff';
       c.textAlign = 'right';
@@ -1001,11 +1034,11 @@ function drawLiveText(c: Ctx, l: Layer, size: number[], color: number[] | null) 
       const str = line.text.slice(a, b);
       c.font = run ? fontString(l, run) : fontString(l);
       (c as any).letterSpacing = `${run?.letterSpacing ?? t.letterSpacing ?? 0}px`;
-      c.fillStyle = color ? cssColor(run?.fill ?? color) : '#fff';
-      c.fillText(str, x, by);
+      if (strokeW) c.strokeText(str, x, by);
+      else { c.fillStyle = color ? cssColor(run?.fill ?? color) : '#fff'; c.fillText(str, x, by); }
       const w = c.measureText(str).width;
       const dec = run?.decoration ?? t.decoration;
-      if (dec && dec !== 'none') {
+      if (dec && dec !== 'none' && !strokeW) {
         const fs = run?.fontSize ?? t.fontSize, th = Math.max(1, fs / 14);
         c.fillRect(x, dec === 'underline' ? by + fs * 0.1 : by - fs * 0.3, w + (justify && str === ' ' ? justify : 0), th);
       }
