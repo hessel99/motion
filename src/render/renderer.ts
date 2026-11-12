@@ -18,7 +18,7 @@ import { loadBundledFonts } from './fonts';
 import { EffectEval, hasEffects, needsBlendShader, type ResolvedEffect } from './effects';
 import { FxPipeline, BLEND_SHADER, type FxRegion } from './fx';
 import { cubicBezier, EASE_PRESETS, springAt } from '../core/easing';
-import { layoutText, textUnits, type TextUnit, rasterPath, rasterText, setImageLoadedHandler, drawPathMask, pathPlacement, rasterBox, imageMaxScale, rasterLayer, needsMainThread, needsShapeRaster, hasComplexPaint, setAssetLookup, type RasterClip, type RasterResult } from './raster';
+import { lineHeightPx, layoutText, textUnits, type TextUnit, rasterPath, rasterText, setImageLoadedHandler, drawPathMask, pathPlacement, rasterBox, imageMaxScale, rasterLayer, needsMainThread, needsShapeRaster, hasComplexPaint, setAssetLookup, type RasterClip, type RasterResult } from './raster';
 
 const F = 40; // floats per instance
 const KIND_RECT = 0, KIND_ELLIPSE = 1, KIND_MASK = 2, KIND_RGBA = 3, KIND_NONE = 4;
@@ -872,7 +872,7 @@ export class Renderer {
         const lines = layoutText(l, sz[0] > 0 ? sz[0] : null);
         const os = i * ST;
         if (sz[0] <= 0) this.style[os] = Math.ceil(Math.max(1, ...lines.map(x => x.width)));
-        if (sz[1] <= 0) this.style[os + 1] = Math.ceil(lines.length * l.text.fontSize * l.text.lineHeight);
+        if (sz[1] <= 0) this.style[os + 1] = Math.ceil(lines.length * lineHeightPx(l));
       }
     }
     if (l.type === 'text' && l.text && l.textAnim) {
@@ -914,7 +914,7 @@ export class Renderer {
       case 'text': {
         const t = l.text!;
         const s = l.props.size?.v ?? [0, 0];
-        return `t${this.fontGen}|${t.content}|${t.fontFamily}|${t.fontWeight}|${t.fontStyle}|${t.fontSize}|${t.lineHeight}|${t.letterSpacing}|${t.align}|${Math.round(s[0])}x${Math.round(s[1])}|${oid(t)}|${oid(l.paints)}|${complex ? (l.props.fill?.v ?? []).join(',') : ''}`;
+        return `t${this.fontGen}|${t.content}|${t.fontFamily}|${t.fontWeight}|${t.fontStyle}|${t.fontSize}|${t.lineHeight}${t.lineHeightAuto ? 'a' : ''}|${t.letterSpacing}|${t.align}|${Math.round(s[0])}x${Math.round(s[1])}|${oid(t)}|${oid(l.paints)}|${complex ? (l.props.fill?.v ?? []).join(',') : ''}`;
       }
       case 'image': return `i${l.imageRef}`; // images stretch to the size box (see raster placement below)
       default: {

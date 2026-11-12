@@ -200,7 +200,7 @@ export interface TextRun {
   fontStyle?: 'normal' | 'italic';
   fontSize?: number;
   fill?: number[];
-  decoration?: 'underline' | 'strike';
+  decoration?: 'underline' | 'strike' | 'none';
   letterSpacing?: number;
 }
 
@@ -219,6 +219,8 @@ export interface TextData {
   fontWeight: number;
   fontStyle?: 'normal' | 'italic';
   lineHeight: number; // multiplier
+  /** figma "auto" line height: the font's ascender + descender (lineHeight is then only a fallback) */
+  lineHeightAuto?: boolean;
   letterSpacing: number; // px
   align: 'left' | 'center' | 'right' | 'justify';
   valign?: 'top' | 'center' | 'bottom';

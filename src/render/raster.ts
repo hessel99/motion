@@ -732,6 +732,12 @@ export interface TextLine {
   paraEnd: boolean;
   /** first line of its paragraph */
   paraStart: boolean;
+  /** list indent (px) and the marker drawn before the first line of a list paragraph */
+  indent?: number;
+  marker?: string;
+  /** line box height and the baseline's offset in it (px) */
+  lh?: number;
+  base?: number;
 }
 
 export function fontString(l: Layer, run?: { fontFamily?: string; fontWeight?: number; fontStyle?: string; fontSize?: number }) {
@@ -770,51 +776,110 @@ function setFont(c: Ctx, l: Layer) {
   if ('fontKerning' in c) (c as any).fontKerning = t.features?.includes('-kern') ? 'none' : 'normal';
 }
 
+/** the font's ascender / descender (em), from the canvas font metrics (hhea / OS/2) */
+const metricsCache = new Map<string, { asc: number; desc: number }>();
+export function fontMetrics(l: Layer): { asc: number; desc: number } {
+  // measured at 1000 px: font metrics come back rounded to whole pixels
+  const key = fontString(l, { fontSize: 1000 });
+  let m = metricsCache.get(key);
+  if (!m) {
+    const c = mctx();
+    c.font = key;
+    const mt = c.measureText('Hg') as TextMetrics & { fontBoundingBoxAscent?: number; fontBoundingBoxDescent?: number };
+    const fs = 1000;
+    m = mt.fontBoundingBoxAscent ? { asc: mt.fontBoundingBoxAscent / fs, desc: (mt.fontBoundingBoxDescent ?? 0) / fs } : { asc: 0.9, desc: 0.25 };
+    if (metricsCache.size > 256) metricsCache.clear();
+    if (mt.fontBoundingBoxAscent) metricsCache.set(key, m);
+  }
+  return m;
+}
+/** line height in px: figma "auto" = the font's ascender + descender */
+export function lineHeightPx(l: Layer): number {
+  const t = l.text!;
+  if (t.lineHeightAuto) { const m = fontMetrics(l); return (m.asc + m.desc) * t.fontSize; }
+  return t.fontSize * t.lineHeight;
+}
+
 export function layoutText(l: Layer, boxWidth: number | null): TextLine[] {
   const t = l.text!;
   const c = mctx();
   setFont(c, l);
   const wrapW = t.autoResize === 'width' ? null : boxWidth;
-  const lines: TextLine[] = [];
+  const runs = t.runs ?? [];
   const text = displayText(t);
-  let pos = 0, n = 0, ol = 0;
+  // width of text[a, b) with each run's own font (wrapping must see mixed sizes / weights)
+  const runAt = (i: number) => (runs.length ? runs.find(r => i >= r.start && i < r.end) ?? null : null);
+  const measure = (a: number, b: number) => {
+    if (!runs.length) return c.measureText(text.slice(a, b)).width;
+    let w = 0, i = a;
+    while (i < b) {
+      const r = runAt(i);
+      let j = i + 1;
+      while (j < b && runAt(j) === r) j++;
+      c.font = r ? fontString(l, r) : fontString(l);
+      (c as any).letterSpacing = `${r?.letterSpacing ?? t.letterSpacing ?? 0}px`;
+      w += c.measureText(text.slice(i, j)).width;
+      i = j;
+    }
+    setFont(c, l);
+    return w;
+  };
+  // per line: the tallest run sets the line box (auto line height) and the baseline
+  const fm = fontMetrics(l);
+  const lineBox = (a: number, b: number) => {
+    let A = fm.asc * t.fontSize, Dd = fm.desc * t.fontSize, lh = lineHeightPx(l);
+    for (const r of runs) {
+      if (!r.fontSize || r.end <= a || r.start >= b || !text.slice(Math.max(a, r.start), Math.min(b, r.end)).trim()) continue;
+      const k = r.fontSize / t.fontSize;
+      A = Math.max(A, fm.asc * r.fontSize); Dd = Math.max(Dd, fm.desc * r.fontSize);
+      if (t.lineHeightAuto) lh = Math.max(lh, lineHeightPx(l) * k);
+    }
+    return { lh, base: (lh - (A + Dd)) / 2 + A };
+  };
+  const lines: TextLine[] = [];
+  let pos = 0, ol = 0;
   const paras = text.split('\n');
+  // lists: marker right-aligned at 1em, text from 1.64em (measured on figma's renders)
+  const indentW = t.fontSize * 1.64;
   for (let pi = 0; pi < paras.length; pi++) {
     const para = paras[pi];
     const list = t.lists?.[pi] ?? null;
     ol = list === 'ol' ? ol + 1 : 0;
-    const marker = list === 'ul' ? '•  ' : list === 'ol' ? `${ol}.  ` : '';
+    const marker = list === 'ul' ? '•' : list === 'ol' ? `${ol}.` : '';
+    const indent = marker ? indentW : 0;
     const first = lines.length;
-    if (wrapW == null) lines.push({ text: marker + para, width: c.measureText(marker + para).width, start: pos, prefix: marker.length, paraEnd: true, paraStart: true });
+    const push = (a: number, b: number, paraEnd: boolean) => {
+      while (b > a && /\s/.test(text[b - 1]) && !paraEnd) b--;
+      const lb = lineBox(a, b);
+      lines.push({ text: text.slice(a, b), width: measure(a, b), start: a, prefix: 0, paraEnd, paraStart: lines.length === first, indent, marker: lines.length === first && marker ? marker : undefined, lh: lb.lh, base: lb.base });
+    };
+    if (wrapW == null) push(pos, pos + para.length, true);
     else {
-      const words = para.split(/(\s+)/);
-      let cur = marker, curStart = pos, idx = pos;
-      for (const w of words) {
-        const next = cur + w;
-        if (cur.length > marker.length && c.measureText(next).width > wrapW + 0.5 && w.trim()) {
-          const tr = cur.trimEnd();
-          lines.push({ text: tr, width: c.measureText(tr).width, start: curStart, prefix: lines.length === first ? marker.length : 0, paraEnd: false, paraStart: lines.length === first });
-          cur = w.trimStart();
-          curStart = idx + (w.length - w.trimStart().length);
-        } else cur = next;
+      const avail = wrapW - indent - (t.paragraphIndent ?? 0) * 0;
+      const tokens = para.split(/(\s+)/);
+      let a = pos, idx = pos;
+      for (const w of tokens) {
+        if (w && w.trim() && idx > a && measure(a, idx + w.length) - (t.letterSpacing || 0) > avail + 0.5 + t.fontSize * 0.02) {
+          push(a, idx, false);
+          a = idx;
+        }
         idx += w.length;
+        if (!w.trim() && a === idx - w.length && idx > pos) a = idx; // a line never starts with the break's spaces
       }
-      lines.push({ text: cur, width: c.measureText(cur).width, start: curStart, prefix: lines.length === first ? marker.length : 0, paraEnd: true, paraStart: lines.length === first });
+      push(a, pos + para.length, true);
     }
     pos += para.length + 1;
-    n++;
   }
-  void n;
   // truncation: keep maxLines (or what fits the box height) and end the last one with an ellipsis
   if (t.truncate) {
-    const lh = t.fontSize * t.lineHeight;
+    const lh = lineHeightPx(l);
     const hMax = (l.props.size?.v[1] ?? 0) > 0 && t.autoResize !== 'height' && t.autoResize !== 'width' ? Math.max(1, Math.floor(((l.props.size!.v[1]) + 0.5) / lh)) : Infinity;
     const max = Math.min(t.maxLines && t.maxLines > 0 ? t.maxLines : Infinity, hMax);
     if (lines.length > max) {
       lines.length = max;
       const last = lines[max - 1];
       let s = last.text;
-      const limit = (wrapW ?? Infinity);
+      const limit = (wrapW ?? Infinity) - (last.indent ?? 0);
       while (s.length && c.measureText(s + '…').width > limit) s = s.slice(0, -1);
       last.text = s.trimEnd() + '…';
       last.width = c.measureText(last.text).width;
@@ -842,9 +907,10 @@ export function outlineValid(l: Layer): boolean {
 function textMetrics(l: Layer, size: number[]) {
   const t = l.text!;
   const lines = layoutText(l, size[0] > 0 ? size[0] : null);
-  const lh = t.fontSize * t.lineHeight;
+  const lh = lineHeightPx(l);
   const ps = t.paragraphSpacing ?? 0;
-  let textH = lines.length * lh;
+  let textH = 0;
+  for (const ln of lines) textH += ln.lh ?? lh;
   for (let i = 0; i < lines.length - 1; i++) if (lines[i].paraEnd) textH += ps;
   const boxH = size[1] > 0 ? size[1] : textH;
   const y0 = t.valign === 'center' ? (boxH - textH) / 2 : t.valign === 'bottom' ? boxH - textH : 0;
@@ -862,7 +928,7 @@ function textBox(l: Layer, size: number[]): { x: number; y: number; w: number; h
     return { x: x0 - 2, y: y0 - 2, w: x1 - x0 + 4, h: y1 - y0 + 4 };
   }
   const m = textMetrics(l, size);
-  const maxW = Math.max(size[0], ...m.lines.map(x => x.width));
+  const maxW = Math.max(size[0], ...m.lines.map(x => x.width + (x.indent ?? 0)));
   return { x: -pad, y: Math.min(0, m.y0) - pad, w: maxW + pad * 2, h: Math.max(size[1], m.textH) + pad * 2 + Math.max(0, -m.y0) };
 }
 
@@ -904,51 +970,49 @@ export function rasterText(l: Layer, scale: number, size: number[], clip?: Raste
 /** live layout: lines, alignment (incl. justify), runs (font / color / decoration), paragraph spacing */
 function drawLiveText(c: Ctx, l: Layer, size: number[], color: number[] | null) {
   const t = l.text!;
-  const { lines, lh, ps, y0 } = textMetrics(l, size);
+  const { lines, ps, y0 } = textMetrics(l, size);
   setFont(c, l);
   c.textBaseline = 'alphabetic';
-  const ascent = t.fontSize * 0.8;
-  const half = (lh - t.fontSize) / 2;
   const runs = t.runs ?? [];
-  const width = size[0] > 0 ? size[0] : Math.max(0, ...lines.map(x => x.width));
+  const runAt = (i: number) => (runs.length ? runs.find(r => i >= r.start && i < r.end) ?? null : null);
+  const width = size[0] > 0 && t.autoResize !== 'width' ? size[0] : Math.max(0, ...lines.map(x => x.width + (x.indent ?? 0)));
   let y = y0;
   for (const line of lines) {
-    const by = y + half + ascent;
-    let x = t.align === 'center' ? (width - line.width) / 2 : t.align === 'right' ? width - line.width : 0;
+    const by = y + (line.base ?? 0);
+    const ind = line.indent ?? 0;
+    const lw = width - ind;
+    let x = ind + (t.align === 'center' ? (lw - line.width) / 2 : t.align === 'right' ? lw - line.width : 0);
     if (line.paraStart && t.paragraphIndent && t.align !== 'center' && t.align !== 'right') x += t.paragraphIndent;
-    const justify = t.align === 'justify' && !line.paraEnd ? (width - line.width) / Math.max(1, (line.text.match(/ /g) ?? []).length) : 0;
-    // segments: [from, to) in line.text with one style each
-    const segs: { a: number; b: number; run: (typeof runs)[number] | null }[] = [];
+    if (line.marker) {
+      setFont(c, l);
+      c.fillStyle = color ? cssColor(runAt(line.start)?.fill ?? color) : '#fff';
+      c.textAlign = 'right';
+      c.fillText(line.marker, t.fontSize, by);
+      c.textAlign = 'left';
+    }
+    const spaces = (line.text.match(/ /g) ?? []).length;
+    const justify = t.align === 'justify' && !line.paraEnd && spaces ? (lw - line.width) / spaces : 0;
+    // segments [a, b) of one style; with justify every space is its own segment
     let a = 0;
     while (a < line.text.length) {
-      const ci = line.start + Math.max(0, a - line.prefix);
-      const run = a < line.prefix ? null : runs.find(r => ci >= r.start && ci < r.end) ?? null;
+      const run = runAt(line.start + a);
       let b = a + 1;
-      while (b < line.text.length) {
-        const cj = line.start + Math.max(0, b - line.prefix);
-        const rj = b < line.prefix ? null : runs.find(r => cj >= r.start && cj < r.end) ?? null;
-        if (rj !== run || (justify && line.text[b] === ' ')) break;
-        b++;
-      }
-      segs.push({ a, b, run });
-      a = b;
-    }
-    for (const sg of segs) {
-      const str = line.text.slice(sg.a, sg.b);
-      const r = sg.run;
-      c.font = r ? fontString(l, r) : fontString(l);
-      (c as any).letterSpacing = `${r?.letterSpacing ?? t.letterSpacing ?? 0}px`;
-      c.fillStyle = color ? cssColor(r?.fill ?? color) : '#fff';
+      if (!(justify && line.text[a] === ' ')) while (b < line.text.length && runAt(line.start + b) === run && !(justify && line.text[b] === ' ')) b++;
+      const str = line.text.slice(a, b);
+      c.font = run ? fontString(l, run) : fontString(l);
+      (c as any).letterSpacing = `${run?.letterSpacing ?? t.letterSpacing ?? 0}px`;
+      c.fillStyle = color ? cssColor(run?.fill ?? color) : '#fff';
       c.fillText(str, x, by);
       const w = c.measureText(str).width;
-      const dec = r?.decoration ?? t.decoration;
-      if (dec) {
-        const fs = r?.fontSize ?? t.fontSize, th = Math.max(1, fs / 14);
-        c.fillRect(x, dec === 'underline' ? by + fs * 0.1 : by - fs * 0.3, w, th);
+      const dec = run?.decoration ?? t.decoration;
+      if (dec && dec !== 'none') {
+        const fs = run?.fontSize ?? t.fontSize, th = Math.max(1, fs / 14);
+        c.fillRect(x, dec === 'underline' ? by + fs * 0.1 : by - fs * 0.3, w + (justify && str === ' ' ? justify : 0), th);
       }
       x += w + (justify && str === ' ' ? justify : 0);
+      a = b;
     }
-    y += lh + (line.paraEnd ? ps : 0);
+    y += (line.lh ?? lineHeightPx(l)) + (line.paraEnd ? ps : 0);
   }
 }
 
@@ -1028,7 +1092,7 @@ export function textUnits(l: Layer, boxW: number, by: 'char' | 'word' | 'line'):
   const lines = layoutText(l, boxW > 0 ? boxW : null);
   const c = mctx();
   setFont(c, l);
-  const lh = t.fontSize * t.lineHeight;
+  const lh = lineHeightPx(l);
   const out: TextUnit[] = [];
   const width = boxW > 0 ? boxW : Math.max(...lines.map(x => x.width));
   let y = 0;
@@ -1045,7 +1109,7 @@ export function textUnits(l: Layer, boxW: number, by: 'char' | 'word' | 'line'):
         out.push({ text: part, x, y, w: c.measureText(part).width, h: lh, index: out.length });
       }
     }
-    y += lh + (line.paraEnd ? t.paragraphSpacing ?? 0 : 0);
+    y += (line.lh ?? lh) + (line.paraEnd ? t.paragraphSpacing ?? 0 : 0);
   });
   return out;
 }

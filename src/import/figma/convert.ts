@@ -876,6 +876,7 @@ class Converter {
           if (f) r.fill = f;
           if (s.textDecoration === 'UNDERLINE') r.decoration = 'underline';
           else if (s.textDecoration === 'STRIKETHROUGH') r.decoration = 'strike';
+          else if (s.textDecoration === 'NONE' && n.textDecoration && n.textDecoration !== 'NONE') r.decoration = 'none';
           if (s.letterSpacing && typeof s.letterSpacing.value === 'number') r.letterSpacing = s.letterSpacing.units === 'PIXELS' ? s.letterSpacing.value : (s.letterSpacing.value / 100) * (r.fontSize ?? t.fontSize);
           if (Object.keys(r).length > 2) runs.push(r);
         }
@@ -1053,14 +1054,14 @@ function firstGradientColor(paints: any[] | undefined): Color | null {
 function textData(n: any): TextData {
   const fontSize = num(n.fontSize, 12);
   const style: string = n.fontName?.style ?? 'Regular';
-  let lineHeight = 1.2;
+  let lineHeight = 1.2, auto = !n.lineHeight;
   const lh = n.lineHeight;
   if (lh && typeof lh.value === 'number') {
     // units: PIXELS (px), PERCENT (100 = figma "auto"), RAW (multiplier). unverified: we treat
     // PERCENT 100 as auto (~1.2 for typical fonts).
     if (lh.units === 'PIXELS') lineHeight = fontSize > 0 ? lh.value / fontSize : 1.2;
     else if (lh.units === 'RAW') lineHeight = lh.value;
-    else if (lh.units === 'PERCENT') lineHeight = lh.value === 100 ? 1.2 : lh.value / 100;
+    else if (lh.units === 'PERCENT') { lineHeight = lh.value === 100 ? 1.21 : lh.value / 100; auto = lh.value === 100; }
   }
   let letterSpacing = 0;
   const ls = n.letterSpacing;
@@ -1074,6 +1075,7 @@ function textData(n: any): TextData {
     fontWeight: weightFromStyle(style),
     fontStyle: /italic|oblique/i.test(style) ? 'italic' : 'normal',
     lineHeight: lineHeight > 0 ? lineHeight : 1.2,
+    ...(auto ? { lineHeightAuto: true } : {}),
     letterSpacing,
     align: ah === 'CENTER' ? 'center' : ah === 'RIGHT' ? 'right' : ah === 'JUSTIFIED' ? 'justify' : 'left',
   };

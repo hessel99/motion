@@ -361,7 +361,7 @@ function TextPanel({ layer }: { layer: Layer }) {
       </div>
       <div class="row">
         <NumField label="Size" min={1} value={t.fontSize} onChange={n => set({ fontSize: n })} />
-        <NumField label="LH" step={0.01} min={0.5} value={t.lineHeight} onChange={n => set({ lineHeight: n })} />
+        <NumField label="LH" step={0.01} min={0.5} value={t.lineHeight} onChange={n => set({ lineHeight: n, lineHeightAuto: undefined })} />
         <NumField label="LS" step={0.1} value={t.letterSpacing} onChange={n => set({ letterSpacing: n })} />
       </div>
       <Segmented class="row" label="Text align" value={t.align} options={(['left', 'center', 'right'] as const).map(a => ({ value: a, label: a }))} onChange={a => set({ align: a })} />
