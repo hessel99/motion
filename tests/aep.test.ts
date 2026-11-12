@@ -393,7 +393,7 @@ describe('aep -> project', () => {
     const p = aepToProject(buf);
     const ms = performance.now() - t0;
     expect(Object.keys(p.layers).length).toBeGreaterThanOrEqual(3000);
-    // ~0.4s on an idle machine; generous limit so parallel load doesn't flake it (a quadratic
+    // passed a 1.5s limit on a quiet machine; generous limit so parallel load doesn't flake it (a quadratic
     // regression on 3000 nested layers would take far longer)
     expect(ms).toBeLessThan(5000);
   });
