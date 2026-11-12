@@ -8,6 +8,9 @@ import {
 import { createProject, uid, type Asset, type Layer, type Project } from '../core/model';
 import { boundsOf } from '../agent/tools';
 import { demoProject, stressProject } from './demo';
+import { importFigmaDesign, type DesignImportResult } from '../core/design-import';
+import { createComponent } from '../core/components';
+import type { FigmaDesignData } from '../import/figma/convert';
 
 // importers are loaded lazily (keeps startup fast; missing modules are simply unavailable)
 const mods = import.meta.glob(['../import/figma/index.ts', '../import/svg.ts', '../import/lottie.ts', '../import/aep/index.ts', '../export/lottie.ts', '../export/aejsx.ts']);
@@ -289,9 +292,10 @@ export async function exportAeScript() {
 }
 
 // ---------------- inserting layers (paste / import) ----------------
-export function insertLayers(res: { layers: Layer[]; roots: string[]; assets: Asset[] }, opts: { label: string; fitCompIfEmpty?: boolean }) {
+export function insertLayers(res: { layers: Layer[]; roots: string[]; assets: Asset[]; design?: FigmaDesignData }, opts: { label: string; fitCompIfEmpty?: boolean }): DesignImportResult | null {
   const s = st();
-  if (!res.roots.length) return;
+  if (!res.roots.length) return null;
+  let design: DesignImportResult | null = null;
   const byId = new Map(res.layers.map(l => [l.id, l]));
   const wasEmpty = s.comp.root.length === 0;
   // bounding box of the roots (unrotated approx)
@@ -332,8 +336,17 @@ export function insertLayers(res: { layers: Layer[]; roots: string[]; assets: As
       const extra = collect(byId, id);
       insertLayer(s, tx, l, null, undefined, extra);
     }
+    // figma variables / styles / components that came with the paste
+    if (res.design && (res.design.tokens.length || res.design.instances.length)) {
+      const all = new Map(byId);
+      for (const l of res.design.defLayers) all.set(l.id, l);
+      design = importFigmaDesign(s, tx, all, res.design);
+    }
   });
+  const d = design as DesignImportResult | null;
+  if (d && (d.linked || d.components)) { s.emit('tokens'); s.emit('components'); }
   s.select(res.roots);
+  return design;
 }
 
 function collect(byId: Map<string, Layer>, id: string): Layer[] {
@@ -494,8 +507,13 @@ export async function handlePaste(e: ClipboardEvent) {
       const t0 = performance.now();
       const res = m?.parseFigmaClipboard(html);
       if (res && res.roots.length) {
-        insertLayers(res, { label: 'Paste from Figma', fitCompIfEmpty: true });
-        toast(`Pasted ${res.layers.length} layers from Figma (${Math.round(performance.now() - t0)}ms)`);
+        const d = insertLayers(res, { label: 'Paste from Figma', fitCompIfEmpty: true });
+        const extra = [
+          d?.linked ? `${d.linked} linked to styles` : '',
+          d?.components ? `${d.components} component${d.components > 1 ? 's' : ''} added` : '',
+          d?.synced ? `library: ${d.synced}` : '',
+        ].filter(Boolean).join(' · ');
+        toast(`Pasted ${res.layers.length} layers from Figma (${Math.round(performance.now() - t0)}ms)${extra ? ' · ' + extra : ''}`);
         return;
       }
     }
@@ -601,6 +619,12 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     const mod = e.metaKey || e.ctrlKey;
     const k = e.key.toLowerCase();
     const run = (fn: () => void) => { e.preventDefault(); fn(); };
+    if (mod && e.altKey && e.code === 'KeyK') return run(() => {
+      // figma: create component (⌥⌘K); on an instance: detach (⌥⌘B in figma)
+      const id = s.selection[0];
+      if (s.selection.length !== 1 || !id) { toast('Select one layer to make a component', 'error'); return; }
+      try { createComponent(s, id); toast(`${s.layer(id)!.name} is now a component (Library tab: add instances)`); } catch (err: any) { toast(err.message, 'error'); }
+    });
     if (mod && k === 'z') return run(() => (e.shiftKey ? s.redo() : s.undo()));
     if (mod && k === 'y') return run(() => s.redo());
     if (mod && k === 's') return run(() => saveProject(e.shiftKey));

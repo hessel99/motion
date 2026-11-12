@@ -20,6 +20,9 @@ export interface Keyframe {
   /** optional spatial tangents (position only), relative to the keyframe value, like after effects / lottie */
   sOut?: number[];
   sIn?: number[];
+  /** linked to a color/number style (token id, see core/tokens.ts): `v` is kept equal to the
+   *  token's value, and a library sync rewrites it */
+  tok?: string;
 }
 
 export interface Prop {
@@ -28,6 +31,9 @@ export interface Prop {
   kf?: Keyframe[];
   /** expression (safe mini language, see core/expr.ts); `value` = keyframed/static value */
   expr?: string;
+  /** static value linked to a style (token id). `v` always holds the resolved value, so the renderer
+   *  and every exporter read plain numbers: bindings cost nothing per frame */
+  bind?: string;
 }
 
 export type BlendMode = 'normal' | 'multiply' | 'screen' | 'add' | 'darken' | 'lighten';
@@ -168,8 +174,62 @@ export interface Layer {
   /** precomp: referenced composition id and when it starts (comp time) */
   compRef?: string;
   startTime?: number;
+  /** component instance link (see core/components.ts): this layer mirrors main-component layer `main` */
+  link?: InstanceLink;
   /** ui state */
   collapsed?: boolean;
+}
+
+/** an instance layer mirrors one layer of a main component. fields listed in `ov` were changed on the
+ *  instance (overrides) and are not overwritten when the main changes. the instance ROOT also
+ *  carries its offset from the main: position (dx, dy) and time (dt) */
+export interface InstanceLink {
+  main: string;
+  ov?: string[];
+  dx?: number;
+  dy?: number;
+  dt?: number;
+}
+
+/** a main component: the layer (with its subtree) whose id keys Project.components */
+export interface ComponentInfo {
+  name: string;
+  /** figma component key (or symbol guid) it was pasted from: later pastes link to it */
+  figmaKey?: string;
+  description?: string;
+}
+
+/** a named color or number ("style"/"variable"/"design token") that layer properties can link to */
+export interface Token {
+  id: string;
+  /** path with slashes, e.g. "Brand/Primary" (groups the palette) */
+  name: string;
+  type: 'color' | 'number';
+  /** value per mode name. colors are [r,g,b,a] 0..1, numbers [n] */
+  values: Record<string, number[]>;
+  /** where it was synced from (re-sync matches on this key) */
+  source?: { kind: 'figma-variable' | 'figma-style' | 'file' | 'figma-api'; key: string; from?: string };
+  description?: string;
+  /** removed from its library in the last sync but still used here */
+  missing?: boolean;
+}
+
+export interface TokenSource {
+  id: string;
+  kind: 'file' | 'url' | 'figma-api';
+  label: string;
+  /** file path (desktop), url, or figma file key */
+  location: string;
+  lastSync?: number;
+}
+
+export interface TokenLibrary {
+  items: Record<string, Token>;
+  /** mode names (e.g. Light, Dark). always at least one */
+  modes: string[];
+  /** active mode */
+  mode: string;
+  sources?: TokenSource[];
 }
 
 export interface Composition {
@@ -204,6 +264,10 @@ export interface Project {
   activeComp: string;
   layers: Record<string, Layer>;
   assets: Record<string, Asset>;
+  /** colors / numbers layers can link to (optional: older files have none) */
+  tokens?: TokenLibrary;
+  /** main components by main layer id */
+  components?: Record<string, ComponentInfo>;
 }
 
 let idCounter = 0;

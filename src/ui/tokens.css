@@ -108,6 +108,7 @@
   --tl-control-off: #3a3a40;      /* solo / lock off */
   --tl-control-on: #d6d6dc;       /* lock on */
   --tl-solo: #ffcc00;
+  --tl-component: #c792ea;      /* main component / instance badge */
   --tl-bar: rgba(255, 255, 255, 0.06);
   --tl-key-stroke: #16161a;
   --tl-key-selected-stroke: #bcd4ff;
@@ -248,6 +249,7 @@
   --tl-control-off: #cfcfd5;
   --tl-control-on: #2a2a31;
   --tl-solo: #d4a000;
+  --tl-component: #8e4fc0;
   --tl-bar: rgba(0, 0, 0, 0.06);
   --tl-key-stroke: #ffffff;
   --tl-key-selected-stroke: #1747b8;

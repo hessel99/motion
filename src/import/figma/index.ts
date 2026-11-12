@@ -1,13 +1,13 @@
 // figma clipboard import: cmd+c in figma, cmd+v here.
 import type { Asset, Layer } from '../../core/model';
 import { extractFigmaBuffer, decodeFigKiwi, looksLikeFigmaHtml } from './decode';
-import { figmaMessageToLayers } from './convert';
+import { figmaMessageToLayers, type FigmaDesignData } from './convert';
 
 export { extractFigmaBuffer, decodeFigKiwi, looksLikeFigmaHtml } from './decode';
-export { figmaMessageToLayers, decodeCommandsBlob } from './convert';
+export { figmaMessageToLayers, decodeCommandsBlob, type FigmaDesignData } from './convert';
 
 /** parse text/html clipboard data. returns null if it isn't figma data (or can't be decoded). */
-export function parseFigmaClipboard(html: string): { layers: Layer[]; roots: string[]; assets: Asset[] } | null {
+export function parseFigmaClipboard(html: string): { layers: Layer[]; roots: string[]; assets: Asset[]; design: FigmaDesignData } | null {
   if (!html || !looksLikeFigmaHtml(html)) return null;
   const ex = extractFigmaBuffer(html);
   if (!ex) return null;

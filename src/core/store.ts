@@ -4,6 +4,8 @@
 
 import type { Composition, Layer, Project, Prop, PropKey } from './model';
 import { createComp, createProject } from './model';
+import { tokenTxHook } from './tokens';
+import { componentTxHook, rememberTree } from './components';
 
 export interface Change {
   structure: boolean; // layers added/removed/reordered/reparented
@@ -160,6 +162,12 @@ export class Store {
     const tx = new Tx();
     try {
       fn(tx);
+      // linked styles and components: unlink hand-edited values, record instance overrides and copy
+      // main-component edits into instances, all inside this transaction (one undo step)
+      if (tx.undo.length && (this.project.tokens || this.project.components)) {
+        tokenTxHook(this.project, tx);
+        componentTxHook(this, tx);
+      }
     } catch (e) {
       // atomic: roll back whatever was applied before the error
       for (let i = tx.undo.length - 1; i >= 0; i--) tx.undo[i]();
@@ -318,6 +326,7 @@ export class Store {
   /** replace the whole document (open file) */
   load(project: Project) {
     this.project = project;
+    for (const id in project.components ?? {}) rememberTree(project, id);
     this.ensureActiveComp();
     this.workArea = null;
     this.solo.clear();

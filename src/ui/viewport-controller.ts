@@ -146,6 +146,17 @@ export class ViewportController {
   }
 
   toComp(sx: number, sy: number) { return [(sx - this.panX) / this.zoom, (sy - this.panY) / this.zoom]; }
+  /** the (deepest) layer under a mouse / drag event, e.g. to drop a style swatch on it */
+  layerAt(e: MouseEvent): string | null {
+    const [x, y] = this.local(e);
+    const [cx, cy] = this.toComp(x, y);
+    return this.ed.renderer.hitTest(cx, cy);
+  }
+  /** hover outline while dragging something over the canvas (null clears it) */
+  hoverAt(e: MouseEvent | null) {
+    const id = e ? this.layerAt(e) : null;
+    if (this.hover !== id) { this.hover = id; this.overlayDirty = true; }
+  }
   toScreen(x: number, y: number) { return [x * this.zoom + this.panX, y * this.zoom + this.panY]; }
 
   private local(e: PointerEvent | MouseEvent | WheelEvent) {

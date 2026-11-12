@@ -345,3 +345,30 @@ describe('review card identity (undo entry ids)', () => {
     await expect(agentClient.runTool('add_layer', { type: 'rect' })).resolves.toBeTruthy();
   });
 });
+
+describe('agent tools: styles and components', () => {
+  it('creates, lists, links and switches styles; makes components and instances', async () => {
+    const { s, a, b } = fresh();
+    await run('set_style', { name: 'Brand/Primary', value: '#ff0000' });
+    await run('set_style', { name: 'Radius/M', value: 12 });
+    expect(await run('link_style', { ids: [a.id, b.id], prop: 'fill', style: 'Brand / Primary' })).toContain('Brand/Primary');
+    await run('link_style', { ids: [a.id], prop: 'radius', style: 'Radius/M' });
+    expect(a.props.radius!.v).toEqual([12, 12, 12, 12]);
+    const listed = JSON.parse(await run('list_styles', {}));
+    expect(listed.styles.find((x: any) => x.name === 'Brand/Primary')).toMatchObject({ value: '#ff0000', usedBy: 2 });
+    await run('set_style', { name: 'Brand/Primary', value: '#0000ff' });
+    expect(b.props.fill!.v).toEqual([0, 0, 1, 1]);
+    const layer = await run('get_layer', { id: a.id });
+    expect(layer).toContain('Brand/Primary');
+    await run('link_style', { ids: [a.id], prop: 'fill', style: null });
+    expect(a.props.fill!.bind).toBeUndefined();
+    await expect(run('link_style', { ids: [a.id], prop: 'fill', style: 'Nope' })).rejects.toThrow(/no style/);
+
+    await run('create_component', { id: a.id, name: 'Logo' });
+    const inst = JSON.parse(await run('add_instance', { component: 'Logo', x: 500, y: 300, delay: 0.25 }));
+    expect(s.layer(inst.id)!.link!.main).toBe(a.id);
+    expect(s.layer(inst.id)!.props.position!.v).toEqual([500, 300]);
+    expect(JSON.parse(await run('list_styles', {})).components).toEqual([{ id: a.id, name: 'Logo', instances: 1 }]);
+    expect(READ_ONLY_TOOLS()).toContain('list_styles');
+  });
+});

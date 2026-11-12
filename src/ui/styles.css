@@ -363,3 +363,59 @@ kbd, .kbd {
 .panel-error { padding: var(--space-7); display: flex; flex-direction: column; gap: var(--space-4); color: var(--danger-text); }
 .welcome ol { padding-left: 18px; line-height: 1.6; margin: 0; }
 .welcome li { margin-bottom: var(--space-3); }
+
+/* ---------------- library: styles + components (LibraryPanel.tsx, LinkControls.tsx) ---------------- */
+.right-tabs { position: sticky; top: 0; z-index: 2; display: flex; gap: var(--space-1); padding: var(--space-3) var(--space-5) 0; background: var(--surface-1); border-bottom: 1px solid var(--border); }
+.right-tabs > button { background: transparent; border: 0; border-bottom: 2px solid transparent; border-radius: 0; min-height: 30px; padding: 0 var(--space-4); color: var(--text-muted); font-weight: var(--weight-semibold); font-size: var(--text-sm); }
+.right-tabs > button:hover { color: var(--text); background: transparent; }
+.right-tabs > button.on { color: var(--text); border-bottom-color: var(--accent); }
+.library { padding-bottom: 40px; }
+.lib-actions { display: inline-flex; gap: var(--space-1); }
+.lib-modes { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
+.lib-modes .seg { flex: 1; }
+.lib-group + .lib-group { margin-top: var(--space-4); }
+.lib-group-name { font-size: var(--text-xs); color: var(--text-muted); margin: 0 0 var(--space-2); text-transform: none; letter-spacing: 0.01em; }
+.lib-row { display: flex; align-items: center; gap: var(--space-3); min-height: 28px; padding: 0 var(--space-2); margin: 0 calc(-1 * var(--space-2)); border-radius: var(--radius-sm); cursor: pointer; user-select: none; }
+.lib-row:hover { background: var(--surface-hover); }
+.lib-row:active { cursor: grabbing; }
+.lib-row .swatch { flex: none; cursor: pointer; }
+.lib-row.comp { cursor: default; }
+.lib-row.missing .lib-name { color: var(--text-muted); text-decoration: line-through; }
+.lib-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lib-num { flex: none; min-width: 26px; height: 20px; padding: 0 var(--space-2); display: inline-grid; place-items: center; border-radius: var(--radius-xs); background: var(--surface-0); border: 1px solid var(--border); font-size: var(--text-xs); font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.lib-count { flex: none; min-width: 18px; text-align: right; font-size: var(--text-xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.lib-badge { font-size: var(--text-xs); padding: 0 var(--space-2); border-radius: var(--radius-pill); }
+.lib-badge.warn { color: var(--warning-text); background: var(--surface-2); }
+.lib-comp-icon, .comp-icon { color: var(--preset-loop); font-size: 11px; }
+.lib-empty p { margin: 0 0 var(--space-3); }
+.lib-hint { margin: 0; line-height: 1.45; }
+.lib-source { margin-top: var(--space-4); }
+.link { background: none; border: 0; padding: 0; min-height: 0; color: var(--accent-text); cursor: pointer; font: inherit; }
+.link:hover { text-decoration: underline; background: none; }
+.chip { display: inline-block; flex: none; width: 16px; height: 16px; border-radius: var(--radius-xs); border: 1px solid var(--border-strong); background-clip: padding-box; }
+/* inspector: linked values */
+.link-btn { flex: none; width: 22px; height: 22px; min-height: 0; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; color: var(--text-muted); border-radius: var(--radius-sm); }
+.link-btn:hover { color: var(--text); background: var(--surface-hover); border-color: var(--border); }
+.linked-chip { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-2); min-height: var(--control-h-md); padding: 0 var(--space-1) 0 var(--space-3); border: 1px solid var(--accent-soft-border); background: var(--accent-soft); border-radius: var(--radius-sm); }
+.linked-chip.missing { border-color: var(--warning); background: transparent; }
+.linked-name { flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 0; min-height: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent-soft-text); font-size: var(--text-sm); }
+.linked-name:hover { background: none; text-decoration: underline; }
+.linked-detach { flex: none; width: 22px; height: 22px; min-height: 0; padding: 0; display: grid; place-items: center; background: transparent; border: 0; color: var(--accent-soft-text); border-radius: var(--radius-xs); }
+.linked-detach:hover { background: var(--surface-pressed); color: var(--text); }
+/* inspector: component box */
+.comp-box .section-title { display: inline-flex; gap: var(--space-2); align-items: center; }
+.comp-box p { margin: 0 0 var(--space-3); line-height: 1.45; }
+.comp-box .row { flex-wrap: wrap; }
+.ov-list { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-bottom: var(--space-3); }
+.ov-chip { min-height: 20px; padding: 0 var(--space-3); border-radius: var(--radius-pill); font-size: var(--text-xs); background: var(--surface-2); border: 1px solid var(--border); color: var(--text-secondary); }
+.ov-chip:hover { border-color: var(--border-strong); color: var(--text); }
+/* sync review dialog */
+.sync-summary { font-size: var(--text-md, 14px); font-weight: var(--weight-semibold); margin: 0 0 var(--space-4); }
+.sync-list { list-style: none; margin: 0 0 var(--space-4); padding: 0; max-height: 50vh; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-md); }
+.sync-list li { display: grid; grid-template-columns: 64px 1fr auto auto; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); }
+.sync-list li:last-child { border-bottom: 0; }
+.sync-vals { display: inline-flex; align-items: center; gap: var(--space-2); }
+.sync-tag { font-size: var(--text-xs); border-radius: var(--radius-pill); padding: 1px var(--space-3); text-align: center; }
+.sync-tag.changed { background: var(--accent-soft); color: var(--accent-soft-text); }
+.sync-tag.added { background: rgba(62, 207, 110, 0.15); color: var(--success); }
+.sync-tag.removed { background: var(--danger-soft); color: var(--danger-text); }

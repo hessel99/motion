@@ -122,6 +122,29 @@ ipcMain.handle('file:saveAs', async (_e, opts = {}) => {
   return writeFromRenderer(target, opts.data, opts.encoding);
 });
 
+// design tokens files: re-read and watch (only .json files the user picked or a project remembers)
+const tokenWatchers = new Map();
+const jsonOnly = (p) => typeof p === 'string' && path.isAbsolute(p) && p.toLowerCase().endsWith('.json');
+ipcMain.handle('file:readText', async (_e, p) => {
+  if (!jsonOnly(p)) throw new Error('only .json files');
+  return fs.readFile(p, 'utf8');
+});
+ipcMain.handle('file:watch', (_e, p) => {
+  if (!jsonOnly(p) || tokenWatchers.has(p)) return false;
+  let timer = null;
+  try {
+    const w = require('node:fs').watch(p, () => {
+      clearTimeout(timer);
+      // editors save in several steps (truncate, write, rename): wait for the file to settle
+      timer = setTimeout(async () => {
+        try { const data = await fs.readFile(p, 'utf8'); if (win && !win.isDestroyed()) win.webContents.send('file:changed', p, data); } catch { /* deleted or mid-write */ }
+      }, 300);
+    });
+    tokenWatchers.set(p, w);
+    return true;
+  } catch { return false; }
+});
+
 // crash-safe autosave of the open project (no size limit, unlike browser storage)
 const autosavePath = () => path.join(app.getPath('userData'), 'autosave.motion');
 let autosaveChain = Promise.resolve(true);
