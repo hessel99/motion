@@ -10,15 +10,15 @@ const out = process.argv[2] || 'director-run';
 const style = process.argv[3] || 'Swiss';
 const brief = process.argv[4] || (process.env.SETUP ? JSON.parse(fs.readFileSync(new URL('../src/agent/guides/evals/concept-briefs.json', import.meta.url), 'utf8')).briefs.find((x) => x.id === process.env.SETUP).brief : '') || 'Make a 10 second launch teaser for "Orbit", a calendar app for teams. Tagline: "Plan less. Do more."';
 fs.mkdirSync(out, { recursive: true });
-const URL = (process.env.URL || 'http://localhost:5273/') + `?blank&bridge=${process.env.BRIDGE || 7863}`;
+const PAGE = (process.env.URL || 'http://localhost:5273/') + `?blank&bridge=${process.env.BRIDGE || 7863}`;
 const browser = await chromium.launch({ args: ['--ignore-gpu-blocklist'] });
 const page = await browser.newPage({ viewport: { width: 1700, height: 1050 } });
 const errs = [];
 page.on('pageerror', (e) => errs.push(e.message));
-await page.goto(URL);
+await page.goto(PAGE);
 await page.click('.lp-tab[aria-label="Agent"]').catch(() => {});
 await page.evaluate((model) => { localStorage.setItem('motion.agent.model', model); localStorage.setItem('motion.agent.storyboard', 'ask'); for (const k of Object.keys(localStorage)) if (k.startsWith('motion.agent.chat:')) localStorage.removeItem(k); }, process.env.MODEL || 'auto').catch(() => {});
-await page.goto(URL);
+await page.goto(PAGE);
 await page.waitForSelector('.dot.connected', { timeout: 15000 });
 // SETUP=<brief id> builds an eval brief's artwork first (src/agent/guides/evals/concept-briefs.json) through MCP
 if (process.env.SETUP) {
