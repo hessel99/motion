@@ -99,7 +99,7 @@ export function defaultEaseFor(key: string, from: number[], to: number[]): any {
 
 export const POLISH = {
   /** follow up when the score is below this, or when a high-severity issue is left */
-  threshold: 72,
+  threshold: 80,
   maxRounds: 2,
   /** fixes per round */
   maxFixes: 3,

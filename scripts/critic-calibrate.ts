@@ -47,6 +47,12 @@ const C = rows.map(r => r.score);
 console.log('run'.padEnd(34), 'judge', 'critic', 'ms   ', 'issues');
 for (const r of rows) console.log(`${path.basename(r.dir)}/${r.name}`.slice(-34).padEnd(34), String(r.judge).padEnd(5), String(r.score).padEnd(6), String(r.ms).padEnd(5), flag('verbose') ? r.issues.join(' ') : r.issues.slice(0, 6).join(' '));
 console.log(`\n${rows.length} runs: pearson r = ${pearson(C, J).toFixed(3)}, spearman ρ = ${spearman(C, J).toFixed(3)}, critic mean ${(C.reduce((a, b) => a + b, 0) / C.length).toFixed(1)}, max ms ${Math.max(...rows.map(r => r.ms))}`);
+// within-brief: does the critic rank different builds of the SAME brief like the judge? (removes brief difficulty)
+const briefOf = (r: Row) => r.name.replace(/-r\d+$/, '');
+const centred = (f: (r: Row) => number) => { const m = new Map<string, number[]>(); for (const r of rows) m.set(briefOf(r), [...(m.get(briefOf(r)) ?? []), f(r)]); return rows.map(r => { const v = m.get(briefOf(r))!; return v.length > 1 ? f(r) - v.reduce((a, b) => a + b, 0) / v.length : NaN; }); };
+const wc = centred(r => r.score), wj = centred(r => r.judge);
+const keep = wc.map((v, i) => i).filter(i => !isNaN(wc[i]));
+console.log(`within-brief pearson r = ${pearson(keep.map(i => wc[i]), keep.map(i => wj[i])).toFixed(3)} (${keep.length} runs of briefs with 2+ builds)`);
 for (const c of CATEGORIES) { const v = rows.map(r => r.sub[c]); if (new Set(v).size > 1) console.log(`  ${c.padEnd(13)} r(judge overall) ${pearson(v, J).toFixed(2)}`); }
 
 if (flag('fit')) {
@@ -71,6 +77,8 @@ if (flag('fit')) {
     loo.push(scoreWith(ww, rows[k]));
   }
   console.log(`\nfit: pearson ${best.toFixed(3)} with`, JSON.stringify(w));
+  const shrunk = Object.fromEntries(CATEGORIES.map(c => [c, Math.round(((w[c] + CAT_WEIGHTS[c]) / 2) * 10) / 10])) as Record<Category, number>;
+  console.log(`shrunk halfway to the current weights: pearson ${pearson(rows.map(r => scoreWith(shrunk, r)), J).toFixed(3)} with`, JSON.stringify(shrunk));
   console.log(`leave-one-out pearson ${pearson(loo, J).toFixed(3)}`);
 }
 if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ n: rows.length, pearson: pearson(C, J), spearman: spearman(C, J), rows }, null, 1));

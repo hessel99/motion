@@ -79,6 +79,9 @@ export const RULES: Record<string, { cat: Category; w: number; title: string }> 
   'fade-only': { cat: 'polish', w: 1, title: 'only fades' },
   'loop-seam': { cat: 'polish', w: 1, title: 'loop seam' },
   'thin': { cat: 'richness', w: 1, title: 'too few elements / moves for the length' },
+  'one-move': { cat: 'richness', w: 1, title: 'every element moves once and stops' },
+  'copy-paste': { cat: 'polish', w: 1, title: 'identical motion copy-pasted across layers' },
+  'default-fill': { cat: 'polish', w: 1, title: 'leftover default colour' },
   'invisible': { cat: 'technical', w: 1, title: 'layer never visible' },
   'dead-trim': { cat: 'technical', w: 1.4, title: 'draw-on that does not render' },
   'font-fallback': { cat: 'technical', w: 1.2, title: 'font falls back' },
@@ -91,7 +94,7 @@ export const RULES: Record<string, { cat: Category; w: number; title: string }> 
 };
 const SEV: Record<Severity, number> = { high: 30, medium: 16, low: 7 };
 /** category weights of the overall score (calibrated) */
-export const CAT_WEIGHTS: Record<Category, number> = { timing: 1, easing: 1, choreography: 1, composition: 1, readability: 1, polish: 1, richness: 1, technical: 1, brand: 0.5, music: 0.8 };
+export const CAT_WEIGHTS: Record<Category, number> = { timing: 0.5, easing: 1.2, choreography: 1.5, composition: 0.7, readability: 0.8, polish: 0.5, richness: 0.7, technical: 1.5, brand: 0.4, music: 0.8 };
 /** penalty points (after category weights) that halve the score's distance to 0: score = 100·0.5^(P/HALF) */
 export const HALF = 110;
 
@@ -483,7 +486,8 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
       } else continue;
       if (sg.kind === 'exit') exp *= 0.75;
       if (d > 2.5 && sg.kind === 'move') continue; // camera drifts / ambient
-      const hi = exp * (sg.a.interp === 'spring' || overshootSeg(sg.a, sg.b) ? 3.2 : 2.4) + 0.15, lo = exp * 0.4;
+      // slow is a style choice (luxury, calm) far more often than fast: only flag clearly sluggish moves
+      const hi = exp * (sg.a.interp === 'spring' || overshootSeg(sg.a, sg.b) ? 4 : 3) + 0.2, lo = exp * 0.4;
       if (d > hi || d < lo) bad.push({ sg, exp, d });
     }
     bad.sort((a, b) => Math.abs(Math.log(b.d / b.exp)) - Math.abs(Math.log(a.d / a.exp)));
@@ -737,6 +741,54 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
       const sev: Severity = elems <= want / 2 || moves < D * 0.6 ? 'high' : 'medium';
       push('thin', sev, `${elems} element${elems === 1 ? '' : 's'} and ${moves} moves for ${ft(D)}: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch`, primary ? [primary.l.id] : [], undefined,
         primary && primary.segs.some(s => PHYS.includes(s.key)) ? [{ tool: 'secondary_motion', args: { ids: [primary.l.id], overshoot: 0.1, segments: 'all' } }] : []);
+    }
+  }
+
+  // every element gets exactly one move (an entrance) and then sits still: "a checklist build"
+  {
+    const moversL = infos.filter(x => !x.group && !x.piece && !isBg(x) && (x.segs.length || x.expr || x.l.textAnim));
+    const once = moversL.filter(x => !x.expr && !x.l.textAnim && new Set(x.segs.filter(sg => sg.key !== 'opacity' || x.segs.every(q => q.key === 'opacity')).map(sg => Math.round(sg.t0 * 10))).size <= 1 && x.segs.every(sg => sg.kind !== 'exit'));
+    if (D >= 4 && moversL.length >= 3 && once.length / moversL.length >= 0.75 && !all.some(sg => overshootSeg(sg.a, sg.b))) {
+      const ids = [primary, ...once.filter(x => x !== primary)].filter(Boolean).slice(0, 3).map(x => x!.l.id).filter(id => infoById.get(id)?.segs.some(sg => PHYS.includes(sg.key)));
+      push('one-move', once.length / moversL.length >= 0.9 ? 'high' : 'medium', `${once.length} of ${moversL.length} elements move once and stop: give the hero a second beat (an accent, a settle, a transition) and overlap follow-through on the others`, ids, undefined,
+        ids.length ? [{ tool: 'secondary_motion', args: { ids, overshoot: 0.1, segments: 'all' } }] : []);
+    }
+  }
+
+  // ================================================================ polish (more)
+  {
+    // identical motion copy-pasted on several layers (same props, durations, eases, distances; only offset in time)
+    const sig = new Map<string, Info[]>();
+    for (const x of infos) {
+      if (x.group || x.piece || (!x.segs.length && !x.expr)) continue;
+      const t0 = x.segs.length ? Math.min(...x.segs.map(sg => sg.t0)) : 0;
+      const parts = x.segs.map(sg => `${sg.key}:${r1(sg.t0 - t0)}:${r1(sg.t1 - sg.t0)}:${sg.ease}:${Math.round(sg.mag / 5)}`).sort();
+      for (const k of PROP_KEYS) { const e = x.l.props[k]?.expr; if (e && EXPR_PROPS.includes(k) && !/index|seed|random/.test(e)) parts.push(`${k}~${e}`); }
+      if (!parts.length) continue;
+      // the same keys on elements of different sizes look different (bars of a chart): size is part of the signature
+      const key = `${Math.round(Math.sqrt(x.area) / 25)}#` + parts.join('|');
+      sig.set(key, [...(sig.get(key) ?? []), x]);
+    }
+    const movers = infos.filter(x => !x.group && !x.piece && (x.segs.length || x.expr)).length;
+    const groups = [...sig.values()].filter(g => g.length >= 3 && g.length >= movers * 0.4).sort((a, b) => b.length - a.length);
+    for (const g of groups.slice(0, 1)) {
+      const alt = g.filter((_, i) => i % 2 === 1).map(x => x.l.id);
+      const t0 = Math.min(...g.flatMap(x => x.segs.map(sg => sg.t0)), 0);
+      push('copy-paste', g.length >= 5 ? 'high' : 'medium', `${g.length} layers run the exact same animation (${g.slice(0, 4).map(x => x.l.name).join(', ')}${g.length > 4 ? '…' : ''}): vary distance, timing or overshoot per element (hero bigger, followers smaller), offset phases`, g.map(x => x.l.id), undefined,
+        alt.length ? [{ tool: 'retime', args: { ids: alt, scale: 1.25, pivot: r2(t0) } }] : []);
+    }
+    // the editor's default blue on a finished piece
+    let n = 0;
+    for (const x of infos) {
+      if (n >= 2 || x.group || x.text || !['rect', 'ellipse', 'path'].includes(x.l.type) || x.l.paints?.some(pp => pp.stops)) continue;
+      const f = x.l.props.fill?.v;
+      if (!f || x.l.props.fill?.kf?.length || Math.abs(f[0] - 0.42) > 0.005 || Math.abs(f[1] - 0.55) > 0.005 || Math.abs(f[2] - 1) > 0.005 || (f[3] ?? 1) < 0.05) continue;
+      let seen = false; for (let si = 0; si <= N && !seen; si++) seen = G(si, x.idx, 4) > 0.05;
+      if (!seen) continue;
+      n++;
+      const stroked = valueAt(x.l, 'strokeWidth', 0)[0] > 0;
+      push('default-fill', 'medium', `${nm(x.l)} still has the editor's default blue fill (#6b8cff)${stroked ? ' behind its stroke' : ''}`, [x.l.id], undefined,
+        [{ tool: 'update_layer', args: { id: x.l.id, props: { fill: stroked ? '#00000000' : hex(primary && primary.l.id !== x.l.id && primary.fill[3] > 0.05 ? primary.fill : [0.07, 0.07, 0.07, 1]) } } }]);
     }
   }
 

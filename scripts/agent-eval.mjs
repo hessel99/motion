@@ -254,7 +254,8 @@ async function runBrief(worker, brief, rep) {
   const dir = path.join(O.out, name);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'brief.json'), JSON.stringify(brief, null, 2));
-  await page.goto(`${O.url}?blank&bridge=${port}`);
+  // a busy dev server can be slow to serve the first page: retry before giving up on the brief
+  for (let a = 0; ; a++) { try { await page.goto(`${O.url}?blank&bridge=${port}`, { timeout: 90_000 }); break; } catch (e) { if (a >= 2) throw e; log(`[w${worker.i}] ${brief.id}: page load retry (${String(e.message).slice(0, 60)})`); } }
   await page.waitForFunction(() => window.editor?.store && window.editor.renderer);
   for (let i = 0; i < 100; i++) {
     const h = await fetch(`http://127.0.0.1:${port}/health`).then((r) => r.json()).catch(() => ({}));
@@ -274,6 +275,8 @@ async function runBrief(worker, brief, rep) {
     const { setCompSettings } = await import('/src/core/commands.ts');
     const { TOOLS } = await import('/src/agent/tools.ts');
     const st = window.editor.store;
+    // every brief starts from an empty document (nothing restored or left over)
+    if (Object.keys(st.project.layers).length) { const { createProject } = await import("/src/core/model.ts"); window.editor.load(createProject()); }
     setCompSettings(st, { width: comp.width, height: comp.height, fps: comp.fps, duration: comp.duration });
     st.setTime(0); st.select([]);
     window.__evalLog = [];
@@ -520,6 +523,8 @@ async function main() {
     const bridge = await startBridge({ port: O.port + i, log: () => {}, workDir });
     const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
     await ctx.addInitScript(SEED_SCRIPT, O.seed);
+    // headless turns: storyboards build right away (nobody is there to approve the card)
+    await ctx.addInitScript(() => { try { localStorage.setItem("motion.agent.storyboard", "auto"); } catch { /* */ } });
     const page = await ctx.newPage();
     const w = { i, port: bridge.port, bridge, page, onEvent: null, pageErrors: [] };
     page.on('pageerror', (e) => w.pageErrors.push(e.message));
