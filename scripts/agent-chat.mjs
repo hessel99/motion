@@ -6,7 +6,7 @@ const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
 const errs = []; page.on('pageerror', e => errs.push(e.message));
 await page.goto((process.env.URL || 'http://localhost:5173/') + '?blank' + (process.env.BRIDGE ? '&bridge=' + process.env.BRIDGE : ''));
 await page.waitForSelector('.dot.connected', { timeout: 15000 });
-await page.waitForFunction(() => !document.querySelector('.agent-head select')?.textContent.includes('not found') || true);
+await page.waitForFunction(() => true);
 await page.fill('.agent-input textarea', prompt);
 const t0 = Date.now();
 await page.click('.agent-input button.primary');

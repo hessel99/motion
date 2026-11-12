@@ -11,7 +11,7 @@ page.on('pageerror', e => errors.push(String(e)));
 page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
 await page.goto(URL + '?blank&nobridge');
 await page.waitForFunction(() => (globalThis).editor);
-await page.evaluate(() => { try { localStorage.setItem('motion.agentOpen', '0'); } catch { /* */ } });
+await page.evaluate(() => { try { localStorage.setItem('motion.ui', JSON.stringify({ leftOpen: true, leftTab: 'library' })); } catch { /* */ } });
 await page.reload();
 await page.waitForFunction(() => (globalThis).editor);
 await page.waitForTimeout(500);
@@ -60,7 +60,7 @@ await page.evaluate(() => globalThis.viewport?.fit());
 await page.waitForTimeout(300);
 
 // 1. library tab
-await page.click('.right-tabs button:has-text("Library")');
+await page.click('.lp-tab[aria-label="Library"]');
 await page.waitForTimeout(400);
 await page.screenshot({ path: `${out}/20-library-panel.png` });
 
@@ -90,7 +90,7 @@ await page.evaluate(() => globalThis.editor.store.undo());
 
 // 3. inspector of an instance layer with an override + linked fill
 await page.evaluate(({ bBadge }) => globalThis.editor.store.select([bBadge]), info);
-await page.click('.right-tabs button:has-text("Design")');
+await page.evaluate(() => {}); // the inspector is always in the right panel
 await page.waitForTimeout(400);
 await page.screenshot({ path: `${out}/20-inspector-instance.png` });
 const chip = await page.textContent('.linked-chip');
@@ -122,7 +122,7 @@ console.log('radius after sync:', after);
 if (after !== 24) throw new Error('sync did not update the linked radius');
 
 // 6. dark mode
-await page.click('.right-tabs button:has-text("Library")');
+await page.click('.lp-tab[aria-label="Library"]');
 await page.click('.lib-modes button:has-text("Dark")');
 await page.evaluate(() => globalThis.editor.store.select([]));
 await page.waitForTimeout(500);

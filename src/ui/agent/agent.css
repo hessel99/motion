@@ -26,8 +26,10 @@
 /* tool steps */
 .ag-steps { display: flex; flex-direction: column; gap: 2px; }
 .ag-steps-group > summary { cursor: pointer; color: var(--ag-muted); font-size: 11px; list-style: none; padding: 2px 0; }
-.ag-steps-group > summary::before { content: '▸ '; }
-.ag-steps-group[open] > summary::before { content: '▾ '; }
+.ag-steps-group > summary::-webkit-details-marker { display: none; }
+/* chevron drawn with borders (no glyphs) */
+.ag-steps-group > summary::before { content: ''; display: inline-block; width: 5px; height: 5px; margin: 0 7px 1px 2px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(-45deg); }
+.ag-steps-group[open] > summary::before { transform: rotate(45deg); margin-bottom: 3px; }
 .ag-step { font-size: 11.5px; color: var(--text-secondary); }
 .ag-step > summary { display: flex; gap: 6px; align-items: center; cursor: pointer; list-style: none; padding: 2px 4px; border-radius: 5px; }
 .ag-step > summary::-webkit-details-marker { display: none; }

@@ -22,6 +22,7 @@ const send = async (text) => { await page.fill('.agent-input textarea', text); a
 const rootCount = () => page.evaluate(() => editor.store.comp.root.length);
 
 await page.goto(URL);
+await page.click('.lp-tab[aria-label="Agent"]'); // the conversation lives on the left panel's agent tab
 await page.evaluate(() => { for (const k of Object.keys(localStorage)) if (k.startsWith('motion.agent.chat:')) localStorage.removeItem(k); });
 await page.goto(URL);
 await page.waitForSelector('.dot.connected', { timeout: 15000 });
@@ -108,7 +109,7 @@ await page.fill('.agent-input textarea', 'go slow');
 await page.click('.agent-input button.primary');
 await page.waitForSelector('[data-testid=agent-working]');
 await page.waitForTimeout(500);
-await page.locator('.agent-input button', { hasText: 'Stop' }).click();
+await page.locator('.agent-input button[aria-label="Stop"]').click();
 await idle();
 check(/Stopped/.test(await page.locator('.msg.info').last().innerText()), 'stop ends the turn');
 

@@ -14,10 +14,11 @@ const page = await browser.newPage({ viewport: { width: 1500, height: 950 } });
 const errs = [];
 page.on('pageerror', (e) => errs.push(e.message));
 await page.goto(URL);
+await page.click('.lp-tab[aria-label="Agent"]'); // the conversation lives on the left panel's agent tab
 await page.evaluate(() => { for (const k of Object.keys(localStorage)) if (k.startsWith('motion.agent.chat:')) localStorage.removeItem(k); });
 await page.goto(URL);
 await page.waitForSelector('.dot.connected', { timeout: 15000 });
-await page.selectOption('.model-select', process.env.MODEL ?? 'sonnet');
+await page.evaluate((m) => import('/src/ui/agent/agent-prefs.ts').then(p => { p.setAgentPref('provider', 'claude'); p.setAgentPref('model', m); }), process.env.MODEL ?? 'sonnet');
 
 const idle = () => page.waitForSelector('[data-testid=agent-working]', { state: 'detached', timeout: 600000 });
 async function turn(label, run) {
