@@ -107,10 +107,20 @@ export function ExportDialog(props: { onClose: () => void }) {
   };
 
   const cancel = () => { if (busy) abort.current?.abort(); else props.onClose(); };
+  const cancelRef = useRef(cancel);
+  cancelRef.current = cancel;
+  // modal: keep editor shortcuts (space = play, delete, ...) away while the dialog is open
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      e.stopPropagation();
+      if (e.key === 'Escape') { e.preventDefault(); cancelRef.current(); }
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, []);
 
   return (
-    <div class="xv-backdrop" onPointerDown={e => { if (e.target === e.currentTarget && !busy) props.onClose(); }}
-      onKeyDown={e => { e.stopPropagation(); if (e.key === 'Escape') cancel(); }}>
+    <div class="xv-backdrop" onPointerDown={e => { if (e.target === e.currentTarget && !busy) props.onClose(); }}>
       <div class="xv-dialog" role="dialog" aria-label="Export video">
         <div class="xv-title">Export video</div>
         <div class="xv-grid">

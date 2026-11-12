@@ -9,6 +9,7 @@ import {
 } from '../core/commands';
 import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type PropKey } from '../core/model';
 import { showContextMenu, type MenuItem } from './menu';
+import { GraphView } from './graph';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { setEase, setInterp, setSpring } from '../core/commands';
 
@@ -31,6 +32,7 @@ type Drag =
   | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: Set<string> }
   | { kind: 'rows'; ids: string[]; sy: number; y: number; moved: boolean }
   | { kind: 'split'; sx: number; w0: number }
+  | { kind: 'graph' }
   | { kind: 'bar'; id: string; sx: number; in0: number; out0: number; mode: 'in' | 'out' }
   | { kind: 'shift'; sx: number; moved: boolean; orig: Map<string, { inP: number; outP: number; kf: Partial<Record<PropKey, Keyframe[]>> }> };
 
@@ -53,8 +55,11 @@ export class Timeline {
   private hoverRow = -1;
   private input: HTMLInputElement | null = null;
   private autoFit = true;
+  graphMode = false;
+  private graph: GraphView;
 
   constructor(private ed: Editor, private host: HTMLElement) {
+    this.graph = new GraphView(ed.store);
     this.canvas = document.createElement('canvas');
     this.canvas.className = 'tl-canvas';
     host.appendChild(this.canvas);
@@ -231,6 +236,10 @@ export class Timeline {
     }
     g.restore();
 
+    if (this.graphMode) {
+      this.graph.draw(g, { x0: x0, y0: HEADER_H, x1: this.w, y1: this.h, tToX: t => this.tToX(t), xToT: x => this.xToT(x) });
+    }
+
     // left/right divider
     g.fillStyle = '#2a2a2e';
     g.fillRect(x0 - 1, 0, 1, this.h);
@@ -244,6 +253,16 @@ export class Timeline {
     g.fillStyle = '#8a8a93';
     g.font = '11px system-ui, sans-serif';
     g.fillText(`${this.rows.filter(r => r.kind === 'layer').length} layers`, 10, HEADER_H / 2);
+    // keys / graph toggle
+    const tx0 = this.leftW - 112;
+    for (const [i, label] of ['Keys', 'Graph'].entries()) {
+      const on = (i === 1) === this.graphMode;
+      const bx = tx0 + i * 52;
+      g.fillStyle = on ? 'rgba(76,141,255,0.25)' : 'rgba(255,255,255,0.04)';
+      g.beginPath(); g.roundRect(bx, 5, 48, HEADER_H - 10, 4); g.fill();
+      g.fillStyle = on ? '#cfe0ff' : '#8a8a93';
+      g.fillText(label, bx + 24 - g.measureText(label).width / 2, HEADER_H / 2);
+    }
 
     // drag feedback
     const d = this.drag;
@@ -454,6 +473,16 @@ export class Timeline {
     const st = this.ed.store;
     this.canvas.setPointerCapture(e.pointerId);
     if (Math.abs(x - this.leftW) < 4) { this.drag = { kind: 'split', sx: x, w0: this.leftW }; return; }
+    if (y < HEADER_H && x < this.leftW && x >= this.leftW - 112 && x < this.leftW - 8) {
+      this.graphMode = x >= this.leftW - 60;
+      this.baseDirty = true;
+      return;
+    }
+    if (this.graphMode && x > this.leftW && y > HEADER_H) {
+      if (this.graph.down(x, y, e.shiftKey)) { this.drag = { kind: 'graph' }; this.baseDirty = true; }
+      else if (!e.shiftKey) { st.keySelection = new Set(); st.emit('keys'); }
+      return;
+    }
     if (y < HEADER_H && x > this.leftW) {
       this.drag = { kind: 'scrub' };
       this.scrubTo(x, e.shiftKey);
@@ -574,6 +603,7 @@ export class Timeline {
       this.canvas.style.cursor = Math.abs(x - this.leftW) < 4 ? 'col-resize' : '';
       return;
     }
+    if (d.kind === 'graph') { this.graph.move(x, y, e.shiftKey); this.baseDirty = true; return; }
     if (d.kind === 'scrub') this.scrubTo(x, e.shiftKey);
     else if (d.kind === 'split') { this.leftW = Math.max(180, Math.min(this.w - 200, d.w0 + x - d.sx)); this.baseDirty = true; }
     else if (d.kind === 'keys') {
@@ -644,6 +674,7 @@ export class Timeline {
     this.drag = null;
     this.canvas.releasePointerCapture?.(e.pointerId);
     const st = this.ed.store;
+    if (d?.kind === 'graph') this.graph.up();
     st.endGesture();
     if (d?.kind === 'rows' && d.moved) {
       const tgt = this.dropTarget(d.y);

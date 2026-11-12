@@ -56,6 +56,7 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
       { label: 'Save As…', shortcut: '⇧⌘S', action: () => saveProject(true) },
       { separator: true },
       { label: 'Export Lottie JSON', action: exportLottie },
+      { label: 'Export video…', action: () => { import('./ExportDialog').then(m => m.openExportDialog()); } },
       { separator: true },
       { label: 'Load demo animation', action: loadDemo },
       {

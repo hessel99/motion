@@ -142,3 +142,18 @@ code { background: #111; padding: 1px 4px; border-radius: 3px; }
 .md-li { padding-left: 6px; }
 .md-gap { height: 6px; }
 .msg.assistant { white-space: normal; }
+
+/* export video dialog */
+.xv-backdrop { position: fixed; inset: 0; z-index: 1500; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; }
+.xv-dialog { width: 380px; max-width: calc(100vw - 32px); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; box-shadow: 0 16px 48px rgba(0,0,0,.5); display: flex; flex-direction: column; gap: 12px; }
+.xv-title { font-weight: 600; font-size: 13px; }
+.xv-grid { display: grid; grid-template-columns: 90px 1fr; gap: 8px 10px; align-items: center; }
+.xv-grid label { color: var(--muted); }
+.xv-seg { display: flex; gap: 2px; }
+.xv-seg button { flex: 1; }
+.xv-seg button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.xv-info { font-size: 11px; }
+.xv-bar { height: 6px; border-radius: 3px; background: #151517; overflow: hidden; }
+.xv-bar > div { height: 100%; background: var(--accent); transition: width .1s linear; }
+.xv-stat { display: flex; justify-content: space-between; font-size: 11px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.xv-actions { display: flex; justify-content: flex-end; gap: 8px; }

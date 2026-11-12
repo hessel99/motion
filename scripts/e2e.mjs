@@ -8,6 +8,7 @@ page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
 await page.goto('http://localhost:5173/?nobridge&blank');
 await page.waitForFunction(() => window.editor?.renderer);
 const ev = (fn, arg) => page.evaluate(fn, arg);
+let _lw = 300; const timeline_leftW = () => _lw;
 const results = [];
 const check = (name, ok, info = '') => { results.push(`${ok ? 'PASS' : 'FAIL'} ${name} ${info}`); };
 const vp = await page.locator('.viewport').boundingBox();
@@ -101,6 +102,20 @@ check('drag keyframe in timeline', newT > keyMoved.t + 0.2, `${keyMoved.t} -> ${
   check('copy/paste keyframes at playhead', ts.length === 4 && ts[2] === 3, JSON.stringify(ts));
   await page.keyboard.press('Control+z');
   await ev(() => { editor.store.keySelection.clear(); editor.store.emit('keys'); });
+}
+
+// graph editor: switch to graph, select first position key, drag its out handle -> ease changes
+{
+  const lid = await ev(() => editor.store.selection[0]);
+  await ev((id) => { editor.store.keySelection = new Set([id + '|position|0']); editor.store.emit('keys'); timeline.expand(id, true); }, lid);
+  await page.mouse.click(tl.x + timeline_leftW() - 30, tl.y + 14);
+  await page.waitForTimeout(150);
+  const before = await ev((id) => editor.store.layer(id).props.position.kf[0].out.slice(), lid);
+  const h = await ev(() => { const gv = timeline.graph; const c = gv.curves.find(c => c.handles); const kf = c.layer.props[c.key].kf; return gv.handlePos(c, kf, 0); });
+  await page.mouse.move(tl.x + h.ox, tl.y + h.oy); await page.mouse.down(); await page.mouse.move(tl.x + h.ox + 40, tl.y + h.oy - 30, { steps: 5 }); await page.mouse.up();
+  const after = await ev((id) => editor.store.layer(id).props.position.kf[0].out.slice(), lid);
+  check('graph editor handle drag edits easing', after[0] !== before[0] || after[1] !== before[1], `${before} -> ${after}`);
+  await page.mouse.click(tl.x + timeline_leftW() - 90, tl.y + 14); // back to keys
 }
 
 // scrub ruler
