@@ -758,6 +758,9 @@ export function renameComp(store: Store, id: string, name: string) {
 
 /** set or clear (undefined / '') a property expression */
 export function setExpr(store: Store, ids: string[], key: PropKey, src: string | undefined, mergeKey?: string) {
+  const next = src?.trim() ? src : undefined;
+  // nothing would change (e.g. a suggestion chip equal to the current text): no undo step
+  if (ids.every(id => { const l = store.layer(id); return !l || l.props[key]?.expr === next; })) return;
   store.transact(src ? 'Set expression' : 'Remove expression', tx => {
     for (const id of ids) {
       const l = store.layer(id);

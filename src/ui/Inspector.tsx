@@ -632,7 +632,8 @@ function SmartRow({ ids, dur }: { ids: string[]; dur: number }) {
       const r = smartAnimate(store, a, b, { duration: dur });
       store.select([a]);
       (globalThis as any).timeline?.expand(a, true);
-      toast(`Smart animate: ${r.matched} matched layers, ${r.props} animated properties` + (r.fadedIn + r.fadedOut ? `, ${r.fadedIn} fade in, ${r.fadedOut} fade out` : ''));
+      if (!r.props) toast('Smart animate: the two versions have no differences inside them (the frames’ own positions are not animated). Undo to get the second one back.', 'error');
+      else toast(`Smart animate: ${r.matched} matched layers, ${r.props} animated properties` + (r.fadedIn + r.fadedOut ? `, ${r.fadedIn} fade in, ${r.fadedOut} fade out` : ''));
     } catch (e: any) { toast(e.message, 'error'); }
   };
   return (
