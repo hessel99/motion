@@ -4,14 +4,15 @@ import { editor } from '../app/editor';
 import { ViewportController } from './viewport-controller';
 import { Timeline } from './timeline';
 import { STYLE_MIME, applyStyle } from './LibraryPanel';
+import { LibraryReview } from './ComponentPanels';
 import { useChannels } from './hooks';
-import { menuFrom, showContextMenu } from './menu';
+import { menuFrom, showContextMenu, type MenuItem } from './menu';
 import { agentMenuItems } from './agent-menu';
 import { AskBar } from './chrome/AskBar';
 import { EmptyCanvas, ImportSuggestion } from './chrome/CanvasAgent';
 import { SelectionBar, stopPreview } from './chrome/CanvasBars';
 import { openBrowserFile, setupShortcuts, runBenchmark, toast } from '../app/actions';
-import { prefs, setPref } from '../app/prefs';
+import { DEV, prefs, setPref } from '../app/prefs';
 import { cloneLayers, deleteLayers } from '../core/commands';
 import { Button, Dialog, Kbd, trapTab } from './ui';
 import { IconProvider, X } from './chrome/icons';
@@ -75,6 +76,7 @@ export function App() {
         <aside class="right sidebar" aria-label="Properties"><Guard name="Properties"><RightPanel /></Guard></aside>
         {home && <div class="home-host"><Guard name="Home"><Home /></Guard></div>}
         {ui.settingsOpen && <SettingsModal />}
+        <Guard name="Library"><LibraryReview /></Guard>
         <AskBar />
         <ShortcutHelp />
         <Welcome />
@@ -175,11 +177,13 @@ function ZoomBadge() {
       { label: 'Zoom to 100%', action: () => vp?.setZoom(1) },
       { label: 'Zoom in', shortcut: '⌘+', action: () => vp?.setZoom(vp.zoom * 1.25) },
       { label: 'Zoom out', shortcut: '⌘−', action: () => vp?.setZoom(vp.zoom / 1.25) },
+      ...(!DEV ? [] : [
       { separator: true },
       { label: 'Pixel grid (400% and above)', checked: prefs.pixelGrid, action: () => setPref('pixelGrid', !prefs.pixelGrid) },
       { label: 'Snap to pixel grid', checked: prefs.snapToPixels, action: () => setPref('snapToPixels', !prefs.snapToPixels) },
       { label: 'Play at composition fps', checked: editor.snapPlaybackToFrames, action: () => { editor.snapPlaybackToFrames = !editor.snapPlaybackToFrames; toast(editor.snapPlaybackToFrames ? 'Playback snaps to composition frames' : 'Playback is smooth (every display frame)'); } },
       { label: 'Performance HUD', checked: editor.showHud, action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
+      ] as MenuItem[]),
     ], { align: 'right', above: true });
   };
   return <button type="button" ref={el} class="zoom-badge" aria-haspopup="menu" data-tooltip="Zoom and view options" data-tooltip-side="top" onClick={menu}>100%</button>;

@@ -12,6 +12,8 @@ import { TrackPool } from '../core/trackpool';
 import { compileExpr, compileProgram, runProgram, type ExprFrame, type ExprProgram } from '../core/expr';
 import { PROP_DEFS, type Layer, type Paint, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
+import { effectivePlay, instancePlan, instanceTime, InstanceResolver, type InstancePlan } from '../core/motion-components';
+import type { Composition, PlaySpec } from '../core/model';
 import { Atlas, type AtlasEntry } from './atlas';
 import { newFxFrame, ShaderHost, type FxFrame, type ItemShaders } from './shader-host';
 import type { PathGeometry, PathKey } from '../core/model';
@@ -239,6 +241,9 @@ const MASK_MODE: Record<string, number> = { alpha: 0, luminance: 1, vector: 2 };
 const CMD_SHD = 7, CMD_SFXPOP = 8, CMD_LPUSH = 9;
 const BLEND_IDS: Record<string, number> = { normal: 0, multiply: 1, screen: 2, add: 3, darken: 4, lighten: 5 };
 
+/** a precomp with its own timing: local time = instanceTime(comp, play, parent local time - start) */
+interface TimeMapNode { parent: number; tOff: number; start: number; comp: Composition; play: PlaySpec | undefined }
+
 interface UnitState { unit: TextUnit; delay: number; ease: (p: number) => number; entry: AtlasEntry | null; raster: RasterResult | null; scale: number }
 
 interface Item {
@@ -254,6 +259,11 @@ interface Item {
   isoGroup: boolean;
   /** time offset (precomp start times): local time = comp time - tOff */
   tOff: number;
+  /** time map (Renderer.tmaps) of a precomp with its own timing it lives in; -1 = local time is t - tOff */
+  tm: number;
+  /** component instance this occurrence belongs to: its resolver chain and plan (patched layers) */
+  chain?: string;
+  plan?: InstancePlan | null;
   /** comp time after which this item is hidden (end of the precomp it lives in) */
   tEnd: number;
   /** index of the item in the active comp that owns this one (itself, or the precomp layer it is inside) */
@@ -650,23 +660,39 @@ export class Renderer {
     const L = store.project.layers;
     // flatten the layer tree depth-first; precomp layers expand the referenced comp inline
     // (each expanded item gets its own time offset). items outside the active comp are not indexed.
-    const entries: { layer: Layer; parent: number; tOff: number; local: boolean; owner: number; tEnd: number; end: number }[] = [];
+    const entries: { layer: Layer; parent: number; tOff: number; local: boolean; owner: number; tEnd: number; end: number; tm: number; chain: string; plan: InstancePlan | null }[] = [];
     let tEndCur = Infinity;
-    const walk = (ids: string[], parent: number, tOff: number, local: boolean, owner: number, depth: number, stack: string[]) => {
+    // precomps with their own timing (speed, loop, ranges, hold: Layer.play) get a time map node;
+    // everything inside one (also plain precomps nested in it) reads its local time from the chain.
+    // component instances hand their patched layers (exposed values, variants) to the walk.
+    const tmaps: TimeMapNode[] = [];
+    const R = this.resolver;
+    R.begin(this.changedLayers);
+    const walk = (ids: string[], parent: number, tOff: number, local: boolean, owner: number, depth: number, stack: string[], tm = -1, chain = '', plan: InstancePlan | null = null) => {
       for (const id of ids) {
-        const layer = L[id];
+        let layer = L[id];
         if (!layer) continue;
+        if (plan) layer = R.resolve(chain, layer, plan);
         const idx = entries.length;
-        const e = { layer, parent, tOff, local, owner: local ? idx : owner, tEnd: tEndCur, end: 0 };
+        const e = { layer, parent, tOff, local, owner: local ? idx : owner, tEnd: tEndCur, end: 0, tm, chain, plan };
         entries.push(e);
-        if (layer.children.length) walk(layer.children, idx, tOff, local, local ? idx : owner, depth, stack);
+        if (layer.children.length) walk(layer.children, idx, tOff, local, local ? idx : owner, depth, stack, tm, chain, plan);
         if (layer.type === 'precomp' && layer.compRef && depth < 16 && !stack.includes(layer.compRef)) {
           const comp = store.project.comps[layer.compRef];
           if (comp) {
             const prevEnd = tEndCur;
-            tEndCur = Math.min(prevEnd, tOff + (layer.startTime ?? 0) + comp.duration);
+            const play = comp.component ? effectivePlay(store.project, layer) : layer.play;
+            const nplan = comp.component ? instancePlan(store.project, layer, comp) : null;
+            const nchain = nplan ? chain + '>' + layer.id : chain;
             stack.push(layer.compRef);
-            walk(comp.root, idx, tOff + (layer.startTime ?? 0), false, local ? idx : owner, depth + 1, stack);
+            if (tm >= 0 || play) {
+              tmaps.push({ parent: tm, tOff, start: layer.startTime ?? 0, comp, play });
+              tEndCur = Infinity;
+              walk(comp.root, idx, tOff + (layer.startTime ?? 0), false, local ? idx : owner, depth + 1, stack, tmaps.length - 1, nchain, nplan);
+            } else {
+              tEndCur = Math.min(prevEnd, tOff + (layer.startTime ?? 0) + comp.duration);
+              walk(comp.root, idx, tOff + (layer.startTime ?? 0), false, local ? idx : owner, depth + 1, stack, -1, nchain, nplan);
+            }
             stack.pop();
             tEndCur = prevEnd;
           }
@@ -675,6 +701,10 @@ export class Renderer {
       }
     };
     walk(store.comp.root, -1, 0, true, -1, 0, [store.comp.id]);
+    R.end();
+    this.tmaps = tmaps;
+    this.tmT = new Float64Array(tmaps.length);
+    this.tmAt = NaN;
     const n = entries.length;
     // solo: keep soloed layers, their ancestors (for transforms) and descendants
     let soloKeep: Set<string> | null = null;
@@ -695,17 +725,24 @@ export class Renderer {
     const prevItems = this.items, prevN = prevItems.length;
     const full = this.forceFull || !prevN || !this.incrementalCompile || (this.pool.used > 1_000_000 && this.pool.used > this.poolLive * 3);
     // old items per layer id, in order (several for layers inside precomps instanced more than once)
-    let head: Map<string, number> | null = null, nextOcc: Int32Array | null = null;
+    // keyed by the layer OBJECT: component instances show patched copies under the same id
+    let head: Map<Layer, number> | null = null, nextOcc: Int32Array | null = null;
     if (!full) {
       head = new Map();
       nextOcc = new Int32Array(prevN);
-      for (let j = prevN - 1; j >= 0; j--) { const id = prevItems[j].id; const h = head.get(id); nextOcc[j] = h ?? -1; head.set(id, j); }
+      for (let j = prevN - 1; j >= 0; j--) { const lo = prevItems[j].layer; const h = head.get(lo); nextOcc[j] = h ?? -1; head.set(lo, j); }
     }
     if (full) this.pool.reset();
     this.unitCount = 0;
     this.items = new Array(n);
     this.index.clear();
-    for (let i = 0; i < n; i++) if (entries[i].local) this.index.set(entries[i].layer.id, i);
+    this.occ.clear();
+    for (let i = 0; i < n; i++) {
+      const e = entries[i];
+      if (e.local) { this.index.set(e.layer.id, i); continue; }
+      const a = this.occ.get(e.layer.id);
+      if (a) a.push(i); else this.occ.set(e.layer.id, [i]);
+    }
     // the arrays compileItem / evalItem fill are double-buffered: reused items copy from the previous set
     const prev = this.soa();
     const cap = this.world.length < n * 6 ? Math.max(64, n * 2) : this.world.length / 6;
@@ -715,6 +752,7 @@ export class Renderer {
       this.drawnMask = new Uint8Array(cap);
       this.sPar = new Int32Array(cap);
       this.sTOff = new Float64Array(cap);
+      this.sTM = new Int32Array(cap);
       this.sEnd = new Float64Array(cap);
       this.sFlags = new Uint8Array(cap);
       this.chg = new Uint8Array(cap);
@@ -730,18 +768,19 @@ export class Renderer {
     this.setSoa(next);
     // first item of each layer that lives inside a precomp: later instances share its pool tracks
     // and, when they sample the same local time, its evaluated values
-    const first = new Map<Layer, number>();
+    // keyed by id: patched instance copies share the tracks of every prop they did not change
+    const first = new Map<string, number>();
     const okLayer = new Map<Layer, boolean>();
     const changed = this.changedLayers;
     const SRC = this.sSrc, EVT = this.sEvT;
     let reused = 0;
     for (let i = 0; i < n; i++) {
       const en = entries[i];
-      const { layer, parent, tOff, owner, tEnd } = en;
+      const { layer, parent, tOff, owner, tEnd, tm, chain, plan } = en;
       let src = -1;
       if (!en.local) {
-        const f = first.get(layer);
-        if (f === undefined) first.set(layer, i); else src = f;
+        const f = first.get(layer.id);
+        if (f === undefined) first.set(layer.id, i); else src = f;
       }
       const pit = parent >= 0 ? this.items[parent] : null;
       const hidden = !layer.visible || (!!pit && pit.hidden) || (!!soloKeep && en.local && !soloKeep.has(layer.id));
@@ -750,18 +789,18 @@ export class Renderer {
       const isoGroup = layer.children.length > 0 || layer.type === 'precomp';
       let j = -1;
       if (head) {
-        const h = head.get(layer.id);
+        const h = head.get(layer);
         if (h !== undefined && prevItems[h].layer === layer && !changed.has(layer.id)) {
           let ok = okLayer.get(layer);
           if (ok === undefined) { ok = this.sigSame(layer); okLayer.set(layer, ok); }
-          if (ok) { j = h; const nx = nextOcc![h]; if (nx >= 0) head.set(layer.id, nx); else head.delete(layer.id); }
+          if (ok) { j = h; const nx = nextOcc![h]; if (nx >= 0) head.set(layer, nx); else head.delete(layer); }
         }
       }
-      this.sPar[i] = parent; this.sTOff[i] = tOff; this.sEnd[i] = tEnd; this.sClip[i] = clip;
+      this.sPar[i] = parent; this.sTOff[i] = tOff; this.sEnd[i] = tEnd; this.sClip[i] = clip; this.sTM[i] = tm;
       EVT[i] = NaN;
       if (j >= 0) {
         const it = prevItems[j];
-        it.parent = parent; it.clip = clip; it.isoGroup = isoGroup; it.hidden = hidden; it.tOff = tOff; it.owner = owner; it.tEnd = tEnd;
+        it.parent = parent; it.clip = clip; it.isoGroup = isoGroup; it.hidden = hidden; it.tOff = tOff; it.owner = owner; it.tEnd = tEnd; it.tm = tm; it.chain = chain; it.plan = plan;
         this.items[i] = it;
         copySoa(prev, j, next, i);
         this.sIn[i] = layer.inPoint; this.sOut[i] = layer.outPoint;
@@ -775,19 +814,20 @@ export class Renderer {
         const it: Item = {
           id: layer.id, layer, parent, clip, kind: KIND_NONE, animated: false, animMask: 0, isoGroup, hidden,
           rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
-          tOff, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null, fx: null, fxBlend: 0,
+          tOff, tm, chain, plan, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null, fx: null, fxBlend: 0,
         };
         this.items[i] = it;
         this.compileItem(i, src);
       }
       // shared evaluation only for items without expressions (they read their own item index)
-      SRC[i] = src >= 0 && !this.sExpr[i] && !this.sExpr[src] ? src : -1;
+      // (and only for the very same layer object: a patched instance copy differs from the main)
+      SRC[i] = src >= 0 && !this.sExpr[i] && !this.sExpr[src] && this.items[src].layer === layer ? src : -1;
     }
     this.lastReused = reused;
     if (this.shdMap.size) {
       // re-key by the items' current occurrence (reused items may have moved) and free the rest
       const next = new Map<string, ItemShaders>(), live = new Set<ItemShaders>();
-      for (const it of this.items) if (it.shd) { next.set(`${it.id}@${it.tOff}`, it.shd); live.add(it.shd); }
+      for (const it of this.items) if (it.shd) { next.set(`${it.id}@${it.tOff}@${it.tm}`, it.shd); live.add(it.shd); }
       for (const sd of this.shdMap.values()) if (!live.has(sd)) this.shaders.detach(sd);
       this.shdMap = next;
     }
@@ -855,7 +895,7 @@ export class Renderer {
   private compileItem(i: number, src = -1) {
     const it = this.items[i];
     const l = it.layer;
-    if (src < 0) this.sigs.set(l, this.sigOf(l, []));
+    if (src < 0 || !this.sigs.has(l)) this.sigs.set(l, this.sigOf(l, []));
     this.sEvT[i] = NaN;
     let mask = 0;
     // animated props go into the track pool; static ones are written once below (no Track
@@ -863,7 +903,7 @@ export class Renderer {
     for (let k = 0; k < TR_KEYS.length; k++) {
       const key = TR_KEYS[k];
       const p = this.store.renderProp(l, key); // preview overrides (hover swatch, Perform) win
-      if (p?.kf && p.kf.length > 1) { mask |= 1 << k; this.sH[i * 10 + k] = src >= 0 ? this.sH[src * 10 + k] : this.pool.add(p, PROP_DEFS[key].dim, key === 'position'); }
+      if (p?.kf && p.kf.length > 1) { mask |= 1 << k; this.sH[i * 10 + k] = src >= 0 && this.store.renderProp(this.items[src].layer, key) === p ? this.sH[src * 10 + k] : this.pool.add(p, PROP_DEFS[key].dim, key === 'position'); }
     }
     // expressions: evaluated every frame on top of the keyframed/static value
     let emask = 0;
@@ -975,7 +1015,7 @@ export class Renderer {
     it.fxBlend = !l.mask && (needsBlendShader(l.blend) || inIso || ((it.fx || it.isoGroup) && l.blend && l.blend !== 'normal')) ? BLEND_SHADER[l.blend!] ?? 0 : 0;
     if (it.fx?.animated) it.animated = true;
     // shaders (fill and/or effects): results survive recompiles of the same layer occurrence
-    const sk = `${l.id}@${it.tOff}`;
+    const sk = `${l.id}@${it.tOff}@${it.tm}`;
     const shd = (l.paints || l.shaderEffects) ? this.shaders.attach(l, i, this.shdMap.get(sk) ?? null) : null;
     if (!shd) { const old = this.shdMap.get(sk); if (old) { this.shaders.detach(old); this.shdMap.delete(sk); } }
     else this.shdMap.set(sk, shd);
@@ -1130,6 +1170,33 @@ export class Renderer {
   // struct-of-arrays copies of the item fields the per-frame loops need
   private sPar = new Int32Array(0);
   private sTOff = new Float64Array(0);
+  /** time map of item i (-1 = none) */
+  private sTM = new Int32Array(0);
+  private tmaps: TimeMapNode[] = [];
+  /** local time of each time map at tmAt */
+  private tmT = new Float64Array(0);
+  private tmAt = NaN;
+  private resolver = new InstanceResolver();
+  /** item indices of each layer shown inside precomps (not in the active comp itself) */
+  private occ = new Map<string, number[]>();
+  /** patched instance layers made by the last compile (stats / tests) */
+  get patchedLayers() { return this.resolver.patched; }
+  private evalMaps(t: number) {
+    const M = this.tmT, maps = this.tmaps;
+    for (let k = 0; k < maps.length; k++) {
+      const m = maps[k];
+      const pt = m.parent >= 0 ? M[m.parent] : t - m.tOff;
+      M[k] = pt !== pt ? NaN : instanceTime(m.comp, m.play, pt - m.start);
+    }
+    this.tmAt = t;
+  }
+  /** local time of item i at comp time t (NaN: its precomp is not showing) */
+  private itemT(i: number, t: number) {
+    const m = this.sTM[i];
+    if (m < 0) return t - this.sTOff[i];
+    if (this.tmAt !== t) this.evalMaps(t);
+    return this.tmT[m];
+  }
   private sIn = new Float64Array(0);
   private sOut = new Float64Array(0);
   private sEnd = new Float64Array(0);
@@ -1159,18 +1226,21 @@ export class Renderer {
   private evaluateRange(t: number, from: number, to: number, all: boolean) {
     const W = this.world, L = this.local, O = this.opa, LO = this.lopa;
     const PAR = this.sPar, TOFF = this.sTOff, IN = this.sIn, OUT = this.sOut, END = this.sEnd, FL = this.sFlags, CHG = this.chg, VIS = this.vis, SRC = this.sharedEval ? this.sSrc : null, EVT = this.sEvT;
+    const TM = this.sTM, MT = this.tmT;
+    if (this.tmaps.length && this.tmAt !== t) this.evalMaps(t);
     for (let i = from; i < to; i++) {
-      const tl = t - TOFF[i];
+      const m = TM[i];
+      const tl = m < 0 ? t - TOFF[i] : MT[m];
       const fl = FL[i];
       let c = all;
-      if (fl & 1) {
+      if (fl & 1 && tl === tl) {
         // precomp instances sampling the same local time as an earlier instance copy its values
         const s = SRC ? SRC[i] : -1;
         if (s >= 0 && EVT[s] === tl) this.copyEval(s, i); else this.evalItem(i, tl);
         EVT[i] = tl;
         c = true;
       }
-      const vis = (fl & 2) || tl < IN[i] || tl >= OUT[i] || t >= END[i] ? 0 : 1;
+      const vis = (fl & 2) || tl !== tl || tl < IN[i] || tl >= OUT[i] || t >= END[i] ? 0 : 1;
       if (vis !== VIS[i]) { VIS[i] = vis; c = true; }
       const p = PAR[i];
       if (p >= 0 && CHG[p]) c = true;
@@ -1712,11 +1782,31 @@ export class Renderer {
       // incremental recompiles append to the pool; repack when it has grown a lot
       if (this.pool.used > 1_000_000 && this.pool.used > this.poolLive * 3) this.needsCompile = true;
       if (this.needsCompile) { this.compile(); }
-      for (const id of this.dirtyLayers) if (!this.index.has(id)) { this.needsCompile = true; break; }
+      // layers shown only inside precomps / component instances (an edit of a component seen from a
+      // composition that uses it): recompile their occurrences in place, no new walk. not while a
+      // component shows a variant (instance plans then depend on the edited values)
+      const editingVariant = this.occ.size > 0 && Object.values(store.project.comps).some(c => c.component?.editing);
+      for (const id of this.dirtyLayers) if (!this.index.has(id) && (editingVariant || !this.occ.has(id) || !store.project.layers[id])) { this.needsCompile = true; break; }
+      const compiled = this.needsCompile;
       if (this.needsCompile) this.compile();
       for (const id of this.dirtyLayers) {
         const i = this.index.get(id);
         if (i !== undefined) { this.items[i].layer = store.project.layers[id]; this.compileItem(i); this.dirtyIdx.push(i); }
+        const occ = compiled ? undefined : this.occ.get(id);
+        if (occ) {
+          const src = store.project.layers[id];
+          this.resolver.begin([id], false);
+          // the first occurrence compiles the tracks, the others share every unpatched one
+          let first = -1;
+          for (const k of occ) {
+            const it = this.items[k];
+            it.layer = it.plan ? this.resolver.resolve(it.chain!, src, it.plan) : src;
+            this.compileItem(k, first);
+            if (first < 0) first = k;
+            this.sSrc[k] = k !== first && !this.sExpr[k] && !this.sExpr[first] && this.items[first].layer === it.layer ? first : -1;
+            this.dirtyIdx.push(k);
+          }
+        }
       }
       for (const id of this.dirtyLayers) this.changedLayers.delete(id);
       this.dirtyLayers.clear();
@@ -1936,11 +2026,12 @@ export class Renderer {
       }
       if (bits & 8 && items[i].dyn) {
         const it = items[i] as Item & { dyn: NonNullable<Item['dyn']> };
-        const fr = Math.round((t - it.tOff) * this.store.comp.fps);
+        const lt = this.itemT(i, t);
+        const fr = Math.round(lt * this.store.comp.fps);
         if (fr !== it.dyn.frame) {
           // same slot every frame (no per-frame atlas keys): just mark it for a redraw
           it.dyn.frame = fr;
-          it.dyn.t = t - it.tOff;
+          it.dyn.t = lt;
           it.dyn.need = true;
         }
       }
@@ -2299,7 +2390,7 @@ export class Renderer {
     const z = this.zoom * this.dpr;
     const scale = Math.sqrt(Math.abs(a0 * d0 - b0 * c0)) * z * Math.max(1, ta.from.scale / 100);
     const bucket = this.bucketOf(scale);
-    const lt = t - it.tOff;
+    const lt = this.itemT(i, t);
     for (const u of units) {
       // raster per unit (cached in the atlas like any other raster)
       if (!u.entry || u.entry.dead || u.scale < scale * 0.999 || u.scale > scale * 2.83) {
@@ -2370,7 +2461,7 @@ export class Renderer {
     const det = a * d - b * c, sc = Math.sqrt(Math.abs(det)) || 1e-9;
     const inv = Math.abs(det) > 1e-12 ? [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det] : [1, 0, 0, 1, 0, 0];
     const S = this.style, os = i * ST, w = S[os], h = S[os + 1];
-    const list: ResolvedEffect[] = it.fx ? it.fx.at(t - it.tOff) : [];
+    const list: ResolvedEffect[] = it.fx ? it.fx.at(this.itemT(i, t)) : [];
     const dev = (x: number, y: number): [number, number] => [a * x + c * y + e, b * x + d * y + f];
     const R: (typeof this.fxFrame)[number] = {
       opacity, blend: it.fxBlend, shadows: [], inner: [], blur: null, bg: null, noise: [], inv, texture: null, glass: null,

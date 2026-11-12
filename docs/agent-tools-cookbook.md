@@ -7,7 +7,6 @@ guides. All coordinates are composition px (top-left origin), times in seconds, 
 
 ```json
 { "comp": { "duration": 6, "background": "#0b0b14" },
-  "markers": [{ "t": 0.5, "label": "logo" }, { "t": 2, "label": "title" }],
   "layers": [
     { "key": "bg", "x": 0, "y": 0, "w": 1920, "h": 1080, "fill": { "type": "radial", "stops": ["#2a1b4d", "#0b0b14"] } },
     { "key": "blob", "shape": "blob", "shapeOptions": { "seed": 4 }, "center": [960, 480], "w": 420, "h": 400,
@@ -57,7 +56,7 @@ guides. All coordinates are composition px (top-left origin), times in seconds, 
 - `secondary_motion {"ids":[...],"overshoot":0.15,"oscillations":2,"anticipation":0.1}` — on existing position/scale/rotation keys.
 - `loop {"ids":[...],"mode":"cycle","fitComp":true}` — closing key + `loopOut('cycle')`; `pingpong` for back-and-forth.
 - `camera_rig {"layers":[{"id":"<bg>","depth":0.3},{"id":"<mid>","depth":1},{"id":"<fg>","depth":1.8},{"id":"<title>","depth":0}],"keys":[{"t":0,"x":0,"zoom":100},{"t":4,"x":300,"zoom":115,"ease":"Sine In Out"}]}`.
-- `align_to_beats {"ids":[...],"mode":"sequence"}` (layer i on marker i) · `{"mode":"end","bpm":120}` · `{"mode":"keys","tolerance":0.2}`.
+- `align_to_beats {"ids":[...],"mode":"sequence","beats":[0.5,1,1.5]}` (layer i on beat i; default beats: the music) · `{"mode":"end","bpm":120}` · `{"mode":"keys","tolerance":0.2}`.
 
 ## Typography
 

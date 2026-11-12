@@ -33,11 +33,11 @@ For an existing mark, the motion comes from what it depicts (get_guide "concepts
 5. Check: `contact_sheet` { frames: 8, start: 0, end: 2 } → dot pops first, bar sweeps, wordmark lands last, all at rest by 1.5 s.
 
 ## Kinetic quote (6 s, kinetic-type)
-1. `set_composition` { duration: 6, background: "#0E0E0E" }; `set_markers` { add: [{ t: 0.2, label: "make" }, { t: 1.2, label: "simple" }, { t: 2.6, label: "bold" }] }
+1. `set_composition` { duration: 6, background: "#0E0E0E" } (word hits at 0.2, 1.2, 2.6)
 2. Words as separate text layers stacked at the center line:
    - `add_layer` { type: "text", name: "W1 Make it", x: 160, y: 420, w: 1600, h: 240, fill: "#F5F5F0", text: { content: "MAKE IT", fontSize: 200, fontWeight: 900, letterSpacing: -8, align: "center", lineHeight: 1 } }
    - same for "W2 Simple" (content "SIMPLE.", fill "#FF3D2E") and "W3 Bold" (content "BOLD.", fontSize 300).
-3. Swaps (each word enters on its marker, exits as the next enters, 0.05 s overlap):
+3. Swaps (each word enters on its hit time, exits as the next enters, 0.05 s overlap):
    `animate` { tracks: [
    { id: <w1>, prop: "position", keyframes: [{ t: 0.2, v: [960, 640], ease: "Expo Out" }, { t: 0.5, v: [960, 540], ease: "Expo In" }, { t: 1.15, v: [960, 540] }, { t: 1.35, v: [960, 440] }] },
    { id: <w1>, prop: "opacity", keyframes: [{ t: 0.2, v: 0 }, { t: 0.35, v: 100 }, { t: 1.2, v: 100 }, { t: 1.35, v: 0 }] },
@@ -64,7 +64,7 @@ For an existing mark, the motion comes from what it depicts (get_guide "concepts
    { name: "Problem", start: 0, end: 4, description: "Docs pile up, frown face, caption", style: "Back Out pops, 0.1 s stagger" },
    { name: "Solution", start: 4, end: 8, description: "Docs fly on arcs into the phone; screen turns teal + check", style: "Cubic In Out arcs, connector draw" },
    { name: "Outcome", start: 8, end: 12, description: "Arrow to smile + coins; logo + CTA", style: "spring Quick, hold 1.5 s" } ] } → wait for approval if asked.
-2. `set_composition` { duration: 12.4 }; `set_markers` { add: [{ t: 0, label: "Problem" }, { t: 4, label: "Solution" }, { t: 8, label: "Outcome" }] }
+2. `set_composition` { duration: 12.4 } (beats: Problem 0, Solution 4, Outcome 8)
 3. For each beat: `update_progress` { beat: 1, status: "active" } → `add_layer` the beat's objects (group them: `group_layers` { ids, name: "Beat 1" }) → `animate` entrances with stagger (`apply_preset` { ids, preset: "Pop", t: 0.3, stagger: 0.1 } is fine for icons) → exits/transition at the end of the beat (group opacity or a pan of the group) → `update_progress` { beat: 1, status: "done", note: "3 docs + face" }.
 4. Critique: `contact_sheet` { frames: 12, start: 0, end: 12 }; fix ≤ 2 rounds.
 
@@ -85,7 +85,7 @@ For an existing mark, the motion comes from what it depicts (get_guide "concepts
 6. Check the seam: `contact_sheet` { times: [0, 2, 3.98, 4] } — the first and last frames must match.
 
 ## Title sequence (10 s, editorial / minimal-luxury)
-1. `set_composition` { duration: 10, background: "#0C0C0C" }; markers at 0, 3.5, 7.
+1. `set_composition` { duration: 10, background: "#0C0C0C" }; beats at 0, 3.5, 7.
 2. Beat 1 (0–3.5 s): hairline path `add_layer` { type: "path", name: "Hairline", x: 560, y: 539, w: 800, h: 2, d: "M0 1 L800 1", stroke: "#C8A96A", strokeWidth: 2, fill: "#00000000" }; `animate` trimEnd 0 → 100 (0.2 → 1.4 s, `Sine In Out`). Kicker text (Inter 400, 22 px, letterSpacing 6) with `set_text_animation` { preset: "Fade up", by: "char", stagger: 0.06, start: 0.9 }.
 3. Beat 2 (3.5–7 s): title in `serif` 300, 140 px, centered: opacity 0 → 100 over 1.2 s + scale 104 → 100 (`Sine Out`) from 3.6 s; credits line fades in 0.4 s after; hairline trimStart 0 → 100 (erases) 3.5–4.3 s.
 4. Beat 3 (7–10 s): glint rect (white, 40 x 300, rotation 20, opacity 0) sweeps x 600 → 1320 with opacity 0 → 60 → 0 over 0.8 s (`Sine In Out`) across the title; everything fades out 9–10 s (`Sine In`).

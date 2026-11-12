@@ -16,6 +16,8 @@ import { toast } from '../app/actions';
 import { AudioInspector } from './audio/AudioInspector';
 import { Button, Checkbox, ColorSwatch, FieldRow, NumField, Section, Segmented, Slider, Toggle } from './ui';
 import { ComponentBox, LinkButton, LinkedChip, sharedLink } from './LinkControls';
+import { ComponentPanel, ExposeSection, InstancePanel } from './ComponentPanels';
+import { instanceComp } from '../core/motion-components';
 import {
   AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignHorizontalDistributeCenter, AlignStartHorizontal,
   AlignStartVertical, AlignVerticalDistributeCenter, ArrowUpRight, Blend, ChevronLeft, ChevronRight, Minus,
@@ -130,6 +132,8 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
   const removeStroke = () => store.batch('stroke', () => { for (const x of layers) setProp(store, x.id, 'strokeWidth', [0]); }, 'Remove stroke');
   return (
     <>
+      {layers.length === 1 && instanceComp(store.project, l) && <InstancePanel layer={l} />}
+      {layers.length === 1 && store.comp.component && <ExposeSection layer={l} />}
       <Section title="Position">
         <PropRow layers={layers} prop="position" label="Position">
           <NumField label="X" title="Position X" value={pos[0]} onChange={(n, mk) => vecMulti('position', 0, n, mk)} />
@@ -229,7 +233,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
         </Section>
       )}
       {layers.every(x => x.type === 'text') && <TextAnimPanel layers={layers} />}
-      {layers.length === 1 && l.type === 'precomp' && l.compRef && (
+      {layers.length === 1 && l.type === 'precomp' && l.compRef && !instanceComp(store.project, l) && (
         <Section title="Composition" right={<Button variant="ghost" size="sm" onClick={() => store.openComp(l.compRef!)}>Open <ArrowUpRight size={14} /></Button>}>
           <FieldRow label="Start">
             <NumField label={<Clock size={13} />} title="Start offset" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={(n, mk) => store.transact('Precomp start', tx => { for (const id of ids) { const x = store.layer(id); if (x) { tx.set(x, 'startTime', n); tx.touch(id); } } tx.structure(); }, mk)} />
@@ -456,6 +460,7 @@ function CompPanel() {
   const preset = SIZE_PRESETS.find(p => p[1] === c.width && p[2] === c.height);
   return (
     <>
+      {c.component && <ComponentPanel comp={c} />}
       <Section title="Composition">
         <FieldRow label="Name">
           <input class="grow name-input" aria-label="Composition name" value={c.name} spellcheck={false}
