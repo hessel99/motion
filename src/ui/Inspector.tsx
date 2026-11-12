@@ -670,7 +670,7 @@ function TextAnimPanel({ layers }: { layers: Layer[] }) {
   return (
     <Section title="Text animation" right={ta && <button class="ghost" onClick={() => setTextAnim(store, ids, undefined)}>Remove</button>}>
       <div class="preset-grid">
-        {TEXT_ANIM_PRESETS.map(p => <button class="preset in" onClick={() => setTextAnim(store, ids, { ...p.anim, start: store.time - layers[0].inPoint })}>{p.name}</button>)}
+        {TEXT_ANIM_PRESETS.map(p => <button class={'preset ' + (p.anim.mode === 'out' ? 'out' : 'in')} title={p.anim.mode === 'out' ? 'Animates the text out' : 'Animates the text in'} onClick={() => setTextAnim(store, ids, { ...p.anim, start: store.time - layers[0].inPoint })}>{p.name}</button>)}
       </div>
       {ta && (
         <>

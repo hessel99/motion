@@ -100,7 +100,7 @@ select:disabled, input:disabled { opacity: 0.5; }
 }
 .num:hover:not(:focus-within) { background: var(--input-bg-hover); }
 .num:focus-within { border-color: var(--accent); }
-.num-label { order: 0; padding: 0 var(--space-1) 0 var(--space-4); color: var(--text-muted); cursor: ew-resize; font-size: var(--text-sm); min-width: 22px; align-self: stretch; display: flex; align-items: center; }
+.num-label { order: 0; flex: none; padding: 0 var(--space-2) 0 var(--space-4); color: var(--text-muted); cursor: ew-resize; font-size: var(--text-sm); min-width: 22px; align-self: stretch; display: flex; align-items: center; }
 .num-hint { order: 2; padding-right: var(--space-4); color: var(--text-muted); font-size: var(--text-sm); white-space: nowrap; pointer-events: none; }
 .num-label:hover { color: var(--text); }
 .num input, .num input:hover:not(:focus) { order: 1; border: 0; background: transparent; width: 100%; min-width: 0; min-height: 0; padding: 3px var(--space-2); box-shadow: none; font-variant-numeric: tabular-nums; color: var(--text); }
@@ -179,6 +179,12 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
 .field-row-fields { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-3); }
 .field-row-fields > .num, .field-row-fields > select, .field-row-fields > input:not([type='checkbox']), .field-row-fields > .color-field { flex: 1; min-width: 0; }
 .field-row-trail { flex: none; display: inline-flex; align-items: center; }
+/* one right edge per section: rows without a keyframe diamond keep its column empty, and a style
+   link button sits inside the end of its field instead of pushing the field narrower */
+.insp-section:has(.field-row-trail .keybtn) .field-row:not(:has(> .field-row-trail))::after { content: ''; flex: 0 0 24px; }
+.field-row-fields { position: relative; }
+.field-row-fields > .link-btn { position: absolute; right: var(--space-2); top: 50%; translate: 0 -50%; }
+.field-row-fields:has(> .link-btn) > .num, .field-row-fields:has(> .link-btn) > .color-field { padding-right: 28px; }
 .prop-row.animated .field-row-label { color: var(--text); }
 /* fill rows: swatch, what it is, how much */
 .swatch-row { display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-h-md); background: var(--input-bg); border-radius: var(--radius-md); padding: 0 var(--space-4) 0 var(--space-2); }
@@ -312,7 +318,7 @@ kbd, .kbd {
 .ease-chip { font-weight: var(--weight-regular); justify-content: flex-start; gap: var(--space-3); padding: 0 var(--space-3); text-align: left; font-size: var(--text-xs); color: var(--text-secondary); }
 .ease-chip svg { color: var(--accent); flex: none; }
 /* animatable property rows: ‹ ◆ › key navigation, the property's name, its fields */
-.prop-row { gap: var(--space-2); }
+.prop-row { gap: var(--space-3); }
 .keynav { display: inline-flex; align-items: center; flex: none; }
 .keynav-step { position: relative; width: 14px; height: 20px; min-height: 0; padding: 0; border: 0; background: transparent; color: var(--text-muted); border-radius: var(--radius-xs); visibility: hidden; display: inline-grid; place-items: center; }
 .keynav.animated .keynav-step { visibility: visible; }
