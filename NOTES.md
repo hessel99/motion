@@ -129,7 +129,10 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
 
 - Parsed from the RIFX container, using the community format spec from py-aep / aep_parser.
 - Verified against real sample files: comps, solids, layer flags, static transforms, text documents.
-- Keyframe and shape-layer byte layouts follow the spec but are not yet verified against real files with keyframes.
+- **Keyframes and shape layers are verified with real .aep files from public GitHub repos** (`bench/aep-real.ts`):
+  - A Lottie-tutorial thermometer (shape paths + keyframed position/scale) renders correctly and animates as intended.
+  - A 4 MB broadcast template parses in 130 ms (21 comps, 267 layers, 139 keyframes; text, nested comps and timing come through).
+  - Footage (video/PSD) is not inside .aep files, so it becomes placeholders.
 - Skipped: effects, masks, mattes, expressions, 3D, cameras, lights.
 - **Lottie** import/export is the reliable interchange format today (round-trip tested).
 - **Lottie export is verified against the official lottie-web player** (`scripts/export-compare.mjs`): frame-identical for transforms, easing, springs and opacity with its default SVG renderer.
