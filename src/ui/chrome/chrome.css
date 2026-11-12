@@ -453,3 +453,8 @@
 .rail .grow { flex: 1; }
 [data-tooltip-side='right']::after { left: calc(100% + 8px); top: 50%; transform: translate(-2px, -50%); }
 [data-tooltip-side='right']:hover::after, [data-tooltip-side='right']:focus-visible::after { transform: translate(0, -50%); }
+
+/* the stage is narrower between two sidebars: the timeline header gives up labels first */
+.tl-head { container-type: inline-size; container-name: tlhead; }
+@container tlhead (max-width: 1080px) { .tt-label { display: none; } .tt-zoom { width: 64px; } .ct-tab { max-width: 120px; } }
+@container tlhead (max-width: 900px) { .tp-meta { display: none; } .tt-zoom { display: none; } }

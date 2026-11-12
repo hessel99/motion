@@ -4,31 +4,52 @@ Canvas and timeline are the core of the window; the agent supports them. Dark is
 theme (light works through the same tokens). Screenshots: `docs/shots/ui-v3/`
 (`node scripts/ui-shots.mjs`, `node scripts/agent-panel-shots.mjs` against the fake claude).
 
-## The window
+## The window (v4: rail + fixed sidebars + stage)
 
 ```
-┌ top bar (window colour) ─────────────────────────────────────────────────────────────┐
-│ ⌂  ▯  [file tab ●] [file tab] +                       ↶ ↷  …  [Export]               │
-├─────────────┬──────────────────────────────────────────────┬─────────────────────────┤
-│ Agent|Assets│ canvas card                                  │ inspector card           │
-│ (card)      │   ┌ selection bar ┐                          │  name · "Rectangle · in  │
-│  thread     │   [ layer ]                                  │  Group 14" · …           │
-│  composer   │              [tool pill · zoom]              │  align · Position ·      │
-├─────────────┴──────────────────────────────────────────────┤  Layout · Appearance ·   │
-│ timeline card: comp tabs · agent pill · transport · range · │  Fill · Stroke · …       │
-│ markers · auto-key · Keys|Graph|Speed · zoom ── rows ──     │  (nothing selected:      │
-│                                                             │  composition settings)   │
-└─────────────────────────────────────────────────────────────┴─────────────────────────┘
+┌──┬──────────────┬───────────────────────────────────────┬──────────────────────┐
+│⌂ │ Agent    ● ✎ │ [file tab ●] [file tab] +             │ ↶ ↷ …        [Share] │
+│+ │              │ ┌ canvas (inset card) ──────────────┐ │ Pill                 │
+│⌕ │  thread      │ │   ┌ selection bar ┐               │ │ Rectangle · 5 keys   │
+│──│              │ │   [ layer ]                       │ │ align · Position ·   │
+│✦ │              │ │        [tool pill · zoom]         │ │ Layout · Appearance ·│
+│◇ │              │ └───────────────────────────────────┘ │ Fill · Stroke ·      │
+│  │              │ ┌ timeline (inset card) ────────────┐ │ Effects · Animate …  │
+│🔔│  composer    │ │ comp tabs · transport · tools     │ │                      │
+│⚙ │              │ └───────────────────────────────────┘ │                      │
+└──┴──────────────┴───────────────────────────────────────┴──────────────────────┘
+ rail   left sidebar          the stage (middle)             right sidebar
 ```
 
-- **Top bar**: Home, side panel toggle, real document tabs (each tab keeps its own project,
-  undo history, selection, playhead, comp tabs and canvas view; switching swaps that state into
-  the one store: `src/app/documents.ts`), undo/redo, the app menu (…), and the one primary
-  action, Export (⌘E).
+- **Rail** (icon only, tooltips with shortcuts): Home, New file (⌘N), Ask / commands (⌘K),
+  Agent (⌘I), Assets, Updates (desktop app, with a dot when one is ready), Settings at the bottom.
+  Clicking the active Agent / Assets icon collapses the left sidebar. It replaces the old Agent |
+  Assets tabs and the Home / panel buttons of the top bar.
+- **Two fixed sidebars**, flush to the window edges and full height, a hairline toward the
+  stage (a slightly lighter tone than the window): the agent or assets on the left, the inspector on
+  the right. No inset, no radius: they are tools around the work, not part of it.
+- **The stage** (the middle) keeps the inset + radius look: the file tabs on top, then the canvas
+  and the timeline as **two inset cards**. Why two cards and not one: the canvas and the timeline
+  zoom, scroll and resize independently, the gap between them is where the timeline's splitter
+  lives, and a timeline in the same card as the canvas reads as part of the picture. Both stay
+  inside the stage, so "canvas + timeline" still reads as one area between the sidebars.
+- **Top right** (the inspector's first row): undo / redo, the app menu (…), and **Share**
+  (neutral primary). Share opens a popover with two ways out:
+  - *Share a preview file*: one self-contained html page (the animation rendered frame-accurately
+    as an embedded video + a small player: play / pause, scrub, loop, frame time, Space and , .
+    keys). Works offline; save it and send it (`src/app/share/player.ts`).
+  - *Copy a preview link* uploads that page through a `ShareProvider` (`src/app/share/index.ts`:
+    `configured()`, `upload(blob, name) → url`). Shipped with one provider, "your upload endpoint"
+    (POST to an https URL you control, optional Authorization header). Off by default: the popover
+    then shows **Set up link sharing…**, which opens Settings → Connections → Link sharing.
+  - *Export a file…* (⌘E): the export dialog (MP4 / WebM / GIF / PNG / Lottie / After Effects).
+
+### v3 layout notes (still valid inside the stage)
+
 - **Home** (⌂, and whenever no file is open): the brief box "What do you want to make?" (format
   chips, starter chips, drop zone), start from a size, recent files (thumbnails, IndexedDB:
   `src/app/recent.ts`), import (Lottie, SVG, After Effects, images/audio, Figma paste hint).
-- **Side panel**: Agent | Assets (compositions, components, colors/numbers, imported files).
+- **Left sidebar**: Agent or Assets (compositions, components, colors/numbers, imported files), picked on the rail.
   Layers live in the timeline only.
 - **Canvas**: floating tool pill (select, hand, shapes with variants, pen, text, zoom + view
   options), a selection bar over the selected layer, the brief box on an empty composition, a suggestion after an import.
@@ -140,3 +161,14 @@ Every remaining control was clicked through after the change (e2e plus the scree
 - Breadcrumbs for nested precomps were not added; tabs cover the navigation.
 - In a browser tab ⌘T / ⌘W / Ctrl+Tab stay with the browser; the desktop menu sends them to the app.
 - The read-only Ask mode still exists in the agent backend (quick actions, client) but nothing in the UI sends it.
+
+## v4 changes (rail, sidebars, Share)
+
+| element | before | decision | why |
+|---|---|---|---|
+| Agent \| Assets segmented tabs | top of the left card | **move** to the rail | One place to switch side views; frees the sidebar header for its title and the agent's status. |
+| Home and panel-toggle buttons (top left) | top bar | **move** to the rail | Home is a rail icon; the active rail icon toggles the sidebar. |
+| Sidebars as inset cards | radius + gaps | **change** to fixed full-height sidebars | Calmer frame; the inset look is kept for the stage only, where the work is. |
+| Export button | top right | **replace** with Share | Share covers sending a preview (file now, link when set up) and exporting files. |
+| Rhythm panel | inspector | **removed** (on the main branch) | Asked for by the user. |
+| Timeline header labels (Range, Auto-key, duration, zoom) | always | **shrink** in a narrow stage | Container queries drop labels first, then the duration and zoom slider. |

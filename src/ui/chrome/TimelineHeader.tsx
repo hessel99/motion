@@ -170,15 +170,15 @@ function TrackTools() {
   }, []);
   return (
     <div class="tt">
-      <button type="button" class={'tt-chip' + (wa ? ' set' : '')} data-tooltip={wa ? 'Preview range (click to clear). B / N set its ends' : 'Preview range: B / N set its start / end at the playhead'} data-tooltip-side="top"
+      <button type="button" class={'tt-chip' + (wa ? ' set' : '')} aria-label="Preview range" data-tooltip={wa ? 'Preview range (click to clear). B / N set its ends' : 'Preview range: B / N set its start / end at the playhead'} data-tooltip-side="top"
         onClick={() => { s.workArea = wa ? null : [s.time, s.comp.duration]; s.emit('workarea'); }}>
-        <Brackets size={14} />{wa ? `${wa[0].toFixed(2)}–${wa[1].toFixed(2)}s` : 'Range'}
+        <Brackets size={14} />{wa ? `${wa[0].toFixed(2)}–${wa[1].toFixed(2)}s` : <span class="tt-label">Range</span>}
       </button>
       <Button variant="ghost" icon size="sm" tip="Add marker at playhead (M)" tipSide="top" onClick={() => addMarker(s, s.time)}><Bookmark /></Button>
-      <button type="button" class={'tt-chip autokey' + (editMode.autoKey ? ' rec' : '')} aria-pressed={editMode.autoKey}
+      <button type="button" class={'tt-chip autokey' + (editMode.autoKey ? ' rec' : '')} aria-pressed={editMode.autoKey} aria-label="Auto-key"
         data-tooltip="Auto-key: every change creates a keyframe at the playhead" data-tooltip-side="top"
         onClick={() => { editMode.autoKey = !editMode.autoKey; editor.emit('view'); }}>
-        <span class="rec-dot" aria-hidden="true" />Auto-key
+        <span class="rec-dot" aria-hidden="true" /><span class="tt-label">Auto-key</span>
       </button>
       <Segmented class="tt-mode" size="sm" label="Track view" value={tl?.mode ?? 'keys'} options={[{ value: 'keys', label: 'Keys' }, { value: 'graph', label: 'Graph', title: 'Value curves' }, { value: 'speed', label: 'Speed', title: 'Speed curves' }]}
         onChange={m => view.tl?.setMode(m as any)} />

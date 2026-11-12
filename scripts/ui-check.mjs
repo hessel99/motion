@@ -58,11 +58,40 @@ await press('Escape');
 await page.waitForTimeout(200);
 check('nothing selected: composition settings', await page.locator('.inspector input[aria-label="Composition name"]').count() === 1);
 // side panel tabs
-await click('.lp-tabs button:nth-child(2)');
+await click('.rail-btn[aria-label="Assets"]');
 check('Assets tab lists compositions', await page.locator('.assets .list-row').count() >= 1);
-await click('.lp-tabs button:nth-child(1)');
+await click('.rail-btn[aria-label="Assets"]');
+check('clicking the active rail icon collapses the sidebar', await page.locator('aside.left[hidden]').count() === 1);
+await click('.rail-btn[aria-label="Agent (⌘I)"]');
+check('rail: Agent opens the sidebar', await page.locator('aside.left:not([hidden]) .lp-title').innerText() === 'Agent');
 // export dialog: every format tab
-await click('.tb-export');
+// Share popover: preview file, link sharing setup, export
+await click('.tb-share');
+check('Share popover offers the preview file, link setup and export', await page.locator('.ctx-item:has-text("Share a preview file")').count() === 1 && await page.locator('.ctx-item:has-text("Set up link sharing")').count() === 1);
+await click('.ctx-item:has-text("Set up link sharing")');
+check('Set up link sharing opens Settings with the Link sharing card', await page.locator('.settings-modal .set-card-title:has-text("Link sharing")').count() === 1);
+await press('Escape');
+await click('.tb-share');
+const dl = page.waitForEvent('download', { timeout: 120000 });
+await click('.ctx-item:has-text("Share a preview file")');
+const file = await dl;
+const html = await (await import('node:fs')).promises.readFile(await file.path(), 'utf8');
+check('preview file: one html page with an embedded video and a player', /^<!doctype html>/.test(html) && /<video id="v" src="data:video\//.test(html) && /id="t" type="range"/.test(html), `${Math.round(html.length / 1024)} KB ${file.suggestedFilename()}`);
+{
+  // the page plays on its own (offline, file://): the video loads, the scrubber moves
+  const pp = await browser.newPage();
+  const os = await import('node:os'), path = await import('node:path');
+  const htmlPath = path.join(os.tmpdir(), `motion-preview-${Date.now()}.html`);
+  await file.saveAs(htmlPath);
+  await pp.goto('file://' + htmlPath);
+  await pp.waitForFunction(() => document.getElementById('v').readyState >= 2, null, { timeout: 15000 }).catch(() => {});
+  await pp.waitForTimeout(800);
+  const st = await pp.evaluate(() => ({ ready: document.getElementById('v').readyState, dur: document.getElementById('v').duration, t: +document.getElementById('t').value }));
+  check('preview page loads and plays offline', st.ready >= 2 && st.dur > 0, JSON.stringify(st));
+  await pp.close();
+}
+await click('.tb-share');
+await click('.ctx-item:has-text("Export a file")');
 await page.waitForSelector('.xv-dialog');
 for (const i of [2, 3, 4, 5, 1]) await click(`.xv-kinds button:nth-child(${i})`);
 check('export dialog with five formats', await page.locator('.xv-kinds button').count() === 5);
@@ -86,7 +115,7 @@ check('Settings modal', await page.locator('.settings-modal').count() === 1);
 await press('Escape');
 check('Settings closes', await page.locator('.settings-modal').count() === 0);
 // home + close tab
-await click('.tb-home');
+await click('.rail-btn[aria-label="Home"]');
 check('Home view', await page.locator('.home').count() === 1);
 await click('.tb-tab >> nth=1');
 await press('Control+w');
