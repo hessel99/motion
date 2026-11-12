@@ -165,3 +165,8 @@ code { background: #111; padding: 1px 4px; border-radius: 3px; }
 .preset.in { border-left: 2px solid #3ecf6e; }
 .preset.out { border-left: 2px solid #ff5a4f; }
 .preset.loop { border-left: 2px solid #c792ea; }
+.help-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 3000; display: grid; place-items: center; }
+.help { background: #1f1f23; border: 1px solid #36363d; border-radius: 12px; padding: 16px 20px; width: min(640px, 92vw); max-height: 80vh; overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.help-title { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; margin-bottom: 12px; }
+.help-grid { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; align-items: center; }
+kbd { font: 11px ui-monospace, Menlo, monospace; background: #2a2a30; border: 1px solid #3a3a42; border-radius: 4px; padding: 2px 6px; color: #e4e4e8; white-space: nowrap; }

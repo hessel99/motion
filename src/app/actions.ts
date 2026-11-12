@@ -434,6 +434,7 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (mod && k === '0') return run(() => hooks.fit());
     if (mod && k === 'i') return run(() => hooks.toggleAgent());
     if (mod) return;
+    if (e.key === '?') return run(() => editor.emit('help'));
     if (e.code === 'Space') return run(() => editor.togglePlay());
     if (k === 'delete' || k === 'backspace') return run(() => (s.keySelection.size ? deleteKeyframes(s, [...s.keySelection]) : deleteLayers(s, s.selection)));
     if (k === 'escape') return run(() => { if (s.keySelection.size) { s.keySelection.clear(); s.emit('keys'); } else s.select([]); editor.setTool('select'); });

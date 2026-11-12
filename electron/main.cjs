@@ -104,6 +104,18 @@ ipcMain.handle('file:saveAs', async (_e, opts = {}) => {
   return writeFromRenderer(target, opts.data, opts.encoding);
 });
 
+// exports requested by tools/agents go to a fixed folder (no arbitrary paths): ~/Movies/Motion (mac) or ~/Videos/Motion
+ipcMain.handle('file:saveExport', async (_e, opts = {}) => {
+  const base = app.getPath('videos');
+  const dir = path.join(base, 'Motion');
+  await fs.mkdir(dir, { recursive: true });
+  const safe = String(opts.name || 'export').replace(/[^\w.\- ]+/g, '_').slice(0, 120) || 'export';
+  let target = path.join(dir, safe);
+  // never overwrite: add a counter
+  for (let i = 1; require('node:fs').existsSync(target) && i < 1000; i++) target = path.join(dir, safe.replace(/(\.[^.]+)?$/, ` (${i})$1`));
+  return writeFromRenderer(target, opts.data, opts.encoding || 'base64');
+});
+
 function sendMenu(action) {
   if (win && !win.isDestroyed()) win.webContents.send('menu', action);
 }

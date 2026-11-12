@@ -365,6 +365,27 @@ export const TOOLS: ToolDef[] = [
     run: ({ id }) => { if (!st().project.comps[id]) throw new Error('no such composition'); st().openComp(id); return text('ok'); },
   },
   {
+    name: 'export_video',
+    description: 'Render the active composition to a video file. Desktop app: saved to the Movies/Videos "Motion" folder (returns the path). Browser: downloaded. Takes a while for long comps.',
+    inputSchema: { type: 'object', properties: { format: { enum: ['mp4', 'webm'] }, scale: { type: 'number', description: '0.5, 1 or 2 (resolution multiplier)' }, quality: { enum: ['low', 'medium', 'high'] } } },
+    run: async (a) => {
+      const { exportVideoDetailed } = await import('../export/video');
+      const res = await exportVideoDetailed({ format: a.format ?? 'mp4', scale: a.scale ?? 1, quality: a.quality ?? 'high' });
+      const name = `${(st().project.name || 'motion').replace(/[^\w\- ]+/g, '_')} - ${st().comp.name}.${res.format}`;
+      const native = (globalThis as any).motionNative;
+      if (native?.saveExport) {
+        const buf = new Uint8Array(await res.blob.arrayBuffer());
+        let bin = '';
+        for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+        const path = await native.saveExport({ name, data: btoa(bin), encoding: 'base64' });
+        return text({ saved: path, format: res.format, codec: res.codec, frames: res.frames, bytes: buf.length });
+      }
+      const { download } = await import('../app/actions');
+      download(name, res.blob, res.blob.type);
+      return text({ downloaded: name, format: res.format, codec: res.codec, frames: res.frames, bytes: res.blob.size });
+    },
+  },
+  {
     name: 'undo',
     description: 'Undo the last change (also user changes!).',
     inputSchema: { type: 'object', properties: {} },

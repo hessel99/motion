@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld('motionNative', {
   openFile: (opts) => ipcRenderer.invoke('file:open', opts || {}),
   /** opts: {path?, defaultPath?, data, encoding?, filters?} -> saved path | null */
   saveFile: (opts) => ipcRenderer.invoke('file:save', opts || {}),
+  /** Saves an export into ~/Movies/Motion (or ~/Videos/Motion) without a dialog. opts: {name, data(base64)} -> path */
+  saveExport: (opts) => ipcRenderer.invoke('file:saveExport', opts || {}),
   /** Always shows the dialog. */
   saveFileAs: (opts) => ipcRenderer.invoke('file:saveAs', opts || {}),
   /** cb(action) for 'new'|'open'|'save'|'saveAs'|'import'|'export-lottie'; returns unsubscribe. */

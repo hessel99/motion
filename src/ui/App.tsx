@@ -32,6 +32,7 @@ export function App() {
       <main class="center"><Viewport /></main>
       <aside class="right"><Inspector /></aside>
       <section class="bottom"><TimelineHost /></section>
+      <ShortcutHelp />
     </div>
   );
 }
@@ -217,4 +218,28 @@ function startTextEdit(id: string) {
   };
   ta.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape' || (e.key === 'Enter' && (e.metaKey || e.ctrlKey))) ta.blur(); });
   ta.addEventListener('blur', done);
+}
+
+const SHORTCUTS: [string, string][] = [
+  ['Space', 'Play / pause'], [', / .', 'Previous / next frame (shift: 10)'], ['J / K', 'Previous / next keyframe'], ['Home / End', 'Start / end'],
+  ['V R O T P H', 'Move, rectangle, ellipse, text, pen, hand'], ['⌘Z / ⇧⌘Z', 'Undo / redo'], ['⌘C ⌘V ⌘X', 'Copy, paste (also from Figma), cut — layers or keyframes'],
+  ['⌘D', 'Duplicate'], ['Alt-drag', 'Duplicate while moving'], ['⌘G / ⇧⌘G', 'Group / ungroup'], ['⇧⌘C', 'Pre-compose'],
+  ['⌘[ / ⌘]', 'Send backward / bring forward (alt: to back / front)'], ['Arrows', 'Nudge (shift: 10px)'], ['⇧P ⇧S ⇧A', 'Animate position / scale / anchor'],
+  ['F9', 'Easy ease on selected keys'], ['Delete', 'Delete layers or keyframes'], ['⌘0 / ⌘+ / ⌘−', 'Fit / zoom in / zoom out'],
+  ['⌘ while dragging', 'No snapping'], ['Shift while dragging', 'Constrain axis / keep aspect / 15° steps'], ['Alt while resizing', 'From center'],
+  ['Double-click', 'Edit text / enter group / edit path / open precomp'], ['⌘I', 'Toggle AI agent'], ['?', 'This help'],
+];
+
+function ShortcutHelp() {
+  const [open, setOpen] = useState(false);
+  useEffect(() => editor.on('help', () => setOpen(o => !o)), []);
+  if (!open) return null;
+  return (
+    <div class="help-backdrop" onClick={() => setOpen(false)}>
+      <div class="help" onClick={e => e.stopPropagation()}>
+        <div class="help-title">Keyboard shortcuts <button class="ghost" onClick={() => setOpen(false)}>✕</button></div>
+        <div class="help-grid">{SHORTCUTS.map(([k, d]) => <><kbd>{k}</kbd><span>{d}</span></>)}</div>
+      </div>
+    </div>
+  );
 }
