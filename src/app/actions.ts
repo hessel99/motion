@@ -65,11 +65,6 @@ function isTypingTarget(t: EventTarget | null) {
   return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
 }
 
-export function confirmDiscard(what = 'This replaces the current project.'): boolean {
-  if (!isDirty() || (window as any).__noUnloadGuard || navigator.webdriver || st().historyLength === 0) return true;
-  return window.confirm(`${what}\nUnsaved changes will be lost. Continue?`);
-}
-
 export function toast(msg: string, kind: 'info' | 'error' = 'info') {
   let host = document.querySelector('.toasts') as HTMLElement | null;
   if (!host) { host = document.createElement('div'); host.className = 'toasts'; host.setAttribute('role', 'status'); host.setAttribute('aria-live', 'polite'); document.body.appendChild(host); }

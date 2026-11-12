@@ -58,9 +58,11 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
     s.select([l.id]);
   });
   await page.waitForTimeout(200);
-  for (const o of await page.locator('select[aria-label="Add effect"] option').allTextContents()) {
-    if (o === 'Add…') continue;
-    await page.selectOption('select[aria-label="Add effect"]', { label: o }).catch(() => {});
+  // every effect, through the section's "+" menu
+  for (let i = 0; i < 8 && await page.locator('button[aria-label="Add effect"]').count(); i++) {
+    await page.click('button[aria-label="Add effect"]');
+    await page.waitForTimeout(100);
+    await page.click('.ctx-menu .ctx-item >> nth=0').catch(() => {});
     await page.waitForTimeout(100);
   }
   await page.waitForTimeout(200);

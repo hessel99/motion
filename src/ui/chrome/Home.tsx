@@ -97,7 +97,7 @@ function RecentCard({ entry }: { entry: RecentEntry }) {
     const tab = documents().find(d => recentKey(docProject(d), d.path) === entry.key);
     if (tab) { switchTo(tab.id); editor.emit('doc-open'); return; }
     const p = entry.stored ? await recentProject(entry.key) : null;
-    if (!p) { toast(`"${entry.name}" is not stored here anymore${entry.path ? ': open it with Open file…' : ''}`, 'error'); forgetRecent(entry.key); return; }
+    if (!p) { toast(`“${entry.name}” is not stored here anymore${entry.path ? ': open it with Open file…' : ''}`, 'error'); forgetRecent(entry.key); return; }
     openProject(p, entry.path);
   };
   return (

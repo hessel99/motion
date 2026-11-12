@@ -167,12 +167,29 @@ export function moveDoc(id: string, to: number) {
   emit();
 }
 
-/** close a tab. asks first when it has unsaved changes. returns false when the user kept it */
-export function closeDoc(id: string, opts: { force?: boolean } = {}): boolean {
+/** how a dirty document is closed: the ui registers a dialog (Save / Don't save / Cancel) and the
+ *  save action (setCloseGuard); without one (tests, early startup) the browser confirm is used */
+export type CloseAnswer = 'save' | 'discard' | 'cancel';
+let closeGuard: { ask: (name: string) => Promise<CloseAnswer>; save: () => Promise<void> } | null = null;
+export function setCloseGuard(g: typeof closeGuard) { closeGuard = g; }
+
+/** close a tab. asks first when it has unsaved changes (save, don't save or cancel). resolves to
+ *  false when the user kept it */
+export async function closeDoc(id: string, opts: { force?: boolean } = {}): Promise<boolean> {
   const d = docs.find(x => x.id === id);
   if (!d) return true;
   if (!opts.force && isDocDirty(d) && !navigator.webdriver && !(window as any).__noUnloadGuard) {
-    if (!window.confirm(`"${docName(d)}" has unsaved changes. Close it anyway?`)) return false;
+    const answer: CloseAnswer = closeGuard
+      ? await closeGuard.ask(docName(d))
+      : window.confirm(`“${docName(d)}” has unsaved changes. Close it without saving?`) ? 'discard' : 'cancel';
+    if (answer === 'cancel') return false;
+    if (answer === 'save') {
+      if (d !== active) switchTo(d.id);
+      await closeGuard!.save();
+      // the save dialog was cancelled: keep the file open
+      if (isDocDirty(d)) return false;
+    }
+    if (!docs.includes(d)) return true;
   }
   if (d === active) {
     // the closing document goes to the recent files with a fresh thumbnail

@@ -54,7 +54,7 @@ function TopActions() {
         <Button variant="ghost" icon size="sm" disabled={!s.canRedo} tip="Redo (⇧⌘Z)" onClick={() => s.redo()}><Redo2 /></Button>
       </>}
       <Button variant="ghost" icon size="sm" tip="Menu" aria-haspopup="menu" class="tb-menu" onClick={e => menuFrom(e.currentTarget as Element, appMenuItems(), { align: 'right' })}><Ellipsis /></Button>
-      <button type="button" class="pill-btn tb-share" disabled={!editing} aria-haspopup="menu" title="Share a preview or export a file (⌘E exports)" onClick={e => openShare(e.currentTarget as HTMLElement)}>Share</button>
+      {editing && <button type="button" class="pill-btn tb-share" aria-haspopup="menu" title="Share a preview or export a file (⌘E exports)" onClick={e => openShare(e.currentTarget as HTMLElement)}>Share</button>}
     </div>
   );
 }
@@ -79,7 +79,7 @@ function DocTab({ doc, active }: { doc: Doc; active: boolean }) {
       { label: 'Save', shortcut: '⌘S', action: () => { switchTo(doc.id); saveProject(false); } },
       { separator: true },
       { label: 'Close', shortcut: '⌘W', action: () => closeDoc(doc.id) },
-      { label: 'Close others', disabled: !others.length, action: () => { for (const d of others) if (!closeDoc(d.id)) break; } },
+      { label: 'Close others', disabled: !others.length, action: async () => { for (const d of others) if (!(await closeDoc(d.id))) break; } },
     ]);
   };
   // drag to reorder (pointer events: no html5 drag image, the tab itself follows the pointer)

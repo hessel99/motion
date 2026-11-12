@@ -191,9 +191,19 @@ export class Timeline {
     this.canvas.addEventListener('wheel', e => this.wheel(e), { passive: false });
     this.canvas.addEventListener('contextmenu', e => this.context(e));
     this.canvas.addEventListener('pointerleave', () => { this.hoverRow = -1; this.baseDirty = true; });
+    // keyboard path for the layer list (it is drawn, so it has no dom rows): focus the canvas
+    // (Tab), ↑ / ↓ select the previous / next layer (shift extends), → / ← unfold / fold it,
+    // Shift+F10 or the menu key opens its menu (hide, lock, solo, rename, delete…)
+    this.canvas.tabIndex = 0;
+    this.canvas.setAttribute('role', 'group');
+    this.canvas.setAttribute('aria-roledescription', 'layer list');
+    this.canvas.setAttribute('aria-label', 'Layers: arrow keys select and fold layers, Shift+F10 opens a layer’s menu');
+    this.canvas.addEventListener('keydown', e => this.key(e));
     const search = document.createElement('input');
     search.className = 'tl-search';
     search.placeholder = 'Search layers';
+    search.type = 'search';
+    search.setAttribute('aria-label', 'Search layers');
     search.addEventListener('input', () => { this.filter = search.value.trim().toLowerCase(); this.scrollY = 0; this.rowsDirty = true; this.baseDirty = true; });
     search.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { search.value = ''; this.filter = ''; this.rowsDirty = true; search.blur(); } });
     host.appendChild(search);
@@ -460,6 +470,17 @@ export class Timeline {
     g.beginPath();
     g.rect(0, HEADER_H, this.w, this.h - HEADER_H);
     g.clip();
+    // empty states point forward: no layers yet, or nothing matches the search
+    if (!this.rows.length && this.h > HEADER_H + ROW_H * 2) {
+      const cx = this.leftW / 2, cy = HEADER_H + Math.min(64, (this.h - HEADER_H) / 2);
+      g.save();
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillStyle = T.tlLayerName; g.font = T.font.ui;
+      g.fillText(this.filter ? `No layers match “${this.filter}”` : 'No layers yet', cx, cy);
+      g.fillStyle = T.tlHint; g.font = T.font.uiSm;
+      g.fillText(this.filter ? 'Press Esc in the search to clear it' : 'Draw with the tools or drop a file', cx, cy + 18);
+      g.restore();
+    }
     for (let i = first; i < last; i++) {
       const r = this.rows[i];
       const y = this.rowY(i);
@@ -607,14 +628,22 @@ export class Timeline {
     const nameX = tx + 16;
     const maxW = this.leftW - nameX - 70;
     g.fillText(ellipsize(g, l.name, maxW), nameX, cy);
-    // solo + eye + lock
+    // solo + eye + lock: quiet by default. each shows when it is not in its default state (soloed,
+    // hidden, locked), and all three on the hovered / selected row (they stay clickable everywhere)
     const soloed = st.solo.has(l.id);
-    g.fillStyle = soloed ? T.tlSolo : T.tlControlOff;
-    g.beginPath(); g.arc(this.leftW - 58, cy, soloed ? 4 : 3, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = l.visible ? T.tlControl : T.tlControlOff;
-    strokeIcon(g, l.visible ? Eye : EyeOff, this.leftW - 40, cy, 13, 1.2);
-    g.strokeStyle = l.locked ? T.tlControlOn : T.tlControlOff;
-    strokeIcon(g, l.locked ? Lock : LockOpen, this.leftW - 20, cy, 12, 1.2);
+    const hot = isSel || this.rows[this.hoverRow] === r;
+    if (hot || soloed) {
+      g.fillStyle = soloed ? T.tlSolo : T.tlControlOff;
+      g.beginPath(); g.arc(this.leftW - 58, cy, soloed ? 4 : 3, 0, Math.PI * 2); g.fill();
+    }
+    if (hot || !l.visible) {
+      g.strokeStyle = l.visible ? T.tlControl : T.tlControlOff;
+      strokeIcon(g, l.visible ? Eye : EyeOff, this.leftW - 40, cy, 13, 1.2);
+    }
+    if (hot || l.locked) {
+      g.strokeStyle = l.locked ? T.tlControlOn : T.tlControlOff;
+      strokeIcon(g, l.locked ? Lock : LockOpen, this.leftW - 20, cy, 12, 1.2);
+    }
 
     // track: layer bar
     const comp = st.comp;
@@ -886,6 +915,40 @@ export class Timeline {
       kf.forEach((f, j) => { if (Math.abs(this.tToX(f.t) - x) <= 5) out.push(keyId(r.id, k as PropKey, j)); });
     }
     return out;
+  }
+
+  /** keyboard navigation of the layer rows (see the constructor) */
+  private key(e: KeyboardEvent) {
+    const st = this.ed.store;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (this.rowsDirty) this.buildRows();
+    const layerRows = this.rows.filter(r => r.kind === 'layer');
+    if (!layerRows.length) return;
+    const cur = st.selection.length ? layerRows.findIndex(r => r.id === st.selection[st.selection.length - 1]) : -1;
+    const done = () => { e.preventDefault(); e.stopPropagation(); };
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      const n = cur < 0 ? (e.key === 'ArrowDown' ? 0 : layerRows.length - 1) : Math.max(0, Math.min(layerRows.length - 1, cur + (e.key === 'ArrowDown' ? 1 : -1)));
+      const id = layerRows[n].id;
+      if (e.shiftKey && st.selection.length) st.select([...st.selection.filter(x => x !== id), id]); else st.select([id]);
+      this.reveal(id);
+      this.canvas.setAttribute('aria-label', `Layers: ${layerRows[n].layer.name}${layerRows[n].layer.visible ? '' : ', hidden'}${layerRows[n].layer.locked ? ', locked' : ''} (${n + 1} of ${layerRows.length})`);
+      return done();
+    }
+    if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && cur >= 0) {
+      const r = layerRows[cur];
+      this.expand(r.id, e.key === 'ArrowRight');
+      return done();
+    }
+    if ((e.key === 'F10' && e.shiftKey) || e.key === 'ContextMenu') {
+      const id = cur >= 0 ? layerRows[cur].id : layerRows[0].id;
+      if (cur < 0) st.select([id]);
+      this.reveal(id);
+      const i = this.layerRowIndex(id);
+      const b = this.canvas.getBoundingClientRect();
+      const y = HEADER_H + i * ROW_H - this.scrollY + ROW_H / 2;
+      this.context(new MouseEvent('contextmenu', { clientX: b.left + 48, clientY: b.top + y }));
+      return done();
+    }
   }
 
   private local(e: MouseEvent) {
@@ -1291,6 +1354,8 @@ export class Timeline {
         const props = rowKeys(r.layer.type);
         items.push({ label: 'Animate', submenu: props.map(p => ({ label: PROP_DEFS[p].label, checked: isAnimated(r.layer, p), action: () => { toggleAnimated(st, st.selection, p); this.expand(r.id); } })) });
         items.push({ label: r.layer.visible ? 'Hide' : 'Show', action: () => setLayerField(st, st.selection, 'visible', !r.layer.visible) });
+        items.push({ label: r.layer.locked ? 'Unlock' : 'Lock', action: () => setLayerField(st, st.selection, 'locked', !r.layer.locked, 'Toggle lock') });
+        items.push({ label: st.solo.has(r.id) ? 'Unsolo' : 'Solo', action: () => { st.toggleSolo(r.id); this.baseDirty = true; } });
         items.push({ label: 'Rename', action: () => this.startRename(r, i) });
         items.push({ label: 'Duplicate', shortcut: '⌘D', action: () => { const ids = cloneLayers(st, st.selection); if (ids?.length) st.select(ids); } });
         items.push({ label: 'Delete', shortcut: '⌫', action: () => deleteLayers(st, st.selection) });

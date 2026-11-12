@@ -17,8 +17,10 @@ html, body, #app {
   background: var(--bg-app); color: var(--text);
   font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-ui);
   user-select: none; -webkit-user-select: none;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
 }
+/* the root keeps the reader's font size, so the rem type tokens scale with it */
+html { font-size: 100%; }
 button, input, select, textarea { font: inherit; color: inherit; }
 h1, h2, h3, h4 { margin: 0; font: inherit; }
 code { background: var(--surface-code); padding: 1px var(--space-2); border-radius: var(--radius-xs); font-family: var(--font-mono); font-size: 0.95em; }
@@ -31,6 +33,7 @@ code { background: var(--surface-code); padding: 1px var(--space-2); border-radi
 /* focus: visible for keyboard users only. one ring style everywhere. */
 :focus { outline: none; }
 :focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); }
+@media (forced-colors: active) { :focus-visible { outline-color: Highlight; } }
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
 
 /* ---------------- button ----------------
@@ -49,6 +52,15 @@ button svg, .btn svg { flex: none; }
 .btn-block { width: 100%; }
 button:active:not(:disabled) { background: var(--surface-pressed); }
 button:disabled { opacity: 0.38; cursor: default; }
+/* press: a button scales to 0.96 (150ms ease-out); rows, cards and segments opt out (.static) */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-reduce-motion]) button:not(.static):not(.seg-item):not(.suggest):not(.recent-open):not(.preset-card):not(.import-card):not(.model-row):not(.theme-card):not(.set-nav-item):not(.ag-sb-concept):not(.ag-result):not(.ag-ref):not(.link):not(.linked-name) {
+    transition-property: background-color, border-color, color, scale;
+    transition-duration: var(--dur-fast), var(--dur-fast), var(--dur-fast), 150ms;
+    transition-timing-function: var(--ease-standard), var(--ease-standard), var(--ease-standard), ease-out;
+  }
+  :root:not([data-reduce-motion]) button:not(:disabled):active:not(.static):not(.seg-item):not(.suggest):not(.recent-open):not(.preset-card):not(.import-card):not(.model-row):not(.theme-card):not(.set-nav-item):not(.ag-sb-concept):not(.ag-result):not(.ag-ref):not(.link):not(.linked-name) { scale: 0.96; }
+}
 button.on, button[aria-pressed='true'] { background: var(--surface-selected); border-color: transparent; color: var(--text); }
 
 .btn-ghost, button.ghost { background: transparent; border-color: transparent; }
@@ -57,9 +69,10 @@ button.on, button[aria-pressed='true'] { background: var(--surface-selected); bo
 .btn-ghost:active:not(:disabled), button.ghost:active:not(:disabled) { background: var(--surface-pressed); }
 .btn-ghost.on, button.ghost.on { background: var(--surface-pressed); border-color: transparent; color: var(--text); }
 
-.btn-primary, button.primary { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--text-on-accent); }
-.btn-primary:hover:not(:disabled), button.primary:hover:not(:disabled) { background: var(--accent-solid-hover); border-color: var(--accent-solid-hover); }
-.btn-primary:active:not(:disabled), button.primary:active:not(:disabled) { background: var(--accent-solid-pressed); }
+/* the one primary action: neutral (near-white on dark), like Share; blue only means selection */
+.btn-primary, button.primary { background: var(--primary-bg); border-color: var(--primary-bg); color: var(--primary-text); }
+.btn-primary:hover:not(:disabled), button.primary:hover:not(:disabled) { background: var(--primary-bg-hover); border-color: var(--primary-bg-hover); }
+.btn-primary:active:not(:disabled), button.primary:active:not(:disabled) { background: var(--primary-bg-hover); }
 
 .btn-danger { background: var(--danger-soft); color: var(--danger-text); }
 .btn-danger:hover:not(:disabled) { background: var(--danger-soft); border-color: var(--danger-border); }
@@ -99,7 +112,7 @@ select:disabled, input:disabled { opacity: 0.5; }
 }
 .num:hover:not(:focus-within) { background: var(--input-bg-hover); }
 .num:focus-within { border-color: var(--accent); }
-.num-label { order: 0; padding: 0 var(--space-1) 0 var(--space-4); color: var(--text-muted); cursor: ew-resize; font-size: var(--text-sm); min-width: 22px; flex: none; white-space: nowrap; align-self: stretch; display: flex; align-items: center; }
+.num-label { order: 0; flex: none; white-space: nowrap; padding: 0 var(--space-2) 0 var(--space-4); color: var(--text-muted); cursor: ew-resize; font-size: var(--text-sm); min-width: 22px; align-self: stretch; display: flex; align-items: center; }
 .num-hint { order: 2; padding-right: var(--space-4); color: var(--text-muted); font-size: var(--text-sm); white-space: nowrap; pointer-events: none; }
 .num-label:hover { color: var(--text); }
 .num input, .num input:hover:not(:focus) { order: 1; border: 0; background: transparent; width: 100%; min-width: 0; min-height: 0; padding: 3px var(--space-2); box-shadow: none; font-variant-numeric: tabular-nums; color: var(--text); }
@@ -178,6 +191,12 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
 .field-row-fields { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-3); }
 .field-row-fields > .num, .field-row-fields > select, .field-row-fields > input:not([type='checkbox']), .field-row-fields > .color-field { flex: 1; min-width: 0; }
 .field-row-trail { flex: none; display: inline-flex; align-items: center; }
+/* one right edge per section: rows without a keyframe diamond keep its column empty, and a style
+   link button sits inside the end of its field instead of pushing the field narrower */
+.insp-section:has(.field-row-trail .keybtn) .field-row:not(:has(> .field-row-trail))::after { content: ''; flex: 0 0 24px; }
+.field-row-fields { position: relative; }
+.field-row-fields > .link-btn { position: absolute; right: var(--space-2); top: 50%; translate: 0 -50%; }
+.field-row-fields:has(> .link-btn) > .num, .field-row-fields:has(> .link-btn) > .color-field { padding-right: 28px; }
 .prop-row.animated .field-row-label { color: var(--text); }
 /* fill rows: swatch, what it is, how much */
 .swatch-row { display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-h-md); background: var(--input-bg); border-radius: var(--radius-md); padding: 0 var(--space-4) 0 var(--space-2); }
@@ -188,6 +207,10 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
 /* ---------------- tooltip (css only: [data-tooltip]) ----------------
    no js, no layout cost: a pseudo element shown after a short delay on hover / keyboard focus. */
 [data-tooltip] { position: relative; }
+/* raised surfaces draw their edge with box-shadow, which forced-colors mode drops */
+@media (forced-colors: active) {
+  .ctx-menu, .askbar, .toolbar, .sel-bar, .dialog, .settings-modal, .toast, [data-tooltip]::after { border: 1px solid CanvasText; }
+}
 [data-tooltip]::after {
   content: attr(data-tooltip); position: absolute; left: 50%; top: calc(100% + 6px); z-index: var(--z-tooltip);
   transform: translate(-50%, -2px); padding: 3px var(--space-3); border-radius: var(--radius-sm);
@@ -197,6 +220,7 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
   transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), visibility 0s linear var(--dur-fast);
 }
 [data-tooltip-side='top']::after { top: auto; bottom: calc(100% + 6px); transform: translate(-50%, 2px); }
+[aria-expanded='true'][data-tooltip]::after { display: none; }
 [data-tooltip]:hover::after, [data-tooltip]:focus-visible::after {
   opacity: 1; visibility: visible; transform: translate(-50%, 0);
   transition-delay: 400ms, 400ms, 400ms;
@@ -251,10 +275,11 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
 .dialog-actions .btn-primary:hover:not(:disabled), .xv-actions .btn-primary:hover:not(:disabled) { background: var(--primary-bg-hover); border-color: var(--primary-bg-hover); }
 .dialog-actions .btn:not(.btn-primary), .xv-actions .btn:not(.btn-primary) { border-radius: var(--radius-pill); padding: 0 var(--space-7); }
 .dialog-body { min-height: 0; }
-.dialog-actions, .xv-actions { display: flex; justify-content: flex-end; gap: var(--space-4); }
+.save-changes-text { margin: 0; color: var(--text-secondary); }
+.dialog-actions, .xv-actions { display: flex; justify-content: flex-end; gap: var(--space-6); }
 
 kbd, .kbd {
-  font: var(--text-xs) var(--font-mono); background: var(--surface-3); border: 1px solid var(--border-overlay);
+  font: var(--text-xs) var(--font-ui); background: var(--surface-3); border: 1px solid var(--border-overlay);
   border-bottom-width: 2px; border-radius: var(--radius-xs); padding: 1px var(--space-3); color: var(--text); white-space: nowrap;
 }
 
@@ -284,10 +309,13 @@ kbd, .kbd {
 .keybtn.animated svg path { stroke: var(--keyframe-animated); }
 .field-row-trail .keybtn { margin-left: 2px; }
 .keybtn.at svg path { fill: var(--keyframe-animated); stroke: var(--keyframe-animated); }
+/* animated but not on a key: a centre dot, so the state is not carried by color alone */
+.keybtn .keybtn-dot { fill: none; }
+.keybtn.animated .keybtn-dot { fill: var(--keyframe-animated); }
 .color-field { display: flex; gap: var(--space-2); align-items: center; flex: 1; min-width: 0; }
 .color-field { gap: 0; background: var(--input-bg); border-radius: var(--radius-md); padding-left: var(--space-2); height: var(--control-h-md); }
 .color-field:hover { background: var(--input-bg-hover); }
-.color-field .swatch { width: 20px; height: 20px; border-radius: var(--radius-xs); border: 0; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
+.color-field .swatch { width: 20px; height: 20px; border-radius: var(--radius-xs); border: 0; box-shadow: inset 0 0 0 1px var(--image-outline); }
 .color-field .hex { flex: 1; min-width: 0; width: 60px; font-family: var(--font-ui); font-size: var(--text-md); text-transform: uppercase; background: transparent; padding: 0 var(--space-3); }
 .color-field .hex:hover:not(:focus) { background: transparent; }
 .color-field .num { flex: 0 0 72px; max-width: 72px; background: transparent; }
@@ -305,9 +333,9 @@ kbd, .kbd {
 .ease-chip { font-weight: var(--weight-regular); justify-content: flex-start; gap: var(--space-3); padding: 0 var(--space-3); text-align: left; font-size: var(--text-xs); color: var(--text-secondary); }
 .ease-chip svg { color: var(--accent); flex: none; }
 /* animatable property rows: ‹ ◆ › key navigation, the property's name, its fields */
-.prop-row { gap: var(--space-2); }
+.prop-row { gap: var(--space-3); }
 .keynav { display: inline-flex; align-items: center; flex: none; }
-.keynav-step { width: 14px; height: 20px; min-height: 0; padding: 0; border: 0; background: transparent; color: var(--text-muted); border-radius: var(--radius-xs); visibility: hidden; display: inline-grid; place-items: center; }
+.keynav-step { position: relative; width: 14px; height: 20px; min-height: 0; padding: 0; border: 0; background: transparent; color: var(--text-muted); border-radius: var(--radius-xs); visibility: hidden; display: inline-grid; place-items: center; }
 .keynav.animated .keynav-step { visibility: visible; }
 .keynav-step:hover:not(:disabled) { color: var(--text); background: var(--surface-hover); }
 .keynav-step:disabled { opacity: 0.35; }
@@ -341,7 +369,7 @@ kbd, .kbd {
 .xv-kinds > button { padding: 0 var(--space-3); }
 .xv-sub { font-size: var(--text-sm); }
 .xv-grid { display: grid; grid-template-columns: 90px 1fr; gap: var(--space-4) var(--space-5); align-items: center; }
-.xv-grid label { color: var(--text-muted); }
+.xv-grid label, .xv-label { color: var(--text-muted); }
 .xv-info { font-size: var(--text-sm); line-height: var(--leading-loose); }
 .xv-stat { display: flex; justify-content: space-between; font-size: var(--text-xs); margin-top: var(--space-2); font-variant-numeric: tabular-nums; }
 .help-grid { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-3) var(--space-7); align-items: center; }
@@ -371,11 +399,12 @@ kbd, .kbd {
 .lib-count { flex: none; min-width: 18px; text-align: right; font-size: var(--text-xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .lib-badge { font-size: var(--text-xs); padding: 0 var(--space-2); border-radius: var(--radius-pill); }
 .lib-badge.warn { color: var(--warning-text); background: var(--surface-2); }
-.lib-comp-icon, .comp-icon { color: var(--preset-loop); font-size: 11px; }
+.lib-comp-icon, .comp-icon { color: var(--preset-loop); font-size: var(--text-xs); }
 .lib-empty p { margin: 0 0 var(--space-3); }
 .lib-hint { margin: 0; line-height: 1.45; }
-.link { background: none; border: 0; padding: 0; min-height: 0; color: var(--accent-text); cursor: pointer; font: inherit; }
-.link:hover { text-decoration: underline; background: none; }
+/* links are neutral and underlined: blue only means selection, the playhead and keys */
+.link { background: none; border: 0; padding: 0; min-height: 0; color: var(--text); cursor: pointer; font: inherit; text-decoration: underline; text-decoration-color: var(--text-muted); text-underline-offset: 2px; text-decoration-thickness: 1px; }
+.link:hover { text-decoration-color: currentColor; background: none; }
 .chip { display: inline-block; flex: none; width: 16px; height: 16px; border-radius: var(--radius-xs); border: 1px solid var(--border-strong); background-clip: padding-box; }
 /* inspector: linked values */
 .link-btn { flex: none; width: 22px; height: 22px; min-height: 0; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; color: var(--text-muted); border-radius: var(--radius-sm); }
@@ -428,7 +457,80 @@ kbd, .kbd {
 .prop-row .keynav-step { position: absolute; top: 50%; transform: translateY(-50%); visibility: hidden !important; }
 .prop-row .keynav-step:first-child { right: 100%; }
 .prop-row .keynav-step:last-child { left: 100%; }
-.prop-row.animated:hover .keynav-step { visibility: visible !important; background: var(--surface-1); }
+.prop-row.animated:hover .keynav-step, .prop-row.animated:focus-within .keynav-step { visibility: visible !important; background: var(--surface-1); }
+/* 24px hit area around the 14px arrows (WCAG 2.5.8) */
+.keynav-step::after { content: ''; position: absolute; inset: -2px -5px; }
 .agent-offline { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5); font-size: var(--text-sm); color: var(--text-muted); border-radius: var(--radius-pill); }
 .agent-offline .link { font-size: var(--text-sm); }
-.tp-dur { color: var(--text-disabled); }
+.tp-dur { color: var(--text-muted); }
+
+/* ---------------- polish (better-* audit) ---------------- */
+/* concentric radii: outer = inner + padding (menu 4px padding around 8px rows) */
+.ctx-menu { border-radius: calc(var(--radius-md) + var(--space-2)); }
+/* scrolling past the end of an overlay never scrolls what is behind it */
+.ctx-menu, .dialog, .help, .xv-dialog, .askbar-list, .agent-list, .right, .lp-scroll, .set-main, .set-nav { overscroll-behavior: contain; }
+/* content images: a 1px pure black / white outline just inside the edge */
+.recent-thumb img, .ag-result img, .ag-shots img { outline: 1px solid var(--image-outline); outline-offset: -1px; }
+/* wrap: titles balance, paragraphs avoid a lone last word; long-form text keeps a measure */
+.dialog-title, .help-title, .xv-title, .set-card-title, .home-h { text-wrap: balance; }
+.xv-info, .home-hint, .home-empty, .set-card-sub, .set-row-sub, .insp-empty, .hint, .agent-empty-line, .msg.assistant { text-wrap: pretty; }
+.home-hint, .xv-info, .set-card-sub { max-width: 65ch; }
+/* text people may want to copy stays selectable (the app root is user-select: none for drags) */
+.toast, .dialog-body, .xv-info, .set-main, .home-hint, .insp-empty, .hint, .expr-err, .panel-error { user-select: text; -webkit-user-select: text; }
+/* infrequent surfaces fade in (150ms); menus and tooltips stay instant */
+@media (prefers-reduced-motion: no-preference) {
+  .dialog, .settings-modal, .askbar { transition: opacity 150ms ease-out, translate 150ms ease-out; }
+  @starting-style { .dialog, .settings-modal, .askbar { opacity: 0; translate: 0 4px; } }
+}
+:root[data-reduce-motion] .dialog, :root[data-reduce-motion] .settings-modal, :root[data-reduce-motion] .askbar { transition: none; }
+/* status pulses: off under the OS reduced-motion preference too (spinners keep turning) */
+@media (prefers-reduced-motion: reduce) { .agent-pill-dot { animation: none; } }
+/* counters that tick */
+.agent-pill, .left-panel .ag-status { font-variant-numeric: tabular-nums; }
+/* the export dialog keeps its top edge when the format changes its height */
+.dialog-backdrop:has(> .xv-dialog) { place-items: start center; padding-top: 12vh; }
+
+/* ================= calm pass: 8pt rhythm, space instead of lines, quiet until needed =================
+   one place for the "less dense, more minimal" layer on top of the components above. */
+/* inspector: 16px section padding, 32px rows 8px apart, sections separated by space (no hairlines) */
+.section, .insp-section { padding: var(--space-6) var(--space-7) var(--space-7); border-bottom: 0; }
+.section.empty { padding-bottom: var(--space-4); }
+.section-header, .insp-title { margin-bottom: var(--space-4); }
+.section-title, .insp-title > span:first-child { font-weight: var(--weight-medium); }
+.field-row { gap: var(--space-4); margin-bottom: var(--space-4); }
+.prop-row { gap: var(--space-4); }
+.field-row-label { flex-basis: 60px; }
+.field-row-fields { gap: var(--space-4); }
+.rp-title { padding: var(--space-6) var(--space-6) var(--space-4) var(--space-7); }
+.rp-name { font-weight: var(--weight-medium); }
+.rp-align { padding: 0 var(--space-7) var(--space-4); border-bottom: 0; }
+.align-bar { background: transparent; padding: 0; gap: var(--space-2); }
+.align-bar .icon { min-height: 32px; border-radius: var(--radius-md); }
+/* quiet until needed: a property's keyframe diamond shows when it is animated, or on the row's hover
+   / keyboard focus; the style link button likewise. both stay in place (no layout shift) */
+.keybtn:not(.animated):not(.at), .field-row-fields > .link-btn { opacity: 0; transition: opacity var(--dur-fast) var(--ease-standard); }
+.field-row:hover .keybtn, .field-row:focus-within .keybtn,
+.field-row:hover .field-row-fields > .link-btn, .field-row:focus-within .field-row-fields > .link-btn,
+.keybtn:focus-visible, .link-btn:focus-visible { opacity: 1; }
+.field-row-fields:has(> .link-btn) > .num, .field-row-fields:has(> .link-btn) > .color-field { padding-right: 0; }
+.field-row:hover .field-row-fields:has(> .link-btn) > .num, .field-row:focus-within .field-row-fields:has(> .link-btn) > .num,
+.field-row:hover .field-row-fields:has(> .link-btn) > .color-field, .field-row:focus-within .field-row-fields:has(> .link-btn) > .color-field { padding-right: 28px; }
+/* progressive disclosure: More options */
+.insp-more { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); padding: var(--space-4) var(--space-7) var(--space-8); }
+.insp-more-btn { gap: var(--space-3); margin-left: calc(-1 * var(--space-4)); padding: 0 var(--space-4); color: var(--text-secondary); font-weight: var(--weight-regular); }
+.insp-more-btn:hover:not(:disabled) { color: var(--text); }
+.insp-more-hint { color: var(--text-muted); font-size: var(--text-sm); }
+/* larger hit areas for the small icon buttons (24 → 28px) */
+.btn-sm { min-height: 28px; }
+.btn-icon.btn-sm { width: 28px; min-width: 28px; }
+/* agent panel: same 13px text, more vertical rhythm */
+.left-panel .ag-panel { --ag-leading: 1.55; }
+.left-panel .agent-list { padding: var(--space-6) var(--space-7) var(--space-8); gap: var(--space-7); }
+.left-panel .lp-head, .lp-head { padding-left: var(--space-7); }
+/* Home and Settings: titles one weight (medium), no heavier */
+.home-h, .set-card-title, .set-title, .dialog-title, .help-title, .xv-title, .lp-title { font-weight: var(--weight-medium); }
+/* Home: sections separated by space, not cards; quieter headings */
+.home-col { gap: 40px; }
+.home-sec { background: transparent; padding: 0; border-radius: 0; }
+.home-h { color: var(--text-secondary); margin-bottom: var(--space-6); }
+.prompt-drop { color: var(--text-muted); }

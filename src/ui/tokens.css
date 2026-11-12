@@ -56,7 +56,7 @@
   --tooltip-bg: #161616;
   --tooltip-text: #ffffff;
   --toggle-on: #161616;
-  --toggle-off: #e2e2e2;
+  --toggle-off: #8f8f8f;
   --toggle-knob: #ffffff;
   --avatar-bg: #e9e9e9;
   --avatar-text: #1a1a1a;
@@ -91,7 +91,7 @@
   /* ---------- text ---------- */
   --text: #1a1a1a;
   --text-secondary: #4a4a4a;
-  --text-muted: #737373;      /* labels: AA on white and on --input-bg */
+  --text-muted: #6b6b6b;      /* labels: AA on white (5.3:1) and on --input-bg (4.85:1) */
   --text-disabled: #b4b4b4;
   --text-on-accent: #ffffff;
 
@@ -134,7 +134,7 @@
   --record: #d92d20;
 
   /* ---------- focus ---------- */
-  --focus-ring-color: rgba(47, 111, 237, 0.55);
+  --focus-ring-color: #2f6fed;   /* opaque: 4.6:1 on white (a ring needs 3:1, WCAG 1.4.11) */
 
   /* ---------- canvas: timeline ---------- */
   --tl-bg: #ffffff;
@@ -147,7 +147,7 @@
   --tl-tick: #d6d6d6;
   --tl-tick-minor: #ececec;
   --tl-grid: rgba(0, 0, 0, 0.03);
-  --tl-ruler-text: #8c8c8c;
+  --tl-ruler-text: #737373;
   --tl-layer-name: #262626;
   --tl-layer-name-selected: #111111;
   --tl-layer-name-hidden: #b0b0b0;
@@ -169,7 +169,7 @@
   --tl-segment: rgba(0, 0, 0, 0.12);
   --tl-segment-spring: rgba(47, 111, 237, 0.3);
   --tl-segment-selected: rgba(47, 111, 237, 0.75);
-  --tl-hint: #9a9a9a;
+  --tl-hint: #737373;
   --tl-playhead: #2f6fed;
   --tl-work-area: rgba(47, 111, 237, 0.35);
   --tl-work-area-dim: rgba(0, 0, 0, 0.04);
@@ -199,7 +199,7 @@
   /* ---------- canvas: graph editor ---------- */
   --graph-bg: #fcfcfc;
   --graph-grid: rgba(0, 0, 0, 0.05);
-  --graph-label: #9a9a9a;
+  --graph-label: #737373;
   --graph-key-tick: rgba(0, 0, 0, 0.3);
   --graph-key-selected: #111111;
   --graph-handle: #2f6fed;
@@ -226,10 +226,13 @@
   --vp-hud-text: #11692f;
 
   /* ---------- elevation: soft and rare ---------- */
-  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 14px rgba(0, 0, 0, 0.06); /* floating tool pill */
-  --shadow-2: 0 6px 24px rgba(0, 0, 0, 0.1), 0 0 0 0.5px rgba(0, 0, 0, 0.06);  /* menus, toasts, tooltips */
-  --shadow-3: 0 18px 60px rgba(0, 0, 0, 0.16), 0 0 0 0.5px rgba(0, 0, 0, 0.05); /* dialogs */
+  --shadow-border: 0 0 0 1px rgba(0, 0, 0, 0.06);       /* the 1px ring every raised surface carries */
+  --shadow-border-hover: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-1: var(--shadow-border), 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 14px rgba(0, 0, 0, 0.06); /* floating tool pill */
+  --shadow-2: var(--shadow-border), 0 6px 24px rgba(0, 0, 0, 0.1);  /* menus, toasts, tooltips */
+  --shadow-3: var(--shadow-border), 0 18px 60px rgba(0, 0, 0, 0.16); /* dialogs */
   --shadow-tab: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --image-outline: rgba(0, 0, 0, 0.1); /* 1px outline inside content images and swatches */
 }
 
 [data-theme='dark'] {
@@ -262,7 +265,7 @@
   --tooltip-bg: #3a3a3a;
   --tooltip-text: #f1f1f1;
   --toggle-on: #e6e6e6;
-  --toggle-off: #3a3a3a;
+  --toggle-off: #767676;      /* 3.2:1 on --card-bg (a control boundary needs 3:1) */
   --toggle-knob: #161616;
   --avatar-bg: #333333;
   --avatar-text: #f1f1f1;
@@ -270,8 +273,8 @@
   --composer-border: #333333;
   --tool-active: #3b3b3b;
   --tool-active-text: #ffffff;
-  --seg-track: #1c1c1c;
-  --seg-on: #333333;
+  --seg-track: #292929;       /* visible on --surface-1: unselected segments still read as controls */
+  --seg-on: #3a3a3a;
   --seg-on-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   --settings-nav-bg: #1e1e1e;
   --card-bg: #2a2a2a;
@@ -320,10 +323,10 @@
   --success: #3ccf75;
   --success-soft: rgba(60, 207, 117, 0.14);
   --success-text: #6fe09a;
-  --neutral-dot: #5a5a5a;
+  --neutral-dot: #7a7a7a;
 
   --keyframe: #e2e2e2;
-  --keyframe-idle: #5c5c5c;
+  --keyframe-idle: #7a7a7a;
   --preset-in: #3ccf75;
   --preset-out: #ff6159;
   --preset-loop: #a98bf3;
@@ -333,7 +336,7 @@
   --curve-guide: #383838;
   --record: #ff6159;
 
-  --focus-ring-color: rgba(91, 143, 249, 0.6);
+  --focus-ring-color: #5b8ff9;   /* opaque: 5.3:1 on --surface-1 */
 
   --tl-bg: #1f1f1f;
   --transport-bg: #1f1f1f;
@@ -351,7 +354,7 @@
   --tl-layer-name-hidden: #626262;
   --tl-prop-name: #a8a8a8;
   --tl-icon: #a8a8a8;
-  --tl-icon-off: #555555;
+  --tl-icon-off: #6e6e6e;
   --tl-twirl: #8a8a8a;
   --tl-control: #8a8a8a;
   --tl-control-off: #444444;
@@ -367,7 +370,7 @@
   --tl-segment: rgba(255, 255, 255, 0.12);
   --tl-segment-spring: rgba(91, 143, 249, 0.35);
   --tl-segment-selected: rgba(91, 143, 249, 0.8);
-  --tl-hint: #707070;
+  --tl-hint: #8a8a8a;
   --tl-playhead: #5b8ff9;
   --tl-work-area: rgba(91, 143, 249, 0.4);
   --tl-work-area-dim: rgba(0, 0, 0, 0.2);
@@ -395,7 +398,7 @@
 
   --graph-bg: #202020;
   --graph-grid: rgba(255, 255, 255, 0.05);
-  --graph-label: #6e6e6e;
+  --graph-label: #8a8a8a;
   --graph-key-tick: rgba(255, 255, 255, 0.35);
   --graph-key-selected: #ffffff;
   --graph-handle: #5b8ff9;
@@ -420,10 +423,14 @@
   --vp-hud-bg: rgba(0, 0, 0, 0.65);
   --vp-hud-text: #9fe39f;
 
-  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.3);
-  --shadow-2: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
-  --shadow-3: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  /* depth shadows vanish on near-black: a 1px white ring carries the edge */
+  --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-border-hover: 0 0 0 1px rgba(255, 255, 255, 0.13);
+  --shadow-1: var(--shadow-border), 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.3);
+  --shadow-2: var(--shadow-border), 0 8px 28px rgba(0, 0, 0, 0.45);
+  --shadow-3: var(--shadow-border), 0 20px 60px rgba(0, 0, 0, 0.55);
   --shadow-tab: none;
+  --image-outline: rgba(255, 255, 255, 0.1);
 }
 
 /* ---------- alias tokens ----------
@@ -438,7 +445,7 @@
   --tl-key: var(--keyframe);
   --tl-key-selected: var(--keyframe-selected);
   --tl-key-off: var(--keyframe-idle);
-  --tl-value: var(--accent-text);
+  --tl-value: var(--text-secondary); /* values are not selection: neutral, not blue */
   --tl-comp-end: var(--border-strong);
   --tl-marquee-stroke: var(--accent);
   --tl-drop: var(--accent);
@@ -473,11 +480,19 @@
   /* type: 13px base */
   --font-ui: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --text-2xs: 10px;
-  --text-xs: 11px;
-  --text-sm: 12px;
-  --text-md: 13px;    /* base UI size */
-  --text-lg: 15px;
+  /* sizes in rem (the reader's font size applies); 11px is the floor */
+  --text-2xs: 0.6875rem; /* 11px: tags, tiny counters (was 10px) */
+  --text-xs: 0.75rem;    /* 12px: hints, tooltips (chrome uses two sizes: 12 and 13) */
+  --text-sm: 0.75rem;    /* 12px */
+  --text-md: 0.8125rem;  /* 13px: base UI size */
+  --text-lg: 0.9375rem;  /* 15px */
+  --text-headline: 1.375rem; /* 22px: the brief box title on the canvas */
+  --text-display: 1.625rem;  /* 26px: the Home hero */
+  /* roles: what components should reach for */
+  --text-caption: var(--text-xs);
+  --text-label: var(--text-sm);
+  --text-body: var(--text-md);
+  --text-title: var(--text-lg);
   --leading-tight: 1.2;
   --leading: 1.4;
   --leading-loose: 1.5;
@@ -536,7 +551,7 @@
 
   /* focus ring */
   --focus-ring-width: 2px;
-  --focus-ring-offset: 1px;
+  --focus-ring-offset: 2px;
 }
 
 /* narrow windows (down to the 1100px minimum): the sidebars give the stage room */

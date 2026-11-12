@@ -85,9 +85,9 @@ export function SelectionBar() {
   };
   return (
     <div ref={el} class="sel-bar vp-ui" role="toolbar" aria-label="Selection" style={{ visibility: 'hidden' }}>
-      <button type="button" class="sel-btn" data-tooltip="Keyframe at the playhead" data-tooltip-side="top" onClick={key}><Diamond size={14} /></button>
-      <button type="button" class="sel-btn" aria-haspopup="menu" data-tooltip="Ease its keys" data-tooltip-side="top" onClick={ease as any}><Spline size={14} /></button>
-      <button type="button" class="sel-btn" data-tooltip="Show in the timeline" data-tooltip-side="top" onClick={() => { for (const id of ids) view.tl?.expand(id, true); view.tl?.reveal(ids[0]); }}><Rows3 size={14} /></button>
+      <button type="button" class="sel-btn" aria-label="Add a keyframe at the playhead" data-tooltip="Keyframe at the playhead" data-tooltip-side="top" onClick={key}><Diamond size={14} /></button>
+      <button type="button" class="sel-btn" aria-haspopup="menu" aria-label="Ease its keyframes" data-tooltip="Ease its keyframes" data-tooltip-side="top" onClick={ease as any}><Spline size={14} /></button>
+      <button type="button" class="sel-btn" aria-label="Show in the timeline" data-tooltip="Show in the timeline" data-tooltip-side="top" onClick={() => { for (const id of ids) view.tl?.expand(id, true); view.tl?.reveal(ids[0]); }}><Rows3 size={14} /></button>
       <span class="sel-sep" aria-hidden="true" />
       <button type="button" class="sel-btn sel-ask" aria-expanded={asking} onClick={() => setAsking(a => !a)}><Sparkles size={14} />Ask</button>
       {asking && <InlineAsk count={ids.length} onClose={() => setAsking(false)} />}

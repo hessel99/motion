@@ -152,10 +152,11 @@ check(await toast.count() === 0, 'error toast closes with its ✕');
 await bridge.close();
 await page.waitForSelector('[data-testid=agent-reconnect]', { timeout: 10000 });
 await page.click('.tb-add');
-await page.waitForSelector('.prompt-offline', { timeout: 5000 });
-check(/offline/i.test(await page.locator('.prompt-offline').innerText()), 'AIUX-21: the brief box says the agent is offline');
-await page.fill('.vp-empty .prompt-input', 'Build two shapes for the offline test');
-await page.press('.vp-empty .prompt-input', 'Enter');
+// with the agent panel open, the empty canvas only shows a note (the panel's composer is the one brief box)
+await page.waitForSelector('.vp-empty-note', { timeout: 5000 });
+check(await page.locator('[data-testid=agent-reconnect]').count() >= 1, 'AIUX-21: the panel offers Reconnect while offline');
+await page.fill('.agent-input textarea', 'Build two shapes for the offline test');
+await page.press('.agent-input textarea', 'Enter');
 await page.waitForTimeout(300);
 const pend = page.locator('[data-testid=agent-queued]');
 check(await pend.count() === 1 && /waiting for the agent/i.test(await pend.innerText()), 'AIUX-21: the brief waits as a pending bubble');

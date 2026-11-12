@@ -117,7 +117,9 @@ export function NumField(props: NumFieldProps) {
         aria-label={props.title ?? (typeof props.label === 'string' ? props.label : undefined)}
         inputMode="decimal"
         value={text ?? fmt(props.value) + (props.suffix ?? '')}
-        onFocus={e => { editing.current = fmt(props.value); setText(editing.current); requestAnimationFrame(() => (e.target as HTMLInputElement).select()); }}
+        onFocus={e => { editing.current = fmt(props.value); setText(editing.current); const el = e.target as HTMLInputElement;
+          // select() also focuses: only while the field still has focus, or a quick Tab is pulled back here
+          requestAnimationFrame(() => { if (document.activeElement === el) el.select(); }); }}
         onInput={e => { editing.current = (e.target as HTMLInputElement).value; setText(editing.current); }}
         onBlur={commit}
         onKeyDown={e => {
@@ -224,7 +226,7 @@ export function Segmented<V extends string | number>(props: {
  */
 export function Section(props: {
   title: ComponentChildren; children?: ComponentChildren; right?: ComponentChildren; class?: string;
-  onAdd?: () => void; addLabel?: string; onRemove?: () => void; removeLabel?: string;
+  onAdd?: (e?: MouseEvent) => void; addLabel?: string; onRemove?: () => void; removeLabel?: string;
 }) {
   const empty = props.children === undefined || props.children === null || props.children === false || (Array.isArray(props.children) && props.children.every(c => c === null || c === undefined || c === false));
   return (
@@ -234,7 +236,7 @@ export function Section(props: {
         <span class="section-actions">
           {props.right}
           {props.onRemove && <Button variant="ghost" icon size="sm" tip={props.removeLabel ?? 'Remove'} onClick={props.onRemove}><Minus size={14} /></Button>}
-          {props.onAdd && <Button variant="ghost" icon size="sm" tip={props.addLabel ?? 'Add'} onClick={props.onAdd}><Plus size={14} /></Button>}
+          {props.onAdd && <Button variant="ghost" icon size="sm" tip={props.addLabel ?? 'Add'} onClick={props.onAdd as any}><Plus size={14} /></Button>}
         </span>
       </header>
       {props.children}
@@ -285,6 +287,16 @@ export function Kbd(props: { children: ComponentChildren }) {
 let dialogSeq = 0;
 const FOCUSABLE = 'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])';
 
+/** keep Tab / Shift+Tab inside a modal container (wraps at the ends) */
+export function trapTab(e: KeyboardEvent, box: HTMLElement) {
+  if (e.key !== 'Tab') return;
+  const items = [...box.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(el => el.offsetParent !== null || el === document.activeElement);
+  if (!items.length) { e.preventDefault(); return; }
+  const first = items[0], last = items[items.length - 1];
+  if (e.shiftKey && (document.activeElement === first || document.activeElement === box)) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
+
 /**
  * modal dialog: backdrop, title, body, actions. focus moves into the dialog on open (the
  * element with `autofocus`, else the dialog itself), tab is trapped inside, escape calls
@@ -316,12 +328,7 @@ export function Dialog(props: {
   }, []);
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && onClose.current) { e.preventDefault(); e.stopPropagation(); onClose.current(); return; }
-    if (e.key !== 'Tab') return;
-    const items = [...ref.current!.querySelectorAll<HTMLElement>(FOCUSABLE)];
-    if (!items.length) { e.preventDefault(); return; }
-    const first = items[0], last = items[items.length - 1];
-    if (e.shiftKey && (document.activeElement === first || document.activeElement === ref.current)) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    trapTab(e, ref.current!);
   };
   const dismissable = props.dismissable ?? !!props.onClose;
   return (
