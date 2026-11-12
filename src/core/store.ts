@@ -21,6 +21,8 @@ interface Entry {
   undo: Op[];
   redo: Op[];
   selection: string[];
+  /** what the transaction(s) of this step changed: undo/redo invalidate exactly that */
+  change: Change;
 }
 
 export type Listener = (c: Change) => void;
@@ -132,8 +134,12 @@ export class Store {
     if (mk && top && top.mergeKey === mk) {
       top.undo.push(...tx.undo);
       top.redo.push(...tx.redo);
+      const c = top.change, d = tx.change;
+      c.structure ||= d.structure; c.comp ||= d.comp; c.meta ||= d.meta; c.assets ||= d.assets;
+      for (const id of d.layers) c.layers.add(id);
     } else {
-      this.undoStack.push({ label, mergeKey: mk, undo: tx.undo, redo: tx.redo, selection: this.selection.slice() });
+      const d = tx.change;
+      this.undoStack.push({ label, mergeKey: mk, undo: tx.undo, redo: tx.redo, selection: this.selection.slice(), change: { ...d, layers: new Set(d.layers) } });
       if (this.undoStack.length > 500) this.undoStack.shift();
     }
     this.emitChange(tx.change);
@@ -192,12 +198,15 @@ export class Store {
     return true;
   }
 
-  private afterHistory(_e: Entry) {
-    this.ensureActiveComp();
-    // we don't know precisely what changed: invalidate everything (undo is rare, so this is fine)
+  private afterHistory(e: Entry) {
+    const compSwitched = this.ensureActiveComp();
     this.selection = this.selection.filter(id => this.project.layers[id]);
     this.keySelection.clear();
-    this.emitChange({ structure: true, comp: true, layers: new Set(Object.keys(this.project.layers)), meta: true, assets: true });
+    // invalidate what the step changed (recorded per transaction). invalidating every layer made
+    // each undo a full recompile: ~350ms per undo in a 10k layer scene (stress lab undo-storm).
+    const c = e.change;
+    if (compSwitched) this.emitChange({ structure: true, comp: true, layers: new Set(Object.keys(this.project.layers)), meta: true, assets: true });
+    else this.emitChange({ structure: c.structure, comp: c.comp, layers: new Set(c.layers), meta: c.meta, assets: c.assets });
     this.emit('selection');
     this.emit('keys');
     this.emit('history');

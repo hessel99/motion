@@ -391,3 +391,22 @@ describe('parent changes keep the on-screen transform', () => {
     expect([await world(s, r.id, 0, 0), await world(s, r.id, 60, 40)]).toEqual(before);
   });
 });
+
+describe('undo invalidation', () => {
+  it('undo/redo report what the step changed, not every layer', () => {
+    const s = new Store();
+    const a = addLayer(s, 'rect', {});
+    const b = addLayer(s, 'rect', {});
+    setProp(s, a.id, 'opacity', [50]);
+    const seen: any[] = [];
+    s.onChange(c => seen.push(c));
+    s.undo();
+    expect(seen[0].structure).toBe(false);
+    expect([...seen[0].layers]).toEqual([a.id]);
+    s.redo();
+    expect([...seen[1].layers]).toEqual([a.id]);
+    s.undo(); s.undo(); // removes layer b: a structural step
+    expect(seen[3].structure).toBe(true);
+    expect(s.layer(b.id)).toBeUndefined();
+  });
+});
