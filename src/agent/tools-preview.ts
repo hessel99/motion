@@ -2,11 +2,11 @@
 // and a short low-res GIF saved to a file the agent can reference.
 
 import { editor } from '../app/editor';
-import { st, text, type ToolContent, type ToolDef } from './tool-kit';
+import { renderer, st, text, type ToolContent, type ToolDef } from './tool-kit';
 import { fmtTime } from './describe';
 
 async function frameImage(t: number, size: number): Promise<HTMLImageElement> {
-  const url = editor.renderer.snapshot(t, size);
+  const url = renderer().snapshot(t, size);
   const im = new Image();
   await new Promise<void>((res, rej) => { im.onload = () => res(); im.onerror = () => rej(new Error('snapshot decode failed')); im.src = url; });
   return im;

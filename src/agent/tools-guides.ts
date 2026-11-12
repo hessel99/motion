@@ -83,7 +83,7 @@ export const GUIDE_TOOLS: ToolDef[] = [
       required: ['beat', 'status'],
     },
     run: ({ beat, status, note }) => {
-      const r = storyboards.progress(editor.store, beat, status, note);
+      const r = storyboards.progress(st(), beat, status, note);
       const sb = storyboards.current!;
       const done = sb.beats.filter(b => b.status === 'done' || b.status === 'skipped').length;
       return text(`beat ${r.index + 1} "${r.beat.name}" ${status}; ${done}/${sb.beats.length} beats finished${sb.state === 'done' ? ' — now critique with contact_sheet (rubric: get_guide handbook, section "Critique")' : ''}`);

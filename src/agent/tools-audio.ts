@@ -30,7 +30,7 @@ async function needMusic(): Promise<Music> {
   if (!a) throw new Error('the audio could not be decoded / analysed');
   const m = music(s);
   if (!m) throw new Error('the audio layer is hidden or muted');
-  if (refreshAudioEnv(s) && editor.renderer) editor.renderer.dirty = true;
+  if (refreshAudioEnv(s) && hasRenderer()) editor.renderer.dirty = true;
   return m;
 }
 

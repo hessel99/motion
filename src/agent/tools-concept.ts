@@ -481,7 +481,7 @@ async function renderSheet(views: View[], t: number): Promise<string> {
   g.fillStyle = '#1b1b1f'; g.fillRect(0, 0, canvas.width, canvas.height);
   // 1) the real render (renderer snapshot, same path as the preview tools), cropped, with numbered outlines
   const snapScale = Math.min(1, ok, 2048 / Math.max(comp.width, comp.height));
-  const url = editor.renderer.snapshot(t, Math.max(comp.width, comp.height) * snapScale);
+  const url = renderer().snapshot(t, Math.max(comp.width, comp.height) * snapScale);
   const im = new Image();
   await new Promise<void>((res, rej) => { im.onload = () => res(); im.onerror = () => rej(new Error('snapshot decode failed')); im.src = url; });
   const ox = Math.round((SW - ow) / 2);
@@ -1370,7 +1370,7 @@ export const CONCEPT_TOOLS: ToolDef[] = [
       if (!views.length) throw new Error('no visible parts under those layers');
       const parts = describeViews(views, t);
       const out: ToolContent[] = [{ type: 'text', text: JSON.stringify({ t, parts, ...(skipped ? { skipped: `${skipped} hidden/extra layers not listed` } : {}) }) }];
-      if (a.image !== false && typeof document !== 'undefined' && editor.renderer) out.push({ type: 'image', data: await renderSheet(views, t), mimeType: 'image/jpeg' });
+      if (a.image !== false && typeof document !== 'undefined' && hasRenderer()) out.push({ type: 'image', data: await renderSheet(views, t), mimeType: 'image/jpeg' });
       return out;
     },
   },
