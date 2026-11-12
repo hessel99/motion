@@ -1,7 +1,7 @@
 // raster worker: draws path / text / gradient-shape rasters off the main thread.
 // receives plain layer data (structured clone), returns pixel buffers as transferables.
 
-import { rasterPath, rasterShapePaint, rasterText, type RasterClip, type RasterResult } from './raster';
+import { rasterLayer, type RasterClip, type RasterResult } from './raster';
 import type { Layer } from '../core/model';
 import { loadBundledFonts } from './fonts';
 
@@ -23,10 +23,7 @@ self.onmessage = async (ev: MessageEvent<RasterJob>) => {
   if (j.layer.type === 'text') await fontsReady;
   let r: RasterResult | null = null;
   try {
-    const l = j.layer;
-    if (l.type === 'path') r = rasterPath(l, j.bucket, j.strokeWidth, undefined, j.clip);
-    else if (l.type === 'text') r = rasterText(l, j.bucket, j.size, j.clip);
-    else r = rasterShapePaint(l, j.bucket, j.size, j.radius, j.strokeWidth, j.clip);
+    r = rasterLayer(j.layer, j.bucket, j.size, j.radius, j.strokeWidth, j.clip);
   } catch (e) {
     (self as any).postMessage({ id: j.id, error: String(e) });
     return;

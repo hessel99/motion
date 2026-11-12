@@ -27,6 +27,7 @@ function startEditor() {
     setupAutosave();
     setupTitle();
     preloadImporters();
+    import('./app/figma-capture').then(m => m.setupFigmaCaptureAutoSave()).catch(() => {});
     // the editor is up: a freshly installed update is kept (no signal = automatic rollback)
     signalAppReady();
   });
