@@ -78,7 +78,7 @@ function DocTab({ doc, active }: { doc: Doc; active: boolean }) {
       { label: 'Save', shortcut: '⌘S', action: () => { switchTo(doc.id); saveProject(false); } },
       { separator: true },
       { label: 'Close', shortcut: '⌘W', action: () => closeDoc(doc.id) },
-      { label: 'Close others', disabled: !others.length, action: () => { for (const d of others) if (!closeDoc(d.id)) break; } },
+      { label: 'Close others', disabled: !others.length, action: async () => { for (const d of others) if (!(await closeDoc(d.id))) break; } },
     ]);
   };
   // drag to reorder (pointer events: no html5 drag image, the tab itself follows the pointer)

@@ -31,6 +31,7 @@ code { background: var(--surface-code); padding: 1px var(--space-2); border-radi
 /* focus: visible for keyboard users only. one ring style everywhere. */
 :focus { outline: none; }
 :focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); }
+@media (forced-colors: active) { :focus-visible { outline-color: Highlight; } }
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
 
 /* ---------------- button ----------------
@@ -252,6 +253,7 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
 .dialog-actions .btn-primary:hover:not(:disabled), .xv-actions .btn-primary:hover:not(:disabled) { background: var(--primary-bg-hover); border-color: var(--primary-bg-hover); }
 .dialog-actions .btn:not(.btn-primary), .xv-actions .btn:not(.btn-primary) { border-radius: var(--radius-pill); padding: 0 var(--space-7); }
 .dialog-body { min-height: 0; }
+.save-changes-text { margin: 0; color: var(--text-secondary); }
 .dialog-actions, .xv-actions { display: flex; justify-content: flex-end; gap: var(--space-4); }
 
 kbd, .kbd {
@@ -286,6 +288,9 @@ kbd, .kbd {
 .keybtn.animated svg path { stroke: var(--keyframe-animated); }
 .field-row-trail .keybtn { margin-left: 2px; }
 .keybtn.at svg path { fill: var(--keyframe-animated); stroke: var(--keyframe-animated); }
+/* animated but not on a key: a centre dot, so the state is not carried by color alone */
+.keybtn .keybtn-dot { fill: none; }
+.keybtn.animated .keybtn-dot { fill: var(--keyframe-animated); }
 .color-field { display: flex; gap: var(--space-2); align-items: center; flex: 1; min-width: 0; }
 .color-field { gap: 0; background: var(--input-bg); border-radius: var(--radius-md); padding-left: var(--space-2); height: var(--control-h-md); }
 .color-field:hover { background: var(--input-bg-hover); }
@@ -309,7 +314,7 @@ kbd, .kbd {
 /* animatable property rows: ‹ ◆ › key navigation, the property's name, its fields */
 .prop-row { gap: var(--space-2); }
 .keynav { display: inline-flex; align-items: center; flex: none; }
-.keynav-step { width: 14px; height: 20px; min-height: 0; padding: 0; border: 0; background: transparent; color: var(--text-muted); border-radius: var(--radius-xs); visibility: hidden; display: inline-grid; place-items: center; }
+.keynav-step { position: relative; width: 14px; height: 20px; min-height: 0; padding: 0; border: 0; background: transparent; color: var(--text-muted); border-radius: var(--radius-xs); visibility: hidden; display: inline-grid; place-items: center; }
 .keynav.animated .keynav-step { visibility: visible; }
 .keynav-step:hover:not(:disabled) { color: var(--text); background: var(--surface-hover); }
 .keynav-step:disabled { opacity: 0.35; }
@@ -343,7 +348,7 @@ kbd, .kbd {
 .xv-kinds > button { padding: 0 var(--space-3); }
 .xv-sub { font-size: var(--text-sm); }
 .xv-grid { display: grid; grid-template-columns: 90px 1fr; gap: var(--space-4) var(--space-5); align-items: center; }
-.xv-grid label { color: var(--text-muted); }
+.xv-grid label, .xv-label { color: var(--text-muted); }
 .xv-info { font-size: var(--text-sm); line-height: var(--leading-loose); }
 .xv-stat { display: flex; justify-content: space-between; font-size: var(--text-xs); margin-top: var(--space-2); font-variant-numeric: tabular-nums; }
 .help-grid { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-3) var(--space-7); align-items: center; }
@@ -403,7 +408,9 @@ kbd, .kbd {
 .prop-row .keynav-step { position: absolute; top: 50%; transform: translateY(-50%); visibility: hidden !important; }
 .prop-row .keynav-step:first-child { right: 100%; }
 .prop-row .keynav-step:last-child { left: 100%; }
-.prop-row.animated:hover .keynav-step { visibility: visible !important; background: var(--surface-1); }
+.prop-row.animated:hover .keynav-step, .prop-row.animated:focus-within .keynav-step { visibility: visible !important; background: var(--surface-1); }
+/* 24px hit area around the 14px arrows (WCAG 2.5.8) */
+.keynav-step::after { content: ''; position: absolute; inset: -2px -5px; }
 .agent-offline { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5); font-size: var(--text-sm); color: var(--text-muted); border-radius: var(--radius-pill); }
 .agent-offline .link { font-size: var(--text-sm); }
 .tp-dur { color: var(--text-disabled); }

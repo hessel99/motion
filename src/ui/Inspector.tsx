@@ -57,8 +57,8 @@ export function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
     (globalThis as any).timeline?.expand(ids[0], true);
   };
   return (
-    <button type="button" tabIndex={-1} class={'keybtn' + (animated ? ' animated' : '') + (atKey ? ' at' : '')} title={animated ? 'Add/remove keyframe (alt: stop animating)' : 'Animate this property'} aria-label={(atKey ? 'Remove keyframe: ' : 'Add keyframe: ') + propDef(props.prop).label} onClick={click}>
-      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0.8 L9.2 5 L5 9.2 L0.8 5 Z" /></svg>
+    <button type="button" class={'keybtn' + (animated ? ' animated' : '') + (atKey ? ' at' : '')} title={animated ? 'Add/remove keyframe (alt: stop animating)' : 'Animate this property'} aria-label={(atKey ? 'Remove keyframe: ' : 'Add keyframe: ') + propDef(props.prop).label} onClick={click}>
+      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0.8 L9.2 5 L5 9.2 L0.8 5 Z" /><circle class="keybtn-dot" cx="5" cy="5" r="1.3" /></svg>
     </button>
   );
 }
@@ -77,9 +77,9 @@ export function KeyNav(props: { layers: Layer[]; prop: PropKey }) {
   const label = propDef(props.prop).label;
   return (
     <span class={'keynav' + (animated ? ' animated' : '')}>
-      <button type="button" tabIndex={-1} class="keynav-step" disabled={!animated || prev === -Infinity} aria-label={`Previous ${label} keyframe`} title="Previous keyframe" onClick={() => store.setTime(prev)}><ChevronLeft size={12} /></button>
+      <button type="button" class="keynav-step" disabled={!animated || prev === -Infinity} aria-label={`Previous ${label} keyframe`} title="Previous keyframe" onClick={() => store.setTime(prev)}><ChevronLeft size={12} /></button>
       <KeyButton layers={props.layers} prop={props.prop} />
-      <button type="button" tabIndex={-1} class="keynav-step" disabled={!animated || next === Infinity} aria-label={`Next ${label} keyframe`} title="Next keyframe" onClick={() => store.setTime(next)}><ChevronRight size={12} /></button>
+      <button type="button" class="keynav-step" disabled={!animated || next === Infinity} aria-label={`Next ${label} keyframe`} title="Next keyframe" onClick={() => store.setTime(next)}><ChevronRight size={12} /></button>
     </span>
   );
 }
@@ -132,8 +132,8 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
     <>
       <Section title="Position">
         <PropRow layers={layers} prop="position" label="Position">
-          <NumField label="X" value={pos[0]} onChange={(n, mk) => vecMulti('position', 0, n, mk)} />
-          <NumField label="Y" value={pos[1]} onChange={(n, mk) => vecMulti('position', 1, n, mk)} />
+          <NumField label="X" title="Position X" value={pos[0]} onChange={(n, mk) => vecMulti('position', 0, n, mk)} />
+          <NumField label="Y" title="Position Y" value={pos[1]} onChange={(n, mk) => vecMulti('position', 1, n, mk)} />
         </PropRow>
         <PropRow layers={layers} prop="rotation" label="Rotation">
           <NumField label={<RotateCw size={13} />} title="Rotation" value={rot} suffix="°" onChange={(n, mk) => set('rotation', [n], mk)} />
@@ -146,8 +146,8 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
       <Section title="Layout">
         {common.includes('size') && (
           <PropRow layers={layers} prop="size" label="Size">
-            <NumField label="W" min={0} value={size[0]} onChange={(n, mk) => sizeChange(layers, 0, n, mk)} />
-            <NumField label="H" min={0} value={size[1]} onChange={(n, mk) => sizeChange(layers, 1, n, mk)} />
+            <NumField label="W" title="Width" min={0} value={size[0]} onChange={(n, mk) => sizeChange(layers, 0, n, mk)} />
+            <NumField label="H" title="Height" min={0} value={size[1]} onChange={(n, mk) => sizeChange(layers, 1, n, mk)} />
           </PropRow>
         )}
         <PropRow layers={layers} prop="scale" label="Scale">
@@ -240,8 +240,8 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
       {common.includes('shadowColor') && <EffectsPanel layers={layers} />}
       <Section title="Timing">
         <FieldRow label="Visible">
-          <NumField label="In" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
-          <NumField label="Out" step={1 / store.comp.fps} min={0} value={Math.min(l.outPoint, store.comp.duration)} suffix="s" onChange={n => setLayerField(store, ids, 'outPoint', n >= store.comp.duration ? 1e9 : n)} />
+          <NumField label="In" title="Visible from" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />
+          <NumField label="Out" title="Visible until" step={1 / store.comp.fps} min={0} value={Math.min(l.outPoint, store.comp.duration)} suffix="s" onChange={n => setLayerField(store, ids, 'outPoint', n >= store.comp.duration ? 1e9 : n)} />
         </FieldRow>
       </Section>
       <ExprPanel layers={layers} />
@@ -470,8 +470,8 @@ function CompPanel() {
           </select>
         </FieldRow>
         <FieldRow label="">
-          <NumField label="W" min={1} value={c.width} onChange={n => setCompSettings(store, { width: Math.round(n) })} />
-          <NumField label="H" min={1} value={c.height} onChange={n => setCompSettings(store, { height: Math.round(n) })} />
+          <NumField label="W" title="Width" min={1} value={c.width} onChange={n => setCompSettings(store, { width: Math.round(n) })} />
+          <NumField label="H" title="Height" min={1} value={c.height} onChange={n => setCompSettings(store, { height: Math.round(n) })} />
         </FieldRow>
         <FieldRow label="Timing">
           <NumField label={<Gauge size={13} />} title="Frame rate" min={1} max={240} value={c.fps} hint="fps" onChange={n => setCompSettings(store, { fps: Math.round(n) })} />
@@ -730,8 +730,8 @@ function ExprPanel({ layers }: { layers: Layer[] }) {
   };
   return (
     <Section title="Expressions" right={
-      <select class="expr-add" value="" onChange={add}>
-        <option value="">+ add</option>
+      <select class="expr-add" value="" onChange={add} aria-label="Add expression">
+        <option value="">Add…</option>
         {keys.filter(k => !withExpr.includes(k)).map(k => <option value={k}>{propDef(k).label}</option>)}
       </select>
     }>

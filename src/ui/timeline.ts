@@ -190,6 +190,14 @@ export class Timeline {
     this.canvas.addEventListener('wheel', e => this.wheel(e), { passive: false });
     this.canvas.addEventListener('contextmenu', e => this.context(e));
     this.canvas.addEventListener('pointerleave', () => { this.hoverRow = -1; this.baseDirty = true; });
+    // keyboard path for the layer list (it is drawn, so it has no dom rows): focus the canvas
+    // (Tab), ↑ / ↓ select the previous / next layer (shift extends), → / ← unfold / fold it,
+    // Shift+F10 or the menu key opens its menu (hide, lock, solo, rename, delete…)
+    this.canvas.tabIndex = 0;
+    this.canvas.setAttribute('role', 'group');
+    this.canvas.setAttribute('aria-roledescription', 'layer list');
+    this.canvas.setAttribute('aria-label', 'Layers: arrow keys select and fold layers, Shift+F10 opens a layer’s menu');
+    this.canvas.addEventListener('keydown', e => this.key(e));
     const search = document.createElement('input');
     search.className = 'tl-search';
     search.placeholder = 'Search layers';
@@ -880,6 +888,40 @@ export class Timeline {
     return out;
   }
 
+  /** keyboard navigation of the layer rows (see the constructor) */
+  private key(e: KeyboardEvent) {
+    const st = this.ed.store;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (this.rowsDirty) this.buildRows();
+    const layerRows = this.rows.filter(r => r.kind === 'layer');
+    if (!layerRows.length) return;
+    const cur = st.selection.length ? layerRows.findIndex(r => r.id === st.selection[st.selection.length - 1]) : -1;
+    const done = () => { e.preventDefault(); e.stopPropagation(); };
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      const n = cur < 0 ? (e.key === 'ArrowDown' ? 0 : layerRows.length - 1) : Math.max(0, Math.min(layerRows.length - 1, cur + (e.key === 'ArrowDown' ? 1 : -1)));
+      const id = layerRows[n].id;
+      if (e.shiftKey && st.selection.length) st.select([...st.selection.filter(x => x !== id), id]); else st.select([id]);
+      this.reveal(id);
+      this.canvas.setAttribute('aria-label', `Layers: ${layerRows[n].layer.name}${layerRows[n].layer.visible ? '' : ', hidden'}${layerRows[n].layer.locked ? ', locked' : ''} (${n + 1} of ${layerRows.length})`);
+      return done();
+    }
+    if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && cur >= 0) {
+      const r = layerRows[cur];
+      this.expand(r.id, e.key === 'ArrowRight');
+      return done();
+    }
+    if ((e.key === 'F10' && e.shiftKey) || e.key === 'ContextMenu') {
+      const id = cur >= 0 ? layerRows[cur].id : layerRows[0].id;
+      if (cur < 0) st.select([id]);
+      this.reveal(id);
+      const i = this.layerRowIndex(id);
+      const b = this.canvas.getBoundingClientRect();
+      const y = HEADER_H + i * ROW_H - this.scrollY + ROW_H / 2;
+      this.context(new MouseEvent('contextmenu', { clientX: b.left + 48, clientY: b.top + y }));
+      return done();
+    }
+  }
+
   private local(e: MouseEvent) {
     const r = this.canvas.getBoundingClientRect();
     return [e.clientX - r.left, e.clientY - r.top];
@@ -1283,6 +1325,8 @@ export class Timeline {
         const props = rowKeys(r.layer.type);
         items.push({ label: 'Animate', submenu: props.map(p => ({ label: PROP_DEFS[p].label, checked: isAnimated(r.layer, p), action: () => { toggleAnimated(st, st.selection, p); this.expand(r.id); } })) });
         items.push({ label: r.layer.visible ? 'Hide' : 'Show', action: () => setLayerField(st, st.selection, 'visible', !r.layer.visible) });
+        items.push({ label: r.layer.locked ? 'Unlock' : 'Lock', action: () => setLayerField(st, st.selection, 'locked', !r.layer.locked, 'Toggle lock') });
+        items.push({ label: st.solo.has(r.id) ? 'Unsolo' : 'Solo', action: () => { st.toggleSolo(r.id); this.baseDirty = true; } });
         items.push({ label: 'Rename', action: () => this.startRename(r, i) });
         items.push({ label: 'Duplicate', shortcut: '⌘D', action: () => { const ids = cloneLayers(st, st.selection); if (ids?.length) st.select(ids); } });
         items.push({ label: 'Delete', shortcut: '⌫', action: () => deleteLayers(st, st.selection) });

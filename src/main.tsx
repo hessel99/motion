@@ -4,6 +4,7 @@ import './ui/styles.css';
 import { initTheme } from './ui/theme';
 import { editor } from './app/editor';
 import { setupDocuments } from './app/documents';
+import { setupSaveChanges } from './ui/chrome/SaveChanges';
 import { agentClient } from './agent/client';
 import { signalAppReady, updatesAvailable } from './app/updates';
 import { loadDemo, loadStress, newProject, preloadImporters, restoreAutosave, restoreAutosaveNative, setupAutosave, setupTitle } from './app/actions';
@@ -18,6 +19,7 @@ if (q.has('styleguide')) {
 
 function startEditor() {
   setupDocuments();
+  setupSaveChanges();
   render(<App />, document.getElementById('app')!);
 
   // ?stress=5000[&animated=0.1], ?demo, ?blank (an empty document), ?hud, ?play

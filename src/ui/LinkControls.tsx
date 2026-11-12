@@ -48,7 +48,7 @@ export function LinkedChip({ layers, prop }: { layers: Layer[]; prop: PropKey })
 /** small "link to a style" button next to a value */
 export function LinkButton({ layers, prop }: { layers: Layer[]; prop: PropKey }) {
   return (
-    <button type="button" class="link-btn" tabIndex={-1} data-tooltip={PROP_DEFS[prop].unit === 'color' ? 'Use a color style' : 'Use a named number'} aria-label={`Link ${PROP_DEFS[prop].label} to a style`}
+    <button type="button" class="link-btn" data-tooltip={PROP_DEFS[prop].unit === 'color' ? 'Use a color style' : 'Use a named number'} aria-label={`Link ${PROP_DEFS[prop].label} to a style`}
       onClick={e => pickStyle(e, layers, prop)}>
       <SwatchBook size={14} />
     </button>

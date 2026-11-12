@@ -134,7 +134,7 @@
   --record: #d92d20;
 
   /* ---------- focus ---------- */
-  --focus-ring-color: rgba(47, 111, 237, 0.55);
+  --focus-ring-color: #2f6fed;   /* opaque: 4.6:1 on white (a ring needs 3:1, WCAG 1.4.11) */
 
   /* ---------- canvas: timeline ---------- */
   --tl-bg: #ffffff;
@@ -333,7 +333,7 @@
   --curve-guide: #383838;
   --record: #ff6159;
 
-  --focus-ring-color: rgba(91, 143, 249, 0.6);
+  --focus-ring-color: #5b8ff9;   /* opaque: 5.3:1 on --surface-1 */
 
   --tl-bg: #1f1f1f;
   --transport-bg: #1f1f1f;
@@ -536,7 +536,7 @@
 
   /* focus ring */
   --focus-ring-width: 2px;
-  --focus-ring-offset: 1px;
+  --focus-ring-offset: 2px;
 }
 
 /* narrow windows (down to the 1100px minimum): the sidebars give the stage room */
