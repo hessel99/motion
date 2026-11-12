@@ -26,7 +26,7 @@
 - **Import**:
   - **Figma copy and paste** (just ⌘C in Figma, ⌘V here)
   - SVG (by paste or drop), Lottie JSON, After Effects `.aep` (best effort, see below), images
-- **Export**: Lottie JSON and **video** (MP4 H.264 / WebM VP9 through WebCodecs + mediabunny; verified with ffprobe in Chromium and Electron)
+- **Export**: Lottie JSON, **GIF**, and **video** (MP4 H.264 / WebM VP9 through WebCodecs + mediabunny; verified with ffprobe in Chromium and Electron)
 - **Graph editor**: value curves in the timeline. Drag keys (time/value) and bezier handles on the real curve, which Figma Motion doesn't have.
 - **Expressions** (`wiggle(2, 20)`, `loopOut('pingpong')`, `time * 90`, `linear(...)`, vectors…): a *safe* mini language with its own parser and interpreter (`src/core/expr.ts`). It never calls `eval`, so opening someone else's project can't run code.
 - **Text animation** (per letter / word / line, like AE text animators): presets (Fade up, Typewriter, Pop letters, Spin letters, …), order (forward, backward, center, random), springs. Every unit is its own instance in the same single draw call.
@@ -147,9 +147,19 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
 - The editor registers its tools (`src/agent/tools.ts`). Any MCP client can connect to `http://127.0.0.1:7823/mcp` while the app is open.
 - Verified with a real Claude Code run: it built a four-layer animation in 28 seconds, used screenshots to check its work, and fixed its own anchor mistake.
 
+## Quality process used
+
+- Three independent read-only review rounds by separate agents. Each round reported 10–15 confirmed bugs with reproductions; all were fixed and most now have regression tests (`tests/core.test.ts`, "review regressions").
+- Real-world fixtures:
+  - Figma clipboard captures, including the 2025 format
+  - 11 Lottie files from lottie-web, compared against the official player
+  - real `.aep` files
+- `scripts/` holds the browser and Electron checks: e2e interactions, perf, drag-and-drop, agent loop, precomps, masks, text animation, Lottie comparison, video/GIF export, context loss, desktop autosave.
+
 ## Known limitations / next
 
 - Only the nearest clip ancestor clips (no nested clip intersection). No AE track mattes yet. No effects yet (on purpose).
-- No graph editor yet: easing is edited per segment (like Figma Motion). A value/speed graph would be a differentiator.
-- Rasterization runs on the main thread. Moving it to a worker with OffscreenCanvas would remove the cold-start stutter on huge imports.
+- **Design pass** (visual polish of all panels) is still to do. The current UI is functional on purpose.
+- Lottie export of text for lottie-web's *canvas* renderer (it needs glyph outlines).
+- AE: effects, expressions beyond the safe subset, 3D, cameras, luma/inverted mattes.
 - Precomps/multiple compositions are not built yet.
