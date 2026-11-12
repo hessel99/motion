@@ -112,12 +112,26 @@ Every remaining control was clicked through after the change (e2e plus the scree
 - ⌘K / "/" opens the ask bar: commands filter as you type; a sentence goes to the agent with
   the selection, selected keys and preview range as context (chips show it).
 - Right-click on layers (canvas, timeline), keyframes and the ruler: two or three one-click asks
-  plus "Ask agent…". The selection bar has "Ask".
+  plus "Ask agent…" ("Critique the motion" runs read-only: editing tools are refused, the bubble
+  says "read-only"). The selection bar's "Ask" opens a small prompt anchored to the layer, with
+  suggestions for it (Animate in, Bouncier, Add follow-through), not the command palette.
 - After artwork (Figma paste, SVG, image) or audio comes in: one dismissible suggestion,
   "Animate this" / "Sync to music". Never automatic.
 - While the agent works the user keeps working; with the panel hidden its progress shows as a
   pill in the timeline header; the storyboard beat being built is highlighted in the timeline.
-- All of these go through `askAgent(text, { chip, context })` (`src/ui/agent-bridge.ts`).
+- All of these go through `askAgent(text, { chip, context, mode })` (`src/ui/agent-bridge.ts`).
+  They never touch the composer's draft: when the agent is busy or offline they wait as "queued"
+  bubbles (removable, "Send now" interrupts) and go out in order when it is free / connected. The
+  context (selected keys, preview range) stays with the ask as a chip on its bubble.
+- **Runs belong to their document**: switching or opening a tab never stops a run. Its tool calls
+  carry the chat id (per-chat MCP url `/mcp?chat=…`) and edit that document's own store
+  (`docStore` in `src/app/documents.ts`); the tab shows a spinner. Rendered previews are paused
+  for a document in a background tab (the tool says so). Closing the tab stops the run.
+- **A turn is one undo step** ("Agent: …"): ⌘Z right after it undoes the whole turn, like Revert.
+- **After a turn** the changed range plays once and the playhead rests on its end state
+  (Settings → Models → After a turn: play / jump to the end / leave it).
+- **Errors have one fix**: step limit → Continue; not signed in → steps in the app + Check again;
+  bridge lost → Reconnect. The raw text is behind "details". Error toasts stay until closed.
 
 ## The agent panel: what is in it and why
 
@@ -133,7 +147,7 @@ Every remaining control was clicked through after the change (e2e plus the scree
   The storyboard card (concepts as a pick-one list with large rows, beats, approve) and the review
   card (diff, compare, revert, result contact sheet) stay: they are the director workflow and the
   safety net. A "Jump to latest" pill appears when you scroll up while it streams. One row per turn: while it runs, the activity row; once it changed the file, the review card ("added 3 layers · 13 steps") whose details hold the diff and the steps. Run stats (time, cost, tokens) go to the console, not the thread.
-- **Composer**: one rounded box. Enter sends, Shift+Enter is a newline, Esc stops a run (the send
+- **Composer**: one rounded box. Enter sends (while the agent works: queues the message), Shift+Enter is a newline, Esc stops a run (the send
   button turns into stop). Bottom left: "+" (add an image/SVG/audio, mention a layer, style,
   model) and "point at a layer on the canvas" (the next layer clicked becomes an @mention). Files
   pasted or dropped into it come into the document and get selected, so "animate this" refers to
