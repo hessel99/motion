@@ -1,4 +1,4 @@
-// Settings: a large modal over the window (⌘, or the app menu in the top bar). a left nav (Account / Agents / Workspace / App) and
+// Settings: a large modal over the window (⌘, or the app menu in the top bar). a left nav (General / Agents / Workspace / App) and
 // card sections: Appearance, Keyboard shortcuts, Models, Agent runs, Connections, Fonts, Updates
 // (src/app/updates.ts, electron/updates/) and Figma import.
 
@@ -25,7 +25,7 @@ import {
 import './settings.css';
 
 const NAV: { group: string; items: { id: SettingsSection; label: string; Icon: LucideIcon }[] }[] = [
-  { group: 'Account', items: [
+  { group: 'General', items: [
     { id: 'appearance', label: 'Appearance', Icon: Monitor },
     { id: 'shortcuts', label: 'Keyboard shortcuts', Icon: Keyboard },
   ] },
