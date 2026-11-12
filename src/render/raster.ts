@@ -633,8 +633,10 @@ function drawImagePaint(c: Ctx, p: Paint, bw: number, bh: number) {
     const s = p.tileScale ?? 1;
     const pat = c.createPattern(img, 'repeat');
     if (!pat) return;
-    const k = iw / ((img as any).width || iw);
-    pat.setTransform(new DOMMatrix([s * k, 0, 0, s * k, 0, 0]).rotate(rot * 90));
+    // tile units = the asset's natural size (svg bitmaps are decoded larger than that)
+    const k = (asset.width || iw) / ((img as any).width || iw);
+    const m = p.transform; // svg patterns: tile space -> box (patternTransform, origin)
+    pat.setTransform(m ? new DOMMatrix([m[0], m[1], m[2], m[3], m[4], m[5]]).scale(s * k) : new DOMMatrix([s * k, 0, 0, s * k, 0, 0]).rotate(rot * 90));
     c.fillStyle = pat;
     c.fillRect(-1e4, -1e4, 2e4, 2e4);
     return;
@@ -1067,9 +1069,17 @@ export function getBitmap(asset: Asset): ImageBitmap | null {
   if (b === 'loading' || b === 'error') return null;
   if (b) return b;
   bitmaps.set(asset.id, 'loading');
-  fetch(asset.data)
-    .then(r => r.blob())
-    .then(blob => createImageBitmap(blob))
+  // svg images: createImageBitmap can't decode an svg blob; draw it through an <img> at a large size
+  // (it is vector: a big bitmap stays sharp when the layer is scaled up)
+  const isSvg = /svg/i.test(asset.mime) && typeof Image !== 'undefined';
+  (isSvg
+    ? new Promise<ImageBitmap>((res, rej) => {
+      const im = new Image();
+      im.onload = () => { const k = 2048 / Math.max(1, asset.width || im.naturalWidth, asset.height || im.naturalHeight); createImageBitmap(im, { resizeWidth: Math.max(1, Math.round((asset.width || im.naturalWidth || 300) * k)), resizeHeight: Math.max(1, Math.round((asset.height || im.naturalHeight || 150) * k)) }).then(res, rej); };
+      im.onerror = rej;
+      im.src = asset.data;
+    })
+    : fetch(asset.data).then(r => r.blob()).then(blob => createImageBitmap(blob)))
     .then(bmp => { bitmaps.set(asset.id, bmp); onImageLoaded?.(); })
     .catch(() => bitmaps.set(asset.id, 'error'));
   return null;
