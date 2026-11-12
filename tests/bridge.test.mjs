@@ -159,7 +159,7 @@ describe('claude stream-json parser', () => {
       { kind: 'tool_result', id: 'toolu_1', isError: false, summary: 'added rect' },
       { kind: 'thinking', text: 'done now' },
       { kind: 'text', text: 'Done.' },
-      { kind: 'done', result: 'Done.', costUsd: 0.086924, durationMs: 2781 },
+      { kind: 'done', result: 'Done.', costUsd: 0.086924, durationMs: 2781, numTurns: 2, usage: undefined },
     ]);
   });
 

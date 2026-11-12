@@ -117,7 +117,7 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
           // history: jump back several steps at once (newest first)
           e.preventDefault();
           const labels = s.historyLabels;
-          const items: MenuItem[] = labels.map((label, i) => ({ label: `${label}`, shortcut: i === labels.length - 1 ? 'last' : `${labels.length - i}`, action: () => s.undoTo(i) })).reverse().slice(0, 25);
+          const items: MenuItem[] = labels.map((label, i) => ({ label: `${label}`, shortcut: i === labels.length - 1 ? 'last' : `${labels.length - i}`, action: () => s.undoTo(i + s.historyLength - labels.length) })).reverse().slice(0, 25);
           if (items.length) showContextMenu(e.clientX, e.clientY + 8, items);
         }}>↶</Button>
         <Button variant="ghost" icon disabled={!s.canRedo} tip="Redo (⇧⌘Z)" onClick={() => s.redo()}>↷</Button>

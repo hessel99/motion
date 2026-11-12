@@ -6,6 +6,10 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { parseClaudeLine, parseCodexLine, parseGeminiLine, splitJsonLines } from './parsers.mjs';
+import { classifyError } from './errors.mjs';
+
+/** a turn is killed when the CLI prints nothing for this long (tool calls time out after 120s) */
+export const IDLE_TIMEOUT_MS = Number(process.env.MOTION_AGENT_IDLE_MS) || 300_000;
 
 const IS_WIN = process.platform === 'win32';
 
@@ -71,7 +75,10 @@ export function defaultWorkDir() {
  * Build the command for one turn. Pure (except gemini's settings file), exported for tests.
  * @returns {{bin:string, args:string[], stdin?:string, env?:object, parse:Function}}
  */
-export function buildCommand(provider, { message, sessionId, model, systemPrompt, mcpUrl, workDir }) {
+/** set once a claude CLI rejected the lean flags (older versions): later turns skip them */
+let claudeLeanUnsupported = false;
+
+export function buildCommand(provider, { message, sessionId, model, systemPrompt, mcpUrl, workDir, readOnlyTools, lean = !claudeLeanUnsupported }) {
   switch (provider) {
     case 'claude': {
       const mcpConfig = JSON.stringify({ mcpServers: { motion: { type: 'http', url: mcpUrl } } });
@@ -82,9 +89,13 @@ export function buildCommand(provider, { message, sessionId, model, systemPrompt
         '--include-partial-messages',
         '--mcp-config', mcpConfig,
         '--strict-mcp-config',
-        '--allowedTools', 'mcp__motion',
+        // Ask mode: only the read-only editor tools are pre-approved; anything else is denied in -p mode
+        '--allowedTools', Array.isArray(readOnlyTools) && readOnlyTools.length ? readOnlyTools.map((t) => `mcp__motion__${t}`).join(',') : 'mcp__motion',
         '--permission-mode', 'default',
       ];
+      // lean: no built-in tools (Bash, file edits, web...) and no skills/slash commands. The agent only
+      // needs the editor's MCP tools; this cuts ~10k tokens per request and keeps it away from the disk.
+      if (lean) args.push('--tools', '', '--disable-slash-commands');
       if (sessionId) args.push('--resume', sessionId);
       if (systemPrompt) args.push('--append-system-prompt', systemPrompt);
       if (model) args.push('--model', model);
@@ -133,24 +144,39 @@ export function runTurn(provider, opts, onEvent, log = () => {}) {
   const state = {};
   let terminal = false;
   let cancelled = false;
+  let timedOut = false;
   let stderrTail = '';
+  const idleMs = opts.idleMs ?? IDLE_TIMEOUT_MS;
+  let idleTimer = null;
+  // errors carry a type + a fix the UI can show (login, install, rate limit, ...)
+  const typed = (ev) => (ev.kind === 'error' && !ev.errorKind ? { ...ev, ...classifyError(ev.message, provider) } : ev);
   const emit = (ev) => {
     if (terminal) return;
-    if (ev.kind === 'done' || ev.kind === 'error') {
-      // an 'error' followed by 'done' in the same batch: error is terminal for the UI only via done
-      if (ev.kind === 'done') terminal = true;
-    }
-    onEvent(ev);
+    // an 'error' followed by 'done' in the same batch: the turn only ends with 'done'
+    if (ev.kind === 'done') { terminal = true; clearTimeout(idleTimer); }
+    onEvent(typed(ev));
   };
-  const finishWithError = (message) => {
+  const finishWithError = (message, extra = {}) => {
     if (terminal) return;
-    onEvent({ kind: 'error', message });
-    onEvent({ kind: 'done' });
     terminal = true;
+    clearTimeout(idleTimer);
+    onEvent(typed({ kind: 'error', message, ...extra }));
+    onEvent({ kind: 'done' });
+  };
+  let child;
+  const armIdle = () => {
+    clearTimeout(idleTimer);
+    if (!(idleMs > 0)) return;
+    idleTimer = setTimeout(() => {
+      timedOut = true;
+      try { child?.kill('SIGTERM'); } catch {}
+      setTimeout(() => { try { if (child && child.exitCode == null) child.kill('SIGKILL'); } catch {} }, 3000).unref?.();
+      finishWithError(`${cmd.bin} was inactive for ${Math.round(idleMs / 1000)}s and was stopped (timed out).`, { errorKind: 'timeout', hint: 'Retry, or split the request into smaller steps.' });
+    }, idleMs);
+    idleTimer.unref?.();
   };
 
   log(`[bridge] spawn ${cmd.bin} ${provider}${opts.sessionId ? ' (resume)' : ''}`);
-  let child;
   try {
     child = spawn(cmd.bin, cmd.args, {
       cwd: workDir,
@@ -164,8 +190,10 @@ export function runTurn(provider, opts, onEvent, log = () => {}) {
   }
 
   let buf = '';
+  armIdle();
   child.stdout.setEncoding('utf8');
   child.stdout.on('data', (chunk) => {
+    armIdle();
     buf += chunk;
     const [objs, rest] = splitJsonLines(buf);
     buf = rest;
@@ -183,7 +211,15 @@ export function runTurn(provider, opts, onEvent, log = () => {}) {
       const [objs] = splitJsonLines(buf + '\n');
       for (const o of objs) for (const ev of cmd.parse(o, state)) emit(ev);
     }
-    if (cancelled) return finishWithError('cancelled');
+    if (cancelled) return finishWithError('cancelled', { errorKind: 'cancelled' });
+    if (timedOut) return;
+    // an older claude CLI that doesn't know the lean flags: retry the turn once without them
+    if (!terminal && provider === 'claude' && cmd.args.includes('--tools') && /unknown option|unrecognized|unexpected argument/i.test(stderrTail) && /--tools|--disable-slash-commands/.test(stderrTail)) {
+      claudeLeanUnsupported = true;
+      log('[bridge] claude CLI without --tools support: retrying without lean flags');
+      inner = runTurn(provider, { ...opts, lean: false }, onEvent, log);
+      return;
+    }
     if (!terminal) {
       if (code === 0 && provider !== 'claude') emit({ kind: 'done' });
       else finishWithError(`${cmd.bin} exited with ${signal ?? `code ${code}`}${stderrTail ? `: ${stderrTail.trim().slice(-800)}` : ''}`);
@@ -194,8 +230,10 @@ export function runTurn(provider, opts, onEvent, log = () => {}) {
     child.stdin.end(cmd.stdin);
   } else child.stdin.end();
 
+  let inner = null;
   return {
     cancel() {
+      if (inner) return inner.cancel();
       if (terminal || cancelled) return;
       cancelled = true;
       try { child.kill('SIGTERM'); } catch {}
