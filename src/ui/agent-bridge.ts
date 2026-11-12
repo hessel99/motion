@@ -6,6 +6,8 @@
 // listeners: editor channels 'agent-ask' (to the panel) and 'agent-turn' (progress).
 
 import { editor } from '../app/editor';
+import type { Store } from '../core/store';
+import { agentPrefs } from './agent/agent-prefs';
 
 export interface AgentAsk {
   text: string;
@@ -13,6 +15,8 @@ export interface AgentAsk {
   chip?: string;
   /** what the ask refers to beyond the layer selection (keys, a time range), added to the message */
   context?: string;
+  /** 'ask': read-only (critique, explain): editing tools are refused for this turn */
+  mode?: 'edit' | 'ask';
 }
 
 let pending: AgentAsk | null = null;
@@ -48,4 +52,26 @@ export function selectionContext(): string | undefined {
   }
   if (s.workArea) parts.push(`the time range ${s.workArea[0].toFixed(2)}s–${s.workArea[1].toFixed(2)}s`);
   return parts.length ? parts.join(' and ') : undefined;
+}
+
+/** after a turn: show its result on the canvas (Settings → Models → "After a turn"). 'play' plays
+ *  the changed range once and stops on its end state; 'end' parks the playhead there; 'off' leaves
+ *  the playhead alone. a document in a background tab (`visible` false) only gets its playhead
+ *  parked at the end, so the result is there when the user switches back */
+export function playResult(store: Store, range: [number, number], visible: boolean) {
+  const how = agentPrefs.afterTurn;
+  if (how === 'off') return;
+  const D = store.comp.duration;
+  const a = Math.max(0, Math.min(D, range[0] - 0.1)), end = Math.min(D, range[1] + 0.2);
+  if (!visible || how === 'end' || end - a < 0.05 || store !== editor.store) { store.setTime(end); return; }
+  if (store.playing) return; // the user is already watching
+  store.setTime(a);
+  editor.play();
+  const startedAt = store.time;
+  const off = editor.onFrame((_now, t, playing) => {
+    // the user paused, or moved / switched away: stop following
+    if (!playing || editor.store !== store) { off(); return; }
+    // reached the end, or playback wrapped (a preview range / loop)
+    if (t >= end - 1e-3 || t < startedAt - 1e-3) { off(); editor.pause(); store.setTime(end); }
+  });
 }

@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { agentClient, type ChatEvent, type ChatMode } from '../agent/client';
 import { editor } from '../app/editor';
+import { activeDoc, closedDoc, docStore, setDocBusy, switching, type Doc } from '../app/documents';
 import { composeMessage, editorContext, resolveMentions } from '../agent/context';
 import { diffDocs, diffIsEmpty, snapshotDoc, type DocSnapshot } from '../agent/diff';
 import { loadChat, projectKey, saveChat, type Msg, type ReviewInfo } from '../agent/history';
@@ -19,27 +20,58 @@ import { showContextMenu, type MenuItem } from './menu';
 import { openSettings } from './chrome/ui-state';
 import { useChannels } from './hooks';
 import { Button } from './ui';
-import { ArrowDown, ArrowUp, Check, ChevronRight, MousePointerClick, CircleX, LAYER_ICON, Layers, LoaderCircle, Palette, Plus, Square, SquarePen, X } from './chrome/icons';
+import { ArrowDown, ArrowUp, Check, ChevronRight, Clock, MousePointerClick, CircleX, LAYER_ICON, Layers, LoaderCircle, Palette, Plus, Square, SquarePen, X } from './chrome/icons';
 import { lastImport, openBrowserFile } from '../app/actions';
 import type { ComponentChildren } from 'preact';
 import './agent/agent.css';
-import { setAgentProgress, setChatStarted, takeAsk } from './agent-bridge';
+import { playResult, setAgentProgress, setChatStarted, takeAsk } from './agent-bridge';
 
-interface Turn { chatId: string; startedAt: number; activity: string; stopping: boolean; live: number; snap: DocSnapshot; startId: number }
+/** a running turn. `doc`: the document it works in (runs belong to their document: switching tabs
+ *  keeps it going there, see docStore) */
+interface Turn { chatId: string; startedAt: number; activity: string; stopping: boolean; live: number; snap: DocSnapshot; startId: number; doc: Doc | null }
+/** a message waiting for its turn: typed while the agent works, or an ask from elsewhere (⌘K, a
+ *  context menu, Home, the selection bar) while it is busy or offline. never put into the draft */
+interface Queued { id: number; text: string; chip?: string; context?: string; mode?: ChatMode; style?: string; mentions?: Mention[] }
+/** one document's conversation (keyed by projectKey). background documents keep theirs here
+ *  while a run works in them */
+interface Conv { msgs: Msg[]; sessions: Record<string, string | undefined>; turn: Turn | null; queue: Queued[] }
+interface SendOpts { mode?: ChatMode; chip?: string; style?: string; context?: string; mentions?: Mention[]; fromComposer?: boolean }
+
+let queueSeq = 0;
 
 /**
  * the left panel's agent: the conversation (when `chat`) or another tab's content (`children`)
- * above the composer, which is always there. state (messages, the running turn) lives here so
- * switching tabs never drops a conversation.
+ * above the composer, which is always there. state (conversations, running turns) lives here so
+ * switching panel tabs or window tabs never drops a conversation or a run.
  */
 export function AgentPanel(props: { chat: boolean; children?: ComponentChildren; onSent?: () => void }) {
   useChannels([], ['agent-prefs']);
   const [, force] = useState(0);
+  const bump = () => force(x => x + 1);
   const key = useRef(projectKey(editor.store.project));
-  const restored = useMemo(() => loadChat(key.current), []);
-  const [msgs, setMsgs] = useState<Msg[]>(() => restored?.msgs ?? []);
-  const session = useRef<Record<string, string | undefined>>(restored?.sessions ?? {});
+  const convs = useRef(new Map<string, Conv>());
+  const conv = (k: string): Conv => {
+    let c = convs.current.get(k);
+    if (!c) { const saved = loadChat(k); c = { msgs: saved?.msgs ?? [], sessions: saved?.sessions ?? {}, turn: null, queue: [] }; convs.current.set(k, c); }
+    return c;
+  };
+  const saveTimers = useRef(new Map<string, number>());
+  const persist = (k: string) => {
+    clearTimeout(saveTimers.current.get(k));
+    saveTimers.current.set(k, window.setTimeout(() => { const c = convs.current.get(k); if (c) saveChat(k, c.msgs, c.sessions); }, 400));
+  };
+  const setMsgsFor = (k: string, fn: (m: Msg[]) => Msg[]) => { const c = conv(k); const next = fn(c.msgs); if (next === c.msgs) return; c.msgs = next; persist(k); bump(); };
+  const setMsgs = (fn: (m: Msg[]) => Msg[]) => setMsgsFor(key.current, fn);
+  const setTurnFor = (k: string, fn: (t: Turn | null) => Turn | null) => { const c = conv(k); const next = fn(c.turn); if (next === c.turn) return; c.turn = next; bump(); };
+  const setQueue = (k: string, fn: (q: Queued[]) => Queued[]) => { const c = conv(k); c.queue = fn(c.queue); bump(); };
+  const cur = conv(key.current);
+  const msgs = cur.msgs;
+  const turn = cur.turn;
+  /** the visible document's running turn (read in event handlers) */
+  const visibleTurn = () => conv(key.current).turn;
   const [input, setInput] = useState('');
+  const inputRef = useRef(input);
+  inputRef.current = input;
   const [mentions, setMentions] = useState<Mention[]>([]);
   /** style picked in the style row: prefixes the next brief */
   const [style, setStyle] = useState('');
@@ -48,67 +80,103 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   const [scrolledUp, setScrolledUp] = useState(false);
   /** pick mode: the next layer clicked on the canvas becomes an @mention */
   const [picking, setPicking] = useState(false);
-  const [turn, setTurn] = useState<Turn | null>(null);
-  const turnRef = useRef<Turn | null>(null);
-  turnRef.current = turn;
-  // one mode: the agent works in the document (read-only "Ask" was dropped: a question is just a message)
-  const mode: ChatMode = 'edit';
   const { provider, model } = agentPrefs;
   const list = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
   const [, tick] = useState(0);
-  /** local finish per running chat. drop = the turn was detached (another project was opened):
-   *  no review card, nothing appended to the (now different) conversation */
+  /** local finish per running chat. drop = the turn was detached (its document was closed or its
+   *  content replaced): no review card, the undo history it would point at is gone */
   const finishers = useRef(new Map<string, (drop?: boolean) => void>());
 
-  useEffect(() => agentClient.on(() => force(x => x + 1)), []);
-  useEffect(() => editor.store.on('history', () => force(x => x + 1)), []);
-  useEffect(() => editor.store.on('selection', () => force(x => x + 1)), []);
-  // a drafted message from elsewhere (e.g. "Ask the agent" on the audio sync card)
-  useEffect(() => editor.on('agent-draft', () => { const t = (editor as any).agentDraft; if (t) { (editor as any).agentDraft = ''; setInput(t); } }), []);
+  useEffect(() => agentClient.on(bump), []);
+  useEffect(() => editor.store.on('history', bump), []);
+  useEffect(() => editor.store.on('selection', bump), []);
+  // a drafted message from elsewhere (e.g. "Ask the agent" on the audio sync card): it becomes the
+  // draft only when there is none; an unsent draft is never overwritten (the ask waits in the queue)
+  useEffect(() => editor.on('agent-draft', () => {
+    const t = (editor as any).agentDraft;
+    if (!t) return;
+    (editor as any).agentDraft = '';
+    if (!inputRef.current.trim()) setInput(t);
+    else setQueue(key.current, q => [...q, { id: ++queueSeq, text: t }]);
+  }), []);
   // keep scrolled to the bottom unless the user scrolled up to read
-  useEffect(() => { if (stick.current) list.current?.scrollTo({ top: 1e9 }); }, [msgs, turn]);
+  useEffect(() => { if (stick.current) list.current?.scrollTo({ top: 1e9 }); }, [msgs, turn, cur.queue.length]);
   // elapsed timer while a turn runs
   useEffect(() => { if (!turn) return; const t = setInterval(() => tick(x => x + 1), 1000); return () => clearInterval(t); }, [!!turn]);
 
-  // per-project persistence
-  useEffect(() => { const k = key.current; const t = setTimeout(() => { if (k === key.current) saveChat(k, msgs, session.current); }, 400); return () => clearTimeout(t); }, [msgs]);
-  const msgsRef = useRef(msgs);
-  msgsRef.current = msgs;
-  // a different project was opened: switch to its conversation. subscribed in a layout effect and
-  // re-checked once mounted, because the startup project can load before passive effects run.
+  /** every conversation with a running turn (the visible one and background documents') */
+  const running = () => [...convs.current.entries()].filter(([, c]) => c.turn);
+
+  // another document in front (tab switch, a file opened in a new tab): show its conversation.
+  // runs keep going in their own documents. subscribed in a layout effect and re-checked once
+  // mounted, because the startup project can load before passive effects run.
   useLayoutEffect(() => {
     const sync = () => {
-      // a running turn belongs to the document that was just replaced: stop it and detach it, so
-      // its remaining events / review never mix into the newly opened project
-      const t = turnRef.current;
-      if (t) { agentClient.cancel(t.chatId); finishers.current.get(t.chatId)?.(true); }
+      const d = activeDoc();
+      if (!switching) {
+        // the content of a tab was replaced (a file loaded into it): a run working there has lost
+        // its document. stop it and detach it, so its edits never mix into the new content
+        for (const [k, c] of running()) {
+          const t = c.turn!;
+          if (t.doc ? t.doc === d : true) {
+            agentClient.cancel(t.chatId);
+            finishers.current.get(t.chatId)?.(true);
+            setMsgsFor(k, m => [...m, { role: 'info', text: 'Stopped: another file was opened in this tab.' }]);
+          }
+        }
+      }
       const k = projectKey(editor.store.project);
-      // the undo history is gone: review cards of this conversation can no longer revert/compare
-      if (k === key.current) { setMsgs(m => m.some(x => x.review?.state === 'pending') ? m.map(x => (x.review?.state === 'pending' ? { ...x, review: { ...x.review, state: 'stale' as const } } : x)) : m); return; }
-      saveChat(key.current, msgsRef.current, session.current);
+      // the same project loaded again (not a tab switch): the undo history is gone, so review
+      // cards of this conversation can no longer revert/compare
+      if (k === key.current) {
+        if (!switching) setMsgsFor(k, m => m.some(x => x.review?.state === 'pending') ? m.map(x => (x.review?.state === 'pending' ? { ...x, review: { ...x.review, state: 'stale' as const } } : x)) : m);
+        return;
+      }
+      const old = key.current;
+      const oc = convs.current.get(old);
+      if (oc) saveChat(old, oc.msgs, oc.sessions);
       key.current = k;
-      const c = loadChat(k);
-      session.current = c?.sessions ?? {};
-      setMsgs(c?.msgs ?? []);
+      // a fresh load of a project known only from an earlier visit: read it again from storage
+      const known = convs.current.get(k);
+      if (known && !known.turn && !switching) convs.current.delete(k);
+      bump();
     };
     sync();
     return editor.on('loaded', sync);
   }, []);
 
-  // live change counter while the agent works
+  // a tab was closed: a run working in it stops (its document is gone)
+  useEffect(() => editor.on('doc-closed', () => {
+    for (const [k, c] of running()) {
+      const t = c.turn!;
+      if (t.doc?.id !== closedDoc) continue;
+      agentClient.cancel(t.chatId);
+      finishers.current.get(t.chatId)?.(true);
+      setMsgsFor(k, m => [...m, { role: 'info', text: 'Stopped: the file was closed.' }]);
+      const cc = convs.current.get(k);
+      if (cc) saveChat(k, cc.msgs, cc.sessions);
+    }
+  }), []);
+
+  // live change counter while the agent works (the visible document's turn)
   useEffect(() => editor.store.on('history', () => {
-    const t = turnRef.current;
-    if (!t) return;
+    const k = key.current;
+    const t = conv(k).turn;
+    if (!t || (t.doc && t.doc !== activeDoc())) return;
     const d = diffDocs(t.snap, snapshotDoc(editor.store.project));
     const live = d.added.length + d.changed.length + d.removed.length;
-    if (live !== t.live) setTurn(x => (x && x.chatId === t.chatId ? { ...x, live } : x));
+    if (live !== t.live) setTurnFor(k, x => (x && x.chatId === t.chatId ? { ...x, live } : x));
   }), []);
+
+  /** the conversation a chat belongs to */
+  const convOfChat = (chatId: string | undefined) => chatId ? running().find(([, c]) => c.turn!.chatId === chatId)?.[0] : undefined;
 
   // show the images the agent looked at inside its tool steps
   useEffect(() => agentClient.onToolImage(img => {
-    if (!turnRef.current) return;
-    setMsgs(m => {
+    const k = convOfChat(img.chatId) ?? (visibleTurn() ? key.current : undefined);
+    if (!k) return;
+    setMsgsFor(k, m => {
       for (let i = m.length - 1; i >= 0; i--) {
         const t = m[i].tool;
         if (t && !t.image && t.name.endsWith(img.tool)) { const c = m.slice(); c[i] = { ...m[i], tool: { ...t, image: `data:${img.mimeType};base64,${img.data}` } }; return c; }
@@ -118,65 +186,86 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   }), []);
 
   // the storyboard card: proposed by the agent (propose_storyboard), progress per beat (update_progress)
-  useEffect(() => storyboards.on(sb => setMsgs(m => {
-    const i = m.findIndex(x => x.storyboard?.id === sb.id);
-    if (i >= 0) { const c = m.slice(); c[i] = { ...m[i], storyboard: sb }; return c; }
-    return turnRef.current ? [...m, { role: 'storyboard', text: '', storyboard: sb }] : m;
-  })), []);
+  useEffect(() => storyboards.on(sb => {
+    const owner = [...convs.current.entries()].find(([, c]) => c.msgs.some(x => x.storyboard?.id === sb.id))?.[0];
+    const k = owner ?? convOfChat(agentClient.toolChat) ?? (visibleTurn() ? key.current : undefined);
+    if (!k) return;
+    setMsgsFor(k, m => {
+      const i = m.findIndex(x => x.storyboard?.id === sb.id);
+      if (i >= 0) { const c = m.slice(); c[i] = { ...m[i], storyboard: sb }; return c; }
+      return [...m, { role: 'storyboard', text: '', storyboard: sb }];
+    });
+  }), []);
 
   const layerName = (id: string) => editor.store.layer(id)?.name;
 
-  const send = (text: string, opts: { mode?: ChatMode; chip?: string; style?: string } = {}) => {
+  /** start a turn in the visible document. returns false when it could not start (busy / offline) */
+  const send = (text: string, opts: SendOpts = {}): boolean => {
     text = text.trim();
-    if (!text || turnRef.current || agentClient.status !== 'connected') return;
+    const k = key.current;
+    const c = conv(k);
+    if (!text || c.turn || agentClient.status !== 'connected') return false;
     const s = editor.store;
-    const m: ChatMode = 'edit';
-    const m0 = m;
+    const doc = activeDoc();
+    /** the run's document store, wherever its tab is (null once the tab is closed) */
+    const storeOf = () => (doc ? docStore(doc) : editor.store);
+    const m: ChatMode = opts.mode ?? 'edit';
     const st = opts.style ?? '';
     const pre = st ? stylePrefix(st) : '';
+    const body = opts.context ? `${text}\n\n(This refers to ${opts.context}.)` : text;
     // the style line goes in the message (never the system prompt: that is the cached prefix)
-    const message = composeMessage(s, pre ? `${pre}\n${text}` : text, mentions);
+    const message = composeMessage(s, pre ? `${pre}\n${body}` : body, opts.mentions ?? []);
     const scope = briefScope(text, { chip: opts.chip, selCount: s.selection.length, style: !!st });
-    setInput('');
-    setMentions([]);
-    if (st) setStyle('');
+    if (opts.fromComposer) {
+      setInput('');
+      setMentions([]);
+      if (st) setStyle('');
+    }
     stick.current = true;
-    setMsgs(x => [...x, { role: 'user', text, mode: m, chip: opts.chip, ...(st ? { style: st } : {}) }]);
+    setMsgsFor(k, x => [...x, { role: 'user', text, mode: m, chip: opts.chip, ...(opts.context ? { context: opts.context } : {}), ...(st ? { style: st } : {}) }]);
     const snap = snapshotDoc(s.project);
     const marker = s.historyLength; // only for the step count shown on the card
     const startId = s.topEntryId; // identifies the exact pre-turn state (revert / compare)
-    const startKey = key.current;
     let assistantIdx = -1;
     let finished = false;
-    const append = (fn: (m: Msg[]) => Msg[]) => setMsgs(fn);
-    const activity = (a: string) => setTurn(t => (t && t.chatId === chatId ? { ...t, activity: a } : t));
+    const append = (fn: (m: Msg[]) => Msg[]) => setMsgsFor(k, fn);
+    const activity = (a: string) => setTurnFor(k, t => (t && t.chatId === chatId ? { ...t, activity: a } : t));
 
     const finish = (e: ChatEvent, drop = false) => {
       if (finished) return;
       finished = true;
-      agentClient.forget(chatId); // lifts the Ask-mode lock even when the bridge never sends 'done'
+      agentClient.forget(chatId); // lifts the read-only lock even when the bridge never sends 'done'
       finishers.current.delete(chatId);
-      setTurn(t => (t && t.chatId === chatId ? null : t));
-      if (drop || key.current !== startKey) return;
-      const steps = Math.max(1, s.historyLength - marker);
-      const diff = diffDocs(snap, snapshotDoc(s.project));
-      if (s.topEntryId !== startId && !diffIsEmpty(diff)) {
+      if (doc) setDocBusy(doc.id, false);
+      setTurnFor(k, t => (t && t.chatId === chatId ? null : t));
+      const ds = storeOf();
+      if (drop || !ds) return;
+      const steps = Math.max(1, ds.historyLength - marker);
+      const diff = diffDocs(snap, snapshotDoc(ds.project));
+      if (ds.topEntryId !== startId && !diffIsEmpty(diff)) {
+        // the whole turn is ONE undo step (⌘Z right after it undoes all of it, like Revert)
+        ds.squashSince(startId, `Agent: ${opts.chip ?? shortLabel(text)}`);
         let a = Infinity, b = -Infinity;
-        for (const c of [...diff.added, ...diff.changed]) { const l = s.layer(c.id); const r = l && animRange(l); if (r) { a = Math.min(a, r[0]); b = Math.max(b, r[1]); } }
-        const review: ReviewInfo = { startId, endId: s.topEntryId, steps, diff, state: 'pending', range: isFinite(a) ? [a, b] : undefined };
+        for (const c of [...diff.added, ...diff.changed]) { const l = ds.layer(c.id); const r = l && animRange(l); if (r) { a = Math.min(a, r[0]); b = Math.max(b, r[1]); } }
+        const review: ReviewInfo = { startId, endId: ds.topEntryId, steps, diff, state: 'pending', range: isFinite(a) ? [a, b] : undefined };
+        const visible = ds === editor.store;
         // the preview's box is reserved right away, so its arrival doesn't shift / scroll the card
-        append(x => [...x, { role: 'review', text: '', review, ...(editor.renderer ? { preview: 'pending' } : {}) }]);
-        // inline preview of the result: one contact sheet over what the turn animated
-        resultPreview(review.range).then(src => append(x => x.map(y => (y.review?.endId === review.endId && y.role === 'review' ? { ...y, preview: src } : y))));
+        append(x => [...x, { role: 'review', text: '', review, ...(visible && editor.renderer ? { preview: 'pending' } : {}) }]);
+        if (visible) {
+          // inline preview of the result: one contact sheet over what the turn animated
+          resultPreview(review.range).then(src => append(x => x.map(y => (y.review?.endId === review.endId && y.role === 'review' ? { ...y, preview: src } : y))));
+        }
+        // show the result on the canvas (a background document: its playhead waits at the end state)
+        if (review.range) playResult(ds, review.range, visible);
       }
       const bits = [e.durationMs ? `${(e.durationMs / 1000).toFixed(1)}s` : '', e.costUsd ? `$${e.costUsd.toFixed(3)}` : '', e.usage ? `${fmtTok(e.usage.input)} in · ${fmtTok(e.usage.output)} out` : ''].filter(Boolean);
       // run stats (time, cost, tokens) are developer detail: the console, not the thread
       if (bits.length) console.info('[agent turn]', bits.join(' · '));
     };
 
-    const chatId = agentClient.chat({ provider, message, sessionId: session.current[provider], model: provider === 'claude' ? resolveModel(scope, model) : undefined, mode: m, maxTurns: turnBudget() }, (e: ChatEvent) => {
+    const chatId = agentClient.chat({ provider, message, sessionId: c.sessions[provider], model: provider === 'claude' ? resolveModel(scope, model) : undefined, mode: m, maxTurns: turnBudget(), store: storeOf }, (e: ChatEvent) => {
       switch (e.kind) {
-        case 'session': session.current[provider] = e.sessionId; break;
+        case 'session': conv(k).sessions[provider] = e.sessionId; persist(k); break;
         case 'text_delta':
           activity('Writing…');
           append(m => {
@@ -207,22 +296,31 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
           break;
         case 'error':
           if (e.errorKind === 'cancelled') append(m => [...m, { role: 'info', text: 'Stopped.' }]);
-          else append(m => [...m, { role: 'error', text: e.message, errorKind: e.errorKind, hint: e.hint, retry: text, mode: m0 }]);
+          else append(x => [...x, { role: 'error', text: e.message, errorKind: e.errorKind, hint: e.hint, retry: text, mode: m }]);
           break;
         case 'done': finish(e); break;
       }
     });
-    setTurn({ chatId, startedAt: Date.now(), activity: 'Starting…', stopping: false, live: 0, snap, startId });
+    setTurnFor(k, () => ({ chatId, startedAt: Date.now(), activity: 'Starting…', stopping: false, live: 0, snap, startId, doc }));
+    if (doc) setDocBusy(doc.id, true);
     // safety net: if the bridge never confirms a cancel, finish locally
     if (!finished) finishers.current.set(chatId, (drop?: boolean) => finish({ kind: 'done' }, drop));
+    return true;
   };
 
   const stop = () => {
-    const t = turnRef.current;
+    const t = visibleTurn();
     if (!t || t.stopping) return;
+    const k = key.current;
     agentClient.cancel(t.chatId);
-    setTurn({ ...t, stopping: true, activity: 'Stopping…' });
-    setTimeout(() => { if (turnRef.current?.chatId === t.chatId) finishers.current.get(t.chatId)?.(); finishers.current.delete(t.chatId); }, 6000);
+    setTurnFor(k, x => (x && x.chatId === t.chatId ? { ...x, stopping: true, activity: 'Stopping…' } : x));
+    setTimeout(() => { if (conv(k).turn?.chatId === t.chatId) finishers.current.get(t.chatId)?.(); finishers.current.delete(t.chatId); }, 6000);
+  };
+
+  /** send now, or wait in the queue (busy / offline). the draft is never touched */
+  const sendOrQueue = (text: string, opts: Omit<SendOpts, 'fromComposer'> = {}) => {
+    if (!text.trim()) return;
+    if (!send(text, opts)) setQueue(key.current, q => [...q, { id: ++queueSeq, text: text.trim(), ...opts }]);
   };
 
   const approveStoryboard = (sb: Storyboard) => send(approvalMessage(storyboards.approve(sb)), { mode: 'edit', chip: sb.edited ? 'Approved storyboard (edited)' : 'Approved storyboard' });
@@ -230,20 +328,25 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   const building = turn ? [...msgs].reverse().find(x => x.storyboard)?.storyboard : undefined;
   const activeBeat = building?.state === 'building' ? building.beats.findIndex(b => b.status === 'active') : -1;
 
-  // asks from elsewhere (Home prompt, ⌘K, context menus, import suggestions: ./agent-bridge.ts).
-  // offline or busy: the text lands in the composer instead of getting lost
-  const sendRef = useRef(send);
-  sendRef.current = send;
+  // asks from elsewhere (Home prompt, ⌘K, context menus, the selection bar, import suggestions:
+  // ./agent-bridge.ts). busy or offline: they wait in the queue (visible, cancellable) and go out
+  // when the agent is free. the composer's draft is never overwritten
+  const sendRef = useRef(sendOrQueue);
+  sendRef.current = sendOrQueue;
   useEffect(() => editor.on('agent-ask', () => {
     const a = takeAsk();
-    if (!a) return;
-    const text = a.context ? `${a.text}
-
-(This refers to ${a.context}.)` : a.text;
-    if (agentClient.status === 'connected' && !turnRef.current) sendRef.current(text, { chip: a.chip });
-    else setInput(a.text);
+    if (a) sendRef.current(a.text, { chip: a.chip, context: a.context, mode: a.mode });
   }), []);
-  useEffect(() => setChatStarted(msgs.length > 0), [msgs.length > 0]);
+  // the queue moves on when the visible document's agent is free (and connected)
+  const status = agentClient.status;
+  useEffect(() => {
+    if (turn || status !== 'connected' || !cur.queue.length) return;
+    const [q, ...rest] = cur.queue;
+    cur.queue = rest;
+    if (!send(q.text, q)) cur.queue = [q, ...cur.queue];
+    bump();
+  }, [!!turn, status, cur.queue.length, key.current]);
+  useEffect(() => setChatStarted(msgs.length > 0 || cur.queue.length > 0), [msgs.length > 0 || cur.queue.length > 0]);
   const beatRange: [number, number] | undefined = activeBeat >= 0 ? [building!.beats[activeBeat].start, building!.beats[activeBeat].end] : undefined;
   useEffect(() => {
     setAgentProgress(turn ? { activity: activeBeat >= 0 ? `${building!.beats[activeBeat].name} · ${turn.activity}` : turn.activity, live: turn.live, startedAt: turn.startedAt, range: beatRange } : null);
@@ -269,7 +372,6 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   const setReview = (i: number, state: ReviewInfo['state'], note?: string) => setMsgs(all => all.map((x, j) => (j === i && x.review ? { ...x, review: { ...x.review, state }, text: note ?? x.text } : x)));
 
   const providers = agentClient.providers;
-  const status = agentClient.status;
   const avail = providers.find(p => p.id === provider)?.available;
   const s = editor.store;
   const selCount = s.selection.length;
@@ -288,7 +390,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
     else blocks.push({ kind: 'msg', m, i });
   });
 
-  const newChat = () => { session.current = {}; setMsgs([]); };
+  const newChat = () => { cur.sessions = {}; cur.queue = []; setMsgs(() => []); };
   const modelItems = (): MenuItem[] => {
     const list = providers.length ? providers : [{ id: 'claude', name: 'Claude Code', available: false }];
     const items: MenuItem[] = [];
@@ -334,10 +436,21 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   const chipLabel = selLayer?.name ?? `${selCount} layers`;
   const ChipIcon = selLayer ? LAYER_ICON[selLayer.type] : Layers;
   const styleGuide = style ? STYLE_GUIDES.find(g => g.name === style) : undefined;
-  const placeholder = status !== 'connected' ? 'The agent is offline'
-    : turn ? 'The agent is working… (Esc stops it)'
+  const placeholder = status !== 'connected' ? 'The agent is offline (messages wait until it connects)'
+    : turn ? 'The agent is working… Enter queues a follow-up, Esc stops'
     : selCount ? 'What should happen to the selection?' : msgs.length ? 'Reply or ask for a change…' : 'Describe an animation…';
-  const submit = () => { if (input.trim()) { props.onSent?.(); send(input, { style }); } };
+  /** Enter: send, or (busy / offline) queue it with a visible "queued" bubble */
+  const submit = () => {
+    const t = input.trim();
+    if (!t) return;
+    props.onSent?.();
+    if (send(t, { style, mentions, fromComposer: true })) return;
+    setQueue(key.current, q => [...q, { id: ++queueSeq, text: t, style: style || undefined, mentions }]);
+    setInput(''); setMentions([]); if (style) setStyle('');
+    stick.current = true;
+  };
+  /** an error card's fix, resent as a normal message */
+  const resend = (text: string, opts: SendOpts = {}) => sendOrQueue(text, opts);
 
   return (
     <div class="agent ag-panel">
@@ -353,7 +466,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
             onWheel={e => { const el = e.currentTarget as HTMLDivElement; requestAnimationFrame(() => { const up = el.scrollHeight - el.scrollTop - el.clientHeight >= 40; if (up !== scrolledUp) setScrolledUp(up); }); }}>
             {status !== 'connected' && (
               <div class="agent-note agent-offline" title="The desktop app starts the bridge automatically; in the browser run npm run bridge. It uses the Claude Code / Codex / Gemini CLI on your computer (your own subscription).">
-                <span class="dot" aria-hidden="true" />Agent offline · <button class="link" onClick={() => openSettings('connections')}>How to connect</button>
+                <span class="dot" aria-hidden="true" />{status === 'connecting' ? 'Connecting to the agent…' : 'Agent offline'} · <button class="link" data-testid="agent-reconnect" disabled={status === 'connecting'} onClick={() => agentClient.reconnect()}>Reconnect</button> · <button class="link" onClick={() => openSettings('connections')}>How to connect</button>
               </div>
             )}
             {status === 'connected' && providers.length > 0 && !avail && (
@@ -387,22 +500,13 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
                   {m.preview && m.preview !== 'pending' && <button type="button" class="ag-result" title="Replay the result" onClick={() => { const r = m.review!.range; s.setTime(Math.max(0, (r?.[0] ?? 0) - 0.1)); editor.play(); }}><img src={m.preview} alt="Result: frames over time" data-testid="result-preview" onLoad={() => { if (stick.current) list.current?.scrollTo({ top: 1e9 }); }} /></button>}
                 </>
               );
-              if (m.role === 'error') return (
-                <div class={'msg error ag-error ' + (m.errorKind ?? '')}>
-                  <div><b>{ERROR_TITLE[m.errorKind ?? ''] ?? 'Something went wrong'}</b></div>
-                  {m.hint && <div class="ag-hint"><Markdown text={m.hint} /></div>}
-                  <details><summary class="ag-muted">details</summary><div class="ag-small">{m.text}</div></details>
-                  <div class="ag-row">
-                    {m.retry && <button class="ag-btn" disabled={!ready} onClick={() => send(m.retry!, { mode: m.mode })}>Retry</button>}
-                    {m.errorKind === 'not_installed' && <button class="ag-btn" onClick={() => agentClient.refreshProviders()}>Check again</button>}
-                    {m.errorKind === 'auth' && <button class="ag-btn" title="Start a fresh agent session (after logging in)" onClick={() => { session.current[provider] = undefined; }}>Reset session</button>}
-                  </div>
-                </div>
-              );
+              if (m.role === 'error') return <ErrorCard m={m} ready={ready} status={status} onSend={resend} onFreshSession={() => { cur.sessions[provider] = undefined; persist(key.current); }} />;
               if (m.role === 'user') return (
                 <div class="msg user">
                   {m.style && <span class="ag-tag">{styleLabel(STYLE_GUIDES.find(g => g.name === m.style) ?? { title: m.style } as any)}</span>}
+                  {m.mode === 'ask' && <span class="ag-tag" title="This turn could look but not edit">read-only</span>}
                   {m.chip ? <span title={m.text}><b>{m.chip}</b></span> : m.text}
+                  {m.context && <span class="ag-msg-ctx" title="Context sent with this message">{m.context}</span>}
                 </div>
               );
               return <div class={'msg ' + m.role}>{m.role === 'assistant' ? <Markdown text={m.text} /> : m.text}</div>;
@@ -414,6 +518,18 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
                 <span class="ag-muted">{Math.floor((Date.now() - turn.startedAt) / 1000)}s</span>
               </div>
             )}
+            {cur.queue.map(q => (
+              <div class="msg user ag-queued" data-testid="agent-queued" key={q.id}>
+                <span class="ag-queued-tag"><Clock size={11} />{status !== 'connected' ? 'waiting for the agent' : 'queued'}</span>
+                {q.mode === 'ask' && <span class="ag-tag">read-only</span>}
+                {q.chip ? <span title={q.text}><b>{q.chip}</b></span> : q.text}
+                {q.context && <span class="ag-msg-ctx">{q.context}</span>}
+                <span class="ag-queued-actions">
+                  {turn && cur.queue[0] === q && <button type="button" class="ag-link" title="Stop the current turn and send this now" onClick={stop}>Send now</button>}
+                  <button type="button" class="ag-icon-btn" aria-label="Remove from the queue" title="Remove" onClick={() => setQueue(key.current, x => x.filter(y => y.id !== q.id))}><X size={12} /></button>
+                </span>
+              </div>
+            ))}
           </div>
           {scrolledUp && <button type="button" class="ag-jump" onClick={() => { stick.current = true; setScrolledUp(false); list.current?.scrollTo({ top: 1e9, behavior: 'smooth' }); }}>Jump to latest <ArrowDown size={13} /></button>}
         </div>
@@ -458,7 +574,7 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
             <span class="grow" />
             {turn
               ? <button class="send-btn stop" title="Stop (Esc)" aria-label="Stop" disabled={turn.stopping} onClick={stop}><Square size={12} /></button>
-              : <button class="primary send-btn" aria-label="Send" title="Send (Enter)" disabled={!input.trim() || status !== 'connected'} onClick={submit}><ArrowUp /></button>}
+              : <button class="primary send-btn" aria-label="Send" title={status === 'connected' ? 'Send (Enter)' : 'Queue: sends when the agent connects (Enter)'} disabled={!input.trim()} onClick={submit}><ArrowUp /></button>}
           </div>
         </div>
       </div>
@@ -468,14 +584,44 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
 
 const ERROR_TITLE: Record<string, string> = {
   not_installed: 'Agent CLI not found',
-  auth: 'Not logged in (or the login expired)',
+  auth: 'Sign in to Claude to use the agent',
   rate_limit: 'Usage limit reached',
   overloaded: 'The model is busy',
   network: 'Network problem',
   timeout: 'The agent stopped responding',
   bridge: 'Bridge disconnected',
-  turn_budget: 'Turn budget used up',
+  turn_budget: 'The agent paused: step limit reached',
 };
+
+/** an error with one primary fix a novice can act on (Continue / Check again / Reconnect), the
+ *  technical text behind "details" */
+function ErrorCard({ m, ready, status, onSend, onFreshSession }: { m: Msg; ready: boolean; status: string; onSend: (text: string, opts?: SendOpts) => void; onFreshSession: () => void }) {
+  const k = m.errorKind ?? '';
+  const provider = agentPrefs.provider;
+  return (
+    <div class={'msg error ag-error ' + k} data-testid="agent-error">
+      <div><b>{ERROR_TITLE[k] ?? 'Something went wrong'}</b></div>
+      {k === 'turn_budget' ? <div class="ag-hint">It used all its steps for this message (Settings → Models → Turn budget). Its work so far is kept. Continue to let it finish.</div>
+        : k === 'auth' && provider === 'claude' ? (
+          <div class="ag-hint">
+            <div>The agent runs on your own Claude account, and this computer is not signed in yet.</div>
+            <div class="md-li">1. Open the <b>Terminal</b> app (⌘Space, type “Terminal”).</div>
+            <div class="md-li">2. Type <code>claude</code>, press Return and sign in on the page that opens.</div>
+            <div class="md-li">3. Come back here and click <b>Check again</b>.</div>
+          </div>
+        ) : k === 'bridge' ? <div class="ag-hint">Motion lost its connection to the agent. Reconnect, then retry; the changes so far are kept.</div>
+        : m.hint && <div class="ag-hint"><Markdown text={m.hint} /></div>}
+      <details><summary class="ag-muted">details</summary><div class="ag-small">{m.text}{m.hint && k !== 'turn_budget' && (k === 'auth' || k === 'bridge') ? <div>{m.hint}</div> : null}</div></details>
+      <div class="ag-row">
+        {k === 'turn_budget' && <button class="ag-btn primary" disabled={!ready} onClick={() => onSend('continue', { chip: 'Continue' })}>Continue</button>}
+        {k === 'auth' && m.retry && <button class="ag-btn primary" disabled={!ready} title="Try again (with a fresh session)" onClick={() => { onFreshSession(); onSend(m.retry!, { mode: m.mode }); }}>Check again</button>}
+        {k === 'bridge' && status !== 'connected' && <button class="ag-btn primary" disabled={status === 'connecting'} onClick={() => agentClient.reconnect()}>{status === 'connecting' ? 'Reconnecting…' : 'Reconnect'}</button>}
+        {k !== 'turn_budget' && k !== 'auth' && m.retry && <button class="ag-btn" disabled={!ready} onClick={() => onSend(m.retry!, { mode: m.mode })}>Retry</button>}
+        {k === 'not_installed' && <button class="ag-btn" onClick={() => agentClient.refreshProviders()}>Check again</button>}
+      </div>
+    </div>
+  );
+}
 
 /** width / height of the 6-frame result sheet (3 x 2 cells, labels, padding: see contactSheet in tools.ts) */
 function previewAspect() {
@@ -499,6 +645,9 @@ async function resultPreview(range?: [number, number]): Promise<string | undefin
     return img ? `data:${img.mimeType};base64,${img.data}` : undefined;
   } catch { return undefined; }
 }
+
+/** a short undo label for a typed brief */
+function shortLabel(t: string) { const one = t.replace(/\s+/g, ' ').trim(); return one.length > 32 ? one.slice(0, 31) + '…' : one; }
 
 function fmtTok(n: number) { return n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(n); }
 

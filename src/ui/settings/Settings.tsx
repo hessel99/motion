@@ -317,6 +317,9 @@ function Models() {
         <Row label="Turn budget" sub="Max tool round trips per message (empty = 90). Say “continue” when it runs out.">
           <input class="input input-sm" type="number" min="5" max="500" step="5" style={{ width: '72px' }} aria-label="Turn budget" placeholder="90" value={agentPrefs.turns} onChange={e => setAgentPref('turns', (e.target as HTMLInputElement).value.replace(/[^\d]/g, ''))} />
         </Row>
+        <Row label="After a turn" sub="Show what the agent animated on the canvas.">
+          <Select size="sm" aria-label="After a turn" value={agentPrefs.afterTurn} onChange={v => setAgentPref('afterTurn', v === 'end' || v === 'off' ? v : 'play')} options={[{ value: 'play', label: 'Play the result once' }, { value: 'end', label: 'Jump to its end' }, { value: 'off', label: 'Leave the playhead' }]} />
+        </Row>
       </Card>
     </>
   );
