@@ -107,6 +107,7 @@ export function AgentPanel() {
         {status === 'connected' && providers.length > 0 && !avail && (
           <div class="agent-note">The <b>{provider}</b> CLI was not found. Install it and log in (e.g. <code>npm i -g @anthropic-ai/claude-code</code> then <code>claude</code>).</div>
         )}
+        {msgs.length === 0 && status === 'connected' && <ConnectInfo port={agentClient.port} />}
         {msgs.length === 0 && status === 'connected' && (
           <div class="agent-empty">
             <div>Ask the agent to build or change your animation.</div>
@@ -159,4 +160,21 @@ function Markdown({ text }: { text: string }) {
     if (h) return <div><b>{inline(h[1])}</b></div>;
     return line.trim() ? <div>{inline(line)}</div> : <div class="md-gap" />;
   })}</>;
+}
+
+/** how to connect any other MCP-capable AI app (Claude Desktop, Cursor, VS Code, ...) */
+function ConnectInfo({ port }: { port: number }) {
+  const url = `http://127.0.0.1:${port}/mcp`;
+  const json = JSON.stringify({ mcpServers: { motion: { type: 'http', url } } }, null, 2);
+  const [copied, setCopied] = useState('');
+  const copy = (what: string, text: string) => { navigator.clipboard?.writeText(text).then(() => { setCopied(what); setTimeout(() => setCopied(''), 1500); }); };
+  return (
+    <details class="connect-info">
+      <summary>Connect other AI apps (MCP)</summary>
+      <div class="small muted">While Motion is open, any MCP client can drive this document: Claude Desktop, Cursor, VS Code, Codex or your own agent.</div>
+      <div class="row"><code class="grow">{url}</code><button class="ghost" onClick={() => copy('url', url)}>{copied === 'url' ? '✓' : 'Copy'}</button></div>
+      <div class="row"><span class="small muted grow">MCP config JSON</span><button class="ghost" onClick={() => copy('json', json)}>{copied === 'json' ? '✓' : 'Copy'}</button></div>
+      <div class="small muted">Claude Code: <code>claude mcp add --transport http motion {url}</code></div>
+    </details>
+  );
 }

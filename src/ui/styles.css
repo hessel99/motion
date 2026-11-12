@@ -186,3 +186,8 @@ kbd { font: 11px ui-monospace, Menlo, monospace; background: #2a2a30; border: 1p
 .panel-error { padding: 14px; display: flex; flex-direction: column; gap: 8px; color: #ffb3ad; }
 .welcome ol { padding-left: 18px; line-height: 1.6; margin: 0 0 14px; }
 .welcome li { margin-bottom: 6px; }
+.connect-info { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+.connect-info summary { cursor: pointer; color: #c9c9cf; }
+.connect-info .row { margin: 6px 0 0; }
+.connect-info code { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grow { flex: 1; min-width: 0; }
