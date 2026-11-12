@@ -176,6 +176,8 @@ export interface Layer {
   startTime?: number;
   /** component instance link (see core/components.ts): this layer mirrors main-component layer `main` */
   link?: InstanceLink;
+  /** stable key the agent's build_scene gave this layer (re-building with the same key updates it) */
+  sceneKey?: string;
   /** ui state */
   collapsed?: boolean;
 }
