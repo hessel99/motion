@@ -656,8 +656,11 @@ function invertPathLayer(l: Layer, box: [number, number, number, number]): boole
   const [x0, y0] = toG(box[0], box[1]), [x1, y1] = toG(box[0] + box[2], box[1] + box[3]);
   const rect: PathGeometry = { cmds: rectCmds(Math.min(x0, x1), Math.min(y0, y1), Math.abs(x1 - x0), Math.abs(y1 - y0)), fillRule: 'evenodd' };
   // geometry outside [0, geomSize] is fine for the rasterizer (bounds come from the geometry)
-  l.geometry = [rect, ...l.geometry.map(g => ({ ...g, fillRule: 'evenodd' as const }))];
-  if (l.pathKf) l.pathKf = l.pathKf.map(k => ({ ...k, geometry: [rect, ...k.geometry.map(g => ({ ...g, fillRule: 'evenodd' as const }))] }));
+  // ONE even-odd geometry (box + shapes): the rasterizer fills each geometry entry on its own,
+  // so separate entries would give a full box instead of a box with holes
+  const merge = (gs: PathGeometry[]): PathGeometry[] => [{ cmds: [...rect.cmds, ...gs.flatMap(g => g.cmds)], fillRule: 'evenodd' }];
+  l.geometry = merge(l.geometry);
+  if (l.pathKf) l.pathKf = l.pathKf.map(k => ({ ...k, geometry: merge(k.geometry) }));
   return true;
 }
 

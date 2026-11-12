@@ -47,7 +47,7 @@ describe('lottie track mattes', () => {
     ]), 'm', st);
     const unit = byName(p)['C (matte)'];
     const m = kids(p, kids(p, unit)[0])[0];
-    expect(m.geometry!.length).toBe(2);
+    expect(m.geometry!.length).toBe(1); // one even-odd geometry: separate entries would each be filled on their own
     expect(m.geometry!.every(g => g.fillRule === 'evenodd')).toBe(true);
     expect(st.invertedMattes).toBe(1);
     expect(st.invertedApprox).toBe(0);
