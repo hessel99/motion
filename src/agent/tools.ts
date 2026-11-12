@@ -24,7 +24,8 @@ export type { ToolDef, ToolContent } from './tool-kit';
 
 import { st, text, colorSchema, propValueSchema, easeSchema, keyframeSchema, idsSchema, parseColor, toValue, checkProp, need, round, buildKeys, writeTrack, shiftLayerKeys, contactSheet, resolveEase, boundsOf } from './tool-kit';
 export { parseColor, boundsOf } from './tool-kit';
-import { SCENE_TOOLS } from './tools-scene';
+import { SCENE_TOOLS, textAnimFrom } from './tools-scene';
+import { TYPE_TOOLS } from './tools-type';
 import { SHAPE_TOOLS } from './tools-shapes';
 import { MOTION_TOOLS } from './tools-motion';
 
@@ -428,12 +429,13 @@ export const TOOLS: ToolDef[] = [
       required: ['ids'],
     },
     run: (a) => {
+      if (!Array.isArray(a.ids) || !a.ids.length) throw new Error('ids must list text layers');
+      const notText = a.ids.map(need).filter((l: Layer) => l.type !== 'text');
+      if (notText.length) throw new Error(`not text layers: ${notText.map((l: Layer) => l.name).join(', ')} (text animators work on text layers; split_text makes per-letter layers)`);
       if (a.remove) { setTextAnim(st(), a.ids, undefined); return text('removed'); }
-      const base = a.preset ? TEXT_ANIM_PRESETS.find(p => p.name.toLowerCase() === String(a.preset).toLowerCase())?.anim : TEXT_ANIM_PRESETS[0].anim;
-      if (!base) throw new Error('unknown preset; presets: ' + TEXT_ANIM_PRESETS.map(p => p.name).join(', '));
-      const anim = { ...base, start: 0, ...Object.fromEntries(['by', 'start', 'duration', 'stagger', 'ease', 'mode', 'order'].filter(k => a[k] !== undefined).map(k => [k, a[k]])), from: { ...base.from, ...(a.from ?? {}) } } as any;
+      const anim = textAnimFrom(a);
       setTextAnim(st(), a.ids, anim);
-      return text('ok');
+      return text(`${anim.mode} by ${anim.by} from ${fmtTime(anim.start)}: ${fmtTime(anim.duration)} each, stagger ${fmtTime(anim.stagger)}, ${anim.ease}`);
     },
   },
   {
@@ -642,6 +644,7 @@ export const TOOLS: ToolDef[] = [
   ...SCENE_TOOLS,
   ...SHAPE_TOOLS,
   ...MOTION_TOOLS,
+  ...TYPE_TOOLS,
 ];
 
 export const AGENT_SYSTEM_PROMPT = `You are working inside "Motion", a motion design editor (like After Effects / Figma Motion).
