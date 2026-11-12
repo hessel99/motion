@@ -116,6 +116,9 @@ export class GraphView {
           if (arr[s] > hi) hi = arr[s];
         }
         lo = Math.min(lo, 0);
+        // hold keys make near-infinite one-sample spikes: scale to the 98th percentile instead
+        const sorted = Array.from(arr).sort((x, y) => x - y);
+        hi = Math.min(hi, sorted[Math.floor(sorted.length * 0.98)] * 1.15 || hi);
         samples.push(arr);
         continue;
       }

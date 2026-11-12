@@ -388,6 +388,7 @@ export class Renderer {
   invalidateText() {
     for (const it of this.items) if (it.layer.type === 'text') { it.rasterBase = (it.rasterBase ?? '') + '~f'; it.entry = null; it.rasterKey = null; it.units = it.units?.map(u => ({ ...u, entry: null, raster: null })) ?? null; }
     this.fontGen++;
+    this.needsCompile = true; // auto-sized text boxes were measured with fallback metrics
     this.dirty = true;
   }
   private fontGen = 0;
@@ -816,7 +817,16 @@ export class Renderer {
         for (let w = 0; w < 2; w++) {
           const worker = new Worker(new URL('./raster-worker.ts', import.meta.url), { type: 'module' });
           worker.onmessage = ev => this.onRasterDone(ev.data);
-          worker.onerror = (ev) => { this.workersOk = false; this.workerErrors.push(String((ev as ErrorEvent).message ?? 'worker error')); };
+          worker.onerror = (ev) => {
+            // fall back to main-thread rasters: drop pending jobs so their layers get rasterized again
+            this.workersOk = false;
+            this.workerErrors.push(String((ev as ErrorEvent).message ?? 'worker error'));
+            for (const w of this.workers) w.terminate();
+            this.workers = [];
+            this.pending.clear();
+            this.pendingKeys.clear();
+            this.dirty = true;
+          };
           this.workers.push(worker);
         }
       } catch { this.workersOk = false; return; }

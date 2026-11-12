@@ -1168,7 +1168,20 @@ function maskRegions(masks: any[], c: LCtx, box: [number, number, number, number
 }
 
 function regionLayer(ctx: BuildCtx, name: string, r: MaskRegion, fill: PaintNode): Layer {
-  return pathLayer(ctx, name, r.parts.flatMap(p => p.srcs), fill, undefined, undefined, undefined, r.parts.map(p => ({ n: p.srcs.length, rule: p.rule })));
+  const srcs = r.parts.flatMap(p => p.srcs);
+  const anim = srcs.filter(x => x.keys && x.keys.length > 1);
+  const sameTimes = anim.every(x => x.keys!.length === anim[0].keys!.length && x.keys!.every((k, i) => Math.abs(k.t - anim[0].keys![i].t) < 1e-6));
+  if (r.parts.length > 1 && !sameTimes) {
+    // parts animated on different key times: one path layer per part (exact keys, no
+    // resampling) in a group whose opacity carries the mask opacity (a union of alphas)
+    const g = ctx.make('group', name, { ...identityTR(), opacity: (fill as any).opacity }, {});
+    g.props.size = sprop([0, 0]);
+    g.props.fill = sprop([1, 1, 1, 0]);
+    const solidFill = { ...fill, opacity: sprop([100]) } as PaintNode;
+    ctx.adopt(g, r.parts.map(p => pathLayer(ctx, name, p.srcs, { ...solidFill, rule: p.rule } as PaintNode, undefined, undefined, p.rule)));
+    return g;
+  }
+  return pathLayer(ctx, name, srcs, fill, undefined, undefined, undefined, r.parts.map(p => ({ n: p.srcs.length, rule: p.rule })));
 }
 
 function whiteFill(opacity: Prop, rule: 'nonzero' | 'evenodd'): PaintNode {
@@ -1182,7 +1195,8 @@ function foldTransform(l: Layer, t: TR) {
   l.props.position = t.position;
   l.props.scale = t.scale;
   l.props.rotation = t.rotation;
-  l.props.opacity = t.opacity;
+  const own = l.props.opacity!;
+  l.props.opacity = isAnimated(own) || own.v[0] !== 100 ? combineProps([t.opacity, own], [1, 1], ([a, b]) => [(a[0] * b[0]) / 100]) : t.opacity;
 }
 
 /**
