@@ -103,12 +103,18 @@ export function cloneLayers(store: Store, ids: string[], offset = 0) {
   };
   const created: string[] = [];
   ids = ids.filter(id => P.layers[id] && !ids.some(o => o !== id && store.isAncestor(o, id)));
+  const names = new Set(Object.values(P.layers).map(l => l.name));
   store.transact('Duplicate', tx => {
     for (const id of ids) {
       const src = P.layers[id];
       if (!src) continue;
       const copy = cloneRec(id, src.parent);
-      copy.name = src.name + ' copy';
+      // "Box copy", then "Box copy 2", "Box copy 3" (never "Box copy copy")
+      const base = src.name.replace(/ copy( \d+)?$/, '');
+      let nm = base + ' copy', k = 2;
+      while (names.has(nm)) nm = `${base} copy ${k++}`;
+      names.add(nm);
+      copy.name = nm;
       if (offset) offsetPosition(copy, offset, offset);
       const extra = [...map.values()].filter(l => l !== copy);
       const owner = src.parent ? null : ownerRoot(store, id)?.comp ?? store.comp;

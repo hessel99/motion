@@ -4,7 +4,8 @@ export default defineConfig({
   plugins: [preact()],
   base: './',
   build: { target: 'es2022', sourcemap: true },
-  server: { port: 5173 },
+  // agent worktrees live in .claude/: never watch or scan them (they re-triggered dep optimization)
+  server: { port: 5173, watch: { ignored: ['**/.claude/**', '**/release/**', '**/bench/results/**'] } },
   // every runtime dependency pre-bundled up front: lazily discovered deps (importers, exporters,
   // the lab) made vite re-optimize mid-session and load preact twice ("reading '__H'")
   optimizeDeps: {
