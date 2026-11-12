@@ -182,7 +182,14 @@ export const TOOLS: ToolDef[] = [
         if (a.inPoint !== undefined) tx.set(l, 'inPoint', a.inPoint);
         if (a.outPoint !== undefined) tx.set(l, 'outPoint', a.outPoint);
         if (a.text && l.text) tx.set(l, 'text', { ...l.text, ...a.text });
-        for (const [k, v] of Object.entries(a.props ?? {})) setPropTx(tx, l, checkProp(k), toValue(k as PropKey, v), s.time);
+        const props = a.props ?? {};
+        // keep a centered anchor centered when the size changes (unless the anchor is set explicitly)
+        if (props.size !== undefined && props.anchor === undefined && !isAnimated(l, 'anchor')) {
+          const sz = valueAt(l, 'size', s.time), an = valueAt(l, 'anchor', s.time);
+          const ns = toValue('size', props.size);
+          if (Math.abs(an[0] - sz[0] / 2) < 0.5 && Math.abs(an[1] - sz[1] / 2) < 0.5) setPropTx(tx, l, 'anchor', [ns[0] / 2, ns[1] / 2], s.time);
+        }
+        for (const [k, v] of Object.entries(props)) setPropTx(tx, l, checkProp(k), toValue(k as PropKey, v), s.time);
         tx.touch(l.id);
       });
       return text('ok');

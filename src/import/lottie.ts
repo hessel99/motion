@@ -843,7 +843,7 @@ export function lottieToProject(json: any, name?: string): Project {
   finalizeTimes(ctx.layers);
   const comp: Composition = {
     id: uid('c'), name: typeof json.nm === 'string' && json.nm ? json.nm : name ?? 'Lottie',
-    width: w, height: h, fps: fr, duration: Math.max(1 / fr, (op - ip) / fr), background: [0, 0, 0, 0], root: roots.map(l => l.id),
+    width: w, height: h, fps: fr, duration: Math.max(1 / fr, (op - ip) / fr), background: [0.07, 0.07, 0.08, 1], root: roots.map(l => l.id),
   };
   return { version: 1, name: name ?? comp.name, comps: { [comp.id]: comp }, activeComp: comp.id, layers: ctx.layers, assets: ctx.assets };
 }

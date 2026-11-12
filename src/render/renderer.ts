@@ -162,6 +162,9 @@ interface Item {
   rasterBase: string | null;
   rasterKey: string | null; // last resolved atlas key
   raster: RasterResult | null; // placement of last raster
+  rasterScale: number; // bucket scale of the current raster
+  rasterGen: number; // atlas generation the raster belongs to
+  entry: import('./atlas').AtlasEntry | null;
 }
 
 const TR_KEYS: PropKey[] = ['anchor', 'position', 'scale', 'rotation', 'opacity', 'size', 'radius', 'fill', 'stroke', 'strokeWidth'];
@@ -249,7 +252,7 @@ export class Renderer {
 
   constructor(private store: Store, canvas?: HTMLCanvasElement) {
     this.canvas = canvas ?? document.createElement('canvas');
-    const gl = this.canvas.getContext('webgl2', { antialias: false, alpha: false, premultipliedAlpha: true, preserveDrawingBuffer: false, powerPreference: 'high-performance', desynchronized: true });
+    const gl = this.canvas.getContext('webgl2', { antialias: false, alpha: false, premultipliedAlpha: true, preserveDrawingBuffer: false, powerPreference: 'high-performance' });
     if (!gl) throw new Error('webgl2 not available');
     this.gl = gl;
     this.prog = this.buildProgram();
@@ -275,7 +278,7 @@ export class Renderer {
     gl.uniform1i(gl.getUniformLocation(this.prog, 'uTex'), 0);
 
     store.onChange(c => this.onChange(c));
-    setImageLoadedHandler(() => { for (const it of this.items) if (it.layer.type === 'image') it.rasterKey = null; this.dirty = true; });
+    setImageLoadedHandler(() => { for (const it of this.items) if (it.layer.type === 'image') { it.rasterKey = null; it.entry = null; } this.dirty = true; });
     this.canvas.addEventListener('webglcontextlost', e => e.preventDefault());
   }
 
@@ -331,7 +334,7 @@ export class Renderer {
       const it: Item = {
         id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10),
         hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden),
-        rasterBase: null, rasterKey: null, raster: null,
+        rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null,
       };
       if (parent >= 0) {
         const p = this.items[parent];
@@ -369,6 +372,7 @@ export class Renderer {
     }
     it.rasterBase = this.rasterBase(l, complex);
     it.rasterKey = null;
+    it.entry = null;
     this.evalItem(i, 0, true);
   }
 
@@ -476,17 +480,27 @@ export class Renderer {
   private resolveRaster(i: number, scale: number, budgetEnd: number): boolean {
     const it = this.items[i];
     const l = it.layer;
+    // fast path (no allocation): current raster is sharp enough and not wastefully large.
+    // the 1x..2.83x window is hysteresis so animated scale doesn't thrash re-rasters.
+    if (it.entry && !it.entry.dead && it.rasterScale >= scale * 0.999 && it.rasterScale <= scale * 2.83) {
+      it.entry.lastUsed = this.atlas.frame;
+      return true;
+    }
     const bucket = Math.min(16, Math.max(1 / 16, Math.pow(2, Math.ceil(Math.log2(Math.max(scale, 1e-3)) * 2) / 2)));
     const key = `${it.rasterBase}@${bucket}`;
-    if (it.rasterKey === key && this.atlas.get(key)) return true;
     const hit = this.atlas.get(key);
     if (hit && this.rasterMeta.has(key)) {
       it.rasterKey = key;
       it.raster = this.rasterMeta.get(key)!;
+      it.entry = hit; it.rasterScale = bucket; it.rasterGen = this.atlas.generation;
       return true;
     }
+    // shrinking but the current raster is still sharp: keep it (a smaller one is only nicer, not needed)
+    if (it.entry && !it.entry.dead && it.rasterScale >= scale && performance.now() > budgetEnd) { this.pendingUpgrade = true; return true; }
     // have an older resolution? keep it and upgrade when time allows
-    const hasOld = it.rasterKey && this.atlas.get(it.rasterKey);
+    const hasOld = !!it.entry && !it.entry.dead;
+    // never block a frame for long on first-time rasters (cold start / after eviction): pop in next frame
+    if (!hasOld && performance.now() > budgetEnd + 24) { this.pendingUpgrade = true; return false; }
     if (hasOld && performance.now() > budgetEnd) { this.pendingUpgrade = true; return true; }
     const S = this.style, os = i * ST;
     let r: RasterResult | null = null;
@@ -503,13 +517,14 @@ export class Renderer {
     if (this.atlasGen !== this.atlas.generation) {
       this.rasterMeta.clear();
       this.atlasGen = this.atlas.generation;
-      for (const x of this.items) x.rasterKey = null;
+      for (const x of this.items) { x.rasterKey = null; x.entry = null; }
     }
-    this.atlas.upload(e, r.data!);
+    this.atlas.upload(e, r.data);
     r.data = undefined as any; // free memory, keep placement
     this.rasterMeta.set(key, r);
     it.rasterKey = key;
     it.raster = r;
+    it.entry = e; it.rasterScale = bucket; it.rasterGen = this.atlas.generation;
     return true;
   }
   private rasterMeta = new Map<string, RasterResult>();
@@ -536,8 +551,9 @@ export class Renderer {
 
   get hasAnimation() { return this.items.some(i => i.animated); }
 
-  render(t: number) {
+  render(t: number, retry = false) {
     const f0 = performance.now();
+    const compactions0 = this.atlas.compactions + this.atlas.generation;
     const store = this.store;
     if (this.needsCompile) this.compile();
     if (this.dirtyLayers.size) {
@@ -591,9 +607,8 @@ export class Renderer {
         const r0 = performance.now();
         const ok = this.resolveRaster(i, scale, budgetEnd);
         rasterMs += performance.now() - r0;
-        if (!ok || !it.raster || !it.rasterKey) continue;
-        const ent = this.atlas.get(it.rasterKey);
-        if (!ent) continue;
+        if (!ok || !it.raster || !it.entry || it.entry.dead) continue;
+        const ent = it.entry;
         const r = it.raster;
         // matrix = W * S(gx,gy) * T(r.x, r.y)
         a *= gx; b *= gx; c *= gy; d *= gy;
@@ -634,9 +649,12 @@ export class Renderer {
       k++;
     }
     const w1 = performance.now();
+    // atlas was repacked while writing instances: earlier uvs are stale, redo the frame once
+    if (!retry && this.atlas.compactions + this.atlas.generation !== compactions0) { this.render(t, true); return; }
 
     // ---- gpu ----
     const gl = this.gl;
+    this.atlas.flush(); // all raster uploads of this frame: at most one call per atlas page
     const cw = this.canvas.width, ch = this.canvas.height;
     gl.viewport(0, 0, cw, ch);
     gl.disable(gl.SCISSOR_TEST);

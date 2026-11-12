@@ -1,0 +1,23 @@
+// real agent test: types a prompt into the sidebar, waits for the agent to finish, screenshots.
+import { chromium } from './pw.mjs';
+const prompt = process.argv[3] || 'Create a short logo reveal: three shapes in the center that pop in one after another with a bouncy spring, then a title "Hello" fading up below them. Keep it under 3 seconds.';
+const browser = await chromium.launch({ args: ['--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
+const errs = []; page.on('pageerror', e => errs.push(e.message));
+await page.goto('http://localhost:5173/?blank');
+await page.waitForSelector('.dot.connected', { timeout: 15000 });
+await page.waitForFunction(() => !document.querySelector('.agent-head select')?.textContent.includes('not found') || true);
+await page.fill('.agent-input textarea', prompt);
+const t0 = Date.now();
+await page.click('.agent-input button.primary');
+await page.waitForFunction(() => !document.querySelector('.msg.info')?.textContent.includes('working'), null, { timeout: 600000, polling: 1000 });
+console.log('agent finished in', Math.round((Date.now() - t0) / 1000), 's');
+const transcript = await page.evaluate(() => [...document.querySelectorAll('.agent-list .msg')].map(m => (m.classList.contains('tool') ? '[tool] ' : `[${m.className.replace('msg ', '')}] `) + m.textContent.slice(0, 160)));
+console.log(transcript.join('\n'));
+const info = await page.evaluate(() => ({ layers: Object.values(editor.store.project.layers).map(l => `${l.type}:${l.name}:${Object.keys(l.props).filter(k => l.props[k].kf?.length).join('+')}`) }));
+console.log(JSON.stringify(info));
+await page.evaluate(() => { editor.store.setTime(Math.min(2.5, editor.store.comp.duration)); });
+await page.waitForTimeout(300);
+await page.screenshot({ path: process.argv[2] });
+console.log(errs.length ? errs : 'no page errors');
+await browser.close();

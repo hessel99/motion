@@ -63,11 +63,16 @@ export class Timeline {
     new ResizeObserver(() => this.resize()).observe(host);
     this.resize();
     const st = ed.store;
-    st.on('doc', () => { this.rowsDirty = true; this.baseDirty = true; });
+    let lastDur = st.comp.duration;
+    st.on('doc', () => {
+      this.rowsDirty = true; this.baseDirty = true;
+      if (st.comp.duration !== lastDur) { lastDur = st.comp.duration; this.fitTime(); }
+    });
     st.on('selection', () => { this.baseDirty = true; });
     st.on('keys', () => { this.baseDirty = true; });
     st.on('time', () => { if (!st.playing) this.baseDirty = true; });
-    ed.on('loaded', () => { this.expanded.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
+    ed.on('loaded', () => {
+      lastDur = st.comp.duration; this.expanded.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
     ed.onFrame(() => this.frame());
     this.canvas.addEventListener('pointerdown', e => this.down(e));
     this.canvas.addEventListener('pointermove', e => this.move(e));

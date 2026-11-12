@@ -108,7 +108,7 @@ export function AgentPanel() {
               <pre>{JSON.stringify(m.tool!.input, null, 1)}</pre>
               {m.tool!.result && <pre>{m.tool!.result}</pre>}
             </details>
-          ) : <div class={'msg ' + m.role}>{m.text}</div>
+          ) : <div class={'msg ' + m.role}>{m.role === 'assistant' ? <Markdown text={m.text} /> : m.text}</div>
         ))}
         {busy && <div class="msg info">working…</div>}
       </div>
@@ -124,4 +124,17 @@ export function AgentPanel() {
       </div>
     </div>
   );
+}
+
+/** tiny markdown renderer: **bold**, `code`, - bullets. builds vnodes (never innerHTML) */
+function Markdown({ text }: { text: string }) {
+  const inline = (s: string) => s.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map(part =>
+    part.startsWith('**') && part.endsWith('**') ? <b>{part.slice(2, -2)}</b> : part.startsWith('`') && part.endsWith('`') ? <code>{part.slice(1, -1)}</code> : part);
+  return <>{text.split('\n').map(line => {
+    const b = line.match(/^\s*[-*]\s+(.*)/);
+    if (b) return <div class="md-li">• {inline(b[1])}</div>;
+    const h = line.match(/^#+\s+(.*)/);
+    if (h) return <div><b>{inline(h[1])}</b></div>;
+    return line.trim() ? <div>{inline(line)}</div> : <div class="md-gap" />;
+  })}</>;
 }
