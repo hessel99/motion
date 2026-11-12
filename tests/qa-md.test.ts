@@ -1,7 +1,16 @@
 // regressions from the motion-designer QA (docs/next-up.md, MD-xx)
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import { writeFileSync, mkdtempSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { GIFEncoder } from 'gifenc';
 import { Store } from '../src/core/store';
 import { addLayer, setProp, toggleAnimated, toggleKeyAtTime } from '../src/core/commands';
+import { gifDelaysCs } from '../src/export/gif';
+
+// the exporters read the live editor; these tests only need their pure helpers
+vi.mock('../src/app/editor', () => ({ editor: {} }));
 
 describe('MD-13: property shortcuts never wipe an animation', () => {
   it('Alt+Shift+<prop> toggles one key at the playhead, keeps the others', () => {
@@ -33,5 +42,36 @@ describe('MD-13: property shortcuts never wipe an animation', () => {
     expect(s.layer(l.id)!.props.rotation!.kf).toBeUndefined();
     s.undo();
     expect(s.layer(l.id)!.props.rotation!.kf!.length).toBe(2);
+  });
+});
+
+describe('MD-43: GIF frame delays add up to the comp duration', () => {
+  it('spreads the centisecond rounding (30 fps: 3,4,3 …), exact total for every fps', () => {
+    expect(gifDelaysCs(6, 30)).toEqual([3, 4, 3, 3, 4, 3]);
+    for (const fps of [10, 12, 15, 24, 25, 30, 50]) {
+      for (const sec of [1, 2, 3.5]) {
+        const n = Math.round(sec * fps);
+        const d = gifDelaysCs(n, fps);
+        expect(d.reduce((a, b) => a + b, 0)).toBe(Math.round((n * 100) / fps));
+        expect(Math.max(...d) - Math.min(...d)).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+  it('a 2 s, 30 fps GIF decodes to 2.0 s (graphic control blocks + ffprobe)', () => {
+    const gif = GIFEncoder();
+    const delays = gifDelaysCs(60, 30);
+    const pal = [[0, 0, 0], [255, 255, 255]];
+    for (let i = 0; i < 60; i++) gif.writeFrame(new Uint8Array(16).fill(i & 1), 4, 4, { palette: i === 0 ? pal : undefined, delay: delays[i] * 10 });
+    gif.finish();
+    const bytes = gif.bytes();
+    // graphic control extensions: 21 F9 04 flags delayLo delayHi …
+    let cs = 0;
+    for (let i = 0; i < bytes.length - 6; i++) if (bytes[i] === 0x21 && bytes[i + 1] === 0xf9 && bytes[i + 2] === 4) cs += bytes[i + 4] | (bytes[i + 5] << 8);
+    expect(cs).toBe(200);
+    try { execFileSync('ffprobe', ['-version'], { stdio: 'ignore' }); } catch { return; } // ffprobe not installed
+    const f = join(mkdtempSync(join(tmpdir(), 'gif-')), 't.gif');
+    writeFileSync(f, bytes);
+    const dur = +execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString().trim();
+    expect(dur).toBeCloseTo(2, 2);
   });
 });
