@@ -1,0 +1,69 @@
+{
+  "id": "12-hand-drawn",
+  "title": "Hand-drawn organic",
+  "complexity": "medium",
+  "style": [
+    "hand-drawn",
+    "organic"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "duration": 6
+  },
+  "prompt": "Hand-drawn, organic feel for a bakery called \"Crumb & Co\". A wobbly line-drawn wheat stalk and a loaf draw themselves on (stroke reveal), a few irregular blob shapes in warm earthy colors breathe slowly, the name appears in a friendly way. Imperfect is good: slight boil/wobble on the lines (like hand-animated at 12fps), soft eases, nothing mechanical.",
+  "checklist": [
+    {
+      "text": "name present",
+      "check": {
+        "type": "textContains",
+        "text": "Crumb"
+      }
+    },
+    {
+      "text": "stroke draw-on (trim paths animated)",
+      "check": {
+        "type": "trimAnimated"
+      }
+    },
+    {
+      "text": "custom paths (≥2)",
+      "check": {
+        "type": "pathLayersMin",
+        "min": 2
+      }
+    },
+    {
+      "text": "boil/wobble (wiggle expression, hold keys or path keys)",
+      "check": {
+        "type": "jitter"
+      }
+    },
+    {
+      "text": "breathing blobs (scale animated)",
+      "check": {
+        "type": "propAnimated",
+        "prop": "scale"
+      }
+    },
+    {
+      "text": "warm palette",
+      "check": {
+        "type": "hueRange",
+        "hues": [
+          [
+            15,
+            50
+          ]
+        ]
+      }
+    },
+    {
+      "text": "no linear eases",
+      "check": {
+        "type": "noLinear"
+      }
+    }
+  ]
+}

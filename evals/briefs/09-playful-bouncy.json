@@ -1,0 +1,70 @@
+{
+  "id": "09-playful-bouncy",
+  "title": "Playful bouncy",
+  "complexity": "medium",
+  "style": [
+    "playful",
+    "bouncy",
+    "cartoon"
+  ],
+  "comp": {
+    "width": 1080,
+    "height": 1080,
+    "fps": 60,
+    "duration": 5
+  },
+  "prompt": "Playful bouncy intro for a kids' app called \"Boop!\". Colorful candy shapes (circles, stars, rounded squares) drop in and bounce with squash & stretch, jostle each other, then the letters B-o-o-p-! hop in one by one like they're on a trampoline. Everything should feel elastic and joyful. End with a little idle wiggle.",
+  "checklist": [
+    {
+      "text": "\"Boop\" present (one layer or letter layers)",
+      "check": {
+        "type": "textOrLetters",
+        "text": "Boop"
+      }
+    },
+    {
+      "text": "per-letter hop (text animator by char or separate letter layers)",
+      "check": {
+        "type": "perLetter"
+      }
+    },
+    {
+      "text": "springs or Back eases",
+      "check": {
+        "type": "overshoot"
+      }
+    },
+    {
+      "text": "squash & stretch",
+      "check": {
+        "type": "squash"
+      }
+    },
+    {
+      "text": "star shapes present",
+      "check": {
+        "type": "starShape"
+      }
+    },
+    {
+      "text": "≥5 candy shapes",
+      "check": {
+        "type": "nonTextLayersMin",
+        "min": 5
+      }
+    },
+    {
+      "text": "idle wiggle at the end (motion in the last 0.8s)",
+      "check": {
+        "type": "activeAtEnd"
+      }
+    },
+    {
+      "text": "≥4 colors",
+      "check": {
+        "type": "paletteMin",
+        "min": 4
+      }
+    }
+  ]
+}

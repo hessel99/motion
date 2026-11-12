@@ -1,0 +1,72 @@
+{
+  "id": "06-loop-bg",
+  "title": "Seamless looping background",
+  "complexity": "medium",
+  "style": [
+    "ambient",
+    "gradient"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration": 6
+  },
+  "prompt": "A seamless looping ambient background for a conference stage screen: soft blurred-looking blobs/orbs in a purple-to-teal palette drifting slowly, plus a subtle grid of small dots that gently pulses. It must loop perfectly at 6 seconds (frame 0 == last frame), no visible jump. Calm, not busy.",
+  "checklist": [
+    {
+      "text": "loops seamlessly (first frame ≈ frame at the loop point)",
+      "check": {
+        "type": "loops"
+      }
+    },
+    {
+      "text": "everything moves (animated coverage ≥90%)",
+      "check": {
+        "type": "coverageMin",
+        "min": 0.9
+      }
+    },
+    {
+      "text": "≥3 blobs/orbs (ellipses)",
+      "check": {
+        "type": "layersOfTypeMin",
+        "layerType": "ellipse",
+        "min": 3
+      }
+    },
+    {
+      "text": "dot grid (≥15 layers)",
+      "check": {
+        "type": "layersMin",
+        "min": 15
+      }
+    },
+    {
+      "text": "uses loop expressions or matching first/last keys",
+      "check": {
+        "type": "loopTechnique"
+      }
+    },
+    {
+      "text": "purple/teal palette",
+      "check": {
+        "type": "hueRange",
+        "hues": [
+          [
+            250,
+            310
+          ],
+          [
+            160,
+            200
+          ]
+        ]
+      }
+    },
+    {
+      "text": "calm: no fast motion",
+      "check": null
+    }
+  ]
+}
