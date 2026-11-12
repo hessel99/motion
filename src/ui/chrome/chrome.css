@@ -382,14 +382,6 @@
 .sel-btn:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
 .sel-ask { padding: 0 var(--space-4) 0 var(--space-3); }
 .sel-sep { width: 1px; height: 16px; background: var(--border); margin: 0 2px; }
-.play-pill {
-  position: absolute; right: var(--space-5); bottom: var(--space-5); z-index: var(--z-canvas-ui); display: flex; align-items: center; gap: 2px; padding: 4px;
-  background: var(--surface-1); border-radius: var(--radius-pill); box-shadow: var(--shadow-1);
-}
-.pp-btn { width: 32px; min-width: 32px; height: 32px; min-height: 0; padding: 0; border: 0; border-radius: var(--radius-pill); background: transparent; color: var(--text-secondary); }
-.pp-btn:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
-.pp-btn.on, .pp-btn[aria-pressed='true'] { background: var(--tool-active); color: var(--tool-active-text); }
-.pp-btn svg { flex: none; }
 .app.previewing { grid-template-columns: 1fr; grid-template-rows: 1fr; grid-template-areas: 'center'; padding: 0; gap: 0; }
 .app.previewing > :not(.center):not(.dialog-backdrop):not(.askbar-backdrop) { display: none !important; }
 .app.previewing .center { border-radius: 0; }

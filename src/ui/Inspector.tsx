@@ -472,7 +472,7 @@ function CompPanel() {
         <FieldRow><ColorField value={c.background} onChange={col => setCompSettings(store, { background: col as any })} /></FieldRow>
       </Section>
       <Section title="Markers" onAdd={() => addMarker(store, store.time)} addLabel="Add a marker at the playhead (M)">
-        {(c.markers ?? []).length === 0 && <div class="muted small hint-text">Markers mark beats and moments: M at the playhead, or from an audio layer's beats. J / K and key drags snap to them.</div>}
+        {(c.markers ?? []).length === 0 && <div class="muted small" title="From an audio layer's beats too. J / K and key drags snap to them.">Press M to mark a moment at the playhead.</div>}
         {[...(c.markers ?? [])].sort((a, b) => a.t - b.t).map(m => (
           <div class="marker-row list-row">
             <button type="button" class="marker-time" title="Go to this marker" onClick={() => store.setTime(m.t)}>{m.t.toFixed(2)}s</button>

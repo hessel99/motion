@@ -13,7 +13,7 @@ theme (light works through the same tokens). Screenshots: `docs/shots/ui-v3/`
 │ Agent|Assets│ canvas card                                  │ inspector card           │
 │ (card)      │   ┌ selection bar ┐                          │  name · "Rectangle · in  │
 │  thread     │   [ layer ]                                  │  Group 14" · …           │
-│  composer   │        [tool pill · zoom]        [▶ ⟲ [] ⤢]  │  align · Position ·      │
+│  composer   │              [tool pill · zoom]              │  align · Position ·      │
 ├─────────────┴──────────────────────────────────────────────┤  Layout · Appearance ·   │
 │ timeline card: comp tabs · agent pill · transport · range · │  Fill · Stroke · …       │
 │ markers · auto-key · Keys|Graph|Speed · zoom ── rows ──     │  (nothing selected:      │
@@ -31,11 +31,10 @@ theme (light works through the same tokens). Screenshots: `docs/shots/ui-v3/`
 - **Side panel**: Agent | Assets (compositions, components, colors/numbers, imported files).
   Layers live in the timeline only.
 - **Canvas**: floating tool pill (select, hand, shapes with variants, pen, text, zoom + view
-  options), playback pill (play, loop, preview range, full-screen preview), a selection bar over
-  the selected layer, the brief box on an empty composition, a suggestion after an import.
+  options), a selection bar over the selected layer, the brief box on an empty composition, a suggestion after an import.
 - **Timeline**: compositions as pill tabs (+ new, close, double-click a precomp layer opens its
   tab), the agent's progress pill when the panel is hidden, compact transport (start, frame step,
-  play, loop, editable timecode, duration and fps menus), range, marker, auto-key, Keys | Graph |
+  play, loop, full-screen preview, editable timecode, duration and fps menus), range, marker, auto-key, Keys | Graph |
   Speed, a zoom slider. 28px rows; the beat the agent is building is highlighted.
 - **Inspector**: calm field rows (label · fields · keyframe diamond; ‹ › on hover when
   animated), sections with "+" / "−" where something can be added (Stroke, Markers). Section,
@@ -113,7 +112,7 @@ Every remaining control was clicked through after the change (e2e plus the scree
   A centered status line ("Beat 2/3 · Reveal · Writing… · 8s") replaces the boxed indicator.
   The storyboard card (concepts as a pick-one list with large rows, beats, approve) and the review
   card (diff, compare, revert, result contact sheet) stay: they are the director workflow and the
-  safety net. A "Jump to latest" pill appears when you scroll up while it streams.
+  safety net. A "Jump to latest" pill appears when you scroll up while it streams. One row per turn: while it runs, the activity row; once it changed the file, the review card ("added 3 layers · 13 steps") whose details hold the diff and the steps. Run stats (time, cost, tokens) go to the console, not the thread.
 - **Composer**: one rounded box. Enter sends, Shift+Enter is a newline, Esc stops a run (the send
   button turns into stop). Bottom left: "+" (add an image/SVG/audio, mention a layer, style,
   model) and "point at a layer on the canvas" (the next layer clicked becomes an @mention). Files
@@ -126,7 +125,7 @@ Every remaining control was clicked through after the change (e2e plus the scree
 | pattern (from AI design tools) | adapted here as |
 |---|---|
 | Floating bottom tool pill, active tool filled, zoom inside | Same, neutral filled active tool; the zoom's menu carries canvas view options (pixel grid, snapping, comp-fps playback, HUD). |
-| Second floating pill for page actions (preview, export, full screen) | A **playback** pill: play/pause, loop, preview range, full-screen preview (only the canvas, playing; Esc leaves). Placed bottom right instead of above the tool pill so it never covers the composition. |
+| Second floating pill for page actions (preview, export, full screen) | Not a second pill: playback already lives in the timeline transport, and a duplicate play/loop/range on the canvas was noise. The canvas-specific part, **full-screen preview** (only the canvas, playing; Esc leaves), is a button in the transport. |
 | Mini toolbar above the selected element | **Motion actions** above the selected layer: keyframe at the playhead (on what is animated, else position), ease its keys (springs and curves), show in the timeline, Ask. Hidden while dragging, playing or using another tool. |
 | Inline links to created items | Layer chips in agent replies: select the layer **and** jump the playhead to its animation start. Neutral chip with the layer-type icon. |
 | "Pick all that apply" question card | Storyboard **concepts** as a pick-one card with large rows and the choice mark on the right. Concept thumbnails are not available yet (the agent proposes concepts as text). |

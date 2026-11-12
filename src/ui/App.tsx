@@ -9,7 +9,7 @@ import { menuFrom, showContextMenu } from './menu';
 import { agentMenuItems } from './agent-menu';
 import { AskBar } from './chrome/AskBar';
 import { EmptyCanvas, ImportSuggestion } from './chrome/CanvasAgent';
-import { PlaybackPill, SelectionBar, stopPreview } from './chrome/CanvasBars';
+import { SelectionBar, stopPreview } from './chrome/CanvasBars';
 import { openBrowserFile, setupShortcuts, runBenchmark, toast } from '../app/actions';
 import { prefs, setPref } from '../app/prefs';
 import { cloneLayers, deleteLayers } from '../core/commands';
@@ -146,7 +146,6 @@ function Viewport() {
       <ImportSuggestion />
       <SelectionBar />
       <Toolbar><ZoomBadge /></Toolbar>
-      <PlaybackPill />
       <Hud />
     </div>
   );

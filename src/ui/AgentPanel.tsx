@@ -172,7 +172,8 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
         resultPreview(review.range).then(src => append(x => x.map(y => (y.review?.endId === review.endId && y.role === 'review' ? { ...y, preview: src } : y))));
       }
       const bits = [e.durationMs ? `${(e.durationMs / 1000).toFixed(1)}s` : '', e.costUsd ? `$${e.costUsd.toFixed(3)}` : '', e.usage ? `${fmtTok(e.usage.input)} in · ${fmtTok(e.usage.output)} out` : ''].filter(Boolean);
-      if (bits.length) append(x => [...x, { role: 'info', text: bits.join(' · ') }]);
+      // run stats (time, cost, tokens) are developer detail: the console, not the thread
+      if (bits.length) console.info('[agent turn]', bits.join(' · '));
     };
 
     const chatId = agentClient.chat({ provider, message, sessionId: session.current[provider], model: provider === 'claude' ? resolveModel(scope, model) : undefined, mode: m, maxTurns: turnBudget() }, (e: ChatEvent) => {
@@ -277,6 +278,10 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
   const ready = status === 'connected' && !turn;
   const mentioned = resolveMentions(s, input, mentions).filter(l => !s.selection.includes(l.id));
 
+  /** the review card that closes the turn a message belongs to (-1: none yet) */
+  const reviewOf = (i: number) => { for (let j = i + 1; j < msgs.length; j++) { if (msgs[j].role === 'user') return -1; if (msgs[j].role === 'review') return j; } return -1; };
+  /** the tool steps of the turn a review card closes */
+  const toolsOf = (r: number) => { const out: Msg[] = []; for (let j = r - 1; j >= 0 && msgs[j].role !== 'user'; j--) if (msgs[j].role === 'tool') out.unshift(msgs[j]); return out; };
   // render: consecutive tool steps collapse into one group
   const blocks: ({ kind: 'msg'; m: Msg; i: number } | { kind: 'tools'; items: { m: Msg; i: number }[] })[] = [];
   msgs.forEach((m, i) => {
@@ -366,13 +371,17 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
               </div>
             )}
             {blocks.map(b => b.kind === 'tools' ? (
+              // a finished turn with a review card: its steps live inside the card (one row per turn)
+              reviewOf(b.items[b.items.length - 1].i) >= 0 ? null :
               <ToolGroup items={b.items.map(x => x.m)} running={!!turn && b.items[b.items.length - 1].i === lastToolIndex(msgs)} layerName={layerName} />
             ) : (() => {
               const { m, i } = b;
               if (m.role === 'storyboard' && m.storyboard) return <StoryboardCard sb={m.storyboard} busy={!ready} onApprove={approveStoryboard} />;
               if (m.role === 'review') return (
                 <>
-                  <TurnReview review={m.review!} busy={!!turn} onState={(st, note) => setReview(i, st, note)} />
+                  <TurnReview review={m.review!} busy={!!turn} onState={(st, note) => setReview(i, st, note)}>
+                    {toolsOf(i).length > 0 && <ToolGroup items={toolsOf(i)} running={false} layerName={layerName} />}
+                  </TurnReview>
                   {/* below the card: arriving late, it must not shift the card's buttons */}
                   {m.preview === 'pending' && <div class="ag-result pending" style={{ aspectRatio: previewAspect() }} />}
                   {m.preview && m.preview !== 'pending' && <button type="button" class="ag-result" title="Replay the result" onClick={() => { const r = m.review!.range; s.setTime(Math.max(0, (r?.[0] ?? 0) - 0.1)); editor.play(); }}><img src={m.preview} alt="Result: frames over time" data-testid="result-preview" /></button>}

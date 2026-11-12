@@ -1,8 +1,7 @@
 // canvas pills for motion (the reference patterns, translated):
 // - SelectionBar: a small bar floating above the selected layer(s) with motion actions: a key at
 //   the playhead, an ease for its keys, ask the agent about it, show it in the timeline.
-// - PlaybackPill: bottom right, playback and preview: play / pause, loop, the preview range,
-//   full-screen preview (Esc leaves it).
+// - full-screen preview (the transport's ⤢ button): only the canvas, playing; Esc leaves it.
 // positions are written straight into the dom per frame (only when they change).
 
 import { useEffect, useRef, useState } from 'preact/hooks';
@@ -13,7 +12,7 @@ import { setSpring } from '../../core/commands';
 import type { PropKey } from '../../core/model';
 import { useChannels } from '../hooks';
 import { menuFrom } from '../menu';
-import { Diamond, Maximize2, Pause, Play, Repeat, Sparkles, Spline, Brackets, Rows3 } from './icons';
+import { Diamond, Sparkles, Spline, Rows3 } from './icons';
 import { setUi, ui } from './ui-state';
 import { view } from './view';
 
@@ -85,21 +84,6 @@ export function SelectionBar() {
       <button type="button" class="sel-btn" data-tooltip="Show in the timeline" data-tooltip-side="top" onClick={() => { for (const id of ids) view.tl?.expand(id, true); view.tl?.reveal(ids[0]); }}><Rows3 size={14} /></button>
       <span class="sel-sep" aria-hidden="true" />
       <button type="button" class="sel-btn sel-ask" onClick={() => editor.emit('ask-bar')}><Sparkles size={14} />Ask</button>
-    </div>
-  );
-}
-
-export function PlaybackPill() {
-  useChannels(['playing', 'workarea'], ['view', 'ui']);
-  const s = editor.store;
-  const wa = s.workArea;
-  return (
-    <div class="play-pill vp-ui" role="toolbar" aria-label="Playback">
-      <button type="button" class="pp-btn" data-tooltip={s.playing ? 'Pause (Space)' : 'Play (Space)'} data-tooltip-side="top" aria-label={s.playing ? 'Pause' : 'Play'} onClick={() => editor.togglePlay()}>{s.playing ? <Pause size={14} /> : <Play size={14} />}</button>
-      <button type="button" class={'pp-btn' + (s.loop ? ' on' : '')} aria-pressed={s.loop} data-tooltip={s.loop ? 'Loop: on' : 'Loop: off'} data-tooltip-side="top" onClick={() => { s.loop = !s.loop; editor.emit('view'); }}><Repeat size={14} /></button>
-      <button type="button" class={'pp-btn' + (wa ? ' on' : '')} aria-pressed={!!wa} data-tooltip={wa ? 'Preview range on (click: whole composition)' : 'Preview only from the playhead to the end (B / N)'} data-tooltip-side="top"
-        onClick={() => { s.workArea = wa ? null : [s.time, s.comp.duration]; s.emit('workarea'); }}><Brackets size={14} /></button>
-      <button type="button" class="pp-btn" data-tooltip="Full-screen preview (Esc to leave)" data-tooltip-side="top" onClick={() => startPreview()}><Maximize2 size={14} /></button>
     </div>
   );
 }

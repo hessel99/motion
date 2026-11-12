@@ -13,7 +13,8 @@ import { addMarker, addPrecompLayer, editMode, newComposition, renameComp, setCo
 import { useChannels } from '../hooks';
 import { menuFrom, showContextMenu, type MenuItem } from '../menu';
 import { Button, Segmented } from '../ui';
-import { Bookmark, Brackets, Pause, Play, Plus, Repeat, SkipBack, StepBack, StepForward, X } from './icons';
+import { Bookmark, Brackets, Maximize2, Pause, Play, Plus, Repeat, SkipBack, StepBack, StepForward, X } from './icons';
+import { startPreview } from './CanvasBars';
 import { fmtDuration, fmtTimecode, view } from './view';
 import { setUi, STAGE_MIN, TL_MIN, ui } from './ui-state';
 import { agentProgress } from '../agent-bridge';
@@ -139,6 +140,7 @@ function Transport() {
       <Button variant="ghost" icon size="sm" tip="Next frame (.) · next key (K)" tipSide="top" onClick={() => editor.stepFrames(1)}><StepForward /></Button>
       <Button variant="ghost" icon size="sm" class="tp-loop" active={s.loop} tip={s.loop ? 'Loop: on' : 'Loop: off'} tipSide="top"
         onClick={() => { s.loop = !s.loop; editor.emit('view'); }}><Repeat /></Button>
+      <Button variant="ghost" icon size="sm" tip="Full-screen preview (Esc to leave)" tipSide="top" onClick={() => startPreview()}><Maximize2 /></Button>
       <input ref={time} class="tp-time" aria-label="Current time (minutes:seconds:frames)" title="Current time: type 1:12, 2.5 (seconds) or 90f" spellcheck={false} defaultValue="00:00:00"
         onFocus={e => { editing.current = true; (e.target as HTMLInputElement).select(); }}
         onBlur={e => commit(e.target as HTMLInputElement)}

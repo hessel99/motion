@@ -73,7 +73,7 @@ await page.keyboard.type('graph');
 await press('Enter');
 check('ask bar runs a command', await ev(() => timeline.mode) === 'graph');
 // playback pill: full-screen preview
-await click('.play-pill .pp-btn >> nth=3');
+await click('.tp button[data-tooltip^="Full-screen"]');
 await page.waitForTimeout(300);
 check('full-screen preview', await page.locator('.app.previewing').count() === 1);
 await press('Escape');
