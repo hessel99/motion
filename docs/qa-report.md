@@ -36,6 +36,7 @@ The existing `scripts/e2e.mjs`, `scripts/ui-check.mjs`, `scripts/audio-smoke.mjs
 |---|---|---|
 | O-2 | Agent turn revert: Revert undoes the turn's N steps one by one, so ⌘⇧Z afterwards brings the turn back one step at a time (first just "Add rect", a half-built state) while the card still says "Reverted". Either squash the turn into one undo step at the end (`Store.squashSince`, as storyboard beats do; careful with edits the user makes during the turn) or make the card follow redo. Needs an owner decision. | agent |
 | O-3 | Settings → Appearance → GPU engine: the long renderer string is cut off mid-word without an ellipsis. | settings / shell |
+| O-4 | `tests/pathops.test.ts` "is fast enough for detailed shapes" has a hard 30 ms limit; it failed once at 30.05 ms while the machine was loaded (passes on rerun). Flaky under load: loosen or measure the best of several runs. | tests |
 | O-1 | Export file names differ per format for the same comp: `Demo.mp4`, `Demo.json`, but `Demo - Logo reveal.gif` / `.html`, `Demo_0000.png`. | export-parity |
 
 ## Checked and working
