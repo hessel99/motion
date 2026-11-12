@@ -179,3 +179,19 @@ describe('boot + rollback decision', () => {
     for (const bad of ['../x', 'a/../../x', '/etc/passwd', 'C:\\x', 'a\\..\\..\\x', '']) expect(core.safeEntryName(bad)).toBeNull();
   });
 });
+
+describe('signing key parsing is tolerant of how secrets get pasted', () => {
+  it('accepts mangled line breaks, quotes, CRLF and a bare base64 body', async () => {
+    const crypto = await import('node:crypto');
+    const core = (await import('../electron/updates/core.cjs')).default ?? await import('../electron/updates/core.cjs');
+    const { privateKey } = crypto.generateKeyPairSync('ed25519');
+    const pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
+    const body = pem.split('\n').filter(l => !l.startsWith('-----')).join('');
+    const want = crypto.createPublicKey(privateKey).export({ type: 'spki', format: 'der' });
+    for (const v of [pem, pem.replace(/\n/g, ' '), pem.replace(/\n/g, '\\n'), JSON.stringify(pem), pem.replace(/\n/g, '\r\n'), body, `  ${pem}  `]) {
+      const got = crypto.createPublicKey(core.privateKeyFromPem(v)).export({ type: 'spki', format: 'der' });
+      expect(got.equals(want)).toBe(true);
+    }
+    expect(() => core.privateKeyFromPem('')).toThrow();
+  });
+});

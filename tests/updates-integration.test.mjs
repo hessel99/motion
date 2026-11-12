@@ -37,7 +37,7 @@ function fakeDist(name, marker) {
 function release(feedDir, { version, dist, key = keyFile, extra = [] }) {
   return execFileSync(process.execPath, [path.join(root, 'scripts/release.mjs'),
     '--version', version, '--dist', dist, '--out', feedDir, '--no-shell', '--key', key, '--allow-other-key', ...extra,
-  ], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  ], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, MOTION_UPDATE_PRIVATE_KEY: '' } });
 }
 
 // one http server; `served` points at the folder that is "the release" right now; `tamper` flips bytes

@@ -52,7 +52,19 @@ function generateKeyPair() {
   const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
   return { publicKey: publicKeyToBase64(publicKey), privateKeyPem: privateKey.export({ format: 'pem', type: 'pkcs8' }).toString() };
 }
-const privateKeyFromPem = pem => crypto.createPrivateKey(String(pem));
+/**
+ * private key from a PEM, tolerant of how secrets get pasted: literal "\n", line breaks turned
+ * into spaces, CRLF, surrounding quotes/whitespace, or just the base64 body (PKCS#8 DER)
+ */
+function privateKeyFromPem(pem) {
+  let s = String(pem).trim().replace(/^["']|["']$/g, '').replace(/\\n/g, '\n').replace(/\r/g, '');
+  const m = /-----BEGIN ([A-Z ]+)-----([\s\S]*?)-----END \1-----/.exec(s);
+  const label = m ? m[1] : 'PRIVATE KEY';
+  const body = (m ? m[2] : s).replace(/[^A-Za-z0-9+/=]/g, '');
+  if (!body) throw new Error('signing key is empty');
+  const lines = body.match(/.{1,64}/g).join('\n');
+  return crypto.createPrivateKey(`-----BEGIN ${label}-----\n${lines}\n-----END ${label}-----\n`);
+}
 
 /** JSON with sorted keys and no whitespace: the exact bytes that get signed */
 function canonicalJson(v) {

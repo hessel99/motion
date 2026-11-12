@@ -44,9 +44,11 @@ const baseUrl = opt('base-url', '');
 const urlFor = (name) => (baseUrl ? `${baseUrl.replace(/\/+$/, '')}/${encodeURIComponent(name)}` : name);
 
 // ---- key
-let pem = process.env.MOTION_UPDATE_PRIVATE_KEY;
-const keyFile = opt('key', fs.existsSync(path.join(root, '.update-key/private.pem')) ? path.join(root, '.update-key/private.pem') : null);
-if (!pem && keyFile) pem = fs.readFileSync(path.resolve(root, keyFile), 'utf8');
+// an explicit --key wins; then the env secret (CI); then the local key file
+const explicitKey = opt('key', null);
+let pem = explicitKey ? fs.readFileSync(path.resolve(root, explicitKey), 'utf8') : process.env.MOTION_UPDATE_PRIVATE_KEY;
+const keyFile = fs.existsSync(path.join(root, '.update-key/private.pem')) ? path.join(root, '.update-key/private.pem') : null;
+if (!pem && keyFile) pem = fs.readFileSync(keyFile, 'utf8');
 if (!pem) die('no signing key: set MOTION_UPDATE_PRIVATE_KEY or pass --key FILE (create one with `node scripts/gen-update-key.mjs`)');
 const privateKey = core.privateKeyFromPem(pem);
 const derivedPublic = core.publicKeyToBase64(crypto.createPublicKey(privateKey));
