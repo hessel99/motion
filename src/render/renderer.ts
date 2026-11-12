@@ -1801,19 +1801,7 @@ export class Renderer {
       mask[i] = 0;
       if (O[i] <= 0.0005) { lastK[i] = -1; continue; }
       const bits = BITS[i], kind = KIND[i];
-      let fxf: FxFrame | null = null;
-      if ((bits & SB_FX) && !stack.some(r => r.maskEnd > i) && (fxf = this.planFx(i, t, z, px0, py0, cw0, ch0))) {
-        // shader effects: render the layer (with its children) offscreen, then the effect chain
-        // runs on it (render/shader-host.ts) and its result is composited (CMD_FXPOP)
-        flush();
-        const box = newBox();
-        boxes[box] = fxf.sx0; boxes[box + 1] = fxf.sy0; boxes[box + 2] = fxf.sx1; boxes[box + 3] = fxf.sy1;
-        this.fxOf.set(box, fxf);
-        cmds.push(CMD_PUSH, box, 0);
-        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box, fx: -1, kStart: k, mode: 0, sfx: true });
-        div = O[i];
-        isolated++;
-      } else if ((bits & 1) && !(top && top.maskEnd > i)) {
+      if ((bits & 1) && !(top && top.maskEnd > i)) {
         // masks the following siblings: region = rest of the parent's subtree
         flush();
         const box = newBox();
@@ -1838,6 +1826,20 @@ export class Renderer {
         const box = newBox();
         cmds.push(CMD_PUSH, box, 0);
         stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box, fx: -1, kStart: k, mode: 0 });
+        div = O[i];
+        isolated++;
+      }
+      let fxf: FxFrame | null = null;
+      if ((bits & SB_FX) && !stack.some(r => r.maskEnd > i) && (fxf = this.planFx(i, t, z, px0, py0, cw0, ch0))) {
+        // shader effects: render the layer (with its children) offscreen, then the effect chain
+        // runs on it (render/shader-host.ts) and its result is composited (CMD_SFXPOP). nested inside
+        // the effect pipeline's region / group opacity when the layer has those too (they apply on top)
+        flush();
+        const box = newBox();
+        boxes[box] = fxf.sx0; boxes[box + 1] = fxf.sy0; boxes[box + 2] = fxf.sx1; boxes[box + 3] = fxf.sy1;
+        this.fxOf.set(box, fxf);
+        cmds.push(CMD_PUSH, box, 0);
+        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box, fx: -1, kStart: k, mode: 0, sfx: true });
         div = O[i];
         isolated++;
       }
