@@ -4,7 +4,7 @@ const prompt = process.argv[3] || 'Create a short logo reveal: three shapes in t
 const browser = await chromium.launch({ args: ['--ignore-gpu-blocklist'] });
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
 const errs = []; page.on('pageerror', e => errs.push(e.message));
-await page.goto('http://localhost:5173/?blank');
+await page.goto((process.env.URL || 'http://localhost:5173/') + '?blank');
 await page.waitForSelector('.dot.connected', { timeout: 15000 });
 await page.waitForFunction(() => !document.querySelector('.agent-head select')?.textContent.includes('not found') || true);
 await page.fill('.agent-input textarea', prompt);

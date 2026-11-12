@@ -118,6 +118,23 @@ check('drag keyframe in timeline', newT > keyMoved.t + 0.2, `${keyMoved.t} -> ${
   await page.mouse.click(tl.x + timeline_leftW() - 90, tl.y + 14); // back to keys
 }
 
+// motion path: drag the 2nd position keyframe on the canvas, alt-click the 1st to curve it
+{
+  await page.keyboard.press('Escape');
+  const lid = await ev(() => { const id = Object.values(editor.store.project.layers).find(l => l.props.position?.kf?.length >= 2).id; editor.store.select([id]); return id; });
+  await page.waitForTimeout(100);
+  const pts = await ev(() => viewport.pathPoints().filter(p => p.part === 'key'));
+  const v0 = await ev((id) => editor.store.layer(id).props.position.kf[1].v.slice(), lid);
+  await page.mouse.move(vp.x + pts[1].x, vp.y + pts[1].y); await page.mouse.down(); await page.mouse.move(vp.x + pts[1].x + 40, vp.y + pts[1].y - 20, { steps: 4 }); await page.mouse.up();
+  const v1 = await ev((id) => editor.store.layer(id).props.position.kf[1].v.slice(), lid);
+  const z = await ev(() => viewport.zoom);
+  check('drag motion path keyframe', Math.abs((v1[0] - v0[0]) * z - 40) < 1.5 && Math.abs((v1[1] - v0[1]) * z + 20) < 1.5, `${v0} -> ${v1}`);
+  await page.keyboard.down('Alt'); await page.mouse.click(vp.x + pts[0].x, vp.y + pts[0].y); await page.keyboard.up('Alt');
+  const so = await ev((id) => editor.store.layer(id).props.position.kf[0].sOut, lid);
+  check('alt-click curves a motion path key', !!so && (so[0] !== 0 || so[1] !== 0), JSON.stringify(so));
+  await page.keyboard.press('Control+z'); await page.keyboard.press('Control+z');
+}
+
 // scrub ruler
 await page.mouse.click(tl.x + 700, tl.y + 10);
 const tScrub = await ev(() => editor.store.time);

@@ -14,7 +14,8 @@ type Drag =
   | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: string[] }
   | { kind: 'create'; type: 'rect' | 'ellipse'; cx: number; cy: number; id: string | null }
   | { kind: 'resize'; id: string; handle: number; inv: number[]; size: number[]; anchor: number[]; local: number[]; shift: boolean }
-  | { kind: 'rotate'; id: string; cx: number; cy: number; a0: number; r0: number };
+  | { kind: 'rotate'; id: string; cx: number; cy: number; a0: number; r0: number }
+  | { kind: 'pathkey'; id: string; idx: number; part: 'key' | 'out' | 'in'; inv: number[]; sx: number; sy: number; v0: number[] };
 
 const HANDLE = 8;
 
@@ -170,6 +171,30 @@ export class ViewportController {
     return null;
   }
 
+  /** motion path: keyframes + spatial tangent handles of selected layers (screen space) */
+  private pathPoints() {
+    const st = this.ed.store, r = this.ed.renderer;
+    const out: { id: string; idx: number; part: 'key' | 'out' | 'in'; x: number; y: number }[] = [];
+    for (const id of st.selection) {
+      const l = st.layer(id);
+      const kf = l?.props.position?.kf;
+      if (!l || !kf || kf.length < 2) continue;
+      const pw = l.parent ? r.worldMatrix(l.parent) : [1, 0, 0, 1, 0, 0];
+      if (!pw) continue;
+      const P = (x: number, y: number) => this.toScreen(pw[0] * x + pw[2] * y + pw[4], pw[1] * x + pw[3] * y + pw[5]);
+      kf.forEach((k, i) => {
+        const [sx, sy] = P(k.v[0], k.v[1]);
+        out.push({ id, idx: i, part: 'key', x: sx, y: sy });
+        const keySel = st.keySelection.has(`${id}|position|${i}`);
+        if (keySel || k.sOut?.some(v => v) || k.sIn?.some(v => v)) {
+          if (i < kf.length - 1 && k.sOut) { const [hx, hy] = P(k.v[0] + k.sOut[0], k.v[1] + k.sOut[1]); out.push({ id, idx: i, part: 'out', x: hx, y: hy }); }
+          if (i > 0 && k.sIn) { const [hx, hy] = P(k.v[0] + k.sIn[0], k.v[1] + k.sIn[1]); out.push({ id, idx: i, part: 'in', x: hx, y: hy }); }
+        }
+      });
+    }
+    return out;
+  }
+
   /** screen-space handle points: 0 tl,1 t,2 tr,3 r,4 br,5 b,6 bl,7 l */
   private handlePoints(c: number[]) {
     const s = (i: number) => this.toScreen(c[i * 2], c[i * 2 + 1]);
@@ -211,7 +236,33 @@ export class ViewportController {
       setTimeout(() => this.onTextEdit?.(l.id), 0);
       return;
     }
-    // select tool
+    // select tool: motion path keys / tangents first
+    const pp = this.pathPoints().reverse().find(p => Math.hypot(p.x - x, p.y - y) <= (p.part === 'key' ? 6 : 5));
+    if (pp) {
+      const l = st.layer(pp.id)!;
+      const kf = l.props.position!.kf!;
+      const k = kf[pp.idx];
+      if (pp.part === 'key' && e.altKey) {
+        // alt-click: toggle curve handles (straight <-> smooth) for this key
+        const curved = k.sOut?.some(v => v) || k.sIn?.some(v => v);
+        const prev = kf[pp.idx - 1], next = kf[pp.idx + 1];
+        const dir = prev && next ? [(next.v[0] - prev.v[0]) / 6, (next.v[1] - prev.v[1]) / 6] : next ? [(next.v[0] - k.v[0]) / 3, (next.v[1] - k.v[1]) / 3] : prev ? [(k.v[0] - prev.v[0]) / 3, (k.v[1] - prev.v[1]) / 3] : [0, 0];
+        st.transact('Toggle path curve', tx => {
+          const nk = kf.map((f, i) => (i === pp.idx ? { ...f, sOut: curved ? [0, 0] : dir, sIn: curved ? [0, 0] : [-dir[0], -dir[1]] } : f));
+          tx.keepKeys = true;
+          tx.set(l.props.position!, 'kf', nk);
+          tx.touch(l.id);
+        });
+        return;
+      }
+      st.keySelection = new Set([`${pp.id}|position|${pp.idx}`]);
+      st.emit('keys');
+      const pw = l.parent ? this.ed.renderer.worldMatrix(l.parent)! : [1, 0, 0, 1, 0, 0];
+      const v0 = pp.part === 'key' ? k.v.slice() : (pp.part === 'out' ? (k.sOut ?? [0, 0]) : (k.sIn ?? [0, 0])).slice();
+      this.drag = { kind: 'pathkey', id: pp.id, idx: pp.idx, part: pp.part, inv: invert(pw), sx: x, sy: y, v0 };
+      st.beginGesture('pathkey');
+      return;
+    }
     const h = this.handleAt(x, y);
     if (h) {
       const l = st.layer(h.id)!;
@@ -426,6 +477,26 @@ export class ViewportController {
         setTx(tx, l, 'anchor', [round2(na[0]), round2(na[1])]);
         setTx(tx, l, 'position', [round2(pos[0]), round2(pos[1])]);
       });
+    } else if (d.kind === 'pathkey') {
+      const dcx = (x - d.sx) / this.zoom, dcy = (y - d.sy) / this.zoom;
+      const dx = d.inv[0] * dcx + d.inv[2] * dcy, dy = d.inv[1] * dcx + d.inv[3] * dcy;
+      const l = st.layer(d.id);
+      const p = l?.props.position;
+      if (!l || !p?.kf) return;
+      const nv = [Math.round((d.v0[0] + dx) * 100) / 100, Math.round((d.v0[1] + dy) * 100) / 100];
+      st.transact('Edit motion path', tx => {
+        tx.keepKeys = true;
+        const kf = p.kf!.map((f, i) => {
+          if (i !== d.idx) return f;
+          if (d.part === 'key') return { ...f, v: nv };
+          // tangent: keep the opposite one mirrored unless alt is held (broken tangents)
+          const mirror = !e.altKey;
+          if (d.part === 'out') return { ...f, sOut: nv, ...(mirror ? { sIn: [-nv[0], -nv[1]] } : {}) };
+          return { ...f, sIn: nv, ...(mirror ? { sOut: [-nv[0], -nv[1]] } : {}) };
+        });
+        tx.set(p, 'kf', kf);
+        tx.touch(l.id);
+      });
     } else if (d.kind === 'rotate') {
       const [cx, cy] = this.toComp(x, y);
       let deg = d.r0 + (Math.atan2(cy - d.cy, cx - d.cx) - d.a0) * 180 / Math.PI;
@@ -535,6 +606,17 @@ export class ViewportController {
       g.setLineDash([4, 3]);
       g.stroke();
       g.setLineDash([]);
+      // spatial tangent handles
+      for (const pt of this.pathPoints()) {
+        if (pt.part === 'key' || pt.id !== id) continue;
+        const k = p.kf[pt.idx];
+        const kx = pw[0] * k.v[0] + pw[2] * k.v[1] + pw[4], ky = pw[1] * k.v[0] + pw[3] * k.v[1] + pw[5];
+        const [ax, ay] = this.toScreen(kx, ky);
+        g.strokeStyle = 'rgba(255,255,255,0.55)';
+        g.beginPath(); g.moveTo(ax, ay); g.lineTo(pt.x, pt.y); g.stroke();
+        g.fillStyle = '#ffd34d';
+        g.beginPath(); g.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2); g.fill();
+      }
       // frame ticks + keyframe squares
       g.fillStyle = accent;
       for (const k of p.kf) {
