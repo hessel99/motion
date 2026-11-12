@@ -58,7 +58,7 @@ check('interpolates at 0.5s', mid && mid[4] > kfs[0][1][0] - 200, JSON.stringify
 
 // timeline shows prop rows, select keys by marquee in timeline and apply ease via F9
 const tl = await page.locator('.timeline').boundingBox();
-await page.mouse.move(tl.x + tl.width - 60, tl.y + 28 + 24 + 6); await page.mouse.down(); await page.mouse.move(tl.x + 306, tl.y + 120, { steps: 6 }); await page.mouse.up();
+await page.mouse.move(tl.x + tl.width - 60, tl.y + 28 + 28 + 6); await page.mouse.down(); await page.mouse.move(tl.x + 306, tl.y + 120, { steps: 6 }); await page.mouse.up();
 const ksel = await ev(() => editor.store.keySelection.size);
 check('timeline marquee selects keys', ksel >= 2, `selected ${ksel}`);
 await page.keyboard.press('F9');
@@ -74,7 +74,7 @@ const keyMoved = await ev(() => {
   return { t: l.props.position.kf[1].t, x: timeline.tToX(l.props.position.kf[1].t), rows: timeline.rows.map(r => r.kind + ':' + (r.prop || '')) };
 });
 const rowIdx = keyMoved.rows.indexOf('prop:position');
-const ky = tl.y + 28 + rowIdx * 24 + 12;
+const ky = tl.y + 28 + rowIdx * 28 + 14;
 await page.mouse.click(tl.x + 200, tl.y + 300); // deselect keys (empty area)
 await page.mouse.move(tl.x + keyMoved.x, ky); await page.mouse.down(); await page.mouse.move(tl.x + keyMoved.x + 100, ky, { steps: 6 }); await page.mouse.up();
 const newT = await ev(() => editor.store.layer(editor.store.selection[0])?.props.position.kf?.[1]?.t);
@@ -83,7 +83,7 @@ check('drag keyframe in timeline', newT > keyMoved.t + 0.2, `${keyMoved.t} -> ${
 // drag layer bar: moves the whole layer + keys in time
 {
   const k0 = await ev(() => editor.store.layer(editor.store.selection[0]).props.position.kf.map(k => k.t));
-  const bx = tl.x + 700, by = tl.y + 28 + 12;
+  const bx = tl.x + 700, by = tl.y + 28 + 14;
   await page.mouse.move(bx, by); await page.mouse.down(); await page.mouse.move(bx + 60, by, { steps: 5 }); await page.mouse.up();
   const k1 = await ev(() => { const l = editor.store.layer(editor.store.selection[0]); return { t: l.props.position.kf.map(k => k.t), inP: l.inPoint }; });
   const dt = k1.t[0] - k0[0];
@@ -108,14 +108,14 @@ check('drag keyframe in timeline', newT > keyMoved.t + 0.2, `${keyMoved.t} -> ${
 {
   const lid = await ev(() => editor.store.selection[0]);
   await ev((id) => { editor.store.keySelection = new Set([id + '|position|0']); editor.store.emit('keys'); timeline.expand(id, true); }, lid);
-  await page.mouse.click(tl.x + timeline_leftW() - 80, tl.y + 14);
+  await page.click('.tt-mode button:nth-child(2)'); // Graph (timeline header)
   await page.waitForTimeout(150);
   const before = await ev((id) => editor.store.layer(id).props.position.kf[0].out.slice(), lid);
   const h = await ev(() => { const gv = timeline.graph; const c = gv.curves.find(c => c.handles); const kf = c.layer.props[c.key].kf; return gv.handlePos(c, kf, 0); });
   await page.mouse.move(tl.x + h.ox, tl.y + h.oy); await page.mouse.down(); await page.mouse.move(tl.x + h.ox + 40, tl.y + h.oy - 30, { steps: 5 }); await page.mouse.up();
   const after = await ev((id) => editor.store.layer(id).props.position.kf[0].out.slice(), lid);
   check('graph editor handle drag edits easing', after[0] !== before[0] || after[1] !== before[1], `${before} -> ${after}`);
-  await page.mouse.click(tl.x + timeline_leftW() - 128, tl.y + 14); // back to keys
+  await page.click('.tt-mode button:nth-child(1)'); // back to keys
 }
 
 // motion path: drag the 2nd position keyframe on the canvas, alt-click the 1st to curve it

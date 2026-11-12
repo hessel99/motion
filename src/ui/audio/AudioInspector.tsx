@@ -211,7 +211,7 @@ export function MusicActionsRow() {
           {lens.phrase && Math.abs(lens.phrase - s.comp.duration) > 0.05 && lens.phrase < lens.full && <button type="button" class="au-btn" title="End on the next 4-bar phrase" onClick={() => setCompSettings(s, { duration: Math.round(lens.phrase! * s.comp.fps) / s.comp.fps })}>Phrase {lens.phrase.toFixed(1)} s</button>}
         </span>
       </div>
-      <div class="muted small">{beats(m).length} beats in the comp · ♪ in the timeline header toggles snapping</div>
+      <div class="muted small">{beats(m).length} beats in the comp · Alt-drag (Shift-scrub) ignores the beats</div>
     </>
   );
 }

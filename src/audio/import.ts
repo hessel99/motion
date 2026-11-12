@@ -48,7 +48,8 @@ export async function importAudioFile(f: File, opts: { at?: number } = {}) {
   const l = addAudioLayer(f.name.replace(/\.[^.]+$/, ''), data, f.type || MIME[ext] || 'audio/mpeg', opts);
   const { toast } = await import('../app/actions');
   toast(`Audio added at ${(l.startTime ?? 0).toFixed(2)}s · analysing the music…`);
-  await offerAfterImport(l);
+  void offerAfterImport(l);
+  return l;
 }
 
 /** after decode + analysis: fit-comp offer and the sync offer */

@@ -121,6 +121,19 @@ ipcMain.handle('file:save', async (_e, opts = {}) => {
   return writeFromRenderer(target, opts.data, opts.encoding);
 });
 
+// figma importer debugging (src/app/figma-capture.ts): with MOTION_FIGMA_CAPTURE_DIR set, every figma
+// paste is also written into that folder. names are sanitized; nothing is written without the env var.
+const FIGMA_CAPTURE_DIR = process.env.MOTION_FIGMA_CAPTURE_DIR ? path.resolve(process.env.MOTION_FIGMA_CAPTURE_DIR) : null;
+ipcMain.handle('figma:captureDir', () => FIGMA_CAPTURE_DIR);
+ipcMain.handle('figma:captureWrite', async (_e, name, text) => {
+  if (!FIGMA_CAPTURE_DIR) return null;
+  const safe = String(name || 'figma-paste.figcapture.json').replace(/[^\w.-]+/g, '_').slice(0, 120);
+  await fs.mkdir(FIGMA_CAPTURE_DIR, { recursive: true });
+  const target = path.join(FIGMA_CAPTURE_DIR, safe);
+  await fs.writeFile(target, String(text ?? ''), 'utf8');
+  return target;
+});
+
 ipcMain.handle('file:saveAs', async (_e, opts = {}) => {
   const target = await saveDialog(opts);
   if (!target) return null;
@@ -193,16 +206,19 @@ function buildMenu() {
       label: 'File',
       submenu: [
         { label: 'New', accelerator: 'CmdOrCtrl+N', click: () => sendMenu('new') },
+        { label: 'New Tab', accelerator: 'CmdOrCtrl+T', click: () => sendMenu('newTab') },
         { label: 'Open…', accelerator: 'CmdOrCtrl+O', click: () => sendMenu('open') },
+        { label: 'Close Tab', accelerator: 'CmdOrCtrl+W', click: () => sendMenu('closeTab') },
+        { label: 'Next Tab', accelerator: 'Ctrl+Tab', click: () => sendMenu('nextTab') },
+        { label: 'Previous Tab', accelerator: 'Ctrl+Shift+Tab', click: () => sendMenu('prevTab') },
         { type: 'separator' },
         { label: 'Save', accelerator: 'CmdOrCtrl+S', click: () => sendMenu('save') },
         { label: 'Save As…', accelerator: 'CmdOrCtrl+Shift+S', click: () => sendMenu('saveAs') },
         { type: 'separator' },
         { label: 'Import…', click: () => sendMenu('import') }, // ⌘I is the agent sidebar toggle in the app; ⌘O opens + imports
-        { label: 'Export Lottie…', accelerator: 'CmdOrCtrl+E', click: () => sendMenu('export-lottie') },
-        { label: 'Export for After Effects (.jsx)…', click: () => sendMenu('export-ae') },
+        { label: 'Export…', accelerator: 'CmdOrCtrl+E', click: () => sendMenu('export') },
         { type: 'separator' },
-        isMac ? { role: 'close' } : { role: 'quit' },
+        isMac ? { label: 'Close Window', accelerator: 'CmdOrCtrl+Shift+W', role: 'close' } : { role: 'quit' },
       ],
     },
     {

@@ -1,4 +1,4 @@
-// Settings: its own tab in the tab strip. a left nav (Account / Agents / Workspace / App) and
+// Settings: a large modal over the window (⌘, or the app menu in the top bar). a left nav (Account / Agents / Workspace / App) and
 // card sections. Appearance, Connections, Keyboard shortcuts, Models and Agent runs are real;
 // Updates is real too (src/app/updates.ts, electron/updates/). Profile, Notifications and Members are placeholders.
 
@@ -8,6 +8,7 @@ import { editor } from '../../app/editor';
 import { flushAutosave, toast } from '../../app/actions';
 import { checkForUpdates, formatBytes, getUpdateStatus, isBusy, onUpdateStatus, restartToUpdate, revertUi, setUpdatePrefs, updatesAvailable, type UpdateStatus } from '../../app/updates';
 import { prefs, setPref } from '../../app/prefs';
+import { activeProvider, setShareSettings, shareSettings, SHARE_PROVIDERS } from '../../app/share';
 import { agentClient } from '../../agent/client';
 import { useChannels } from '../hooks';
 import { getThemePref, onThemeChange, setTheme, type ThemePref } from '../theme';
@@ -39,6 +40,7 @@ const NAV: { group: string; items: { id: SettingsSection; label: string; Icon: L
   ] },
   { group: 'App', items: [
     { id: 'updates', label: 'Updates', Icon: Download },
+    { id: 'figma', label: 'Figma import', Icon: Code },
   ] },
 ];
 
@@ -72,6 +74,7 @@ export function SettingsPage() {
           {sec === 'runs' && <AgentRuns />}
           {sec === 'fonts' && <Fonts />}
           {sec === 'updates' && <Updates />}
+          {sec === 'figma' && <FigmaImport />}
           {sec === 'profile' && <Placeholder title="Profile" text="Motion runs on your computer without an account. Your name and avatar for comments will live here." />}
           {sec === 'notifications' && <Placeholder title="Notifications" text="Notifications for finished agent runs and exports are coming." />}
           {sec === 'members' && <Placeholder title="Members" text="Files are local and shared as .motion files for now. Shared workspaces are coming." />}
@@ -139,7 +142,7 @@ function Appearance() {
   useEffect(() => onThemeChange(() => setT(getThemePref())), []);
   const cards: { id: ThemePref; label: string; sub: string; Icon: LucideIcon; note?: string }[] = [
     { id: 'dark', label: 'Dark', sub: 'Default', Icon: Moon },
-    { id: 'light', label: 'Light', sub: 'Paper white', Icon: Sun },
+    { id: 'light', label: 'Light', sub: 'Light greys', Icon: Sun },
     { id: 'system', label: 'System', sub: 'Follows your OS', Icon: Monitor, note: 'Switches with your computer.' },
   ];
   const gpu = gpuName();
@@ -253,7 +256,34 @@ function Connections() {
           {status === 'connected' ? <Status kind="ok">Running</Status> : <Status kind="off">Offline</Status>}
         </Row>
       </Card>
+      <LinkSharing />
     </>
+  );
+}
+
+/** Share → "Copy a preview link": where the preview page is uploaded (src/app/share). off by default */
+function LinkSharing() {
+  useChannels([], ['share']);
+  const prov = SHARE_PROVIDERS.find(p => p.id === shareSettings.provider);
+  const ready = !!activeProvider();
+  return (
+    <Card title="Link sharing" sub="Share → Copy a preview link uploads the preview page (a self-contained player) and copies its link. Without a service, Share saves the page as a file to send.">
+      <Row label="Service" sub={prov ? prov.description : 'Off: previews are shared as files'}>
+        <Select size="sm" aria-label="Link sharing service" value={shareSettings.provider} onChange={v => setShareSettings({ provider: v })}
+          options={[{ value: '', label: 'Off' }, ...SHARE_PROVIDERS.map(p => ({ value: p.id, label: p.name }))]} />
+      </Row>
+      {prov?.id === 'http' && <>
+        <Row label="Upload URL" sub="https only. The page is POSTed as text/html; answer with the link (text or { url }).">
+          <input class="set-input" aria-label="Upload URL" placeholder="https://…" value={shareSettings.endpoint} spellcheck={false}
+            onChange={e => setShareSettings({ endpoint: (e.target as HTMLInputElement).value.trim() })} onKeyDown={e => e.stopPropagation()} />
+        </Row>
+        <Row label="Authorization" sub="Optional header value, e.g. Bearer …">
+          <input class="set-input" type="password" aria-label="Authorization header" value={shareSettings.header} spellcheck={false}
+            onChange={e => setShareSettings({ header: (e.target as HTMLInputElement).value })} onKeyDown={e => e.stopPropagation()} />
+        </Row>
+        <Row label="Status">{ready ? <Status kind="ok">Ready</Status> : <Status kind="off">Needs an https URL</Status>}</Row>
+      </>}
+    </Card>
   );
 }
 
@@ -354,6 +384,18 @@ function Fonts() {
     <Card title="Fonts in this file" sub="Text layers use fonts installed on this computer, or fonts embedded when a design was pasted.">
       {[...used].map(([f, n]) => <Row icon={<ALargeSmall />} label={<span style={{ fontFamily: f }}>{f}</span>} sub={`${n} text layer${n === 1 ? '' : 's'}`} />)}
       {!used.size && <div class="set-empty muted">No text layers yet.</div>}
+    </Card>
+  );
+}
+
+// ---------------- figma import ----------------
+function FigmaImport() {
+  return (
+    <Card title="Debugging Figma pastes" sub="When a paste from Figma does not look right, save it and attach the file to a bug report. The file holds the clipboard data (your design) and how Motion decoded it.">
+      <Row icon={<Download />} label="Save last Figma paste…" sub="Raw clipboard payload plus the decoded layer tree, as one .json file.">
+        <Button onClick={() => { import('../../app/figma-capture').then(m => m.saveLastFigmaPaste()).catch(err => toast(String(err), 'error')); }}>Save…</Button>
+      </Row>
+      <div class="set-empty muted">Developers: start the app with MOTION_FIGMA_CAPTURE_DIR=/folder (desktop) or VITE_FIGMA_CAPTURE_DIR=/folder (npm run dev) to save every paste automatically.</div>
     </Card>
   );
 }

@@ -185,6 +185,17 @@ const svg = (d: string) => `<svg width="14" height="14" viewBox="0 0 24 24" fill
 const CHECK_SVG = svg('<path d="M20 6 9 17l-5-5"/>');
 const CHEVRON_SVG = svg('<path d="m9 18 6-6-6-6"/>');
 
+/** open a menu anchored to a button: under it (left or right aligned), or above it */
+export function menuFrom(anchor: Element, items: MenuItem[], opts: { align?: 'left' | 'right'; above?: boolean } = {}) {
+  const r = anchor.getBoundingClientRect();
+  showContextMenu(r.left, r.bottom + 6, items);
+  const m = current;
+  if (!m) return;
+  const mr = m.getBoundingClientRect();
+  if (opts.align === 'right') m.style.left = Math.max(4, r.right - mr.width) + 'px';
+  if (opts.above) m.style.top = Math.max(4, r.top - mr.height - 6) + 'px';
+}
+
 function place(el: HTMLElement, x: number, y: number) {
   el.style.left = '0px';
   el.style.top = '0px';

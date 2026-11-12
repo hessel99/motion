@@ -1,7 +1,7 @@
 // timeline drawing for music: the waveform of audio layer rows (min/max peak pyramid computed once per
 // buffer, rendered into cached 512 px tiles at the exact zoom and device pixel ratio, so it stays crisp
 // at any zoom and redraws cost a few drawImage calls), beat / bar ticks in the ruler, subtle section
-// bands, and the snap-to-music toggle.
+// bands, and the snap-to-music preference.
 
 import type { Asset, Layer } from '../../core/model';
 import type { Store } from '../../core/store';
@@ -171,20 +171,4 @@ export function drawMusicRuler(g: CanvasRenderingContext2D, v: TlView, store: St
     g.fillRect(x - 0.5, H, 1, v.h - H);
     if (barPx * every >= 24) { g.fillStyle = barTick; g.fillText(String(i + 1), x + 3, H - 15); }
   });
-}
-
-/** the ♪ snap toggle in the timeline header (only while a comp has music): its hit box */
-export function musicToggleBox(v: TlView, store: Store): { x: number; y: number; w: number; h: number } | null {
-  if (!music(store)) return null;
-  return { x: v.leftW - 182, y: 5, w: 26, h: v.headerH - 10 };
-}
-export function drawMusicToggle(g: CanvasRenderingContext2D, v: TlView, store: Store, on: { bg: string; text: string }, off: { bg: string; text: string }) {
-  const b = musicToggleBox(v, store);
-  if (!b) return;
-  const s = musicSnap.on ? on : off;
-  g.fillStyle = s.bg;
-  g.beginPath(); g.roundRect(b.x, b.y, b.w, b.h, 4); g.fill();
-  g.fillStyle = s.text;
-  g.font = '12px system-ui, sans-serif';
-  g.fillText('♪', b.x + b.w / 2 - 4, v.headerH / 2);
 }

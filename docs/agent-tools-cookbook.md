@@ -82,6 +82,46 @@ guides. All coordinates are composition px (top-left origin), times in seconds, 
 - `preview_strip {"layout":"grid","frames":16}` — the whole piece.
 - `preview_video {"start":0,"end":3,"fps":12}` → `saved image/gif: /tmp/motion-previews/....gif` (a path to hand on).
 
+## Concept: animate what the artwork IS
+
+Look first, then rig the parts like the real thing (a door opens instead of popping in).
+`inspect_artwork {"id":"<logo>"}` → an image with numbered parts + JSON hints; compound paths show as `1.1`, `1.2`.
+
+House logo with a door (one imported compound path):
+```json
+// 1. look: "1.2: tall rectangle, sits in the hole of #1.1 (house-like pentagon (pointed roof) with a hole)"
+{ "id": "<logo>" }                                                     // inspect_artwork
+// 2. cut it into parts at the same place → group "Logo" with "Part 1 (largest)" (house), "Part 2 (smallest)" (door)
+{ "id": "<logo>" }                                                     // split_shape
+// 3. the door swings in on its left hinge; the doorway lights up behind it
+{ "ids": ["<door>"], "kind": "hinge", "t0": 0.4, "duration": 1.2, "options": { "edge": "left", "light": true } }
+```
+`hinge` moves the pivot to the edge, foreshortens (scaleX), tapers path doors in perspective (`swing: "in"` free edge
+shrinks, `"out"` grows), shades the fill; `mode: "open-close"` + `hold`, `"close"` slams with a rebound.
+
+Leaf grows from its stem (pivot at the base, spring overshoot, small sway):
+`rig {"ids":["<leaf>"],"kind":"grow","options":{"from":"bottom"},"t0":0.6,"duration":0.9}` — for a leaf hanging
+from a branch use `"from":"top"`; bars in a chart: several ids + `"stagger":0.06`.
+
+Chat bubble pops with its tail (tail grows out of the bubble after it lands):
+```json
+{ "id": "<bubble path>" }                                                                   // split_shape → body + tail
+{ "id": "<tail>", "at": { "layerEdgeOf": "<body>" } }                                      // set_pivot on the body's edge
+{ "ids": ["<body>"], "kind": "grow", "options": { "from": "bottom-left" }, "t0": 0.2, "duration": 0.6 }
+{ "ids": ["<tail>"], "kind": "grow", "options": { "from": "top", "pivot": "keep" }, "t0": 0.45, "duration": 0.4, "intensity": 0.8 }
+```
+
+Rocket launches (crouch, rumble, stretch, accelerate off-screen, trail echoes):
+`rig {"ids":["<rocket>"],"kind":"launch","options":{"direction":"up-right"},"t0":1,"duration":1.2,"intensity":0.7}` —
+the flame can `beat`/`pulse` with `loop` while it waits: `rig {"ids":["<flame>"],"kind":"pulse","options":{"period":0.3}}`.
+
+More: `swing` (sign on a nail, `pivot:"top"`), `unfold` (map panels, `direction:"right"`), `orbit`
+(`center:[960,540]` or `around:"<planet>"`, `tilt:0.6`, `orient`, `loop`), `blink` (eye, `loop`, `every:3`), `beat` (heart),
+`liquid-fill` (cup / battery, `level:0.7`), `draw-then-fill` (line icons), `land` (`from:"left"`), `type-on`
+(`cursor:true`), `assemble` (scattered parts fly together, `order:"outside-in"`), `reveal-from`
+(`ids:["<wordmark>"]`, `options:{"from":"<mark>"}`: the wordmark slides out from behind the mark under a mask).
+Entrance rigs reverse with `mode:"out"`. Everything is plain keys afterwards: `get_animation`, `retime`, `set_easing` work on it.
+
 ## A typical build loop
 
 1. `build_scene` with all layers + entrances (keys!), 2. `choreograph` / `secondary_motion` for feel,

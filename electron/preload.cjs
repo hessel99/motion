@@ -16,6 +16,9 @@ contextBridge.exposeInMainWorld('motionNative', {
   /** crash-safe autosave in the app data folder */
   autosaveWrite: (text) => ipcRenderer.invoke('autosave:write', text),
   autosaveRead: () => ipcRenderer.invoke('autosave:read'),
+  /** figma paste capture folder (MOTION_FIGMA_CAPTURE_DIR) or null; write a capture file into it */
+  figmaCaptureDir: () => ipcRenderer.invoke('figma:captureDir'),
+  figmaCaptureWrite: (name, text) => ipcRenderer.invoke('figma:captureWrite', name, text),
   /** Always shows the dialog. */
   saveFileAs: (opts) => ipcRenderer.invoke('file:saveAs', opts || {}),
   /** design tokens: read a .json file again / watch it (cb(path, text) on every save) */

@@ -1,12 +1,13 @@
+import type { ComponentChildren } from 'preact';
 // review card shown after every agent turn that changed the document: what changed (click a layer
 // to select it), hold-to-compare with the state before the turn, replay, keep or revert.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
 import { reviewAtEnd, type ReviewInfo } from '../../agent/history';
 import { summarizeDiff, type LayerChange } from '../../agent/diff';
-import { Check, ChevronDown, ChevronRight, Play, Sparkles, Undo2 } from '../chrome/icons';
+import { Check, ChevronDown, ChevronRight, Play, Sparkles, Undo2, Eye } from '../chrome/icons';
 
-export function TurnReview(props: { review: ReviewInfo; busy?: boolean; onState: (s: ReviewInfo['state'], note?: string) => void }) {
+export function TurnReview(props: { review: ReviewInfo; busy?: boolean; onState: (s: ReviewInfo['state'], note?: string) => void; /** the turn's steps, shown with the details */ children?: ComponentChildren }) {
   const r = props.review;
   const s = editor.store;
   const live = r.state === 'pending' || r.state === 'kept';
@@ -74,7 +75,7 @@ export function TurnReview(props: { review: ReviewInfo; busy?: boolean; onState:
           {r.state === 'reverted' ? 'Reverted: ' : ''}{summarizeDiff(r.diff)}
           <span class="ag-muted"> · {r.steps} step{r.steps === 1 ? '' : 's'}</span>
         </span>
-        {total > 0 && <button class="ag-icon-btn" title={open ? 'Hide details' : 'Show details'} aria-expanded={open} onClick={() => setOpen(o => !o)}>{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</button>}
+        {(total > 0 || props.children) && <button class="ag-icon-btn" title={open ? 'Hide details' : 'Show details'} aria-expanded={open} onClick={() => setOpen(o => !o)}>{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</button>}
       </div>
       {open && total > 0 && (
         <div class="ag-diff">
@@ -84,11 +85,13 @@ export function TurnReview(props: { review: ReviewInfo; busy?: boolean; onState:
           {r.diff.comp.length > 0 && <div class="ag-diff-row chg"><span class="ag-diff-sign">~</span><span class="ag-diff-name">Composition</span><span class="ag-diff-fields">{r.diff.comp.join(', ')}</span></div>}
         </div>
       )}
+      {open && props.children}
       {live && (
         <div class="ag-review-actions">
           <button
-            class={'ag-btn' + (comparing ? ' on' : '')}
+            class={'ag-btn ag-icon-only' + (comparing ? ' on' : '')}
             disabled={!canCompare && !comparing}
+            aria-label="Hold to compare with before"
             title="Hold to see the document as it was before this turn"
             onPointerDown={e => { (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId); startCompare(); }}
             onPointerUp={endCompare}
@@ -97,8 +100,8 @@ export function TurnReview(props: { review: ReviewInfo; busy?: boolean; onState:
             onBlur={endCompare}
             onKeyDown={e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); startCompare(); } }}
             onKeyUp={e => { if (e.key === ' ' || e.key === 'Enter') endCompare(); }}
-          >{comparing ? 'Showing before' : 'Hold to compare'}</button>
-          {r.range && <button class="ag-btn" title="Play the changed part" onClick={replay}><Play size={11} /> Replay</button>}
+          ><Eye size={13} /></button>
+          {r.range && <button class="ag-btn ag-icon-only" aria-label="Replay" title="Play the changed part" onClick={replay}><Play size={12} /></button>}
           <span class="ag-grow" />
           <button
             class="ag-btn danger"

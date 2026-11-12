@@ -11,8 +11,19 @@ electron.png
 .claude/worktrees/
 undefined-*.png
 
+# figma paste captures (Save last Figma paste for debugging / MOTION_FIGMA_CAPTURE_DIR): real designs, never commit
+*.figcapture.json
+figma-captures/
+
 # update signing key (scripts/gen-update-key.mjs): never commit
 .update-key/
 
 # agent eval: transcoder intermediates (results are committed, mp4s are kept < 2 MB)
 evals/results/**/*.raw.*
+# figma / svg fidelity harness (scripts/figma-fidelity.mjs): ground truth renders, node dumps and
+# reports stay local (they can contain the user's design data); real pasted payloads too
+bench/results/figma-truth/
+bench/results/figma-fidelity/
+bench/results/figma-fidelity-*/
+bench/results/svg-fidelity/
+fixtures/figma-paste/
