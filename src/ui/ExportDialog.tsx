@@ -5,7 +5,9 @@
 import { render } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
-import { download, exportAeScript, exportFramePng, exportGifFile, exportLottie, toast } from '../app/actions';
+import { download, exportAeScript, exportFramePng, exportGifFile, exportLottie, exportPngSequence, toast } from '../app/actions';
+import { lottiePreflight, lottieFeatureLabel, type LottieIssue } from '../export/lottie';
+import { gifFrameCount, gifSize } from '../export/gif';
 import { Button, Dialog, Segmented } from './ui';
 import {
   evenDimensions, computeBitrate, frameCount, exportVideoDetailed, probeVideoSupport, videoFileName,
@@ -77,8 +79,13 @@ export function ExportDialog(props: { onClose: () => void }) {
   const [scale, setScale] = useState(1);
   const [fps, setFps] = useState(comp.fps);
   const [quality, setQuality] = useState<VideoQuality>('high');
-  const [gifSize, setGifSize] = useState(640);
+  const [gifSizeMax, setGifSize] = useState(640);
   const [gifFps, setGifFps] = useState(Math.min(comp.fps, 30));
+  const [pngMode, setPngMode] = useState<'frame' | 'sequence'>('frame');
+  // lottie preflight: what lottie can't draw, listed before exporting. bake (default) or ignore each
+  const [issues] = useState<LottieIssue[]>(() => { try { return lottiePreflight(editor.store.project); } catch { return []; } });
+  const [ignored, setIgnored] = useState<Set<string>>(() => new Set());
+  const toggleIgnore = (id: string, ignore: boolean) => setIgnored(prev => { const n = new Set(prev); if (ignore) n.add(id); else n.delete(id); return n; });
   const [support, setSupport] = useState<Record<VideoFormat, string | null> | null>(null);
   const [prog, setProg] = useState<ExportProgress | null>(null);
   const [busy, setBusy] = useState(false);
@@ -122,9 +129,9 @@ export function ExportDialog(props: { onClose: () => void }) {
     if (kind === 'video') return startVideo();
     // the other formats run with their own progress toast (or instantly): the dialog closes
     props.onClose();
-    if (kind === 'gif') exportGifFile({ maxSize: gifSize, fps: gifFps }).catch(() => {});
-    else if (kind === 'image') exportFramePng(scale).catch(() => {});
-    else if (kind === 'lottie') exportLottie();
+    if (kind === 'gif') exportGifFile({ maxSize: gifSizeMax, fps: gifFps }).catch(() => {});
+    else if (kind === 'image') (pngMode === 'sequence' ? exportPngSequence(scale) : exportFramePng(scale)).catch(() => {});
+    else if (kind === 'lottie') exportLottie([...ignored, ...issues.filter(i => !i.bakeable).map(i => i.id)]);
     else if (kind === 'ae') exportAeScript();
   };
 
@@ -142,7 +149,8 @@ export function ExportDialog(props: { onClose: () => void }) {
     return () => window.removeEventListener('keydown', onKey, true);
   }, []);
 
-  const gifScale = Math.min(1, gifSize / Math.max(comp.width, comp.height));
+  const gifDims = gifSize(comp.width, comp.height, gifSizeMax);
+  const pngFrames = frameCount(comp.duration, comp.fps);
   const label: Record<Kind, string> = { video: busy ? 'Exporting…' : 'Export video', gif: 'Export GIF', image: 'Export PNG', lottie: 'Export Lottie', ae: 'Export script' };
   return (
     <Dialog title="Export" class="xv-dialog" actionsClass="xv-actions" onClose={() => cancelRef.current()} dismissable={!busy}
@@ -177,22 +185,50 @@ export function ExportDialog(props: { onClose: () => void }) {
         {kind === 'gif' && <>
           <div class="xv-grid">
             <label>Size</label>
-            <Segmented class="xv-seg" label="GIF size" value={gifSize} options={[320, 480, 640, 960].map(v => ({ value: v, label: `${v}px` }))} onChange={setGifSize} />
+            <Segmented class="xv-seg" label="GIF size" value={gifSizeMax} options={[320, 480, 640, 960].map(v => ({ value: v, label: `${v}px` }))} onChange={setGifSize} />
             <label for="xv-gfps">Frame rate</label>
             <select id="xv-gfps" value={String(gifFps)} onChange={e => setGifFps(Number((e.target as HTMLSelectElement).value))}>
               {[12, 15, 24, 25, 30, 50].map(f => <option value={String(f)}>{f} fps</option>)}
             </select>
           </div>
-          <div class="xv-info muted">{Math.round(comp.width * gifScale)}×{Math.round(comp.height * gifScale)} · {Math.max(1, Math.round(comp.duration * gifFps))} frames · loops forever</div>
+          <div class="xv-info muted">{gifDims.width}×{gifDims.height} · {gifFrameCount(comp.duration, gifFps)} frames · loops forever{comp.background[3] < 1 ? ' · GIF transparency is on / off (no soft edges)' : ''}</div>
         </>}
         {kind === 'image' && <>
           <div class="xv-grid">
+            <label>Frames</label>
+            <Segmented class="xv-seg" label="Frames" value={pngMode} options={[{ value: 'frame' as const, label: 'Current frame' }, { value: 'sequence' as const, label: 'Sequence' }]} onChange={setPngMode} />
             <label>Scale</label>
             <Segmented class="xv-seg" label="Scale" value={scale} options={[0.5, 1, 2, 4].map(s => ({ value: s, label: `${s}×` }))} onChange={setScale} />
           </div>
-          <div class="xv-info muted">The frame under the playhead ({editor.store.time.toFixed(2)}s) as a PNG.</div>
+          <div class="xv-info muted">{pngMode === 'frame'
+            ? <>The frame under the playhead ({editor.store.time.toFixed(2)}s) as a PNG, {Math.round(comp.width * scale)}×{Math.round(comp.height * scale)}, with transparency.</>
+            : <>{pngFrames} PNGs ({Math.round(comp.width * scale)}×{Math.round(comp.height * scale)}, {comp.fps} fps, with transparency) in a zip.</>}</div>
         </>}
-        {kind === 'lottie' && <div class="xv-info muted">Lottie JSON for the web and apps (lottie-web, iOS, Android): shapes, text, gradients, precomps and markers.</div>}
+        {kind === 'lottie' && <>
+          <div class="xv-info muted">Lottie JSON for the web and apps (lottie-web, iOS, Android).</div>
+          {issues.length === 0
+            ? <div class="xv-info">Everything in this composition exports to Lottie as it looks here.</div>
+            : <div class="xv-preflight">
+              <div class="xv-pf-head">
+                <span>{issues.length === 1 ? '1 thing' : `${issues.length} things`} would look different in Lottie</span>
+                {issues.some(i => i.bakeable) && <span class="xv-pf-all">
+                  <button class="link" onClick={() => setIgnored(new Set())}>Bake all</button>
+                  <button class="link" onClick={() => setIgnored(new Set(issues.filter(i => i.bakeable).map(i => i.id)))}>Ignore all</button>
+                </span>}
+              </div>
+              <ul class="xv-pf-list">
+                {issues.map(i => (
+                  <li key={i.id}>
+                    <div class="xv-pf-text"><b>{i.layer}</b> · {lottieFeatureLabel(i.feature)}<div class="muted">{i.message}</div></div>
+                    {i.bakeable
+                      ? <Segmented size="sm" label={`${i.layer}: ${lottieFeatureLabel(i.feature)}`} value={ignored.has(i.id) ? 'ignore' : 'bake'} options={[{ value: 'bake', label: 'Bake', title: 'Render it into images: looks exactly like here' }, { value: 'ignore', label: 'Ignore', title: 'Export it as Lottie shapes / text: editable, but approximated' }]} onChange={v => toggleIgnore(i.id, v === 'ignore')} />
+                      : <span class="muted xv-pf-na">left out</span>}
+                  </li>
+                ))}
+              </ul>
+              <div class="xv-info muted">Bake renders the layer into images that move with its real animation, so it looks exactly like here (bigger file, not editable as shapes).</div>
+            </div>}
+        </>}
         {kind === 'ae' && <div class="xv-info muted">A script (.jsx) that rebuilds this composition in After Effects: File › Scripts › Run Script File… Shape layers, text, precomps, keyframes with their easing.</div>}
         {prog && (
           <div class="xv-progress">

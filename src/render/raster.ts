@@ -108,6 +108,7 @@ export interface RasterClip { x: number; y: number; pw: number; ph: number }
 let assetLookup: ((id: string) => Asset | undefined) | null = null;
 /** main thread: how image paints find their asset (workers have none: those layers raster here) */
 export function setAssetLookup(fn: (id: string) => Asset | undefined) { assetLookup = fn; }
+export function getAssetLookup() { return assetLookup; }
 
 const hasImagePaint = (ps: Paint[] | undefined) => !!ps && ps.some(p => p.type === 'image');
 /** layers whose raster needs main-thread data (image bitmaps) */
@@ -323,6 +324,7 @@ function setStrokeStyle(c: Ctx, l: Layer, width: number, doubled: boolean) {
   c.lineJoin = l.strokeJoin ?? (l.type === 'path' ? 'round' : 'miter');
   c.lineCap = l.strokeCap ?? (l.type === 'path' ? 'round' : 'butt');
   c.miterLimit = l.miterLimit ?? 4;
+  c.lineDashOffset = 0; // trims set it on this shared context: never let it leak into the next path
   if (l.dash?.length) {
     // figma dashes are measured along the visible stroke (inside/outside strokes use a doubled width,
     // the dash lengths stay the same)

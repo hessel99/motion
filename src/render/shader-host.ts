@@ -201,6 +201,13 @@ export class ShaderHost {
     }
   }
 
+  /** stop the worker for good (a renderer that is thrown away, e.g. export bakes) */
+  dispose() {
+    this.worker?.terminate();
+    this.worker = null;
+    this.jobs.clear();
+  }
+
   private disable(why: string) {
     this.available = false;
     this.error = why;

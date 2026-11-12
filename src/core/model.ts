@@ -47,8 +47,10 @@ export const BLEND_MODES: BlendMode[] = [
   'normal', 'darken', 'multiply', 'linearBurn', 'colorBurn', 'lighten', 'screen', 'add', 'colorDodge',
   'overlay', 'softLight', 'hardLight', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity',
 ];
-/** modes the gpu blend unit does on its own (everything else composites through a shader) */
-export const SIMPLE_BLENDS: ReadonlySet<BlendMode> = new Set<BlendMode>(['normal', 'multiply', 'screen', 'add', 'darken', 'lighten']);
+/** modes the gpu blend unit does exactly on its own (everything else composites through a shader).
+ *  darken / lighten are not among them: min / max of premultiplied colours is only right where the
+ *  layer is opaque (its transparent surroundings turned the backdrop black, export parity) */
+export const SIMPLE_BLENDS: ReadonlySet<BlendMode> = new Set<BlendMode>(['normal', 'multiply', 'screen', 'add']);
 
 export type LayerType = 'group' | 'rect' | 'ellipse' | 'path' | 'text' | 'image' | 'precomp' | 'audio';
 

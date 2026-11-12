@@ -1,9 +1,11 @@
 // the preview page: one self-contained html file with the animation (a frame-accurate video
 // rendered by the export pipeline, embedded as a data url) and a small player: play / pause,
-// scrub, loop, frame-accurate time. no network, no scripts from elsewhere.
+// scrub, loop, frame-accurate time. no network, no scripts from elsewhere. seeks land in the middle
+// of a frame ((f + 0.5) / fps): a seek to the exact frame start can show the previous frame when the
+// container rounds timestamps up (checked by scripts/export-parity.mjs).
 
 import { editor } from '../editor';
-import { evenDimensions, exportVideoDetailed, type ExportProgress } from '../../export/video';
+import { exportVideoDetailed, type ExportProgress } from '../../export/video';
 
 const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
@@ -13,12 +15,15 @@ async function blobToDataUrl(b: Blob): Promise<string> {
 
 export interface PreviewPage { html: string; name: string; bytes: number }
 
-/** render the active composition and wrap it in the player page (max 1280 px on the long side) */
+/** render the active composition and wrap it in the player page. the video is encoded at up to 2x
+ *  the size it is shown at (max 1280 px on the long side): sharp on hidpi screens, and 4:2:0 colour
+ *  then keeps the comp's full colour resolution where it is shown 1:1 */
 export async function buildPreviewPage(onProgress?: (p: ExportProgress) => void, signal?: AbortSignal): Promise<PreviewPage> {
   const s = editor.store, c = s.comp;
-  const scale = Math.min(1, 1280 / Math.max(c.width, c.height));
-  const res = await exportVideoDetailed({ format: 'mp4', scale, quality: 'medium' }, onProgress, signal);
-  const dims = evenDimensions(c.width, c.height, scale);
+  const shown = Math.min(1, 1280 / Math.max(c.width, c.height));
+  const scale = Math.max(shown, Math.min(2, 1280 / Math.max(c.width, c.height)));
+  const res = await exportVideoDetailed({ format: 'mp4', scale, quality: 'high' }, onProgress, signal);
+  const dims = { width: Math.round(c.width * shown), height: Math.round(c.height * shown) };
   const src = await blobToDataUrl(res.blob);
   const title = `${s.project.name || 'Untitled'} · ${c.name}`;
   const html = pageHtml({ title, src, width: dims.width, height: dims.height, fps: c.fps, duration: c.duration });
@@ -54,14 +59,15 @@ h1{font-size:13px;font-weight:600;margin:0 0 10px;color:#c4c4c4}
 <span class="time" id="tc">0:00:00 / ${o.duration.toFixed(2)}s</span>
 </div></div>
 <script>
-(function(){var v=document.getElementById('v'),t=document.getElementById('t'),p=document.getElementById('play'),ic=document.getElementById('ic'),l=document.getElementById('loop'),tc=document.getElementById('tc'),fps=${o.fps},dur=${o.duration};
+(function(){var v=document.getElementById('v'),t=document.getElementById('t'),p=document.getElementById('play'),ic=document.getElementById('ic'),l=document.getElementById('loop'),tc=document.getElementById('tc'),fps=${o.fps},dur=${o.duration},nf=Math.max(1,Math.ceil(dur*fps-1e-6));
 function fmt(s){var f=Math.floor(s*fps+1e-6),sec=Math.floor(f/fps);return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')+':'+String(f%fps).padStart(2,'0')}
 function icon(){ic.setAttribute('d',v.paused?'M7 4v16l13-8z':'M6 4h4v16H6zM14 4h4v16h-4z')}
 function tick(){t.value=v.currentTime;tc.textContent=fmt(v.currentTime)+' / '+dur.toFixed(2)+'s';requestAnimationFrame(tick)}
 p.onclick=function(){v.paused?v.play():v.pause()};v.onplay=v.onpause=icon;
-t.oninput=function(){v.pause();v.currentTime=+t.value};
+function seekFrame(f){f=Math.max(0,Math.min(nf-1,f));v.currentTime=(f+0.5)/fps}
+t.oninput=function(){v.pause();seekFrame(Math.round(+t.value*fps))};
 l.onclick=function(){v.loop=!v.loop;l.classList.toggle('on',v.loop)};
-document.addEventListener('keydown',function(e){if(e.code==='Space'){e.preventDefault();p.onclick()}if(e.key===','||e.key==='.'){v.pause();v.currentTime=Math.max(0,Math.min(dur,v.currentTime+(e.key==='.'?1:-1)/fps))}});
+document.addEventListener('keydown',function(e){if(e.code==='Space'){e.preventDefault();p.onclick()}if(e.key===','||e.key==='.'){v.pause();seekFrame(Math.floor(v.currentTime*fps+1e-6)+(e.key==='.'?1:-1))}});
 icon();tick();})();
 </script></body></html>`;
 }

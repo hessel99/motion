@@ -293,22 +293,50 @@ export async function exportGifFile(opts: import('../export/gif').GifOptions = {
   } finally { el.remove(); setBusy('export-gif', false); }
 }
 
-export async function exportLottie() {
-  const m = await mod('../export/lottie.ts');
-  if (!m) { toast('Lottie export not available yet', 'error'); return; }
-  const lot = m.projectToLottie(st().project);
-  // text as glyph outlines so every lottie player draws it without the font (bundled Inter only)
-  try { const g = await import('../export/lottie-glyphs'); await g.addGlyphs(lot); } catch (e) { console.warn('glyphs skipped', e); }
-  download((st().project.name || 'animation') + '.json', JSON.stringify(lot), 'application/json');
+/** lottie export. `ignore`: preflight issue ids the user chose to export natively instead of baking */
+export async function exportLottie(ignore: string[] = []) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = 'Exporting Lottie…';
+  document.body.appendChild(el);
+  editor.pause();
+  editor.stop();
+  try {
+    const { exportLottieFull } = await import('../export/lottie-bake');
+    const { lottie } = await exportLottieFull(st().project, ignore);
+    download((st().project.name || 'animation') + '.json', JSON.stringify(lottie), 'application/json');
+  } catch (e: any) {
+    console.error(e);
+    toast('Lottie export failed: ' + (e?.message ?? e), 'error');
+  } finally { el.remove(); editor.resume(); }
 }
 
-/** the current frame at full composition size */
+/** the current frame at full composition size (times scale), with transparency */
 export async function exportFramePng(scale = 1) {
   const s = st(), c = s.comp;
-  const url = editor.renderer.snapshot(s.time, Math.round(Math.max(c.width, c.height) * scale));
-  const blob = await (await fetch(url)).blob();
+  const { framePng } = await import('../export/png');
+  const blob = await framePng(s.time, scale);
   const frame = Math.round(s.time * c.fps);
   download(`${s.project.name || 'frame'}_${String(frame).padStart(4, '0')}.png`, blob, 'image/png');
+}
+
+/** every frame as a numbered PNG, in a zip */
+export async function exportPngSequence(scale = 1) {
+  const s = st();
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = 'Exporting PNG sequence…';
+  setBusy('export-png', true);
+  document.body.appendChild(el);
+  try {
+    const { pngSequence } = await import('../export/png');
+    const name = (s.project.name || 'frame').replace(/[^\w\- ]+/g, '_');
+    const res = await pngSequence({ scale, name }, (d, n) => { el.textContent = `Exporting PNG sequence… ${Math.round((d / n) * 100)}%`; });
+    download(`${name} - ${s.comp.name}.zip`, res.blob, 'application/zip');
+    toast(`Exported ${res.files} frames`);
+  } catch (e: any) {
+    toast('PNG export failed: ' + (e?.message ?? e), 'error');
+  } finally { el.remove(); setBusy('export-png', false); }
 }
 
 /** extendscript that rebuilds the active comp in after effects (File > Scripts > Run Script File) */
