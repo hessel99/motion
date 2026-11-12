@@ -197,3 +197,24 @@ describe('lottie expressions that read another property', () => {
     expect(all(p)[0].props.rotation!.v[0]).toBe(15);
   });
 });
+
+describe('import safety', () => {
+  it('nested repeaters share one copy budget (a tiny file cannot ask for 500^3 shapes)', async () => {
+    const { lottieToProject } = await import('../src/import/lottie');
+    const tr = { ty: 'tr', p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } };
+    const rp = (c: number) => ({ ty: 'rp', nm: 'R', c: { a: 0, k: c }, o: { a: 0, k: 0 }, m: 1, tr: { ty: 'tr', p: { a: 0, k: [1, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, so: { a: 0, k: 100 }, eo: { a: 0, k: 100 } } });
+    const inner = { ty: 'gr', it: [{ ty: 'rc', s: { a: 0, k: [2, 2] }, p: { a: 0, k: [0, 0] }, r: { a: 0, k: 0 } }, { ty: 'fl', c: { a: 0, k: [1, 0, 0, 1] }, o: { a: 0, k: 100 } }, rp(500), tr] };
+    const outer = { ty: 'gr', it: [inner, rp(500), tr] };
+    const top = { ty: 'gr', it: [outer, rp(500), tr] };
+    const json = { v: '5.7', fr: 30, ip: 0, op: 30, w: 100, h: 100, layers: [{ ty: 4, nm: 'S', ip: 0, op: 30, st: 0, ks: {}, shapes: [top] }] };
+    const t0 = performance.now();
+    const p = lottieToProject(json);
+    expect(performance.now() - t0).toBeLessThan(10000);
+    expect(Object.keys(p.layers).length).toBeLessThan(60000);
+  });
+  it('path booleans ignore rings with non-finite points', async () => {
+    const { booleanRings } = await import('../src/import/pathops');
+    const sq = (x: number) => [x, 0, x + 10, 0, x + 10, 10, x, 10];
+    expect(() => booleanRings([sq(0), [NaN, 0, 5, 5, 0, 5]], [sq(5)], 'union')).not.toThrow();
+  });
+});

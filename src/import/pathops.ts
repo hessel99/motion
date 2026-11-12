@@ -111,7 +111,11 @@ function edgesOf(rings: Ring[], snap: (v: number) => number): number[] {
 }
 
 /** a op b, both filled nonzero. output rings have the inside on their left (ccw in y-down = clockwise visually) */
+/** rings with any non-finite coordinate are dropped (NaN would index the sweep bands) */
+const finiteRings = (rs: Ring[]) => rs.filter(r => { for (let i = 0; i < r.length; i++) if (!isFinite(r[i])) return false; return true; });
+
 export function booleanRings(a: Ring[], b: Ring[], op: BoolOp): Ring[] {
+  a = finiteRings(a); b = finiteRings(b);
   const [bx0, by0, bx1, by1] = ringsBounds([a, b]);
   if (!isFinite(bx0)) return [];
   const diag = Math.hypot(bx1 - bx0, by1 - by0) || 1;

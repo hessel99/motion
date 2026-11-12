@@ -159,16 +159,19 @@ export class Store {
     if (prev) return fn();
     const g = key + ':' + Math.random();
     this.gesture = g;
-    const mine = () => { const top = this.undoStack[this.undoStack.length - 1]; return top && top.mergeKey === g ? top : null; };
+    // entries are counted, not matched by merge key: inner commands may pass their own merge key
+    const before = this.undoStack.length;
     try {
       const r = fn();
-      const top = mine();
-      if (top && label) { top.label = label; this.emit('history'); }
+      const top = this.undoStack[this.undoStack.length - 1];
+      if (label && top && this.undoStack.length === before + 1) { top.label = label; this.emit('history'); }
       return r;
     } catch (e) {
-      // all or nothing: undo what the batch already did
+      // all or nothing: undo every entry the batch added (merges into older entries can't be split)
       this.gesture = null;
-      if (mine()) { this.undo(); this.redoStack.pop(); this.emit('history'); }
+      let n = 0;
+      while (this.undoStack.length > before) { this.undo(); n++; }
+      if (n) { this.redoStack.splice(this.redoStack.length - n, n); this.emit('history'); }
       throw e;
     } finally { this.gesture = null; }
   }

@@ -518,11 +518,16 @@ export const TOOLS: ToolDef[] = [
     inputSchema: { type: 'object', properties: { ids: idsSchema, scale: { type: 'number', default: 1 }, offset: { type: 'number', default: 0, description: 'seconds' }, pivot: { type: 'number' } } },
     run: ({ ids, scale = 1, offset = 0, pivot }) => {
       const s = st();
-      if (!(scale > 0)) throw new Error('scale must be > 0');
+      if (!(scale > 0) || !isFinite(scale)) throw new Error('scale must be a positive number');
+      if (!isFinite(offset) || (pivot != null && !isFinite(pivot))) throw new Error('offset and pivot must be numbers');
       const list: Layer[] = ids?.length ? ids.map(need) : s.selection.length ? s.selection.map(need) : Object.values(s.project.layers);
       const ranges = list.map(animRange).filter(Boolean) as [number, number][];
       if (!ranges.length) throw new Error('none of these layers is animated');
       const p0 = pivot ?? Math.min(...ranges.map(r => r[0]));
+      // the whole mapping must keep keys at t >= 0: clamping each key would stack them on 0
+      const earliest = Math.min(...ranges.map(r => r[0]));
+      const mapped0 = p0 + (earliest - p0) * scale + offset;
+      if (mapped0 < -1e-9) throw new Error(`this would move the first key to ${fmtTime(mapped0)} (before 0). The smallest allowed offset here is ${fmtTime(offset - mapped0)}.`);
       const f = (t: number) => Math.max(0, p0 + (t - p0) * scale + offset);
       let end = 0;
       s.transact('Agent: retime', tx => {
@@ -543,7 +548,13 @@ export const TOOLS: ToolDef[] = [
       if (list.length < 2) throw new Error('stagger needs at least two layers (pass ids or select them)');
       const animated = list.filter(l => animRange(l));
       if (!animated.length) throw new Error('none of these layers is animated yet; animate them first (e.g. apply_preset with stagger)');
+      if (!isFinite(step) || (start != null && !isFinite(start))) throw new Error('step and start must be numbers');
       const base = start ?? animRange(animated[0])![0];
+      // every layer's first key must stay at t >= 0 (clamping per key would stack keys on 0)
+      for (const [i, l] of animated.entries()) {
+        const at = base + i * step;
+        if (at < -1e-9) throw new Error(`layer "${l.name}" would start at ${fmtTime(at)} (before 0); use a later start or a positive step`);
+      }
       s.transact('Agent: stagger', tx => {
         animated.forEach((l, i) => {
           const d = base + i * step - animRange(l)![0];

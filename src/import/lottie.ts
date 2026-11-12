@@ -1343,9 +1343,22 @@ function roundNode(n: ShapeNode, radius: Prop): ShapeNode {
  * start to end opacity. composite 1 (above): later copies on top. animated offset / transform
  * props go through combineProps.
  */
+/** shape nodes all repeaters of one import may still create (nested repeaters multiply: a tiny
+ * hostile file could otherwise ask for 500^3 copies and hang the app) */
+let repeatBudget = 0;
+const REPEAT_BUDGET = 20000;
+function countNodes(items: ShapeNode[]): number {
+  let n = 0;
+  for (const it of items) { n++; if (it.kind === 'group') n += countNodes(it.items); }
+  return n;
+}
+
 function repeatItems(items: ShapeNode[], rp: Extract<RawShapeNode, { kind: 'repeater' }>): ShapeNode[] {
-  const n = Math.max(0, Math.min(500, Math.ceil(firstValue(rp.copies)[0] ?? 0)));
+  let n = Math.max(0, Math.min(500, Math.ceil(firstValue(rp.copies)[0] ?? 0)));
   if (!n || !items.length) return n ? items : [];
+  const size = countNodes(items) + 1;
+  n = Math.max(1, Math.min(n, Math.floor(repeatBudget / size)));
+  repeatBudget = Math.max(0, repeatBudget - n * size);
   const pw = (s: number, j: number) => Math.sign(s || 1) * Math.pow(Math.abs(s / 100), j) * 100;
   const copies: ShapeNode[] = [];
   for (let k = 0; k < n; k++) {
@@ -1646,6 +1659,7 @@ export function lottieToProject(json: any, name?: string, stats?: LottieImportSt
   if (typeof json === 'string') json = JSON.parse(json);
   if (!json || typeof json !== 'object') throw new Error('invalid lottie json');
   const fr = num(json.fr, 30) || 30;
+  repeatBudget = REPEAT_BUDGET;
   const ip = num(json.ip, 0), op = num(json.op, ip + fr * 5);
   const w = Math.max(1, num(json.w, 512)), h = Math.max(1, num(json.h, 512));
   const ctx = new BuildCtx(w, h);

@@ -166,6 +166,18 @@ describe('agent tools', () => {
     expect(() => tool('stagger').run({ ids: [a.id], step: 0.1 })).toThrow(/at least two/);
   });
 
+  it('retime / stagger refuse to push keys before 0 instead of stacking them on 0', async () => {
+    const s = editor.store;
+    const [a, b] = s.comp.root.map(id => s.layer(id)!);
+    await run('animate', { tracks: [{ id: a.id, prop: 'opacity', keyframes: [{ t: 0.2, v: 0 }, { t: 0.5, v: 50 }, { t: 0.8, v: 100 }] }, { id: b.id, prop: 'opacity', keyframes: [{ t: 0.2, v: 0 }, { t: 0.6, v: 100 }] }] });
+    expect(() => tool('retime').run({ ids: [a.id], offset: -1 })).toThrow(/before 0/);
+    expect(a.props.opacity!.kf!.map(k => k.t)).toEqual([0.2, 0.5, 0.8]);
+    await run('retime', { ids: [a.id], offset: -0.2 });
+    expect(a.props.opacity!.kf!.map(k => +k.t.toFixed(6))).toEqual([0, 0.3, 0.6]);
+    expect(() => tool('stagger').run({ ids: [a.id, b.id], step: 0.1, start: -0.5 })).toThrow(/before 0/);
+    expect(() => tool('retime').run({ ids: [a.id], scale: NaN })).toThrow();
+  });
+
   it('variations capture and re-apply animation state (undoable)', async () => {
     const s = editor.store;
     const [a] = s.comp.root.map(id => s.layer(id)!);
