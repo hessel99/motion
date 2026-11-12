@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
 const req = createRequire(execSync('npm root -g').toString().trim() + '/');
 const { _electron } = req('playwright');
-const app = await _electron.launch({ executablePath: (await import('electron')).default, args: ['.', '--no-sandbox'], cwd: process.cwd(), env: { ...process.env, MOTION_BRIDGE_PORT: '7830' } });
+const app = await _electron.launch({ executablePath: process.env.EXE || (await import('electron')).default, args: process.env.EXE ? ['--no-sandbox'] : ['.', '--no-sandbox'], cwd: process.cwd(), env: { ...process.env, MOTION_BRIDGE_PORT: '7830' } });
 const win = await app.firstWindow();
 const errs = []; win.on('pageerror', e => errs.push(e.message)); win.on('console', m => m.type() === 'error' && errs.push(m.text()));
 await win.waitForFunction(() => window.editor?.renderer, null, { timeout: 20000 });
