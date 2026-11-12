@@ -768,7 +768,7 @@ export class Renderer {
     out.length = 0;
     const pv = this.store.previewProps.get(l.id);
     out.push(l.type, l.props, pv, l.paints, l.geometry, l.strokeGeometry, l.strokeAlign, l.text, l.textAnim, l.pathKf, l.trimOn, l.imageRef, l.mask, l.blend, this.fontGen,
-      l.strokePaints, l.dash, l.strokeCap, l.strokeJoin, l.miterLimit, l.strokeSides, l.smoothing, l.effects, l.maskType);
+      l.strokePaints, l.dash, l.strokeCap, l.strokeJoin, l.miterLimit, l.strokeSides, l.smoothing, l.effects, l.maskType, l.isolate);
     for (const key of SIG_KEYS) { const p = pv?.[key] ?? l.props[key]; out.push(p, p?.v, p?.kf, p?.expr); }
     return out;
   }
@@ -898,9 +898,12 @@ export class Renderer {
     it.fx = fxOn ? new EffectEval(l, key => this.store.renderProp(l, key)) : null;
     if (it.fx && !it.fx.list.length) it.fx = null;
     // a group's blend mode applies to its composite (figma, after effects): isolate it too
-    it.fxBlend = !l.mask && (needsBlendShader(l.blend) || ((it.fx || it.isoGroup) && l.blend && l.blend !== 'normal')) ? BLEND_SHADER[l.blend!] ?? 0 : 0;
+    // inside an isolated group the gpu multiply / lighten would see a transparent backdrop: shader
+    let inIso = false;
+    if (l.blend === 'multiply' || l.blend === 'lighten') for (let p = it.parent; p >= 0; p = this.items[p].parent) { const pl = this.items[p].layer; if (pl.isolate || this.items[p].fx) { inIso = true; break; } }
+    it.fxBlend = !l.mask && (needsBlendShader(l.blend) || inIso || ((it.fx || it.isoGroup) && l.blend && l.blend !== 'normal')) ? BLEND_SHADER[l.blend!] ?? 0 : 0;
     if (it.fx?.animated) it.animated = true;
-    this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0) | (it.fx || it.fxBlend ? 16 : 0);
+    this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0) | (it.fx || it.fxBlend || (l.isolate && it.isoGroup) ? 16 : 0);
     this.sBlend[i] = it.fx || it.fxBlend ? 0 : l.blend ? BLEND_IDS[l.blend] ?? 0 : 0;
     this.sAlign[i] = l.strokeAlign === 'inside' ? -1 : l.strokeAlign === 'outside' ? 1 : 0;
   }

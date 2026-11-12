@@ -328,6 +328,7 @@ class Converter {
   private instanceDepth = 0;
   private defStack: string[] = [];
   warnings = new Map<string, number>();
+  private byId = new Map<string, Layer>();
 
   constructor(private message: any, private opts: FigmaConvertOptions = {}) {
     this.blobs = Array.isArray(message?.blobs) ? message.blobs : [];
@@ -480,6 +481,7 @@ class Converter {
     if (!layer) return null;
     layer.parent = parentId;
     this.layers.push(layer);
+    this.byId.set(layer.id, layer);
 
     if (n.type === 'BOOLEAN_OPERATION') return layer.id; // operands are baked into fillGeometry
 
@@ -522,7 +524,14 @@ class Converter {
       }
     }
     if (isInstance) this.instanceDepth--;
+    // a NORMAL (not pass-through) group isolates its children's blend modes
+    if (n.blendMode === 'NORMAL' && layer.type === 'group' && this.hasBlendBelow(layer)) layer.isolate = true;
     return layer.id;
+  }
+
+  private hasBlendBelow(l: Layer): boolean {
+    for (const c of l.children) { const k = this.byId.get(c); if (k && ((k.blend && k.blend !== 'normal') || this.hasBlendBelow(k))) return true; }
+    return false;
   }
 
   warn(msg: string) { this.warnings.set(msg, (this.warnings.get(msg) ?? 0) + 1); }

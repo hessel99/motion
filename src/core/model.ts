@@ -46,7 +46,7 @@ export const BLEND_MODES: BlendMode[] = [
   'overlay', 'softLight', 'hardLight', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity',
 ];
 /** modes the gpu blend unit does on its own (everything else composites through a shader) */
-export const SIMPLE_BLENDS: ReadonlySet<BlendMode> = new Set<BlendMode>(['normal', 'multiply', 'screen', 'add', 'darken', 'lighten']);
+export const SIMPLE_BLENDS: ReadonlySet<BlendMode> = new Set<BlendMode>(['normal', 'multiply', 'screen', 'add', 'lighten']); // darken: MIN on a quad's transparent pixels draws a black box
 
 export type LayerType = 'group' | 'rect' | 'ellipse' | 'path' | 'text' | 'image' | 'precomp' | 'audio';
 
@@ -296,6 +296,9 @@ export interface Layer {
   blend?: BlendMode;
   /** effects (shadows, blurs, noise...), figma order */
   effects?: Effect[];
+  /** group composites as one image (figma NORMAL group, vs pass-through): its children's blend
+   *  modes only see the group's own content */
+  isolate?: boolean;
   /** in/out points in seconds; layer is hidden outside */
   inPoint: number;
   outPoint: number;

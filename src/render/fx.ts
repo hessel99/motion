@@ -184,11 +184,8 @@ vec3 setSat(vec3 c, float s) {
   float mn = min(c.r, min(c.g, c.b)), mx = max(c.r, max(c.g, c.b));
   return mx > mn ? (c - mn) * s / (mx - mn) : vec3(0.0);
 }
-float softL(float b, float s) {
-  if (s <= 0.5) return b - (1.0 - 2.0 * s) * b * (1.0 - b);
-  float d = b <= 0.25 ? ((16.0 * b - 12.0) * b + 4.0) * b : sqrt(b);
-  return b + (2.0 * s - 1.0) * (d - b);
-}
+// soft light: figma's renders match the "pegtop" curve far better than the w3c one (measured)
+float softL(float b, float s) { return (1.0 - 2.0 * s) * b * b + 2.0 * s * b; }
 float hardL(float b, float s) { return s <= 0.5 ? b * 2.0 * s : b + (2.0 * s - 1.0) - b * (2.0 * s - 1.0); }
 float dodge(float b, float s) { return b <= 0.0 ? 0.0 : s >= 1.0 ? 1.0 : min(1.0, b / (1.0 - s)); }
 float burn(float b, float s) { return b >= 1.0 ? 1.0 : s <= 0.0 ? 0.0 : 1.0 - min(1.0, (1.0 - b) / s); }
@@ -517,13 +514,16 @@ export class FxPipeline {
     let B: WebGLTexture[] = [];
     if (R.bg || R.glass || R.blend > 0) {
       const bk = this.tgt('back', R.w, R.h);
-      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, R.parentFb);
-      gl.bindTexture(gl.TEXTURE_2D, bk.tex);
+      // blit, not copyTexSubImage2D: the canvas framebuffer has no alpha channel (alpha: false), and
+      // copying RGB into an RGBA texture is an error (the backdrop came out black)
       const [x0, y0, x1, y1] = R.box;
       const gx0 = Math.max(0, Math.floor(x0)), gx1 = Math.min(R.w, Math.ceil(x1));
       const gy0 = Math.max(0, Math.floor(R.h - y1)), gy1 = Math.min(R.h, Math.ceil(R.h - y0));
-      if (gx1 > gx0 && gy1 > gy0) gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, gx0, gy0, gx0, gy0, gx1 - gx0, gy1 - gy0);
-      gl.bindTexture(gl.TEXTURE_2D, null);
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, R.parentFb);
+      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, bk.fb);
+      gl.disable(gl.SCISSOR_TEST);
+      if (gx1 > gx0 && gy1 > gy0) gl.blitFramebuffer(gx0, gy0, gx1, gy1, gx0, gy0, gx1, gy1, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       back = bk.tex;
       if (R.bg || R.glass) B = this.blurLevels(back, R, R.bg ?? { sigma: 0 }, 'bb');
     }
