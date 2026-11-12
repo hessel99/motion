@@ -62,6 +62,12 @@ for (const n of counts) {
     const byId = new Map(prof.nodes.map(nd => [nd.id, nd])); const self = new Map();
     prof.samples.forEach((s, i) => { const nd = byId.get(s); const k = `${nd.callFrame.functionName || '(anon)'} ${nd.callFrame.url.split('/').pop().split('?')[0]}:${nd.callFrame.lineNumber + 1}`; self.set(k, (self.get(k) || 0) + (prof.timeDeltas[i] || 0)); });
     const total = [...self.entries()].filter(([k]) => !k.startsWith('(idle)') && !k.startsWith('(program)')).reduce((a, [, b]) => a + b, 0);
+    if (process.env.LINES) {
+      // hottest source lines of one function (positionTicks), e.g. LINES=render
+      const lines = new Map();
+      for (const nd of prof.nodes) if (nd.callFrame.functionName === process.env.LINES) for (const pt of nd.positionTicks ?? []) lines.set(pt.line, (lines.get(pt.line) || 0) + pt.ticks);
+      console.log([...lines].sort((a, b) => b[1] - a[1]).slice(0, 15).map(([l, t]) => `line ${l}: ${t}`).join('\n'));
+    }
     console.log(`--- ${n} layers, self time ---`);
     console.log([...self].filter(([k]) => !k.startsWith('(idle)') && !k.startsWith('(program)')).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([k, us]) => `${(100 * us / total).toFixed(1).padStart(5)}%  ${k}`).join('\n'));
   }
