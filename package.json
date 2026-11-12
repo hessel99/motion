@@ -18,6 +18,7 @@
     "dist:dir": "npm run build && electron-builder --dir",
     "stress": "vite build && node scripts/stress-lab.mjs",
     "stress:quick": "vite build && node scripts/stress-lab.mjs --quick",
+    "fidelity": "node scripts/figma-fidelity.mjs",
     "release:local": "npm run build && node scripts/release.mjs --out release/updates",
     "release:local:mac": "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac zip --publish never && node scripts/release.mjs --out release/updates",
     "release:serve": "node scripts/serve-release.mjs release/updates",

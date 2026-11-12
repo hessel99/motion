@@ -13,3 +13,11 @@ undefined-*.png
 
 # update signing key (scripts/gen-update-key.mjs): never commit
 .update-key/
+
+# figma / svg fidelity harness (scripts/figma-fidelity.mjs): ground truth renders, node dumps and
+# reports stay local (they can contain the user's design data); real pasted payloads too
+bench/results/figma-truth/
+bench/results/figma-fidelity/
+bench/results/figma-fidelity-*/
+bench/results/svg-fidelity/
+fixtures/figma-paste/
