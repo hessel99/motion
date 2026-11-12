@@ -12,6 +12,8 @@ import { useChannels } from './hooks';
 import { ANIM_PRESETS, alignLayers, applyPreset, distributeLayers, setTextAnim, TEXT_ANIM_PRESETS, type Align } from '../core/presets';
 import { invert } from './viewport-controller';
 import { toast } from '../app/actions';
+import { EaseStudio, showClassicEase, studioEnabled, StudioSwitch } from './patterns/EaseStudio';
+import { RhythmPanel } from './patterns/RhythmPanel';
 
 const st = () => editor.store;
 
@@ -294,6 +296,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
         </Section>
       )}
       <AnimatePanel ids={ids} />
+      <RhythmPanel ids={ids} />
       <ExprPanel layers={layers} />
       <Section title="Timing">
         <div class="row">
@@ -496,7 +499,9 @@ function EasePanel() {
   const cur: [number, number, number, number] = a && b ? (a.interp === 'linear' ? [0, 0, 1, 1] : [a.out[0], a.out[1], b.in[0], b.in[1]]) : [0.333, 0, 0.667, 1];
   const active = EASE_PRESETS.find(p => p.v.every((x, i) => Math.abs(x - cur[i]) < 1e-3));
   return (
-    <Section title={`Easing · ${keys.length} key${keys.length > 1 ? 's' : ''}`} right={seg && <span class="insp-type">{PROP_DEFS[seg.key].label}</span>}>
+    <Section title={`Easing · ${keys.length} key${keys.length > 1 ? 's' : ''}`} right={<span class="row" style={{ margin: 0 }}>{seg && <span class="insp-type">{PROP_DEFS[seg.key].label}</span>}<StudioSwitch /></span>}>
+      {studioEnabled() && <EaseStudio />}
+      {showClassicEase() && <>
       {a && b && seg && a.interp === 'spring' && <SpringView bounce={a.bounce ?? 0.3} onChange={v => setSpring(store, keys, v)} />}
       {a && b && seg && a.interp !== 'hold' && a.interp !== 'spring' && (
         <CurveEditor value={cur} onChange={(v, mk) => setSegmentHandles(store, seg!.layerId, seg!.key, seg!.i, [v[0], v[1]], [v[2], v[3]], mk)} />
@@ -526,6 +531,7 @@ function EasePanel() {
           </button>
         ))}
       </div>
+      </>}
       <div class="row small muted">cubic-bezier({cur.map(x => Math.round(x * 100) / 100).join(', ')})</div>
     </Section>
   );
