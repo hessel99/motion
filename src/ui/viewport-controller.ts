@@ -195,7 +195,8 @@ export class ViewportController {
       this.ed.renderer.render(st.time);
       st.select([l.id]);
       this.ed.setTool('select');
-      this.onTextEdit?.(l.id);
+      e.preventDefault(); // keep focus for the text editor that opens after this event
+      setTimeout(() => this.onTextEdit?.(l.id), 0);
       return;
     }
     // select tool
