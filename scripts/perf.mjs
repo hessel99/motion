@@ -17,10 +17,10 @@ for (const n of counts) {
   await page.goto(`${url}?nobridge&blank&stress=${n}${kinds ? '&kinds=' + kinds : ''}${nested ? '&nested' : ''}`);
   await page.waitForFunction(() => (window.editor?.renderer?.stats?.layers ?? 0) > 0, null, { timeout: 60000 });
   const loadMs = Date.now() - t0;
-  const r = await page.evaluate(async () => {
+  const r = await page.evaluate(async (warmup) => {
     const ed = window.editor;
     ed.play();
-    await new Promise(r => setTimeout(r, 800)); // warmup (rasters, jit)
+    await new Promise(r => setTimeout(r, warmup)); // warmup (rasters, jit)
     const frames = [], ev = [], wr = [], gpu = [], tot = [];
     let last = performance.now();
     await new Promise(res => {
@@ -37,7 +37,7 @@ for (const n of counts) {
     const p95 = a => { const b = [...a].sort((x, y) => x - y); return b[Math.floor(b.length * 0.95)]; };
     const s = ed.renderer.stats;
     return { fps: +(1000 / med(frames)).toFixed(1), p95FrameMs: +p95(frames).toFixed(1), cpuFrameMs: +med(tot).toFixed(2), evalMs: +med(ev).toFixed(2), writeMs: +med(wr).toFixed(2), gpuSubmitMs: +med(gpu).toFixed(2), drawn: s.instances, drawCalls: s.drawCalls };
-  });
+  }, +(process.env.WARMUP || 800));
   rows.push({ layers: n, loadMs, ...r, errors: errs.length });
   await page.close();
 }

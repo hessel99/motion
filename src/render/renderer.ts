@@ -163,6 +163,7 @@ interface Item {
   rasterKey: string | null; // last resolved atlas key
   raster: RasterResult | null; // placement of last raster
   rasterScale: number; // bucket scale of the current raster
+  maxScale: number; // largest |scale| (factor) reached by this layer's scale keyframes
   rasterGen: number; // atlas generation the raster belongs to
   entry: import('./atlas').AtlasEntry | null;
 }
@@ -334,7 +335,7 @@ export class Renderer {
       const it: Item = {
         id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10),
         hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden),
-        rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null,
+        rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
       };
       if (parent >= 0) {
         const p = this.items[parent];
@@ -361,6 +362,8 @@ export class Renderer {
       if (tr.animated) { mask |= 1 << k; it.h[k] = this.pool.add(p!, PROP_DEFS[key].dim, key === 'position'); }
     }
     it.animMask = mask;
+    const sp = l.props.scale;
+    it.maxScale = sp?.kf?.length ? Math.max(...sp.kf.map(k => Math.max(Math.abs(k.v[0]), Math.abs(k.v[1])))) / 100 : 1;
     it.animated = mask !== 0;
     const complex = !!l.paints?.some(p => p.type !== 'solid');
     switch (l.type) {
@@ -603,7 +606,12 @@ export class Renderer {
           gx = l.geomSize[0] ? w / l.geomSize[0] : 1;
           gy = l.geomSize[1] ? h / l.geomSize[1] : 1;
         }
-        const scale = Math.sqrt(Math.abs(a * d - b * c) * Math.abs(gx * gy)) * z;
+        let scale = Math.sqrt(Math.abs(a * d - b * c) * Math.abs(gx * gy)) * z;
+        // raster once at the largest scale the animation reaches: no re-rasters during playback
+        if (it.maxScale > 0) {
+          const o8 = i * 8, cur = Math.max(Math.abs(this.xf[o8 + 4]), Math.abs(this.xf[o8 + 5])) / 100;
+          if (cur > 1e-3) scale *= Math.min(8, Math.max(1, it.maxScale / cur));
+        }
         const r0 = performance.now();
         const ok = this.resolveRaster(i, scale, budgetEnd);
         rasterMs += performance.now() - r0;
