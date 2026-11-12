@@ -6,7 +6,16 @@ import type { Project } from '../core/model';
 import type { TurnDiff } from './diff';
 
 export interface ToolInfo { id: string; name: string; input: any; result?: string; isError?: boolean; image?: string; startedAt?: number; ms?: number }
-export interface ReviewInfo { marker: number; endMarker: number; steps: number; diff: TurnDiff; state: 'pending' | 'kept' | 'reverted' | 'stale'; range?: [number, number] }
+/** startId / endId: the store's top undo entry id before / after the turn (Store.topEntryId). the
+ *  card can revert/compare only while endId is still on top, i.e. the document is exactly as the
+ *  turn left it (a step count could match after the user undid the turn and made own edits) */
+export interface ReviewInfo { startId?: number; endId?: number; steps: number; diff: TurnDiff; state: 'pending' | 'kept' | 'reverted' | 'stale'; range?: [number, number] }
+
+/** the document is exactly as the turn left it: the turn's last undo entry is on top. (a step
+ *  count is not enough: undo the turn, make as many own edits, and the count matches again) */
+export function reviewAtEnd(r: ReviewInfo, topEntryId: number) {
+  return r.endId !== undefined && r.startId !== undefined && r.endId !== r.startId && topEntryId === r.endId;
+}
 
 export interface Msg {
   role: 'user' | 'assistant' | 'tool' | 'error' | 'info' | 'review';

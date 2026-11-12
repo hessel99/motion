@@ -17,7 +17,7 @@ const STORAGE = 'motion.agent';
 const pref = (k: string, d: string) => { try { return localStorage.getItem(STORAGE + '.' + k) || d; } catch { return d; } };
 const setPref = (k: string, v: string) => { try { localStorage.setItem(STORAGE + '.' + k, v); } catch { /* */ } };
 
-interface Turn { chatId: string; startedAt: number; activity: string; stopping: boolean; live: number; snap: DocSnapshot; marker: number }
+interface Turn { chatId: string; startedAt: number; activity: string; stopping: boolean; live: number; snap: DocSnapshot; startId: number }
 
 export function AgentPanel() {
   const [, force] = useState(0);
@@ -36,7 +36,9 @@ export function AgentPanel() {
   const list = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
   const [, tick] = useState(0);
-  const finishers = useRef(new Map<string, () => void>());
+  /** local finish per running chat. drop = the turn was detached (another project was opened):
+   *  no review card, nothing appended to the (now different) conversation */
+  const finishers = useRef(new Map<string, (drop?: boolean) => void>());
 
   useEffect(() => agentClient.on(() => force(x => x + 1)), []);
   useEffect(() => editor.store.on('history', () => force(x => x + 1)), []);
@@ -55,8 +57,13 @@ export function AgentPanel() {
   // re-checked once mounted, because the startup project can load before passive effects run.
   useLayoutEffect(() => {
     const sync = () => {
+      // a running turn belongs to the document that was just replaced: stop it and detach it, so
+      // its remaining events / review never mix into the newly opened project
+      const t = turnRef.current;
+      if (t) { agentClient.cancel(t.chatId); finishers.current.get(t.chatId)?.(true); }
       const k = projectKey(editor.store.project);
-      if (k === key.current) return;
+      // the undo history is gone: review cards of this conversation can no longer revert/compare
+      if (k === key.current) { setMsgs(m => m.some(x => x.review?.state === 'pending') ? m.map(x => (x.review?.state === 'pending' ? { ...x, review: { ...x.review, state: 'stale' as const } } : x)) : m); return; }
       saveChat(key.current, msgsRef.current, session.current);
       key.current = k;
       const c = loadChat(k);
@@ -103,27 +110,31 @@ export function AgentPanel() {
     stick.current = true;
     setMsgs(x => [...x, { role: 'user', text, mode: m, chip: opts.chip }]);
     const snap = snapshotDoc(s.project);
-    const marker = s.historyLength;
+    const marker = s.historyLength; // only for the step count shown on the card
+    const startId = s.topEntryId; // identifies the exact pre-turn state (revert / compare)
+    const startKey = key.current;
     let assistantIdx = -1;
     let finished = false;
     const append = (fn: (m: Msg[]) => Msg[]) => setMsgs(fn);
     const activity = (a: string) => setTurn(t => (t && t.chatId === chatId ? { ...t, activity: a } : t));
 
-    const finish = (e: ChatEvent) => {
+    const finish = (e: ChatEvent, drop = false) => {
       if (finished) return;
       finished = true;
-      const steps = s.historyLength - marker;
+      agentClient.forget(chatId); // lifts the Ask-mode lock even when the bridge never sends 'done'
+      finishers.current.delete(chatId);
+      setTurn(t => (t && t.chatId === chatId ? null : t));
+      if (drop || key.current !== startKey) return;
+      const steps = Math.max(1, s.historyLength - marker);
       const diff = diffDocs(snap, snapshotDoc(s.project));
-      if (steps > 0 && !diffIsEmpty(diff)) {
+      if (s.topEntryId !== startId && !diffIsEmpty(diff)) {
         let a = Infinity, b = -Infinity;
         for (const c of [...diff.added, ...diff.changed]) { const l = s.layer(c.id); const r = l && animRange(l); if (r) { a = Math.min(a, r[0]); b = Math.max(b, r[1]); } }
-        const review: ReviewInfo = { marker, endMarker: s.historyLength, steps, diff, state: 'pending', range: isFinite(a) ? [a, b] : undefined };
+        const review: ReviewInfo = { startId, endId: s.topEntryId, steps, diff, state: 'pending', range: isFinite(a) ? [a, b] : undefined };
         append(x => [...x, { role: 'review', text: '', review }]);
       }
       const bits = [e.durationMs ? `${(e.durationMs / 1000).toFixed(1)}s` : '', e.costUsd ? `$${e.costUsd.toFixed(3)}` : '', e.usage ? `${fmtTok(e.usage.input)} in · ${fmtTok(e.usage.output)} out` : ''].filter(Boolean);
       if (bits.length) append(x => [...x, { role: 'info', text: bits.join(' · ') }]);
-      finishers.current.delete(chatId);
-      setTurn(null);
     };
 
     const chatId = agentClient.chat({ provider, message, sessionId: session.current[provider], model: provider === 'claude' && model ? model : undefined, mode: m }, (e: ChatEvent) => {
@@ -164,9 +175,9 @@ export function AgentPanel() {
         case 'done': finish(e); break;
       }
     });
-    setTurn({ chatId, startedAt: Date.now(), activity: m === 'ask' ? 'Looking…' : 'Starting…', stopping: false, live: 0, snap, marker });
+    setTurn({ chatId, startedAt: Date.now(), activity: m === 'ask' ? 'Looking…' : 'Starting…', stopping: false, live: 0, snap, startId });
     // safety net: if the bridge never confirms a cancel, finish locally
-    finishers.current.set(chatId, () => finish({ kind: 'done' }));
+    if (!finished) finishers.current.set(chatId, (drop?: boolean) => finish({ kind: 'done' }, drop));
   };
 
   const stop = () => {
@@ -239,7 +250,7 @@ export function AgentPanel() {
           <ToolGroup items={b.items.map(x => x.m)} running={!!turn && b.items[b.items.length - 1].i === lastToolIndex(msgs)} layerName={layerName} />
         ) : (() => {
           const { m, i } = b;
-          if (m.role === 'review') return <TurnReview review={m.review!} onState={(st, note) => setReview(i, st, note)} />;
+          if (m.role === 'review') return <TurnReview review={m.review!} busy={!!turn} onState={(st, note) => setReview(i, st, note)} />;
           if (m.role === 'error') return (
             <div class={'msg error ag-error ' + (m.errorKind ?? '')}>
               <div><b>{ERROR_TITLE[m.errorKind ?? ''] ?? 'Something went wrong'}</b></div>

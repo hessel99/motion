@@ -165,7 +165,10 @@ describe('pattern operations on the document', () => {
     store.setTime(3);
     const pv = new EasePreview(store);
     pv.begin([keyId(ids[0], 'position', 0)], { kind: 'spring', bounce: 0.5 });
-    expect(prop.kf![0].interp).toBe('spring');
+    // the renderer sees the previewed ease, the document (autosave, agent tools) never does
+    expect(store.renderProp(store.layer(ids[0])!, 'position')!.kf![0].interp).toBe('spring');
+    expect(prop.kf![0].interp).not.toBe('spring');
+    expect(JSON.stringify(store.project)).toBe(json);
     pv.tick(500);
     expect(store.time).toBeGreaterThanOrEqual(0.5);
     pv.begin([keyId(ids[0], 'position', 0)], { kind: 'linear' });
@@ -174,6 +177,24 @@ describe('pattern operations on the document', () => {
     expect(JSON.stringify(store.project)).toBe(json);
     expect(store.historyLength).toBe(h);
     expect(store.time).toBe(3);
+    expect(store.previewProps.size).toBe(0);
+  });
+  it('a real edit or undo during a hover preview ends it (no stale override, no clobbered edit)', () => {
+    const { store, ids } = scene();
+    const pv = new EasePreview(store);
+    let ended = 0;
+    pv.onEnd = () => ended++;
+    pv.begin([keyId(ids[0], 'position', 0)], { kind: 'spring', bounce: 0.5 });
+    expect(store.previewProps.size).toBe(1);
+    setEase(store, [keyId(ids[0], 'position', 0)], [0.16, 1, 0.3, 1]); // e.g. an agent tool call
+    expect(pv.active).toBe(false);
+    expect(ended).toBe(1);
+    expect(store.previewProps.size).toBe(0);
+    expect(store.layer(ids[0])!.props.position!.kf![0].out).toEqual([0.16, 1]); // the edit survives
+    pv.begin([keyId(ids[0], 'position', 0)], { kind: 'linear' });
+    store.undo();
+    expect(pv.active).toBe(false);
+    expect(store.previewProps.size).toBe(0);
   });
 });
 

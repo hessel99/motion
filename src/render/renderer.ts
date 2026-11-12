@@ -487,7 +487,7 @@ export class Renderer {
     let mask = 0;
     for (let k = 0; k < TR_KEYS.length; k++) {
       const key = TR_KEYS[k];
-      const p = l.props[key];
+      const p = this.store.renderProp(l, key); // preview overrides (hover swatch, Perform) win
       const tr = p ? new Track(p, PROP_DEFS[key].dim, key === 'position') : defaultTrack(key);
       it.tracks[k] = tr;
       if (tr.animated) { mask |= 1 << k; it.h[k] = this.pool.add(p!, PROP_DEFS[key].dim, key === 'position'); }
@@ -496,7 +496,7 @@ export class Renderer {
     let emask = 0;
     it.exprs = null;
     for (let k = 0; k < TR_KEYS.length; k++) {
-      const p = l.props[TR_KEYS[k]];
+      const p = this.store.renderProp(l, TR_KEYS[k]);
       if (!p?.expr?.trim()) continue;
       const c = compileExpr(p.expr);
       if (!c.node) continue;
@@ -507,7 +507,7 @@ export class Renderer {
     it.exprMask = emask;
     mask |= emask;
     it.animMask = mask;
-    const sp = l.props.scale;
+    const sp = this.store.renderProp(l, 'scale');
     it.maxScale = sp?.kf?.length ? Math.max(...sp.kf.map(k => Math.max(Math.abs(k.v[0]), Math.abs(k.v[1])))) / 100 : 1;
     it.animated = mask !== 0;
     const complex = !!l.paints?.some(p => p.type !== 'solid');
@@ -528,7 +528,7 @@ export class Renderer {
       const pkf = l.pathKf && l.pathKf.length >= 2 ? l.pathKf : null;
       it.dyn = {
         base: `${it.rasterBase}|r${this.dynRev++}`, // revision: trim/pathKf edits must never reuse old frames
-        trim: l.trimOn ? [new Track(l.props.trimStart ?? { v: [0] }, 1), new Track(l.props.trimEnd ?? { v: [100] }, 1), new Track(l.props.trimOffset ?? { v: [0] }, 1)] : null,
+        trim: l.trimOn ? [new Track(this.store.renderProp(l, 'trimStart') ?? { v: [0] }, 1), new Track(this.store.renderProp(l, 'trimEnd') ?? { v: [100] }, 1), new Track(this.store.renderProp(l, 'trimOffset') ?? { v: [0] }, 1)] : null,
         pkf,
         eases: pkf ? pkf.map((k, j) => (j < pkf.length - 1 && k.interp === 'bezier' ? cubicBezier(k.out[0], k.out[1], pkf[j + 1].in[0], pkf[j + 1].in[1]) : (x: number) => x)) : [],
         frame: NaN, t: 0,
