@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
 import {
   addKeyframe, deleteKeyframes, isAnimated, keyId, parseKeyId, setCompSettings, setEase, setLayerField, setProp,
-  setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, addMarker,
+  setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, addMarker, deleteMarker,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { starGeometry } from '../core/shapes';
@@ -463,6 +463,16 @@ function DocPanel() {
       </Section>
       <Section title="Background">
         <div class="row"><ColorField value={c.background} onChange={col => setCompSettings(store, { background: col as any })} /></div>
+      </Section>
+      <Section title="Markers" right={<button type="button" class="ghost small" title="Add a marker at the playhead (M)" onClick={() => addMarker(store, store.time)}>Add at playhead</button>}>
+        {(c.markers ?? []).length === 0 && <div class="muted small">Markers mark beats and moments: M at the playhead, or from an audio layer's beats. J / K and key drags snap to them.</div>}
+        {[...(c.markers ?? [])].sort((a, b) => a.t - b.t).map(m => (
+          <div class="marker-row">
+            <button type="button" class="marker-time" title="Go to this marker" onClick={() => store.setTime(m.t)}>{m.t.toFixed(2)}s</button>
+            <span class="marker-label">{m.label || 'Marker'}</span>
+            <button type="button" class="ghost icon marker-x" aria-label="Delete marker" title="Delete marker" onClick={() => deleteMarker(store, m.id)}><X size={12} /></button>
+          </div>
+        ))}
       </Section>
       <Section title="Export">
         <div class="row">

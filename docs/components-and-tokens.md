@@ -9,7 +9,7 @@ Two features let you build a motion design from a design system rather than from
 
 ## How to use it
 
-### Colors and numbers (Library tab, right panel)
+### Colors and numbers (Library tab, left panel)
 - **Get styles in**:
   - paste a design from Figma (its color styles and variables come along)
   - or **Sync ▾ → Import tokens file**

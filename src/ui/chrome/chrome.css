@@ -236,8 +236,8 @@
 .autokey.rec, .autokey.rec:hover:not(:disabled) { color: var(--record); background: var(--danger-soft); }
 .autokey.rec .rec-dot { background: var(--record); }
 .tp-sep { width: 1px; height: 16px; background: var(--border); margin: 0 var(--space-3); }
-.tp-grip { position: absolute; left: 0; right: 0; top: -4px; height: 7px; cursor: row-resize; z-index: 2; touch-action: none; }
-.tp-grip::after { content: ''; position: absolute; left: 50%; top: 2px; width: 36px; height: 3px; margin-left: -18px; border-radius: 2px; background: var(--border-strong); opacity: 0; transition: opacity var(--dur-fast) var(--ease-standard); }
+.tp-grip { position: absolute; left: 0; right: 0; top: 0; height: 6px; cursor: row-resize; z-index: 2; touch-action: none; }
+.tp-grip::after { content: ''; position: absolute; left: 50%; top: 1px; width: 36px; height: 3px; margin-left: -18px; border-radius: 2px; background: var(--border-strong); opacity: 0; transition: opacity var(--dur-fast) var(--ease-standard); }
 .tp-grip:hover::after { opacity: 1; }
 @media (max-width: 1180px) { .tp-fps, .tp-range { display: none; } }
 .timeline { position: relative; width: 100%; flex: 1; min-height: 0; overflow: hidden; }

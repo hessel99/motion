@@ -17,7 +17,7 @@ import { GraphView } from './graph';
 import { T, onThemeChange } from './theme';
 import { Eye, EyeOff, LAYER_ICON, Lock, LockOpen, Square, strokeIcon } from './chrome/icons';
 import { audioDuration, audioFailed, audioPeaks } from '../audio/engine';
-import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
+import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
 import { setEase, setInterp, setSpring, updateMarker, deleteMarker, cloneLayers, deleteLayers } from '../core/commands';
 
 export const HEADER_H = 28;
@@ -651,6 +651,37 @@ export class Timeline {
     }
   }
 
+  /** the segment an animated property row's ease swatch stands for: the one under the playhead
+   *  (the first / last one before / after the keys) */
+  private swatchSegment(kf: Keyframe[]) {
+    const i = lowerBound(kf, this.ed.store.time + 1e-6) - 1;
+    return Math.max(0, Math.min(kf.length - 2, i));
+  }
+  /** ease swatch x range in the left column (score layout idea: value, ease, keys in one line) */
+  private swatchX() { return this.leftW - 146; }
+
+  /** a small curve of the current segment's ease, next to the values. click: select that
+   *  segment's keys, so the ease studio opens on it */
+  private drawEaseSwatch(g: CanvasRenderingContext2D, l: Layer, key: PropKey, kf: Keyframe[], cy: number) {
+    const i = this.swatchSegment(kf);
+    const a = kf[i], b = kf[i + 1];
+    const x0 = this.swatchX(), w = 20, h = 14, y0 = cy - h / 2;
+    const st = this.ed.store;
+    const sel = st.keySelection.has(keyId(l.id, key, i)) && st.keySelection.has(keyId(l.id, key, i + 1));
+    g.fillStyle = T.tlRowHover;
+    g.beginPath(); g.roundRect(x0, y0, w, h, 3); g.fill();
+    g.strokeStyle = sel ? T.tlHot : T.tlPropName;
+    g.lineWidth = 1.25;
+    const px = (u: number) => x0 + 3 + u * (w - 6), py = (v: number) => y0 + h - 3 - v * (h - 6);
+    g.beginPath();
+    g.moveTo(px(0), py(0));
+    if (a.interp === 'hold') { g.lineTo(px(1), py(0)); g.lineTo(px(1), py(1)); }
+    else if (a.interp === 'linear') g.lineTo(px(1), py(1));
+    else if (a.interp === 'spring') { const bo = a.bounce ?? 0.3; for (let k = 1; k <= 16; k++) { const u = k / 16; g.lineTo(px(u), py(springAt(bo, u))); } }
+    else g.bezierCurveTo(px(a.out[0]), py(a.out[1]), px(b.in[0]), py(b.in[1]), px(1), py(1));
+    g.stroke();
+  }
+
   private drawPropRow(g: CanvasRenderingContext2D, r: Row, y: number) {
     const l = r.layer, key = r.prop!;
     const st = this.ed.store;
@@ -685,6 +716,7 @@ export class Timeline {
     g.fillText(txt, this.leftW - (this.studio ? 26 : 12) - tw, cy);
     }
     }
+    if (this.studio && !this.hideValues && kf.length >= 2) this.drawEaseSwatch(g, l, key, kf, cy);
     if (this.studio) this.drawVelocity(g, l, key, kf, cy);
     // keyframes: only the visible time range (keys are sorted by time)
     for (let i = lowerBound(kf, this.xToT(this.leftW - 6) - 1e-9); i < kf.length; i++) {
@@ -880,6 +912,16 @@ export class Timeline {
         else if (!st.selection.includes(r.id)) st.select([r.id]);
         this.drag = { kind: 'rows', ids: st.selection.slice(), sy: y, y, moved: false };
       } else {
+        // prop row: the ease swatch selects the segment under the playhead (the ease studio opens on it)
+        const kfs = r.layer.props[r.prop!]?.kf ?? [];
+        const sx = this.swatchX();
+        if (this.studio && !this.hideValues && kfs.length >= 2 && x >= sx - 2 && x <= sx + 22) {
+          const j = this.swatchSegment(kfs);
+          if (!st.selection.includes(r.id)) st.select([r.id]);
+          st.keySelection = new Set([keyId(r.id, r.prop!, j), keyId(r.id, r.prop!, j + 1)]);
+          st.emit('keys');
+          return;
+        }
         // prop row: diamond toggles key at current time, else select layer
         if (this.studio ? x >= this.leftW - 22 && x < this.leftW - 4 : x >= ix + 10 && x <= ix + 26) {
           const kf = r.layer.props[r.prop!]?.kf ?? [];
