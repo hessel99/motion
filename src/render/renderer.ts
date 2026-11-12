@@ -9,7 +9,7 @@
 
 import { Track } from '../core/evaluate';
 import { TrackPool } from '../core/trackpool';
-import { compileExpr, runExpr, type ExprContext } from '../core/expr';
+import { compileExpr, compileProgram, runProgram, type ExprFrame, type ExprProgram } from '../core/expr';
 import { PROP_DEFS, type Layer, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
 import { Atlas, type AtlasEntry } from './atlas';
@@ -197,7 +197,7 @@ interface Item {
   dyn: { base: string; stale?: boolean; trim: Track[] | null; pkf: PathKey[] | null; eases: ((p: number) => number)[]; frame: number; t: number } | null;
   /** properties driven by expressions (bit = TR_* index) + their compiled programs */
   exprMask: number;
-  exprs: ({ node: any; track: Track; keyTimes: number[] } | null)[] | null;
+  exprs: ({ prog: ExprProgram; track: Track; fr: ExprFrame } | null)[] | null;
   hidden: boolean; // visible=false (self or ancestor)
   rasterBase: string | null;
   rasterKey: string | null; // last resolved atlas key
@@ -525,7 +525,10 @@ export class Renderer {
       const c = compileExpr(p.expr);
       if (!c.node) continue;
       if (!it.exprs) it.exprs = new Array(TR_KEYS.length).fill(null);
-      it.exprs[k] = { node: c.node, track: p ? new Track(p, PROP_DEFS[TR_KEYS[k]].dim, k === TR_POS) : defaultTrack(TR_KEYS[k]), keyTimes: (p.kf ?? []).map(f => f.t) };
+      const dim = PROP_DEFS[TR_KEYS[k]].dim, track = new Track(p, dim, k === TR_POS);
+      // the frame object, seed and valueAt are made once here, not per frame
+      const fr: ExprFrame = { time: 0, index: i, fps: 30, duration: 1, inPoint: 0, seed: (hashStr(it.id) + k * 31) % 9973, keyTimes: (p.kf ?? []).map(f => f.t), value: new Float64Array(4), valueAt: (tt, o) => track.eval(tt, o, 0), calls: 0 };
+      it.exprs[k] = { prog: compileProgram(c.node, dim), track, fr };
       emask |= 1 << k;
     }
     it.exprMask = emask;
@@ -669,7 +672,6 @@ export class Renderer {
     }
   }
 
-  private exprCtx: ExprContext = { time: 0, value: 0, index: 0, fps: 30, duration: 1, inPoint: 0, valueAt: () => 0, keyTimes: [], seed: 0 };
   private exprTmp = new Float64Array(4);
 
   /** run the expressions of item i at time t and write results where the tracks would */
@@ -679,30 +681,23 @@ export class Renderer {
     for (let k = 0; k < TR_KEYS.length; k++) {
       const e = ex[k];
       if (!e) continue;
-      const dim = PROP_DEFS[TR_KEYS[k]].dim;
-      const tmp = this.exprTmp;
-      e.track.eval(t, tmp, 0);
-      const c = this.exprCtx;
-      c.time = t;
-      c.value = dim === 1 ? tmp[0] : Array.from(tmp.subarray(0, dim));
+      const tmp = this.exprTmp, c = e.fr, P = e.prog;
+      c.time = t; // runProgram reads the keyframed value through c.valueAt when it needs it
       c.index = i;
       c.fps = comp.fps;
       c.duration = comp.duration;
       c.inPoint = it.layer.inPoint;
-      c.keyTimes = e.keyTimes;
-      c.seed = (hashStr(it.id) + k * 31) % 9973;
-      c.valueAt = (tt: number) => { const o = new Float64Array(4); e.track.eval(tt, o, 0); return dim === 1 ? o[0] : Array.from(o.subarray(0, dim)); };
       switch (k) {
-        case TR_ANCHOR: runExpr(e.node, c, 2, X, o8); break;
-        case TR_POS: runExpr(e.node, c, 2, X, o8 + 2); break;
-        case TR_SCALE: runExpr(e.node, c, 2, X, o8 + 4); break;
-        case TR_ROT: runExpr(e.node, c, 1, X, o8 + 6); X[o8 + 6] *= Math.PI / 180; break;
-        case TR_OPA: runExpr(e.node, c, 1, tmp, 0); this.lopa[i] = Math.min(1, Math.max(0, tmp[0] / 100)); break;
-        case TR_SIZE: runExpr(e.node, c, 2, S, os); break;
-        case TR_RAD: runExpr(e.node, c, 4, S, os + 2); break;
-        case TR_FILL: runExpr(e.node, c, 4, S, os + 6); break;
-        case TR_STROKE: runExpr(e.node, c, 4, S, os + 10); break;
-        case TR_SW: runExpr(e.node, c, 1, S, os + 14); break;
+        case TR_ANCHOR: runProgram(P, c, X, o8); break;
+        case TR_POS: runProgram(P, c, X, o8 + 2); break;
+        case TR_SCALE: runProgram(P, c, X, o8 + 4); break;
+        case TR_ROT: runProgram(P, c, X, o8 + 6); X[o8 + 6] *= Math.PI / 180; break;
+        case TR_OPA: runProgram(P, c, tmp, 0); this.lopa[i] = Math.min(1, Math.max(0, tmp[0] / 100)); break;
+        case TR_SIZE: runProgram(P, c, S, os); break;
+        case TR_RAD: runProgram(P, c, S, os + 2); break;
+        case TR_FILL: runProgram(P, c, S, os + 6); break;
+        case TR_STROKE: runProgram(P, c, S, os + 10); break;
+        case TR_SW: runProgram(P, c, S, os + 14); break;
       }
     }
   }
