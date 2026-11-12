@@ -168,7 +168,8 @@ void main() {
 }`;
 
 // command list for one frame (offscreen isolation for group opacity + masks)
-const CMD_DRAW = 0, CMD_PUSH = 1, CMD_POP = 2, CMD_MASK = 3;
+const CMD_DRAW = 0, CMD_PUSH = 1, CMD_POP = 2, CMD_MASK = 3, CMD_BLEND = 4;
+const BLEND_IDS: Record<string, number> = { normal: 0, multiply: 1, screen: 2, add: 3, darken: 4, lighten: 5 };
 
 interface UnitState { unit: TextUnit; delay: number; ease: (p: number) => number; entry: AtlasEntry | null; raster: RasterResult | null; scale: number }
 
@@ -918,6 +919,7 @@ export class Renderer {
     // open isolation regions: end index, composite opacity, divisor to restore, optional mask range
     const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number }[] = [];
     let div = 1; // opacity already applied by the enclosing isolated group (instances inside divide it out)
+    let curBlend = 0;
     let isolated = 0;
     const flush = () => { if (k > pending) { cmds.push(CMD_DRAW, pending, k - pending); pending = k; } };
     for (let i = 0; i <= n; i++) {
@@ -928,6 +930,7 @@ export class Renderer {
         const r = stack.pop()!;
         flush();
         if (r.maskCount > 0) cmds.push(CMD_MASK, r.maskStart, r.maskCount);
+        if (curBlend !== 0) { cmds.push(CMD_BLEND, 0, 0); curBlend = 0; }
         cmds.push(CMD_POP, 0, r.opacity);
         div = r.div;
       }
@@ -953,6 +956,9 @@ export class Renderer {
         isolated++;
       }
       if (it.kind === KIND_NONE) continue;
+      // blend mode changes split the draw (only when used)
+      const bm = l.blend ? BLEND_IDS[l.blend] ?? 0 : 0;
+      if (bm !== curBlend) { flush(); cmds.push(CMD_BLEND, bm, 0); curBlend = bm; }
       if (it.units) {
         const r0 = performance.now();
         k = this.writeUnits(i, k, t, div !== 1 ? O[i] / div : O[i], budgetEnd);
@@ -1181,6 +1187,20 @@ export class Renderer {
     return k;
   }
 
+  /** premultiplied-alpha blend functions for the supported modes */
+  private setBlend(mode: number) {
+    const gl = this.gl;
+    gl.blendEquation(gl.FUNC_ADD);
+    switch (mode) {
+      case 1: gl.blendFunc(gl.DST_COLOR, gl.ONE_MINUS_SRC_ALPHA); break; // multiply
+      case 2: gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_COLOR); break; // screen
+      case 3: gl.blendFunc(gl.ONE, gl.ONE); break; // add (linear dodge)
+      case 4: gl.blendEquation(gl.MIN); gl.blendFunc(gl.ONE, gl.ONE); break; // darken (exact for opaque layers)
+      case 5: gl.blendEquation(gl.MAX); gl.blendFunc(gl.ONE, gl.ONE); break; // lighten
+      default: gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    }
+  }
+
   /** draw instances [start, start+count) by pointing the attributes at that range (no baseInstance in webgl2) */
   private drawRange(start: number, count: number) {
     const gl = this.gl;
@@ -1233,6 +1253,7 @@ export class Renderer {
     for (let c = 0; c < cmds.length; c += 3) {
       const type = cmds[c], a = cmds[c + 1], b = cmds[c + 2];
       if (type === CMD_DRAW) this.drawRange(a, b);
+      else if (type === CMD_BLEND) this.setBlend(a);
       else if (type === CMD_PUSH) {
         const f = this.fbo(depth);
         depth++;
@@ -1242,6 +1263,7 @@ export class Renderer {
         gl.clear(gl.COLOR_BUFFER_BIT);
       } else if (type === CMD_MASK) {
         // render the mask shape into its own layer; the composite multiplies by its alpha
+        this.setBlend(0);
         const mf = this.fbo(depth);
         gl.bindFramebuffer(gl.FRAMEBUFFER, mf.fb);
         gl.clearColor(0, 0, 0, 0);
@@ -1273,6 +1295,7 @@ export class Renderer {
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     for (let a = 0; a < 10; a++) gl.vertexAttribPointer(1 + a, 4, gl.FLOAT, false, F * 4, a * 16); // back to the fast path layout
+    this.setBlend(0);
   }
 
   // ---------------- queries (hit testing, bounds) ----------------

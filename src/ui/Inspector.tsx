@@ -6,7 +6,7 @@ import {
 } from '../core/commands';
 import { compileExpr } from '../core/expr';
 import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
-import { PROP_DEFS, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
+import { BLEND_MODES, PROP_DEFS, TYPE_PROPS, type Layer, type PropKey, type TextData } from '../core/model';
 import { useChannels } from './hooks';
 import { ANIM_PRESETS, alignLayers, applyPreset, distributeLayers, setTextAnim, TEXT_ANIM_PRESETS, type Align } from '../core/presets';
 import { invert } from './viewport-controller';
@@ -232,6 +232,13 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
           <div class="muted small">{store.project.comps[l.compRef]?.name}</div>
         </Section>
       )}
+      <Section title="Blending">
+        <div class="row">
+          <select value={l.blend ?? 'normal'} style={{ flex: 1 }} onChange={e => setLayerField(store, ids, 'blend', (e.target as HTMLSelectElement).value as any, 'Blend mode')}>
+            {BLEND_MODES.map(m => <option value={m}>{m[0].toUpperCase() + m.slice(1)}</option>)}
+          </select>
+        </div>
+      </Section>
       {layers.length === 1 && (
         <Section title="Mask">
           <label class="check"><input type="checkbox" checked={!!l.mask} onChange={e => setLayerField(store, ids, 'mask', (e.target as HTMLInputElement).checked, 'Use as mask')} /> Use as mask (masks the layers above it in the same group)</label>

@@ -30,6 +30,9 @@ export interface Prop {
   expr?: string;
 }
 
+export type BlendMode = 'normal' | 'multiply' | 'screen' | 'add' | 'darken' | 'lighten';
+export const BLEND_MODES: BlendMode[] = ['normal', 'multiply', 'screen', 'add', 'darken', 'lighten'];
+
 export type LayerType = 'group' | 'rect' | 'ellipse' | 'path' | 'text' | 'image' | 'precomp';
 
 /** ordered list of animatable properties shown in timeline / inspector */
@@ -137,6 +140,8 @@ export interface Layer {
   clip?: boolean;
   /** figma-style mask: this layer's alpha masks the siblings above it (in the same parent) */
   mask?: boolean;
+  /** blend mode with what is below (gpu blend functions; premultiplied colors) */
+  blend?: BlendMode;
   /** in/out points in seconds; layer is hidden outside */
   inPoint: number;
   outPoint: number;

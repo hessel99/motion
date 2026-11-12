@@ -341,7 +341,8 @@ function primLayer(ctx: BuildCtx, p: PrimNode, fill?: PaintNode, stroke?: PaintN
  * a path layer from one or more path sources (all in the same space). animated sources
  * become pathKf; the geometry space is the union bounds over every key.
  */
-export function pathLayer(ctx: BuildCtx, name: string, srcs: PathSrc[], fill?: PaintNode, stroke?: PaintNode, trim?: TrimNode, ruleOverride?: 'nonzero' | 'evenodd'): Layer {
+export function pathLayer(ctx: BuildCtx, name: string, srcs: PathSrc[], fill?: PaintNode, stroke?: PaintNode, trim?: TrimNode, ruleOverride?: 'nonzero' | 'evenodd',
+  parts?: { n: number; rule: 'nonzero' | 'evenodd' }[]): Layer {
   const keyed = combinePathSrcs(srcs);
   const first = keyed ? keyed[0].paths : srcs.map(s => s.cmds);
   let [bx, by, bw, bh] = cmdsBounds(first.flat());
@@ -359,8 +360,15 @@ export function pathLayer(ctx: BuildCtx, name: string, srcs: PathSrc[], fill?: P
   const l = ctx.make('path', name, tr);
   delete l.props.radius;
   const rule = ruleOverride ?? (fill && (fill.kind === 'fill' || fill.kind === 'gfill') ? fill.rule : 'nonzero');
-  // one compound path (like ae): even-odd and opposite-winding holes work across sub-paths
-  const geo = (paths: PathCmd[][]): PathGeometry[] => [{ cmds: translateCmds(paths.flat(), -bx, -by), fillRule: rule }];
+  // one compound path (like ae shape groups): even-odd and opposite-winding holes work across
+  // sub-paths. `parts` instead splits the sources into separately filled compounds (a union).
+  const geo = (paths: PathCmd[][]): PathGeometry[] => {
+    if (!parts) return [{ cmds: translateCmds(paths.flat(), -bx, -by), fillRule: rule }];
+    const out: PathGeometry[] = [];
+    let i = 0;
+    for (const p of parts) { out.push({ cmds: translateCmds(paths.slice(i, i + p.n).flat(), -bx, -by), fillRule: p.rule }); i += p.n; }
+    return out;
+  };
   l.geometry = geo(first);
   if (keyed) l.pathKf = keyed.map(k => ({ t: k.t, geometry: geo(k.paths), interp: k.interp, out: [k.out[0], k.out[1]], in: [k.in[0], k.in[1]] }));
   l.geomSize = [bw, bh];
@@ -1119,14 +1127,16 @@ function dataUrlMime(s: string): string {
 
 // ---------------- layer masks ----------------
 
-interface MaskRegion { srcs: PathSrc[]; rule: 'nonzero' | 'evenodd'; opacity: Prop }
+interface MaskPart { srcs: PathSrc[]; rule: 'nonzero' | 'evenodd' }
+interface MaskRegion { parts: MaskPart[]; opacity: Prop }
 
 /**
  * lottie masksProperties -> a list of regions whose INTERSECTION is the visible area. each
- * region is a union of paths (nonzero) or an even-odd set (used for inverted / subtracted
- * shapes: layer box + path). modes: a add (union into the current region), s subtract (new
- * inverted region), i intersect (new region), f difference (approx: even-odd add), n none.
- * the first mask starts from empty, except subtract which starts from the full layer.
+ * region is a union of parts (separate fills); a part is one path (nonzero) or an even-odd
+ * compound (inverted / subtracted shapes: layer box + path). modes: a add (new part in the
+ * current region), s subtract (new inverted region), i intersect (new region), f difference
+ * (approx: even-odd with the last part), n none. the first mask starts from empty, except
+ * subtract which starts from the full layer.
  */
 function maskRegions(masks: any[], c: LCtx, box: [number, number, number, number]): MaskRegion[] {
   const boxSrc: PathSrc = { cmds: rectCmds(box[0], box[1], box[2], box[3]) };
@@ -1135,20 +1145,27 @@ function maskRegions(masks: any[], c: LCtx, box: [number, number, number, number
     if (!m || typeof m !== 'object') continue;
     const mode = typeof m.mode === 'string' ? m.mode : 'a';
     if (mode === 'n') continue;
-    const src = lpathSrc(m.pt, c);
+    const src = lpathSrc(m.pt, c, m.cl !== false);
     if (!src.cmds.length) continue;
     const opacity = lprop(m.o, v => [v[0]], [100], c);
-    const shape = m.inv ? { srcs: [boxSrc, src], rule: 'evenodd' as const } : { srcs: [src], rule: 'nonzero' as const };
-    const inverse = () => (m.inv ? { srcs: [src], rule: 'nonzero' as const } : { srcs: [boxSrc, src], rule: 'evenodd' as const });
+    const shape = (): MaskPart => (m.inv ? { srcs: [boxSrc, src], rule: 'evenodd' } : { srcs: [src], rule: 'nonzero' });
+    const inverse = (): MaskPart => (m.inv ? { srcs: [src], rule: 'nonzero' } : { srcs: [boxSrc, src], rule: 'evenodd' });
     if (!regions.length || mode === 's' || mode === 'i') {
-      regions.push({ ...(mode === 's' ? inverse() : shape), opacity });
+      regions.push({ parts: [mode === 's' ? inverse() : shape()], opacity });
       continue;
     }
     const last = regions[regions.length - 1];
-    last.srcs.push(...shape.srcs);
-    if (shape.rule === 'evenodd' || mode === 'f') last.rule = 'evenodd';
+    if (mode === 'f') {
+      const lp = last.parts[last.parts.length - 1];
+      lp.srcs.push(...shape().srcs);
+      lp.rule = 'evenodd';
+    } else last.parts.push(shape());
   }
   return regions;
+}
+
+function regionLayer(ctx: BuildCtx, name: string, r: MaskRegion, fill: PaintNode): Layer {
+  return pathLayer(ctx, name, r.parts.flatMap(p => p.srcs), fill, undefined, undefined, undefined, r.parts.map(p => ({ n: p.srcs.length, rule: p.rule })));
 }
 
 function whiteFill(opacity: Prop, rule: 'nonzero' | 'evenodd'): PaintNode {
@@ -1173,8 +1190,8 @@ function foldTransform(l: Layer, t: TR) {
 function withMasks(ctx: BuildCtx, name: string, regions: MaskRegion[], t: TR, solid: number[] | null, content: (t: TR) => Layer | null): Layer | null {
   if (solid && regions.length === 1) {
     const r = regions[0];
-    const fill: PaintNode = { kind: 'fill', name: 'Fill', color: sprop(solid), opacity: r.opacity, rule: r.rule };
-    const l = pathLayer(ctx, name, r.srcs, fill, undefined, undefined, r.rule);
+    const fill: PaintNode = { kind: 'fill', name: 'Fill', color: sprop(solid), opacity: r.opacity, rule: 'nonzero' };
+    const l = regionLayer(ctx, name, r, fill);
     foldTransform(l, t);
     return l;
   }
@@ -1184,7 +1201,7 @@ function withMasks(ctx: BuildCtx, name: string, regions: MaskRegion[], t: TR, so
   let cur = outer;
   for (let i = 0; i < regions.length; i++) {
     const r = regions[i];
-    const m = pathLayer(ctx, 'Mask', r.srcs, whiteFill(r.opacity, r.rule), undefined, undefined, r.rule);
+    const m = regionLayer(ctx, 'Mask', r, whiteFill(r.opacity, 'nonzero'));
     m.mask = true;
     m.inPoint = WIDE_IN; m.outPoint = WIDE_OUT;
     if (i === regions.length - 1) {

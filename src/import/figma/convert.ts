@@ -244,6 +244,8 @@ class Converter {
     setTransform(layer, n.transform, w, h);
     layer.props.opacity!.v = [Math.max(0, Math.min(100, num(n.opacity, 1) * 100))];
     if (n.isMask || n.mask) layer.mask = true; // masks the siblings above it
+    const bm: Record<string, Layer['blend']> = { MULTIPLY: 'multiply', SCREEN: 'screen', LINEAR_DODGE: 'add', DARKEN: 'darken', LIGHTEN: 'lighten' };
+    if (typeof n.blendMode === 'string' && bm[n.blendMode]) layer.blend = bm[n.blendMode];
 
     if (lt === 'image') {
       layer.imageRef = imgAsset!.id;
