@@ -133,6 +133,7 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
   return (
     <>
       {layers.length === 1 && instanceComp(store.project, l) && <InstancePanel layer={l} />}
+      {layers.length === 1 && store.comp.component && <ExposeSection layer={l} />}
       <Section title="Position">
         <PropRow layers={layers} prop="position" label="Position">
           <NumField label="X" value={pos[0]} onChange={(n, mk) => vecMulti('position', 0, n, mk)} />
@@ -249,7 +250,6 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
       </Section>
       <ExprPanel layers={layers} />
       {layers.length === 1 && <ComponentBox layer={l} />}
-      {layers.length === 1 && store.comp.component && <ExposeSection layer={l} />}
     </>
   );
 }
