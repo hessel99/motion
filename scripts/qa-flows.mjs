@@ -44,7 +44,8 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
     const dt = new DataTransfer(); dt.setData('text/plain', JSON.stringify(j));
     document.body.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
   });
-  await page.waitForTimeout(600);
+  // the lottie importer loads lazily (slow on a cold dev server): wait for the tab, not a fixed time
+  await page.waitForFunction(() => editor.store.project.name === 'Bounce', null, { timeout: 8000 }).catch(() => {});
   const lot = await ev(() => ({ name: editor.store.project.name, n: editor.store.comp.root.length, tabs: document.querySelectorAll('.tb-tab').length }));
   check(`${w}: pasted Lottie opens in a tab named after it`, lot.name === 'Bounce' && lot.n === 1, JSON.stringify(lot));
 
@@ -158,6 +159,44 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   await page.mouse.down(); await page.mouse.move(p[0] + off + 30, p[1] + 20, { steps: 5 }); await page.mouse.up();
   const rot2 = await ev(id => editor.store.layer(id).props.rotation?.v[0] ?? 0, scene.word);
   check('MD-04: the corner zone rotates there', Math.abs(rot2) > 1, String(rot2));
+
+  // MD-02 / MD-03: one save flow for every export, named after the saved document. a fake desktop
+  // shell records what the app asks the native side for
+  await ev(() => {
+    window.__nat = [];
+    window.motionNative = {
+      platform: 'darwin', onMenu() {},
+      saveFile: async o => { window.__nat.push({ fn: 'saveFile', ...o, data: undefined }); return o.path ?? '/Users/me/Work/Logo reveal.motion'; },
+      saveFileAs: async o => { window.__nat.push({ fn: 'saveFileAs', ...o, data: undefined }); return '/Users/me/Exports/' + o.defaultPath; },
+      revealFile: async p => { window.__nat.push({ fn: 'reveal', p }); return true; },
+    };
+  });
+  await page.mouse.click(5, 5);
+  await page.keyboard.press('Control+s');
+  await page.waitForTimeout(400);
+  const named = await ev(() => ({ name: editor.store.project.name, title: document.title, tab: document.querySelector('.tb-tab[aria-selected="true"]')?.textContent ?? document.querySelector('.tb-tab')?.textContent }));
+  check('MD-02: saving names the document after the file', named.name === 'Logo reveal' && named.title.includes('Logo reveal') && named.tab.includes('Logo reveal'), JSON.stringify(named));
+  const names = await ev(async () => {
+    const a = await import('/src/app/actions.ts');
+    const one = [a.exportFileName('mp4'), a.exportFileName('gif'), a.exportFileName('json'), a.exportFileName('png', { frame: 7 })];
+    const c = await import('/src/core/commands.ts');
+    const p = editor.store.project;
+    const two = a.exportFileName('gif', { project: { ...p, comps: { ...p.comps, x: { ...p.comps[p.activeComp], name: 'Other' } } } });
+    return { one, two, comp: editor.store.comp.name, hasC: !!c };
+  });
+  check('MD-02: one naming pattern for every export', JSON.stringify(names.one) === JSON.stringify(['Logo reveal.mp4', 'Logo reveal.gif', 'Logo reveal.json', 'Logo reveal_0007.png']) && names.two === `Logo reveal - ${names.comp}.gif`, JSON.stringify(names));
+  await ev(async () => { window.__nat.length = 0; const a = await import('/src/app/actions.ts'); await a.exportLottie(); await a.exportFramePng(0.25); await a.exportGifFile({ maxSize: 64, fps: 10, end: 0.3 }); });
+  const calls = await ev(() => window.__nat);
+  const want = [['Logo reveal.json', 'json'], ['Logo reveal_0000.png', 'png'], ['Logo reveal.gif', 'gif']];
+  check('MD-03: Lottie / PNG / GIF all use the native save dialog with their extension', calls.length === 3 && calls.every((c, i) => c.fn === 'saveFileAs' && c.kind === 'export' && c.defaultPath === want[i][0] && c.filters?.[0]?.extensions?.[0] === want[i][1]), JSON.stringify(calls));
+  const btn = page.locator('.toast-action').last();
+  check('MD-03: the export toast offers "Show in Finder"', (await btn.count()) > 0 && (await btn.textContent()) === 'Show in Finder');
+  if (await btn.count()) { await btn.click(); await page.waitForTimeout(50); }
+  check('MD-03: "Show in Finder" reveals the saved file', (await ev(() => window.__nat.at(-1))).p === '/Users/me/Exports/Logo reveal.gif', JSON.stringify(await ev(() => window.__nat.at(-1))));
+  // browser: a download with the same name
+  await ev(() => { delete window.motionNative; });
+  const [dl] = await Promise.all([page.waitForEvent('download'), ev(async () => (await import('/src/app/actions.ts')).exportFramePng(0.25))]);
+  check('MD-03: in a browser the export is a download with the same name', dl.suggestedFilename() === 'Logo reveal_0000.png', dl.suggestedFilename());
 
   check('MD: no page errors', errors.length === 0, JSON.stringify(errors.slice(0, 5)));
   await ctx.close();

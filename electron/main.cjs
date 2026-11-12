@@ -99,12 +99,35 @@ async function writeFromRenderer(filePath, data, encoding) {
   return filePath;
 }
 
+// exports (opts.kind === 'export') open the save dialog in the folder of the last export
+// (remembered across launches in userData/export-dir.txt); the files the user saved can be revealed
+const exportDirFile = () => path.join(app.getPath('userData'), 'export-dir.txt');
+let lastExportDir = null;
+const savedPaths = new Set();
+async function exportDir() {
+  if (lastExportDir) return lastExportDir;
+  try { const d = (await fs.readFile(exportDirFile(), 'utf8')).trim(); if (d && path.isAbsolute(d) && require('node:fs').existsSync(d)) return (lastExportDir = d); } catch { /* first export */ }
+  return null;
+}
+
 async function saveDialog(opts) {
+  let defaultPath = opts.defaultPath;
+  const isExport = opts.kind === 'export';
+  if (isExport && defaultPath && !path.isAbsolute(defaultPath)) {
+    const dir = (await exportDir()) || app.getPath('downloads');
+    defaultPath = path.join(dir, path.basename(String(defaultPath)));
+  }
   const r = await dialog.showSaveDialog(win, {
-    defaultPath: opts.defaultPath,
+    defaultPath,
     filters: opts.filters || [{ name: 'Motion project', extensions: ['motion'] }],
   });
-  return r.canceled || !r.filePath ? null : r.filePath;
+  if (r.canceled || !r.filePath) return null;
+  if (isExport) {
+    lastExportDir = path.dirname(r.filePath);
+    fs.writeFile(exportDirFile(), lastExportDir, 'utf8').catch(() => {});
+  }
+  savedPaths.add(r.filePath);
+  return r.filePath;
 }
 
 ipcMain.handle('bridge:port', () => startBridge());
@@ -191,6 +214,13 @@ ipcMain.handle('autosave:read', async () => {
   try { return await fs.readFile(autosavePath(), 'utf8'); } catch { return null; }
 });
 
+// "Show in Finder" for a file this session saved (never an arbitrary path from the renderer)
+ipcMain.handle('file:reveal', (_e, p) => {
+  if (typeof p !== 'string' || !savedPaths.has(p)) return false;
+  shell.showItemInFolder(p);
+  return true;
+});
+
 // exports requested by tools/agents go to a fixed folder (no arbitrary paths): ~/Movies/Motion (mac) or ~/Videos/Motion
 ipcMain.handle('file:saveExport', async (_e, opts = {}) => {
   const base = app.getPath('videos');
@@ -200,7 +230,9 @@ ipcMain.handle('file:saveExport', async (_e, opts = {}) => {
   let target = path.join(dir, safe);
   // never overwrite: add a counter
   for (let i = 1; require('node:fs').existsSync(target) && i < 1000; i++) target = path.join(dir, safe.replace(/(\.[^.]+)?$/, ` (${i})$1`));
-  return writeFromRenderer(target, opts.data, opts.encoding || 'base64');
+  await writeFromRenderer(target, opts.data, opts.encoding || 'base64');
+  savedPaths.add(target);
+  return target;
 });
 
 function sendMenu(action) {

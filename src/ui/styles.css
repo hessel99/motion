@@ -232,6 +232,8 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
 .toast.error { background: var(--surface-3); border: 1px solid var(--danger-border); color: var(--danger-text); }
 .toast.success { border-color: var(--success); }
 .toast.out { opacity: 0; }
+/* toastAction(): "Show in Finder" after an export */
+.toast-action { pointer-events: auto; margin-left: var(--space-3); background: none; border: 0; padding: 0; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
 
 /* ---------------- dialog ---------------- */
 .dialog-backdrop, .help-backdrop, .xv-backdrop {

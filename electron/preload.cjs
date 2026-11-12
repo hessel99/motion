@@ -26,7 +26,9 @@ contextBridge.exposeInMainWorld('motionNative', {
   /** figma paste capture folder (MOTION_FIGMA_CAPTURE_DIR) or null; write a capture file into it */
   figmaCaptureDir: () => ipcRenderer.invoke('figma:captureDir'),
   figmaCaptureWrite: (name, text) => ipcRenderer.invoke('figma:captureWrite', name, text),
-  /** Always shows the dialog. */
+  /** shows a file saved this session (save dialog / export) in Finder / Explorer */
+  revealFile: (p) => ipcRenderer.invoke('file:reveal', p),
+  /** Always shows the dialog. opts.kind 'export': opens in the last export folder */
   saveFileAs: (opts) => ipcRenderer.invoke('file:saveAs', opts || {}),
   /** design tokens: read a .json file again / watch it (cb(path, text) on every save) */
   readTextFile: (p) => ipcRenderer.invoke('file:readText', p),

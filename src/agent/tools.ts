@@ -463,12 +463,12 @@ export const TOOLS: ToolDef[] = [
     run: async (a) => {
       if (a.format === 'gif') {
         const { exportGifFile } = await import('../app/actions');
-        const blob = await exportGifFile();
+        const blob = await exportGifFile({}, 'agent');
         return text({ format: 'gif', bytes: blob.size });
       }
       const { exportVideoDetailed } = await import('../export/video');
       const res = await exportVideoDetailed({ format: a.format ?? 'mp4', scale: a.scale ?? 1, quality: a.quality ?? 'high' });
-      const name = `${(st().project.name || 'motion').replace(/[^\w\- ]+/g, '_')} - ${st().comp.name}.${res.format}`;
+      const name = (await import('../app/actions')).exportFileName(res.format);
       const native = (globalThis as any).motionNative;
       if (native?.saveExport) {
         const buf = new Uint8Array(await res.blob.arrayBuffer());
