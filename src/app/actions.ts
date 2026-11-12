@@ -245,6 +245,15 @@ export async function exportLottie() {
   download((st().project.name || 'animation') + '.json', JSON.stringify(m.projectToLottie(st().project)), 'application/json');
 }
 
+/** the current frame at full composition size */
+export async function exportFramePng() {
+  const s = st(), c = s.comp;
+  const url = editor.renderer.snapshot(s.time, Math.max(c.width, c.height));
+  const blob = await (await fetch(url)).blob();
+  const frame = Math.round(s.time * c.fps);
+  download(`${s.project.name || 'frame'}_${String(frame).padStart(4, '0')}.png`, blob, 'image/png');
+}
+
 /** extendscript that rebuilds the active comp in after effects (File > Scripts > Run Script File) */
 export async function exportAeScript() {
   const m = await mod('../export/aejsx.ts');
