@@ -133,7 +133,8 @@ code { background: #111; padding: 1px 4px; border-radius: 3px; }
 .ctx-sc { color: var(--muted); }
 .ctx-item:hover .ctx-sc { color: #fff; }
 .ctx-sep { height: 1px; background: #38383e; margin: 4px 2px; }
-.toast { position: fixed; bottom: 320px; left: 50%; transform: translateX(-50%); background: #2a2a30; border: 1px solid #3a3a42; padding: 8px 14px; border-radius: 8px; z-index: 2000; transition: opacity .3s; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+.toasts { position: fixed; bottom: 320px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; z-index: 2000; pointer-events: none; }
+.toast { background: #2a2a30; border: 1px solid #3a3a42; padding: 8px 14px; border-radius: 8px; z-index: 2000; transition: opacity .3s; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
 .toast.error { border-color: rgba(255,90,79,.6); color: #ffb3ad; }
 .toast.out { opacity: 0; }
 

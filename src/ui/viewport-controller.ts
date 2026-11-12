@@ -7,10 +7,11 @@ import type { Tx } from '../core/store';
 import { PenTool } from './pen';
 import type { Layer } from '../core/model';
 import { Track } from '../core/evaluate';
+import { markSpacePanned } from '../app/actions';
 
 type Drag =
   | { kind: 'pan'; sx: number; sy: number; px: number; py: number }
-  | { kind: 'move'; sx: number; sy: number; start: Map<string, { pos: number[]; inv: number[] }>; moved: boolean; box: number[]; xs: Float64Array; ys: Float64Array }
+  | { kind: 'move'; sx: number; sy: number; start: Map<string, { pos: number[]; inv: number[] }>; moved: boolean; box: number[]; xs: Float64Array; ys: Float64Array; dup?: boolean }
   | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: string[] }
   | { kind: 'create'; type: 'rect' | 'ellipse'; cx: number; cy: number; id: string | null }
   | { kind: 'resize'; id: string; handle: number; inv: number[]; size: number[]; anchor: number[]; local: number[]; shift: boolean }
@@ -211,6 +212,7 @@ export class ViewportController {
     const st = this.ed.store;
     const tool = this.ed.tool;
     if (e.button === 1 || this.spaceDown || tool === 'hand') {
+      if (this.spaceDown) markSpacePanned();
       this.drag = { kind: 'pan', sx: x, sy: y, px: this.panX, py: this.panY };
       return;
     }
@@ -287,9 +289,11 @@ export class ViewportController {
       if (e.shiftKey) st.select([id], 'toggle');
       else if (!st.selection.includes(id)) st.select([id]);
       if (e.altKey) {
-        // alt-drag duplicates (figma)
+        // alt-drag duplicates (figma): duplicate + move are one undo step; no drag = no copy
+        st.beginGesture('duplicate');
         cloneLayers(st, st.selection);
-        this.startMove(x, y);
+        this.startMove(x, y, true);
+        if (this.drag?.kind === 'move') this.drag.dup = true;
         return;
       }
       this.startMove(x, y);
@@ -299,7 +303,7 @@ export class ViewportController {
     }
   }
 
-  private startMove(x: number, y: number) {
+  private startMove(x: number, y: number, keepGesture = false) {
     const st = this.ed.store;
     this.ed.renderer.render(st.time); // fresh bounds (e.g. right after alt-drag duplicate)
     const start = new Map<string, { pos: number[]; inv: number[] }>();
@@ -331,7 +335,7 @@ export class ViewportController {
       ys.push(b[1], (b[1] + b[3]) / 2, b[3]);
     }
     this.drag = { kind: 'move', sx: x, sy: y, start, moved: false, box: box ?? [0, 0, 0, 0], xs: Float64Array.from(xs).sort(), ys: Float64Array.from(ys).sort() };
-    st.beginGesture('move');
+    if (!keepGesture) st.beginGesture('move');
   }
 
   /** comp-space axis aligned bounds of layers [x0,y0,x1,y1] */
@@ -522,6 +526,7 @@ export class ViewportController {
       }
       this.ed.setTool('select');
     }
+    if (d?.kind === 'move' && d.dup && !d.moved) { st.undo(); return; } // alt-click without a drag: drop the copy
     if (d?.kind === 'move' && !d.moved && !e.shiftKey) {
       // click (no drag) on a selected item inside a multi-selection: select just it
       const [cx, cy] = this.toComp(...(this.local(e) as [number, number]));

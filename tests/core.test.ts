@@ -355,3 +355,39 @@ describe('smart animate', () => {
     expect(s.layer(a1.id)!.props.position?.kf).toBeUndefined();
   });
 });
+
+describe('parent changes keep the on-screen transform', () => {
+  const world = async (s: Store, id: string, x: number, y: number) => {
+    const { layerWorldMatrix } = await import('../src/core/commands');
+    const m = layerWorldMatrix(s, id, s.time);
+    return [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]].map(v => Math.round(v * 1000) / 1000);
+  };
+  it('ungroup folds the group rotation/scale/opacity into the children', async () => {
+    const { ungroup } = await import('../src/core/commands');
+    const s = new Store();
+    const a = addLayer(s, 'rect', { x: 100, y: 100, w: 50, h: 50 } as any);
+    const b = addLayer(s, 'rect', { x: 300, y: 150, w: 40, h: 20 } as any);
+    const g = groupLayers(s, [a.id, b.id], { x: 100, y: 100, w: 240, h: 70 });
+    setProp(s, g.id, 'rotation', [30]);
+    setProp(s, g.id, 'scale', [150, 150]);
+    setProp(s, g.id, 'opacity', [50]);
+    const before = [await world(s, a.id, 0, 0), await world(s, a.id, 50, 50), await world(s, b.id, 40, 20)];
+    ungroup(s, g.id);
+    expect(s.layer(g.id)).toBeUndefined();
+    expect([await world(s, a.id, 0, 0), await world(s, a.id, 50, 50), await world(s, b.id, 40, 20)]).toEqual(before);
+    expect(valueAt(s.layer(a.id)!, 'opacity', 0)).toEqual([50]);
+  });
+  it('moving into a transformed group keeps the world position (keepWorld)', async () => {
+    const { moveLayers } = await import('../src/core/commands');
+    const s = new Store();
+    const a = addLayer(s, 'rect', { x: 0, y: 0, w: 50, h: 50 } as any);
+    const g = groupLayers(s, [a.id], { x: 0, y: 0, w: 50, h: 50 });
+    setProp(s, g.id, 'position', [400, 300]);
+    setProp(s, g.id, 'rotation', [90]);
+    const r = addLayer(s, 'rect', { x: 1000, y: 500, w: 60, h: 40 } as any);
+    const before = [await world(s, r.id, 0, 0), await world(s, r.id, 60, 40)];
+    moveLayers(s, [r.id], g.id, 0, { keepWorld: true });
+    expect(s.layer(r.id)!.parent).toBe(g.id);
+    expect([await world(s, r.id, 0, 0), await world(s, r.id, 60, 40)]).toEqual(before);
+  });
+});

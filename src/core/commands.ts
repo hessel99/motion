@@ -156,7 +156,7 @@ export function setLayerField<K extends keyof Layer>(store: Store, ids: string[]
 }
 
 /** move layers to a new parent/index (drag in layer list). index counts in the target sibling list. */
-export function moveLayers(store: Store, ids: string[], parent: string | null, index: number) {
+export function moveLayers(store: Store, ids: string[], parent: string | null, index: number, opts: { keepWorld?: boolean } = {}) {
   const P = store.project;
   ids = ids.filter(id => P.layers[id] && id !== parent && !(parent && store.isAncestor(id, parent)));
   ids = ids.filter(id => !ids.some(o => o !== id && store.isAncestor(o, id)));
@@ -182,7 +182,15 @@ export function moveLayers(store: Store, ids: string[], parent: string | null, i
     const list = targetList().slice();
     list.splice(Math.max(0, Math.min(list.length, idx)), 0, ...ids);
     if (parent) tx.set(P.layers[parent], 'children', list); else tx.set(store.comp, 'root', list);
-    for (const id of ids) tx.set(P.layers[id], 'parent', parent);
+    for (const id of ids) {
+      const l = P.layers[id];
+      if (opts.keepWorld && l.parent !== parent) {
+        // keep the on-screen placement: old parent space -> new parent space
+        const X = mul(inv(layerWorldMatrix(store, parent, store.time)), layerWorldMatrix(store, l.parent, store.time));
+        applyParentChange(tx, l, X);
+      }
+      tx.set(l, 'parent', parent);
+    }
     tx.structure();
   });
 }
@@ -239,16 +247,73 @@ function ungroupInner(store: Store, groupId: string) {
   const g = store.layer(groupId);
   if (!g || !g.children.length) return;
   const kids = g.children.slice();
-  const pos = valueAt(g, 'position', store.time);
-  const anc = valueAt(g, 'anchor', store.time);
+  // the children keep their on-screen transform: the group's own transform and opacity (at the
+  // playhead) are folded into them
+  const X = layerLocalMatrix(g, store.time);
+  const gop = valueAt(g, 'opacity', store.time)[0] / 100;
   const parent = g.parent;
   const idx = store.siblings(g).indexOf(groupId);
   moveLayers(store, kids, parent, idx + 1);
   store.transact('Ungroup', tx => {
-    for (const id of kids) shiftLayerPosition(tx, store.layer(id)!, pos[0] - anc[0], pos[1] - anc[1]);
+    for (const id of kids) {
+      const l = store.layer(id)!;
+      applyParentChange(tx, l, X);
+      if (gop < 1 - 1e-9) {
+        const p = l.props.opacity ?? { v: [100] };
+        if (!l.props.opacity) tx.set(l.props, 'opacity', p);
+        tx.set(p, 'v', [p.v[0] * gop]);
+        if (p.kf) tx.set(p, 'kf', p.kf.map(k => ({ ...k, v: [k.v[0] * gop] })));
+      }
+    }
   });
   deleteLayers(store, [groupId]);
   store.select(kids);
+}
+
+// ---------------- keeping the on-screen transform when the parent changes ----------------
+
+type Mat = number[]; // [a, b, c, d, e, f]
+const mul = (m: Mat, n: Mat): Mat => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
+function inv(m: Mat): Mat {
+  const det = m[0] * m[3] - m[1] * m[2] || 1e-12;
+  const a = m[3] / det, b = -m[1] / det, c = -m[2] / det, d = m[0] / det;
+  return [a, b, c, d, -(a * m[4] + c * m[5]), -(b * m[4] + d * m[5])];
+}
+export function layerLocalMatrix(l: Layer, t: number): Mat {
+  const a = valueAt(l, 'anchor', t), p = valueAt(l, 'position', t), s = valueAt(l, 'scale', t), r = valueAt(l, 'rotation', t)[0] * Math.PI / 180;
+  const cs = Math.cos(r), sn = Math.sin(r);
+  const A = cs * s[0] / 100, B = sn * s[0] / 100, C = -sn * s[1] / 100, D = cs * s[1] / 100;
+  return [A, B, C, D, p[0] - (A * a[0] + C * a[1]), p[1] - (B * a[0] + D * a[1])];
+}
+/** world matrix of a layer (keyframes at time t; expressions are not included) */
+export function layerWorldMatrix(store: Store, id: string | null, t: number): Mat {
+  let m: Mat = [1, 0, 0, 1, 0, 0];
+  for (let cur = id ? store.layer(id) : undefined; cur; cur = cur.parent ? store.layer(cur.parent) : undefined) m = mul(layerLocalMatrix(cur, t), m);
+  return m;
+}
+
+/**
+ * re-express a layer's transform after its parent space changed by X (old parent space ->
+ * new parent space): positions are mapped, rotation and scale absorb X's rotation/scale.
+ * exact for rotation + uniform scale; a skew (rotated non-uniform parents) cannot be kept.
+ */
+function applyParentChange(tx: Tx, l: Layer, X: Mat) {
+  const ident = Math.abs(X[0] - 1) < 1e-9 && Math.abs(X[1]) < 1e-9 && Math.abs(X[2]) < 1e-9 && Math.abs(X[3] - 1) < 1e-9;
+  const mapP = (v: number[]) => [X[0] * v[0] + X[2] * v[1] + X[4], X[1] * v[0] + X[3] * v[1] + X[5]];
+  const remap = (key: PropKey, f: (v: number[]) => number[], def: number[]) => {
+    let p = l.props[key];
+    if (!p) { const v = f(def); if (v.every((x, i) => Math.abs(x - def[i]) < 1e-9)) return; p = { v: def.slice() }; tx.set(l.props, key, p); }
+    tx.set(p, 'v', f(p.v));
+    if (p.kf) tx.set(p, 'kf', p.kf.map(k => ({ ...k, v: f(k.v), sOut: k.sOut && !ident ? [X[0] * k.sOut[0] + X[2] * k.sOut[1], X[1] * k.sOut[0] + X[3] * k.sOut[1]] as any : k.sOut, sIn: k.sIn && !ident ? [X[0] * k.sIn[0] + X[2] * k.sIn[1], X[1] * k.sIn[0] + X[3] * k.sIn[1]] as any : k.sIn })));
+  };
+  remap('position', mapP, [0, 0]);
+  if (!ident) {
+    const sx = Math.hypot(X[0], X[1]), det = X[0] * X[3] - X[1] * X[2], sy = det / (sx || 1);
+    const rot = Math.atan2(X[1], X[0]) * 180 / Math.PI;
+    if (Math.abs(rot) > 1e-9) remap('rotation', v => [v[0] + rot], [0]);
+    if (Math.abs(sx - 1) > 1e-9 || Math.abs(sy - 1) > 1e-9) remap('scale', v => [v[0] * sx, v[1] * sy], [100, 100]);
+  }
+  tx.touch(l.id);
 }
 
 function shiftLayerPosition(tx: Tx, l: Layer, dx: number, dy: number) {

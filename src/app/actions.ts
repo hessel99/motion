@@ -47,11 +47,28 @@ export function setupTitle() {
   updateTitle();
 }
 
+/** true when there is nothing unsaved or the user agrees to discard it */
+/** pending space tap (cleared when the space-hand pans the viewport) */
+let spaceTap: { panned: boolean } | null = null;
+export function markSpacePanned() { if (spaceTap) spaceTap.panned = true; }
+function isTypingTarget(t: EventTarget | null) {
+  const el = t as HTMLElement | null;
+  return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+}
+
+export function confirmDiscard(what = 'This replaces the current project.'): boolean {
+  if (!isDirty() || (window as any).__noUnloadGuard || navigator.webdriver || st().historyLength === 0) return true;
+  return window.confirm(`${what}\nUnsaved changes will be lost. Continue?`);
+}
+
 export function toast(msg: string, kind: 'info' | 'error' = 'info') {
+  let host = document.querySelector('.toasts') as HTMLElement | null;
+  if (!host) { host = document.createElement('div'); host.className = 'toasts'; document.body.appendChild(host); }
   const el = document.createElement('div');
   el.className = 'toast ' + kind;
   el.textContent = msg;
-  document.body.appendChild(el);
+  host.appendChild(el);
+  while (host.children.length > 3) host.firstElementChild!.remove();
   setTimeout(() => el.classList.add('out'), kind === 'error' ? 5000 : 2200);
   setTimeout(() => el.remove(), kind === 'error' ? 5400 : 2600);
 }
@@ -172,15 +189,17 @@ export async function openData(name: string, data: string, path?: string) {
     if (ext === 'motion') {
       const p = JSON.parse(data) as Project;
       if (!p.comps || !p.layers) throw new Error('not a motion project');
+      if (!confirmDiscard(`Open "${name}"?`)) return;
       editor.load(p);
       currentPath = path ?? null;
       return;
     }
     if (ext === 'json') {
       const json = JSON.parse(data);
-      if (json.layers && json.comps) { editor.load(json); currentPath = path ?? null; return; }
+      if (json.layers && json.comps) { if (!confirmDiscard(`Open "${name}"?`)) return; editor.load(json); currentPath = path ?? null; return; }
       const m = await mod('../import/lottie.ts');
       if (!m) throw new Error('lottie import not available');
+      if (!confirmDiscard(`Open "${name}"?`)) return;
       const t0 = performance.now();
       editor.load(m.lottieToProject(json, name.replace(/\.json$/i, '')));
       toast(`Lottie imported in ${Math.round(performance.now() - t0)}ms`);
@@ -206,6 +225,7 @@ async function importAep(buf: ArrayBuffer, name: string) {
     const t0 = performance.now();
     const p: Project = m.aepToProject(buf);
     p.name ||= name.replace(/\.aep$/i, '');
+    if (!confirmDiscard(`Open "${name}"?`)) return;
     editor.load(p);
     toast(`After Effects project imported in ${Math.round(performance.now() - t0)}ms`);
   } catch (e: any) {
@@ -541,6 +561,12 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     else if (keys.length) deleteKeyframes(st(), keys);
   });
   window.addEventListener('paste', e => handlePaste(e));
+  window.addEventListener('keyup', e => {
+    if (e.code !== 'Space' || !spaceTap) return;
+    const tap = spaceTap;
+    spaceTap = null;
+    if (!tap.panned && !isTypingTarget(e.target)) editor.togglePlay();
+  });
   window.addEventListener('keydown', e => {
     if (isTyping(e)) return;
     const s = st();
@@ -566,7 +592,8 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (mod && k === 'i') return run(() => hooks.toggleAgent());
     if (mod) return;
     if (e.key === '?') return run(() => editor.emit('help'));
-    if (e.code === 'Space') return run(() => editor.togglePlay());
+    // space: tap toggles playback on release; holding it and dragging pans (no toggle, no autorepeat)
+    if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) spaceTap = { panned: false }; return; }
     if (k === 'delete' || k === 'backspace') return run(() => (s.keySelection.size ? deleteKeyframes(s, [...s.keySelection]) : deleteLayers(s, s.selection)));
     if (k === 'escape') return run(() => { if (s.keySelection.size) { s.keySelection.clear(); s.emit('keys'); } else s.select([]); editor.setTool('select'); });
     if (k === 'v') return run(() => editor.setTool('select'));
@@ -620,7 +647,7 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     }
   });
   native()?.onMenu(cmd => {
-    if (cmd === 'new') newProject();
+    if (cmd === 'new') { if (confirmDiscard()) newProject(); }
     else if (cmd === 'open' || cmd === 'import') openFileDialog();
     else if (cmd === 'save') saveProject(false);
     else if (cmd === 'saveAs') saveProject(true);

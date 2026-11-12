@@ -832,7 +832,7 @@ export class Timeline {
     if (d?.kind === 'marker' && !d.moved) { const m = st.comp.markers?.find(q => q.id === d.id); if (m) st.setTime(m.t); }
     if (d?.kind === 'rows' && d.moved) {
       const tgt = this.dropTarget(d.y);
-      if (tgt) moveLayers(st, d.ids, tgt.parent, tgt.index);
+      if (tgt) { moveLayers(st, d.ids, tgt.parent, tgt.index, { keepWorld: true }); if (tgt.parent) this.expand(tgt.parent); }
     }
     if (d?.kind === 'rows' && !d.moved && !(e.metaKey || e.ctrlKey || e.shiftKey)) {
       const i = this.rowAtY(d.sy);

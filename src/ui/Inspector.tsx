@@ -58,12 +58,14 @@ export function NumField(props: { label: string; value: number; step?: number; m
   };
   const commit = () => {
     if (text == null) return;
-    const v = evalExpr(text, props.value);
     setText(null);
+    // focus + blur without editing must not touch the document (no rounding, no stray keyframe)
+    if (text.trim() === fmt(props.value)) return;
+    const v = evalExpr(text, props.value);
     if (v != null && isFinite(v)) props.onChange(clamp(v));
   };
   return (
-    <label class="num" title={props.title}>
+    <div class="num" title={props.title}>
       <span class="num-label" onPointerDown={onScrub as any}>{props.label}</span>
       <input
         value={text ?? fmt(props.value) + (props.suffix ?? '')}
@@ -82,7 +84,7 @@ export function NumField(props: { label: string; value: number; step?: number; m
           }
         }}
       />
-    </label>
+    </div>
   );
 }
 
@@ -110,7 +112,7 @@ function KeyButton(props: { layers: Layer[]; prop: PropKey }) {
     (globalThis as any).timeline?.expand(ids[0], true);
   };
   return (
-    <button class={'keybtn' + (animated ? ' animated' : '') + (atKey ? ' at' : '')} title={animated ? 'Add/remove keyframe (alt: stop animating)' : 'Animate this property'} onClick={click}>
+    <button tabIndex={-1} class={'keybtn' + (animated ? ' animated' : '') + (atKey ? ' at' : '')} title={animated ? 'Add/remove keyframe (alt: stop animating)' : 'Animate this property'} onClick={click}>
       <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0.8 L9.2 5 L5 9.2 L0.8 5 Z" /></svg>
     </button>
   );
@@ -349,8 +351,11 @@ function ColorField({ value, onChange }: { value: number[]; onChange: (c: number
         onChange([parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255, value[3]], mk.current);
       }} onChange={() => (mk.current = 'color' + Math.random())} />
       <input class="hex" value={hex.slice(1).toUpperCase()} onKeyDown={e => e.stopPropagation()} onChange={e => {
-        const h = (e.target as HTMLInputElement).value.replace('#', '');
+        const inp = e.target as HTMLInputElement;
+        let h = inp.value.trim().replace('#', '');
+        if (/^[0-9a-f]{3}$/i.test(h)) h = h.replace(/./g, c => c + c); // css shorthand f00 -> ff0000
         if (/^[0-9a-f]{6}$/i.test(h)) onChange([parseInt(h.slice(0, 2), 16) / 255, parseInt(h.slice(2, 4), 16) / 255, parseInt(h.slice(4, 6), 16) / 255, value[3]]);
+        else { inp.value = hex.slice(1).toUpperCase(); toast('Use a hex color like FF0000 or F00', 'error'); }
       }} />
       <NumField label="A" min={0} max={100} value={Math.round(value[3] * 100)} suffix="%" onChange={(n, k) => onChange([value[0], value[1], value[2], n / 100], k)} />
     </div>

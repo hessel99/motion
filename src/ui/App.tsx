@@ -8,7 +8,7 @@ import { AgentPanel } from './AgentPanel';
 import { useChannels } from './hooks';
 import { showContextMenu, type MenuItem } from './menu';
 import {
-  exportLottie, exportAeScript, exportFramePng, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, toast, runBenchmark, exportGifFile,
+  exportLottie, exportAeScript, exportFramePng, confirmDiscard, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, toast, runBenchmark, exportGifFile,
 } from '../app/actions';
 import { setProjectName, editMode, newComposition, addPrecompLayer, renameComp } from '../core/commands';
 
@@ -54,7 +54,7 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
   const fileMenu = (e: MouseEvent) => {
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const items: MenuItem[] = [
-      { label: 'New', shortcut: '', action: newProject },
+      { label: 'New', shortcut: '', action: () => { if (confirmDiscard()) newProject(); } },
       { label: 'Open / Import…', shortcut: '⌘O', action: openFileDialog },
       { label: 'Save', shortcut: '⌘S', action: () => saveProject(false) },
       { label: 'Save As…', shortcut: '⇧⌘S', action: () => saveProject(true) },
@@ -65,14 +65,14 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
       { label: 'Export GIF', action: () => { exportGifFile().catch(() => {}); } },
       { label: 'Export video…', action: () => { import('./ExportDialog').then(m => m.openExportDialog()); } },
       { separator: true },
-      { label: 'Load demo animation', action: loadDemo },
+      { label: 'Load demo animation', action: () => { if (confirmDiscard()) loadDemo(); } },
       {
         label: 'Performance test', submenu: [
-          { label: '1,000 animated shapes', action: () => loadStress(1000) },
-          { label: '5,000 animated shapes', action: () => loadStress(5000) },
-          { label: '10,000 animated shapes', action: () => loadStress(10000) },
-          { label: '25,000 animated shapes', action: () => loadStress(25000) },
-          { label: '2,000 mixed (text, stars, shapes, groups)', action: () => loadStress(2000, ['rect', 'ellipse', 'text', 'path'], true) },
+          { label: '1,000 animated shapes', action: () => confirmDiscard() && loadStress(1000) },
+          { label: '5,000 animated shapes', action: () => confirmDiscard() && loadStress(5000) },
+          { label: '10,000 animated shapes', action: () => confirmDiscard() && loadStress(10000) },
+          { label: '25,000 animated shapes', action: () => confirmDiscard() && loadStress(25000) },
+          { label: '2,000 mixed (text, stars, shapes, groups)', action: () => confirmDiscard() && loadStress(2000, ['rect', 'ellipse', 'text', 'path'], true) },
         ],
       },
       { label: 'Run performance benchmark', action: () => editor.emit('benchmark') },
