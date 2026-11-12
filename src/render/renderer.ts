@@ -418,6 +418,17 @@ export class Renderer {
     };
     walk(store.comp.root, -1, 0, true, -1, 0, [store.comp.id]);
     const n = entries.length;
+    // solo: keep soloed layers, their ancestors (for transforms) and descendants
+    let soloKeep: Set<string> | null = null;
+    if (store.solo.size) {
+      soloKeep = new Set();
+      for (const id of store.solo) {
+        if (!L[id]) continue;
+        let cur: string | null = id;
+        while (cur) { soloKeep.add(cur); cur = L[cur]?.parent ?? null; }
+        for (const d of store.descendants(id)) soloKeep.add(d);
+      }
+    }
     this.pool.reset();
     this.unitCount = 0;
     this.items = new Array(n);
@@ -437,7 +448,7 @@ export class Renderer {
       const { layer, parent, tOff, owner, tEnd } = entries[i];
       const it: Item = {
         id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10), isoGroup: layer.children.length > 0 || layer.type === 'precomp',
-        hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden),
+        hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden) || (!!soloKeep && entries[i].local && !soloKeep.has(layer.id)),
         rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
         tOff, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null,
       };

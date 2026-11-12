@@ -12,6 +12,7 @@
 import { createLayer, uid, type Asset, type Composition, type Keyframe, type Layer, type LayerType, type Paint, type PathCmd, type PathGeometry, type Project, type Prop, type PropKey } from '../core/model';
 import { evalProp } from '../core/evaluate';
 import { cubicBezier } from '../core/easing';
+import { compileExpr } from '../core/expr';
 
 // ======================================================================================
 // prop helpers
@@ -658,14 +659,19 @@ export function assembleStacked(ctx: BuildCtx, src: SrcLayerX[], stats?: Assembl
   for (const s of src) byKey.set(s.key, s);
   // valid parent chains (cycles / missing parents -> root)
   const chainOf = new Map<string | number, SrcLayerX[]>();
+  const parentOf = (s: SrcLayerX) => (s.parent != null && s.parent !== s.key ? byKey.get(s.parent) : undefined);
+  const inCycle = (s: SrcLayerX) => {
+    const seen = new Set<string | number>();
+    for (let cur = parentOf(s); cur && !seen.has(cur.key); cur = parentOf(cur)) { if (cur.key === s.key) return true; seen.add(cur.key); }
+    return false;
+  };
+  // members of a parent cycle become roots; layers parented to them attach normally
   const chain = (s: SrcLayerX): SrcLayerX[] => {
     const hit = chainOf.get(s.key);
     if (hit) return hit;
-    const seen = new Set<string | number>([s.key]);
-    const out: SrcLayerX[] = [];
-    let cur = s.parent != null ? byKey.get(s.parent) : undefined;
-    while (cur && !seen.has(cur.key)) { seen.add(cur.key); out.unshift(cur); cur = cur.parent != null ? byKey.get(cur.parent) : undefined; }
-    const res = cur ? [] : out; // cycle: treat as root
+    chainOf.set(s.key, []); // guard
+    const p = parentOf(s);
+    const res = !p || inCycle(s) ? [] : [...chain(p), p];
     chainOf.set(s.key, res);
     return res;
   };
@@ -729,7 +735,7 @@ export function assembleStacked(ctx: BuildCtx, src: SrcLayerX[], stats?: Assembl
       if (ml) {
         ml.inPoint = matteSrc.inPoint; ml.outPoint = matteSrc.outPoint;
         const inv = s.matte === 2 || s.matte === 4;
-        if (s.matte >= 3 && stats) stats.lumaMattes++;
+        if ((s.matte ?? 0) >= 3 && stats) stats.lumaMattes++;
         if (inv) {
           if (stats) stats.invertedMattes++;
           if (!invertPathLayer(ml, matteSrc.box ?? [-ctx.compW, -ctx.compH, ctx.compW * 3, ctx.compH * 3])) {
@@ -782,13 +788,14 @@ function avg(x: any, d: number): number {
 }
 function arr(x: any): number[] { return Array.isArray(x) ? x.map((v: any) => num(v)) : typeof x === 'number' ? [x] : []; }
 
-interface LCtx { fr: number; ip: number }
+/** fr = global frame rate; tf maps a frame of the current (pre)comp to our comp seconds */
+interface LCtx { fr: number; tf: (frame: number) => number }
 
 /**
  * convert a lottie animatable value to our prop.
- * conv maps a raw lottie value array to our value array. off = seconds added to key times.
+ * conv maps a raw lottie value array to our value array. key times go through c.tf.
  */
-function lprop(lp: any, conv: (v: number[]) => number[], def: number[], c: LCtx, off: number, spatial = false): Prop {
+function lprop(lp: any, conv: (v: number[]) => number[], def: number[], c: LCtx, spatial = false): Prop {
   if (lp == null) return sprop(def);
   const k = lp.k;
   const animated = Array.isArray(k) && k.length > 0 && typeof k[0] === 'object' && k[0] !== null && 't' in k[0];
@@ -805,7 +812,7 @@ function lprop(lp: any, conv: (v: number[]) => number[], def: number[], c: LCtx,
     if (key.e !== undefined) prevEnd = arr(key.e);
     if (!raw) continue;
     const kf: Keyframe = {
-      t: (num(key.t) - c.ip) / c.fr + off,
+      t: c.tf(num(key.t)),
       v: conv(raw),
       interp: key.h === 1 ? 'hold' : 'bezier',
       out: key.o ? [avg(key.o.x, 0.333), avg(key.o.y, 0)] : [0.333, 0],
@@ -848,20 +855,76 @@ function hexColor(s: any): number[] {
   return [0, 0, 0, 1];
 }
 
-function ltransform(ks: any, c: LCtx, off: number): TR {
+function ltransform(ks: any, c: LCtx): TR {
   ks = ks ?? {};
   let position: Prop;
   if (ks.p && ks.p.s) {
-    const x = lprop(ks.p.x, v => [v[0]], [0], c, off), y = lprop(ks.p.y, v => [v[0]], [0], c, off);
+    const x = lprop(ks.p.x, v => [v[0]], [0], c), y = lprop(ks.p.y, v => [v[0]], [0], c);
     position = combineProps([x, y], [1, 1], ([a, b]) => [a[0], b[0]]);
-  } else position = lprop(ks.p, v2, [0, 0], c, off, true);
+  } else position = withExpr(lprop(ks.p, v2, [0, 0], c, true), ks.p);
   return {
-    anchor: lprop(ks.a, v2, [0, 0], c, off),
+    anchor: lprop(ks.a, v2, [0, 0], c),
     position,
-    scale: lprop(ks.s, v2, [100, 100], c, off),
-    rotation: lprop(ks.r ?? ks.rz, v => [v[0]], [0], c, off),
-    opacity: lprop(ks.o, v => [v[0]], [100], c, off),
+    scale: withExpr(lprop(ks.s, v2, [100, 100], c), ks.s),
+    rotation: withExpr(lprop(ks.r ?? ks.rz, v => [v[0]], [0], c), ks.r ?? ks.rz),
+    opacity: withExpr(lprop(ks.o, v => [v[0]], [100], c), ks.o),
   };
+}
+
+// identifiers our expression language understands (see core/expr.ts)
+const EXPR_IDS = new Set(['value', 'time', 'index', 'fps', 'frameRate', 'duration', 'inPoint', 'PI', 'loopOut', 'loopIn', 'wiggle', 'clamp', 'linear', 'ease', 'easeIn', 'easeOut',
+  'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2', 'abs', 'min', 'max', 'floor', 'ceil', 'round', 'sqrt', 'pow', 'exp', 'log', 'mod', 'random', 'noise', 'valueAtTime', 'length', 'normalize']);
+
+/**
+ * map a bodymovin expression (`x`) onto our safe mini language when it is a single
+ * `$bm_rt = <expr>;` using only things we support (loopOut, wiggle, clamp(value..), time math).
+ * anything referencing other layers, effects or js is dropped (keyframes still play).
+ */
+export function lottieExpr(x: any): string | undefined {
+  if (typeof x !== 'string') return undefined;
+  const body = x.replace(/^\s*var\s+\$bm_rt\s*;\s*/, '').trim();
+  const m = /^\$bm_rt\s*=\s*([^;]*?)\s*;?\s*$/.exec(body);
+  if (!m) return undefined;
+  const e = m[1].replace(/\bthisProperty\./g, '').replace(/\bMath\./g, '').replace(/"/g, "'");
+  const ids = e.replace(/'[^']*'/g, '').match(/[A-Za-z_$][\w$]*/g) ?? [];
+  if (!ids.every(id => EXPR_IDS.has(id))) return undefined;
+  if (compileExpr(e).error) return undefined;
+  return e;
+}
+
+function withExpr(p: Prop, lp: any): Prop {
+  const e = lottieExpr(lp?.x);
+  if (e) p.expr = e;
+  return p;
+}
+
+/** keyframed lottie shape (sh ks / mask pt) -> path source with keys */
+function lpathSrc(lp: any, c: LCtx): PathSrc {
+  const k = lp?.k;
+  const animated = Array.isArray(k) && k.length > 0 && typeof k[0] === 'object' && k[0] !== null && 't' in k[0];
+  const shape = (s: any) => (Array.isArray(s) ? s[0] : s);
+  if (!animated) return { cmds: lpathCmds(shape(k)) };
+  const keys: PathAnimKey[] = [];
+  let prevEnd: any = null;
+  for (let i = 0; i < k.length; i++) {
+    const key = k[i];
+    const raw = key.s !== undefined ? shape(key.s) : prevEnd;
+    if (key.e !== undefined) prevEnd = shape(key.e);
+    if (!raw || typeof raw !== 'object') continue;
+    const prev = i > 0 ? k[i - 1] : null;
+    keys.push({
+      t: c.tf(num(key.t)), cmds: lpathCmds(raw), interp: key.h === 1 ? 'hold' : 'bezier',
+      out: key.o ? [avg(key.o.x, 0.333), avg(key.o.y, 0)] : [0.333, 0],
+      in: prev?.i ? [avg(prev.i.x, 0.667), avg(prev.i.y, 1)] : [0.667, 1],
+    });
+  }
+  for (let i = 0; i < keys.length - 1; i++) {
+    const a = keys[i], b = keys[i + 1];
+    if (a.interp === 'bezier' && Math.abs(a.out[0] - a.out[1]) < 1e-9 && Math.abs(b.in[0] - b.in[1]) < 1e-9) a.interp = 'linear';
+  }
+  if (!keys.length) return { cmds: [] };
+  if (keys.length === 1 || keys.every(kk => JSON.stringify(kk.cmds) === JSON.stringify(keys[0].cmds))) return { cmds: keys[0].cmds };
+  return { cmds: keys[0].cmds, keys };
 }
 
 function lpathCmds(sh: any): PathCmd[] {
@@ -922,7 +985,7 @@ function firstStatic(lp: any, def: number[]): number[] {
   return v.length ? v : def;
 }
 
-function lshapes(items: any[], c: LCtx, off: number): ShapeNode[] {
+function lshapes(items: any[], c: LCtx): ShapeNode[] {
   const out: ShapeNode[] = [];
   if (!Array.isArray(items)) return out;
   for (const it of items) {
@@ -932,45 +995,46 @@ function lshapes(items: any[], c: LCtx, off: number): ShapeNode[] {
       switch (it.ty) {
         case 'gr': {
           const tr = (it.it ?? []).find((x: any) => x?.ty === 'tr');
-          out.push({ kind: 'group', name: name || 'Group', tr: ltransform(tr, c, off), items: lshapes((it.it ?? []).filter((x: any) => x?.ty !== 'tr'), c, off) });
+          out.push({ kind: 'group', name: name || 'Group', tr: ltransform(tr, c), items: lshapes((it.it ?? []).filter((x: any) => x?.ty !== 'tr'), c) });
           break;
         }
         case 'rc':
-          out.push({ kind: 'rect', name: name || 'Rectangle', size: lprop(it.s, v2, [100, 100], c, off), position: lprop(it.p, v2, [0, 0], c, off), roundness: lprop(it.r, v => [v[0]], [0], c, off) });
+          out.push({ kind: 'rect', name: name || 'Rectangle', size: lprop(it.s, v2, [100, 100], c), position: lprop(it.p, v2, [0, 0], c), roundness: lprop(it.r, v => [v[0]], [0], c) });
           break;
         case 'el':
-          out.push({ kind: 'ellipse', name: name || 'Ellipse', size: lprop(it.s, v2, [100, 100], c, off), position: lprop(it.p, v2, [0, 0], c, off) });
+          out.push({ kind: 'ellipse', name: name || 'Ellipse', size: lprop(it.s, v2, [100, 100], c), position: lprop(it.p, v2, [0, 0], c) });
           break;
         case 'sh': {
-          // animated paths: first keyframe, statically
-          const k = it.ks?.k;
-          const sh = Array.isArray(k) ? (Array.isArray(k[0]?.s) ? k[0].s[0] : k[0]?.s) : k;
-          out.push({ kind: 'path', name: name || 'Path', cmds: lpathCmds(sh) });
+          const src = lpathSrc(it.ks, c);
+          out.push({ kind: 'path', name: name || 'Path', cmds: src.cmds, keys: src.keys });
           break;
         }
+        case 'tm':
+          out.push({ kind: 'trim', name: name || 'Trim Paths', start: lprop(it.s, v => [v[0]], [0], c), end: lprop(it.e, v => [v[0]], [100], c), offset: lprop(it.o, v => [v[0]], [0], c) });
+          break;
         case 'sr':
           out.push({ kind: 'path', name: name || 'Polystar', cmds: starCmds(it) });
           break;
         case 'fl':
-          out.push({ kind: 'fill', name: name || 'Fill', color: lprop(it.c, color01, [1, 1, 1, 1], c, off), opacity: lprop(it.o, v => [v[0]], [100], c, off), rule: it.r === 2 ? 'evenodd' : 'nonzero' });
+          out.push({ kind: 'fill', name: name || 'Fill', color: lprop(it.c, color01, [1, 1, 1, 1], c), opacity: lprop(it.o, v => [v[0]], [100], c), rule: it.r === 2 ? 'evenodd' : 'nonzero' });
           break;
         case 'st':
-          out.push({ kind: 'stroke', name: name || 'Stroke', color: lprop(it.c, color01, [1, 1, 1, 1], c, off), opacity: lprop(it.o, v => [v[0]], [100], c, off), width: lprop(it.w, v => [v[0]], [1], c, off) });
+          out.push({ kind: 'stroke', name: name || 'Stroke', color: lprop(it.c, color01, [1, 1, 1, 1], c), opacity: lprop(it.o, v => [v[0]], [100], c), width: lprop(it.w, v => [v[0]], [1], c) });
           break;
         case 'gf':
         case 'gs': {
           const node: any = {
             kind: 'gfill', name: name || 'Gradient', gtype: it.t === 2 ? 'radial' : 'linear', stops: lgradStops(it.g),
-            start: firstStatic(it.s, [0, 0]), end: firstStatic(it.e, [100, 0]), opacity: lprop(it.o, v => [v[0]], [100], c, off), rule: it.r === 2 ? 'evenodd' : 'nonzero',
+            start: firstStatic(it.s, [0, 0]), end: firstStatic(it.e, [100, 0]), opacity: lprop(it.o, v => [v[0]], [100], c), rule: it.r === 2 ? 'evenodd' : 'nonzero',
           };
           if (it.ty === 'gs') {
             // gradient stroke -> plain stroke with the first stop colour
             const col = node.stops[0]?.color ?? [1, 1, 1, 1];
-            out.push({ kind: 'stroke', name: node.name, color: sprop(col), opacity: node.opacity, width: lprop(it.w, v => [v[0]], [1], c, off) });
+            out.push({ kind: 'stroke', name: node.name, color: sprop(col), opacity: node.opacity, width: lprop(it.w, v => [v[0]], [1], c) });
           } else out.push(node);
           break;
         }
-        default: break; // tm, rp, mm, rd, ... unsupported modifiers are skipped
+        default: break; // rp, mm, rd, ... unsupported modifiers are skipped
       }
     } catch { /* skip malformed shape */ }
   }
@@ -988,105 +1052,265 @@ function dataUrlMime(s: string): string {
   return m ? m[1] : 'image/png';
 }
 
+// ---------------- layer masks ----------------
+
+interface MaskRegion { srcs: PathSrc[]; rule: 'nonzero' | 'evenodd'; opacity: Prop }
+
+/**
+ * lottie masksProperties -> a list of regions whose INTERSECTION is the visible area. each
+ * region is a union of paths (nonzero) or an even-odd set (used for inverted / subtracted
+ * shapes: layer box + path). modes: a add (union into the current region), s subtract (new
+ * inverted region), i intersect (new region), f difference (approx: even-odd add), n none.
+ * the first mask starts from empty, except subtract which starts from the full layer.
+ */
+function maskRegions(masks: any[], c: LCtx, box: [number, number, number, number]): MaskRegion[] {
+  const boxSrc: PathSrc = { cmds: rectCmds(box[0], box[1], box[2], box[3]) };
+  const regions: MaskRegion[] = [];
+  for (const m of masks) {
+    if (!m || typeof m !== 'object') continue;
+    const mode = typeof m.mode === 'string' ? m.mode : 'a';
+    if (mode === 'n') continue;
+    const src = lpathSrc(m.pt, c);
+    if (!src.cmds.length) continue;
+    const opacity = lprop(m.o, v => [v[0]], [100], c);
+    const shape = m.inv ? { srcs: [boxSrc, src], rule: 'evenodd' as const } : { srcs: [src], rule: 'nonzero' as const };
+    const inverse = () => (m.inv ? { srcs: [src], rule: 'nonzero' as const } : { srcs: [boxSrc, src], rule: 'evenodd' as const });
+    if (!regions.length || mode === 's' || mode === 'i') {
+      regions.push({ ...(mode === 's' ? inverse() : shape), opacity });
+      continue;
+    }
+    const last = regions[regions.length - 1];
+    last.srcs.push(...shape.srcs);
+    if (shape.rule === 'evenodd' || mode === 'f') last.rule = 'evenodd';
+  }
+  return regions;
+}
+
+function whiteFill(opacity: Prop, rule: 'nonzero' | 'evenodd'): PaintNode {
+  return { kind: 'fill', name: 'Mask', color: sprop([1, 1, 1, 1]), opacity, rule };
+}
+
+/** move a layer built at the origin of its parent space under the layer transform `t` */
+function foldTransform(l: Layer, t: TR) {
+  const c = l.props.position!.v, k = l.props.anchor!.v;
+  l.props.anchor = mapProp(t.anchor, a => [a[0] - c[0] + k[0], a[1] - c[1] + k[1]]);
+  l.props.position = t.position;
+  l.props.scale = t.scale;
+  l.props.rotation = t.rotation;
+  l.props.opacity = t.opacity;
+}
+
+/**
+ * apply layer masks: a solid with one region becomes the masked path itself (no offscreen
+ * pass, and it works inside matte sources). otherwise: group(layer transform) holding one
+ * mask path layer per region, nested so the regions intersect, and the content innermost.
+ */
+function withMasks(ctx: BuildCtx, name: string, regions: MaskRegion[], t: TR, solid: number[] | null, content: (t: TR) => Layer | null): Layer | null {
+  if (solid && regions.length === 1) {
+    const r = regions[0];
+    const fill: PaintNode = { kind: 'fill', name: 'Fill', color: sprop(solid), opacity: r.opacity, rule: r.rule };
+    const l = pathLayer(ctx, name, r.srcs, fill, undefined, undefined, r.rule);
+    foldTransform(l, t);
+    return l;
+  }
+  const outer = ctx.make('group', name, { ...t, opacity: sprop([100]) });
+  outer.props.size = sprop([0, 0]);
+  outer.props.fill = sprop([1, 1, 1, 0]);
+  let cur = outer;
+  for (let i = 0; i < regions.length; i++) {
+    const r = regions[i];
+    const m = pathLayer(ctx, 'Mask', r.srcs, whiteFill(r.opacity, r.rule), undefined, undefined, r.rule);
+    m.mask = true;
+    m.inPoint = WIDE_IN; m.outPoint = WIDE_OUT;
+    if (i === regions.length - 1) {
+      const inner = content(identityTR(t.opacity));
+      ctx.adopt(cur, inner ? [m, inner] : [m]);
+    } else {
+      const g = ctx.make('group', name + ' mask ' + (i + 2), identityTR(), { inPoint: WIDE_IN, outPoint: WIDE_OUT });
+      g.props.size = sprop([0, 0]);
+      g.props.fill = sprop([1, 1, 1, 0]);
+      ctx.adopt(cur, [m, g]);
+      cur = g;
+    }
+  }
+  return outer;
+}
+
+// ---------------- precomp time ----------------
+
+/**
+ * frame mapping for the layers inside a precomp layer L of the comp mapped by c:
+ * without time remap an inner frame k plays at parent frame st + k * sr. with time remap (tm,
+ * seconds of the precomp as a function of the parent frame) we invert the sampled remap curve
+ * (first crossing; constant stretches map to a near-frozen time).
+ */
+function precompTf(L: any, c: LCtx, lip: number, lop: number): (k: number) => number {
+  const st = num(L.st, 0), sr = num(L.sr, 1) || 1;
+  if (!L.tm || L.tm.k === undefined) return k => c.tf(st + k * sr);
+  const fr = c.fr;
+  const tmp = lprop(L.tm, v => [v[0]], [0], { fr, tf: f => f }); // keyed in parent frames
+  if (!isAnimated(tmp)) {
+    const v = tmp.v[0] * fr;
+    const t0 = c.tf(lip);
+    return k => t0 + (k - v) * 1e4; // frozen frame: everything else is far away in time
+  }
+  const n = Math.max(2, Math.min(4000, Math.ceil(lop - lip) + 1));
+  const F0 = lip, step = (lop - lip) / (n - 1) || 1;
+  const tau = new Float64Array(n);
+  for (let i = 0; i < n; i++) tau[i] = evalProp(tmp, F0 + i * step, 1, [0])[0] * fr;
+  return k => {
+    for (let i = 0; i < n - 1; i++) {
+      const a = tau[i], b = tau[i + 1];
+      if (a !== b && ((a <= k && k <= b) || (b <= k && k <= a))) return c.tf(F0 + (i + (k - a) / (b - a)) * step);
+    }
+    // outside the remapped range: continue at normal speed before / after
+    if (Math.abs(k - tau[0]) <= Math.abs(k - tau[n - 1])) return c.tf(F0 - Math.abs(k - tau[0]));
+    return c.tf(F0 + (n - 1) * step + Math.abs(k - tau[n - 1]));
+  };
+}
+
+/** what the importer had to approximate or skip (for reports / tests) */
+export interface LottieImportStats extends AssembleStats {
+  masks: number; maskRegions: number; animatedPaths: number; trims: number; expressions: number; timeRemaps: number;
+  unsupported: Record<string, number>;
+}
+
 /** import a lottie / bodymovin json document (object or json string) */
-export function lottieToProject(json: any, name?: string): Project {
+export function lottieToProject(json: any, name?: string, stats?: LottieImportStats): Project {
   if (typeof json === 'string') json = JSON.parse(json);
   if (!json || typeof json !== 'object') throw new Error('invalid lottie json');
   const fr = num(json.fr, 30) || 30;
   const ip = num(json.ip, 0), op = num(json.op, ip + fr * 5);
   const w = Math.max(1, num(json.w, 512)), h = Math.max(1, num(json.h, 512));
   const ctx = new BuildCtx(w, h);
-  const c: LCtx = { fr, ip };
+  const st: LottieImportStats = stats ?? { mattes: 0, invertedMattes: 0, invertedApprox: 0, lumaMattes: 0, masks: 0, maskRegions: 0, animatedPaths: 0, trims: 0, expressions: 0, timeRemaps: 0, unsupported: {} };
+  const rootC: LCtx = { fr, tf: f => (f - ip) / fr };
   const assetsById = new Map<string, any>();
   for (const a of Array.isArray(json.assets) ? json.assets : []) if (a && a.id != null) assetsById.set(String(a.id), a);
   const imageAssets = new Map<string, string>(); // lottie id -> our asset id
   const fonts = new Map<string, any>();
   for (const f of json.fonts?.list ?? []) if (f?.fName) fonts.set(f.fName, f);
+  const note = (k: string) => { st.unsupported[k] = (st.unsupported[k] ?? 0) + 1; };
+  const countShapes = (items: any[]) => {
+    if (!Array.isArray(items)) return;
+    for (const it of items) {
+      if (!it || it.hd === true) continue;
+      if (it.ty === 'gr') countShapes(it.it);
+      else if (it.ty === 'sh' && it.ks?.a === 1) st.animatedPaths++;
+      else if (it.ty === 'tm') st.trims++;
+      else if (['rp', 'rd', 'mm', 'tw', 'pb', 'op', 'zz'].includes(it.ty)) note('shape ' + it.ty);
+      else if (it.ty === 'gs') note('gradient stroke');
+    }
+  };
 
-  const convertLayers = (layers: any[], off: number, depth: number): Layer[] => {
+  const convertLayers = (layers: any[], c: LCtx, cw: number, ch: number, depth: number): Layer[] => {
     if (!Array.isArray(layers) || depth > 16) return [];
-    const src: SrcLayer[] = [];
+    const src: SrcLayerX[] = [];
     layers.forEach((L, index) => {
       if (!L || typeof L !== 'object') return;
       const ty = L.ty;
       if (![0, 1, 2, 3, 4, 5].includes(ty)) return; // audio, camera, data, ... skipped
-      const tr = ltransform(L.ks, c, off);
+      const tr = ltransform(L.ks, c);
+      for (const p of [tr.position, tr.scale, tr.rotation, tr.opacity]) if (p.expr) st.expressions++;
       const lname = typeof L.nm === 'string' ? L.nm : `Layer ${index + 1}`;
       const lip = num(L.ip, ip), lop = num(L.op, op);
-      const s: SrcLayer = {
+      const masks = L.hasMask !== false && Array.isArray(L.masksProperties) ? L.masksProperties : [];
+      if (Array.isArray(L.ef) && L.ef.length) note('effects');
+      if (L.ao === 1) note('auto-orient');
+      if (L.ddd === 1) note('3d layer');
+      // layer-space box (for inverted masks / mattes)
+      const a = ty === 0 || ty === 2 ? assetsById.get(String(L.refId)) : null;
+      const box: [number, number, number, number] =
+        ty === 1 ? [0, 0, num(L.sw, 100), num(L.sh, 100)]
+        : ty === 0 ? [0, 0, num(L.w, num(a?.w, cw)), num(L.h, num(a?.h, ch))]
+        : ty === 2 ? [0, 0, num(a?.w, 100), num(a?.h, 100)]
+        : [0, 0, cw, ch];
+      const content = (t: TR): Layer | null => {
+        switch (ty) {
+          case 4: countShapes(L.shapes); return buildShapeLayer(ctx, lname, lshapes(L.shapes, c), t);
+          case 1: {
+            const l = ctx.make('rect', lname, t);
+            l.props.size = sprop([num(L.sw, 100), num(L.sh, 100)]);
+            l.props.fill = sprop(hexColor(L.sc));
+            return l;
+          }
+          case 3: {
+            const l = ctx.make('group', lname, { ...t, opacity: sprop([100]) });
+            l.props.size = sprop([0, 0]);
+            l.props.fill = sprop([1, 1, 1, 0]);
+            return l;
+          }
+          case 2: {
+            const lw = num(a?.w, 100), lh = num(a?.h, 100);
+            let ref = imageAssets.get(String(L.refId));
+            const p = typeof a?.p === 'string' ? a.p : '';
+            if (!ref && (a?.e === 1 || p.startsWith('data:'))) {
+              ref = uid('a');
+              ctx.assets[ref] = { id: ref, kind: 'image', mime: dataUrlMime(p), data: p, width: lw, height: lh };
+              imageAssets.set(String(L.refId), ref);
+            }
+            const l = ctx.make(ref ? 'image' : 'rect', lname, t);
+            l.props.size = sprop([lw, lh]);
+            if (ref) { l.imageRef = ref; delete l.props.fill; delete l.props.radius; delete l.props.stroke; delete l.props.strokeWidth; }
+            else l.props.fill = sprop([0.5, 0.5, 0.5, 0.5]); // external image: placeholder
+            return l;
+          }
+          case 5: {
+            const doc = L.t?.d?.k?.[0]?.s ?? {};
+            const font = fonts.get(doc.f);
+            const text = String(doc.t ?? '').replace(/\r\n?|\u0003/g, '\n');
+            const fs = num(doc.s, 24);
+            const j = num(doc.j, 0);
+            return buildTextLayer(ctx, lname, t, {
+              content: text, fontSize: fs, font: font?.fFamily ?? doc.f ?? 'Inter', fontWeight: weightFromStyle(String(font?.fStyle ?? doc.f ?? '')),
+              italic: /italic|oblique/i.test(String(font?.fStyle ?? '')), color: color01(arr(doc.fc ?? [1, 1, 1])),
+              justify: j === 1 ? 'right' : j === 2 ? 'center' : 'left', lineHeight: num(doc.lh, fs * 1.2), tracking: (num(doc.tr, 0) / 1000) * fs,
+              box: Array.isArray(doc.sz) ? { pos: arr(doc.ps ?? [0, 0]), size: arr(doc.sz) } : undefined,
+            });
+          }
+          case 0: {
+            const g = ctx.make('group', lname, t, { clip: true });
+            g.props.size = sprop([box[2], box[3]]);
+            g.props.fill = sprop([1, 1, 1, 0]);
+            if (L.tm) st.timeRemaps++;
+            const inner: LCtx = { fr, tf: precompTf(L, c, lip, lop) };
+            ctx.adopt(g, convertLayers(a?.layers ?? [], inner, box[2], box[3], depth + 1));
+            return g;
+          }
+        }
+        return null;
+      };
+      const s: SrcLayerX = {
         key: L.ind ?? `__${index}`,
         parent: L.parent ?? null,
         index,
         name: lname,
         isNull: ty === 3,
-        visible: !(L.hd === true || L.td === 1),
-        inPoint: (lip - ip) / fr + off,
-        outPoint: (lop - ip) / fr + off,
+        visible: L.hd !== true,
+        inPoint: c.tf(lip),
+        outPoint: c.tf(lop),
         tr,
+        matte: num(L.tt, 0) || undefined,
+        matteSource: L.td === 1 || L.td === true,
+        matteParent: L.tp ?? undefined,
+        box,
         build: (t: TR) => {
           try {
-            switch (ty) {
-              case 4: return buildShapeLayer(ctx, lname, lshapes(L.shapes, c, off), t);
-              case 1: {
-                const l = ctx.make('rect', lname, t);
-                l.props.size = sprop([num(L.sw, 100), num(L.sh, 100)]);
-                l.props.fill = sprop(hexColor(L.sc));
-                return l;
-              }
-              case 3: {
-                const l = ctx.make('group', lname, { ...t, opacity: sprop([100]) });
-                l.props.size = sprop([0, 0]);
-                l.props.fill = sprop([1, 1, 1, 0]);
-                return l;
-              }
-              case 2: {
-                const a = assetsById.get(String(L.refId));
-                const lw = num(a?.w, 100), lh = num(a?.h, 100);
-                let ref = imageAssets.get(String(L.refId));
-                const p = typeof a?.p === 'string' ? a.p : '';
-                if (!ref && (a?.e === 1 || p.startsWith('data:'))) {
-                  ref = uid('a');
-                  ctx.assets[ref] = { id: ref, kind: 'image', mime: dataUrlMime(p), data: p, width: lw, height: lh };
-                  imageAssets.set(String(L.refId), ref);
-                }
-                const l = ctx.make(ref ? 'image' : 'rect', lname, t);
-                l.props.size = sprop([lw, lh]);
-                if (ref) { l.imageRef = ref; delete l.props.fill; delete l.props.radius; delete l.props.stroke; delete l.props.strokeWidth; }
-                else l.props.fill = sprop([0.5, 0.5, 0.5, 0.5]); // external image: placeholder
-                return l;
-              }
-              case 5: {
-                const doc = L.t?.d?.k?.[0]?.s ?? {};
-                const font = fonts.get(doc.f);
-                const content = String(doc.t ?? '').replace(/\r\n?|\u0003/g, '\n');
-                const fs = num(doc.s, 24);
-                const j = num(doc.j, 0);
-                return buildTextLayer(ctx, lname, t, {
-                  content, fontSize: fs, font: font?.fFamily ?? doc.f ?? 'Inter', fontWeight: weightFromStyle(String(font?.fStyle ?? doc.f ?? '')),
-                  italic: /italic|oblique/i.test(String(font?.fStyle ?? '')), color: color01(arr(doc.fc ?? [1, 1, 1])),
-                  justify: j === 1 ? 'right' : j === 2 ? 'center' : 'left', lineHeight: num(doc.lh, fs * 1.2), tracking: (num(doc.tr, 0) / 1000) * fs,
-                  box: Array.isArray(doc.sz) ? { pos: arr(doc.ps ?? [0, 0]), size: arr(doc.sz) } : undefined,
-                });
-              }
-              case 0: {
-                const a = assetsById.get(String(L.refId));
-                const g = ctx.make('group', lname, t, { clip: true });
-                g.props.size = sprop([num(L.w, num(a?.w, w)), num(L.h, num(a?.h, h))]);
-                g.props.fill = sprop([1, 1, 1, 0]);
-                ctx.adopt(g, convertLayers(a?.layers ?? [], off + num(L.st, 0) / fr, depth + 1));
-                return g;
-              }
-            }
+            const regions = ty === 3 ? [] : maskRegions(masks, c, box);
+            if (!regions.length) return content(t);
+            st.masks++;
+            st.maskRegions += regions.length;
+            return withMasks(ctx, lname, regions, t, ty === 1 ? hexColor(L.sc) : null, content);
           } catch { /* fall through */ }
           return null;
         },
       };
       src.push(s);
     });
-    return assemble(ctx, src);
+    return assembleStacked(ctx, src, st);
   };
 
-  const roots = convertLayers(json.layers ?? [], 0, 0);
+  const roots = convertLayers(json.layers ?? [], rootC, w, h, 0);
   finalizeTimes(ctx.layers);
   const comp: Composition = {
     id: uid('c'), name: typeof json.nm === 'string' && json.nm ? json.nm : name ?? 'Lottie',

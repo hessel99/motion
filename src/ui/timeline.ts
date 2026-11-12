@@ -389,9 +389,12 @@ export class Timeline {
     g.fillStyle = !l.visible ? '#66666e' : isSel ? '#ffffff' : '#d6d6dc';
     g.font = '12px system-ui, -apple-system, Segoe UI, sans-serif';
     const nameX = tx + 16;
-    const maxW = this.leftW - nameX - 52;
+    const maxW = this.leftW - nameX - 70;
     g.fillText(ellipsize(g, l.name, maxW), nameX, cy);
-    // eye + lock
+    // solo + eye + lock
+    const soloed = st.solo.has(l.id);
+    g.fillStyle = soloed ? '#ffcc00' : '#3a3a40';
+    g.beginPath(); g.arc(this.leftW - 58, cy, soloed ? 4 : 3, 0, Math.PI * 2); g.fill();
     g.fillStyle = l.visible ? '#8a8a93' : '#4a4a50';
     drawEye(g, this.leftW - 40, cy, l.visible);
     g.fillStyle = l.locked ? '#d6d6dc' : '#3a3a40';
@@ -584,6 +587,7 @@ export class Timeline {
       const ix = 8 + r.depth * INDENT;
       if (r.kind === 'layer') {
         if (x >= ix - 2 && x <= ix + 10) { this.expand(r.id, !this.expanded.has(r.id)); return; }
+        if (x >= this.leftW - 66 && x < this.leftW - 50) { st.toggleSolo(r.id); this.baseDirty = true; return; }
         if (x >= this.leftW - 48 && x < this.leftW - 30) { setLayerField(st, [r.id], 'visible', !r.layer.visible, 'Toggle visibility'); return; }
         if (x >= this.leftW - 28) { setLayerField(st, [r.id], 'locked', !r.layer.locked, 'Toggle lock'); return; }
         if (e.shiftKey && st.selection.length) {

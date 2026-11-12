@@ -62,6 +62,12 @@ export class Store {
   time = 0;
   playing = false;
   loop = true;
+  /** soloed layers (view state, not undoable): when non-empty only these + their ancestors/descendants render */
+  solo = new Set<string>();
+  toggleSolo(id: string) {
+    this.solo.has(id) ? this.solo.delete(id) : this.solo.add(id);
+    this.emitChange({ structure: true, comp: false, layers: new Set(), meta: false, assets: false });
+  }
   /** preview range [start, end] in seconds (after effects "work area"); null = whole comp */
   workArea: [number, number] | null = null;
   private listeners = new Set<Listener>();
@@ -215,6 +221,7 @@ export class Store {
     if (!this.project.comps[id] || id === this.project.activeComp) return;
     this.project.activeComp = id;
     this.workArea = null;
+    this.solo.clear();
     this.selection = [];
     this.keySelection.clear();
     this.time = Math.min(this.time, this.comp.duration);
