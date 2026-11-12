@@ -1,0 +1,735 @@
+{
+ "date": "2026-11-12T06:19:27.021Z",
+ "commit": "e2e9f78",
+ "gl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+ "cpus": 4,
+ "quick": false,
+ "measureMs": 4000,
+ "soakSec": 180,
+ "results": {
+  "springs-10k": {
+   "kind": "play",
+   "setup": {
+    "buildMs": 278.5999999999767,
+    "loadMs": 5.5,
+    "firstFrameMs": 1188.3000000000466,
+    "layers": 10000,
+    "items": 10000,
+    "drawn": 9981,
+    "culled": 19,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 1000280,
+    "heapMB": 150.120895
+   },
+   "fps": 72.99,
+   "frameP50": 13.7,
+   "frameP95": 32.5,
+   "frameP99": 37,
+   "tickP50": 5.4,
+   "tickP95": 12.7,
+   "tickP99": 18.3,
+   "tickMax": 50,
+   "cpuP50": 5.4,
+   "cpuP95": 12.5,
+   "evalP50": 4.1,
+   "writeP50": 1,
+   "rasterP50": 0,
+   "rasterP95": 0,
+   "gpuP50": 0.3,
+   "longTasks": 1,
+   "longMax": 64,
+   "heapDeltaMB": 10.74,
+   "frames": 255,
+   "busyPct": 97.94,
+   "scriptPct": 43.55,
+   "gcPct": 0.18,
+   "profile": [
+    {
+     "fn": "eval src/core/trackpool.ts:105",
+     "ms": 892.85,
+     "pct": 51.22
+    },
+    {
+     "fn": "render src/render/renderer.ts:971",
+     "ms": 334.67,
+     "pct": 19.2
+    },
+    {
+     "fn": "evalItem src/render/renderer.ts:624",
+     "ms": 310.67,
+     "pct": 17.82
+    },
+    {
+     "fn": "bufferSubData (native):0",
+     "ms": 63.32,
+     "pct": 3.63
+    },
+    {
+     "fn": "evaluateRange src/render/renderer.ts:764",
+     "ms": 57.19,
+     "pct": 3.28
+    },
+    {
+     "fn": "tick src/app/editor.ts:94",
+     "ms": 22.82,
+     "pct": 1.31
+    },
+    {
+     "fn": "(anon) src/ui/App.tsx:50",
+     "ms": 8.03,
+     "pct": 0.46
+    },
+    {
+     "fn": "(garbage collector)",
+     "ms": 7.57,
+     "pct": 0.43
+    }
+   ],
+   "after": {
+    "items": 10000,
+    "drawn": 9976,
+    "culled": 24,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 1000280,
+    "heapMB": 149.024591
+   },
+   "swFps": 4.31,
+   "swFrameP95": 345.8,
+   "swTickP50": 6.2,
+   "swLongTasks": 41,
+   "errors": [],
+   "load": 6.13,
+   "seconds": 18
+  },
+  "scrub-springs-10k": {
+   "kind": "scrub",
+   "setup": {
+    "buildMs": 106.5,
+    "loadMs": 3,
+    "firstFrameMs": 999.2999999999302,
+    "layers": 10000,
+    "items": 10000,
+    "drawn": 9981,
+    "culled": 19,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 1000280,
+    "heapMB": 157.260391
+   },
+   "fps": 65.79,
+   "frameP50": 15.2,
+   "frameP95": 32.6,
+   "frameP99": 34.2,
+   "tickP50": 6.9,
+   "tickP95": 11.6,
+   "tickP99": 13.8,
+   "tickMax": 24,
+   "cpuP50": 5.6,
+   "cpuP95": 9.7,
+   "evalP50": 4.2,
+   "writeP50": 1,
+   "rasterP50": 0,
+   "rasterP95": 0,
+   "gpuP50": 0.3,
+   "longTasks": 0,
+   "longMax": 0,
+   "heapDeltaMB": -2.8,
+   "frames": 249,
+   "busyPct": 98.69,
+   "scriptPct": 45.16,
+   "gcPct": 0.67,
+   "profile": [
+    {
+     "fn": "eval src/core/trackpool.ts:105",
+     "ms": 831.14,
+     "pct": 39.77
+    },
+    {
+     "fn": "render src/render/renderer.ts:971",
+     "ms": 269.06,
+     "pct": 12.87
+    },
+    {
+     "fn": "drawImage (native):0",
+     "ms": 166,
+     "pct": 7.94
+    },
+    {
+     "fn": "composeLocal src/render/renderer.ts:711",
+     "ms": 135.57,
+     "pct": 6.49
+    },
+    {
+     "fn": "evalItem src/render/renderer.ts:624",
+     "ms": 96.19,
+     "pct": 4.6
+    },
+    {
+     "fn": "bufferSubData (native):0",
+     "ms": 65.2,
+     "pct": 3.12
+    },
+    {
+     "fn": "drawOverlay src/ui/viewport-controller.ts:583",
+     "ms": 44.46,
+     "pct": 2.13
+    },
+    {
+     "fn": "evaluateRange src/render/renderer.ts:764",
+     "ms": 44.08,
+     "pct": 2.11
+    }
+   ],
+   "after": {
+    "items": 10000,
+    "drawn": 9985,
+    "culled": 15,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 1000280,
+    "heapMB": 156.705447
+   },
+   "swFps": 4.26,
+   "swFrameP95": 258.5,
+   "swTickP50": 7.4,
+   "swLongTasks": 39,
+   "errors": [],
+   "load": 6.13,
+   "seconds": 17
+  },
+  "undo-storm-10k": {
+   "kind": "undo",
+   "setup": {
+    "buildMs": 83.30000000004657,
+    "loadMs": 2.800000000046566,
+    "firstFrameMs": 1008.5,
+    "layers": 10000,
+    "items": 10000,
+    "drawn": 9981,
+    "culled": 19,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 1000280,
+    "heapMB": 156.659171
+   },
+   "editP50": 0.1,
+   "editP95": 0.2,
+   "editFrameP50": 19.9,
+   "editFrameP95": 32.6,
+   "undoP50": 1.7,
+   "undoP95": 2.4,
+   "undoFrameP50": 28.3,
+   "undoFrameP95": 32,
+   "redoP50": 1.7,
+   "redoP95": 2.8,
+   "redoFrameP50": 28.6,
+   "redoFrameP95": 37.9,
+   "gcPct": 0.55,
+   "profile": [
+    {
+     "fn": "resolveMentions src/agent/context.ts:25",
+     "ms": 516.66,
+     "pct": 26.56
+    },
+    {
+     "fn": "render src/render/renderer.ts:971",
+     "ms": 219.98,
+     "pct": 11.31
+    },
+    {
+     "fn": "editorContext src/agent/context.ts:40",
+     "ms": 210.9,
+     "pct": 10.84
+    },
+    {
+     "fn": "r src/ui/timeline.ts:158",
+     "ms": 200.07,
+     "pct": 10.28
+    },
+    {
+     "fn": "drawImage (native):0",
+     "ms": 144,
+     "pct": 7.4
+    },
+    {
+     "fn": "buildRows src/ui/timeline.ts:143",
+     "ms": 113.98,
+     "pct": 5.86
+    },
+    {
+     "fn": "bufferSubData (native):0",
+     "ms": 52.67,
+     "pct": 2.71
+    },
+    {
+     "fn": "N node_modules/preact/dist/preact.module.js:1",
+     "ms": 29.54,
+     "pct": 1.52
+    }
+   ],
+   "errors": [],
+   "load": 5.37,
+   "seconds": 7
+  },
+  "ops-5k": {
+   "kind": "ops",
+   "setup": {
+    "buildMs": 68.30000000004657,
+    "loadMs": 2.299999999930151,
+    "firstFrameMs": 527.4000000000233,
+    "layers": 5000,
+    "items": 5000,
+    "drawn": 4993,
+    "culled": 7,
+    "atlasEntries": 0,
+    "atlasPages": 2,
+    "rasterMeta": 0,
+    "shadowMB": 0,
+    "isolated": 0,
+    "asyncRasters": 0,
+    "compactions": 0,
+    "generation": 0,
+    "poolUsed": 500480,
+    "heapMB": 88.423351
+   },
+   "ops": {
+    "selectAll": {
+     "ms": 0.2000000000698492,
+     "frameMs": 132.30000000004657,
+     "n": 5000
+    },
+    "applyPreset Pop (stagger)": {
+     "ms": 75.5,
+     "frameMs": 235.90000000002328,
+     "n": 5000
+    },
+    "setExpr wiggle": {
+     "ms": 3,
+     "frameMs": 157.90000000002328,
+     "n": 3000
+    },
+    "setTextAnim (non-text, no-op path)": {
+     "ms": 1.2999999999301508,
+     "frameMs": 4.5,
+     "n": 1000
+    },
+    "duplicate 1000": {
+     "ms": 114.19999999995343,
+     "frameMs": 307.79999999993015,
+     "n": 1000
+    },
+    "group 2000": {
+     "ms": 268.5999999999767,
+     "frameMs": 376.0999999999767,
+     "n": 2000
+    },
+    "precompose 2000": {
+     "ms": 28.600000000093132,
+     "frameMs": 113.20000000006985,
+     "n": 2000
+    },
+    "delete 1000": {
+     "ms": 42.40000000002328,
+     "frameMs": 81.90000000002328,
+     "n": 1000
+    },
+    "undo x4": {
+     "ms": 3.299999999930151,
+     "frameMs": 71.59999999997672,
+     "n": 4
+    },
+    "serialize": {
+     "ms": 102.70000000006985,
+     "frameMs": 103.30000000004657,
+     "n": 1
+    }
+   },
+   "op:selectAll": 132.3,
+   "op:applyPreset Pop (stagger)": 235.9,
+   "op:setExpr wiggle": 157.9,
+   "op:setTextAnim (non-text, no-op path)": 4.5,
+   "op:duplicate 1000": 307.8,
+   "op:group 2000": 376.1,
+   "op:precompose 2000": 113.2,
+   "op:delete 1000": 81.9,
+   "op:undo x4": 71.6,
+   "op:serialize": 103.3,
+   "gcPct": 9.76,
+   "profile": [
+    {
+     "fn": "(garbage collector)",
+     "ms": 164.85,
+     "pct": 11.73
+    },
+    {
+     "fn": "add src/core/trackpool.ts:75",
+     "ms": 144.19,
+     "pct": 10.26
+    },
+    {
+     "fn": "(anon) src/lab/index.ts:208",
+     "ms": 102.89,
+     "pct": 7.32
+    },
+    {
+     "fn": "tx src/core/commands.ts:166",
+     "ms": 88.58,
+     "pct": 6.3
+    },
+    {
+     "fn": "compileItem src/render/renderer.ts:508",
+     "ms": 49.48,
+     "pct": 3.52
+    },
+    {
+     "fn": "c src/core/commands.ts:180",
+     "ms": 49.33,
+     "pct": 3.51
+    },
+    {
+     "fn": "isAncestor src/core/store.ts:342",
+     "ms": 45.09,
+     "pct": 3.21
+    },
+    {
+     "fn": "lut src/core/trackpool.ts:41",
+     "ms": 44.15,
+     "pct": 3.14
+    }
+   ],
+   "errors": [],
+   "load": 5.1,
+   "seconds": 3
+  }
+ },
+ "regressions": [
+  {
+   "scenario": "undo-storm-10k",
+   "metric": "redoFrameP50",
+   "before": 24.9,
+   "after": 28.6,
+   "change": "15% worse",
+   "baseline": "d09dd40",
+   "noisy": "load 7.12->5.37"
+  }
+ ],
+ "improvements": [
+  {
+   "scenario": "springs-10k",
+   "metric": "tickP50",
+   "before": 11.3,
+   "after": 5.4,
+   "change": "52% better",
+   "baseline": "d09dd40",
+   "noisy": "load 10.49->6.13"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "tickP95",
+   "before": 21.1,
+   "after": 12.7,
+   "change": "40% better",
+   "baseline": "d09dd40",
+   "noisy": "load 10.49->6.13"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "tickP99",
+   "before": 44,
+   "after": 18.3,
+   "change": "58% better",
+   "baseline": "d09dd40",
+   "noisy": "load 10.49->6.13"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "cpuP50",
+   "before": 11.1,
+   "after": 5.4,
+   "change": "51% better",
+   "baseline": "d09dd40",
+   "noisy": "load 10.49->6.13"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "cpuP95",
+   "before": 20.2,
+   "after": 12.5,
+   "change": "38% better",
+   "baseline": "d09dd40",
+   "noisy": "load 10.49->6.13"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "evalP50",
+   "before": 8.3,
+   "after": 4.1,
+   "change": "51% better",
+   "baseline": "d09dd40",
+   "noisy": "load 10.49->6.13"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "writeP50",
+   "before": 2.1,
+   "after": 1,
+   "change": "52% better",
+   "baseline": "d09dd40",
+   "noisy": "load 10.49->6.13"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "frameP95",
+   "before": 40.3,
+   "after": 32.5,
+   "change": "19% better",
+   "baseline": "d09dd40",
+   "noisy": "load 10.49->6.13"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "fps",
+   "before": 42.92,
+   "after": 72.99,
+   "change": "70% better",
+   "baseline": "d09dd40",
+   "noisy": "load 10.49->6.13"
+  },
+  {
+   "scenario": "springs-10k",
+   "metric": "longTasks",
+   "before": 4,
+   "after": 1,
+   "change": "75% better",
+   "baseline": "d09dd40",
+   "noisy": "load 10.49->6.13"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "tickP50",
+   "before": 13.3,
+   "after": 6.9,
+   "change": "48% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.8->6.13"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "tickP95",
+   "before": 28.4,
+   "after": 11.6,
+   "change": "59% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.8->6.13"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "tickP99",
+   "before": 42.1,
+   "after": 13.8,
+   "change": "67% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.8->6.13"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "cpuP50",
+   "before": 11.7,
+   "after": 5.6,
+   "change": "52% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.8->6.13"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "cpuP95",
+   "before": 25.3,
+   "after": 9.7,
+   "change": "62% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.8->6.13"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "evalP50",
+   "before": 8.8,
+   "after": 4.2,
+   "change": "52% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.8->6.13"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "writeP50",
+   "before": 2.4,
+   "after": 1,
+   "change": "58% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.8->6.13"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "frameP95",
+   "before": 43.6,
+   "after": 32.6,
+   "change": "25% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.8->6.13"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "fps",
+   "before": 38.91,
+   "after": 65.79,
+   "change": "69% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.8->6.13"
+  },
+  {
+   "scenario": "scrub-springs-10k",
+   "metric": "longTasks",
+   "before": 4,
+   "after": 0,
+   "change": "100% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.8->6.13"
+  },
+  {
+   "scenario": "undo-storm-10k",
+   "metric": "editFrameP50",
+   "before": 22.8,
+   "after": 19.9,
+   "change": "13% better",
+   "baseline": "d09dd40",
+   "noisy": "load 7.12->5.37"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:selectAll",
+   "before": 470.3,
+   "after": 132.3,
+   "change": "72% better",
+   "baseline": "d09dd40",
+   "noisy": "load 6.79->5.1"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:applyPreset Pop (stagger)",
+   "before": 757.4,
+   "after": 235.9,
+   "change": "69% better",
+   "baseline": "d09dd40",
+   "noisy": "load 6.79->5.1"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:setExpr wiggle",
+   "before": 712.1,
+   "after": 157.9,
+   "change": "78% better",
+   "baseline": "d09dd40",
+   "noisy": "load 6.79->5.1"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:setTextAnim (non-text, no-op path)",
+   "before": 16.2,
+   "after": 4.5,
+   "change": "72% better",
+   "baseline": "d09dd40",
+   "noisy": "load 6.79->5.1"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:duplicate 1000",
+   "before": 542.5,
+   "after": 307.8,
+   "change": "43% better",
+   "baseline": "d09dd40",
+   "noisy": "load 6.79->5.1"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:group 2000",
+   "before": 661.2,
+   "after": 376.1,
+   "change": "43% better",
+   "baseline": "d09dd40",
+   "noisy": "load 6.79->5.1"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:precompose 2000",
+   "before": 308.5,
+   "after": 113.2,
+   "change": "63% better",
+   "baseline": "d09dd40",
+   "noisy": "load 6.79->5.1"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:delete 1000",
+   "before": 249.5,
+   "after": 81.9,
+   "change": "67% better",
+   "baseline": "d09dd40",
+   "noisy": "load 6.79->5.1"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:undo x4",
+   "before": 274.7,
+   "after": 71.6,
+   "change": "74% better",
+   "baseline": "d09dd40",
+   "noisy": "load 6.79->5.1"
+  },
+  {
+   "scenario": "ops-5k",
+   "metric": "op:serialize",
+   "before": 122.1,
+   "after": 103.3,
+   "change": "15% better",
+   "baseline": "d09dd40",
+   "noisy": "load 6.79->5.1"
+  }
+ ],
+ "baselines": {
+  "springs-10k": "2026-11-12T04-51-29.json",
+  "scrub-springs-10k": "2026-11-12T04-51-29.json",
+  "undo-storm-10k": "2026-11-12T04-51-29.json",
+  "ops-5k": "2026-11-12T04-51-29.json"
+ }
+}

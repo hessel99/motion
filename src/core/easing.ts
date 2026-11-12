@@ -67,15 +67,28 @@ const LUT_N = 256;
 const lutCache = new Map<string, Float32Array>();
 /** dense lookup table of y for uniformly spaced x (LUT_N+1 samples). playback uses this with
  *  linear interpolation: ~10x faster than solving the cubic, error < 1e-4 */
+// numeric front cache: compiles look up a LUT per keyframe; building a string key each time
+// showed up in profiles of big scenes (thousands of keys share a handful of eases)
+const FRONT = 512;
+const frontK = new Float64Array(FRONT * 4).fill(NaN);
+const frontV: (Float32Array | null)[] = new Array(FRONT).fill(null);
+function frontSlot(a: number, b: number, c: number, d: number) {
+  let h = Math.imul((a * 1e4) | 0, 73856093) ^ Math.imul((b * 1e4) | 0, 19349663) ^ Math.imul((c * 1e4) | 0, 83492791) ^ Math.imul((d * 1e4) | 0, 2654435761);
+  return (h >>> 0) % FRONT;
+}
+
 export function easeLUT(x1: number, y1: number, x2: number, y2: number): Float32Array {
+  const slot = frontSlot(x1, y1, x2, y2), o = slot * 4;
+  if (frontK[o] === x1 && frontK[o + 1] === y1 && frontK[o + 2] === x2 && frontK[o + 3] === y2) return frontV[slot]!;
   const key = `${x1},${y1},${x2},${y2}`;
   let t = lutCache.get(key);
-  if (t) return t;
+  if (t) { frontK[o] = x1; frontK[o + 1] = y1; frontK[o + 2] = x2; frontK[o + 3] = y2; frontV[slot] = t; return t; }
   const f = cubicBezier(x1, y1, x2, y2);
   t = new Float32Array(LUT_N + 2);
   for (let i = 0; i <= LUT_N; i++) t[i] = f(i / LUT_N);
   t[LUT_N + 1] = t[LUT_N];
   lutCache.set(key, t);
+  frontK[o] = x1; frontK[o + 1] = y1; frontK[o + 2] = x2; frontK[o + 3] = y2; frontV[slot] = t;
   return t;
 }
 export const EASE_LUT_N = LUT_N;
@@ -96,14 +109,17 @@ export function springAt(bounce: number, t: number): number {
   return f(t) + (1 - end) * t * t * t;
 }
 
+let lastSpringB = NaN, lastSpring: Float32Array | null = null;
 export function springLUT(bounce: number): Float32Array {
+  if (bounce === lastSpringB) return lastSpring!;
   const key = `spring:${bounce}`;
   let t = lutCache.get(key);
-  if (t) return t;
+  if (t) { lastSpringB = bounce; lastSpring = t; return t; }
   t = new Float32Array(LUT_N + 2);
   for (let i = 0; i <= LUT_N; i++) t[i] = springAt(bounce, i / LUT_N);
   t[LUT_N + 1] = t[LUT_N];
   lutCache.set(key, t);
+  lastSpringB = bounce; lastSpring = t;
   return t;
 }
 
