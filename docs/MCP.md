@@ -5,7 +5,7 @@ tools over MCP so any MCP client can drive the open document — Claude Code, Cl
 VS Code, Codex or your own agent.
 
 - URL: `http://127.0.0.1:7823/mcp` (port: `--port <n>` or `MOTION_BRIDGE_PORT`; the desktop app picks
-  a free port and shows the URL in the agent sidebar under *Connect other AI apps*)
+  a free port and shows the URL in *Settings → Connections*, with setup snippets per client)
 - Transport: Streamable HTTP, `POST` only, JSON responses (no SSE stream). JSON-RPC batches work.
 - Protocol versions: `2025-06-18`, `2025-03-26`, `2024-11-05`
 - Methods: `initialize`, `ping`, `tools/list`, `tools/call` (`resources/list` and `prompts/list` are empty)

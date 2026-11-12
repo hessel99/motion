@@ -57,11 +57,12 @@
 
 /* ---------------- left panel ---------------- */
 .left-panel { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-.lp-tabs { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-4) var(--space-5); flex: none; border-bottom: 1px solid var(--border-subtle); }
+.lp-tabs { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5); overflow: hidden; flex: none; border-bottom: 1px solid var(--border-subtle); }
 .lp-tab {
-  min-height: 30px; padding: 0 var(--space-4); gap: var(--space-3); border: 1px solid transparent; background: transparent;
+  min-height: 30px; min-width: 30px; padding: 0 var(--space-3); gap: var(--space-3); border: 1px solid transparent; background: transparent;
   color: var(--text-secondary); border-radius: var(--radius-md); font-weight: var(--weight-medium);
 }
+.lp-tab.on { padding: 0 var(--space-4) 0 var(--space-3); }
 .lp-tab:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
 .lp-tab.on, .lp-tab.on:hover:not(:disabled) { background: var(--surface-2); color: var(--text); border-color: var(--border); }
 [data-theme='light'] .lp-tab.on { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
@@ -80,7 +81,7 @@
 .lp-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 36px; padding: var(--space-3) var(--space-5) 0 var(--space-7); color: var(--text-secondary); font-weight: var(--weight-medium); flex: none; }
 .lp-search { flex: 1; min-height: 24px; font-size: var(--text-sm); }
 .pages-list { overflow: auto; padding: 0 var(--space-4); scrollbar-width: thin; }
-.page-row { display: flex; align-items: center; gap: var(--space-4); min-height: 28px; padding: 0 var(--space-4) 0 var(--space-5); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: default; }
+.page-row { font-size: var(--text-md); display: flex; align-items: center; gap: var(--space-4); min-height: 28px; padding: 0 var(--space-4) 0 var(--space-5); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: default; }
 .page-row:hover { background: var(--surface-hover); color: var(--text); }
 .page-row.on { color: var(--text); font-weight: var(--weight-medium); background: var(--surface-selected); }
 .page-row:focus-visible { outline-offset: -2px; }
@@ -91,6 +92,7 @@
 .tree { flex: 1; min-height: 0; overflow: auto; position: relative; padding: 0 var(--space-4); scrollbar-width: thin; contain: strict; }
 .tree-inner { position: relative; }
 .tree-row {
+  font-size: var(--text-md);
   position: absolute; left: 0; right: 0; height: 28px; display: flex; align-items: center; gap: var(--space-2);
   padding-right: var(--space-3); border-radius: var(--radius-sm); color: var(--text); cursor: default; white-space: nowrap;
 }
@@ -182,7 +184,7 @@ button.twirl:hover:not(:disabled) { background: var(--surface-hover); color: var
 .rp-sub { font-size: var(--text-xs); color: var(--text-muted); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .list-row {
   display: flex; align-items: center; gap: var(--space-5); width: 100%; min-height: 30px; padding: 0 var(--space-2); margin: 0 calc(-1 * var(--space-2));
-  width: calc(100% + 2 * var(--space-2)); background: transparent; border: 0; color: var(--text); font-weight: var(--weight-regular); justify-content: flex-start; border-radius: var(--radius-sm);
+  width: calc(100% + 2 * var(--space-2)); background: transparent; border: 0; color: var(--text); font-weight: var(--weight-regular); justify-content: flex-start; text-align: left; border-radius: var(--radius-sm);
 }
 .list-row:hover:not(:disabled) { background: var(--surface-hover); }
 .list-row > svg { color: var(--text-secondary); }
