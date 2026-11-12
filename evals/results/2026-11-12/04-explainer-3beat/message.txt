@@ -1,0 +1,6 @@
+A 12-second explainer scene for a password manager, in three beats of ~4s each: (1) a messy pile of sticky notes with passwords appears and jitters anxiously, (2) they get sucked into a shield/vault icon, (3) the shield glows and a single "One key. Every login." headline lands with a check mark. Flat illustration style, friendly colors. Each beat should hand over to the next — no hard cuts.
+
+<editor_context>
+comp "Main" 1920x1080 30fps 12s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

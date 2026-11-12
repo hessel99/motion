@@ -1,0 +1,141 @@
+{
+ "run": {
+  "id": "16-reference-match",
+  "name": "16-reference-match",
+  "model": "sonnet",
+  "seed": 1,
+  "wallMs": 38425,
+  "timedOut": false,
+  "turns": 21,
+  "costUsd": 0.11279710000000001,
+  "durationMs": 37590,
+  "usage": {
+   "input": 111813,
+   "cached": 101231,
+   "output": 6037
+  },
+  "errors": [],
+  "toolCalls": 20,
+  "toolErrors": 0,
+  "toolsAvailable": 37,
+  "finalText": "I've built the scene and checked four frames (0.2s, 0.8s, 1.5s, 3.5s). The band, headline, buttons and cards all behave as described, but I didn't add card shadows, so the cards look flat. I only looked at those four frames, not a full playback.\n\n- **Band:** the `Band` group is three adjacent strips (violet, coral, orange) rotated -12°. They slide left slowly for the full 6s. Strips stand in for a gradient, so the colour steps are hard-edged.\n- **Headline:** `H1`, `H2` and `H3` slide up 40px with a fade, 80ms apart, using Expo Out, from 0.3s. I didn't build a clip mask, so the lines fade in as they rise instead of emerging from behind one.\n- **Buttons:** `Btn Start` (indigo pill, white label) and `Link Contact` rise in between 1.0s and 1.6s.\n- **Cards:** `Card A`, `Card B` and `Card C` rise into the right half between 1.6s and 3.0s, white with 12px corners. After that they bob continuously at different speeds and amplitudes (8, 14 and 6px).\n\nI can fake the card shadows with soft offset rectangles behind them. I can also soften the band into a smoother gradient with more strips."
+ },
+ "metrics": {
+  "layers": 13,
+  "drawableLayers": 12,
+  "layerTypes": {
+   "group": 1,
+   "rect": 7,
+   "text": 5
+  },
+  "groups": 1,
+  "animatedLayers": 10,
+  "keys": 38,
+  "segments": 19,
+  "easesUsed": {
+   "Linear": 1,
+   "Expo Out": 12,
+   "Easy Ease": 6
+  },
+  "distinctEases": 3,
+  "easeFamilies": 3,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 1,
+  "expressions": 3,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 6,
+  "palette": [
+   "#7a5cff",
+   "#ff6b8a",
+   "#ff9a3c",
+   "#0a1f44",
+   "#4f46e5",
+   "#ffffff"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 1.005,
+  "firstMotion": 0,
+  "lastMotion": 6,
+  "endHold": 0,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 2,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.233,
+  "midLuma": 0.741,
+  "toolErrors": 0,
+  "toolCalls": 20
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "headline present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "both CTAs present",
+    "type": "textAllOf",
+    "pass": true
+   },
+   {
+    "text": "gradient band (gradient paint)",
+    "type": "gradientPaint",
+    "pass": false
+   },
+   {
+    "text": "band rotated about -12°",
+    "type": "rotatedAbout",
+    "pass": true
+   },
+   {
+    "text": "line-by-line headline reveal (text animator by line, or ≥2 line layers staggered)",
+    "type": "byLine",
+    "pass": true
+   },
+   {
+    "text": "Expo Out used",
+    "type": "easeUsed",
+    "pass": true
+   },
+   {
+    "text": "3 cards with radius ≈12",
+    "type": "cards",
+    "pass": true
+   },
+   {
+    "text": "cards keep bobbing to the end (motion in the last 0.8s)",
+    "type": "activeAtEnd",
+    "pass": true
+   },
+   {
+    "text": "no new entrances after ~3s",
+    "type": "noEntrancesAfter",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 9,
+  "total": 9
+ },
+ "video": {
+  "frames": 360,
+  "sourceCodec": "avc1.640020",
+  "bytes": 88722
+ }
+}

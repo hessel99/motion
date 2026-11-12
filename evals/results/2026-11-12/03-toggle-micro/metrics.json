@@ -1,0 +1,133 @@
+{
+ "run": {
+  "id": "03-toggle-micro",
+  "name": "03-toggle-micro",
+  "model": "sonnet",
+  "seed": 1,
+  "wallMs": 18530,
+  "timedOut": false,
+  "turns": 10,
+  "costUsd": 0.0471829,
+  "durationMs": 17745,
+  "usage": {
+   "input": 63074,
+   "cached": 58789,
+   "output": 2418
+  },
+  "errors": [],
+  "toolCalls": 9,
+  "toolErrors": 0,
+  "toolsAvailable": 37,
+  "finalText": "The toggle is built and starts in the off state. I checked it in a contact sheet and a final frame at 1.2s, but I haven't played it through live.\n\n- **Layers:** `Track Off` (grey), `Track On` (green), `Knob` and `Check`.\n- **Timing:** the toggle starts at 0.4s and everything has settled by about 1.0s, inside your 1.2s target.\n- **Knob:** it slides from left to right, stretching wide mid-travel and then squashing tall on arrival. It overshoots by about 9px before settling.\n- **Track:** `Track On` fades in over the grey one between 0.4s and 0.8s, which gives the colour crossfade.\n- **Checkmark:** it draws itself in and fades up in green inside the knob, starting at 0.62s as the knob lands.\n\nI also set the background to a light grey (`#f2f2f7`) so the white knob stands out. The overshoot and squash amounts are easy to change if you want it snappier or softer."
+ },
+ "metrics": {
+  "layers": 4,
+  "drawableLayers": 4,
+  "layerTypes": {
+   "rect": 2,
+   "ellipse": 1,
+   "path": 1
+  },
+  "groups": 0,
+  "animatedLayers": 3,
+  "keys": 15,
+  "segments": 10,
+  "easesUsed": {
+   "Easy Ease": 2,
+   "Quad In": 1,
+   "Quad Out": 4,
+   "Quad In Out": 1,
+   "Ease Out": 1,
+   "Cubic Out": 1
+  },
+  "distinctEases": 6,
+  "easeFamilies": 4,
+  "overshootSegments": 0,
+  "keyedOvershoots": 2,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 1,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#d1d1d6",
+   "#34c759",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.33,
+  "visualActivity": 0.302,
+  "firstMotion": 0.333,
+  "lastMotion": 0.933,
+  "endHold": 1.067,
+  "longestHold": 0,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 0,
+  "exits": 0,
+  "beats": 1,
+  "missingFonts": [],
+  "deadTrimLayers": [
+   "Check"
+  ],
+  "neverVisible": [],
+  "loopDiff": 0.021,
+  "midLuma": 0.938,
+  "toolErrors": 0,
+  "toolCalls": 9
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "track + knob layers",
+    "type": "layersMin",
+    "pass": true
+   },
+   {
+    "text": "knob position animated",
+    "type": "propAnimated",
+    "pass": true
+   },
+   {
+    "text": "track color changes grey → green (fill keys or crossfade)",
+    "type": "colorChange",
+    "pass": true
+   },
+   {
+    "text": "overshoot on the knob (Back/spring)",
+    "type": "overshoot",
+    "pass": true
+   },
+   {
+    "text": "squash & stretch (non-uniform scale or size)",
+    "type": "squash",
+    "pass": true
+   },
+   {
+    "text": "checkmark (path) appears",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "settled by ~1.2s (motion ends ≤1.5s)",
+    "type": "motionEndsBy",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": {
+  "frames": 120,
+  "sourceCodec": "avc1.640020",
+  "bytes": 10896
+ }
+}

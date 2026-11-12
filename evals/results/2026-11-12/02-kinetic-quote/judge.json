@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 7,
+  "style_match": 6,
+  "timing_easing": 5,
+  "composition": 5,
+  "richness": 5,
+  "polish": 5
+ },
+ "overall": 5.5,
+ "critique": [
+  "The phrase transitions are generic whole-layer fade-and-drift exits on default Easy Ease. At 2.17s the outgoing \"Design is not\" collides with the incoming \"just w…\", and the line looks shifted off its centred position, so the hand-off reads as a muddle rather than a designed transition. The type system is also inconsistent: \"Design is\" is set at 120px, then 100px, and the baselines jump between beats.",
+  "Choreograph the hand-offs per word or letter, with a staggered Expo-In exit fully clearing before or masking the next phrase's entry. Lock all phrases to one shared centre and baseline grid. Give the \"how it works\" landing a real spring overshoot instead of the 108→104 scale nudge. Raise the attribution's contrast and give it a slight rise, so the final hold reads as a deliberate payoff."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0601838,
+ "ms": 11588,
+ "raw": "```json\n{\"brief_fit\": 7, \"style_match\": 6, \"timing_easing\": 5, \"composition\": 5, \"richness\": 5, \"polish\": 5,\n \"critique\": [\"The phrase transitions are generic whole-layer fade-and-drift exits on default Easy Ease. At 2.17s the outgoing \\\"Design is not\\\" collides with the incoming \\\"just w…\\\", and the line looks shifted off its centred position, so the hand-off reads as a muddle rather than a designed transition. The type system is also inconsistent: \\\"Design is\\\" is set at 120px, then 100px, and the baselines jump between beats.\", \"Choreograph the hand-offs per word or letter, with a staggered Expo-In exit fully clearing before or masking the next phrase's entry. Lock all phrases to one shared centre and baseline grid. Give the \\\"how it works\\\" landing a real spring overshoot instead of the 108→104 scale nudge. Raise the attribution's contrast and give it a slight rise, so the final hold reads as a deliberate payoff.\"]}\n```"
+}

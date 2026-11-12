@@ -11,7 +11,7 @@ import { prefs, setPref } from '../../app/prefs';
 import { agentClient } from '../../agent/client';
 import { useChannels } from '../hooks';
 import { getThemePref, onThemeChange, setTheme, type ThemePref } from '../theme';
-import { Button, Dialog, Kbd, Segmented } from '../ui';
+import { Button, Dialog, Kbd, Segmented, Select } from '../ui';
 import { SHORTCUTS } from '../chrome/shortcuts';
 import { ui, setUi, type SettingsSection } from '../chrome/ui-state';
 import { agentPrefs, setAgentPref, CLAUDE_MODELS, PROVIDER_LABEL } from '../agent/agent-prefs';
@@ -284,6 +284,20 @@ function Models() {
           <ModelRow on={on('codex')} label="Codex" sub="OpenAI Codex CLI" available={prov('codex')?.available} onPick={() => pick('codex')} />
           <ModelRow on={on('gemini')} label="Gemini" sub="Gemini CLI" available={prov('gemini')?.available} onPick={() => pick('gemini')} />
         </div>
+      </Card>
+      <Card title="Directing" sub="How the agent runs bigger briefs.">
+        <Row label="Auto model · full pieces" sub="With Claude · Auto: used for storyboards, styles and multi-beat briefs.">
+          <Select size="sm" aria-label="Model for full pieces" value={agentPrefs.autoFull} onChange={v => setAgentPref('autoFull', v)} options={CLAUDE_MODELS.filter(m => m.id !== 'auto').map(m => ({ value: m.id, label: m.id ? m.label : 'CLI default' }))} />
+        </Row>
+        <Row label="Auto model · edits" sub="With Claude · Auto: used for quick actions, edits and small builds.">
+          <Select size="sm" aria-label="Model for edits" value={agentPrefs.autoQuick} onChange={v => setAgentPref('autoQuick', v)} options={CLAUDE_MODELS.filter(m => m.id !== 'auto').map(m => ({ value: m.id, label: m.id ? m.label : 'CLI default' }))} />
+        </Row>
+        <Row label="Storyboards" sub="For full pieces the agent first proposes beats you can edit.">
+          <Select size="sm" aria-label="Storyboard approval" value={agentPrefs.storyboard} onChange={v => setAgentPref('storyboard', v === 'auto' ? 'auto' : 'ask')} options={[{ value: 'ask', label: 'Wait for my approval' }, { value: 'auto', label: 'Build right away' }]} />
+        </Row>
+        <Row label="Turn budget" sub="Max tool round trips per message (empty = 90). Say “continue” when it runs out.">
+          <input class="input input-sm" type="number" min="5" max="500" step="5" style={{ width: '72px' }} aria-label="Turn budget" placeholder="90" value={agentPrefs.turns} onChange={e => setAgentPref('turns', (e.target as HTMLInputElement).value.replace(/[^\d]/g, ''))} />
+        </Row>
       </Card>
       <Card title="Default mode">
         <Row label="Edit" sub="The agent changes your file. Every run can be reviewed and undone in one click.">

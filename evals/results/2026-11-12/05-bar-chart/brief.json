@@ -1,0 +1,64 @@
+{
+  "id": "05-bar-chart",
+  "title": "Bar chart build",
+  "complexity": "medium",
+  "style": [
+    "data",
+    "corporate"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration": 6
+  },
+  "prompt": "Animated bar chart: \"Revenue by quarter\" — Q1 12, Q2 18, Q3 15, Q4 27 ($M). Draw the axis line first, then the bars grow up from the baseline one after another, value labels count/fade in above each bar, Q4 bar is highlighted in an accent color with a little extra pop. Title top-left. Clean and readable.",
+  "checklist": [
+    {
+      "text": "title present",
+      "check": {
+        "type": "textContains",
+        "text": "Revenue"
+      }
+    },
+    {
+      "text": "4 bars (rects)",
+      "check": {
+        "type": "layersOfTypeMin",
+        "layerType": "rect",
+        "min": 4
+      }
+    },
+    {
+      "text": "bars grow from the baseline (size/scale animated, bottom edge fixed)",
+      "check": {
+        "type": "barsGrow"
+      }
+    },
+    {
+      "text": "staggered bar entrances",
+      "check": {
+        "type": "staggered",
+        "min": 4
+      }
+    },
+    {
+      "text": "value labels present (≥4 numeric text layers)",
+      "check": {
+        "type": "numericTextMin",
+        "min": 4
+      }
+    },
+    {
+      "text": "accent highlight on Q4 (≥2 bar colors)",
+      "check": {
+        "type": "paletteMin",
+        "min": 2
+      }
+    },
+    {
+      "text": "bar heights proportional to data",
+      "check": null
+    }
+  ]
+}

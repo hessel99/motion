@@ -1,0 +1,19 @@
+{
+ "scores": {
+  "brief_fit": 6,
+  "style_match": 4,
+  "timing_easing": 6,
+  "composition": 5,
+  "richness": 4,
+  "polish": 4
+ },
+ "overall": 4.83,
+ "critique": [
+  "The hero visuals read as placeholder blockout. The 'gradient band' is three flat hard-edged stripes, not a blended violet→coral→orange gradient. The cards are blank white rectangles with no shadow, no UI content and no depth cues, so they sit flat on the stripes. The linear band slide also opens an empty white wedge on the right from ~4s, which a card hangs over awkwardly.",
+  "Replace the stripes with one gradient-filled skewed band sized so it never exposes its right edge during the 6s drift. Give each card a soft drop shadow and simple UI content (a line chart, an amount, avatar/label bars), with per-card scale or shadow differences for depth. Swap the headline's opacity fade for a true clip-mask line reveal."
+ ],
+ "model": "claude-opus-5-5",
+ "cost": 0.0579118,
+ "ms": 10127,
+ "raw": "```json\n{\"brief_fit\": 6, \"style_match\": 4, \"timing_easing\": 6, \"composition\": 5, \"richness\": 4, \"polish\": 4,\n \"critique\": [\"The hero visuals read as placeholder blockout. The 'gradient band' is three flat hard-edged stripes, not a blended violet→coral→orange gradient. The cards are blank white rectangles with no shadow, no UI content and no depth cues, so they sit flat on the stripes. The linear band slide also opens an empty white wedge on the right from ~4s, which a card hangs over awkwardly.\", \"Replace the stripes with one gradient-filled skewed band sized so it never exposes its right edge during the 6s drift. Give each card a soft drop shadow and simple UI content (a line chart, an amount, avatar/label bars), with per-card scale or shadow differences for depth. Swap the headline's opacity fade for a true clip-mask line reveal.\"]}\n```"
+}

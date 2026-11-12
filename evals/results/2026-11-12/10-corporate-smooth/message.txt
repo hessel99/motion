@@ -1,0 +1,6 @@
+Corporate smooth lower third for an interview video: "Dr. Amelia Hart" / "Head of Research, Larkspur Labs". A thin accent line extends, a translucent panel slides in behind it, name and title reveal with a soft mask/slide. Holds, then animates out cleanly by 6s. Calm and premium: long ease-in-outs, nothing bouncy, blue-grey palette.
+
+<editor_context>
+comp "Main" 1920x1080 30fps 6s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

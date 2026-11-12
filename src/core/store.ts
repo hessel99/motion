@@ -251,6 +251,30 @@ export class Store {
     } finally { this.gesture = null; }
   }
 
+  /** collapse every undo entry above entry `sinceId` (0 = the bottom) into ONE labeled step: a
+   *  group of steps made across several async calls (an agent's storyboard beat), where batch()
+   *  can't span the awaits. no-op (returns 0) when `sinceId` is no longer in the stack or nothing
+   *  came after it; with one entry it is only relabeled. returns the number of entries merged */
+  squashSince(sinceId: number, label: string): number {
+    const at = sinceId === 0 ? -1 : this.undoStack.findIndex(e => e.id === sinceId);
+    if (sinceId !== 0 && at < 0) return 0;
+    const parts = this.undoStack.slice(at + 1);
+    if (!parts.length) return 0;
+    if (parts.length === 1) { parts[0].label = label; this.emit('history'); return 1; }
+    const change: Change = { ...parts[0].change, layers: new Set(parts[0].change.layers) };
+    for (const p of parts.slice(1)) {
+      const d = p.change;
+      const sameTree = (!change.structure || !!change.sameTree) && (!d.structure || !!d.sameTree);
+      change.structure ||= d.structure;
+      change.sameTree = change.structure && sameTree; change.comp ||= d.comp; change.meta ||= d.meta; change.assets ||= d.assets;
+      for (const id of d.layers) change.layers.add(id);
+    }
+    const merged: Entry = { id: ++entrySeq, label, undo: parts.flatMap(p => p.undo), redo: parts.flatMap(p => p.redo), selection: parts[0].selection, change };
+    this.undoStack.splice(at + 1, parts.length, merged);
+    this.emit('history');
+    return parts.length;
+  }
+
   /** while a gesture is active, all transactions merge into one undo step */
   beginGesture(key: string) { this.gesture = key + ':' + Math.random(); }
   endGesture() { this.gesture = null; }

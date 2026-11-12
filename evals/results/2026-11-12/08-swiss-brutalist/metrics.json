@@ -1,0 +1,134 @@
+{
+ "run": {
+  "id": "08-swiss-brutalist",
+  "name": "08-swiss-brutalist",
+  "model": "sonnet",
+  "seed": 1,
+  "wallMs": 66388,
+  "timedOut": false,
+  "turns": 21,
+  "costUsd": 0.15233839999999998,
+  "durationMs": 65678,
+  "usage": {
+   "input": 103126,
+   "cached": 90304,
+   "output": 9204
+  },
+  "errors": [],
+  "toolCalls": 20,
+  "toolErrors": 0,
+  "toolsAvailable": 37,
+  "finalText": "The poster is built and plays over 6 seconds. I checked it on a contact sheet of six frames and one full-size frame at 2.8s. I haven't played it back live or exported it.\n\n**Layout.** The grid has 60px margins and six 160px columns. The rotated word sits in columns 1–2, and everything else is on the column 3 edge at x=380. Type is Helvetica Neue / Arial Black, in black, white and one red (#ff2a1a).\n\n**Type.**\n- **Rotated word:** \"ZÜRICH\" is rotated 90° and fills the left side top to bottom.\n- **Main words:** \"2027\" sits in a red block, with \"TYPE\" and \"WEEK\" stacked under it.\n- **Dates:** \"03—07 MAR\" is small, bold uppercase at the bottom left, with an info line starting on the column 3 edge.\n- **Other blocks:** a black block, a thin black rule across the bottom and a red square inside the black block.\n\n**Motion.** All moves are linear or hard cuts, with no fades, bounces or easing.\n- **Rule and red block:** the bottom rule wipes in from the left, then the red block, and \"2027\" cuts in on a hard step.\n- **Words:** \"ZÜRICH\" is revealed bottom to top, then \"TYPE\" and \"WEEK\" left to right, each starting 0.2s after the last.\n- **Black block:** it wipes down from the top.\n- **Date and info lines:** both are revealed left to right.\n- **Red square:** it blinks on and off every 0.5s from 1.8s to 5.3s, as hard cuts.\n\nThe text reveals use white cover rectangles that shrink away, so they only work on the white background. The red square is off at 0.5s boundaries in some frames, so it can look missing in a still.\n\nTwo tweaks I can make: speed everything up for a harder, faster feel, or add a stepped red slab that crosses the poster at the end."
+ },
+ "metrics": {
+  "layers": 15,
+  "drawableLayers": 15,
+  "layerTypes": {
+   "text": 6,
+   "rect": 9
+  },
+  "groups": 0,
+  "animatedLayers": 10,
+  "keys": 47,
+  "segments": 25,
+  "easesUsed": {
+   "Linear": 16,
+   "Hold": 9
+  },
+  "distinctEases": 2,
+  "easeFamilies": 2,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 9,
+  "linearSegments": 16,
+  "expressions": 0,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 3,
+  "palette": [
+   "#000000",
+   "#ff2a1a",
+   "#ffffff"
+  ],
+  "keyCoverage": 0.883,
+  "visualActivity": 0.469,
+  "firstMotion": 0,
+  "lastMotion": 5.333,
+  "endHold": 0.667,
+  "longestHold": 0.469,
+  "offCanvasTime": 0.469,
+  "offCanvasLayers": {
+   "Rule": 0.201,
+   "Cover ZÜRICH": 0.268
+  },
+  "clippedAtEnd": [],
+  "textOverlapTime": 0,
+  "textOverlapPairs": {},
+  "partialOverlapTime": 1.608,
+  "exits": 1,
+  "beats": 6,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.354,
+  "midLuma": 0.639,
+  "toolErrors": 0,
+  "toolCalls": 20
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "title words present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "dates present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "palette black/white/red only (≤3 colors)",
+    "type": "paletteMax",
+    "pass": true
+   },
+   {
+    "text": "no bouncy eases (no Back/spring)",
+    "type": "noOvershoot",
+    "pass": true
+   },
+   {
+    "text": "linear or hold (stepped) interpolation used",
+    "type": "mechanicalEases",
+    "pass": true
+   },
+   {
+    "text": "a word rotated 90°",
+    "type": "rotated90",
+    "pass": true
+   },
+   {
+    "text": "huge type (font size ≥150px)",
+    "type": "fontSizeMin",
+    "pass": true
+   },
+   {
+    "text": "blocks wipe in (rect size/scale animated)",
+    "type": "wipes",
+    "pass": true
+   }
+  ],
+  "hits": 8,
+  "checkable": 8,
+  "total": 8
+ },
+ "video": {
+  "frames": 180,
+  "sourceCodec": "avc1.64001f",
+  "bytes": 26098
+ }
+}

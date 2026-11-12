@@ -1,0 +1,6 @@
+A 3D-feeling parallax shot: a stylised mountain landscape in 5 depth layers (sky gradient, far mountains, mid hills, near trees, foreground grass) with a slow camera push and pan to the right. Farther layers move less and scale less than near ones; add atmospheric haze (lighter, lower-contrast far layers). A title "Into the Quiet" fades in mid-shot at a depth between the hills and trees.
+
+<editor_context>
+comp "Main" 1920x1080 30fps 8s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

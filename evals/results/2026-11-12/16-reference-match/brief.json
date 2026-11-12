@@ -1,0 +1,84 @@
+{
+  "id": "16-reference-match",
+  "title": "Match a described reference",
+  "complexity": "complex",
+  "style": [
+    "reference",
+    "saas-hero",
+    "gradient"
+  ],
+  "comp": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 60,
+    "duration": 6
+  },
+  "prompt": "Match this reference as closely as you can (described from a frame-by-frame look): 0–1s: white background, a large diagonal band of saturated gradient (violet → coral → orange) skewed about -12°, slowly sliding left the whole time. 0.3–1.2s: headline \"Payments infrastructure for the internet\" rises in by line (each line slides up 40px from a clip mask, 80ms stagger, Expo Out), dark navy, left-aligned in the left half. 1.0–1.6s: two buttons fade/slide up: a filled indigo pill \"Start now\" and a text link \"Contact sales →\". 1.6–3s: three floating UI cards (white, soft shadow, rounded 12px) rise into the right half at different depths and keep bobbing slightly forever. Last 3s: everything subtly alive, no new entrances.",
+  "checklist": [
+    {
+      "text": "headline present",
+      "check": {
+        "type": "textContains",
+        "text": "Payments infrastructure"
+      }
+    },
+    {
+      "text": "both CTAs present",
+      "check": {
+        "type": "textAllOf",
+        "texts": [
+          "Start now",
+          "Contact sales"
+        ]
+      }
+    },
+    {
+      "text": "gradient band (gradient paint)",
+      "check": {
+        "type": "gradientPaint"
+      }
+    },
+    {
+      "text": "band rotated about -12°",
+      "check": {
+        "type": "rotatedAbout",
+        "deg": -12,
+        "tol": 6
+      }
+    },
+    {
+      "text": "line-by-line headline reveal (text animator by line, or ≥2 line layers staggered)",
+      "check": {
+        "type": "byLine"
+      }
+    },
+    {
+      "text": "Expo Out used",
+      "check": {
+        "type": "easeUsed",
+        "ease": "Expo Out"
+      }
+    },
+    {
+      "text": "3 cards with radius ≈12",
+      "check": {
+        "type": "cards",
+        "min": 3,
+        "radius": 12
+      }
+    },
+    {
+      "text": "cards keep bobbing to the end (motion in the last 0.8s)",
+      "check": {
+        "type": "activeAtEnd"
+      }
+    },
+    {
+      "text": "no new entrances after ~3s",
+      "check": {
+        "type": "noEntrancesAfter",
+        "seconds": 3.2
+      }
+    }
+  ]
+}

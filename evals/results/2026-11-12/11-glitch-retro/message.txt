@@ -1,0 +1,6 @@
+Glitchy retro title card for a synthwave podcast called "NIGHT SIGNAL". RGB-split text (offset magenta/cyan copies of the title that jitter), horizontal scanline bars that tear across, a few hard flicker frames, CRT-ish dark purple background with a sun-gradient stripe. Glitches come in bursts — stable moments in between.
+
+<editor_context>
+comp "Main" 1920x1080 30fps 5s, 0 layers; playhead 0s
+selected: nothing
+</editor_context>

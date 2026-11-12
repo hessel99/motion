@@ -1,0 +1,692 @@
+[
+ {
+  "name": "set_composition",
+  "argsBytes": 24,
+  "ok": true,
+  "ms": 46,
+  "editorMs": 4,
+  "input": {
+   "background": "#E6FF00"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 75,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "type": "group",
+   "name": "Card",
+   "x": 80,
+   "y": 130,
+   "w": 912,
+   "h": 572,
+   "rotation": -3
+  },
+  "result": "{\"id\":\"l_03jm1\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 78,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "group",
+   "name": "SaleBar",
+   "x": 110,
+   "y": 540,
+   "w": 652,
+   "h": 232,
+   "rotation": 3
+  },
+  "result": "{\"id\":\"l_03jm2\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 81,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "type": "group",
+   "name": "EndsSticker",
+   "x": 650,
+   "y": 60,
+   "w": 352,
+   "h": 102,
+   "rotation": 8
+  },
+  "result": "{\"id\":\"l_03jm3\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 82,
+  "ok": true,
+  "ms": 16,
+  "editorMs": 1,
+  "input": {
+   "type": "group",
+   "name": "ShipSticker",
+   "x": 60,
+   "y": 835,
+   "w": 452,
+   "h": 132,
+   "rotation": -5
+  },
+  "result": "{\"id\":\"l_03jm4\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 81,
+  "ok": true,
+  "ms": 24,
+  "editorMs": 1,
+  "input": {
+   "type": "group",
+   "name": "Starburst",
+   "x": 630,
+   "y": 630,
+   "w": 392,
+   "h": 392,
+   "rotation": 10
+  },
+  "result": "{\"id\":\"l_03jm5\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 102,
+  "ok": true,
+  "ms": 90,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Card Shadow",
+   "parent": "l_03jm1",
+   "x": 12,
+   "y": 12,
+   "w": 900,
+   "h": 560,
+   "fill": "#000000"
+  },
+  "result": "{\"id\":\"l_03jm6\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 133,
+  "ok": true,
+  "ms": 23,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Card Face",
+   "parent": "l_03jm1",
+   "x": 0,
+   "y": 0,
+   "w": 900,
+   "h": 560,
+   "fill": "#1F3BFF",
+   "stroke": "#000000",
+   "strokeWidth": 8
+  },
+  "result": "{\"id\":\"l_03jm7\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 181,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Summer Shadow",
+   "parent": "l_03jm1",
+   "x": 12,
+   "y": 52,
+   "w": 900,
+   "h": 220,
+   "fill": "#000000",
+   "text": {
+    "content": "SUMMER",
+    "fontSize": 200,
+    "fontWeight": 900,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jm8\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 173,
+  "ok": true,
+  "ms": 31,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Summer",
+   "parent": "l_03jm1",
+   "x": 0,
+   "y": 40,
+   "w": 900,
+   "h": 220,
+   "fill": "#E6FF00",
+   "text": {
+    "content": "SUMMER",
+    "fontSize": 200,
+    "fontWeight": 900,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jm9\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 101,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Bar Shadow",
+   "parent": "l_03jm2",
+   "x": 12,
+   "y": 12,
+   "w": 640,
+   "h": 220,
+   "fill": "#000000"
+  },
+  "result": "{\"id\":\"l_03jma\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 132,
+  "ok": true,
+  "ms": 17,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Bar Face",
+   "parent": "l_03jm2",
+   "x": 0,
+   "y": 0,
+   "w": 640,
+   "h": 220,
+   "fill": "#FFFFFF",
+   "stroke": "#000000",
+   "strokeWidth": 8
+  },
+  "result": "{\"id\":\"l_03jmb\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 169,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Sale",
+   "parent": "l_03jm2",
+   "x": 0,
+   "y": 20,
+   "w": 640,
+   "h": 190,
+   "fill": "#000000",
+   "text": {
+    "content": "SALE",
+    "fontSize": 180,
+    "fontWeight": 900,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jmc\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 113,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Ends Shadow",
+   "parent": "l_03jm3",
+   "x": 12,
+   "y": 12,
+   "w": 340,
+   "h": 90,
+   "fill": "#000000",
+   "radius": 45
+  },
+  "result": "{\"id\":\"l_03jmd\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 144,
+  "ok": true,
+  "ms": 22,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Ends Face",
+   "parent": "l_03jm3",
+   "x": 0,
+   "y": 0,
+   "w": 340,
+   "h": 90,
+   "fill": "#FF2E93",
+   "stroke": "#000000",
+   "strokeWidth": 8,
+   "radius": 45
+  },
+  "result": "{\"id\":\"l_03jme\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 179,
+  "ok": true,
+  "ms": 52,
+  "editorMs": 5,
+  "input": {
+   "type": "text",
+   "name": "Ends Text",
+   "parent": "l_03jm3",
+   "x": 0,
+   "y": 20,
+   "w": 340,
+   "h": 50,
+   "fill": "#000000",
+   "text": {
+    "content": "ENDS SUNDAY",
+    "fontSize": 44,
+    "fontWeight": 900,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jmf\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 102,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Ship Shadow",
+   "parent": "l_03jm4",
+   "x": 12,
+   "y": 12,
+   "w": 440,
+   "h": 120,
+   "fill": "#000000"
+  },
+  "result": "{\"id\":\"l_03jmg\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 133,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Ship Face",
+   "parent": "l_03jm4",
+   "x": 0,
+   "y": 0,
+   "w": 440,
+   "h": 120,
+   "fill": "#1F3BFF",
+   "stroke": "#000000",
+   "strokeWidth": 8
+  },
+  "result": "{\"id\":\"l_03jmh\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 181,
+  "ok": true,
+  "ms": 9,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Ship Text",
+   "parent": "l_03jm4",
+   "x": 0,
+   "y": 28,
+   "w": 440,
+   "h": 70,
+   "fill": "#FFFFFF",
+   "text": {
+    "content": "FREE SHIPPING",
+    "fontSize": 56,
+    "fontWeight": 900,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jmi\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 371,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Burst Shadow",
+   "parent": "l_03jm5",
+   "x": 12,
+   "y": 12,
+   "w": 380,
+   "h": 380,
+   "d": "M375 190 L325.2 226.2 L350.2 282.5 L289 289 L282.5 350.2 L226.2 325.2 L190 375 L153.8 325.2 L97.5 350.2 L91 289 L29.8 282.5 L54.8 226.2 L5 190 L54.8 153.8 L29.8 97.5 L91 91 L97.5 29.8 L153.8 54.8 L190 5 L226.2 54.8 L282.5 29.8 L289 91 L350.2 97.5 L325.2 153.8 Z",
+   "fill": "#000000"
+  },
+  "result": "{\"id\":\"l_03jmj\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 402,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Burst Face",
+   "parent": "l_03jm5",
+   "x": 0,
+   "y": 0,
+   "w": 380,
+   "h": 380,
+   "d": "M375 190 L325.2 226.2 L350.2 282.5 L289 289 L282.5 350.2 L226.2 325.2 L190 375 L153.8 325.2 L97.5 350.2 L91 289 L29.8 282.5 L54.8 226.2 L5 190 L54.8 153.8 L29.8 97.5 L91 91 L97.5 29.8 L153.8 54.8 L190 5 L226.2 54.8 L282.5 29.8 L289 91 L350.2 97.5 L325.2 153.8 Z",
+   "fill": "#FF2E93",
+   "stroke": "#000000",
+   "strokeWidth": 8
+  },
+  "result": "{\"id\":\"l_03jmk\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 176,
+  "ok": true,
+  "ms": 18,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Burst Text",
+   "parent": "l_03jm5",
+   "x": 0,
+   "y": 125,
+   "w": 380,
+   "h": 130,
+   "fill": "#FFFFFF",
+   "text": {
+    "content": "-40%",
+    "fontSize": 120,
+    "fontWeight": 900,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jml\"}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 1062,
+  "ok": true,
+  "ms": 25,
+  "editorMs": 2,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm1",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.1,
+       "v": [
+        0,
+        0
+       ]
+      },
+      {
+       "t": 0.5,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Back Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm1",
+     "prop": "rotation",
+     "keyframes": [
+      {
+       "t": 0.1,
+       "v": -25
+      },
+      {
+       "t": 0.5,
+       "v": -3,
+       "ease": "Back Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0.8,
+       "v": [
+        0,
+        0
+       ]
+      },
+      {
+       "t": 1.15,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Back Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "rotation",
+     "keyframes": [
+      {
+       "t": 0.8,
+       "v": -20
+      },
+      {
+       "t": 1.15,
+       "v": 3,
+       "ease": "Back Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 1.4,
+       "v": [
+        0,
+        0
+       ]
+      },
+      {
+       "t": 1.7,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Back Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "rotation",
+     "keyframes": [
+      {
+       "t": 1.4,
+       "v": -30
+      },
+      {
+       "t": 1.7,
+       "v": 8,
+       "ease": "Back Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 1.8,
+       "v": [
+        0,
+        0
+       ]
+      },
+      {
+       "t": 2.1,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Back Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "rotation",
+     "keyframes": [
+      {
+       "t": 1.8,
+       "v": 25
+      },
+      {
+       "t": 2.1,
+       "v": -5,
+       "ease": "Back Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm5",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 2.3,
+       "v": [
+        0,
+        0
+       ]
+      },
+      {
+       "t": 2.9,
+       "v": [
+        100,
+        100
+       ],
+       "ease": "Back Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm5",
+     "prop": "rotation",
+     "keyframes": [
+      {
+       "t": 2.3,
+       "v": -350
+      },
+      {
+       "t": 2.9,
+       "v": 10,
+       "ease": "Back Out"
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 10 tracks on 5 layers"
+ },
+ {
+  "name": "set_expression",
+  "argsBytes": 115,
+  "ok": true,
+  "ms": 36,
+  "editorMs": 1,
+  "input": {
+   "ids": [
+    "l_03jm5"
+   ],
+   "prop": "scale",
+   "expr": "value * (1 + (time > 3.2 ? 0.04 * Math.abs(sin((time - 3.2) * 4)) : 0))"
+  },
+  "result": "ok"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 36,
+  "ok": true,
+  "ms": 475,
+  "editorMs": 447,
+  "input": {
+   "times": [
+    0.4,
+    1.2,
+    2,
+    3.3
+   ],
+   "cell": 400
+  },
+  "result": "4 frames left→right, top→bottom at 0.4s, 1.2s, 2s, 3.3s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/583838f2-5803-4c32-8f49-ee48bd43439e/tool-results/mcp-motion-blob-1794502012211-9kcidd.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 70,
+  "ok": true,
+  "ms": 56,
+  "editorMs": 9,
+  "input": {
+   "id": "l_03jml",
+   "text": {
+    "fontSize": 96
+   },
+   "props": {
+    "position": [
+     190,
+     190
+    ]
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 182,
+  "editorMs": 106,
+  "input": {
+   "t": 3.5,
+   "maxSize": 600
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/583838f2-5803-4c32-8f49-ee48bd43439e/tool-results/mcp-motion-blob-1794502015499-iphppb.png]"
+ }
+]

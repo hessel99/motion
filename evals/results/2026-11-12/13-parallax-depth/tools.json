@@ -1,0 +1,686 @@
+[
+ {
+  "name": "add_layer",
+  "argsBytes": 79,
+  "ok": true,
+  "ms": 89,
+  "editorMs": 2,
+  "input": {
+   "type": "rect",
+   "name": "Sky",
+   "x": -60,
+   "y": -40,
+   "w": 2040,
+   "h": 1160,
+   "fill": "#f0cdb8"
+  },
+  "result": "{\"id\":\"l_03jm1\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 84,
+  "ok": true,
+  "ms": 226,
+  "editorMs": 1,
+  "input": {
+   "type": "rect",
+   "name": "Sky Top",
+   "x": -60,
+   "y": -40,
+   "w": 2040,
+   "h": 560,
+   "fill": "#8ea4cf80"
+  },
+  "result": "{\"id\":\"l_03jm2\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 99,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "ellipse",
+   "name": "Sun Glow",
+   "x": 1000,
+   "y": 300,
+   "w": 360,
+   "h": 360,
+   "fill": "#fff1d6",
+   "opacity": 80
+  },
+  "result": "{\"id\":\"l_03jm3\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 206,
+  "ok": true,
+  "ms": 6,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Far Mountains",
+   "x": -140,
+   "y": 380,
+   "w": 2200,
+   "h": 500,
+   "d": "M0 500 L0 300 L250 160 L420 250 L640 90 L900 260 L1150 150 L1400 280 L1650 120 L1900 250 L2200 180 L2200 500 Z",
+   "fill": "#bcc6dc"
+  },
+  "result": "{\"id\":\"l_03jm4\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 100,
+  "ok": true,
+  "ms": 29,
+  "editorMs": 1,
+  "input": {
+   "type": "ellipse",
+   "name": "Haze Far",
+   "x": -240,
+   "y": 540,
+   "w": 2400,
+   "h": 300,
+   "fill": "#f6e4d8",
+   "opacity": 45
+  },
+  "result": "{\"id\":\"l_03jm5\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 187,
+  "ok": true,
+  "ms": 11,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Mid Hills",
+   "x": -240,
+   "y": 560,
+   "w": 2400,
+   "h": 450,
+   "d": "M0 450 L0 200 Q300 60 600 180 Q900 280 1200 120 Q1600 0 1900 170 Q2150 260 2400 150 L2400 450 Z",
+   "fill": "#8aa0b4"
+  },
+  "result": "{\"id\":\"l_03jm6\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 165,
+  "ok": true,
+  "ms": 44,
+  "editorMs": 1,
+  "input": {
+   "type": "text",
+   "name": "Title",
+   "x": 210,
+   "y": 340,
+   "w": 1500,
+   "h": 150,
+   "fill": "#fff6ec",
+   "text": {
+    "content": "Into the Quiet",
+    "fontSize": 130,
+    "fontWeight": 300,
+    "align": "center"
+   }
+  },
+  "result": "{\"id\":\"l_03jm7\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 101,
+  "ok": true,
+  "ms": 41,
+  "editorMs": 1,
+  "input": {
+   "type": "ellipse",
+   "name": "Haze Near",
+   "x": -340,
+   "y": 700,
+   "w": 2600,
+   "h": 260,
+   "fill": "#dfe6ea",
+   "opacity": 30
+  },
+  "result": "{\"id\":\"l_03jm8\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 369,
+  "ok": true,
+  "ms": 48,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Near Trees",
+   "x": -340,
+   "y": 620,
+   "w": 2600,
+   "h": 520,
+   "d": "M0 520 L0 330 L100 120 L200 330 L300 160 L400 330 L500 200 L600 330 L700 120 L800 330 L900 170 L1000 330 L1100 210 L1200 330 L1300 130 L1400 330 L1500 170 L1600 330 L1700 200 L1800 330 L1900 120 L2000 330 L2100 160 L2200 330 L2300 200 L2400 330 L2500 130 L2600 330 L2600 520 Z",
+   "fill": "#33505a"
+  },
+  "result": "{\"id\":\"l_03jm9\"}"
+ },
+ {
+  "name": "add_layer",
+  "argsBytes": 210,
+  "ok": true,
+  "ms": 57,
+  "editorMs": 1,
+  "input": {
+   "type": "path",
+   "name": "Foreground Grass",
+   "x": -440,
+   "y": 840,
+   "w": 2800,
+   "h": 300,
+   "d": "M0 300 L0 120 Q200 60 400 110 Q700 170 1000 90 Q1300 20 1600 100 Q2000 170 2300 80 Q2600 30 2800 90 L2800 300 Z",
+   "fill": "#14262a"
+  },
+  "result": "{\"id\":\"l_03jma\"}"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 2024,
+  "ok": true,
+  "ms": 40,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm1",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        103,
+        103
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm2",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        103,
+        103
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm3",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        1180,
+        480
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        1165,
+        480
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        630
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        925,
+        630
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm4",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        105,
+        105
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm5",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        690
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        900,
+        690
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm5",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        110,
+        110
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm6",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        785
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        870,
+        785
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm6",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        112,
+        112
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        415
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        820,
+        415
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        96,
+        96
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        116,
+        116
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm7",
+     "prop": "opacity",
+     "keyframes": [
+      {
+       "t": 2.5,
+       "v": 0
+      },
+      {
+       "t": 4.2,
+       "v": 100,
+       "ease": "Cubic Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        830
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        780,
+        830
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm8",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        120,
+        120
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm9",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        880
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        770,
+        880
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jm9",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        122,
+        122
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jma",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        960,
+        990
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        600,
+        990
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    },
+    {
+     "id": "l_03jma",
+     "prop": "scale",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        100,
+        100
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        145,
+        145
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 18 tracks on 10 layers"
+ },
+ {
+  "name": "contact_sheet",
+  "argsBytes": 23,
+  "ok": true,
+  "ms": 194,
+  "editorMs": 179,
+  "input": {
+   "frames": 4,
+   "cell": 480
+  },
+  "result": "4 frames left→right, top→bottom at 0s, 2.67s, 5.33s, 8s\n[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/da0067b5-ca55-477f-aa79-497e37b492f7/tool-results/mcp-motion-blob-1794501996956-i8orcy.jpg]"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 45,
+  "ok": true,
+  "ms": 12,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm2",
+   "props": {
+    "fill": "#8ea4cf40"
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "update_layer",
+  "argsBytes": 39,
+  "ok": true,
+  "ms": 35,
+  "editorMs": 1,
+  "input": {
+   "id": "l_03jm5",
+   "props": {
+    "opacity": 28
+   }
+  },
+  "result": "ok"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 128,
+  "ok": true,
+  "ms": 10,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm3",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        1500,
+        400
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        1485,
+        400
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ },
+ {
+  "name": "screenshot",
+  "argsBytes": 7,
+  "ok": true,
+  "ms": 65,
+  "editorMs": 39,
+  "input": {
+   "t": 5
+  },
+  "result": "[image]\n[Image: source: /root/.claude/projects/-tmp-motion-eval-agent/da0067b5-ca55-477f-aa79-497e37b492f7/tool-results/mcp-motion-blob-1794502000402-gi87qh.png]"
+ },
+ {
+  "name": "animate",
+  "argsBytes": 128,
+  "ok": true,
+  "ms": 14,
+  "editorMs": 1,
+  "input": {
+   "tracks": [
+    {
+     "id": "l_03jm3",
+     "prop": "position",
+     "keyframes": [
+      {
+       "t": 0,
+       "v": [
+        1640,
+        330
+       ]
+      },
+      {
+       "t": 8,
+       "v": [
+        1625,
+        330
+       ],
+       "ease": "Sine In Out"
+      }
+     ]
+    }
+   ]
+  },
+  "result": "ok: 1 tracks on 1 layers"
+ }
+]

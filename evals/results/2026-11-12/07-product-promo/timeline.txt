@@ -1,0 +1,35 @@
+- Word 1 [text] box -58,434,2035,212 #ffffff "40h battery" Inter 170px w800
+- Word 2 [text] box -58,434,2035,212 #ffffff "Spatial audio" Inter 170px w800
+- Word 3 [text] box -77,432,2074,216 #ff5a1f "Pure silence" Inter 170px w800
+- Shockwave [ellipse] box 0,-420,1920,1920 #000000 a0 stroke #ff5a1f 14px
+- PULSE 2 [text] box 0,380,1920,320 #ffffff "PULSE 2" Inter 300px w900
+- Flash Wipe [rect] box 0,0,1920,1080 #ff5a1f
+- CTA Pill [rect] box 960,850,0,0 #ff5a1f
+- Available now [text] box 960,850,0,0 #0a0a0c "Available now" Inter 52px w700
+
+comp 1920x1080 7s @30fps, background #0a0a0c, markers 0.5 40h, 1 Spatial, 1.5 Silence, 2.5 SLAM, 4 CTA
+"Word 1" (text l_03jm1)
+  scale: 0.5s 140 ─Expo Out→ 0.7s 100 ─linear→ 0.96s 106
+  opacity: 0s 0 ─hold→ 0.5s 100 ─hold→ 0.96s 0
+"Word 2" (text l_03jm2)
+  position: 1s [1160,540] ─Expo Out→ 1.2s [960,540]
+  scale: 1s 60 ─Expo Out→ 1.2s 100 ─linear→ 1.46s 106
+  opacity: 0s 0 ─hold→ 1s 100 ─hold→ 1.46s 0
+"Word 3" (text l_03jm3)
+  scale: 1.5s 150 ─Expo Out→ 1.72s 100 ─linear→ 2.46s 108
+  opacity: 0s 0 ─hold→ 1.5s 100 ─hold→ 2.46s 0
+"Shockwave" (ellipse l_03jm4)
+  scale: 2.5s 15 ─Expo Out→ 3.3s 320
+  opacity: 0s 0 ─hold→ 2.5s 100 ─Quad Out→ 3.3s 0
+"PULSE 2" (text l_03jm5)
+  position: 4s [960,540] ─Expo Out→ 4.4s [960,470]
+  scale: 2.5s 280 ─Expo Out→ 2.8s 100
+  opacity: 0s 0 ─hold→ 2.5s 100
+"Flash Wipe" (rect l_03jm6)
+  opacity: 0.5s 35 ─Expo Out→ 0.7s 0 ─Easy Ease→ 1s 35 ─Expo Out→ 1.2s 0 ─Easy Ease→ 1.5s 50 ─Expo Out→ 1.7s 0 ─Easy Ease→ 2.5s 100 ─Expo Out→ 2.85s 0
+"CTA Pill" (rect l_03jm7)
+  scale: 4s 0 ─Back Out→ 4.4s 100
+  opacity: 0s 0 ─hold→ 4s 100
+"Available now" (text l_03jm8)
+  scale: 4s 0 ─Back Out→ 4.4s 100
+  opacity: 0s 0 ─hold→ 4.15s 0 ─Quad Out→ 4.35s 100

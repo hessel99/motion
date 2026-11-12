@@ -1,0 +1,153 @@
+{
+ "run": {
+  "id": "04-explainer-3beat",
+  "name": "04-explainer-3beat",
+  "model": "sonnet",
+  "seed": 1,
+  "wallMs": 104320,
+  "timedOut": false,
+  "turns": 32,
+  "costUsd": 0.2472759,
+  "durationMs": 103405,
+  "usage": {
+   "input": 166801,
+   "cached": 146859,
+   "output": 15285
+  },
+  "errors": [],
+  "toolCalls": 31,
+  "toolErrors": 0,
+  "toolsAvailable": 37,
+  "finalText": "Building is done. I'm now checking the motion on a contact sheet.\nI've built the 12-second scene in the Main comp. I checked it on a contact sheet at ten timestamps. I haven't played it back in real time, so the jitter and the sucking-in motion are unchecked.\n\n- **Beat 1 (0–4s):** Six sticky notes in yellow, pink, mint, orange, blue and lilac pop in one after another, each with a different password. They jitter through 4s using a rotation-wiggle expression. I haven't confirmed that expression produces visible jitter. The shield fades in behind the pile from 3.2s, so there's no cut.\n- **Beat 2 (4–7s):** The notes spin and shrink into the shield one after another. The shield pulses each time one lands, then does a final lock-in squash at about 6.5s.\n- **Beat 3 (6.4–12s):** A flat cyan glow disc blooms behind the shield, which rises slightly as the glow grows. \"One key. Every login.\" slides up at 7.5s. A white check mark then draws itself onto the shield at 8.2s. The glow pulses gently until the end.\n\nBeat 3 starts earlier than a strict 4s split (about 6.4s rather than 8s), so the lock-in doesn't sit idle.\n\nAt 5.4s a small white fragment shows near the shield. I think it's note text mid-suck, but I didn't confirm it isn't the check mark.\n\nI can make the beats an even 4s each, or give the glow a soft gradient instead of the flat disc."
+ },
+ "metrics": {
+  "layers": 22,
+  "drawableLayers": 16,
+  "layerTypes": {
+   "ellipse": 1,
+   "path": 2,
+   "text": 7,
+   "group": 6,
+   "rect": 6
+  },
+  "groups": 6,
+  "animatedLayers": 10,
+  "keys": 125,
+  "segments": 59,
+  "easesUsed": {
+   "Easy Ease": 50,
+   "Cubic Out": 1,
+   "Quad Out": 7,
+   "Back Out": 1
+  },
+  "distinctEases": 4,
+  "easeFamilies": 4,
+  "overshootSegments": 1,
+  "keyedOvershoots": 1,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 6,
+  "textAnimators": 0,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 2,
+  "gradientLayers": 0,
+  "paletteSize": 12,
+  "palette": [
+   "#8fe3ff",
+   "#4f7cff",
+   "#6b8cff",
+   "#ffffff",
+   "#2d2a55",
+   "#ffd84d",
+   "#ff9eb5",
+   "#8fe0b8",
+   "#ffb36b",
+   "#a9c7ff",
+   "#c9b2ff",
+   "#fff4e2"
+  ],
+  "keyCoverage": 1,
+  "visualActivity": 0.759,
+  "firstMotion": 0.2,
+  "lastMotion": 11.467,
+  "endHold": 0.533,
+  "longestHold": 1.005,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0.804,
+  "textOverlapPairs": {
+   "Pw 1 × Pw 2": 0.402,
+   "Pw 1 × Pw 3": 0.067,
+   "Pw 2 × Pw 3": 0.201,
+   "Pw 4 × Pw 5": 0.201,
+   "Pw 5 × Pw 6": 0.067
+  },
+  "partialOverlapTime": 3.886,
+  "exits": 12,
+  "beats": 7,
+  "missingFonts": [],
+  "deadTrimLayers": [
+   "Check"
+  ],
+  "neverVisible": [],
+  "loopDiff": 0.039,
+  "midLuma": 0.941,
+  "toolErrors": 0,
+  "toolCalls": 31
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "3 beats",
+    "type": "beatsMin",
+    "pass": true
+   },
+   {
+    "text": "headline present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "≥5 sticky notes (rects) in beat 1",
+    "type": "layersOfTypeMin",
+    "pass": true
+   },
+   {
+    "text": "jitter/anxious motion (wiggle expression or many small keys)",
+    "type": "jitter",
+    "pass": true
+   },
+   {
+    "text": "shield/vault as a custom path",
+    "type": "pathLayersMin",
+    "pass": true
+   },
+   {
+    "text": "uses most of the 12s (animated coverage ≥70%)",
+    "type": "coverageMin",
+    "pass": true
+   },
+   {
+    "text": "notes converge (moving toward one point)",
+    "type": null,
+    "pass": null
+   },
+   {
+    "text": "transitions between beats are continuous",
+    "type": null,
+    "pass": null
+   }
+  ],
+  "hits": 6,
+  "checkable": 6,
+  "total": 8
+ },
+ "video": {
+  "frames": 360,
+  "sourceCodec": "avc1.64001f",
+  "bytes": 92908
+ }
+}

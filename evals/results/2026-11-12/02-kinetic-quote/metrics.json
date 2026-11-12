@@ -1,0 +1,130 @@
+{
+ "run": {
+  "id": "02-kinetic-quote",
+  "name": "02-kinetic-quote",
+  "model": "sonnet",
+  "seed": 1,
+  "wallMs": 32948,
+  "timedOut": false,
+  "turns": 15,
+  "costUsd": 0.0862965,
+  "durationMs": 31817,
+  "usage": {
+   "input": 87855,
+   "cached": 79665,
+   "output": 4559
+  },
+  "errors": [],
+  "toolCalls": 14,
+  "toolErrors": 0,
+  "toolsAvailable": 37,
+  "finalText": "The quote is built as four phrases on the 8s \"Main\" composition, each handing off to the next. I checked it on a contact sheet and two stills. The last two stills, taken after I shrank the emphasis line, look right.\n\n| Time | Phrase | Animation |\n|---|---|---|\n| 0.2s | \"Design is not\" | Words pop up one by one, then it lifts and fades out around 2s. |\n| 2.0s | \"just what it looks like.\" | Letters rise in one at a time as the first phrase leaves, then it drifts up and fades around 3.5s. |\n| 3.8s | \"Design is\" | Words drop in from above. It stays on screen, shifts up and dims to a grey header. |\n| 4.7s | \"how it works.\" | Pink, heavy, 135px, so it's the biggest and boldest line. Letters spring in with a slight rotation, then it slowly scales up. |\n| 6.4s | \"— Steve Jobs\" | Small grey line that fades in last. |\n\nThe first frame of the contact sheet showed \"how it works.\" wrapping onto two lines at 170px, so I dropped it to 135px to keep it on one line.\n\nI can make the emphasis line even bigger by stacking \"how it\" over \"works.\", or add a background colour shift when it lands."
+ },
+ "metrics": {
+  "layers": 5,
+  "drawableLayers": 5,
+  "layerTypes": {
+   "text": 5
+  },
+  "groups": 0,
+  "animatedLayers": 5,
+  "keys": 17,
+  "segments": 9,
+  "easesUsed": {
+   "Easy Ease": 9
+  },
+  "distinctEases": 1,
+  "easeFamilies": 1,
+  "overshootSegments": 0,
+  "keyedOvershoots": 0,
+  "springSegments": 0,
+  "holdKeys": 0,
+  "linearSegments": 0,
+  "expressions": 0,
+  "textAnimators": 4,
+  "precomps": 0,
+  "markers": 0,
+  "pathLayers": 0,
+  "gradientLayers": 0,
+  "paletteSize": 5,
+  "palette": [
+   "#ffffff",
+   "#c9cbe8",
+   "#ff5c8a",
+   "#9a9cc0",
+   "#0f1020"
+  ],
+  "keyCoverage": 0.849,
+  "visualActivity": 0.427,
+  "firstMotion": 0.133,
+  "lastMotion": 7.333,
+  "endHold": 0.667,
+  "longestHold": 1.608,
+  "offCanvasTime": 0,
+  "offCanvasLayers": {},
+  "clippedAtEnd": [],
+  "textOverlapTime": 0.402,
+  "textOverlapPairs": {
+   "P1 × P2": 0.268,
+   "P2 × P3": 0.067,
+   "P3 × P4 emphasis": 0.067
+  },
+  "partialOverlapTime": 0.402,
+  "exits": 2,
+  "beats": 6,
+  "missingFonts": [],
+  "deadTrimLayers": [],
+  "neverVisible": [],
+  "loopDiff": 0.027,
+  "midLuma": 0.074,
+  "toolErrors": 0,
+  "toolCalls": 14
+ },
+ "checklist": {
+  "items": [
+   {
+    "text": "quote text present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "attribution present",
+    "type": "textContains",
+    "pass": true
+   },
+   {
+    "text": "per-letter or per-word text animation",
+    "type": "textAnimatorMin",
+    "pass": true
+   },
+   {
+    "text": "≥3 text layers (phrases)",
+    "type": "textLayersMin",
+    "pass": true
+   },
+   {
+    "text": "phrases exit/transition (some text animates out)",
+    "type": "exitsMin",
+    "pass": true
+   },
+   {
+    "text": "emphasis: one phrase larger or bolder than the rest",
+    "type": "textEmphasis",
+    "pass": true
+   },
+   {
+    "text": "3–4 beats over the 8s",
+    "type": "beatsMin",
+    "pass": true
+   }
+  ],
+  "hits": 7,
+  "checkable": 7,
+  "total": 7
+ },
+ "video": {
+  "frames": 240,
+  "sourceCodec": "avc1.64001f",
+  "bytes": 71216
+ }
+}

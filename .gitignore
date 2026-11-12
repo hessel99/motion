@@ -13,3 +13,6 @@ undefined-*.png
 
 # update signing key (scripts/gen-update-key.mjs): never commit
 .update-key/
+
+# agent eval: transcoder intermediates (results are committed, mp4s are kept < 2 MB)
+evals/results/**/*.raw.*
