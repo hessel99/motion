@@ -33,6 +33,9 @@ type Drag =
   | { kind: 'rows'; ids: string[]; sy: number; y: number; moved: boolean }
   | { kind: 'split'; sx: number; w0: number }
   | { kind: 'graph' }
+  | { kind: 'vscroll'; sy: number; s0: number }
+  | { kind: 'hscroll'; sx: number; s0: number }
+  | { kind: 'compEnd' }
   | { kind: 'bar'; id: string; sx: number; in0: number; out0: number; mode: 'in' | 'out' }
   | { kind: 'shift'; sx: number; moved: boolean; orig: Map<string, { inP: number; outP: number; kf: Partial<Record<PropKey, Keyframe[]>> }> };
 
@@ -72,7 +75,7 @@ export class Timeline {
     let lastDur = st.comp.duration;
     st.on('doc', () => {
       this.rowsDirty = true; this.baseDirty = true;
-      if (st.comp.duration !== lastDur) { lastDur = st.comp.duration; this.fitTime(); }
+      if (st.comp.duration !== lastDur) { lastDur = st.comp.duration; if (this.drag?.kind !== 'compEnd') this.fitTime(); }
     });
     st.on('selection', () => { this.baseDirty = true; });
     st.on('keys', () => { this.baseDirty = true; });
@@ -264,6 +267,12 @@ export class Timeline {
       g.fillText(label, bx + 24 - g.measureText(label).width / 2, HEADER_H / 2);
     }
 
+    // scrollbars
+    const vs = this.vScroll(), hs = this.hScroll();
+    g.fillStyle = 'rgba(255,255,255,0.18)';
+    if (vs) { g.beginPath(); g.roundRect(this.w - 7, vs.y, 5, vs.h, 2.5); g.fill(); }
+    if (hs) { g.beginPath(); g.roundRect(hs.x, this.h - 7, hs.w, 5, 2.5); g.fill(); }
+
     // drag feedback
     const d = this.drag;
     if (d?.kind === 'marquee') {
@@ -422,6 +431,24 @@ export class Timeline {
     }
   }
 
+  /** vertical scrollbar thumb (null when everything fits) */
+  private vScroll() {
+    const total = this.rows.length * ROW_H + ROW_H, view = this.h - HEADER_H;
+    if (total <= view) return null;
+    const h = Math.max(24, view * (view / total));
+    return { y: HEADER_H + (view - h) * (this.scrollY / (total - view)), h, total, view };
+  }
+  /** horizontal scrollbar thumb over the composition duration */
+  private hScroll() {
+    const dur = this.ed.store.comp.duration;
+    const span = this.w - this.leftW;
+    const visible = span / this.pxPerSec;
+    if (visible >= dur && this.scrollT <= 0) return null;
+    const total = Math.max(dur, this.scrollT + visible);
+    const w = Math.max(30, span * (visible / total));
+    return { x: this.leftW + (span - w) * (this.scrollT / Math.max(1e-6, total - visible)), w, total, visible };
+  }
+
   // ---------- hit testing ----------
   private keyAt(x: number, y: number): string | null {
     const i = this.rowAtY(y);
@@ -473,6 +500,15 @@ export class Timeline {
     const st = this.ed.store;
     this.canvas.setPointerCapture(e.pointerId);
     if (Math.abs(x - this.leftW) < 4) { this.drag = { kind: 'split', sx: x, w0: this.leftW }; return; }
+    const vs = this.vScroll();
+    if (vs && x > this.w - 10 && y > HEADER_H) {
+      if (y < vs.y || y > vs.y + vs.h) { this.scrollY = ((y - HEADER_H - vs.h / 2) / (vs.view - vs.h)) * (vs.total - vs.view); this.clampScroll(); this.baseDirty = true; }
+      this.drag = { kind: 'vscroll', sy: y, s0: this.scrollY };
+      return;
+    }
+    const hs = this.hScroll();
+    if (hs && y > this.h - 10 && x > this.leftW) { this.drag = { kind: 'hscroll', sx: x, s0: this.scrollT }; return; }
+    if (y < HEADER_H && Math.abs(x - this.tToX(st.comp.duration)) < 5) { this.drag = { kind: 'compEnd' }; st.beginGesture('duration'); return; }
     if (y < HEADER_H && x < this.leftW && x >= this.leftW - 112 && x < this.leftW - 8) {
       this.graphMode = x >= this.leftW - 60;
       this.baseDirty = true;
@@ -600,10 +636,25 @@ export class Timeline {
     if (!d) {
       const i = this.rowAtY(y);
       if (i !== this.hoverRow) { this.hoverRow = i; this.baseDirty = true; }
-      this.canvas.style.cursor = Math.abs(x - this.leftW) < 4 ? 'col-resize' : '';
+      this.canvas.style.cursor = Math.abs(x - this.leftW) < 4 || (y < HEADER_H && Math.abs(x - this.tToX(st.comp.duration)) < 5) ? 'col-resize' : '';
       return;
     }
     if (d.kind === 'graph') { this.graph.move(x, y, e.shiftKey); this.baseDirty = true; return; }
+    if (d.kind === 'vscroll') {
+      const vs = this.vScroll();
+      if (vs) { this.scrollY = d.s0 + (y - d.sy) * ((vs.total - vs.view) / (vs.view - vs.h)); this.clampScroll(); this.baseDirty = true; }
+      return;
+    }
+    if (d.kind === 'hscroll') {
+      const hs = this.hScroll();
+      if (hs) { this.scrollT = Math.max(0, d.s0 + (x - d.sx) * ((hs.total - hs.visible) / Math.max(1, (this.w - this.leftW) - hs.w))); this.baseDirty = true; }
+      return;
+    }
+    if (d.kind === 'compEnd') {
+      const dur = Math.max(1 / st.comp.fps, st.snapTime(this.xToT(x)));
+      if (dur !== st.comp.duration) st.transact('Composition duration', tx => { tx.set(st.comp, 'duration', dur); tx.comp(); });
+      return;
+    }
     if (d.kind === 'scrub') this.scrubTo(x, e.shiftKey);
     else if (d.kind === 'split') { this.leftW = Math.max(180, Math.min(this.w - 200, d.w0 + x - d.sx)); this.baseDirty = true; }
     else if (d.kind === 'keys') {
@@ -710,6 +761,7 @@ export class Timeline {
 
   private dbl(e: MouseEvent) {
     const [x, y] = this.local(e);
+    if (y < HEADER_H && x > this.leftW) { this.fitTime(); return; }
     const i = this.rowAtY(y);
     if (i < 0) return;
     const r = this.rows[i];
