@@ -2,7 +2,8 @@
 // relays chat with cli agents (claude code / codex / gemini) using the user's subscription.
 
 import { TOOLS, READ_ONLY_TOOLS } from './tools';
-import { AGENT_SYSTEM_PROMPT, ASK_MODE_PROMPT } from './prompt';
+import { AGENT_SYSTEM_PROMPT, AGENT_SYSTEM_PROMPT_PLAIN, ASK_MODE_PROMPT } from './prompt';
+import { tasteOn } from './taste';
 import { GUIDES } from './guides';
 
 export interface Provider { id: string; name: string; available: boolean; version?: string }
@@ -128,7 +129,7 @@ class AgentClient {
     this.send({
       // the ask-mode note goes into the message (codex/gemini only get the system prompt on the first turn)
       type: 'chat', chatId, provider: opts.provider, message: ask ? `${ASK_MODE_PROMPT}\n\n${opts.message}` : opts.message, sessionId: opts.sessionId, model: opts.model, maxTurns: opts.maxTurns,
-      systemPrompt: AGENT_SYSTEM_PROMPT,
+      systemPrompt: tasteOn() ? AGENT_SYSTEM_PROMPT : AGENT_SYSTEM_PROMPT_PLAIN,
       readOnlyTools: ask ? READ_ONLY_TOOLS() : undefined,
     });
     return chatId;
