@@ -20,3 +20,10 @@ figma-captures/
 
 # agent eval: transcoder intermediates (results are committed, mp4s are kept < 2 MB)
 evals/results/**/*.raw.*
+# figma / svg fidelity harness (scripts/figma-fidelity.mjs): ground truth renders, node dumps and
+# reports stay local (they can contain the user's design data); real pasted payloads too
+bench/results/figma-truth/
+bench/results/figma-fidelity/
+bench/results/figma-fidelity-*/
+bench/results/svg-fidelity/
+fixtures/figma-paste/
