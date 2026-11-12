@@ -11,6 +11,9 @@ contextBridge.exposeInMainWorld('motionNative', {
   saveFile: (opts) => ipcRenderer.invoke('file:save', opts || {}),
   /** Saves an export into ~/Movies/Motion (or ~/Videos/Motion) without a dialog. opts: {name, data(base64)} -> path */
   saveExport: (opts) => ipcRenderer.invoke('file:saveExport', opts || {}),
+  /** crash-safe autosave in the app data folder */
+  autosaveWrite: (text) => ipcRenderer.invoke('autosave:write', text),
+  autosaveRead: () => ipcRenderer.invoke('autosave:read'),
   /** Always shows the dialog. */
   saveFileAs: (opts) => ipcRenderer.invoke('file:saveAs', opts || {}),
   /** cb(action) for 'new'|'open'|'save'|'saveAs'|'import'|'export-lottie'; returns unsubscribe. */

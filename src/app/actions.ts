@@ -410,6 +410,8 @@ const AUTOSAVE_KEY = 'motion.autosave';
 export function setupAutosave() {
   let timer = 0;
   const save = () => {
+    const nat = native() as any;
+    if (nat?.autosaveWrite) { nat.autosaveWrite(serialize()); return; } // desktop: file in app data, any size
     // big projects don't fit local storage anyway (~5MB): skip instead of serializing megabytes on the main thread
     if (Object.keys(st().project.layers).length > 1500) return;
     try {
@@ -423,6 +425,19 @@ export function setupAutosave() {
     timer = window.setTimeout(() => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(save, { timeout: 3000 }) : save()), 1200);
   });
 }
+export async function restoreAutosaveNative(): Promise<boolean> {
+  const nat = native() as any;
+  if (!nat?.autosaveRead) return false;
+  try {
+    const s = await nat.autosaveRead();
+    if (!s) return false;
+    const p = JSON.parse(s);
+    if (!p.comps || !p.layers) return false;
+    editor.load(p);
+    return true;
+  } catch { return false; }
+}
+
 export function restoreAutosave(): boolean {
   try {
     const s = localStorage.getItem(AUTOSAVE_KEY);

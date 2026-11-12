@@ -104,6 +104,19 @@ ipcMain.handle('file:saveAs', async (_e, opts = {}) => {
   return writeFromRenderer(target, opts.data, opts.encoding);
 });
 
+// crash-safe autosave of the open project (no size limit, unlike browser storage)
+const autosavePath = () => path.join(app.getPath('userData'), 'autosave.motion');
+ipcMain.handle('autosave:write', async (_e, text) => {
+  if (typeof text !== 'string' || text.length > 512 * 1024 * 1024) return false;
+  const tmp = autosavePath() + '.tmp';
+  await fs.writeFile(tmp, text, 'utf8');
+  await fs.rename(tmp, autosavePath()); // atomic replace: never leaves a half written file
+  return true;
+});
+ipcMain.handle('autosave:read', async () => {
+  try { return await fs.readFile(autosavePath(), 'utf8'); } catch { return null; }
+});
+
 // exports requested by tools/agents go to a fixed folder (no arbitrary paths): ~/Movies/Motion (mac) or ~/Videos/Motion
 ipcMain.handle('file:saveExport', async (_e, opts = {}) => {
   const base = app.getPath('videos');
