@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
   mac:
-    runs-on: macos-14
+    runs-on: macos-latest   # macos-14 images were retired
     timeout-minutes: 60
     env:
       RELEASES_REPO: ${{ vars.MOTION_RELEASES_REPO || github.repository }}
