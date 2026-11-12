@@ -20,6 +20,7 @@ export function AgentPanel() {
   const [busy, setBusy] = useState<string | null>(null);
   const [provider, setProvider] = useState<string>(() => { try { return localStorage.getItem(STORAGE + '.provider') || 'claude'; } catch { return 'claude'; } });
   const session = useRef<Record<string, string | undefined>>({});
+  const [model, setModel] = useState<string>(() => { try { return localStorage.getItem(STORAGE + '.model') || ''; } catch { return ''; } });
   const list = useRef<HTMLDivElement>(null);
 
   useEffect(() => agentClient.on(() => force(x => x + 1)), []);
@@ -36,7 +37,7 @@ export function AgentPanel() {
     const marker = editor.store.historyLength;
     let assistantIdx = -1;
     const append = (fn: (m: Msg[]) => Msg[]) => setMsgs(fn);
-    const id = agentClient.chat({ provider, message: text + ctx, sessionId: session.current[provider] }, (e: ChatEvent) => {
+    const id = agentClient.chat({ provider, message: text + ctx, sessionId: session.current[provider], model: provider === 'claude' && model ? model : undefined }, (e: ChatEvent) => {
       switch (e.kind) {
         case 'session': session.current[provider] = e.sessionId; break;
         case 'text_delta':
@@ -89,6 +90,11 @@ export function AgentPanel() {
             <option value={p.id}>{p.name}{p.available ? '' : ' (not found)'}</option>
           ))}
         </select>
+ {provider === 'claude' && (
+          <select class="model-select" title="Model (uses your Claude subscription)" value={model} onChange={e => { const v = (e.target as HTMLSelectElement).value; setModel(v); try { localStorage.setItem(STORAGE + '.model', v); } catch { /* */ } }}>
+            <option value="">default</option><option value="opus">Opus</option><option value="sonnet">Sonnet</option><option value="haiku">Haiku</option>
+          </select>
+        )}
         <button class="ghost" title="New conversation" onClick={() => { session.current[provider] = undefined; setMsgs([]); }}>New</button>
       </div>
       <div class="agent-list" ref={list}>
