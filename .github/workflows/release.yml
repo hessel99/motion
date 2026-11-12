@@ -1,0 +1,132 @@
+# Builds Motion and publishes an update (see docs/updates.md).
+#
+# Trigger: push a tag vX.Y.Z (stable) or vX.Y.Z-beta.N (beta) that matches package.json "version",
+# or run it by hand (Actions → Release → Run workflow) with "publish" off for a dry run.
+#
+# Where releases go: the GitHub Releases of RELEASES_REPO, by default this repository (it is public),
+# using the built-in GITHUB_TOKEN. For private code with a separate public releases repo, set the
+# repository variable MOTION_RELEASES_REPO (e.g. hessel99/motion-releases) and the secret
+# MOTION_RELEASES_TOKEN (a fine-grained PAT with "Contents: read and write" on that repo), and set
+# package.json motionUpdates.repo to the same repo.
+#
+# Secrets: MOTION_UPDATE_PRIVATE_KEY (required, from `node scripts/gen-update-key.mjs`).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish the release (off = build + sign only, artifacts attached to the run)'
+        type: boolean
+        default: false
+      notes:
+        description: 'Release notes (optional; default: commit messages since the previous tag)'
+        type: string
+        default: ''
+
+permissions:
+  contents: write   # create releases in this repo with GITHUB_TOKEN
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  mac:
+    runs-on: macos-14
+    timeout-minutes: 60
+    env:
+      RELEASES_REPO: ${{ vars.MOTION_RELEASES_REPO || github.repository }}
+      GH_TOKEN: ${{ secrets.MOTION_RELEASES_TOKEN || secrets.GITHUB_TOKEN }}
+      MOTION_UPDATE_PRIVATE_KEY: ${{ secrets.MOTION_UPDATE_PRIVATE_KEY }}
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'   # not signed with a Developer ID yet (ad-hoc only)
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Version
+        id: v
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "v${VERSION}" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} does not match package.json version ${VERSION}"; exit 1
+          fi
+          CFG_REPO=$(node -p "(require('./package.json').motionUpdates||{}).repo||''")
+          if [ "${CFG_REPO}" != "${RELEASES_REPO}" ]; then
+            echo "::error::package.json motionUpdates.repo (${CFG_REPO}) must be the repo releases go to (${RELEASES_REPO}), or installed apps will not find them"; exit 1
+          fi
+          if [ -z "${MOTION_UPDATE_PRIVATE_KEY}" ]; then
+            echo "::error::secret MOTION_UPDATE_PRIVATE_KEY is missing (see docs/updates.md)"; exit 1
+          fi
+          case "$VERSION" in *-*) CHANNEL=beta ;; *) CHANNEL=stable ;; esac
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "channel=$CHANNEL" >> "$GITHUB_OUTPUT"
+
+      - run: npm ci
+
+      - name: Test
+        run: |
+          npx tsc --noEmit -p .
+          npx vitest run
+
+      - name: Build interface
+        run: npx vite build
+
+      - name: Build app (arm64 + x64 zip and dmg)
+        run: npx electron-builder --mac zip dmg --arm64 --x64 --publish never
+
+      - name: Release notes
+        env:
+          NOTES_INPUT: ${{ inputs.notes }}
+        run: |
+          if [ -n "${NOTES_INPUT}" ]; then printf '%s\n' "${NOTES_INPUT}" > notes.md
+          else
+            PREV=$(git describe --tags --abbrev=0 --match 'v*' HEAD^ 2>/dev/null || true)
+            git log --no-merges --format='- %s' ${PREV:+$PREV..}HEAD | head -n 30 > notes.md
+          fi
+          cat notes.md
+
+      - name: Update manifest (signed)
+        run: |
+          node scripts/release.mjs \
+            --out release/updates \
+            --shell-dir release \
+            --channel "${{ steps.v.outputs.channel }}" \
+            --notes @notes.md \
+            --base-url "https://github.com/${RELEASES_REPO}/releases/download/v${{ steps.v.outputs.version }}" \
+            --feed "https://github.com/${RELEASES_REPO}/releases/download/updates"
+          ls -la release/updates
+
+      - name: Keep artifacts on the run
+        uses: actions/upload-artifact@v4
+        with:
+          name: motion-${{ steps.v.outputs.version }}
+          path: |
+            release/updates/
+            release/*.dmg
+          retention-days: 14
+
+      - name: Publish release + update feed
+        if: github.event_name == 'push' || inputs.publish
+        run: |
+          V="${{ steps.v.outputs.version }}"; CH="${{ steps.v.outputs.channel }}"
+          PRE=""; [ "$CH" = "beta" ] && PRE="--prerelease"
+          # 1. the version's release: app downloads (dmg for new installs, zips for updates) + UI bundle + manifest
+          TARGET=""; [ "$RELEASES_REPO" = "$GITHUB_REPOSITORY" ] && TARGET="--target $GITHUB_SHA"
+          gh release create "v$V" --repo "$RELEASES_REPO" --title "Motion $V" --notes-file notes.md $PRE $TARGET \
+            release/*.dmg release/updates/*.zip "release/updates/manifest-$V.json"
+          # 2. the feed: a fixed release "updates" that holds stable.json / beta.json (what installed apps read)
+          if ! gh release view updates --repo "$RELEASES_REPO" >/dev/null 2>&1; then
+            gh release create updates --repo "$RELEASES_REPO" --prerelease --title "Update feed" \
+              --notes "Update manifests read by installed Motion apps. Do not delete. Downloads are in the versioned releases."
+          fi
+          gh release upload updates --repo "$RELEASES_REPO" --clobber "release/updates/$CH.json"
+          echo "published Motion $V on the $CH channel → https://github.com/$RELEASES_REPO/releases/tag/v$V"

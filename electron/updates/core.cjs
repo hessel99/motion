@@ -180,7 +180,8 @@ function decideUpdate(manifest, env) {
 
 /**
  * which renderer to load at startup.
- * state: { active: {version, dir} | null, pending: {version, dir} | null, bad: [versions], boot: {version, attempts} | null }
+ * state: { active, pending, previous: {version, dir, minShell} | null, bad: [versions], good: [versions], boot: {version, attempts} | null }
+ * previous is the last bundle that started fine before active: the first fallback when active fails.
  * env: { shellVersion, bundledVersion, revoked: [versions], maxAttempts }
  * -> { source: 'bundled' | 'downloaded', version, dir?, state (new state to persist), dropped: [{version, reason}] }
  * A downloaded bundle runs only when it is newer than the bundled one, compatible with this shell,
@@ -203,7 +204,12 @@ function decideBoot(state, env) {
   };
   // a pending (freshly downloaded) bundle replaces the active one
   if (s.pending) {
-    if (usable(s.pending, 'pending')) { s.active = s.pending; s.boot = null; }
+    if (usable(s.pending, 'pending')) {
+      // keep the last bundle that started fine as the first fallback
+      if (s.active && s.active.version !== s.pending.version && (s.good || []).includes(s.active.version)) s.previous = s.active;
+      s.active = s.pending;
+      s.boot = null;
+    }
     s.pending = null;
   }
   // failed boots: the previous launch(es) never reached 'app-ready'
@@ -214,6 +220,10 @@ function decideBoot(state, env) {
     s.boot = null;
   }
   if (s.active && !usable(s.active, 'active')) s.active = null;
+  if (!s.active && s.previous) {
+    if (usable(s.previous, 'previous')) s.active = s.previous;
+    s.previous = null;
+  }
   if (!s.active) { s.boot = null; return { source: 'bundled', version: env.bundledVersion, state: s, dropped }; }
   const attempts = s.boot && s.boot.version === s.active.version ? s.boot.attempts : 0;
   s.boot = { version: s.active.version, attempts: attempts + 1 };

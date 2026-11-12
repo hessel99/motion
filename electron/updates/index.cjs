@@ -78,7 +78,18 @@ function createUpdates({ isDev }) {
 
   function rollback(reason) {
     clearWatchdog();
-    if (updater.bootFailed(reason) && win && !win.isDestroyed()) win.loadFile(bundledIndex);
+    const next = updater.bootFailed(reason);
+    if (!next || !win || win.isDestroyed()) return;
+    if (next.source === 'downloaded') loadBundle(win, next); // the previous good bundle (watched again)
+    else win.loadFile(bundledIndex);
+  }
+
+  function loadBundle(w, b) {
+    if (!fs.existsSync(b.indexHtml)) { rollback('files missing'); return; }
+    log(`loading ui ${b.version}`);
+    clearWatchdog();
+    watchdog = setTimeout(() => rollback(`no start signal within ${Math.round(bootTimeout / 1000)} s`), bootTimeout);
+    return w.loadFile(b.indexHtml);
   }
 
   /** load the right renderer into win (downloaded bundle if there is a good one, else dist/) */
@@ -87,11 +98,7 @@ function createUpdates({ isDev }) {
     if (!enabled && !fs.existsSync(path.join(app.getPath('userData'), 'ui', 'state.json'))) return w.loadFile(bundledIndex);
     const b = isDev ? { source: 'bundled' } : updater.boot();
     if (b.source !== 'downloaded') return w.loadFile(bundledIndex);
-    if (!fs.existsSync(b.indexHtml)) { updater.bootVersion = b.version; rollback('files missing'); return; }
-    log(`loading ui ${b.version}`);
-    clearWatchdog();
-    watchdog = setTimeout(() => rollback(`no start signal within ${Math.round(bootTimeout / 1000)} s`), bootTimeout);
-    return w.loadFile(b.indexHtml);
+    return loadBundle(w, b);
   }
 
   function attach(w) {

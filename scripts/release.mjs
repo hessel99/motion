@@ -15,6 +15,7 @@
 //     --allow-other-key   sign even if the key does not match package.json motionUpdates.publicKey (tests)
 //     --version V         override the version (tests; default package.json)
 //     --revoke V1,V2      UI versions that must stop running (rollback)
+//     --min-shell V       force minShell (advanced: e.g. after a shell change that is known to be compatible)
 //
 // Output: Motion-<v>-ui.zip, the app zips (copied), <channel>.json (the feed manifest) and
 // manifest-<v>.json (same content, kept with the version's release).
@@ -50,7 +51,9 @@ if (!pem) die('no signing key: set MOTION_UPDATE_PRIVATE_KEY or pass --key FILE 
 const privateKey = core.privateKeyFromPem(pem);
 const derivedPublic = core.publicKeyToBase64(crypto.createPublicKey(privateKey));
 if (derivedPublic !== pkg.motionUpdates?.publicKey) {
-  const msg = `the signing key does not match package.json motionUpdates.publicKey (key's public half: ${derivedPublic})`;
+  const msg = pkg.motionUpdates?.publicKey
+    ? `the signing key does not match package.json motionUpdates.publicKey (key's public half: ${derivedPublic})`
+    : `package.json motionUpdates.publicKey is empty: set it to ${derivedPublic} (node scripts/gen-update-key.mjs --write does this) and commit`;
   if (!flag('allow-other-key')) die(msg + '. Installed apps would reject this release.');
   console.warn(`release: warning: ${msg}`);
 }
@@ -75,6 +78,10 @@ const prev = await previous();
 const fingerprint = shellFingerprint(root);
 let minShell = version;
 if (prev && prev.shellFingerprint === fingerprint && core.parseVersion(prev.minShell) && core.compareVersions(prev.minShell, version) <= 0) minShell = prev.minShell;
+if (opt('min-shell', null)) {
+  minShell = opt('min-shell');
+  if (!core.parseVersion(minShell) || core.compareVersions(minShell, version) > 0) die('--min-shell must be a version <= the release version');
+}
 console.log(`release: ${version} (${channel}), shell ${fingerprint.slice(0, 12)}… ${minShell === version ? 'changed or first release → needs app ' + version : 'unchanged → runs on app ' + minShell + '+'}`);
 
 // ---- artifacts

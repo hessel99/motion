@@ -154,22 +154,26 @@ class Updater {
     this.log(`ui ${this.bootVersion} started fine`);
   }
 
-  /** the downloaded renderer failed (no app-ready in time, crash, load error): mark bad, switch to bundled */
+  /**
+   * the downloaded renderer failed (no app-ready in time, crash, load error): mark it bad and decide
+   * again: the previous good bundle if there is one, else the built-in interface. -> boot() result | null
+   */
   bootFailed(reason) {
     const v = this.bootVersion;
-    if (!v) return false;
+    if (!v) return null;
     this.writeStateSync(core.markBootBad(this.readStateSync(), v));
     this.bootVersion = null;
-    this.log(`ui ${v} failed (${reason}), rolling back to the built-in interface`);
-    this.set({ uiVersion: this.o.bundledVersion, uiSource: 'bundled', notice: { kind: 'rolled-back', version: v, text: `Motion ${v} did not start (${reason}), so the previous version is used.` } });
-    return true;
+    this.log(`ui ${v} failed (${reason}), rolling back`);
+    const next = this.boot();
+    this.set({ notice: { kind: 'rolled-back', version: v, text: `Motion ${v} did not start (${reason}), so the previous version is used.` } });
+    return next;
   }
 
   /** forget downloaded UI bundles (Settings → "Use built-in version"). takes effect on the next start. */
   revertUi() {
     const st = this.readStateSync();
     const bad = st.active ? [...new Set([...(st.bad || []), st.active.version])] : st.bad || [];
-    this.writeStateSync({ ...st, active: null, pending: null, boot: null, bad });
+    this.writeStateSync({ ...st, active: null, pending: null, previous: null, boot: null, bad });
     if (this.status.ready?.kind === 'ui') this.set({ ready: null, phase: 'idle' });
   }
 
@@ -178,7 +182,7 @@ class Updater {
   }
   /** remove bundle folders that are neither active nor pending */
   async cleanup(state = this.readStateSync()) {
-    const keep = new Set([state.active?.dir, state.pending?.dir].filter(Boolean));
+    const keep = new Set([state.active?.dir, state.pending?.dir, state.previous?.dir].filter(Boolean));
     let names = [];
     try { names = await fsp.readdir(this.uiRoot); } catch { return; }
     for (const n of names) {

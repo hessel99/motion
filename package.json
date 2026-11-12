@@ -84,7 +84,8 @@
         "AppImage"
       ],
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
-    }
+    },
+    "publish": null
   },
   "author": "Motion"
 }

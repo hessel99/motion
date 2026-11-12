@@ -143,7 +143,7 @@ describe('UI bundle update end to end', () => {
     const u2 = makeUpdater(userData);
     expect(u2.boot().source).toBe('downloaded');
     // watchdog fired (no app-ready in time)
-    expect(u2.bootFailed('no start signal')).toBe(true);
+    expect(u2.bootFailed('no start signal')).toMatchObject({ source: 'bundled' });
     expect(u2.status).toMatchObject({ uiSource: 'bundled', uiVersion: '0.1.0' });
     expect(u2.status.notice.kind).toBe('rolled-back');
     const u3 = makeUpdater(userData);

@@ -44,6 +44,7 @@
 - **Snapping + smart guides** in the viewport; timeline scrollbars; layers can be moved in time; keyframe copy/paste
 - **AI agent sidebar**: chat with **Claude Code**, Codex CLI or Gemini CLI using *your own subscription* (through the local bridge). The agent drives the editor with MCP tools: add/update layers, keyframes, easing, screenshots and more.
 - **Autosave** to local storage, plus `.motion` project files (JSON)
+- **Self-updating desktop app** (`electron/updates/`, `docs/updates.md`): Ed25519-signed manifest on GitHub Releases; interface-only updates (the `dist/` zip, ~1.3 MB) load from the app data folder with an app-ready watchdog and automatic rollback to the last good / built-in interface; full app updates when `minShell` (derived from a fingerprint of electron/, bridge/, Electron + deps) moves past the installed app, swapped on quit by a helper script for the unsigned Mac build. Tag `vX.Y.Z` → `.github/workflows/release.yml` publishes.
 
 ## Running it
 

@@ -158,6 +158,17 @@ describe('boot + rollback decision', () => {
     const s = core.markBootBad(core.decideBoot({ pending: b('0.2.0') }, env).state, '0.2.0');
     expect(core.decideBoot({ ...s, pending: b('0.2.1') }, env)).toMatchObject({ source: 'downloaded', version: '0.2.1' });
   });
+  it('falls back to the previous good bundle before the built-in one', () => {
+    let s = core.markBootGood(core.decideBoot({ pending: b('0.2.0') }, env).state); // 0.2.0 started fine
+    s = core.decideBoot({ ...s, pending: b('0.2.1') }, env).state; // 0.2.1 installed
+    expect(s.previous.version).toBe('0.2.0');
+    const d = core.decideBoot(core.markBootBad(s, '0.2.1'), env); // 0.2.1 hangs -> watchdog
+    expect(d).toMatchObject({ source: 'downloaded', version: '0.2.0' });
+    expect(d.state.previous).toBeNull();
+    // a bundle that never started fine is not kept as a fallback
+    const s2 = core.decideBoot({ ...core.decideBoot({ pending: b('0.2.0') }, env).state, pending: b('0.2.1') }, env).state;
+    expect(s2.previous ?? null).toBeNull();
+  });
   it('ignores bundles that are older than the shell, need a newer shell, or were revoked', () => {
     expect(core.decideBoot({ active: b('0.2.0') }, { ...env, bundledVersion: '0.3.0', shellVersion: '0.3.0' }).source).toBe('bundled');
     expect(core.decideBoot({ active: b('0.2.0', '0.2.0') }, env).source).toBe('bundled');
