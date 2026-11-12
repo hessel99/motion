@@ -668,7 +668,6 @@ export class ViewportController {
     }
     g.fillStyle = T.vpLabel;
     g.font = T.font.uiSm;
-    g.fillText(`${comp.name}  ${comp.width}×${comp.height}`, c0x, c0y - 6);
 
     const accent = T.vpSelection;
     const poly = (c: number[]) => {
