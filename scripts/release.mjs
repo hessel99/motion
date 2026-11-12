@@ -50,7 +50,14 @@ let pem = explicitKey ? fs.readFileSync(path.resolve(root, explicitKey), 'utf8')
 const keyFile = fs.existsSync(path.join(root, '.update-key/private.pem')) ? path.join(root, '.update-key/private.pem') : null;
 if (!pem && keyFile) pem = fs.readFileSync(keyFile, 'utf8');
 if (!pem) die('no signing key: set MOTION_UPDATE_PRIVATE_KEY or pass --key FILE (create one with `node scripts/gen-update-key.mjs`)');
-const privateKey = core.privateKeyFromPem(pem);
+let privateKey;
+try { privateKey = core.privateKeyFromPem(pem); } catch (e) {
+  // describe the shape of the secret without revealing it
+  const t = String(pem).trim();
+  const body = t.replace(/-----[A-Z ]+-----/g, '').replace(/[^A-Za-z0-9+/=]/g, '');
+  die(`the signing key could not be read (${e.message}). It has ${t.length} characters, ${t.includes('-----BEGIN') ? 'a' : 'no'} BEGIN line, and ${body.length} base64 characters; ` +
+    `a valid key has a "-----BEGIN PRIVATE KEY-----" line and 64 base64 characters. A 44-character value is the PUBLIC key, not the private one.`);
+}
 const derivedPublic = core.publicKeyToBase64(crypto.createPublicKey(privateKey));
 if (derivedPublic !== pkg.motionUpdates?.publicKey) {
   const msg = pkg.motionUpdates?.publicKey
