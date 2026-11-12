@@ -171,8 +171,6 @@
   --tl-segment-selected: rgba(47, 111, 237, 0.75);
   --tl-hint: #9a9a9a;
   --tl-playhead: #2f6fed;
-  --tl-marker: #d68a00;
-  --tl-marker-line: rgba(214, 138, 0, 0.22);
   --tl-work-area: rgba(47, 111, 237, 0.35);
   --tl-work-area-dim: rgba(0, 0, 0, 0.04);
   --tl-scrollbar: rgba(0, 0, 0, 0.16);
@@ -371,8 +369,6 @@
   --tl-segment-selected: rgba(91, 143, 249, 0.8);
   --tl-hint: #707070;
   --tl-playhead: #5b8ff9;
-  --tl-marker: #ffb040;
-  --tl-marker-line: rgba(255, 176, 64, 0.18);
   --tl-work-area: rgba(91, 143, 249, 0.4);
   --tl-work-area-dim: rgba(0, 0, 0, 0.2);
   --tl-scrollbar: rgba(255, 255, 255, 0.16);

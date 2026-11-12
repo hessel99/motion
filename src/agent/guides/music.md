@@ -35,7 +35,7 @@ Match the easing to the sound: punchy drums → `Expo Out` / `Back Out` / `sprin
 
 ## 5. Tools
 - `sync_to_audio` (mode `beats`, `bars`, `accents`, `sections`): retimes existing keys so starts, landings and overshoot peaks move to the nearest strong beat; everything else stretches with them (key order, eases and the relative timing are kept). One undo step. Use it after blocking, then fine-tune.
-- `place_on_beats`: `what: "markers"` puts markers on a pattern (beat, half-bar, bar, two-bars, accents, build); `what: "entrances"` moves each layer's animation so layer i starts (or lands, `anchor: "land"`) on pattern time i.
+- `place_on_beats`: pattern (beat, half-bar, bar, two-bars, accents, build); moves each layer's animation so layer i starts (or lands, `anchor: "land"`) on pattern time i.
 - `audio_reactive`: a property follows the music live, e.g. a background's scale pulsing with the kick: band `low`, amount 6, smoothing 0.12. Bands: `low` (kick, bass), `mid`, `high` (hats), `amp`, `beat` (a decaying pulse on every beat), `bar` (on downbeats), `accent` (on the strongest hits). It is the expression `value + amount * audio('low', 0.12, 0)`; write it yourself with `set_expression` for anything fancier, e.g. `value + [8, 8] * audio('beat', 0.1)` or a colour flash on accents. Keep reactive motion subtle (2-8% scale, a few px): it supports the choreography, it is not the choreography.
 - Markers: `set_markers` for named moments ("drop", "hook").
 

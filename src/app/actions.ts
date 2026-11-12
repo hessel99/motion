@@ -4,7 +4,7 @@ import { editor } from './editor';
 import { setBusy } from './updates';
 import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
-  setCompSettings, toggleAnimated, parseKeyId, precompose, addMarker, keyId,
+  setCompSettings, toggleAnimated, parseKeyId, precompose, keyId,
 } from '../core/commands';
 import { uid, type Asset, type Layer, type Project } from '../core/model';
 import { boundsOf } from '../agent/tools';
@@ -722,7 +722,6 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (k === '.' || k === 'pagedown') return run(() => editor.stepFrames(e.shiftKey ? 10 : 1));
     if (k === 'enter' && s.selection.length === 1 && s.layer(s.selection[0])?.type === 'text') return run(() => hooks.editText(s.selection[0]));
     if (e.key === 'F9') return run(() => setEase(s, [...s.keySelection], 'Easy Ease'));
-    if (k === 'm' && !mod && !e.shiftKey && !e.altKey) return run(() => addMarker(s, s.time));
     if (k === 'j' || k === 'k') return run(() => jumpToKey(k === 'j' ? -1 : 1));
     // after effects-style property shortcuts: P S R T A add a keyframe on that property
     const propKeys: Record<string, any> = { p: 'position', s: 'scale', a: 'anchor' };
@@ -770,7 +769,7 @@ function isTyping(e: Event) {
 }
 
 /** J / K: move the playhead to the previous / next keyframe of the selection (every layer of
- *  the active comp when nothing is selected) or marker, like after effects */
+ *  the active comp when nothing is selected), like after effects */
 export function jumpToKey(dir: -1 | 1) {
   const s = editor.store;
   const times = new Set<number>();
@@ -781,7 +780,6 @@ export function jumpToKey(dir: -1 | 1) {
     const l = s.layer(id);
     if (l) for (const p of Object.values(l.props)) p?.kf?.forEach(f => times.add(f.t));
   }
-  for (const m of s.comp.markers ?? []) if (m.t <= s.comp.duration) times.add(m.t);
   const sorted = [...times].sort((a, b) => a - b);
   const t = dir < 0 ? [...sorted].reverse().find(x => x < s.time - 1e-6) : sorted.find(x => x > s.time + 1e-6);
   if (t !== undefined) s.setTime(t);

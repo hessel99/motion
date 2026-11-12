@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
 import { jumpToKey, loadDemo, newProject, openExport, openFileDialog, saveProject, toast } from '../../app/actions';
-import { addMarker, cloneLayers, deleteLayers, newComposition, precompose, setEase } from '../../core/commands';
+import { cloneLayers, deleteLayers, newComposition, precompose, setEase } from '../../core/commands';
 import { askAgent, selectionContext } from '../agent-bridge';
 import { setTheme, getTheme } from '../theme';
 import { Kbd } from '../ui';
@@ -26,7 +26,6 @@ function commands(): Cmd[] {
     { label: 'Open file…', keys: '⌘O', run: () => openFileDialog() },
     { label: 'Save', keys: '⌘S', run: () => saveProject(false) },
     { label: 'New composition', run: () => { const c = newComposition(s, { width: s.comp.width, height: s.comp.height, fps: s.comp.fps }); s.openComp(c.id); } },
-    { label: 'Add marker at playhead', keys: 'M', run: () => addMarker(s, s.time) },
     { label: 'Easy ease selected keys', keys: 'F9', when: () => s.keySelection.size > 0, run: () => setEase(s, [...s.keySelection], 'Easy Ease') },
     { label: 'Next keyframe', keys: 'K', run: () => jumpToKey(1) },
     { label: 'Previous keyframe', keys: 'J', run: () => jumpToKey(-1) },
