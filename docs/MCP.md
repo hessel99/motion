@@ -28,6 +28,9 @@ curl -s http://127.0.0.1:7823/mcp -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_animation","arguments":{}}}'
 ```
 
+Tool results may contain `{type: "file", name, data, mimeType}` items (rendered previews): the bridge writes
+them to `<os tmp>/motion-previews/<name>` and replaces them with a text item holding the path.
+
 Tool errors come back as `result.isError: true` with a text explaining what to fix (unknown property,
 missing layer id, Ask mode, ...). If no editor is open the call fails with "The Motion editor is not open".
 
@@ -35,7 +38,8 @@ missing layer id, Ask mode, ...). If no editor is open the call fails with "The 
 
 Composition pixels, origin top-left, y down. Times in seconds. Rotation in degrees clockwise. Opacity and
 scale in percent. Colors `"#rrggbb"` or `[r,g,b,a]` (0..1). Every edit is a normal undoable editor
-transaction and shows up live. The full agent guide is `AGENT_SYSTEM_PROMPT` in `src/agent/tools.ts`.
+transaction and shows up live (every tool call is one undo step). The full agent guide is `AGENT_SYSTEM_PROMPT` in
+`src/agent/tools.ts`; worked examples for the higher-level tools are in `docs/agent-tools-cookbook.md`.
 
 ## Tools
 
@@ -59,6 +63,31 @@ transaction and shows up live. The full agent guide is `AGENT_SYSTEM_PROMPT` in 
 | `set_composition`, `set_markers`, `open_composition` | | Composition |
 | `export_video` | | MP4/WebM/GIF render |
 | `undo` | | Undo the last change |
+| **Scene** | | |
+| `build_scene` | | Declarative scene spec → whole scene in one undo step: layers (rect/ellipse/path/text/group/star/polygon/image placeholder/precomp), nesting, transforms, solid/gradient fills, strokes, text styles, keyframes, `enter`/`exit` shorthands, `drawOn`, stagger blocks, text animators, expressions, masks, blend. Stable `key`s: re-sending updates in place; `prune` removes keyed layers not in the spec. Returns `{summary, ids, notes}` |
+| **Shapes** | | |
+| `add_shape_path` | | Path from SVG `d` / polyline, or boolean `union`/`subtract`/`intersect`/`exclude` of d strings, library shapes or existing layers |
+| `shape_library` | | Named primitives (arrow, check, plus, heart, bubble, badge, blob(seed), wave, burst, spiral, star, ring, cloud, ...) and any Lucide icon (`lucide:rocket`) |
+| `draw_on` | | Trim-path reveal / erase (rect/ellipse converted to paths, strokes added, fills fade in, groups staggered) |
+| `morph` | | Path shape keys from a layer to another shape / layer / d, structures matched automatically; optional `back` |
+| **Choreography** | | |
+| `arrange` | | grid / row / column / radial / along a path / seeded scatter; optional animated `transition` |
+| `choreograph` | | Stagger whole animations: sequential, reverse, center-out, edges-in, random, wave (by position), distance (from a point); `step`, `overlap` or `spread` |
+| `secondary_motion` | | Overshoot + settle oscillations and anticipation on existing moves |
+| `loop` | | Seamless cycle / pingpong / offset loops (closing keys + `loopOut`), `fitComp` |
+| `camera_rig` | | Depth groups + pan/zoom keys for parallax |
+| `align_to_beats` | | Snap animation starts / ends / keys to markers, beat times or a bpm grid |
+| **Typography** | | |
+| `type_layout` | | Eyebrow / headline / subline / body / caption stack with a type scale, tracking, fit-to-width; idempotent by key |
+| `split_text` | | Text → one layer per char / word / line in a group that keeps the transform; optional staggered preset |
+| `text_on_path` | | Letters placed and rotated along a path |
+| **Analysis** (all read-only) | | |
+| `inspect_motion` | yes | Per move: duration, size, ease shape from the velocity curve, peak speed/acceleration, overshoot, anticipation, holds, warnings |
+| `check_frame` | yes | Off-canvas, safe areas, WCAG text contrast vs what is behind, overlaps, tiny/huge, at chosen times |
+| `timeline_summary` | yes | Beats, who moves when, motion-density strip, idle stretches |
+| **Preview** | | |
+| `preview_strip` | yes | Many small labeled frames in one image: row, grid (≤24) or onion skin |
+| `preview_video` | yes | Short low-res GIF saved to a file (desktop: exports folder; bridge: OS temp `motion-previews/`), returns the path |
 
 All input schemas are validated as strict JSON Schema in `tests/agent.test.ts` (every array has
 `items`, enums are non-empty, `required` names real properties), so they load in Claude, Gemini and
