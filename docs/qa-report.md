@@ -14,6 +14,7 @@ The existing `scripts/e2e.mjs`, `scripts/ui-check.mjs`, `scripts/audio-smoke.mjs
 | QA-3 | Inspector number fields with a long label shrank the label so it ran into the value: "Spread0", "Density50%", "Background Blur" and the Timing "Out" clipped. The label no longer shrinks (`.num-label`, `src/ui/styles.css`). | fixed, `qa-flows` check | see `git log --grep QA-3` |
 | QA-4 | Reopening a recent file (or closing a background tab) stored "no thumbnail" over the one saved before, so its Home card went blank. The stored thumbnail is now kept unless a new one is given (`src/app/recent.ts`). | fixed, `qa-flows` check | see `git log --grep QA-4` |
 | QA-5 | Copying a precomp layer into another document tab pasted a layer pointing at a composition that only existed in the first document (it rendered nothing; opening it failed). The copy now carries the compositions it shows (nested ones too, with their image assets); the paste adds the missing ones in the same undo step (`copyPayload` / `pasteMotion`, `src/app/actions.ts`). | fixed, `qa-flows` check | see `git log --grep QA-5` |
+| QA-6 | Settings nav: the first group was still called "Account" after the Profile page was removed; it holds Appearance and Keyboard shortcuts. Renamed "General". | fixed | see `git log --grep QA-6` |
 
 ## Handed off (layout / chrome: shell agent)
 
@@ -34,6 +35,7 @@ The existing `scripts/e2e.mjs`, `scripts/ui-check.mjs`, `scripts/audio-smoke.mjs
 | # | issue | owner |
 |---|---|---|
 | O-2 | Agent turn revert: Revert undoes the turn's N steps one by one, so ⌘⇧Z afterwards brings the turn back one step at a time (first just "Add rect", a half-built state) while the card still says "Reverted". Either squash the turn into one undo step at the end (`Store.squashSince`, as storyboard beats do; careful with edits the user makes during the turn) or make the card follow redo. Needs an owner decision. | agent |
+| O-3 | Settings → Appearance → GPU engine: the long renderer string is cut off mid-word without an ellipsis. | settings / shell |
 | O-1 | Export file names differ per format for the same comp: `Demo.mp4`, `Demo.json`, but `Demo - Logo reveal.gif` / `.html`, `Demo_0000.png`. | export-parity |
 
 ## Checked and working
