@@ -200,6 +200,11 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
           <label class="check"><input type="checkbox" checked={!!l.clip} onChange={e => setLayerField(store, ids, 'clip', (e.target as HTMLInputElement).checked, 'Clip content')} /> Clip content</label>
         </Section>
       )}
+      {layers.length === 1 && (
+        <Section title="Mask">
+          <label class="check"><input type="checkbox" checked={!!l.mask} onChange={e => setLayerField(store, ids, 'mask', (e.target as HTMLInputElement).checked, 'Use as mask')} /> Use as mask (masks the layers above it in the same group)</label>
+        </Section>
+      )}
       <Section title="Timing">
         <div class="row">
           <NumField label="In" step={1 / store.comp.fps} min={0} value={l.inPoint} suffix="s" onChange={n => setLayerField(store, ids, 'inPoint', n)} />

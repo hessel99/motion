@@ -71,6 +71,10 @@ WebGPU would be the next step, but WebGL2 works everywhere Electron runs, and th
   - Each layer is rasterized **once at the largest scale its animation reaches**. A hysteresis window (1x to 2.8x) avoids re-rasterizing during playback.
   - The atlas keeps a **CPU shadow copy** per page. All raster writes in a frame become at most a few sub-rectangle `texSubImage3D` calls per page. Compaction and growth happen on the CPU copies, so there is no GPU read-back.
 - **Clipping** (Figma "clip content"): the nearest clipping ancestor is passed per instance and tested in the shader as a rounded box.
+- **Group opacity and masks** use offscreen layers, built as a small per-frame command list (DRAW / PUSH / MASK / POP with an FBO stack).
+  - A group is isolated only while its opacity is below 1 and it has children, so it fades as one image the way Figma and AE do.
+  - A Figma-style mask (imported from `isMask`, or the "Use as mask" checkbox) renders into its own texture, and the content is multiplied by its alpha.
+  - Scenes without either keep the single draw call.
 - **Keyframe evaluation**:
   - all animated tracks are packed into **one contiguous `Float64Array` (`TrackPool`)** in evaluation order
   - easing uses a 256-sample lookup table per curve, shared between tracks
@@ -136,8 +140,7 @@ The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, whic
 
 ## Known limitations / next
 
-- Group opacity multiplies into children instead of compositing the group as a whole (it needs offscreen layers).
-- Only the nearest clip ancestor clips (no nested clip intersection). No masks or mattes yet. No effects yet (on purpose).
+- Only the nearest clip ancestor clips (no nested clip intersection). No AE track mattes yet. No effects yet (on purpose).
 - No graph editor yet: easing is edited per segment (like Figma Motion). A value/speed graph would be a differentiator.
 - Rasterization runs on the main thread. Moving it to a worker with OffscreenCanvas would remove the cold-start stutter on huge imports.
 - Precomps/multiple compositions are not built yet.

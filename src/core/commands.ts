@@ -134,7 +134,7 @@ export function setLayerField<K extends keyof Layer>(store: Store, ids: string[]
       tx.set(l, key, value);
       tx.touch(id);
     }
-    if (key === 'visible' || key === 'clip') tx.structure();
+    if (key === 'visible' || key === 'clip' || key === 'mask') tx.structure();
   });
 }
 

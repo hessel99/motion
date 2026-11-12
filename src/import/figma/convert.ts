@@ -243,11 +243,7 @@ class Converter {
     layer.visible = n.visible !== false;
     setTransform(layer, n.transform, w, h);
     layer.props.opacity!.v = [Math.max(0, Math.min(100, num(n.opacity, 1) * 100))];
-    if (n.isMask) {
-      // masks are not supported: hide the mask shape so it doesn't cover the content
-      layer.visible = false;
-      layer.name += ' (mask)';
-    }
+    if (n.isMask || n.mask) layer.mask = true; // masks the siblings above it
 
     if (lt === 'image') {
       layer.imageRef = imgAsset!.id;

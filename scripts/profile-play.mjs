@@ -1,0 +1,21 @@
+// cpu profile of playback: top self-time functions incl. garbage collector
+import { chromium } from './pw.mjs';
+const q = process.argv[2] || 'stress=1000';
+const browser = await chromium.launch({ args: ['--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
+await page.goto(`${process.env.URL || 'http://localhost:4173/'}?nobridge&blank&${q}`);
+await page.waitForFunction(() => (window.editor?.renderer?.stats?.layers ?? 0) > 0);
+await page.evaluate(() => { const st = editor.store; st.select([st.comp.root[0]]); editor.play(); });
+await page.waitForTimeout(2000);
+const cdp = await page.context().newCDPSession(page);
+await cdp.send('Profiler.enable'); await cdp.send('Profiler.setSamplingInterval', { interval: 100 }); await cdp.send('Profiler.start');
+const heap0 = await page.evaluate(() => performance.memory?.usedJSHeapSize);
+await page.waitForTimeout(4000);
+const heap1 = await page.evaluate(() => performance.memory?.usedJSHeapSize);
+const { profile } = await cdp.send('Profiler.stop');
+const byId = new Map(profile.nodes.map(nd => [nd.id, nd])); const self = new Map();
+profile.samples.forEach((s, i) => { const nd = byId.get(s); const k = `${nd.callFrame.functionName || '(anon)'} ${nd.callFrame.url.split('/').pop()}:${nd.callFrame.lineNumber + 1}`; self.set(k, (self.get(k) || 0) + (profile.timeDeltas[i] || 0)); });
+const total = [...self.values()].reduce((a, b) => a + b, 0);
+console.log([...self].filter(([k]) => !k.startsWith('(program)') && !k.startsWith('(idle)')).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([k, us]) => `${(us / 1000).toFixed(1).padStart(7)}ms ${(100 * us / total).toFixed(1).padStart(5)}%  ${k}`).join('\n'));
+console.log('heap delta over 4s:', ((heap1 - heap0) / 1e6).toFixed(2), 'MB');
+await browser.close();

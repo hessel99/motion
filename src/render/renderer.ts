@@ -146,6 +146,26 @@ void main() {
   o = col;
 }`;
 
+const CVS = `#version 300 es
+layout(location=0) in vec2 q;
+out vec2 vUV;
+void main() { vUV = q; gl_Position = vec4(q * 2.0 - 1.0, 0.0, 1.0); }`;
+const CFS = `#version 300 es
+precision highp float;
+uniform sampler2D uSrc;
+uniform sampler2D uMask;
+uniform float uOpacity;
+uniform float uUseMask;
+in vec2 vUV;
+out vec4 o;
+void main() {
+  float m = uUseMask > 0.5 ? texture(uMask, vUV).a : 1.0;
+  o = texture(uSrc, vUV) * (uOpacity * m);
+}`;
+
+// command list for one frame (offscreen isolation for group opacity + masks)
+const CMD_DRAW = 0, CMD_PUSH = 1, CMD_POP = 2, CMD_MASK = 3;
+
 interface Item {
   id: string;
   layer: Layer;
@@ -158,6 +178,8 @@ interface Item {
   animMask: number;
   /** track pool handles for animated tracks (indexed by TR_*) */
   h: Int32Array;
+  /** has children: opacity < 1 needs group isolation */
+  isoGroup: boolean;
   hidden: boolean; // visible=false (self or ancestor)
   rasterBase: string | null;
   rasterKey: string | null; // last resolved atlas key
@@ -242,6 +264,13 @@ export class Renderer {
   cssH = 1;
   editorBg: [number, number, number] = [0.1, 0.1, 0.11];
   clipToComp = true;
+
+  private cprog: WebGLProgram | null = null;
+  private cuOpacity: WebGLUniformLocation | null = null;
+  private cuUseMask: WebGLUniformLocation | null = null;
+  private fbos: { fb: WebGLFramebuffer; tex: WebGLTexture; w: number; h: number }[] = [];
+  private cmds: number[] = []; // [type, a, b] triples (b = count or opacity)
+  isolatedLastFrame = 0;
 
   private needsCompile = true;
   private dirtyLayers = new Set<string>();
@@ -333,7 +362,7 @@ export class Renderer {
       const layer = L[order[i]];
       const parent = layer.parent ? this.index.get(layer.parent) ?? -1 : -1;
       const it: Item = {
-        id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10),
+        id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10), isoGroup: layer.children.length > 0,
         hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden),
         rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
       };
@@ -616,11 +645,47 @@ export class Renderer {
     // composition background is a scissored clear (no fragment shader work)
     let k = 0;
     const mask = this.drawnMask;
-    for (let i = 0; i < n; i++) {
+    const cmds = this.cmds;
+    cmds.length = 0;
+    let pending = 0; // first instance not yet covered by a DRAW command
+    // open isolation regions: end index, composite opacity, divisor to restore, optional mask range
+    const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number }[] = [];
+    let div = 1; // opacity already applied by the enclosing isolated group (instances inside divide it out)
+    let isolated = 0;
+    const flush = () => { if (k > pending) { cmds.push(CMD_DRAW, pending, k - pending); pending = k; } };
+    for (let i = 0; i <= n; i++) {
+      // close finished regions
+      while (stack.length && stack[stack.length - 1].end <= i) {
+        const r = stack.pop()!;
+        flush();
+        if (r.maskCount > 0) cmds.push(CMD_MASK, r.maskStart, r.maskCount);
+        cmds.push(CMD_POP, 0, r.opacity);
+        div = r.div;
+      }
+      // the mask shape's own subtree has been written: mark its range (not drawn in place)
+      const top = stack[stack.length - 1];
+      if (top && top.maskEnd === i) { top.maskCount = k - top.maskStart; pending = k; top.maskEnd = -1; }
+      if (i === n) break;
       const it = items[i];
       mask[i] = 0;
       const l = it.layer;
-      if (it.kind === KIND_NONE || O[i] <= 0.0005) continue;
+      if (O[i] <= 0.0005) continue;
+      if (l.mask && !(top && top.maskEnd > i)) {
+        // masks the following siblings: region = rest of the parent's subtree
+        flush();
+        cmds.push(CMD_PUSH, 0, 0);
+        const end = it.parent >= 0 ? this.subEnd[it.parent] : n;
+        stack.push({ end, opacity: 1, div, maskStart: k, maskCount: 0, maskEnd: this.subEnd[i] });
+        isolated++;
+      } else if (it.isoGroup && this.lopa[i] < 0.999 && this.subEnd[i] > i + 1) {
+        // group opacity: render the group into its own layer, then composite once with its opacity
+        flush();
+        cmds.push(CMD_PUSH, 0, 0);
+        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1 });
+        div = O[i];
+        isolated++;
+      }
+      if (it.kind === KIND_NONE) continue;
       const os = i * ST, o6 = i * 6;
       if (it.kind === KIND_RECT || it.kind === KIND_ELLIPSE) {
         if (S[os + 9] <= 0 && (S[os + 14] <= 0 || S[os + 13] <= 0)) continue;
@@ -664,7 +729,7 @@ export class Renderer {
       I[o + 16] = S[os + 10]; I[o + 17] = S[os + 11]; I[o + 18] = S[os + 12]; I[o + 19] = S[os + 13];
       I[o + 20] = it.kind === KIND_MASK ? 0 : S[os + 14];
       I[o + 21] = l.strokeAlign === 'inside' ? -1 : l.strokeAlign === 'outside' ? 1 : 0;
-      I[o + 22] = O[i];
+      I[o + 22] = div !== 1 ? O[i] / div : O[i];
       I[o + 23] = it.kind;
       I[o + 24] = u0; I[o + 25] = v0; I[o + 26] = u1; I[o + 27] = v1;
       I[o + 28] = page;
@@ -685,6 +750,8 @@ export class Renderer {
       mask[i] = 1;
       k++;
     }
+    flush();
+    this.isolatedLastFrame = isolated;
     const w1 = performance.now();
     // atlas was repacked while writing instances: earlier uvs are stale, redo the frame once
     if (!retry && this.atlas.compactions + this.atlas.generation !== compactions0) { this.render(t, true); return; }
@@ -723,7 +790,11 @@ export class Renderer {
       this.icap = this.inst.byteLength;
     }
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.inst, 0, k * F);
-    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, k);
+    if (cmds.length === 3 && cmds[0] === CMD_DRAW && cmds[1] === 0) {
+      gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, k); // common case: the whole scene in one call
+    } else {
+      this.runCommands(cmds);
+    }
     gl.bindVertexArray(null);
     const g1 = performance.now();
     void bytes;
@@ -741,6 +812,97 @@ export class Renderer {
     st.drawCalls = 1;
     this.lastTime = t;
     this.dirty = this.pendingUpgrade;
+  }
+
+  /** draw instances [start, start+count) by pointing the attributes at that range (no baseInstance in webgl2) */
+  private drawRange(start: number, count: number) {
+    const gl = this.gl;
+    for (let a = 0; a < 10; a++) gl.vertexAttribPointer(1 + a, 4, gl.FLOAT, false, F * 4, start * F * 4 + a * 16);
+    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, count);
+  }
+
+  private fbo(depth: number) {
+    const gl = this.gl;
+    const w = this.canvas.width, h = this.canvas.height;
+    let f = this.fbos[depth];
+    if (!f || f.w !== w || f.h !== h) {
+      if (f) { gl.deleteFramebuffer(f.fb); gl.deleteTexture(f.tex); }
+      const tex = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, w, h);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      const fb = gl.createFramebuffer()!;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+      this.fbos[depth] = f = { fb, tex, w, h };
+    }
+    return f;
+  }
+
+  private compositeProgram() {
+    if (this.cprog) return this.cprog;
+    const gl = this.gl;
+    const sh = (type: number, src: string) => { const x = gl.createShader(type)!; gl.shaderSource(x, src); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(x) ?? ''); return x; };
+    const p = gl.createProgram()!;
+    gl.attachShader(p, sh(gl.VERTEX_SHADER, CVS));
+    gl.attachShader(p, sh(gl.FRAGMENT_SHADER, CFS));
+    gl.linkProgram(p);
+    this.cprog = p;
+    this.cuOpacity = gl.getUniformLocation(p, 'uOpacity');
+    this.cuUseMask = gl.getUniformLocation(p, 'uUseMask');
+    gl.useProgram(p);
+    gl.uniform1i(gl.getUniformLocation(p, 'uSrc'), 1);
+    gl.uniform1i(gl.getUniformLocation(p, 'uMask'), 2);
+    return p;
+  }
+
+  /** execute DRAW / PUSH / MASK / POP commands with an fbo stack */
+  private runCommands(cmds: number[]) {
+    const gl = this.gl;
+    let depth = 0; // 0 = canvas
+    const targets: (WebGLFramebuffer | null)[] = [null];
+    const masks: (WebGLTexture | null)[] = [];
+    for (let c = 0; c < cmds.length; c += 3) {
+      const type = cmds[c], a = cmds[c + 1], b = cmds[c + 2];
+      if (type === CMD_DRAW) this.drawRange(a, b);
+      else if (type === CMD_PUSH) {
+        const f = this.fbo(depth);
+        depth++;
+        targets.push(f.fb);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, f.fb);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+      } else if (type === CMD_MASK) {
+        // render the mask shape into its own layer; the composite multiplies by its alpha
+        const mf = this.fbo(depth);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, mf.fb);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        this.drawRange(a, b);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, targets[targets.length - 1]);
+        masks[depth] = mf.tex;
+      } else if (type === CMD_POP) {
+        const src = this.fbos[depth - 1];
+        const maskTex = masks[depth];
+        masks[depth] = null;
+        depth--;
+        targets.pop();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, targets[targets.length - 1]);
+        // composite the layer with a fullscreen quad
+        gl.useProgram(this.compositeProgram());
+        gl.uniform1f(this.cuOpacity, b);
+        gl.uniform1f(this.cuUseMask, maskTex ? 1 : 0);
+        if (maskTex) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, maskTex); }
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, src.tex);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.useProgram(this.prog);
+      }
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    for (let a = 0; a < 10; a++) gl.vertexAttribPointer(1 + a, 4, gl.FLOAT, false, F * 4, a * 16); // back to the fast path layout
   }
 
   // ---------------- queries (hit testing, bounds) ----------------

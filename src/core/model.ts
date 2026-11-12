@@ -102,6 +102,8 @@ export interface Layer {
   locked: boolean;
   /** clip children to this layer's box (figma frame "clip content") */
   clip?: boolean;
+  /** figma-style mask: this layer's alpha masks the siblings above it (in the same parent) */
+  mask?: boolean;
   /** in/out points in seconds; layer is hidden outside */
   inPoint: number;
   outPoint: number;
