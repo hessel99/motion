@@ -1,0 +1,33 @@
+{
+  "name": "motion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "high-performance motion design editor (after effects style) with ai agent sidebar",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "bridge": "node bridge/server.mjs",
+    "electron": "npm run build && electron .",
+    "electron:dev": "electron . --dev",
+    "bench": "node scripts/bench.mjs"
+  },
+  "dependencies": {
+    "@preact/signals": "^1.3.0",
+    "fflate": "^0.8.2",
+    "fzstd": "^0.1.1",
+    "kiwi-schema": "^0.5.0",
+    "preact": "^10.24.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.9.0",
+    "electron": "^33.0.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.1.0"
+  }
+}

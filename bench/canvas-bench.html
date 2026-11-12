@@ -1,0 +1,74 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>canvas bench</title>
+<style>html,body{margin:0;background:#111;color:#ddd;font:12px monospace}#stage{position:relative;width:1280px;height:720px;overflow:hidden}canvas,svg{position:absolute;inset:0}</style>
+</head><body><div id="stage"></div><pre id="out"></pre>
+<script>
+// renders N animated rounded rectangles with each technique and reports cpu ms per frame + fps.
+const W = 1280, H = 720;
+const stage = document.getElementById('stage');
+const params = new URLSearchParams(location.search);
+
+function makeItems(n) {
+  const items = [];
+  for (let i = 0; i < n; i++) items.push({ x: Math.random()*W, y: Math.random()*H, s: 8+Math.random()*24, p: Math.random()*6.28, c: [Math.random(),Math.random(),Math.random()] });
+  return items;
+}
+function pos(it, t, i) { return [it.x + Math.sin(t*2+it.p)*40, it.y + Math.cos(t*1.7+it.p)*40, t + it.p]; }
+
+const techniques = {
+  dom(items) {
+    const root = document.createElement('div'); root.style.cssText='position:absolute;inset:0'; stage.appendChild(root);
+    const els = items.map(it => { const d = document.createElement('div'); d.style.cssText=`position:absolute;left:0;top:0;width:${it.s}px;height:${it.s}px;border-radius:4px;background:rgb(${it.c.map(v=>v*255|0)});will-change:transform`; root.appendChild(d); return d; });
+    return { frame(t){ for (let i=0;i<items.length;i++){ const [x,y,r]=pos(items[i],t,i); els[i].style.transform=`translate(${x}px,${y}px) rotate(${r}rad)`; } }, dispose(){ root.remove(); } };
+  },
+  svg(items) {
+    const NS='http://www.w3.org/2000/svg'; const svg=document.createElementNS(NS,'svg'); svg.setAttribute('width',W); svg.setAttribute('height',H); stage.appendChild(svg);
+    const els = items.map(it => { const r=document.createElementNS(NS,'rect'); r.setAttribute('width',it.s); r.setAttribute('height',it.s); r.setAttribute('rx',4); r.setAttribute('fill',`rgb(${it.c.map(v=>v*255|0)})`); svg.appendChild(r); return r; });
+    return { frame(t){ for (let i=0;i<items.length;i++){ const [x,y,r]=pos(items[i],t,i); els[i].setAttribute('transform',`translate(${x} ${y}) rotate(${r*57.3})`); } }, dispose(){ svg.remove(); } };
+  },
+  canvas2d(items) {
+    const c=document.createElement('canvas'); c.width=W; c.height=H; stage.appendChild(c); const g=c.getContext('2d');
+    const fills = items.map(it=>`rgb(${it.c.map(v=>v*255|0)})`);
+    return { frame(t){ g.setTransform(1,0,0,1,0,0); g.clearRect(0,0,W,H); for (let i=0;i<items.length;i++){ const it=items[i]; const [x,y,r]=pos(it,t,i); const cs=Math.cos(r), sn=Math.sin(r); g.setTransform(cs,sn,-sn,cs,x,y); g.fillStyle=fills[i]; g.beginPath(); g.roundRect(0,0,it.s,it.s,4); g.fill(); } }, dispose(){ c.remove(); } };
+  },
+  webgl2_naive(items) { return glTech(items, false); },
+  webgl2_instanced(items) { return glTech(items, true); },
+};
+
+function glTech(items, instanced) {
+  const c=document.createElement('canvas'); c.width=W; c.height=H; stage.appendChild(c);
+  const gl=c.getContext('webgl2',{antialias:false,premultipliedAlpha:true});
+  const vs=`#version 300 es
+  layout(location=0) in vec2 q; layout(location=1) in vec4 a; layout(location=2) in vec4 b; layout(location=3) in vec4 col;
+  uniform vec2 res; out vec2 lp; out vec2 sz; out vec4 vc;
+  void main(){ vec2 s=b.zw; vec2 l=q*s; lp=l; sz=s; vc=col; vec2 p=vec2(a.x*l.x+a.z*l.y+b.x, a.y*l.x+a.w*l.y+b.y); gl_Position=vec4(p/res*2.-1.,0,1); gl_Position.y=-gl_Position.y; }`;
+  const fs=`#version 300 es
+  precision mediump float; in vec2 lp; in vec2 sz; in vec4 vc; out vec4 o;
+  void main(){ vec2 h=sz*.5; vec2 d=abs(lp-h)-h+4.; float dist=length(max(d,0.))+min(max(d.x,d.y),0.)-4.; float al=clamp(.5-dist,0.,1.); o=vec4(vc.rgb*al,al); }`;
+  const sh=(t,s)=>{const x=gl.createShader(t); gl.shaderSource(x,s); gl.compileShader(x); if(!gl.getShaderParameter(x,gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(x); return x;};
+  const pr=gl.createProgram(); gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(pr); gl.useProgram(pr);
+  gl.uniform2f(gl.getUniformLocation(pr,'res'),W,H);
+  const vao=gl.createVertexArray(); gl.bindVertexArray(vao);
+  const qb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,qb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([0,0,1,0,0,1,1,1]),gl.STATIC_DRAW); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+  const n=items.length, data=new Float32Array(n*12); const ib=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,ib); gl.bufferData(gl.ARRAY_BUFFER,data.byteLength,gl.DYNAMIC_DRAW);
+  for (let k=0;k<3;k++){ gl.enableVertexAttribArray(1+k); gl.vertexAttribPointer(1+k,4,gl.FLOAT,false,48,k*16); gl.vertexAttribDivisor(1+k,1); }
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+  return { frame(t){
+    for (let i=0;i<n;i++){ const it=items[i]; const [x,y,r]=pos(it,t,i); const cs=Math.cos(r), sn=Math.sin(r); const o=i*12; data[o]=cs;data[o+1]=sn;data[o+2]=-sn;data[o+3]=cs;data[o+4]=x;data[o+5]=y;data[o+6]=it.s;data[o+7]=it.s;data[o+8]=it.c[0];data[o+9]=it.c[1];data[o+10]=it.c[2];data[o+11]=1; }
+    gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+    if (instanced) { gl.bufferSubData(gl.ARRAY_BUFFER,0,data); gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,n); }
+    else { for (let i=0;i<n;i++){ gl.bufferSubData(gl.ARRAY_BUFFER,0,data,i*12,12); gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,1); } }
+  }, dispose(){ gl.getExtension('WEBGL_lose_context')?.loseContext(); c.remove(); } };
+}
+
+async function run(name, n, seconds) {
+  const items = makeItems(n); const tech = techniques[name](items);
+  const cpu = []; const stamps = [];
+  await new Promise(res => { const t0=performance.now(); function loop(now){ const a=performance.now(); tech.frame(now/1000); cpu.push(performance.now()-a); stamps.push(now); if (now-t0 < seconds*1000) requestAnimationFrame(loop); else res(); } requestAnimationFrame(loop); });
+  tech.dispose();
+  cpu.sort((a,b)=>a-b); const fps = (stamps.length-1)/((stamps.at(-1)-stamps[0])/1000);
+  return { name, n, fps: +fps.toFixed(1), cpuMedianMs: +cpu[cpu.length>>1].toFixed(2), cpuP95Ms: +cpu[Math.floor(cpu.length*.95)].toFixed(2) };
+}
+
+window.runBench = async (names, counts, seconds=2) => { const res=[]; for (const n of counts) for (const name of names) { res.push(await run(name,n,seconds)); document.getElementById('out').textContent = JSON.stringify(res,null,1); } return res; };
+</script></body></html>
