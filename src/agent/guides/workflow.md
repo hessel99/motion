@@ -4,13 +4,20 @@
 ## 0. Scope first (decide in your head, don't announce it)
 - **Edit** (change something that exists: "bouncier", "move the logo", "slower", a quick action): no storyboard, no guides needed. Read with `get_animation` / the editor context, change it in 1–3 calls, one `contact_sheet` if the change is visual. Budget: ≤ 6 tool calls.
 - **Small build** (one element or one beat, ≤ 4 s: a button pop, a lower third, a logo bounce): no storyboard. Optionally `get_guide` one style. Build, check once, done. Budget: ≤ 15 tool calls.
-- **Full piece** (several beats, a named style, ≥ 5 s, "explainer", "promo", "title sequence", "make me a…"): run the whole method below with `propose_storyboard`. Budget: ≤ 60 tool calls, ≤ 2 fix rounds.
+- **Full piece** (several beats, a named style, ≥ 5 s, "explainer", "promo", "title sequence", a logo / brand animation, "make me a…"): run the whole method below with `propose_storyboard`. Budget: ≤ 60 tool calls, ≤ 2 fix rounds.
 
 ## 1. Brief
 Extract: message/content (exact text), audience/use (social, UI, presentation), length, format (comp size, fps), style words, brand colors/fonts (`list_styles`), must-haves. Fill gaps with sensible defaults (1920x1080, 60 fps, 8–12 s for a piece) instead of asking.
 
 ## 2. Clarify only if truly ambiguous
 Ask (one short question, with 2–3 options and your default) only when a wrong guess would waste the whole piece: missing core content ("a promo for my product" with no product name), or two incompatible readings. Never ask about things you can choose (colors, eases, timing) — choose, and say what you chose.
+
+## 2b. Concepts (logo, brand, icon, illustration, imported artwork)
+1. Look at the artwork first: `inspect_artwork` (parts rendered alone) or `contact_sheet` / `screenshot` + `get_document`. `split_shape` compound vectors into meaningful parts and rename them after what they depict.
+2. Name what each part depicts and the brand traits (get_guide "concepts", section "Read the artwork").
+3. Write 2–3 concepts rooted in that meaning — `{ name, idea, why }` — and recommend one. Different in kind: the object's literal action (door opens), a transformation (the dot becomes the i's tittle), a personality-driven treatment.
+4. Pass them to `propose_storyboard` as `concepts` with `recommended` (index); the beats describe the recommended concept. The user picks a concept on the card; the approval message names the chosen one: build THAT (re-plan the beats if it differs). Without the storyboard (small build): state the concepts in one line each, then build the recommended one.
+5. Skip this step only when the user already said exactly what should happen.
 
 ## 3. Storyboard (full pieces)
 1. Pick a style: `get_guide` `styles` (index) → `get_guide` `styles/<name>`; blend at most two (base + accent). Reason in one line: why it fits the brief.

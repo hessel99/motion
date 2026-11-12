@@ -29,6 +29,8 @@ export function StoryboardCard(props: { sb: Storyboard; busy: boolean; onApprove
       return { ...d, beats: [...d.beats, { name: `Beat ${d.beats.length + 1}`, start, end: start + 2, description: '', status: 'todo' }] };
     });
   };
+  /** picking another concept is a choice, not an edit of the beats */
+  const pickConcept = (i: number) => setDraft(d => ({ ...d, chosen: i }));
   const removeBeat = (i: number) => { setDirty(true); setDraft(d => ({ ...d, beats: d.beats.filter((_, j) => j !== i) })); };
   const valid = view.beats.length > 0 && view.beats.every(b => b.name.trim() && b.end > b.start && b.start >= 0);
   const approve = () => {
@@ -51,6 +53,17 @@ export function StoryboardCard(props: { sb: Storyboard; busy: boolean; onApprove
         <span class="ag-sb-state">{sb.state === 'proposed' ? 'Storyboard' : sb.state === 'done' ? 'Built' : `${done}/${view.beats.length} beats`}</span>
       </div>
       {view.styleReason && <div class="ag-muted ag-small">{view.styleReason}</div>}
+      {view.concepts && view.concepts.length > 0 && (editable ? (
+        <div class="ag-sb-concepts" role="radiogroup" aria-label="Concept" data-testid="storyboard-concepts">
+          {view.concepts.map((c, i) => (
+            <button type="button" role="radio" aria-checked={(draft.chosen ?? draft.recommended ?? 0) === i} class={'ag-sb-concept' + ((draft.chosen ?? draft.recommended ?? 0) === i ? ' on' : '')} onClick={() => pickConcept(i)}>
+              <span class="ag-sb-concept-name">{c.name}{i === view.recommended && <span class="ag-tag">Recommended</span>}</span>
+              <span class="ag-sb-concept-idea">{c.idea}</span>
+              {c.why && <span class="ag-muted ag-small">{c.why}</span>}
+            </button>
+          ))}
+        </div>
+      ) : (() => { const c = view.concepts![view.chosen ?? view.recommended ?? 0]; return c ? <div class="ag-small"><b>Concept · {c.name}</b> <span class="ag-muted">{c.idea}</span></div> : null; })())}
       {sb.state !== 'proposed' && <div class="ag-sb-bar" aria-hidden="true"><span style={{ width: `${(done / Math.max(1, view.beats.length)) * 100}%` }} /></div>}
       <ol class="ag-sb-beats">
         {view.beats.map((b, i) => (

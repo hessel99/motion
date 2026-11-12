@@ -143,3 +143,10 @@
 .ag-sb-style { flex: 1; color: var(--text-secondary) !important; margin-left: 4px; }
 .ag-sb .ag-btn { display: inline-flex; align-items: center; gap: 3px; }
 .ag-result.pending { cursor: default; animation: ag-pulse 1.2s ease-in-out infinite; }
+.ag-sb-concepts { display: flex; flex-direction: column; gap: 4px; }
+.ag-sb-concept { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 2px; text-align: left; height: auto; white-space: normal; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--ag-line); background: transparent; color: var(--ag-text); cursor: pointer; font: inherit; font-size: 11.5px; }
+.ag-sb-concept:hover { border-color: color-mix(in srgb, var(--ag-accent) 60%, transparent); }
+.ag-sb-concept.on { border-color: var(--ag-accent); background: color-mix(in srgb, var(--ag-accent) 12%, transparent); }
+.ag-sb-concept-name { font-weight: 600; display: flex; gap: 6px; align-items: center; }
+.ag-sb-concept-name .ag-tag { margin: 0; }
+.ag-sb-concept-idea { line-height: 1.35; }

@@ -9,7 +9,7 @@ VS Code, Codex or your own agent.
 - Transport: Streamable HTTP, `POST` only, JSON responses (no SSE stream). JSON-RPC batches work.
 - Protocol versions: `2025-06-18`, `2025-03-26`, `2024-11-05`
 - Methods: `initialize`, `ping`, `tools/list`, `tools/call`, `resources/list`, `resources/read` (`prompts/list` is empty)
-- Resources: the motion guides as markdown, `motion://guides/<name>` (`handbook`, `workflow`, `cookbook`,
+- Resources: the motion guides as markdown, `motion://guides/<name>` (`handbook`, `workflow`, `concepts`, `cookbook`,
   `styles/<style>`), the same text the `get_guide` tool returns. Text tool results over 24k characters are cut
   with a note (`MOTION_MAX_TOOL_TEXT`).
 - Local only: binds 127.0.0.1; requests with a non-loopback `Host` or a non-local browser `Origin` get 403.
@@ -64,7 +64,7 @@ transaction and shows up live. The agent's system prompt is `AGENT_SYSTEM_PROMPT
 | `export_video` | | MP4/WebM/GIF render |
 | `undo` | | Undo the last change |
 | `get_guide` | yes | Motion knowledge on demand: handbook, workflow, cookbook, 16 style recipes (or one section) |
-| `propose_storyboard` | | Director mode: show the plan (beats, times, style) as an editable card; the user approves |
+| `propose_storyboard` | | Director mode: show the plan (beats, times, style, 2–3 concepts for logos) as an editable card; the user picks/approves |
 | `update_progress` | | Per-beat progress on the card; each beat's edits become one undo step |
 
 All input schemas are validated as strict JSON Schema in `tests/agent.test.ts` (every array has

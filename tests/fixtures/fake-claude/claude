@@ -52,7 +52,7 @@ process.stdin.on('end', async () => {
       await tool('update_progress', { beat: i + 1, status: 'done', note: 'block + timing' });
     }
     await tool('contact_sheet', { frames: 6 });
-    say(`Built **${plan.title}**: ${plan.beats.map((b) => b.name).join(', ')}.`);
+    say(`Built **${plan.title}** (concept: ${plan.concept ?? 'none'}${/instead of your recommendation/.test(prompt) ? ', switched' : ''}): ${plan.beats.map((b) => b.name).join(', ')}.`);
   } else if (/storyboard/i.test(prompt)) {
     // director flow, part 1: load a style, propose the plan, wait for approval
     await tool('get_guide', { name: 'styles/swiss' });
@@ -60,6 +60,10 @@ process.stdin.on('end', async () => {
       { name: 'Hook', start: 0, end: 2, description: 'Red bar wipes in', style: 'Expo Out' },
       { name: 'Reveal', start: 2, end: 4, description: 'Logo lands on the grid' },
       { name: 'End card', start: 4, end: 6, description: 'URL types on; hold' },
+    ], recommended: 0, concepts: [
+      { name: 'Grid assembles', idea: 'the week grid wipes in, meetings drop into it', why: 'a calendar is a grid' },
+      { name: 'Orbit path', idea: 'a dot orbits and leaves the days behind', why: 'the name Orbit' },
+      { name: 'Pages flip', idea: 'week pages flip to a calm one' },
     ] });
     say(`Storyboard ready (style prefix: ${/\[Style: Swiss/.test(prompt)}; wait: ${/Wait for approval/.test(r.text)}) — approve or edit it.`);
   } else if (/variations/.test(prompt)) {

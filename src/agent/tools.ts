@@ -340,7 +340,7 @@ export const TOOLS: ToolDef[] = [
           const ns = toValue('size', props.size);
           if (Math.abs(an[0] - sz[0] / 2) < 0.5 && Math.abs(an[1] - sz[1] / 2) < 0.5) setPropTx(tx, l, 'anchor', [ns[0] / 2, ns[1] / 2], s.time);
         }
-        for (const [k, v] of Object.entries(props)) setPropTx(tx, l, checkProp(k), toValue(k as PropKey, v), s.time);
+        for (const [k, v] of Object.entries(props)) { setPropTx(tx, l, checkProp(k), toValue(k as PropKey, v), s.time); enableTrim(tx, l, k as PropKey); }
         tx.touch(l.id);
       });
       return text('ok');
@@ -734,7 +734,13 @@ function writeTrack(tx: Tx, l: Layer, key: PropKey, incoming: Keyframe[], merge:
     kf = [...rest, ...incoming].sort((x, y) => x.t - y.t);
   }
   tx.set(p, 'kf', kf);
+  enableTrim(tx, l, key);
   tx.touch(l.id);
+}
+
+/** trim keys/values only render with the layer's "Trim paths" switch on: turn it on for the agent */
+function enableTrim(tx: Tx, l: Layer, key: PropKey) {
+  if ((key === 'trimStart' || key === 'trimEnd' || key === 'trimOffset') && !l.trimOn) { tx.set(l, 'trimOn', true); tx.recompile(); }
 }
 
 /** remap every key time of a layer (props, path shape, text animator). returns whether anything moved */

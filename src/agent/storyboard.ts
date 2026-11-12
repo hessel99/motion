@@ -16,6 +16,9 @@ export interface Beat {
   note?: string;
 }
 
+/** one idea for a logo / brand / artwork piece, rooted in what the artwork depicts */
+export interface Concept { name: string; idea: string; why?: string }
+
 export interface Storyboard {
   id: string;
   title: string;
@@ -24,6 +27,11 @@ export interface Storyboard {
   duration?: number;
   beats: Beat[];
   notes?: string;
+  /** logo / brand briefs: 2-3 concepts the user picks from (the beats describe `recommended`) */
+  concepts?: Concept[];
+  recommended?: number;
+  /** the concept the user picked on the card */
+  chosen?: number;
   /** proposed: waiting for the user; approved: sent back to the agent; building / done: progress */
   state: 'proposed' | 'approved' | 'building' | 'done';
   /** the user changed something before approving */
@@ -56,6 +64,17 @@ export function normalizeStoryboard(a: any): Omit<Storyboard, 'id' | 'state'> {
   });
   for (let i = 1; i < beats.length; i++) if (beats[i].start < beats[i - 1].start) throw new Error('beats must be in time order');
   const last = Math.max(...beats.map(b => b.end));
+  let concepts: Concept[] | undefined;
+  if (a.concepts !== undefined) {
+    if (!Array.isArray(a.concepts) || a.concepts.length > 4) throw new Error('concepts must be an array of 2-3 {name, idea, why}');
+    concepts = a.concepts.map((c: any, i: number) => {
+      const name = String(c?.name ?? '').trim(), idea = String(c?.idea ?? '').trim();
+      if (!name || !idea) throw new Error(`concepts[${i}] needs name and idea`);
+      return { name: name.slice(0, 60), idea: idea.slice(0, 300), ...(c?.why ? { why: String(c.why).slice(0, 240) } : {}) };
+    });
+    if (!concepts?.length) concepts = undefined;
+  }
+  const recommended = concepts ? Math.min(concepts.length - 1, Math.max(0, Math.round(Number(a.recommended ?? 0)) || 0)) : undefined;
   const duration = a.duration !== undefined && isFinite(+a.duration) ? Math.max(r2(+a.duration), last) : last;
   return {
     title: title.slice(0, 80),
@@ -64,13 +83,17 @@ export function normalizeStoryboard(a: any): Omit<Storyboard, 'id' | 'state'> {
     duration,
     beats,
     ...(a.notes ? { notes: String(a.notes).slice(0, 400) } : {}),
+    ...(concepts ? { concepts, recommended, chosen: recommended } : {}),
   };
 }
 
 /** the text the chat sends back to the agent when the user approves (possibly edited) */
 export function approvalMessage(sb: Storyboard): string {
-  const plan = { title: sb.title, style: sb.style, duration: sb.duration, beats: sb.beats.map(({ name, start, end, description, style }) => ({ name, start, end, description, ...(style ? { style } : {}) })) };
-  return `Storyboard approved${sb.edited ? ' with my edits (follow this version)' : ''}. Build it now, beat by beat: update_progress {beat, status:"active"} before a beat and {status:"done"} after it, then critique with contact_sheet and fix the worst issues.\n<storyboard>${JSON.stringify(plan)}</storyboard>`;
+  const c = sb.concepts?.[sb.chosen ?? sb.recommended ?? 0];
+  const switched = c && sb.chosen !== undefined && sb.chosen !== sb.recommended;
+  const plan = { title: sb.title, style: sb.style, duration: sb.duration, ...(c ? { concept: `${c.name}: ${c.idea}` } : {}), beats: sb.beats.map(({ name, start, end, description, style }) => ({ name, start, end, description, ...(style ? { style } : {}) })) };
+  const pick = c ? ` Concept: "${c.name}"${switched ? ' (I picked this instead of your recommendation: re-plan the beats for it, keeping the times)' : ''}.` : '';
+  return `Storyboard approved${sb.edited ? ' with my edits (follow this version)' : ''}.${pick} Build it now, beat by beat: update_progress {beat, status:"active"} before a beat and {status:"done"} after it, then critique with contact_sheet and fix the worst issues.\n<storyboard>${JSON.stringify(plan)}</storyboard>`;
 }
 
 type Listener = (sb: Storyboard) => void;

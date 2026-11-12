@@ -25,7 +25,7 @@ export const GUIDE_TOOLS: ToolDef[] = [
   {
     name: 'get_guide',
     readOnly: true,
-    description: 'Load motion-design knowledge on demand. No name: the index. "workflow" (director method, scope rules), "handbook" (principles with numbers, timing tables, easing names, critique rubric), "cookbook" (worked recipes with exact tool calls), "styles" (index of style recipes), "styles/<name>" (palette, type, easing, timing, signature moves of one style). section: return only one "## " section (e.g. "Timing tables").',
+    description: 'Load motion-design knowledge on demand. No name: the index. "workflow" (director method, scope rules), "handbook" (principles with numbers, timing tables, easing names, critique rubric), "concepts" (read the artwork + brand; metaphor → motion recipes: door opens, leaf grows, rocket launches; anti-patterns), "cookbook" (worked recipes with exact tool calls), "styles" (index of style recipes), "styles/<name>" (palette, type, easing, timing, signature moves of one style). section: return only one "## " section (e.g. "Timing tables").',
     inputSchema: {
       type: 'object',
       properties: {
@@ -48,7 +48,7 @@ export const GUIDE_TOOLS: ToolDef[] = [
   },
   {
     name: 'propose_storyboard',
-    description: 'Director mode for full pieces (several beats / a named style / >= 5 s): show your plan to the user as an editable storyboard card. Beats in time order with name, start/end (s), description and style notes. The result says whether to wait for the user\'s approval (then end your turn; the approved, possibly edited version comes back as the next message) or to build right away. Not for small edits.',
+    description: 'Director mode for full pieces (several beats / a named style / >= 5 s): show your plan to the user as an editable storyboard card. Beats in time order with name, start/end (s), description and style notes. For logos / brand marks / artwork also pass 2-3 concepts rooted in what the artwork depicts (after looking at it) and the recommended one; the user picks on the card. The result says whether to wait for the user\'s approval (then end your turn; the approved, possibly edited version comes back as the next message) or to build right away. Not for small edits.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -58,6 +58,8 @@ export const GUIDE_TOOLS: ToolDef[] = [
         duration: { type: 'number', description: 'total seconds' },
         beats: { type: 'array', items: beatSchema, description: '3-5 beats of 2-4 s are typical' },
         notes: { type: 'string', description: 'optional: palette, typography, music/markers, open questions' },
+        concepts: { type: 'array', items: { type: 'object', properties: { name: { type: 'string', description: 'e.g. "Door opens"' }, idea: { type: 'string', description: 'what moves and how, rooted in what the artwork depicts' }, why: { type: 'string', description: 'why it fits the brand' } }, required: ['name', 'idea'] }, description: 'logo / brand / artwork briefs: 2-3 concepts the user picks from; the beats describe the recommended one' },
+        recommended: { type: 'number', description: 'index of the recommended concept (0-based)' },
       },
       required: ['title', 'beats'],
     },

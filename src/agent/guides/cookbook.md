@@ -3,6 +3,19 @@
 
 Conventions: 1920x1080 comp, center (960, 540). `add_layer` x/y/w/h is the box (top-left + size); the anchor is the box center, so `position` = (x + w/2, y + h/2). `<name>` = the id returned by an earlier `add_layer`. Keys: `{t, v, ease}`; the ease belongs to the segment that starts at that key.
 
+## Concept-driven logo (door mark, 3 s) — preferred for real logos
+For an existing mark, the motion comes from what it depicts (get_guide "concepts"). Example: "Haven", a house outline with a door.
+1. `inspect_artwork` { ids: [<logo>] } (or `contact_sheet` + `get_document`); `split_shape` the compound path so Roof, Walls, Door, Wordmark are separate; rename them.
+2. Concepts: A "Door opens" (welcome / arriving home), B "House draws itself" (craft, building), C "Light turns on in the window" (warmth). Recommend A.
+3. Door hinge: `set_pivot` { id: <door>, at: "left" } (or `update_layer` props anchor [0, h/2] and position [x, y + h/2] so it doesn't move).
+4. `animate` { tracks: [
+   { id: <walls>, prop: "trimEnd", keyframes: [{ t: 0, v: 0, ease: "Cubic In Out" }, { t: 0.8, v: 100 }] },
+   { id: <door>, prop: "scale", keyframes: [{ t: 0.9, v: [100, 100], ease: "Cubic In Out" }, { t: 1.5, v: [18, 100], ease: "spring Gentle" }, { t: 2.1, v: [24, 100] }] },
+   { id: <glow>, prop: "opacity", keyframes: [{ t: 1.0, v: 0, ease: "Ease Out" }, { t: 1.5, v: 85 }] },
+   { id: <wordmark>, prop: "position", keyframes: [{ t: 1.4, v: [<x - 60>, <y>], ease: "Expo Out" }, { t: 2.0, v: [<x>, <y>] }] },
+   { id: <wordmark>, prop: "opacity", keyframes: [{ t: 1.4, v: 0 }, { t: 1.7, v: 100 }] } ] } (glow = a warm rect behind the door; or `rig` { ids: [<door>], type: "door-open" } when available)
+5. Close the door back to 100 at the end if the final frame must be the exact logo, or keep it open if the brief prefers; hold 1 s.
+
 ## Logo reveal (mark + wordmark, 2.5 s, playful-to-corporate)
 1. `set_composition` { duration: 4, background: "#0F172A" }
 2. Shapes (final poses):
@@ -79,6 +92,7 @@ Conventions: 1920x1080 comp, center (960, 540). `add_layer` x/y/w/h is the box (
 5. Critique for luxury: nothing moves faster than 0.8 s; holds ≥ 2 s; ≤ 3 elements visible.
 
 ## Planned higher-level tools (use them by name when they appear in your tool list)
+Artwork tools (concept-driven motion): `inspect_artwork` (each part rendered alone + bounds + shape hint: identify the door, leaf, letters), `split_shape` (break a compound vector/logo into parts by subpath / connected component, keeping position), `set_pivot` (anchor at an edge/corner/point without moving the part), `rig` (hinge/door-open, grow-from-base, swing, unfold, orbit, blink, pulse, liquid-fill, draw-then-fill).
 Another workstream is adding these; until they exist use the recipes above. When present they replace many low-level calls:
 - `build_scene`: a whole beat in one declarative spec (layers, groups, shapes, text, keys, eases, stagger) with stable ids — use it for blocking + timing a beat in one call, then refine.
 - `shape_library`: icons (Lucide), blobs, arrows, badges, sparkles as path layers — instead of hand-writing SVG `d`.

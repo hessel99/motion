@@ -557,3 +557,50 @@ describe('director tools: storyboard flow', () => {
     expect(toolLabel('update_progress', { beat: 2, status: 'done' }, () => undefined)).toBe('Beat 2 done');
   });
 });
+
+// ---------- concept-driven motion ----------
+
+import conceptBriefs from '../src/agent/guides/evals/concept-briefs.json';
+
+describe('concept-driven motion', () => {
+  beforeEach(() => { fresh(); storyboards.clear(); });
+
+  it('the concepts guide and the prompt rule exist and name the artwork tools', async () => {
+    const g = await run('get_guide', { name: 'concepts' });
+    for (const w of ['Door opens', 'Leaf grows', 'Rocket launches', 'tittle', 'Anti-patterns', 'inspect_artwork', 'split_shape', 'set_pivot', 'rig']) expect(g).toContain(w);
+    for (const w of ['inspect_artwork', 'split_shape', 'set_pivot', 'rig', 'concepts', 'MUST first look']) expect(AGENT_SYSTEM_PROMPT).toContain(w);
+    expect(await run('get_guide', {})).toContain('concepts');
+  });
+
+  it('storyboards carry 2-3 concepts; the approval names the picked one and flags a switch', async () => {
+    await run('propose_storyboard', { title: 'Haven logo', beats: [{ name: 'Door', start: 0, end: 2, description: 'door swings open' }], recommended: 0, concepts: [
+      { name: 'Door opens', idea: 'the door swings on its hinge, light spills out', why: 'welcome home' },
+      { name: 'House draws itself', idea: 'outline draws on, then fills' },
+    ] });
+    const sb = storyboards.current!;
+    expect(sb.concepts!.length).toBe(2);
+    expect(sb.chosen).toBe(0);
+    expect(approvalMessage(sb)).toMatch(/Concept: "Door opens"\. Build/);
+    const other = approvalMessage({ ...sb, chosen: 1 });
+    expect(other).toMatch(/Concept: "House draws itself" \(I picked this instead/);
+    expect(JSON.parse(other.match(/<storyboard>(.*)<\/storyboard>/)![1]).concept).toMatch(/^House draws itself: outline/);
+    expect(() => normalizeStoryboard({ title: 'x', beats: [{ name: 'a', start: 0, end: 1 }], concepts: [{ name: 'no idea' }] })).toThrow(/needs name and idea/);
+  });
+
+  it('eval briefs: every setup call is a valid tool call that builds the artwork', async () => {
+    expect(conceptBriefs.briefs.length).toBeGreaterThanOrEqual(4);
+    for (const b of conceptBriefs.briefs) {
+      fresh();
+      for (const c of b.setup) await tool(c.tool).run(c.args);
+      expect(editor.store.comp.root.length, b.id).toBeGreaterThanOrEqual(5);
+      expect(b.expect.concept.length).toBeGreaterThan(20);
+    }
+  });
+
+  it('animating trim on a path turns its "Trim paths" switch on (draw-on recipes render)', async () => {
+    const { id } = JSON.parse(await run('add_layer', { type: 'path', name: 'Line', d: 'M0 0 L100 0', w: 100, h: 2, stroke: '#000000', strokeWidth: 4 }));
+    expect(editor.store.layer(id)!.trimOn).toBeFalsy();
+    await run('animate', { tracks: [{ id, prop: 'trimEnd', keyframes: [{ t: 0, v: 0 }, { t: 1, v: 100 }] }] });
+    expect(editor.store.layer(id)!.trimOn).toBe(true);
+  });
+});

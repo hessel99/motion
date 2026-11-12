@@ -1,0 +1,66 @@
+{
+  "about": "Eval briefs for concept-driven motion (does the motion express what the mark depicts?). Move into evals/ once the eval harness is merged. setup = editor tool calls that build the artwork before the brief is sent; parts are named neutrally (Path 1..n) on purpose, so the agent has to look at them.",
+  "judge": {
+    "question": "Does the motion express what the mark depicts and fit the brand, instead of generic pop/fade/scale-ins?",
+    "rubric": [
+      "concept: the hero action is the depicted object's own action (see expect.concept); generic pop/fade/scale on every part scores 1",
+      "pivots: parts move around physically plausible pivots (hinge, base, stem, tail tip)",
+      "brand fit: easing/timing match the brand traits named in the brief",
+      "process: the agent looked at the artwork (inspect_artwork / contact_sheet / screenshot) before animating and named the parts",
+      "concepts offered: 2-3 one-line concepts (or propose_storyboard concepts) with a recommendation",
+      "integrity: the final frame equals the original lockup (positions, rotations, scales, colors)"
+    ],
+    "scale": "1-5 per item"
+  },
+  "briefs": [
+    {
+      "id": "concept-house-door",
+      "brief": "Animate our logo for the app intro (about 3 s). Brand: Haven, home rentals; warm and welcoming.",
+      "setup": [
+        { "tool": "set_composition", "args": { "duration": 4, "background": "#FFF8F0" } },
+        { "tool": "add_layer", "args": { "type": "path", "name": "Path 1", "x": 760, "y": 300, "w": 400, "h": 360, "d": "M0 160 L200 0 L400 160 L400 360 L0 360 Z", "fill": "#00000000", "stroke": "#E76F51", "strokeWidth": 18 } },
+        { "tool": "add_layer", "args": { "type": "rect", "name": "Path 2", "x": 915, "y": 500, "w": 90, "h": 160, "radius": 6, "fill": "#E76F51" } },
+        { "tool": "add_layer", "args": { "type": "ellipse", "name": "Path 3", "x": 985, "y": 575, "w": 12, "h": 12, "fill": "#FFF8F0" } },
+        { "tool": "add_layer", "args": { "type": "text", "name": "Text", "x": 660, "y": 700, "w": 600, "h": 120, "fill": "#264653", "text": { "content": "Haven", "fontSize": 96, "fontWeight": 700, "align": "center" } } }
+      ],
+      "expect": { "concept": "the door (Path 2) swings open on a hinge edge (anchor at its left or right edge, scale x / skew), maybe light or the wordmark coming out of it", "antiPatterns": ["door scales from its center", "every part pops in"] }
+    },
+    {
+      "id": "concept-leaf-wordmark",
+      "brief": "Make a 3 second logo animation for Sprout, an organic baby-food brand. Calm and natural.",
+      "setup": [
+        { "tool": "set_composition", "args": { "duration": 4, "background": "#F6EFE3" } },
+        { "tool": "add_layer", "args": { "type": "path", "name": "Path 1", "x": 940, "y": 300, "w": 40, "h": 220, "d": "M20 220 C20 150 22 80 20 0", "fill": "#00000000", "stroke": "#4F7A52", "strokeWidth": 10 } },
+        { "tool": "add_layer", "args": { "type": "path", "name": "Path 2", "x": 960, "y": 250, "w": 160, "h": 110, "d": "M0 110 C30 30 100 0 160 10 C140 70 80 110 0 110 Z", "fill": "#7A9E7E" } },
+        { "tool": "add_layer", "args": { "type": "path", "name": "Path 3", "x": 820, "y": 300, "w": 130, "h": 90, "d": "M130 90 C100 30 50 0 0 10 C20 60 70 90 130 90 Z", "fill": "#7A9E7E" } },
+        { "tool": "add_layer", "args": { "type": "text", "name": "Text", "x": 660, "y": 560, "w": 600, "h": 120, "fill": "#2E2A24", "text": { "content": "sprout", "fontSize": 104, "fontWeight": 600, "align": "center" } } }
+      ],
+      "expect": { "concept": "the stem draws/grows up from its base, leaves unfurl from the stem (pivot at the leaf base), gentle sway; wordmark follows calmly", "antiPatterns": ["leaves drop from above", "bouncy springs that contradict 'calm'", "leaves scale from their centers"] }
+    },
+    {
+      "id": "concept-chat-bubble",
+      "brief": "Animate the Huddle logo (a team chat app) for a 3 s splash screen. Friendly and lively.",
+      "setup": [
+        { "tool": "set_composition", "args": { "duration": 4, "background": "#E8F1FF" } },
+        { "tool": "add_layer", "args": { "type": "path", "name": "Path 1", "x": 800, "y": 300, "w": 320, "h": 260, "d": "M40 0 L280 0 C302 0 320 18 320 40 L320 170 C320 192 302 210 280 210 L120 210 L60 260 L70 210 L40 210 C18 210 0 192 0 170 L0 40 C0 18 18 0 40 0 Z", "fill": "#4D96FF" } },
+        { "tool": "add_layer", "args": { "type": "ellipse", "name": "Path 2", "x": 880, "y": 385, "w": 36, "h": 36, "fill": "#FFFFFF" } },
+        { "tool": "add_layer", "args": { "type": "ellipse", "name": "Path 3", "x": 942, "y": 385, "w": 36, "h": 36, "fill": "#FFFFFF" } },
+        { "tool": "add_layer", "args": { "type": "ellipse", "name": "Path 4", "x": 1004, "y": 385, "w": 36, "h": 36, "fill": "#FFFFFF" } },
+        { "tool": "add_layer", "args": { "type": "text", "name": "Text", "x": 660, "y": 600, "w": 600, "h": 120, "fill": "#2B2D42", "text": { "content": "huddle", "fontSize": 96, "fontWeight": 800, "align": "center" } } }
+      ],
+      "expect": { "concept": "the bubble pops from its tail tip (pivot at the tail), the three dots bounce like typing, then resolve into the wordmark", "antiPatterns": ["bubble scales from its center", "dots just fade in"] }
+    },
+    {
+      "id": "concept-rocket",
+      "brief": "Logo sting for Liftoff, a startup accelerator. 3 seconds, energetic and confident.",
+      "setup": [
+        { "tool": "set_composition", "args": { "duration": 4, "background": "#0B0620" } },
+        { "tool": "add_layer", "args": { "type": "path", "name": "Path 1", "x": 900, "y": 240, "w": 120, "h": 280, "d": "M60 0 C100 40 120 110 120 180 L120 240 L0 240 L0 180 C0 110 20 40 60 0 Z", "fill": "#F5F5F7" } },
+        { "tool": "add_layer", "args": { "type": "path", "name": "Path 2", "x": 860, "y": 420, "w": 200, "h": 120, "d": "M40 0 L0 120 L60 80 Z M160 0 L200 120 L140 80 Z", "fill": "#FF2E97" } },
+        { "tool": "add_layer", "args": { "type": "path", "name": "Path 3", "x": 930, "y": 480, "w": 60, "h": 90, "d": "M0 0 L60 0 L30 90 Z", "fill": "#FFE53D" } },
+        { "tool": "add_layer", "args": { "type": "text", "name": "Text", "x": 660, "y": 640, "w": 600, "h": 120, "fill": "#F5F5F7", "text": { "content": "LIFTOFF", "fontSize": 96, "fontWeight": 800, "align": "center" } } }
+      ],
+      "expect": { "concept": "anticipation (squash/dip), flame flickers (Path 3), the rocket launches upward with acceleration and lands/settles into the lockup or exits and returns; split_shape the two fins (Path 2 is one compound path)", "antiPatterns": ["rocket fades in", "no anticipation", "flame static"] }
+    }
+  ]
+}
