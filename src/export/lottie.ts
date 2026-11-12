@@ -13,7 +13,7 @@
 // known gaps: our group opacity multiplies into children but ae parenting does not inherit
 // opacity, so group opacity only affects the group's own fill; clip is not exported.
 
-import type { Keyframe, Layer, PathCmd, Project, Prop } from '../core/model';
+import type { Composition, Keyframe, Layer, PathCmd, Project, Prop } from '../core/model';
 
 const R = (x: number) => Math.round(x * 1e6) / 1e6;
 
@@ -162,83 +162,99 @@ export function projectToLottie(project: Project): any {
   if (!comp) throw new Error('project has no composition');
   const fr = comp.fps || 30;
   const op = Math.max(1, Math.round(comp.duration * fr));
-  const L = project.layers;
-  // draw order (bottom -> top), parents before children
-  const order: string[] = [];
-  const walk = (ids: string[]) => { for (const id of ids) { const l = L[id]; if (!l) continue; order.push(id); walk(l.children); } };
-  walk(comp.root);
-  const n = order.length;
-  const ind = new Map<string, number>();
-  // lottie order is top -> bottom; ind = position in that list (1-based)
-  for (let i = 0; i < n; i++) ind.set(order[i], n - i);
   const assets: any[] = [];
   const assetIds = new Map<string, string>();
   const fonts = new Map<string, any>();
-  const layers: any[] = [];
-  for (let i = n - 1; i >= 0; i--) {
-    const l = L[order[i]];
-    const base: any = {
-      ddd: 0, ind: ind.get(l.id), nm: l.name, sr: 1, st: 0, bm: 0,
-      ip: Math.max(0, R(l.inPoint * fr)), op: R(Math.min(l.outPoint, comp.duration) * fr),
-      ks: transform(l, fr),
-    };
-    if (!(base.op > base.ip)) base.op = Math.max(op, base.ip + 1);
-    if (l.parent && ind.has(l.parent)) base.parent = ind.get(l.parent);
-    if (!l.visible) base.hd = true;
-    const size = firstV(l.props.size, [100, 100]);
-    switch (l.type) {
-      case 'rect':
-      case 'ellipse': {
-        const prim: any = l.type === 'rect'
-          ? { ty: 'rc', nm: 'Rectangle Path', d: 1, s: exportProp(l.props.size, [100, 100], fr), p: exportProp(mapPropValues(l.props.size, v => [v[0] / 2, v[1] / 2]), [50, 50], fr), r: exportProp(mapPropValues(l.props.radius, v => [v[0] ?? 0]), [0], fr) }
-          : { ty: 'el', nm: 'Ellipse Path', d: 1, s: exportProp(l.props.size, [100, 100], fr), p: exportProp(mapPropValues(l.props.size, v => [v[0] / 2, v[1] / 2]), [50, 50], fr) };
-        layers.push({ ...base, ty: 4, shapes: [{ ty: 'gr', nm: l.type === 'rect' ? 'Rectangle' : 'Ellipse', it: [prim, ...paintItems(l, fr), IDENTITY_TR] }] });
-        break;
-      }
-      case 'path': {
-        const gs = l.geomSize ?? (size as [number, number]);
-        const sx = gs[0] ? size[0] / gs[0] : 1, sy = gs[1] ? size[1] / gs[1] : 1;
-        const it: any[] = [];
-        for (const g of l.geometry ?? []) for (const s of cmdsToLottieShapes(g.cmds, sx, sy)) it.push({ ty: 'sh', nm: 'Path', ks: { a: 0, k: s } });
-        layers.push({ ...base, ty: 4, shapes: [{ ty: 'gr', nm: 'Path', it: [...it, ...paintItems(l, fr), IDENTITY_TR] }] });
-        break;
-      }
-      case 'group': {
-        const fv = firstV(l.props.fill, [0, 0, 0, 0]);
-        if (fv[3] > 0 || l.props.fill?.kf?.length) {
-          const prim = { ty: 'rc', nm: 'Rectangle Path', d: 1, s: exportProp(l.props.size, [100, 100], fr), p: exportProp(mapPropValues(l.props.size, v => [v[0] / 2, v[1] / 2]), [50, 50], fr), r: exportProp(mapPropValues(l.props.radius, v => [v[0] ?? 0]), [0], fr) };
-          layers.push({ ...base, ty: 4, shapes: [{ ty: 'gr', nm: 'Rectangle', it: [prim, ...paintItems(l, fr), IDENTITY_TR] }] });
-        } else layers.push({ ...base, ty: 3 });
-        break;
-      }
-      case 'text': {
-        const t = l.text!;
-        const fill = firstV(l.props.fill, [1, 1, 1, 1]);
-        const fName = (t.fontFamily || 'Inter').replace(/\s+/g, '') + (t.fontWeight >= 700 ? '-Bold' : '-Regular');
-        fonts.set(fName, { fName, fFamily: t.fontFamily, fStyle: `${t.fontWeight >= 700 ? 'Bold' : 'Regular'}${t.fontStyle === 'italic' ? ' Italic' : ''}`, ascent: 75 });
-        const doc = {
-          s: t.fontSize, f: fName, t: t.content.replace(/\n/g, '\r'), j: t.align === 'right' ? 1 : t.align === 'center' ? 2 : 0,
-          tr: t.fontSize ? R((t.letterSpacing / t.fontSize) * 1000) : 0, lh: R(t.fontSize * t.lineHeight), ls: 0,
-          fc: [R(fill[0]), R(fill[1]), R(fill[2])], sz: size.slice(0, 2).map(R), ps: [0, 0],
-        };
-        layers.push({ ...base, ty: 5, t: { d: { k: [{ t: 0, s: doc }] }, p: {}, m: { g: 1, a: { a: 0, k: [0, 0] } }, a: [] } });
-        break;
-      }
-      case 'image': {
-        const a = l.imageRef ? project.assets[l.imageRef] : undefined;
-        if (a) {
-          let id = assetIds.get(a.id);
-          if (!id) {
-            id = `image_${assetIds.size}`;
-            assetIds.set(a.id, id);
-            assets.push({ id, w: a.width, h: a.height, u: '', p: a.data, e: a.data.startsWith('data:') ? 1 : 0 });
-          }
-          layers.push({ ...base, ty: 2, refId: id });
-        } else layers.push({ ...base, ty: 3 });
-        break;
+  const buildLayers = (comp: Composition, stack: string[]): any[] => {
+    const L = project.layers;
+    // draw order (bottom -> top), parents before children
+    const order: string[] = [];
+    const walk = (ids: string[]) => { for (const id of ids) { const l = L[id]; if (!l) continue; order.push(id); walk(l.children); } };
+    walk(comp.root);
+    const n = order.length;
+    const ind = new Map<string, number>();
+    // lottie order is top -> bottom; ind = position in that list (1-based)
+    for (let i = 0; i < n; i++) ind.set(order[i], n - i);
+    const layers: any[] = [];
+    for (let i = n - 1; i >= 0; i--) {
+      const l = L[order[i]];
+      const base: any = {
+        ddd: 0, ind: ind.get(l.id), nm: l.name, sr: 1, st: 0, bm: 0,
+        ip: Math.max(0, R(l.inPoint * fr)), op: R(Math.min(l.outPoint, comp.duration) * fr),
+        ks: transform(l, fr),
+      };
+      if (!(base.op > base.ip)) base.op = Math.max(op, base.ip + 1);
+      if (l.parent && ind.has(l.parent)) base.parent = ind.get(l.parent);
+      if (!l.visible) base.hd = true;
+      const size = firstV(l.props.size, [100, 100]);
+      switch (l.type) {
+        case 'rect':
+        case 'ellipse': {
+          const prim: any = l.type === 'rect'
+            ? { ty: 'rc', nm: 'Rectangle Path', d: 1, s: exportProp(l.props.size, [100, 100], fr), p: exportProp(mapPropValues(l.props.size, v => [v[0] / 2, v[1] / 2]), [50, 50], fr), r: exportProp(mapPropValues(l.props.radius, v => [v[0] ?? 0]), [0], fr) }
+            : { ty: 'el', nm: 'Ellipse Path', d: 1, s: exportProp(l.props.size, [100, 100], fr), p: exportProp(mapPropValues(l.props.size, v => [v[0] / 2, v[1] / 2]), [50, 50], fr) };
+          layers.push({ ...base, ty: 4, shapes: [{ ty: 'gr', nm: l.type === 'rect' ? 'Rectangle' : 'Ellipse', it: [prim, ...paintItems(l, fr), IDENTITY_TR] }] });
+          break;
+        }
+        case 'path': {
+          const gs = l.geomSize ?? (size as [number, number]);
+          const sx = gs[0] ? size[0] / gs[0] : 1, sy = gs[1] ? size[1] / gs[1] : 1;
+          const it: any[] = [];
+          for (const g of l.geometry ?? []) for (const s of cmdsToLottieShapes(g.cmds, sx, sy)) it.push({ ty: 'sh', nm: 'Path', ks: { a: 0, k: s } });
+          layers.push({ ...base, ty: 4, shapes: [{ ty: 'gr', nm: 'Path', it: [...it, ...paintItems(l, fr), IDENTITY_TR] }] });
+          break;
+        }
+        case 'group': {
+          const fv = firstV(l.props.fill, [0, 0, 0, 0]);
+          if (fv[3] > 0 || l.props.fill?.kf?.length) {
+            const prim = { ty: 'rc', nm: 'Rectangle Path', d: 1, s: exportProp(l.props.size, [100, 100], fr), p: exportProp(mapPropValues(l.props.size, v => [v[0] / 2, v[1] / 2]), [50, 50], fr), r: exportProp(mapPropValues(l.props.radius, v => [v[0] ?? 0]), [0], fr) };
+            layers.push({ ...base, ty: 4, shapes: [{ ty: 'gr', nm: 'Rectangle', it: [prim, ...paintItems(l, fr), IDENTITY_TR] }] });
+          } else layers.push({ ...base, ty: 3 });
+          break;
+        }
+        case 'text': {
+          const t = l.text!;
+          const fill = firstV(l.props.fill, [1, 1, 1, 1]);
+          const fName = (t.fontFamily || 'Inter').replace(/\s+/g, '') + (t.fontWeight >= 700 ? '-Bold' : '-Regular');
+          fonts.set(fName, { fName, fFamily: t.fontFamily, fStyle: `${t.fontWeight >= 700 ? 'Bold' : 'Regular'}${t.fontStyle === 'italic' ? ' Italic' : ''}`, ascent: 75 });
+          const doc = {
+            s: t.fontSize, f: fName, t: t.content.replace(/\n/g, '\r'), j: t.align === 'right' ? 1 : t.align === 'center' ? 2 : 0,
+            tr: t.fontSize ? R((t.letterSpacing / t.fontSize) * 1000) : 0, lh: R(t.fontSize * t.lineHeight), ls: 0,
+            fc: [R(fill[0]), R(fill[1]), R(fill[2])], sz: size.slice(0, 2).map(R), ps: [0, 0],
+          };
+          layers.push({ ...base, ty: 5, t: { d: { k: [{ t: 0, s: doc }] }, p: {}, m: { g: 1, a: { a: 0, k: [0, 0] } }, a: [] } });
+          break;
+        }
+        case 'precomp': {
+          const inner = l.compRef ? project.comps[l.compRef] : undefined;
+          if (inner && !stack.includes(inner.id)) {
+            const refId = 'comp_' + inner.id;
+            if (!assets.some(a => a.id === refId)) {
+              const sub = buildLayers(inner, [...stack, inner.id]);
+              assets.push({ id: refId, nm: inner.name, fr, layers: sub });
+            }
+            layers.push({ ...base, ty: 0, refId, w: inner.width, h: inner.height, st: R((l.startTime ?? 0) * fr) });
+          } else layers.push({ ...base, ty: 3 });
+          break;
+        }
+        case 'image': {
+          const a = l.imageRef ? project.assets[l.imageRef] : undefined;
+          if (a) {
+            let id = assetIds.get(a.id);
+            if (!id) {
+              id = `image_${assetIds.size}`;
+              assetIds.set(a.id, id);
+              assets.push({ id, w: a.width, h: a.height, u: '', p: a.data, e: a.data.startsWith('data:') ? 1 : 0 });
+            }
+            layers.push({ ...base, ty: 2, refId: id });
+          } else layers.push({ ...base, ty: 3 });
+          break;
+        }
       }
     }
-  }
+    return layers;
+  };
+  const layers = buildLayers(comp, [comp.id]);
   const out: any = {
     v: '5.7.4', fr, ip: 0, op, w: comp.width, h: comp.height, nm: comp.name, ddd: 0, assets, layers, markers: [],
   };

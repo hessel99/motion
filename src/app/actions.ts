@@ -3,7 +3,7 @@
 import { editor } from './editor';
 import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
-  setCompSettings, toggleAnimated, parseKeyId,
+  setCompSettings, toggleAnimated, parseKeyId, precompose,
 } from '../core/commands';
 import { createProject, uid, type Asset, type Layer, type Project } from '../core/model';
 import { boundsOf } from '../agent/tools';
@@ -410,6 +410,7 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     if (mod && k === 's') return run(() => saveProject(e.shiftKey));
     if (mod && k === 'o') return run(() => openFileDialog());
     if (mod && k === 'd') return run(() => cloneLayers(s, s.selection, 10));
+    if (mod && e.shiftKey && k === 'c') return run(() => { try { precompose(s, s.selection); } catch (err: any) { toast(err.message, 'error'); } });
     if (mod && k === 'a') return run(() => s.select(s.comp.root.slice()));
     if (mod && k === 'g') return run(() => (e.shiftKey ? s.selection.forEach(id => ungroup(s, id)) : s.selection.length && groupLayers(s, s.selection, boundsOf(s.selection))));
     if (mod && k === ']') return run(() => reorder(s, s.selection, e.altKey ? 'top' : 'up'));

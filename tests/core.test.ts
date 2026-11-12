@@ -130,3 +130,27 @@ describe('spring', () => {
     for (let t = 0; t <= 1; t += 0.05) { pool.eval(h, t, o, 0); expect(o[0]).toBeCloseTo(tr.eval1(t), 9); }
   });
 });
+
+import { precompose, addPrecompLayer, newComposition } from '../src/core/commands';
+describe('precomps', () => {
+  it('precompose moves layers into a new comp and back with undo', () => {
+    const s = new Store();
+    const a = addLayer(s, 'rect', { x: 0, y: 0, w: 10, h: 10 });
+    const b = addLayer(s, 'rect', { x: 20, y: 0, w: 10, h: 10 });
+    const c = addLayer(s, 'rect', { x: 40, y: 0, w: 10, h: 10 });
+    const { comp, layer } = precompose(s, [a.id, b.id]);
+    expect(s.comp.root).toEqual([layer.id, c.id]);
+    expect(s.project.comps[comp.id].root).toEqual([a.id, b.id]);
+    s.undo();
+    expect(s.comp.root).toEqual([a.id, b.id, c.id]);
+    expect(s.project.comps[comp.id]).toBeUndefined();
+  });
+  it('refuses cycles', () => {
+    const s = new Store();
+    const main = s.comp.id;
+    const inner = newComposition(s, { name: 'inner' });
+    addPrecompLayer(s, inner.id);
+    s.openComp(inner.id);
+    expect(() => addPrecompLayer(s, main)).toThrow();
+  });
+});

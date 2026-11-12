@@ -4,7 +4,7 @@
 import { editor } from '../app/editor';
 import {
   addLayer, cloneLayers, deleteLayers, groupLayers, isAnimated, keyId, setCompSettings, setEase, setLayerField, setProp,
-  setPropTx, valueAt, setSpring,
+  setPropTx, valueAt, setSpring, precompose,
 } from '../core/commands';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { PROP_DEFS, PROP_KEYS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type LayerType, type PropKey } from '../core/model';
@@ -99,7 +99,8 @@ export const TOOLS: ToolDef[] = [
       const big = total > limit;
       return text({
         file: s.project.name,
-        composition: { width: c.width, height: c.height, fps: c.fps, duration: c.duration, background: round(c.background) },
+        composition: { id: c.id, name: c.name, width: c.width, height: c.height, fps: c.fps, duration: c.duration, background: round(c.background) },
+        compositions: Object.values(s.project.comps).map(x => ({ id: x.id, name: x.name, active: x.id === c.id })),
         currentTime: s.time,
         selection: s.selection,
         layerCount: total,
@@ -309,6 +310,18 @@ export const TOOLS: ToolDef[] = [
       const list: number[] = times?.length ? times.slice(0, 4) : [t ?? st().time];
       return list.map(tt => ({ type: 'image' as const, data: editor.renderer.snapshot(tt, maxSize).split(',')[1], mimeType: 'image/png' }));
     },
+  },
+  {
+    name: 'precompose',
+    description: 'Pre-compose top-level layers of the active composition into a new composition (After Effects style). Returns the new comp id and the precomp layer id. Useful to animate a group of layers as one unit or to reuse it.',
+    inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, name: { type: 'string' } }, required: ['ids'] },
+    run: ({ ids, name }) => { const r = precompose(st(), ids, name); return text({ compId: r.comp.id, layerId: r.layer.id }); },
+  },
+  {
+    name: 'open_composition',
+    description: 'Switch the editor (and all other tools) to another composition by id.',
+    inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
+    run: ({ id }) => { if (!st().project.comps[id]) throw new Error('no such composition'); st().openComp(id); return text('ok'); },
   },
   {
     name: 'undo',

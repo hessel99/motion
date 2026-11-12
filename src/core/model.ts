@@ -28,7 +28,7 @@ export interface Prop {
   kf?: Keyframe[];
 }
 
-export type LayerType = 'group' | 'rect' | 'ellipse' | 'path' | 'text' | 'image';
+export type LayerType = 'group' | 'rect' | 'ellipse' | 'path' | 'text' | 'image' | 'precomp';
 
 /** ordered list of animatable properties shown in timeline / inspector */
 export const PROP_DEFS = {
@@ -56,6 +56,7 @@ export const TYPE_PROPS: Record<LayerType, PropKey[]> = {
   path: ['size', 'fill', 'stroke', 'strokeWidth'],
   text: ['size', 'fill'],
   image: ['size'],
+  precomp: ['size'],
 };
 
 export type PathCmd =
@@ -117,6 +118,9 @@ export interface Layer {
   strokeGeometry?: PathGeometry[];
   text?: TextData;
   imageRef?: string; // asset id
+  /** precomp: referenced composition id and when it starts (comp time) */
+  compRef?: string;
+  startTime?: number;
   /** ui state */
   collapsed?: boolean;
 }

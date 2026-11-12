@@ -200,6 +200,14 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
           <label class="check"><input type="checkbox" checked={!!l.clip} onChange={e => setLayerField(store, ids, 'clip', (e.target as HTMLInputElement).checked, 'Clip content')} /> Clip content</label>
         </Section>
       )}
+      {layers.length === 1 && l.type === 'precomp' && l.compRef && (
+        <Section title="Composition" right={<button class="ghost" onClick={() => store.openComp(l.compRef!)}>Open ↗</button>}>
+          <div class="row">
+            <NumField label="Start" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={n => setLayerField(store, ids, 'startTime', n, 'Precomp start')} />
+          </div>
+          <div class="muted small">{store.project.comps[l.compRef]?.name}</div>
+        </Section>
+      )}
       {layers.length === 1 && (
         <Section title="Mask">
           <label class="check"><input type="checkbox" checked={!!l.mask} onChange={e => setLayerField(store, ids, 'mask', (e.target as HTMLInputElement).checked, 'Use as mask')} /> Use as mask (masks the layers above it in the same group)</label>

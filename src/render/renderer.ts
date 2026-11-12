@@ -180,6 +180,10 @@ interface Item {
   h: Int32Array;
   /** has children: opacity < 1 needs group isolation */
   isoGroup: boolean;
+  /** time offset (precomp start times): local time = comp time - tOff */
+  tOff: number;
+  /** index of the item in the active comp that owns this one (itself, or the precomp layer it is inside) */
+  owner: number;
   hidden: boolean; // visible=false (self or ancestor)
   rasterBase: string | null;
   rasterKey: string | null; // last resolved atlas key
@@ -341,13 +345,29 @@ export class Renderer {
 
   private compile() {
     const store = this.store;
-    const order = store.drawOrder();
     const L = store.project.layers;
-    const n = order.length;
+    // flatten the layer tree depth-first; precomp layers expand the referenced comp inline
+    // (each expanded item gets its own time offset). items outside the active comp are not indexed.
+    const entries: { layer: Layer; parent: number; tOff: number; local: boolean; owner: number }[] = [];
+    const walk = (ids: string[], parent: number, tOff: number, local: boolean, owner: number, depth: number, stack: string[]) => {
+      for (const id of ids) {
+        const layer = L[id];
+        if (!layer) continue;
+        const idx = entries.length;
+        entries.push({ layer, parent, tOff, local, owner: local ? idx : owner });
+        if (layer.children.length) walk(layer.children, idx, tOff, local, local ? idx : owner, depth, stack);
+        if (layer.type === 'precomp' && layer.compRef && depth < 16 && !stack.includes(layer.compRef)) {
+          const comp = store.project.comps[layer.compRef];
+          if (comp) walk(comp.root, idx, tOff + (layer.startTime ?? 0), false, local ? idx : owner, depth + 1, [...stack, layer.compRef]);
+        }
+      }
+    };
+    walk(store.comp.root, -1, 0, true, -1, 0, [store.comp.id]);
+    const n = entries.length;
     this.pool.reset();
     this.items = new Array(n);
     this.index.clear();
-    for (let i = 0; i < n; i++) this.index.set(order[i], i);
+    for (let i = 0; i < n; i++) if (entries[i].local) this.index.set(entries[i].layer.id, i);
     if (this.world.length < n * 6) {
       const cap = Math.max(64, n * 2);
       this.world = new Float64Array(cap * 6);
@@ -359,16 +379,17 @@ export class Renderer {
       this.drawnMask = new Uint8Array(cap);
     }
     for (let i = 0; i < n; i++) {
-      const layer = L[order[i]];
-      const parent = layer.parent ? this.index.get(layer.parent) ?? -1 : -1;
+      const { layer, parent, tOff, owner } = entries[i];
       const it: Item = {
-        id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10), isoGroup: layer.children.length > 0,
+        id: layer.id, layer, parent, clip: -1, kind: KIND_NONE, tracks: [], animated: false, animMask: 0, h: new Int32Array(10), isoGroup: layer.children.length > 0 || layer.type === 'precomp',
         hidden: !layer.visible || (parent >= 0 && this.items[parent].hidden),
         rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
+        tOff, owner,
       };
       if (parent >= 0) {
         const p = this.items[parent];
-        it.clip = p.layer.clip ? parent : p.clip;
+        // precomps clip to their composition bounds (after effects)
+        it.clip = p.layer.clip || p.layer.type === 'precomp' ? parent : p.clip;
       }
       this.items[i] = it;
       this.compileItem(i);
@@ -409,6 +430,7 @@ export class Renderer {
       case 'path': it.kind = complex ? KIND_RGBA : KIND_MASK; break;
       case 'text': it.kind = KIND_MASK; break;
       case 'image': it.kind = KIND_RGBA; break;
+      case 'precomp': it.kind = KIND_NONE; break;
     }
     it.rasterBase = this.rasterBase(l, complex);
     it.rasterKey = null;
@@ -505,11 +527,12 @@ export class Renderer {
     const items = this.items, W = this.world, L = this.local, O = this.opa, LO = this.lopa;
     for (let i = from; i < to; i++) {
       const it = items[i];
-      if (it.animated) this.evalItem(i, t);
+      const tl = t - it.tOff;
+      if (it.animated) this.evalItem(i, tl);
       const o = i * 6;
       const p = it.parent;
       const l = it.layer;
-      const vis = it.hidden || t < l.inPoint || t >= l.outPoint ? 0 : 1;
+      const vis = it.hidden || tl < l.inPoint || tl >= l.outPoint ? 0 : 1;
       if (p < 0) {
         W[o] = L[o]; W[o + 1] = L[o + 1]; W[o + 2] = L[o + 2]; W[o + 3] = L[o + 3]; W[o + 4] = L[o + 4]; W[o + 5] = L[o + 5];
         O[i] = LO[i] * vis;
@@ -613,6 +636,8 @@ export class Renderer {
       // incremental recompiles append to the pool; repack when it has grown a lot
       if (this.pool.used > 1_000_000 && this.pool.used > this.poolLive * 3) this.needsCompile = true;
       if (this.needsCompile) { this.compile(); }
+      for (const id of this.dirtyLayers) if (!this.index.has(id)) { this.needsCompile = true; break; }
+      if (this.needsCompile) this.compile();
       for (const id of this.dirtyLayers) {
         const i = this.index.get(id);
         if (i !== undefined) { this.items[i].layer = store.project.layers[id]; this.compileItem(i); this.dirtyIdx.push(i); }
@@ -941,7 +966,8 @@ export class Renderer {
         // respect clipping ancestors
         if (it.clip >= 0 && !this.hitItem(it.clip, x, y)) continue;
         if (it.layer.type === 'group' && !this.drawnMask[i]) continue;
-        return it.id;
+        if (it.layer.mask) continue;
+        return this.items[it.owner]?.id ?? it.id;
       }
     }
     return null;
@@ -967,7 +993,7 @@ export class Renderer {
     const out: string[] = [];
     for (let i = 0; i < this.items.length; i++) {
       const it = this.items[i];
-      if (it.hidden || it.layer.locked) continue;
+      if (it.hidden || it.layer.locked || it.owner !== i) continue;
       const c = this.corners(it.id)!;
       const bx0 = Math.min(c[0], c[2], c[4], c[6]), bx1 = Math.max(c[0], c[2], c[4], c[6]);
       const by0 = Math.min(c[1], c[3], c[5], c[7]), by1 = Math.max(c[1], c[3], c[5], c[7]);

@@ -3,7 +3,7 @@
 import { evalProp } from './evaluate';
 import { EASE_PRESETS } from './easing';
 import {
-  createLayer, defaultEase, PROP_DEFS, uid,
+  createComp, createLayer, defaultEase, PROP_DEFS, uid,
   type Keyframe, type Layer, type LayerType, type Prop, type PropKey, type Interp,
 } from './model';
 import type { Store, Tx } from './store';
@@ -134,7 +134,7 @@ export function setLayerField<K extends keyof Layer>(store: Store, ids: string[]
       tx.set(l, key, value);
       tx.touch(id);
     }
-    if (key === 'visible' || key === 'clip' || key === 'mask') tx.structure();
+    if (key === 'visible' || key === 'clip' || key === 'mask' || key === 'startTime') tx.structure();
   });
 }
 
@@ -457,4 +457,79 @@ export function setCompSettings(store: Store, patch: Partial<{ width: number; he
 
 export function setProjectName(store: Store, name: string) {
   store.transact('Rename file', tx => { tx.set(store.project, 'name', name); tx.change.meta = true; });
+}
+
+// ---------------- compositions ----------------
+
+export function newComposition(store: Store, init: Partial<{ name: string; width: number; height: number; fps: number; duration: number }> = {}) {
+  const cur = store.comp;
+  const comp = createComp({ name: init.name ?? `Comp ${Object.keys(store.project.comps).length + 1}`, width: init.width ?? cur.width, height: init.height ?? cur.height, fps: init.fps ?? cur.fps, duration: init.duration ?? cur.duration, background: [...cur.background] as any });
+  store.transact('New composition', tx => { tx.set(store.project.comps, comp.id, comp); tx.comp(); });
+  store.emit('comps');
+  return comp;
+}
+
+/** comps that (directly or through nesting) contain a precomp layer of `compId` */
+function compUses(store: Store, outer: string, inner: string, seen = new Set<string>()): boolean {
+  if (outer === inner) return true;
+  if (seen.has(outer)) return false;
+  seen.add(outer);
+  const P = store.project;
+  const walk = (ids: string[]): boolean => ids.some(id => {
+    const l = P.layers[id];
+    if (!l) return false;
+    if (l.type === 'precomp' && l.compRef && compUses(store, l.compRef, inner, seen)) return true;
+    return walk(l.children);
+  });
+  return walk(P.comps[outer]?.root ?? []);
+}
+
+/** add a precomp layer of `compId` to the active comp (refuses cycles) */
+export function addPrecompLayer(store: Store, compId: string) {
+  const comp = store.project.comps[compId];
+  if (!comp) throw new Error('no such composition');
+  if (compUses(store, compId, store.comp.id)) throw new Error('that would nest a composition inside itself');
+  const cur = store.comp;
+  const l = createLayer('precomp', { name: comp.name, w: comp.width, h: comp.height, x: (cur.width - comp.width) / 2, y: (cur.height - comp.height) / 2 });
+  l.compRef = compId;
+  l.startTime = 0;
+  store.transact('Add precomp', tx => insertLayer(store, tx, l, null));
+  store.select([l.id]);
+  return l;
+}
+
+/** after effects "pre-compose": move the selected top-level layers into a new comp, replaced by one precomp layer */
+export function precompose(store: Store, ids: string[], name?: string) {
+  const P = store.project;
+  const cur = store.comp;
+  // only layers directly in the active comp root (keeps the math simple and predictable)
+  const roots = cur.root.filter(id => ids.includes(id));
+  if (!roots.length) throw new Error('select top-level layers to pre-compose');
+  const comp = createComp({ name: name ?? `${P.layers[roots[roots.length - 1]].name} comp`, width: cur.width, height: cur.height, fps: cur.fps, duration: cur.duration, background: [0, 0, 0, 0] });
+  const pc = createLayer('precomp', { name: comp.name, w: cur.width, h: cur.height, x: 0, y: 0 });
+  pc.compRef = comp.id;
+  pc.startTime = 0;
+  const index = cur.root.indexOf(roots[roots.length - 1]);
+  store.transact('Pre-compose', tx => {
+    comp.root = roots.slice();
+    tx.set(P.comps, comp.id, comp);
+    const rest = cur.root.filter(id => !roots.includes(id));
+    const at = rest.length - (cur.root.length - 1 - index);
+    rest.splice(Math.max(0, at), 0, pc.id);
+    tx.set(P.layers, pc.id, pc);
+    pc.parent = null;
+    tx.set(cur, 'root', rest);
+    tx.structure();
+    tx.comp();
+  });
+  store.select([pc.id]);
+  store.emit('comps');
+  return { comp, layer: pc };
+}
+
+export function renameComp(store: Store, id: string, name: string) {
+  const c = store.project.comps[id];
+  if (!c) return;
+  store.transact('Rename composition', tx => { tx.set(c, 'name', name); tx.comp(); });
+  store.emit('comps');
 }

@@ -9,7 +9,7 @@ import { showContextMenu, type MenuItem } from './menu';
 import {
   exportLottie, loadDemo, loadStress, newProject, openBrowserFile, openFileDialog, saveProject, setupShortcuts, toast,
 } from '../app/actions';
-import { setProjectName, editMode } from '../core/commands';
+import { setProjectName, editMode, newComposition, addPrecompLayer, renameComp } from '../core/commands';
 
 let vp: ViewportController | null = null;
 let tl: Timeline | null = null;
@@ -38,7 +38,7 @@ export function App() {
 
 // ---------------- top bar ----------------
 function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
-  useChannels(['doc', 'playing', 'history'], ['view']);
+  useChannels(['doc', 'playing', 'history', 'comps'], ['view']);
   const s = editor.store;
   const time = useRef<HTMLSpanElement>(null);
   useEffect(() => editor.onFrame((_n, t) => {
@@ -80,6 +80,17 @@ function TopBar(props: { agentOpen: boolean; toggleAgent: () => void }) {
         <button class="ghost logo" onClick={fileMenu as any} title="Menu">◆ Motion ▾</button>
         <input class="filename" value={s.project.name} onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
           onChange={e => setProjectName(s, (e.target as HTMLInputElement).value || 'Untitled')} spellcheck={false} />
+        <button class="ghost comp-switch" title="Compositions" onClick={(e: MouseEvent) => {
+          const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+          const comps = Object.values(s.project.comps);
+          showContextMenu(r.left, r.bottom + 4, [
+            ...comps.map(c => ({ label: (c.id === s.comp.id ? '● ' : '   ') + c.name, action: () => s.openComp(c.id) })),
+            { separator: true },
+            { label: 'New composition', action: () => { const c = newComposition(s); s.openComp(c.id); } },
+            ...(comps.length > 1 ? [{ label: 'Add composition as layer', submenu: comps.filter(c => c.id !== s.comp.id).map(c => ({ label: c.name, action: () => { try { addPrecompLayer(s, c.id); } catch (err: any) { toast(err.message, 'error'); } } })) }] : []),
+            { label: 'Rename composition…', action: () => { const n = prompt('Composition name', s.comp.name); if (n) renameComp(s, s.comp.id, n); } },
+          ]);
+        }}>▣ {s.comp.name} ▾</button>
         <span class="muted small">{s.comp.width}×{s.comp.height} · {s.comp.fps}fps · {s.comp.duration}s</span>
       </div>
       <div class="tb-center">

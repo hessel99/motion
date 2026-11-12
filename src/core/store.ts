@@ -174,6 +174,20 @@ export class Store {
     this.emit('history');
   }
 
+  /** switch the active composition (view state, not an undoable edit) */
+  openComp(id: string) {
+    if (!this.project.comps[id] || id === this.project.activeComp) return;
+    this.project.activeComp = id;
+    this.selection = [];
+    this.keySelection.clear();
+    this.time = Math.min(this.time, this.comp.duration);
+    this.emitChange({ structure: true, comp: true, layers: new Set(), meta: false, assets: false });
+    this.emit('selection');
+    this.emit('keys');
+    this.emit('time');
+    this.emit('comps');
+  }
+
   // ---------- selection / time ----------
   select(ids: string[], mode: 'replace' | 'add' | 'toggle' = 'replace') {
     let next: string[];

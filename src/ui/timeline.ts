@@ -5,7 +5,7 @@
 import type { Editor } from '../app/editor';
 import {
   isAnimated, keyId, layerKeyTimes, moveKeyframes, moveLayers, parseKeyId, renameLayer, setLayerField, valueAt,
-  addKeyframe, deleteKeyframes, toggleAnimated,
+  addKeyframe, deleteKeyframes, toggleAnimated, precompose,
 } from '../core/commands';
 import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type PropKey } from '../core/model';
 import { showContextMenu, type MenuItem } from './menu';
@@ -80,6 +80,7 @@ export class Timeline {
     st.on('selection', () => { this.baseDirty = true; });
     st.on('keys', () => { this.baseDirty = true; });
     st.on('time', () => { if (!st.playing) this.baseDirty = true; });
+    st.on('comps', () => { this.expanded.clear(); this.scrollY = 0; this.fitTime(); this.rowsDirty = true; this.baseDirty = true; });
     ed.on('loaded', () => {
       lastDur = st.comp.duration; this.expanded.clear(); this.scrollY = 0; this.autoFit = true; this.rowsDirty = true; this.baseDirty = true; this.resize(); });
     ed.onFrame(() => this.frame());
@@ -765,6 +766,7 @@ export class Timeline {
     const i = this.rowAtY(y);
     if (i < 0) return;
     const r = this.rows[i];
+    if (x < this.leftW && r.kind === 'layer' && r.layer.type === 'precomp' && r.layer.compRef && x < this.leftW - 50 && x > 8 + r.depth * INDENT + 10 && x < 8 + r.depth * INDENT + 28) { this.ed.store.openComp(r.layer.compRef); return; }
     if (x < this.leftW && r.kind === 'layer') this.startRename(r, i);
     else if (x > this.leftW && r.kind === 'prop') {
       // double click on empty track: add keyframe at that time
@@ -837,6 +839,8 @@ export class Timeline {
         items.push({ label: 'Animate', submenu: props.map(p => ({ label: (isAnimated(r.layer, p) ? '✓ ' : '') + PROP_DEFS[p].label, action: () => { toggleAnimated(st, st.selection, p); this.expand(r.id); } })) });
         items.push({ label: r.layer.visible ? 'Hide' : 'Show', action: () => setLayerField(st, st.selection, 'visible', !r.layer.visible) });
         items.push({ label: 'Rename', action: () => this.startRename(r, i) });
+        items.push({ label: 'Pre-compose', shortcut: '⇧⌘C', action: () => { try { precompose(st, st.selection); } catch (err: any) { alert(err.message); } } });
+        if (r.layer.type === 'precomp' && r.layer.compRef) items.push({ label: 'Open composition', action: () => st.openComp(r.layer.compRef!) });
       }
     }
     if (items.length) showContextMenu(e.clientX, e.clientY, items);
@@ -881,6 +885,7 @@ function drawTypeIcon(g: CanvasRenderingContext2D, type: Layer['type'], x: numbe
     case 'text': g.font = 'bold 11px system-ui'; g.fillText('T', x - 3.5, y + 0.5); break;
     case 'image': g.rect(x - 5, y - 4, 10, 8); g.moveTo(x - 5, y + 3); g.lineTo(x - 1, y - 1); g.lineTo(x + 2, y + 2); g.stroke(); break;
     case 'path': g.moveTo(x - 5, y + 4); g.bezierCurveTo(x - 3, y - 6, x + 3, y + 6, x + 5, y - 4); g.stroke(); break;
+    case 'precomp': g.rect(x - 5, y - 4, 10, 8); g.rect(x - 2.5, y - 1.5, 5, 3); g.stroke(); break;
   }
 }
 function ellipsize(g: CanvasRenderingContext2D, s: string, max: number) {

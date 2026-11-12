@@ -452,6 +452,7 @@ export class ViewportController {
     const st = this.ed.store;
     const l = st.layer(hit)!;
     if (l.type === 'text') { st.select([hit]); this.onTextEdit?.(hit); return; }
+    if (l.type === 'precomp' && l.compRef) { st.openComp(l.compRef); return; }
     // double click enters groups: select the next level down
     const sel = st.selection[0];
     let cur: string | null = hit, prev = hit;
