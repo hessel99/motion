@@ -36,8 +36,17 @@ export interface Prop {
   bind?: string;
 }
 
-export type BlendMode = 'normal' | 'multiply' | 'screen' | 'add' | 'darken' | 'lighten';
-export const BLEND_MODES: BlendMode[] = ['normal', 'multiply', 'screen', 'add', 'darken', 'lighten'];
+export type BlendMode =
+  | 'normal' | 'multiply' | 'screen' | 'add' | 'darken' | 'lighten'
+  // modes that need the backdrop (rendered with a compositing shader)
+  | 'overlay' | 'softLight' | 'hardLight' | 'colorDodge' | 'colorBurn' | 'linearBurn'
+  | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity';
+export const BLEND_MODES: BlendMode[] = [
+  'normal', 'darken', 'multiply', 'linearBurn', 'colorBurn', 'lighten', 'screen', 'add', 'colorDodge',
+  'overlay', 'softLight', 'hardLight', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity',
+];
+/** modes the gpu blend unit does on its own (everything else composites through a shader) */
+export const SIMPLE_BLENDS: ReadonlySet<BlendMode> = new Set<BlendMode>(['normal', 'multiply', 'screen', 'add', 'darken', 'lighten']);
 
 export type LayerType = 'group' | 'rect' | 'ellipse' | 'path' | 'text' | 'image' | 'precomp' | 'audio';
 
@@ -56,22 +65,44 @@ export const PROP_DEFS = {
   trimStart: { label: 'Trim Start', dim: 1, default: [0], unit: '%', min: 0, max: 100 },
   trimEnd: { label: 'Trim End', dim: 1, default: [100], unit: '%', min: 0, max: 100 },
   trimOffset: { label: 'Trim Offset', dim: 1, default: [0], unit: '°' },
+  // effects (see Effect below): the first effect of each type reads these, so shadows, blurs and
+  // noise are keyframable like any property (timeline, graph editor, agent tools)
+  shadowColor: { label: 'Shadow Color', dim: 4, default: [0, 0, 0, 0.25], unit: 'color' },
+  shadowOffset: { label: 'Shadow Offset', dim: 2, default: [0, 4], unit: 'px' },
+  shadowBlur: { label: 'Shadow Blur', dim: 1, default: [4], unit: 'px', min: 0 },
+  shadowSpread: { label: 'Shadow Spread', dim: 1, default: [0], unit: 'px' },
+  innerShadowColor: { label: 'Inner Shadow Color', dim: 4, default: [0, 0, 0, 0.25], unit: 'color' },
+  innerShadowOffset: { label: 'Inner Shadow Offset', dim: 2, default: [0, 4], unit: 'px' },
+  innerShadowBlur: { label: 'Inner Shadow Blur', dim: 1, default: [4], unit: 'px', min: 0 },
+  innerShadowSpread: { label: 'Inner Shadow Spread', dim: 1, default: [0], unit: 'px' },
+  blur: { label: 'Layer Blur', dim: 1, default: [0], unit: 'px', min: 0 },
+  backgroundBlur: { label: 'Background Blur', dim: 1, default: [0], unit: 'px', min: 0 },
+  noiseColor: { label: 'Noise Color', dim: 4, default: [0, 0, 0, 0.25], unit: 'color' },
+  noiseSize: { label: 'Noise Size', dim: 1, default: [1], unit: 'px', min: 0 },
+  noiseDensity: { label: 'Noise Density', dim: 1, default: [50], unit: '%', min: 0, max: 100 },
 } as const;
 
 export type PropKey = keyof typeof PROP_DEFS;
 export const PROP_KEYS = Object.keys(PROP_DEFS) as PropKey[];
 export const TRANSFORM_KEYS: PropKey[] = ['anchor', 'position', 'scale', 'rotation', 'opacity'];
 
+/** effect parameters (animatable). a layer only has the ones it uses */
+export const EFFECT_KEYS: PropKey[] = [
+  'shadowColor', 'shadowOffset', 'shadowBlur', 'shadowSpread',
+  'innerShadowColor', 'innerShadowOffset', 'innerShadowBlur', 'innerShadowSpread',
+  'blur', 'backgroundBlur', 'noiseColor', 'noiseSize', 'noiseDensity',
+];
+
 /** which props each layer type exposes (beyond transform) */
 export const TYPE_PROPS: Record<LayerType, PropKey[]> = {
-  group: ['size', 'radius', 'fill', 'stroke', 'strokeWidth'],
-  rect: ['size', 'radius', 'fill', 'stroke', 'strokeWidth'],
-  ellipse: ['size', 'fill', 'stroke', 'strokeWidth'],
-  path: ['size', 'fill', 'stroke', 'strokeWidth', 'trimStart', 'trimEnd', 'trimOffset'],
-  text: ['size', 'fill'],
-  image: ['size'],
+  group: ['size', 'radius', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
+  rect: ['size', 'radius', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
+  ellipse: ['size', 'fill', 'stroke', 'strokeWidth', ...EFFECT_KEYS],
+  path: ['size', 'fill', 'stroke', 'strokeWidth', 'trimStart', 'trimEnd', 'trimOffset', ...EFFECT_KEYS],
+  text: ['size', 'fill', ...EFFECT_KEYS],
+  image: ['size', ...EFFECT_KEYS],
   audio: [],
-  precomp: ['size'],
+  precomp: ['size', ...EFFECT_KEYS],
 };
 
 export type PathCmd =
@@ -84,17 +115,101 @@ export type PathCmd =
 export interface PathGeometry {
   cmds: PathCmd[];
   fillRule: 'nonzero' | 'evenodd';
+  /** this region's own paints (figma vector networks with differently filled regions) */
+  paints?: Paint[];
 }
 
 export interface GradientStop { pos: number; color: [number, number, number, number] }
+
+/** image adjustments in figma's ranges (-1..1, 0 = unchanged) */
+export interface ImageFilters {
+  exposure?: number; contrast?: number; saturation?: number; temperature?: number; tint?: number; highlights?: number; shadows?: number;
+}
+
+export type PaintType = 'solid' | 'linear' | 'radial' | 'angular' | 'diamond' | 'image' | 'noise' | 'pattern';
 export interface Paint {
-  type: 'solid' | 'linear' | 'radial' | 'image';
+  type: PaintType;
   color?: [number, number, number, number];
   stops?: GradientStop[];
-  /** gradient transform: maps unit gradient space to layer box (a,b,c,d,e,f) */
+  /** gradient transform: maps unit gradient space to layer box (a,b,c,d,e,f). gradient space:
+   *  linear runs (0,.5) -> (1,.5); radial / diamond / angular are centered at (.5,.5) with radius .5
+   *  (angular starts at +x and turns clockwise, y down). image 'stretch' (crop): unit image square -> box */
   transform?: number[];
   imageRef?: string;
   opacity?: number;
+  /** blend mode of this paint over the paints below it (same layer) */
+  blend?: BlendMode;
+  /** image paints: how the image covers the box */
+  scaleMode?: 'fill' | 'fit' | 'tile' | 'stretch';
+  /** image rotation in degrees (figma rotates by 90° steps) */
+  rotation?: number;
+  /** tile scale (tile mode: 1 = native image pixels) */
+  tileScale?: number;
+  filters?: ImageFilters;
+  /** noise paint (figma "noise" fill) */
+  noise?: NoiseParams;
+}
+
+export interface NoiseParams {
+  mode: 'mono' | 'duo' | 'multi';
+  /** grain cell size (px) */
+  size: number;
+  /** share of the cells that get grain, 0..1 */
+  density: number;
+  /** mono: grain color; duo: first color */
+  color?: number[];
+  /** duo: second color */
+  secondary?: number[];
+  /** multi: grain opacity */
+  opacity?: number;
+  seed?: number;
+}
+
+export type EffectType = 'dropShadow' | 'innerShadow' | 'layerBlur' | 'backgroundBlur' | 'noise' | 'texture' | 'glass';
+/** a layer effect, figma order. the FIRST effect of each type takes its animatable values from the
+ *  layer props when the layer has them (shadowColor / shadowOffset / shadowBlur / shadowSpread,
+ *  innerShadow*, blur, backgroundBlur, noiseColor / noiseSize / noiseDensity); the fields here are
+ *  the static values (and the only values of further effects of that type). a layer with e.g. a
+ *  shadowColor prop and no dropShadow effect gets one implicitly (agents can just set props). */
+export interface Effect {
+  type: EffectType;
+  visible?: boolean;
+  color?: number[];
+  offset?: [number, number];
+  /** blur radius (figma units: gaussian sigma = radius / 2) */
+  radius?: number;
+  spread?: number;
+  blend?: BlendMode;
+  /** drop shadow: also visible through transparent parts of the layer (figma "show behind") */
+  showBehind?: boolean;
+  /** progressive layer / background blur: radius goes from startRadius at `start` to radius at
+   *  `end` (points in the layer box, 0..1) */
+  progressive?: { start: [number, number]; end: [number, number]; startRadius: number };
+  /** noise / texture effects */
+  noise?: NoiseParams;
+  /** texture / glass parameters (best effort, see docs/figma-fidelity.md) */
+  params?: Record<string, number>;
+}
+
+export interface TextRun {
+  /** [start, end) in content (utf-16 indices) */
+  start: number;
+  end: number;
+  fontFamily?: string;
+  fontWeight?: number;
+  fontStyle?: 'normal' | 'italic';
+  fontSize?: number;
+  fill?: number[];
+  decoration?: 'underline' | 'strike';
+  letterSpacing?: number;
+}
+
+/** figma's own glyph outlines of a text layer (exact fonts, kerning, features, wrapping, lists).
+ *  drawn while the text still matches `sig` (textSig); after an edit, live layout takes over */
+export interface TextOutline {
+  sig: string;
+  /** glyph + decoration geometry per style, in the local box; fill null = the layer fill */
+  groups: { geometry: PathGeometry[]; fill: number[] | null }[];
 }
 
 export interface TextData {
@@ -105,7 +220,34 @@ export interface TextData {
   fontStyle?: 'normal' | 'italic';
   lineHeight: number; // multiplier
   letterSpacing: number; // px
-  align: 'left' | 'center' | 'right';
+  align: 'left' | 'center' | 'right' | 'justify';
+  valign?: 'top' | 'center' | 'bottom';
+  /** 'width': the box grows with the text (no wrapping); 'height': wraps at the box width */
+  autoResize?: 'width' | 'height';
+  decoration?: 'underline' | 'strike';
+  /** extra space after each paragraph (px) */
+  paragraphSpacing?: number;
+  /** first-line indent of each paragraph (px) */
+  paragraphIndent?: number;
+  /** applied when drawn (content stays as typed) */
+  textCase?: 'upper' | 'lower' | 'title' | 'smallCaps';
+  /** truncate with an ellipsis after this many lines */
+  maxLines?: number;
+  truncate?: boolean;
+  /** style runs (figma character style overrides) */
+  runs?: TextRun[];
+  /** opentype features switched on ('ss01') or off ('-liga') */
+  features?: string[];
+  /** variable font axes (tag -> value) */
+  variations?: Record<string, number>;
+  /** list marker per paragraph */
+  lists?: ('ul' | 'ol' | null)[];
+  outline?: TextOutline;
+}
+
+/** what a text layer's look depends on: TextOutline.sig must equal this for the outline to be used */
+export function textSig(t: TextData, size: number[] | undefined): string {
+  return [t.content, t.fontFamily, t.fontSize, t.fontWeight, t.fontStyle ?? 'normal', t.lineHeight, t.letterSpacing, t.align, t.textCase ?? '', t.paragraphSpacing ?? 0, Math.round(size?.[0] ?? 0), Math.round(size?.[1] ?? 0)].join('|');
 }
 
 /** keyframed path shape (morphing). commands are interpolated pairwise when the structure matches */
@@ -147,8 +289,13 @@ export interface Layer {
   clip?: boolean;
   /** figma-style mask: this layer's alpha masks the siblings above it (in the same parent) */
   mask?: boolean;
-  /** blend mode with what is below (gpu blend functions; premultiplied colors) */
+  /** what the mask uses: alpha (default), luminance, or the shape outline ("vector": geometry
+   *  coverage, ignoring fill opacity) */
+  maskType?: 'alpha' | 'luminance' | 'vector';
+  /** blend mode with what is below (premultiplied colors) */
   blend?: BlendMode;
+  /** effects (shadows, blurs, noise...), figma order */
+  effects?: Effect[];
   /** in/out points in seconds; layer is hidden outside */
   inPoint: number;
   outPoint: number;
@@ -156,6 +303,17 @@ export interface Layer {
   /** fills beyond a single solid color (gradients) make the layer render through the raster path */
   paints?: Paint[];
   strokeAlign?: 'inside' | 'center' | 'outside';
+  /** stroke paints beyond one color (gradients, images); strokeWidth still sets the width */
+  strokePaints?: Paint[];
+  /** dash pattern (px, alternating dash / gap) */
+  dash?: number[];
+  strokeCap?: 'butt' | 'round' | 'square';
+  strokeJoin?: 'miter' | 'round' | 'bevel';
+  miterLimit?: number;
+  /** per-side stroke weights of a box [top, right, bottom, left] (figma "individual strokes") */
+  strokeSides?: [number, number, number, number];
+  /** corner smoothing 0..1 (squircle corners; figma's "iOS" preset is 0.6) */
+  smoothing?: number;
   geometry?: PathGeometry[]; // for 'path': coordinates in geometry space (0..geomSize)
   /** size the geometry was authored at; rendering scales geometry by size/geomSize */
   geomSize?: [number, number];

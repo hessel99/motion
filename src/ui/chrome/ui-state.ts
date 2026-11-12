@@ -10,7 +10,7 @@ export type SettingsSection =
   | 'profile' | 'appearance' | 'notifications' | 'shortcuts'
   | 'models' | 'runs' | 'connections'
   | 'members' | 'fonts'
-  | 'updates';
+  | 'updates' | 'figma';
 
 const KEY = 'motion.ui';
 interface UiState { view: 'editor' | 'settings'; settingsOpen: boolean; leftTab: LeftTab; leftOpen: boolean; section: SettingsSection; /** timeline height in css px (the transport's splitter) */ tlH: number }

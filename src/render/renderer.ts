@@ -15,8 +15,10 @@ import type { Store, Change } from '../core/store';
 import { Atlas, type AtlasEntry } from './atlas';
 import type { PathGeometry, PathKey } from '../core/model';
 import { loadBundledFonts } from './fonts';
+import { EffectEval, hasEffects, needsBlendShader, type ResolvedEffect } from './effects';
+import { FxPipeline, BLEND_SHADER, type FxRegion } from './fx';
 import { cubicBezier, EASE_PRESETS, springAt } from '../core/easing';
-import { layoutText, textUnits, type TextUnit, rasterImage, rasterPath, rasterShapePaint, rasterText, setImageLoadedHandler, drawPathMask, pathPlacement, rasterBox, imageMaxScale, type RasterClip, type RasterResult } from './raster';
+import { layoutText, textUnits, type TextUnit, rasterPath, rasterText, setImageLoadedHandler, drawPathMask, pathPlacement, rasterBox, imageMaxScale, rasterLayer, needsMainThread, needsShapeRaster, hasComplexPaint, setAssetLookup, type RasterClip, type RasterResult } from './raster';
 
 const F = 40; // floats per instance
 const KIND_RECT = 0, KIND_ELLIPSE = 1, KIND_MASK = 2, KIND_RGBA = 3, KIND_NONE = 4;
@@ -24,6 +26,8 @@ const KIND_RECT = 0, KIND_ELLIPSE = 1, KIND_MASK = 2, KIND_RGBA = 3, KIND_NONE =
 // shader from a ramp texture (no raster, no atlas space; size / radius animate for free)
 const KIND_GRECT = 5, KIND_GELL = 6;
 const RAMP_W = 256;
+/** gradient kinds the instance shader draws (vJ.z): linear, radial, angular, diamond */
+const GRAD_MODE: Partial<Record<Paint['type'], number>> = { linear: 0, radial: 1, angular: 2, diamond: 3 };
 /** max raster area (px) the anticipatory max-scale boost may produce: 1/8 of an atlas page */
 const BOOST_AREA = 2048 * 2048 / 8;
 /** viewport tiles (layers whose raster at screen resolution would be too big): tile size in raster px */
@@ -106,6 +110,8 @@ uniform sampler2D uRamp;
 uniform float uRampH;
 uniform sampler2D uDyn;
 uniform float uDynH;
+// coverage mode (effects: shadow source, knock-out, backdrop clip; vector masks): shape coverage, no color
+uniform float uCov;
 in vec2 vLocal;
 in vec2 vWorld;
 in vec2 vUV;
@@ -141,9 +147,14 @@ void main() {
   vec4 fill = vec4(vFill.rgb * vFill.a, vFill.a);
   vec4 stroke = vec4(vStroke.rgb * vStroke.a, vStroke.a);
   vec4 col;
+  float cv = 0.0;
   if (kind < 1.5 || kind > 4.5) {
     if (kind > 4.5) {
-      float gt = vJ.z > 0.5 ? length(vUV - 0.5) * 2.0 : vUV.x;
+      float gt;
+      if (vJ.z < 0.5) gt = vUV.x;
+      else if (vJ.z < 1.5) gt = length(vUV - 0.5) * 2.0;
+      else if (vJ.z < 2.5) { vec2 gd = vUV - 0.5; gt = fract(atan(gd.y, gd.x) * 0.15915494); }
+      else { vec2 gd = abs(vUV - 0.5); gt = (gd.x + gd.y) * 2.0; }
       fill = textureLod(uRamp, vec2(clamp(gt, 0.0, 1.0), (vH.x + 0.5) / uRampH), 0.0);
     }
     vec2 h = vSize * 0.5;
@@ -159,22 +170,26 @@ void main() {
       sc = clamp(0.5 - (d - outer) / w, 0.0, 1.0) - clamp(0.5 - (d - inner) / w, 0.0, 1.0);
     }
     col = stroke * sc + fill * fc * (1.0 - stroke.a * sc);
+    cv = max(fill.a > 0.0 || kind > 4.5 ? fc : 0.0, stroke.a > 0.0 ? sc : 0.0);
   } else {
     // page -1: per-frame shapes (their own canvas texture, 2048 wide, uDynH tall)
     vec4 t = vH.x < -0.5 ? textureLod(uDyn, vec2(vUV.x, vUV.y * 2048.0 / uDynH), 0.0) : textureLod(uTex, vec3(vUV, vH.x), 0.0);
     if (kind < 2.5) {
       col = stroke * t.g + fill * t.r * (1.0 - stroke.a * t.g);
+      cv = max(fill.a > 0.0 ? t.r : 0.0, stroke.a > 0.0 ? t.g : 0.0);
     } else {
       col = t * vFill.a;
+      cv = clamp(t.a * 4.0, 0.0, 1.0);
     }
   }
   col *= opacity;
+  float clipc = 1.0;
   if (vH.z >= 0.0) {
     vec2 cp = mat2(vI.xy, vI.zw) * vWorld + vJ.xy;
     vec2 ch = vH.zw * 0.5;
-    col *= cov(sdRoundBox(cp - ch, ch, vec4(vH.y)));
+    clipc = cov(sdRoundBox(cp - ch, ch, vec4(vH.y)));
   }
-  o = col;
+  o = uCov > 0.5 ? vec4(cv * clipc) : col * clipc;
 }`;
 
 const CVS = `#version 300 es
@@ -190,12 +205,14 @@ uniform float uUseMask;
 in vec2 vUV;
 out vec4 o;
 void main() {
-  float m = uUseMask > 0.5 ? texture(uMask, vUV).a : 1.0;
+  vec4 mk = texture(uMask, vUV);
+  float m = uUseMask > 1.5 ? dot(mk.rgb, vec3(0.2126, 0.7152, 0.0722)) : uUseMask > 0.5 ? mk.a : 1.0;
   o = texture(uSrc, vUV) * (uOpacity * m);
 }`;
 
 // command list for one frame (offscreen isolation for group opacity + masks)
-const CMD_DRAW = 0, CMD_PUSH = 1, CMD_POP = 2, CMD_MASK = 3, CMD_BLEND = 4;
+const CMD_DRAW = 0, CMD_PUSH = 1, CMD_POP = 2, CMD_MASK = 3, CMD_BLEND = 4, CMD_FXPOP = 5, CMD_MASKMODE = 6;
+const MASK_MODE: Record<string, number> = { alpha: 0, luminance: 1, vector: 2 };
 const BLEND_IDS: Record<string, number> = { normal: 0, multiply: 1, screen: 2, add: 3, darken: 4, lighten: 5 };
 
 interface UnitState { unit: TextUnit; delay: number; ease: (p: number) => number; entry: AtlasEntry | null; raster: RasterResult | null; scale: number }
@@ -219,6 +236,10 @@ interface Item {
   owner: number;
   /** per-unit text animation state */
   units: UnitState[] | null;
+  /** effects (shadows, blurs, noise...) of this layer, compiled; null = none */
+  fx: EffectEval | null;
+  /** blend mode the effect composite applies (BLEND_SHADER id; 0 = normal) */
+  fxBlend: number;
   /** per-frame raster (animated path shape / trim paths) */
   dyn: { base: string; need: boolean; trim: Track[] | null; pkf: PathKey[] | null; eases: ((p: number) => number)[]; frame: number; t: number } | null;
   /** properties driven by expressions (bit = TR_* index) + their compiled programs */
@@ -393,7 +414,8 @@ export class Renderer {
     store.onChange(c => this.onChange(c));
     // bundled fonts arrive async: re-raster text once they are loaded (no-op if already cached)
     loadBundledFonts().then(() => { this.invalidateText(); });
-    setImageLoadedHandler(() => { for (const it of this.items) if (it.layer.type === 'image') { it.rasterKey = null; it.entry = null; } this.dirty = true; });
+    setImageLoadedHandler(() => { for (const it of this.items) if (it.layer.type === 'image' || (it.rasterBase && needsMainThread(it.layer))) { it.rasterKey = null; it.entry = null; } this.dirty = true; });
+    setAssetLookup(id => this.store.project.assets[id]);
     // gpu resets (macos gpu switch, sleep, driver crash): rebuild everything; atlas pages come back
     // from their cpu shadow copies, so nothing has to be re-rasterized
     this.canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.contextLost = true; });
@@ -403,6 +425,7 @@ export class Renderer {
       this.atlas.restore();
       this.fbos = [];
       this.cprog = null;
+      this.fxp = null;
       this.icap = 0;
       this.dirty = true;
       this.contextRestores++;
@@ -439,6 +462,8 @@ export class Renderer {
     this.uRampH = gl.getUniformLocation(this.prog, 'uRampH')!;
     gl.uniform1i(gl.getUniformLocation(this.prog, 'uDyn'), 4);
     this.uDynH = gl.getUniformLocation(this.prog, 'uDynH')!;
+    this.uCov = gl.getUniformLocation(this.prog, 'uCov')!;
+    gl.uniform1f(this.uCov, 0);
     this.dynTex = null; this.dynTexStale = true;
     this.rampTex = null; // (re)created from the cpu copy on the next frame
   }
@@ -688,7 +713,7 @@ export class Renderer {
         this.sIn[i] = layer.inPoint; this.sOut[i] = layer.outPoint;
         this.sFlags[i] = (it.animated ? 1 : 0) | (hidden ? 2 : 0);
         this.sBits[i] = (this.sBits[i] & ~3) | (layer.mask ? 1 : 0) | (isoGroup ? 2 : 0);
-        this.sBlend[i] = layer.blend ? BLEND_IDS[layer.blend] ?? 0 : 0;
+        this.sBlend[i] = it.fx || it.fxBlend ? 0 : layer.blend ? BLEND_IDS[layer.blend] ?? 0 : 0;
         this.sAlign[i] = layer.strokeAlign === 'inside' ? -1 : layer.strokeAlign === 'outside' ? 1 : 0;
         this.unitCount += it.units?.length ?? 0;
         reused++;
@@ -696,7 +721,7 @@ export class Renderer {
         const it: Item = {
           id: layer.id, layer, parent, clip, kind: KIND_NONE, animated: false, animMask: 0, isoGroup, hidden,
           rasterBase: null, rasterKey: null, raster: null, rasterScale: 0, rasterGen: -1, entry: null, maxScale: 1,
-          tOff, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null,
+          tOff, owner, units: null, exprMask: 0, exprs: null, tEnd, dyn: null, fx: null, fxBlend: 0,
         };
         this.items[i] = it;
         this.compileItem(i, src);
@@ -742,7 +767,8 @@ export class Renderer {
   private sigOf(l: Layer, out: unknown[]) {
     out.length = 0;
     const pv = this.store.previewProps.get(l.id);
-    out.push(l.type, l.props, pv, l.paints, l.geometry, l.strokeGeometry, l.strokeAlign, l.text, l.textAnim, l.pathKf, l.trimOn, l.imageRef, l.mask, l.blend, this.fontGen);
+    out.push(l.type, l.props, pv, l.paints, l.geometry, l.strokeGeometry, l.strokeAlign, l.text, l.textAnim, l.pathKf, l.trimOn, l.imageRef, l.mask, l.blend, this.fontGen,
+      l.strokePaints, l.dash, l.strokeCap, l.strokeJoin, l.miterLimit, l.strokeSides, l.smoothing, l.effects, l.maskType);
     for (const key of SIG_KEYS) { const p = pv?.[key] ?? l.props[key]; out.push(p, p?.v, p?.kf, p?.expr); }
     return out;
   }
@@ -793,9 +819,10 @@ export class Renderer {
     const sp = this.store.renderProp(l, 'scale');
     it.maxScale = sp?.kf?.length ? Math.max(...sp.kf.map(k => Math.max(Math.abs(k.v[0]), Math.abs(k.v[1])))) / 100 : 1;
     it.animated = mask !== 0;
-    let complex = !!l.paints?.some(p => p.type !== 'solid');
+    let complex = hasComplexPaint(l);
+    const shapeRaster = needsShapeRaster(l);
     const gp = l.paints?.length === 1 ? l.paints[0] : null;
-    const shaderGrad = complex && !!gp && (gp.type === 'linear' || gp.type === 'radial') && !!gp.stops?.length && (l.type === 'rect' || l.type === 'group' || l.type === 'ellipse');
+    const shaderGrad = complex && !shapeRaster && !l.strokePaints?.length && !!gp && GRAD_MODE[gp.type] !== undefined && (!gp.blend || gp.blend === 'normal') && !!gp.stops?.length && (l.type === 'rect' || l.type === 'group' || l.type === 'ellipse');
     if (shaderGrad) {
       const m = gp!.transform ?? [1, 0, 0, 1, 0, 0];
       const [a, b, c, d, e, f] = m;
@@ -804,19 +831,19 @@ export class Renderer {
       G[og] = d / det; G[og + 1] = -b / det; G[og + 2] = -c / det; G[og + 3] = a / det;
       G[og + 4] = (c * f - d * e) / det; G[og + 5] = (b * e - a * f) / det;
       G[og + 6] = this.rampRow(gp!);
-      G[og + 7] = gp!.type === 'radial' ? 1 : 0;
+      G[og + 7] = GRAD_MODE[gp!.type] ?? 0;
       complex = false; // no raster
     } else this.sGrad.fill(0, i * 8, i * 8 + 8); // (otherwise the slot keeps what an earlier item left there)
     switch (l.type) {
-      case 'rect': case 'group': it.kind = shaderGrad ? KIND_GRECT : complex ? KIND_RGBA : KIND_RECT; break;
-      case 'ellipse': it.kind = shaderGrad ? KIND_GELL : complex ? KIND_RGBA : KIND_ELLIPSE; break;
+      case 'rect': case 'group': it.kind = shaderGrad ? KIND_GRECT : complex ? KIND_RGBA : shapeRaster ? KIND_MASK : KIND_RECT; break;
+      case 'ellipse': it.kind = shaderGrad ? KIND_GELL : complex ? KIND_RGBA : shapeRaster ? KIND_MASK : KIND_ELLIPSE; break;
       case 'path': it.kind = complex ? KIND_RGBA : KIND_MASK; break;
-      case 'text': it.kind = KIND_MASK; break;
+      case 'text': it.kind = complex && !l.textAnim ? KIND_RGBA : KIND_MASK; break;
       case 'image': it.kind = KIND_RGBA; break;
       case 'audio': it.kind = KIND_NONE; break;
       case 'precomp': it.kind = KIND_NONE; break;
     }
-    it.rasterBase = this.rasterBase(l, complex);
+    it.rasterBase = this.rasterBase(l, complex || shapeRaster);
     it.rasterKey = null;
     it.entry = null;
     it.dyn = null;
@@ -865,24 +892,32 @@ export class Renderer {
       this.unitCount += n;
     }
     this.sKind[i] = it.kind;
-    this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0);
-    this.sBlend[i] = l.blend ? BLEND_IDS[l.blend] ?? 0 : 0;
+    // effects / blend modes that need the backdrop: the layer renders into its own target and is
+    // composited by the effect pipeline (never for mask shapes, never for the scenes without them)
+    const fxOn = !l.mask && l.type !== 'audio' && hasEffects(l);
+    it.fx = fxOn ? new EffectEval(l, key => this.store.renderProp(l, key)) : null;
+    if (it.fx && !it.fx.list.length) it.fx = null;
+    // a group's blend mode applies to its composite (figma, after effects): isolate it too
+    it.fxBlend = !l.mask && (needsBlendShader(l.blend) || ((it.fx || it.isoGroup) && l.blend && l.blend !== 'normal')) ? BLEND_SHADER[l.blend!] ?? 0 : 0;
+    if (it.fx?.animated) it.animated = true;
+    this.sBits[i] = (l.mask ? 1 : 0) | (it.isoGroup ? 2 : 0) | (it.units ? 4 : 0) | (it.dyn ? 8 : 0) | (it.fx || it.fxBlend ? 16 : 0);
+    this.sBlend[i] = it.fx || it.fxBlend ? 0 : l.blend ? BLEND_IDS[l.blend] ?? 0 : 0;
     this.sAlign[i] = l.strokeAlign === 'inside' ? -1 : l.strokeAlign === 'outside' ? 1 : 0;
   }
 
   private rasterBase(l: Layer, complex: boolean): string | null {
     switch (l.type) {
-      case 'path': return `p${oid(l.geometry)}:${oid(l.strokeGeometry)}:${oid(l.paints)}:${l.strokeAlign}:${l.props.strokeWidth?.v[0] ?? 0}:${complex ? (l.props.stroke?.v ?? []).join(',') : ''}`;
+      case 'path': return `p${oid(l.geometry)}:${oid(l.strokeGeometry)}:${oid(l.paints)}:${oid(l.strokePaints)}:${strokeKey(l)}:${l.props.strokeWidth?.v[0] ?? 0}:${complex ? (l.props.stroke?.v ?? []).join(',') : ''}`;
       case 'text': {
         const t = l.text!;
         const s = l.props.size?.v ?? [0, 0];
-        return `t${this.fontGen}|${t.content}|${t.fontFamily}|${t.fontWeight}|${t.fontStyle}|${t.fontSize}|${t.lineHeight}|${t.letterSpacing}|${t.align}|${Math.round(s[0])}x${Math.round(s[1])}`;
+        return `t${this.fontGen}|${t.content}|${t.fontFamily}|${t.fontWeight}|${t.fontStyle}|${t.fontSize}|${t.lineHeight}|${t.letterSpacing}|${t.align}|${Math.round(s[0])}x${Math.round(s[1])}|${oid(t)}|${oid(l.paints)}|${complex ? (l.props.fill?.v ?? []).join(',') : ''}`;
       }
       case 'image': return `i${l.imageRef}`; // images stretch to the size box (see raster placement below)
       default: {
         if (!complex) return null;
         const r2 = (v?: number[]) => (v ? v.map(x => Math.round(x * 10) / 10).join(',') : '');
-        return `g${oid(l.paints)}:${r2(l.props.size?.v)}:${r2(l.props.radius?.v)}:${r2(l.props.stroke?.v)}:${l.props.strokeWidth?.v[0] ?? 0}`;
+        return `g${oid(l.paints)}:${oid(l.strokePaints)}:${l.type}:${strokeKey(l)}:${l.smoothing ?? 0}:${r2(l.props.size?.v)}:${r2(l.props.radius?.v)}:${r2(l.props.stroke?.v)}:${l.props.strokeWidth?.v[0] ?? 0}`;
       }
     }
   }
@@ -1117,7 +1152,7 @@ export class Renderer {
     const S = this.style, os = i * ST;
     // off the main thread: resolution upgrades, and anything beyond this frame's raster budget.
     // first-time rasters within budget stay synchronous so edits (typing, drawing) never flicker.
-    if (l.type !== 'image' && this.workersOk && !this.syncRaster && (hasOld || performance.now() > budgetEnd)) {
+    if (!needsMainThread(l) && this.workersOk && !this.syncRaster && (hasOld || performance.now() > budgetEnd)) {
       this.requestAsync(key, l, bucket, [S[os], S[os + 1]], [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], S[os + 14], undefined, hasOld);
       return hasOld;
     }
@@ -1128,13 +1163,8 @@ export class Renderer {
     // no room at this resolution (the atlas never evicts what this frame draws): go lower
     for (let bk = bucket; bk >= 1 / 16; bk /= 2) {
       const k2 = bk === bucket ? key : `${it.rasterBase}@${bk}`;
-      let r: RasterResult | null = null;
-      if (l.type === 'path') r = rasterPath(l, bk, S[os + 14]);
-      else if (l.type === 'text') r = rasterText(l, bk, size);
-      else if (l.type === 'image') {
-        const asset = l.imageRef ? this.store.project.assets[l.imageRef] : undefined;
-        r = asset ? rasterImage(asset, bk, size) : null;
-      } else r = rasterShapePaint(l, bk, size, [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], S[os + 14]);
+      const asset = l.type === 'image' && l.imageRef ? this.store.project.assets[l.imageRef] : undefined;
+      const r: RasterResult | null = rasterLayer(l, bk, size, [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], S[os + 14], undefined, asset);
       if (!r) return hasOld;
       const e = this.atlas.alloc(k2, r.pw, r.ph, hasOld);
       if (!e) { if (bk === bucket) this.failed.set(key, this.atlas.frame); if (hasOld) return true; continue; }
@@ -1318,19 +1348,14 @@ export class Renderer {
       if (this.pendingKeys.has(t.key) || this.atlas.has(t.key)) continue;
       const it = this.items[t.i], l = it.layer, os = t.i * ST;
       const size = [S[os], S[os + 1]], radius = [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], sw = S[os + 14];
-      if (l.type !== 'image' && this.workersOk && !this.syncRaster) {
+      if (!needsMainThread(l) && this.workersOk && !this.syncRaster) {
         if (this.pending.size >= MAX_INFLIGHT) break;
         this.requestAsync(t.key, l, t.L, size, radius, sw, t.clip, true);
         continue;
       }
       if (performance.now() > budgetEnd) break;
-      let r: RasterResult | null = null;
-      if (l.type === 'path') r = rasterPath(l, t.L, sw, undefined, t.clip);
-      else if (l.type === 'text') r = rasterText(l, t.L, size, t.clip);
-      else if (l.type === 'image') {
-        const asset = l.imageRef ? this.store.project.assets[l.imageRef] : undefined;
-        r = asset ? rasterImage(asset, t.L, size, t.clip) : null;
-      } else r = rasterShapePaint(l, t.L, size, radius, sw, t.clip);
+      const asset = l.type === 'image' && l.imageRef ? this.store.project.assets[l.imageRef] : undefined;
+      const r: RasterResult | null = rasterLayer(l, t.L, size, radius, sw, t.clip, asset);
       if (!r) continue;
       const e = this.atlas.alloc(t.key, r.pw, r.ph, true);
       if (!e) { this.failed.set(t.key, this.atlas.frame); continue; }
@@ -1659,7 +1684,9 @@ export class Renderer {
     cmds.length = 0;
     let pending = 0; // first instance not yet covered by a DRAW command
     // open isolation regions: end index, composite opacity, divisor to restore, optional mask range
-    const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number; box: number }[] = [];
+    const stack: { end: number; opacity: number; div: number; maskStart: number; maskCount: number; maskEnd: number; box: number; fx: number; kStart: number; mode: number }[] = [];
+    const fxFrame = this.fxFrame;
+    fxFrame.length = 0;
     // screen bounds (device px) of what each isolated region draws: its offscreen clear and its
     // composite are scissored to them (they used to clear + composite the whole canvas)
     const boxes = this.boxes;
@@ -1686,9 +1713,15 @@ export class Renderer {
       while (stack.length && stack[stack.length - 1].end <= i) {
         const r = stack.pop()!;
         flush();
-        if (r.maskCount > 0) cmds.push(CMD_MASK, r.maskStart, r.maskCount);
+        if (r.maskCount > 0) { if (r.mode) cmds.push(CMD_MASKMODE, r.mode, 0); cmds.push(CMD_MASK, r.maskStart, r.maskCount); }
         if (curBlend !== 0) { cmds.push(CMD_BLEND, 0, 0); curBlend = 0; }
-        cmds.push(CMD_POP, r.box, r.opacity);
+        if (r.fx >= 0) {
+          // effects reach beyond the layer's pixels: grow the region (its passes and composite)
+          const R = fxFrame[r.fx], bi = r.box;
+          R.kStart = r.kStart; R.kCount = k - r.kStart;
+          if (boxes[bi] <= boxes[bi + 2]) { boxes[bi] -= R.pad; boxes[bi + 1] -= R.pad; boxes[bi + 2] += R.pad; boxes[bi + 3] += R.pad; }
+          cmds.push(CMD_FXPOP, r.box, r.fx);
+        } else cmds.push(CMD_POP, r.box, r.opacity);
         if (stack.length) {
           // the composite lands inside the parent region
           const pb = stack[stack.length - 1].box, cb = r.box;
@@ -1709,14 +1742,24 @@ export class Renderer {
         cmds.push(CMD_PUSH, box, 0);
         const par = this.sPar[i];
         const end = par >= 0 ? this.subEnd[par] : n;
-        stack.push({ end, opacity: 1, div, maskStart: k, maskCount: 0, maskEnd: this.subEnd[i], box });
+        stack.push({ end, opacity: 1, div, maskStart: k, maskCount: 0, maskEnd: this.subEnd[i], box, fx: -1, kStart: k, mode: MASK_MODE[items[i].layer.maskType ?? 'alpha'] ?? 0 });
+        isolated++;
+      } else if ((bits & 16) && !stack.some(r => r.maskEnd > i)) {
+        // effects / backdrop blend: the layer (and its subtree) into its own target, composited by FxPipeline
+        flush();
+        const box = newBox();
+        cmds.push(CMD_PUSH, box, 0);
+        const fi = fxFrame.length;
+        fxFrame.push(this.resolveFx(i, t, O[i] / div));
+        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box, fx: fi, kStart: k, mode: 0 });
+        div = O[i];
         isolated++;
       } else if ((bits & 2) && this.lopa[i] < 0.999 && this.subEnd[i] > i + 1 && !stack.some(r => r.maskEnd > i)) {
         // group opacity: render the group into its own layer, then composite once with its opacity
         flush();
         const box = newBox();
         cmds.push(CMD_PUSH, box, 0);
-        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box });
+        stack.push({ end: this.subEnd[i], opacity: O[i] / div, div, maskStart: 0, maskCount: 0, maskEnd: -1, box, fx: -1, kStart: k, mode: 0 });
         div = O[i];
         isolated++;
       }
@@ -1869,6 +1912,7 @@ export class Renderer {
     if (re > rs) ranges.push(rs, re);
     flush();
     this.isolatedLastFrame = isolated;
+    this.fxRegions = 0;
     if (this.tileWant.length) this.dispatchTiles(budgetEnd);
     const w1 = performance.now();
     // atlas was repacked while writing instances: earlier uvs are stale, redo the frame once
@@ -1990,7 +2034,7 @@ export class Renderer {
         if (!e || !r) {
           if (u.entry && !u.entry.dead && performance.now() > budgetEnd) { this.pendingUpgrade = true; }
           else {
-            const fake = { ...l, text: { ...l.text!, content: u.unit.text, align: 'left' as const } };
+            const fake = { ...l, paints: undefined, text: { ...l.text!, content: u.unit.text, align: 'left' as const, lists: undefined, runs: undefined, truncate: false, valign: undefined, paragraphIndent: undefined, outline: undefined } };
             r = rasterText(fake, bucket, [0, 0]);
             e = this.atlas.alloc(key, r.pw, r.ph) ?? undefined;
             if (e) { this.atlas.upload(e, r.data); r.data = undefined as any; this.rasterMeta.set(key, r); }
@@ -2031,6 +2075,101 @@ export class Renderer {
       k++;
     }
     return k;
+  }
+
+  // ---------------- effects ----------------
+
+  private uCov!: WebGLUniformLocation;
+  fxp: FxPipeline | null = null;
+  /** this frame's effect regions (FXPOP b = index) */
+  private fxFrame: (Omit<FxRegion, 'src' | 'parentFb' | 'w' | 'h' | 'box' | 'drawCoverage'> & { pad: number; kStart: number; kCount: number })[] = [];
+  /** effect regions drawn last frame (stats / tests) */
+  fxRegions = 0;
+
+  /** effects of item i at comp time t, in device px (the region's composite opacity: opacity) */
+  private resolveFx(i: number, t: number, opacity: number) {
+    const it = this.items[i];
+    const W = this.world, o6 = i * 6, z = this.zoom * this.dpr;
+    const a = W[o6] * z, b = W[o6 + 1] * z, c = W[o6 + 2] * z, d = W[o6 + 3] * z;
+    const e = W[o6 + 4] * z + this.panX * this.dpr, f = W[o6 + 5] * z + this.panY * this.dpr;
+    const det = a * d - b * c, sc = Math.sqrt(Math.abs(det)) || 1e-9;
+    const inv = Math.abs(det) > 1e-12 ? [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det] : [1, 0, 0, 1, 0, 0];
+    const S = this.style, os = i * ST, w = S[os], h = S[os + 1];
+    const list: ResolvedEffect[] = it.fx ? it.fx.at(t - it.tOff) : [];
+    const dev = (x: number, y: number): [number, number] => [a * x + c * y + e, b * x + d * y + f];
+    const R: (typeof this.fxFrame)[number] = {
+      opacity, blend: it.fxBlend, shadows: [], inner: [], blur: null, bg: null, noise: [], inv, texture: null, glass: null,
+      pad: (it.fx ? it.fx.padding(list) : 0) * sc + 2, kStart: 0, kCount: 0,
+    };
+    let seed = 0;
+    for (const fx of list) {
+      const sigma = (fx.radius / 2) * sc;
+      switch (fx.type) {
+        case 'dropShadow': case 'innerShadow': {
+          const sh = { color: fx.color, dx: a * fx.offset[0] + c * fx.offset[1], dy: b * fx.offset[0] + d * fx.offset[1], sigma, spread: fx.spread * sc, behind: fx.showBehind };
+          if (sh.color[3] <= 0) break;
+          (fx.type === 'dropShadow' ? R.shadows : R.inner).push(sh);
+          break;
+        }
+        case 'layerBlur': case 'backgroundBlur': {
+          let blur: FxRegion['blur'] = { sigma };
+          if (fx.progressive) {
+            const p0 = dev(fx.progressive.start[0] * w, fx.progressive.start[1] * h), p1 = dev(fx.progressive.end[0] * w, fx.progressive.end[1] * h);
+            blur = { sigma, prog: { x0: p0[0], y0: p0[1], x1: p1[0], y1: p1[1], s0: (fx.progressive.startRadius / 2) * sc, s1: sigma } };
+          } else if (sigma <= 0.25) blur = null;
+          if (fx.type === 'layerBlur') R.blur = blur; else R.bg = blur ?? { sigma: 0 };
+          if (fx.type === 'backgroundBlur') R.pad = Math.max(R.pad, fx.radius * 1.5 * sc + 2);
+          break;
+        }
+        case 'noise': {
+          const n = fx.noise!;
+          if (R.noise.length >= 2) break;
+          R.noise.push({ mode: n.mode === 'multi' ? 2 : n.mode === 'duo' ? 1 : 0, size: Math.max(0.05, n.size), density: n.density, c1: n.color ?? [0, 0, 0, 0.25], c2: n.secondary ?? [1, 1, 1, 0.25], opacity: n.opacity ?? 1, seed: n.seed ?? seed++ });
+          break;
+        }
+        case 'texture': {
+          const n = fx.noise;
+          R.texture = { size: Math.max(0.5, n?.size ?? 4), amp: Math.max(0.5, (fx.params?.radius ?? fx.radius ?? 2)) * sc, seed: n?.seed ?? 7 };
+          break;
+        }
+        case 'glass': {
+          const p = fx.params ?? {};
+          const pick = (keys: string[], dflt: number) => { for (const k of keys) for (const pk in p) if (pk.toLowerCase().includes(k)) return p[pk]; return dflt; };
+          const frost = pick(['frost', 'blur'], fx.radius || 4);
+          R.glass = { refraction: pick(['refraction'], 0.5), depth: Math.max(1, pick(['depth'], 12)) * sc, light: pick(['intensity', 'light'], 0.5), angle: (pick(['angle'], -45) * Math.PI) / 180, dispersion: pick(['dispersion'], 0) };
+          if (!R.bg) R.bg = frost > 0 ? { sigma: (frost / 2) * sc } : { sigma: 0 };
+          R.pad = Math.max(R.pad, frost * 1.5 * sc + 2);
+          break;
+        }
+      }
+    }
+    return R;
+  }
+
+  /** run the effect pipeline for frame region fi (screen box at boxes[bi]) into the parent target */
+  private runFx(fi: number, bi: number, src: WebGLTexture, parentFb: WebGLFramebuffer | null) {
+    const gl = this.gl;
+    if (!this.fxp) this.fxp = new FxPipeline(gl, this.qbuf);
+    const F = this.fxFrame[fi], B = this.boxes;
+    const cw = this.targetW(), ch = this.targetH();
+    const base = this.baseScissor ?? [0, 0, cw, ch];
+    // the region box, clipped to the comp (base scissor) and the target
+    const x0 = Math.max(base[0], B[bi]), x1 = Math.min(base[0] + base[2], B[bi + 2]);
+    const y0 = Math.max(ch - base[1] - base[3], B[bi + 1]), y1 = Math.min(ch - base[1], B[bi + 3]);
+    if (!(x1 > x0 && y1 > y0)) return;
+    const R: FxRegion = {
+      ...F, box: [x0, y0, x1, y1], src, parentFb, w: cw, h: ch,
+      drawCoverage: F.kCount > 0 ? () => {
+        gl.useProgram(this.prog);
+        gl.uniform1f(this.uCov, 1);
+        this.boundVao = null;
+        this.drawRange(F.kStart, F.kCount);
+        gl.uniform1f(this.uCov, 0);
+        this.boundVao = null;
+      } : null,
+    };
+    this.fxp.run(R);
+    this.fxRegions++;
   }
 
   /** premultiplied-alpha blend functions for the supported modes */
@@ -2084,8 +2223,11 @@ export class Renderer {
       const tex = gl.createTexture()!;
       gl.bindTexture(gl.TEXTURE_2D, tex);
       gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, w, h);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      // linear: effect passes sample these at other resolutions (same-size composites hit texel centers)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       const fb = gl.createFramebuffer()!;
       gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
@@ -2118,6 +2260,8 @@ export class Renderer {
     const base = this.target?.fb ?? null;
     const targets: (WebGLFramebuffer | null)[] = [base];
     const masks: (WebGLTexture | null)[] = [];
+    const maskModes: number[] = [];
+    let maskMode = 0;
     // scissor per depth: the comp clip intersected with each open region's screen bounds
     const ch = this.targetH(), cw = this.targetW(), B = this.boxes;
     const bs = this.baseScissor ?? [0, 0, cw, ch];
@@ -2143,6 +2287,21 @@ export class Renderer {
         setSc(r);
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
+      } else if (type === CMD_MASKMODE) {
+        maskMode = a;
+      } else if (type === CMD_FXPOP) {
+        const src = this.fbos[depth - 1];
+        depth--;
+        targets.pop();
+        sc.pop();
+        this.runFx(b, a, src.tex, targets[targets.length - 1]);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, targets[targets.length - 1]);
+        gl.viewport(0, 0, cw, ch);
+        gl.useProgram(this.prog);
+        gl.bindVertexArray(this.vao);
+        this.boundVao = this.vao;
+        this.setBlend(0);
+        setSc(sc[sc.length - 1]);
       } else if (type === CMD_MASK) {
         // render the mask shape into its own layer; the composite multiplies by its alpha
         this.setBlend(0);
@@ -2150,9 +2309,14 @@ export class Renderer {
         gl.bindFramebuffer(gl.FRAMEBUFFER, mf.fb);
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
+        // vector masks: the shape's coverage, whatever its fill opacity
+        if (maskMode === 2) gl.uniform1f(this.uCov, 1);
         this.drawRange(a, b);
+        if (maskMode === 2) gl.uniform1f(this.uCov, 0);
         gl.bindFramebuffer(gl.FRAMEBUFFER, targets[targets.length - 1]);
         masks[depth] = mf.tex;
+        maskModes[depth] = maskMode;
+        maskMode = 0;
       } else if (type === CMD_POP) {
         const src = this.fbos[depth - 1];
         const maskTex = masks[depth];
@@ -2165,7 +2329,7 @@ export class Renderer {
         // composite the layer with a fullscreen quad
         gl.useProgram(this.compositeProgram());
         gl.uniform1f(this.cuOpacity, b);
-        gl.uniform1f(this.cuUseMask, maskTex ? 1 : 0);
+        gl.uniform1f(this.cuUseMask, maskTex ? (maskModes[depth + 1] === 1 ? 2 : 1) : 0);
         if (maskTex) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, maskTex); }
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, src.tex);
@@ -2294,6 +2458,10 @@ export function easeFn(name: string): (p: number) => number {
   return cubicBezier(pr.v[0], pr.v[1], pr.v[2], pr.v[3]);
 }
 
+/** what a stroke raster depends on beyond its width / color */
+function strokeKey(l: Layer) {
+  return `${l.strokeAlign ?? ''}${l.dash ? 'd' + l.dash.join(',') : ''}${l.strokeCap ?? ''}${l.strokeJoin ?? ''}${l.miterLimit ?? ''}${l.strokeSides ? 's' + l.strokeSides.join(',') : ''}`;
+}
 function hashStr(s: string) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
 
 /** interpolate keyframed path shapes (pairwise when command structures match, else hold) */

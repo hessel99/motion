@@ -89,6 +89,8 @@ function insertMenu(el: HTMLElement) {
     { label: 'Composition as layer', disabled: !comps.length, submenu: comps.map(c => ({ label: c.name, action: () => { try { addPrecompLayer(s, c.id); } catch (err: any) { toast(err.message, 'error'); } } })) },
     { separator: true },
     { label: 'Demo animation', action: () => { if (confirmDiscard()) loadDemo(); } },
+    { separator: true },
+    { label: 'Save last Figma paste for debugging…', action: () => { import('../../app/figma-capture').then(m => m.saveLastFigmaPaste()).catch(err => toast(String(err), 'error')); } },
   ]);
 }
 

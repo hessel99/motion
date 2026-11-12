@@ -266,10 +266,11 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
       <Section title="Blending">
         <div class="row">
           <select value={l.blend ?? 'normal'} style={{ flex: 1 }} onChange={e => setLayerField(store, ids, 'blend', (e.target as HTMLSelectElement).value as any, 'Blend mode')}>
-            {BLEND_MODES.map(m => <option value={m}>{m[0].toUpperCase() + m.slice(1)}</option>)}
+            {BLEND_MODES.map(m => <option value={m}>{m[0].toUpperCase() + m.slice(1).replace(/([A-Z])/g, ' $1').toLowerCase()}</option>)}
           </select>
         </div>
       </Section>
+      {common.includes('shadowColor') && <EffectsPanel layers={layers} />}
       {layers.length === 1 && (
         <Section title="Mask">
           <Checkbox checked={!!l.mask} onChange={v => setLayerField(store, ids, 'mask', v, 'Use as mask')}>Use as mask (masks the layers above it in the same group)</Checkbox>
@@ -280,6 +281,51 @@ function VisualLayerPanel({ layers }: { layers: Layer[] }) {
       </Section>
     </>
   );
+}
+
+/** effect parameters (animatable props; the first effect of each type, see core/model.ts Effect) */
+const EFFECT_GROUPS: { title: string; keys: PropKey[]; add: [PropKey, number[]][] }[] = [
+  { title: 'Drop shadow', keys: ['shadowColor', 'shadowOffset', 'shadowBlur', 'shadowSpread'], add: [['shadowColor', [0, 0, 0, 0.25]], ['shadowOffset', [0, 4]], ['shadowBlur', [12]], ['shadowSpread', [0]]] },
+  { title: 'Inner shadow', keys: ['innerShadowColor', 'innerShadowOffset', 'innerShadowBlur', 'innerShadowSpread'], add: [['innerShadowColor', [0, 0, 0, 0.25]], ['innerShadowOffset', [0, 2]], ['innerShadowBlur', [4]], ['innerShadowSpread', [0]]] },
+  { title: 'Layer blur', keys: ['blur'], add: [['blur', [8]]] },
+  { title: 'Background blur', keys: ['backgroundBlur'], add: [['backgroundBlur', [16]]] },
+  { title: 'Noise', keys: ['noiseColor', 'noiseSize', 'noiseDensity'], add: [['noiseColor', [0, 0, 0, 0.25]], ['noiseSize', [1]], ['noiseDensity', [50]]] },
+];
+function EffectsPanel({ layers }: { layers: Layer[] }) {
+  const store = st();
+  const l = layers[0];
+  const t = store.time;
+  const set = (key: PropKey, v: number[], mk?: string) => store.batch('insp', () => { for (const x of layers) setProp(store, x.id, key, v, { mergeKey: mk }); });
+  const has = (g: (typeof EFFECT_GROUPS)[number]) => g.keys.some(k => l.props[k]) || l.effects?.some(e => e.type === effectTypeOf(g.title));
+  const shown = EFFECT_GROUPS.filter(has);
+  const extra = (l.effects ?? []).filter((e, i, a) => a.findIndex(x => x.type === e.type) !== i).length;
+  return (
+    <Section title="Effects" right={<select value="" aria-label="Add effect" onChange={e => { const g = EFFECT_GROUPS.find(x => x.title === (e.target as HTMLSelectElement).value); if (g) store.batch('fx', () => { for (const [k, v] of g.add) if (!l.props[k]) set(k, v); }); (e.target as HTMLSelectElement).value = ''; }}>
+      <option value="">Add…</option>
+      {EFFECT_GROUPS.filter(g => !has(g)).map(g => <option value={g.title}>{g.title}</option>)}
+    </select>}>
+      {shown.map(g => (
+        <>
+          <div class="muted small">{g.title}</div>
+          {g.keys.filter(k => l.props[k]).map(k => {
+            const def = PROP_DEFS[k], v = valueAt(l, k, t);
+            return (
+              <div class="row">
+                <KeyButton layers={layers} prop={k} />
+                {def.unit === 'color' ? <ColorField value={v} onChange={(c, mk) => set(k, c, mk)} />
+                  : def.dim === 2 ? <><NumField label="X" value={v[0]} onChange={(n, mk) => set(k, [n, v[1]], mk)} /><NumField label="Y" value={v[1]} onChange={(n, mk) => set(k, [v[0], n], mk)} /></>
+                  : <NumField label={def.label.replace(/^(Inner )?Shadow |^Noise /, '')} min={(def as any).min} max={(def as any).max} value={v[0]} suffix={def.unit === 'px' ? '' : def.unit} onChange={(n, mk) => set(k, [n], mk)} />}
+              </div>
+            );
+          })}
+        </>
+      ))}
+      {extra > 0 && <div class="muted small">{extra} more effect{extra > 1 ? 's' : ''} from Figma (not animatable)</div>}
+    </Section>
+  );
+}
+function effectTypeOf(title: string) {
+  return title === 'Drop shadow' ? 'dropShadow' : title === 'Inner shadow' ? 'innerShadow' : title === 'Layer blur' ? 'layerBlur' : title === 'Background blur' ? 'backgroundBlur' : 'noise';
 }
 
 function sizeChange(layers: Layer[], idx: number, n: number, mk?: string) {

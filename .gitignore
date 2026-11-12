@@ -11,6 +11,10 @@ electron.png
 .claude/worktrees/
 undefined-*.png
 
+# figma paste captures (Save last Figma paste for debugging / MOTION_FIGMA_CAPTURE_DIR): real designs, never commit
+*.figcapture.json
+figma-captures/
+
 # update signing key (scripts/gen-update-key.mjs): never commit
 .update-key/
 
