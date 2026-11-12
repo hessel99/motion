@@ -130,6 +130,8 @@ export async function openFileDialog() {
 
 export async function openBrowserFile(f: File) {
   const ext = f.name.split('.').pop()!.toLowerCase();
+  // svg is "image/svg+xml" but must go to the vector importer, not the bitmap path
+  if (ext === 'svg' || f.type === 'image/svg+xml') return importSvgText(await f.text());
   if (ext === 'aep' || f.type.startsWith('image/')) {
     const buf = await f.arrayBuffer();
     if (ext === 'aep') return importAep(buf, f.name);
