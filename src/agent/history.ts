@@ -34,6 +34,8 @@ export interface Msg {
   storyboard?: Storyboard;
   /** role 'review': contact sheet of the result (data url; not persisted) */
   preview?: string;
+  /** user message: what the ask referred to beyond the selection (keyframes, a time range), shown as a chip */
+  context?: string;
   /** user message: the style picked with the style picker (guide name) */
   style?: string;
 }

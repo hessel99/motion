@@ -80,6 +80,7 @@ export const PREVIEW_TOOLS: ToolDef[] = [
     description: 'Render a short low-res animated GIF of a time range (default: the whole comp, 12 fps, 320 px) and save it to a file; returns the file path (desktop: the exports folder; with the bridge: a temp file). Use it to hand the user / another tool a real-time preview; for your own checks preview_strip is cheaper.',
     inputSchema: { type: 'object', properties: { start: { type: 'number' }, end: { type: 'number' }, fps: { type: 'number', default: 12 }, maxSize: { type: 'number', default: 320, description: 'px, 120..640' } } },
     run: async a => {
+      renderer(); // renders the file on screen: not from a background tab
       const s = st();
       const start = Math.max(0, a.start ?? 0), end = Math.min(s.comp.duration, a.end ?? s.comp.duration);
       if (!(end > start)) throw new Error('end must be after start (seconds within the comp)');

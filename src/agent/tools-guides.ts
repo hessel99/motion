@@ -2,7 +2,7 @@
 // (propose_storyboard → the user approves an editable card → update_progress per beat).
 // registered in TOOLS (tools.ts) next to the editing tools.
 
-import { editor } from '../app/editor';
+import { st } from './tool-kit';
 import type { ToolContent, ToolDef } from './tools';
 import { findGuide, guideIndex, guideSection, guideSections, GUIDES } from './guides';
 import { approvalMode, storyboards } from './storyboard';

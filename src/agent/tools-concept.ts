@@ -3,13 +3,12 @@
 // (set_pivot), and rig parts like the thing they depict (rig: a door hinges open, a leaf grows from its
 // stem, a heart beats, a rocket launches). every edit is one undo step; rigs are plain keyframes.
 
-import { editor } from '../app/editor';
 import { createLayer, type Layer, type PathCmd, type PropKey } from '../core/model';
 import { insertLayer, valueAt } from '../core/commands';
 import type { Tx } from '../core/store';
 import { flattenCmds, type Ring } from '../import/pathops';
 import { fontString, layoutText, toPath2D, getBitmap } from '../render/raster';
-import { st, text, need, parseColor, idsSchema, resolveEase, buildKeys, type ToolDef, type ToolContent } from './tool-kit';
+import { st, text, need, parseColor, idsSchema, resolveEase, buildKeys, renderer, hasRenderer, type ToolDef, type ToolContent } from './tool-kit';
 import { apply, inv, mul, worldMatrix, localMatrix, layerSize, rng, textUnitsSafe, type Mat } from './motion-math';
 import { ellipseCmds, rectCmds, transformCmds, cmdsBounds } from './shape-lib';
 import { fmtTime } from './describe';
