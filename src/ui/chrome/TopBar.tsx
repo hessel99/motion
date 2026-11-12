@@ -7,6 +7,7 @@
 
 import { useRef, useState } from 'preact/hooks';
 import { editor } from '../../app/editor';
+import { DEV } from '../../app/prefs';
 import { loadDemo, loadStress, newProject, openFileDialog, saveProject } from '../../app/actions';
 import { openShare } from './Share';
 import { activeDoc, closeDoc, docName, documents, isDocDirty, moveDoc, switchTo, type Doc } from '../../app/documents';
@@ -146,6 +147,7 @@ export function appMenuItems(): MenuItem[] {
     { label: 'Save', shortcut: '⌘S', disabled: !editing, action: () => saveProject(false) },
     { label: 'Save as…', shortcut: '⇧⌘S', disabled: !editing, action: () => saveProject(true) },
     { separator: true },
+    ...(!DEV ? [] : [
     { label: 'Open the demo animation', action: () => loadDemo() },
     {
       label: 'Performance', submenu: [
@@ -159,6 +161,7 @@ export function appMenuItems(): MenuItem[] {
         { label: 'Performance HUD', checked: editor.showHud, action: () => { editor.showHud = !editor.showHud; editor.emit('hud'); } },
       ],
     },
+    ] as MenuItem[]),
     { separator: true },
     { label: 'Keyboard shortcuts', shortcut: '?', action: () => editor.emit('help') },
     { label: 'Settings…', shortcut: '⌘,', action: () => openSettings() },

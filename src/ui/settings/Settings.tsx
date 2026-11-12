@@ -1,6 +1,6 @@
 // Settings: a large modal over the window (⌘, or the app menu in the top bar). a left nav (Account / Agents / Workspace / App) and
-// card sections. Appearance, Connections, Keyboard shortcuts, Models and Agent runs are real;
-// Updates is real too (src/app/updates.ts, electron/updates/). Profile, Notifications and Members are placeholders.
+// card sections: Appearance, Keyboard shortcuts, Models, Agent runs, Connections, Fonts, Updates
+// (src/app/updates.ts, electron/updates/) and Figma import.
 
 import { useEffect, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
@@ -17,16 +17,14 @@ import { SHORTCUTS } from '../chrome/shortcuts';
 import { ui, setUi, type SettingsSection } from '../chrome/ui-state';
 import { agentPrefs, setAgentPref, CLAUDE_MODELS, PROVIDER_LABEL } from '../agent/agent-prefs';
 import {
-  ALargeSmall, Bell, Bot, Check, CircleCheck, CircleUser, Code, Copy, Cpu, Download, Keyboard, Link, Monitor, Moon, Plug, SquareTerminal, Sun,
-  Terminal, Users, Workflow, type LucideIcon,
+  ALargeSmall, Bot, Check, CircleCheck, Code, Copy, Cpu, Download, Keyboard, Link, Monitor, Moon, Plug, SquareTerminal, Sun,
+  Terminal, Workflow, type LucideIcon,
 } from '../chrome/icons';
 import './settings.css';
 
 const NAV: { group: string; items: { id: SettingsSection; label: string; Icon: LucideIcon }[] }[] = [
   { group: 'Account', items: [
-    { id: 'profile', label: 'Profile', Icon: CircleUser },
     { id: 'appearance', label: 'Appearance', Icon: Monitor },
-    { id: 'notifications', label: 'Notifications', Icon: Bell },
     { id: 'shortcuts', label: 'Keyboard shortcuts', Icon: Keyboard },
   ] },
   { group: 'Agents', items: [
@@ -35,7 +33,6 @@ const NAV: { group: string; items: { id: SettingsSection; label: string; Icon: L
     { id: 'connections', label: 'Connections', Icon: Plug },
   ] },
   { group: 'Workspace', items: [
-    { id: 'members', label: 'Members', Icon: Users },
     { id: 'fonts', label: 'Fonts', Icon: ALargeSmall },
   ] },
   { group: 'App', items: [
@@ -75,9 +72,6 @@ export function SettingsPage() {
           {sec === 'fonts' && <Fonts />}
           {sec === 'updates' && <Updates />}
           {sec === 'figma' && <FigmaImport />}
-          {sec === 'profile' && <Placeholder title="Profile" text="Motion runs on your computer without an account. Your name and avatar for comments will live here." />}
-          {sec === 'notifications' && <Placeholder title="Notifications" text="Notifications for finished agent runs and exports are coming." />}
-          {sec === 'members' && <Placeholder title="Members" text="Files are local and shared as .motion files for now. Shared workspaces are coming." />}
         </div>
       </main>
     </div>
@@ -131,10 +125,6 @@ function useCopy() {
   return { copied, copy };
 }
 
-function Placeholder(props: { title: string; text: string }) {
-  return <Card title={props.title} sub={props.text}><div class="set-empty muted">Nothing to set here yet.</div></Card>;
-}
-
 // ---------------- appearance ----------------
 function Appearance() {
   useChannels([], ['prefs']);
@@ -164,13 +154,9 @@ function Appearance() {
         </div>
       </Card>
       <Card title="Canvas">
-        <Row label="Pixel grid when zoomed in" sub="Shows at 400% and above"><Switch label="Pixel grid when zoomed in" checked={prefs.pixelGrid} onChange={v => setPref('pixelGrid', v)} /></Row>
-        <Row label="Snap to pixel grid" sub="Moved layers land on whole pixels"><Switch label="Snap to pixel grid" checked={prefs.snapToPixels} onChange={v => setPref('snapToPixels', v)} /></Row>
         <Row label="GPU engine" sub={gpu ? `WebGL 2 · ${gpu}` : 'WebGL 2'}><Status kind="ok">Active</Status></Row>
       </Card>
       <Card title="App">
-        <Row label="Interface sounds" sub="Coming soon"><Switch label="Interface sounds" checked={prefs.interfaceSounds} disabled onChange={v => setPref('interfaceSounds', v)} /></Row>
-        <Row label="Sound when an agent finishes" sub="Coming soon"><Switch label="Sound when an agent finishes" checked={prefs.agentSound} disabled onChange={v => setPref('agentSound', v)} /></Row>
         <Row label="Reduce motion" sub="Fewer animations in panels and menus"><Switch label="Reduce motion" checked={prefs.reduceMotion} onChange={v => setPref('reduceMotion', v)} /></Row>
         <Row label="Licenses" sub="Notices for the open-source software in Motion"><Button size="sm" onClick={() => setLicenses(true)}>View</Button></Row>
       </Card>
@@ -327,14 +313,6 @@ function Models() {
         </Row>
         <Row label="Turn budget" sub="Max tool round trips per message (empty = 90). Say “continue” when it runs out.">
           <input class="input input-sm" type="number" min="5" max="500" step="5" style={{ width: '72px' }} aria-label="Turn budget" placeholder="90" value={agentPrefs.turns} onChange={e => setAgentPref('turns', (e.target as HTMLInputElement).value.replace(/[^\d]/g, ''))} />
-        </Row>
-      </Card>
-      <Card title="Default mode">
-        <Row label="Edit" sub="The agent changes your file. Every run can be reviewed and undone in one click.">
-          <input type="radio" name="agent-mode" aria-label="Edit" checked={agentPrefs.mode === 'edit'} onChange={() => setAgentPref('mode', 'edit')} />
-        </Row>
-        <Row label="Ask" sub="Read-only: critique and explain, no edits.">
-          <input type="radio" name="agent-mode" aria-label="Ask" checked={agentPrefs.mode === 'ask'} onChange={() => setAgentPref('mode', 'ask')} />
         </Row>
       </Card>
     </>
