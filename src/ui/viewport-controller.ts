@@ -1,0 +1,559 @@
+// viewport interaction + overlay drawing (vanilla ts, no framework in the hot path).
+// coordinates: css px "screen" = comp * zoom + pan.
+
+import type { Editor } from '../app/editor';
+import { addLayer, valueAt, deleteLayers, cloneLayers, setPropTx } from '../core/commands';
+import type { Tx } from '../core/store';
+import type { Layer } from '../core/model';
+import { Track } from '../core/evaluate';
+
+type Drag =
+  | { kind: 'pan'; sx: number; sy: number; px: number; py: number }
+  | { kind: 'move'; sx: number; sy: number; start: Map<string, { pos: number[]; inv: number[] }>; moved: boolean }
+  | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: string[] }
+  | { kind: 'create'; type: 'rect' | 'ellipse'; cx: number; cy: number; id: string | null }
+  | { kind: 'resize'; id: string; handle: number; inv: number[]; size: number[]; anchor: number[]; local: number[]; shift: boolean }
+  | { kind: 'rotate'; id: string; cx: number; cy: number; a0: number; r0: number };
+
+const HANDLE = 8;
+
+export class ViewportController {
+  overlay: HTMLCanvasElement;
+  octx: CanvasRenderingContext2D;
+  zoom = 0.5;
+  panX = 0;
+  panY = 0;
+  private drag: Drag | null = null;
+  private hover: string | null = null;
+  private spaceDown = false;
+  private overlayDirty = true;
+  private fitted = false;
+  private lastSelKey = '';
+  private mouse = { x: 0, y: 0 };
+  onTextEdit: ((id: string) => void) | null = null;
+
+  constructor(private ed: Editor, private host: HTMLElement, private canvas: HTMLCanvasElement) {
+    this.overlay = document.createElement('canvas');
+    this.overlay.className = 'vp-overlay';
+    host.appendChild(this.overlay);
+    this.octx = this.overlay.getContext('2d')!;
+    const ro = new ResizeObserver(() => this.resize());
+    ro.observe(host);
+    this.resize();
+    host.addEventListener('pointerdown', e => this.down(e));
+    host.addEventListener('pointermove', e => this.move(e));
+    host.addEventListener('pointerup', e => this.up(e));
+    host.addEventListener('dblclick', e => this.dbl(e));
+    host.addEventListener('wheel', e => this.wheel(e), { passive: false });
+    window.addEventListener('keydown', e => { if (e.code === 'Space' && !isTyping(e)) { this.spaceDown = true; this.updateCursor(); } });
+    window.addEventListener('keyup', e => { if (e.code === 'Space') { this.spaceDown = false; this.updateCursor(); } });
+    const st = ed.store;
+    st.on('selection', () => (this.overlayDirty = true));
+    st.on('doc', () => (this.overlayDirty = true));
+    st.on('time', () => (this.overlayDirty = true));
+    ed.on('tool', () => this.updateCursor());
+    ed.on('loaded', () => { this.fitted = false; this.resize(); });
+    ed.onFrame((_now, _t, playing) => {
+      // overlay only depends on selection/time/view: redraw when needed (during playback only if something is selected)
+      if (playing && st.selection.length) this.overlayDirty = true;
+      if (this.overlayDirty) { this.drawOverlay(); this.overlayDirty = false; }
+    });
+  }
+
+  // ---------- view ----------
+  resize() {
+    const r = this.host.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    this.ed.renderer.resize(r.width, r.height, dpr);
+    this.overlay.width = Math.round(r.width * dpr);
+    this.overlay.height = Math.round(r.height * dpr);
+    this.overlay.style.width = r.width + 'px';
+    this.overlay.style.height = r.height + 'px';
+    if (!this.fitted && r.width > 10) { this.fit(); this.fitted = true; }
+    this.applyView();
+  }
+
+  fit() {
+    const r = this.host.getBoundingClientRect();
+    const comp = this.ed.store.comp;
+    const z = Math.min((r.width - 80) / comp.width, (r.height - 80) / comp.height);
+    this.zoom = Math.max(0.02, z);
+    this.panX = (r.width - comp.width * this.zoom) / 2;
+    this.panY = (r.height - comp.height * this.zoom) / 2;
+    this.applyView();
+  }
+
+  setZoom(z: number, cx?: number, cy?: number) {
+    const r = this.host.getBoundingClientRect();
+    cx ??= r.width / 2; cy ??= r.height / 2;
+    z = Math.min(64, Math.max(0.02, z));
+    const wx = (cx - this.panX) / this.zoom, wy = (cy - this.panY) / this.zoom;
+    this.zoom = z;
+    this.panX = cx - wx * z;
+    this.panY = cy - wy * z;
+    this.applyView();
+  }
+
+  private applyView() {
+    this.ed.renderer.setView(this.zoom, this.panX, this.panY);
+    this.overlayDirty = true;
+    this.ed.emit('view');
+  }
+
+  toComp(sx: number, sy: number) { return [(sx - this.panX) / this.zoom, (sy - this.panY) / this.zoom]; }
+  toScreen(x: number, y: number) { return [x * this.zoom + this.panX, y * this.zoom + this.panY]; }
+
+  private local(e: PointerEvent | MouseEvent | WheelEvent) {
+    const r = this.host.getBoundingClientRect();
+    return [e.clientX - r.left, e.clientY - r.top];
+  }
+
+  private wheel(e: WheelEvent) {
+    e.preventDefault();
+    const [x, y] = this.local(e);
+    if (e.ctrlKey || e.metaKey) {
+      // pinch / ctrl+wheel zoom
+      const f = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0025));
+      this.setZoom(this.zoom * f, x, y);
+    } else {
+      this.panX -= e.deltaX;
+      this.panY -= e.deltaY;
+      this.applyView();
+    }
+  }
+
+  // ---------- selection helpers ----------
+  /** figma-like pick: click selects the top-most ancestor unless already inside the selection's subtree */
+  private pick(deepId: string, deep: boolean): string {
+    if (deep) return deepId;
+    const st = this.ed.store;
+    const chain: string[] = [];
+    let cur: string | null = deepId;
+    while (cur) { chain.unshift(cur); cur = st.layer(cur)?.parent ?? null; }
+    // chain[0] = root ancestor. if selection contains an ancestor (or sibling under same parent), go one level deeper
+    for (let i = 0; i < chain.length; i++) {
+      const id = chain[i];
+      if (st.selection.includes(id)) return chain[Math.min(i + 1, chain.length - 1)] === id ? id : (i + 1 < chain.length ? chain[i + 1] : id);
+      const parent = st.layer(id)?.parent;
+      if (parent && st.selection.some(s => st.layer(s)?.parent === parent)) return id;
+    }
+    return chain[0];
+  }
+
+  private handleAt(x: number, y: number): { id: string; handle: number } | null {
+    const st = this.ed.store;
+    if (st.selection.length !== 1) return null;
+    const id = st.selection[0];
+    const c = this.ed.renderer.corners(id);
+    if (!c) return null;
+    const pts = this.handlePoints(c);
+    for (let i = 0; i < pts.length; i++) {
+      const [hx, hy] = pts[i];
+      if (Math.abs(hx - x) <= HANDLE && Math.abs(hy - y) <= HANDLE) return { id, handle: i };
+    }
+    // rotation zone: just outside corners
+    for (let i = 0; i < 4; i++) {
+      const [hx, hy] = pts[i * 2];
+      const d = Math.hypot(hx - x, hy - y);
+      if (d > HANDLE && d < HANDLE * 3) return { id, handle: 100 + i };
+    }
+    return null;
+  }
+
+  /** screen-space handle points: 0 tl,1 t,2 tr,3 r,4 br,5 b,6 bl,7 l */
+  private handlePoints(c: number[]) {
+    const s = (i: number) => this.toScreen(c[i * 2], c[i * 2 + 1]);
+    const [p0, p1, p2, p3] = [s(0), s(1), s(2), s(3)];
+    const mid = (a: number[], b: number[]) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    return [p0, mid(p0, p1), p1, mid(p1, p2), p2, mid(p2, p3), p3, mid(p3, p0)];
+  }
+
+  // ---------- pointer ----------
+  private down(e: PointerEvent) {
+    if ((e.target as HTMLElement).closest('.vp-ui')) return;
+    const [x, y] = this.local(e);
+    this.host.setPointerCapture(e.pointerId);
+    const st = this.ed.store;
+    const tool = this.ed.tool;
+    if (e.button === 1 || this.spaceDown || tool === 'hand') {
+      this.drag = { kind: 'pan', sx: x, sy: y, px: this.panX, py: this.panY };
+      return;
+    }
+    if (e.button !== 0) return;
+    const [cx, cy] = this.toComp(x, y);
+    if (tool === 'rect' || tool === 'ellipse') {
+      this.drag = { kind: 'create', type: tool, cx, cy, id: null };
+      st.beginGesture('create');
+      return;
+    }
+    if (tool === 'text') {
+      const l = addLayer(st, 'text', {
+        x: cx, y: cy, w: 0, h: 0, name: 'Text', color: [1, 1, 1, 1],
+        text: { content: 'Text', fontFamily: 'Inter', fontSize: 64, fontWeight: 600, lineHeight: 1.2, letterSpacing: 0, align: 'left' },
+      } as any);
+      // auto width text: size from measure
+      this.ed.renderer.render(st.time);
+      st.select([l.id]);
+      this.ed.setTool('select');
+      this.onTextEdit?.(l.id);
+      return;
+    }
+    // select tool
+    const h = this.handleAt(x, y);
+    if (h) {
+      const l = st.layer(h.id)!;
+      if (h.handle >= 100) {
+        const W = this.ed.renderer.worldMatrix(h.id)!;
+        const anc = valueAt(l, 'anchor', st.time);
+        const ax = W[0] * anc[0] + W[2] * anc[1] + W[4], ay = W[1] * anc[0] + W[3] * anc[1] + W[5];
+        this.drag = { kind: 'rotate', id: h.id, cx: ax, cy: ay, a0: Math.atan2(cy - ay, cx - ax), r0: valueAt(l, 'rotation', st.time)[0] };
+      } else {
+        const W = this.ed.renderer.worldMatrix(h.id)!;
+        this.drag = {
+          kind: 'resize', id: h.id, handle: h.handle, inv: invert(W), size: valueAt(l, 'size', st.time),
+          anchor: valueAt(l, 'anchor', st.time), local: localMatrix(l, st.time), shift: e.shiftKey,
+        };
+      }
+      st.beginGesture('transform');
+      return;
+    }
+    const hit = this.ed.renderer.hitTest(cx, cy);
+    if (hit) {
+      const id = this.pick(hit, e.metaKey || e.ctrlKey);
+      if (e.shiftKey) st.select([id], 'toggle');
+      else if (!st.selection.includes(id)) st.select([id]);
+      if (e.altKey) {
+        // alt-drag duplicates (figma)
+        cloneLayers(st, st.selection);
+        this.startMove(x, y);
+        return;
+      }
+      this.startMove(x, y);
+    } else {
+      this.drag = { kind: 'marquee', sx: x, sy: y, x, y, base: e.shiftKey ? st.selection.slice() : [] };
+      if (!e.shiftKey) st.select([]);
+    }
+  }
+
+  private startMove(x: number, y: number) {
+    const st = this.ed.store;
+    const start = new Map<string, { pos: number[]; inv: number[] }>();
+    for (const id of st.selection) {
+      const l = st.layer(id);
+      if (!l || l.locked) continue;
+      // skip if an ancestor is also selected
+      if (st.selection.some(o => o !== id && st.isAncestor(o, id))) continue;
+      const pw = l.parent ? this.ed.renderer.worldMatrix(l.parent) : [1, 0, 0, 1, 0, 0];
+      start.set(id, { pos: valueAt(l, 'position', st.time), inv: invert(pw ?? [1, 0, 0, 1, 0, 0]) });
+    }
+    this.drag = { kind: 'move', sx: x, sy: y, start, moved: false };
+    st.beginGesture('move');
+  }
+
+  private move(e: PointerEvent) {
+    const [x, y] = this.local(e);
+    this.mouse = { x, y };
+    const st = this.ed.store;
+    const d = this.drag;
+    if (!d) {
+      if (this.ed.tool === 'select') {
+        const [cx, cy] = this.toComp(x, y);
+        const h = this.handleAt(x, y);
+        this.host.style.cursor = h ? (h.handle >= 100 ? 'alias' : HANDLE_CURSORS[h.handle]) : '';
+        const hit = h ? null : this.ed.renderer.hitTest(cx, cy);
+        const hov = hit ? this.pick(hit, e.metaKey || e.ctrlKey) : null;
+        if (hov !== this.hover) { this.hover = hov; this.overlayDirty = true; }
+      }
+      return;
+    }
+    if (d.kind === 'pan') {
+      this.panX = d.px + (x - d.sx);
+      this.panY = d.py + (y - d.sy);
+      this.applyView();
+    } else if (d.kind === 'move') {
+      let dx = (x - d.sx) / this.zoom, dy = (y - d.sy) / this.zoom;
+      if (e.shiftKey) { if (Math.abs(dx) > Math.abs(dy)) dy = 0; else dx = 0; }
+      if (!d.moved && Math.hypot(x - d.sx, y - d.sy) < 3) return;
+      d.moved = true;
+      st.transact('Move', tx => {
+        for (const [id, s] of d.start) {
+          const l = st.layer(id);
+          if (!l) continue;
+          const ldx = s.inv[0] * dx + s.inv[2] * dy, ldy = s.inv[1] * dx + s.inv[3] * dy;
+          setPropTx(tx, l, 'position', [Math.round((s.pos[0] + ldx) * 100) / 100, Math.round((s.pos[1] + ldy) * 100) / 100], st.time);
+        }
+      });
+    } else if (d.kind === 'marquee') {
+      d.x = x; d.y = y;
+      const [ax, ay] = this.toComp(Math.min(d.sx, x), Math.min(d.sy, y));
+      const [bx, by] = this.toComp(Math.max(d.sx, x), Math.max(d.sy, y));
+      const hits = this.ed.renderer.hitRect(ax, ay, bx, by).map(id => topAncestor(st, id));
+      st.select([...new Set([...d.base, ...hits])]);
+      this.overlayDirty = true;
+    } else if (d.kind === 'create') {
+      const [cx, cy] = this.toComp(x, y);
+      let w = cx - d.cx, h = cy - d.cy;
+      if (e.shiftKey) { const m = Math.max(Math.abs(w), Math.abs(h)); w = Math.sign(w || 1) * m; h = Math.sign(h || 1) * m; }
+      const x0 = Math.min(d.cx, d.cx + w), y0 = Math.min(d.cy, d.cy + h);
+      const aw = Math.max(1, Math.abs(w)), ah = Math.max(1, Math.abs(h));
+      if (!d.id) {
+        if (Math.hypot(w, h) * this.zoom < 3) return;
+        const l = addLayer(st, d.type, { x: x0, y: y0, w: aw, h: ah, name: d.type === 'rect' ? 'Rectangle' : 'Ellipse', color: [0.85, 0.85, 0.85, 1] });
+        d.id = l.id;
+        st.select([l.id]);
+      } else {
+        const id = d.id;
+        st.transact('Resize', tx => {
+          const l = st.layer(id)!;
+          setTx(tx, l, 'size', [aw, ah]);
+          setTx(tx, l, 'anchor', [aw / 2, ah / 2]);
+          setTx(tx, l, 'position', [x0 + aw / 2, y0 + ah / 2]);
+        });
+      }
+    } else if (d.kind === 'resize') {
+      const [cx, cy] = this.toComp(x, y);
+      const lx = d.inv[0] * cx + d.inv[2] * cy + d.inv[4];
+      const ly = d.inv[1] * cx + d.inv[3] * cy + d.inv[5];
+      let x0 = 0, y0 = 0, x1 = d.size[0], y1 = d.size[1];
+      const hnd = d.handle;
+      if (hnd === 0 || hnd === 6 || hnd === 7) x0 = lx;
+      if (hnd === 2 || hnd === 3 || hnd === 4) x1 = lx;
+      if (hnd === 0 || hnd === 1 || hnd === 2) y0 = ly;
+      if (hnd === 4 || hnd === 5 || hnd === 6) y1 = ly;
+      if (e.shiftKey && d.size[0] > 0 && d.size[1] > 0) {
+        const ar = d.size[0] / d.size[1];
+        const w = x1 - x0, h = y1 - y0;
+        if (hnd % 2 === 0) {
+          if (Math.abs(w) / ar > Math.abs(h)) { const nh = Math.abs(w) / ar * Math.sign(h || 1); if (hnd <= 2) y0 = y1 - nh; else y1 = y0 + nh; }
+          else { const nw = Math.abs(h) * ar * Math.sign(w || 1); if (hnd === 0 || hnd === 6) x0 = x1 - nw; else x1 = x0 + nw; }
+        }
+      }
+      if (e.altKey) {
+        // resize from center
+        const cxl = d.size[0] / 2, cyl = d.size[1] / 2;
+        if (x0 !== 0) x1 = 2 * cxl - x0; else if (x1 !== d.size[0]) x0 = 2 * cxl - x1;
+        if (y0 !== 0) y1 = 2 * cyl - y0; else if (y1 !== d.size[1]) y0 = 2 * cyl - y1;
+      }
+      const nx0 = Math.min(x0, x1), ny0 = Math.min(y0, y1);
+      const nw = Math.max(0.5, Math.abs(x1 - x0)), nh = Math.max(0.5, Math.abs(y1 - y0));
+      const fax = d.size[0] ? d.anchor[0] / d.size[0] : 0.5, fay = d.size[1] ? d.anchor[1] / d.size[1] : 0.5;
+      const na = [fax * nw, fay * nh];
+      const q = [nx0 + na[0], ny0 + na[1]];
+      const L = d.local;
+      const pos = [L[0] * q[0] + L[2] * q[1] + L[4], L[1] * q[0] + L[3] * q[1] + L[5]];
+      st.transact('Resize', tx => {
+        const l = st.layer(d.id)!;
+        setTx(tx, l, 'size', [round2(nw), round2(nh)]);
+        setTx(tx, l, 'anchor', [round2(na[0]), round2(na[1])]);
+        setTx(tx, l, 'position', [round2(pos[0]), round2(pos[1])]);
+      });
+    } else if (d.kind === 'rotate') {
+      const [cx, cy] = this.toComp(x, y);
+      let deg = d.r0 + (Math.atan2(cy - d.cy, cx - d.cx) - d.a0) * 180 / Math.PI;
+      if (e.shiftKey) deg = Math.round(deg / 15) * 15;
+      st.transact('Rotate', tx => setTx(tx, st.layer(d.id)!, 'rotation', [round2(deg)]));
+    }
+  }
+
+  private up(e: PointerEvent) {
+    const d = this.drag;
+    this.drag = null;
+    this.host.releasePointerCapture?.(e.pointerId);
+    const st = this.ed.store;
+    st.endGesture();
+    if (d?.kind === 'create') {
+      if (!d.id) {
+        // click without drag: default sized shape
+        const l = addLayer(st, d.type, { x: d.cx - 50, y: d.cy - 50, w: 100, h: 100, name: d.type === 'rect' ? 'Rectangle' : 'Ellipse', color: [0.85, 0.85, 0.85, 1] });
+        st.select([l.id]);
+      }
+      this.ed.setTool('select');
+    }
+    if (d?.kind === 'move' && !d.moved && !e.shiftKey) {
+      // click (no drag) on a selected item inside a multi-selection: select just it
+      const [cx, cy] = this.toComp(...(this.local(e) as [number, number]));
+      const hit = this.ed.renderer.hitTest(cx, cy);
+      if (hit && st.selection.length > 1) st.select([this.pick(hit, e.metaKey || e.ctrlKey)]);
+    }
+    this.overlayDirty = true;
+  }
+
+  private dbl(e: MouseEvent) {
+    const [x, y] = this.local(e);
+    const [cx, cy] = this.toComp(x, y);
+    const hit = this.ed.renderer.hitTest(cx, cy);
+    if (!hit) return;
+    const st = this.ed.store;
+    const l = st.layer(hit)!;
+    if (l.type === 'text') { st.select([hit]); this.onTextEdit?.(hit); return; }
+    // double click enters groups: select the next level down
+    const sel = st.selection[0];
+    let cur: string | null = hit, prev = hit;
+    while (cur && cur !== sel) { prev = cur; cur = st.layer(cur)?.parent ?? null; }
+    if (cur === sel) st.select([prev]);
+  }
+
+  private updateCursor() {
+    const t = this.ed.tool;
+    this.host.style.cursor = this.spaceDown || t === 'hand' ? 'grab' : t === 'select' ? '' : t === 'text' ? 'text' : 'crosshair';
+  }
+
+  // ---------- overlay ----------
+  drawOverlay() {
+    const g = this.octx;
+    const dpr = window.devicePixelRatio || 1;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, this.overlay.width, this.overlay.height);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const st = this.ed.store, r = this.ed.renderer;
+    const comp = st.comp;
+    // comp frame outline
+    g.strokeStyle = 'rgba(255,255,255,0.12)';
+    g.lineWidth = 1;
+    const [c0x, c0y] = this.toScreen(0, 0);
+    g.strokeRect(Math.round(c0x) - 0.5, Math.round(c0y) - 0.5, Math.round(comp.width * this.zoom) + 1, Math.round(comp.height * this.zoom) + 1);
+    g.fillStyle = 'rgba(255,255,255,0.45)';
+    g.font = '11px system-ui, sans-serif';
+    g.fillText(`${comp.name}  ${comp.width}×${comp.height}`, c0x, c0y - 6);
+
+    const accent = '#4c8dff';
+    const poly = (c: number[]) => {
+      g.beginPath();
+      for (let i = 0; i < 4; i++) {
+        const [sx, sy] = this.toScreen(c[i * 2], c[i * 2 + 1]);
+        i ? g.lineTo(sx, sy) : g.moveTo(sx, sy);
+      }
+      g.closePath();
+    };
+    if (this.hover && !st.selection.includes(this.hover) && !this.drag) {
+      const c = r.corners(this.hover);
+      if (c) { g.strokeStyle = accent; g.lineWidth = 1; poly(c); g.stroke(); }
+    }
+    // motion path of selected layers with animated position
+    for (const id of st.selection) {
+      const l = st.layer(id);
+      const p = l?.props.position;
+      if (!l || !p?.kf || p.kf.length < 2) continue;
+      const pw = l.parent ? r.worldMatrix(l.parent) : [1, 0, 0, 1, 0, 0];
+      if (!pw) continue;
+      const tr = new Track(p, 2, true);
+      const t0 = p.kf[0].t, t1 = p.kf[p.kf.length - 1].t;
+      const steps = Math.min(400, Math.max(20, Math.round((t1 - t0) * comp.fps)));
+      const o = [0, 0];
+      g.beginPath();
+      for (let s = 0; s <= steps; s++) {
+        tr.eval(t0 + (t1 - t0) * s / steps, o, 0);
+        const wx = pw[0] * o[0] + pw[2] * o[1] + pw[4], wy = pw[1] * o[0] + pw[3] * o[1] + pw[5];
+        const [sx, sy] = this.toScreen(wx, wy);
+        s ? g.lineTo(sx, sy) : g.moveTo(sx, sy);
+      }
+      g.strokeStyle = 'rgba(76,141,255,0.6)';
+      g.setLineDash([4, 3]);
+      g.stroke();
+      g.setLineDash([]);
+      // frame ticks + keyframe squares
+      g.fillStyle = accent;
+      for (const k of p.kf) {
+        const wx = pw[0] * k.v[0] + pw[2] * k.v[1] + pw[4], wy = pw[1] * k.v[0] + pw[3] * k.v[1] + pw[5];
+        const [sx, sy] = this.toScreen(wx, wy);
+        g.fillRect(sx - 3, sy - 3, 6, 6);
+      }
+    }
+    // selection
+    for (const id of st.selection) {
+      const c = r.corners(id);
+      if (!c) continue;
+      g.strokeStyle = accent;
+      g.lineWidth = 1;
+      poly(c);
+      g.stroke();
+    }
+    if (st.selection.length === 1 && !(this.drag && this.drag.kind === 'move')) {
+      const c = r.corners(st.selection[0]);
+      if (c) {
+        const pts = this.handlePoints(c);
+        g.fillStyle = '#fff';
+        g.strokeStyle = accent;
+        for (const [hx, hy] of pts) {
+          g.beginPath();
+          g.rect(Math.round(hx) - 3.5, Math.round(hy) - 3.5, 7, 7);
+          g.fill();
+          g.stroke();
+        }
+        // anchor point
+        const l = st.layer(st.selection[0])!;
+        const W = r.worldMatrix(l.id)!;
+        const a = valueAt(l, 'anchor', st.time);
+        const [ax, ay] = this.toScreen(W[0] * a[0] + W[2] * a[1] + W[4], W[1] * a[0] + W[3] * a[1] + W[5]);
+        g.beginPath();
+        g.arc(ax, ay, 3.5, 0, Math.PI * 2);
+        g.strokeStyle = accent;
+        g.stroke();
+        // size label
+        const sz = r.sizeOf(l.id);
+        const sc = valueAt(l, 'scale', st.time);
+        const label = `${Math.round(sz[0] * sc[0] / 100)} × ${Math.round(sz[1] * sc[1] / 100)}`;
+        const by = Math.max(...[1, 3, 5, 7].map(i => this.toScreen(0, c[i])[1]));
+        const bx = [0, 2, 4, 6].reduce((s, i) => s + this.toScreen(c[i], 0)[0], 0) / 4;
+        g.font = '11px system-ui, sans-serif';
+        const tw = g.measureText(label).width + 10;
+        g.fillStyle = accent;
+        roundRect(g, bx - tw / 2, by + 8, tw, 18, 3);
+        g.fill();
+        g.fillStyle = '#fff';
+        g.fillText(label, bx - tw / 2 + 5, by + 21);
+      }
+    }
+    const d = this.drag;
+    if (d?.kind === 'marquee') {
+      g.fillStyle = 'rgba(76,141,255,0.08)';
+      g.strokeStyle = accent;
+      const x = Math.min(d.sx, d.x), y = Math.min(d.sy, d.y);
+      g.fillRect(x, y, Math.abs(d.x - d.sx), Math.abs(d.y - d.sy));
+      g.strokeRect(x + 0.5, y + 0.5, Math.abs(d.x - d.sx), Math.abs(d.y - d.sy));
+    }
+  }
+
+  requestOverlay() { this.overlayDirty = true; }
+
+  deleteSelection() { deleteLayers(this.ed.store, this.ed.store.selection); }
+}
+
+const HANDLE_CURSORS = ['nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'];
+
+function round2(v: number) { return Math.round(v * 100) / 100; }
+
+function roundRect(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  g.beginPath();
+  g.roundRect(x, y, w, h, r);
+}
+
+export function invert(m: number[]) {
+  const [a, b, c, d, e, f] = m;
+  const det = a * d - b * c || 1e-12;
+  return [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det];
+}
+
+/** layer local matrix (parent space <- local box) at time t */
+export function localMatrix(l: Layer, t: number) {
+  const a = valueAt(l, 'anchor', t), p = valueAt(l, 'position', t), s = valueAt(l, 'scale', t), r = valueAt(l, 'rotation', t)[0] * Math.PI / 180;
+  const cs = Math.cos(r), sn = Math.sin(r);
+  const A = cs * s[0] / 100, B = sn * s[0] / 100, C = -sn * s[1] / 100, D = cs * s[1] / 100;
+  return [A, B, C, D, p[0] - (A * a[0] + C * a[1]), p[1] - (B * a[0] + D * a[1])];
+}
+
+function isTyping(e: KeyboardEvent) {
+  const t = e.target as HTMLElement;
+  return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+}
+
+function topAncestor(st: Editor['store'], id: string) {
+  let cur = id;
+  while (st.layer(cur)?.parent) cur = st.layer(cur)!.parent!;
+  return cur;
+}
+
+// property setter that respects "animated => keyframe at current time"
+function setTx(tx: Tx, l: Layer, key: 'size' | 'anchor' | 'position' | 'rotation', v: number[]) {
+  setPropTx(tx, l, key, v, (globalThis as any).editor.store.time);
+}
