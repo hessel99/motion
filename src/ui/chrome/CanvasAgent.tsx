@@ -10,6 +10,7 @@ import { agentProgress, askAgent, chatStarted } from '../agent-bridge';
 import { useChannels } from '../hooks';
 import { PromptBox } from './PromptBox';
 import { AudioLines, Sparkles, X } from './icons';
+import { ui } from './ui-state';
 
 const dismissed = new Set<string>();
 
@@ -20,6 +21,16 @@ export function EmptyCanvas() {
   const d = activeDoc();
   const key = (d?.id ?? '') + ':' + s.comp.id;
   if (!d || s.comp.root.length || chatStarted || agentProgress() || s.playing || (editor.tool !== 'select' && editor.tool !== 'hand') || dismissed.has(key)) return null;
+  // the agent panel is open: its composer is the one place to brief it (one primary action per
+  // view); the canvas only says what this empty place is
+  if (ui.leftOpen && ui.leftTab === 'agent') return (
+    <div class="vp-empty">
+      <div class="vp-empty-note" role="note">
+        <span class="vp-empty-title">Empty composition</span>
+        <span class="vp-empty-sub">Describe the animation in the agent panel, draw with the tools, or drop a file here.</span>
+      </div>
+    </div>
+  );
   return (
     <div class="vp-empty">
       <div class="vp-empty-card">

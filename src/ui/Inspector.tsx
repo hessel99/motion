@@ -501,7 +501,7 @@ function EasePanel() {
   const cur: [number, number, number, number] = a && b ? (a.interp === 'linear' ? [0, 0, 1, 1] : [a.out[0], a.out[1], b.in[0], b.in[1]]) : [0.333, 0, 0.667, 1];
   const active = EASE_PRESETS.find(p => p.v.every((x, i) => Math.abs(x - cur[i]) < 1e-3));
   return (
-    <Section title={`Easing · ${keys.length} key${keys.length > 1 ? 's' : ''}`} right={<span class="row" style={{ margin: 0 }}>{seg && <span class="insp-type">{propDef(seg.key).label}</span>}</span>}>
+    <Section title={`Easing · ${keys.length} keyframe${keys.length > 1 ? 's' : ''}`} right={<span class="row" style={{ margin: 0 }}>{seg && <span class="insp-type">{propDef(seg.key).label}</span>}</span>}>
       {a && b && seg && a.interp === 'spring' && <SpringView bounce={a.bounce ?? 0.3} onChange={v => setSpring(store, keys, v)} />}
       {a && b && seg && a.interp !== 'hold' && a.interp !== 'spring' && (
         <CurveEditor value={cur} onChange={(v, mk) => setSegmentHandles(store, seg!.layerId, seg!.key, seg!.i, [v[0], v[1]], [v[2], v[3]], mk)} />

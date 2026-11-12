@@ -201,6 +201,8 @@ export class Timeline {
     const search = document.createElement('input');
     search.className = 'tl-search';
     search.placeholder = 'Search layers';
+    search.type = 'search';
+    search.setAttribute('aria-label', 'Search layers');
     search.addEventListener('input', () => { this.filter = search.value.trim().toLowerCase(); this.scrollY = 0; this.rowsDirty = true; this.baseDirty = true; });
     search.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { search.value = ''; this.filter = ''; this.rowsDirty = true; search.blur(); } });
     host.appendChild(search);
@@ -467,6 +469,17 @@ export class Timeline {
     g.beginPath();
     g.rect(0, HEADER_H, this.w, this.h - HEADER_H);
     g.clip();
+    // empty states point forward: no layers yet, or nothing matches the search
+    if (!this.rows.length && this.h > HEADER_H + ROW_H * 2) {
+      const cx = this.leftW / 2, cy = HEADER_H + Math.min(64, (this.h - HEADER_H) / 2);
+      g.save();
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillStyle = T.tlLayerName; g.font = T.font.ui;
+      g.fillText(this.filter ? `No layers match “${this.filter}”` : 'No layers yet', cx, cy);
+      g.fillStyle = T.tlHint; g.font = T.font.uiSm;
+      g.fillText(this.filter ? 'Press Esc in the search to clear it' : 'Draw with the tools or drop a file', cx, cy + 18);
+      g.restore();
+    }
     for (let i = first; i < last; i++) {
       const r = this.rows[i];
       const y = this.rowY(i);

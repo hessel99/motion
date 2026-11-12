@@ -138,7 +138,7 @@ function Transport() {
         {s.playing ? <Pause size={14} /> : <Play size={14} />}
       </button>
       <Button variant="ghost" icon size="sm" tip="Next frame (.) · next key (K)" tipSide="top" onClick={() => editor.stepFrames(1)}><StepForward /></Button>
-      <Button variant="ghost" icon size="sm" class="tp-loop" active={s.loop} tip={s.loop ? 'Loop: on' : 'Loop: off'} tipSide="top"
+      <Button variant="ghost" icon size="sm" class="tp-loop" active={s.loop} tip="Loop" tipSide="top"
         onClick={() => { s.loop = !s.loop; editor.emit('view'); }}><Repeat /></Button>
       <Button variant="ghost" icon size="sm" tip="Full-screen preview (Esc to leave)" tipSide="top" onClick={() => startPreview()}><Maximize2 /></Button>
       <input ref={time} class="tp-time" aria-label="Current time (minutes:seconds:frames)" title="Current time: type 1:12, 2.5 (seconds) or 90f" spellcheck={false} defaultValue="00:00:00"

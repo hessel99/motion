@@ -38,7 +38,7 @@ function TitleBlock() {
     sub = [
       l.shape ? (l.shape.kind === 'star' ? 'Star' : 'Polygon') : (TYPE_NAME[l.type] ?? l.type),
       parent ? `in ${parent.name}` : null,
-      keys ? `${keys} key${keys === 1 ? '' : 's'}` : null,
+      keys ? `${keys} keyframe${keys === 1 ? '' : 's'}` : null,
     ].filter(Boolean).join(' · ');
     menu = [
       { label: 'Rename…', action: () => { const n = prompt('Layer name', l.name); if (n) renameLayer(s, l.id, n); } },

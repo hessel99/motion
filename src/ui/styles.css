@@ -17,8 +17,10 @@ html, body, #app {
   background: var(--bg-app); color: var(--text);
   font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-ui);
   user-select: none; -webkit-user-select: none;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
 }
+/* the root keeps the reader's font size, so the rem type tokens scale with it */
+html { font-size: 100%; }
 button, input, select, textarea { font: inherit; color: inherit; }
 h1, h2, h3, h4 { margin: 0; font: inherit; }
 code { background: var(--surface-code); padding: 1px var(--space-2); border-radius: var(--radius-xs); font-family: var(--font-mono); font-size: 0.95em; }
@@ -50,6 +52,15 @@ button svg, .btn svg { flex: none; }
 .btn-block { width: 100%; }
 button:active:not(:disabled) { background: var(--surface-pressed); }
 button:disabled { opacity: 0.38; cursor: default; }
+/* press: a button scales to 0.96 (150ms ease-out); rows, cards and segments opt out (.static) */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-reduce-motion]) button:not(.static):not(.seg-item):not(.suggest):not(.recent-open):not(.preset-card):not(.import-card):not(.model-row):not(.theme-card):not(.set-nav-item):not(.ag-sb-concept):not(.ag-result):not(.ag-ref):not(.link):not(.linked-name) {
+    transition-property: background-color, border-color, color, scale;
+    transition-duration: var(--dur-fast), var(--dur-fast), var(--dur-fast), 150ms;
+    transition-timing-function: var(--ease-standard), var(--ease-standard), var(--ease-standard), ease-out;
+  }
+  :root:not([data-reduce-motion]) button:not(:disabled):active:not(.static):not(.seg-item):not(.suggest):not(.recent-open):not(.preset-card):not(.import-card):not(.model-row):not(.theme-card):not(.set-nav-item):not(.ag-sb-concept):not(.ag-result):not(.ag-ref):not(.link):not(.linked-name) { scale: 0.96; }
+}
 button.on, button[aria-pressed='true'] { background: var(--surface-selected); border-color: transparent; color: var(--text); }
 
 .btn-ghost, button.ghost { background: transparent; border-color: transparent; }
@@ -58,9 +69,10 @@ button.on, button[aria-pressed='true'] { background: var(--surface-selected); bo
 .btn-ghost:active:not(:disabled), button.ghost:active:not(:disabled) { background: var(--surface-pressed); }
 .btn-ghost.on, button.ghost.on { background: var(--surface-pressed); border-color: transparent; color: var(--text); }
 
-.btn-primary, button.primary { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--text-on-accent); }
-.btn-primary:hover:not(:disabled), button.primary:hover:not(:disabled) { background: var(--accent-solid-hover); border-color: var(--accent-solid-hover); }
-.btn-primary:active:not(:disabled), button.primary:active:not(:disabled) { background: var(--accent-solid-pressed); }
+/* the one primary action: neutral (near-white on dark), like Share; blue only means selection */
+.btn-primary, button.primary { background: var(--primary-bg); border-color: var(--primary-bg); color: var(--primary-text); }
+.btn-primary:hover:not(:disabled), button.primary:hover:not(:disabled) { background: var(--primary-bg-hover); border-color: var(--primary-bg-hover); }
+.btn-primary:active:not(:disabled), button.primary:active:not(:disabled) { background: var(--primary-bg-hover); }
 
 .btn-danger { background: var(--danger-soft); color: var(--danger-text); }
 .btn-danger:hover:not(:disabled) { background: var(--danger-soft); border-color: var(--danger-border); }
@@ -196,6 +208,10 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
 /* ---------------- tooltip (css only: [data-tooltip]) ----------------
    no js, no layout cost: a pseudo element shown after a short delay on hover / keyboard focus. */
 [data-tooltip] { position: relative; }
+/* raised surfaces draw their edge with box-shadow, which forced-colors mode drops */
+@media (forced-colors: active) {
+  .ctx-menu, .askbar, .toolbar, .sel-bar, .dialog, .settings-modal, .toast, [data-tooltip]::after { border: 1px solid CanvasText; }
+}
 [data-tooltip]::after {
   content: attr(data-tooltip); position: absolute; left: 50%; top: calc(100% + 6px); z-index: var(--z-tooltip);
   transform: translate(-50%, -2px); padding: 3px var(--space-3); border-radius: var(--radius-sm);
@@ -205,6 +221,7 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
   transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), visibility 0s linear var(--dur-fast);
 }
 [data-tooltip-side='top']::after { top: auto; bottom: calc(100% + 6px); transform: translate(-50%, 2px); }
+[aria-expanded='true'][data-tooltip]::after { display: none; }
 [data-tooltip]:hover::after, [data-tooltip]:focus-visible::after {
   opacity: 1; visibility: visible; transform: translate(-50%, 0);
   transition-delay: 400ms, 400ms, 400ms;
@@ -260,7 +277,7 @@ input[type='color']::-moz-color-swatch { border: 0; border-radius: var(--radius-
 .dialog-actions .btn:not(.btn-primary), .xv-actions .btn:not(.btn-primary) { border-radius: var(--radius-pill); padding: 0 var(--space-7); }
 .dialog-body { min-height: 0; }
 .save-changes-text { margin: 0; color: var(--text-secondary); }
-.dialog-actions, .xv-actions { display: flex; justify-content: flex-end; gap: var(--space-4); }
+.dialog-actions, .xv-actions { display: flex; justify-content: flex-end; gap: var(--space-6); }
 
 kbd, .kbd {
   font: var(--text-xs) var(--font-mono); background: var(--surface-3); border: 1px solid var(--border-overlay);
@@ -300,7 +317,7 @@ kbd, .kbd {
 .color-field { display: flex; gap: var(--space-2); align-items: center; flex: 1; min-width: 0; }
 .color-field { gap: 0; background: var(--input-bg); border-radius: var(--radius-md); padding-left: var(--space-2); height: var(--control-h-md); }
 .color-field:hover { background: var(--input-bg-hover); }
-.color-field .swatch { width: 20px; height: 20px; border-radius: var(--radius-xs); border: 0; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
+.color-field .swatch { width: 20px; height: 20px; border-radius: var(--radius-xs); border: 0; box-shadow: inset 0 0 0 1px var(--image-outline); }
 .color-field .hex { flex: 1; min-width: 0; width: 60px; font-family: var(--font-ui); font-size: var(--text-md); text-transform: uppercase; background: transparent; padding: 0 var(--space-3); }
 .color-field .hex:hover:not(:focus) { background: transparent; }
 .color-field .num { flex: 0 0 72px; max-width: 72px; background: transparent; }
@@ -384,11 +401,12 @@ kbd, .kbd {
 .lib-count { flex: none; min-width: 18px; text-align: right; font-size: var(--text-xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .lib-badge { font-size: var(--text-xs); padding: 0 var(--space-2); border-radius: var(--radius-pill); }
 .lib-badge.warn { color: var(--warning-text); background: var(--surface-2); }
-.lib-comp-icon, .comp-icon { color: var(--preset-loop); font-size: 11px; }
+.lib-comp-icon, .comp-icon { color: var(--preset-loop); font-size: var(--text-xs); }
 .lib-empty p { margin: 0 0 var(--space-3); }
 .lib-hint { margin: 0; line-height: 1.45; }
-.link { background: none; border: 0; padding: 0; min-height: 0; color: var(--accent-text); cursor: pointer; font: inherit; }
-.link:hover { text-decoration: underline; background: none; }
+/* links are neutral and underlined: blue only means selection, the playhead and keys */
+.link { background: none; border: 0; padding: 0; min-height: 0; color: var(--text); cursor: pointer; font: inherit; text-decoration: underline; text-decoration-color: var(--text-muted); text-underline-offset: 2px; text-decoration-thickness: 1px; }
+.link:hover { text-decoration-color: currentColor; background: none; }
 .chip { display: inline-block; flex: none; width: 16px; height: 16px; border-radius: var(--radius-xs); border: 1px solid var(--border-strong); background-clip: padding-box; }
 /* inspector: linked values */
 .link-btn { flex: none; width: 22px; height: 22px; min-height: 0; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; color: var(--text-muted); border-radius: var(--radius-sm); }
@@ -419,4 +437,30 @@ kbd, .kbd {
 .keynav-step::after { content: ''; position: absolute; inset: -2px -5px; }
 .agent-offline { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5); font-size: var(--text-sm); color: var(--text-muted); border-radius: var(--radius-pill); }
 .agent-offline .link { font-size: var(--text-sm); }
-.tp-dur { color: var(--text-disabled); }
+.tp-dur { color: var(--text-muted); }
+
+/* ---------------- polish (better-* audit) ---------------- */
+/* concentric radii: outer = inner + padding (menu 4px padding around 8px rows) */
+.ctx-menu { border-radius: calc(var(--radius-md) + var(--space-2)); }
+/* scrolling past the end of an overlay never scrolls what is behind it */
+.ctx-menu, .dialog, .help, .xv-dialog, .askbar-list, .agent-list, .right, .lp-scroll, .set-main, .set-nav { overscroll-behavior: contain; }
+/* content images: a 1px pure black / white outline just inside the edge */
+.recent-thumb img, .ag-result img, .ag-shots img { outline: 1px solid var(--image-outline); outline-offset: -1px; }
+/* wrap: titles balance, paragraphs avoid a lone last word; long-form text keeps a measure */
+.dialog-title, .help-title, .xv-title, .set-card-title, .home-h { text-wrap: balance; }
+.xv-info, .home-hint, .home-empty, .set-card-sub, .set-row-sub, .insp-empty, .hint, .agent-empty-line, .msg.assistant { text-wrap: pretty; }
+.home-hint, .xv-info, .set-card-sub { max-width: 65ch; }
+/* text people may want to copy stays selectable (the app root is user-select: none for drags) */
+.toast, .dialog-body, .xv-info, .set-main, .home-hint, .insp-empty, .hint, .expr-err, .panel-error { user-select: text; -webkit-user-select: text; }
+/* infrequent surfaces fade in (150ms); menus and tooltips stay instant */
+@media (prefers-reduced-motion: no-preference) {
+  .dialog, .settings-modal, .askbar { transition: opacity 150ms ease-out, translate 150ms ease-out; }
+  @starting-style { .dialog, .settings-modal, .askbar { opacity: 0; translate: 0 4px; } }
+}
+:root[data-reduce-motion] .dialog, :root[data-reduce-motion] .settings-modal, :root[data-reduce-motion] .askbar { transition: none; }
+/* status pulses: off under the OS reduced-motion preference too (spinners keep turning) */
+@media (prefers-reduced-motion: reduce) { .agent-pill-dot { animation: none; } }
+/* counters that tick */
+.agent-pill, .left-panel .ag-status { font-variant-numeric: tabular-nums; }
+/* the export dialog keeps its top edge when the format changes its height */
+.dialog-backdrop:has(> .xv-dialog) { place-items: start center; padding-top: 12vh; }

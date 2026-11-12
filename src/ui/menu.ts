@@ -18,8 +18,12 @@ let levels: Level[] = [];
 let seq = 0;
 let cleanup: (() => void) | null = null;
 let restoreFocus: HTMLElement | null = null;
+/** the button a menu was opened from (aria-expanded while open; hides its tooltip) */
+let anchorEl: Element | null = null;
 
 export function closeMenu() {
+  anchorEl?.setAttribute('aria-expanded', 'false');
+  anchorEl = null;
   current?.remove();
   current = null;
   levels = [];
@@ -189,6 +193,8 @@ const CHEVRON_SVG = svg('<path d="m9 18 6-6-6-6"/>');
 export function menuFrom(anchor: Element, items: MenuItem[], opts: { align?: 'left' | 'right'; above?: boolean } = {}) {
   const r = anchor.getBoundingClientRect();
   showContextMenu(r.left, r.bottom + 6, items);
+  anchorEl = anchor;
+  anchor.setAttribute('aria-expanded', 'true');
   const m = current;
   if (!m) return;
   const mr = m.getBoundingClientRect();
