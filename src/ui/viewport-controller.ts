@@ -59,6 +59,8 @@ export class ViewportController {
     ed.on('prefs', () => { this.overlayDirty = true; });
     host.addEventListener('pointerdown', e => this.down(e));
     host.addEventListener('pointermove', e => this.move(e));
+    // mouse-driven shaders follow the cursor while it hovers the canvas (their mouse prop otherwise)
+    host.addEventListener('pointerleave', () => { const r = ed.renderer; r.pointer = null; if (r.usesPointer) r.dirty = true; });
     host.addEventListener('pointerup', e => this.up(e));
     host.addEventListener('pointercancel', e => this.up(e));
     host.addEventListener('dblclick', e => this.dbl(e));
@@ -457,6 +459,7 @@ export class ViewportController {
   private move(e: PointerEvent) {
     const [x, y] = this.local(e);
     this.mouse = { x, y };
+    { const r = this.ed.renderer, [px, py] = this.toComp(x, y); r.pointer = { x: px, y: py }; if (r.usesPointer) r.dirty = true; }
     const st = this.ed.store;
     const d = this.drag;
     if (this.ed.tool === 'pen') { const [cx, cy] = this.toComp(x, y); this.pen.move(cx, cy); return; }
@@ -676,7 +679,6 @@ export class ViewportController {
     }
     g.fillStyle = T.vpLabel;
     g.font = T.font.uiSm;
-    g.fillText(`${comp.name}  ${comp.width}×${comp.height}`, c0x, c0y - 6);
 
     const accent = T.vpSelection;
     const poly = (c: number[]) => {

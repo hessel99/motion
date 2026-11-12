@@ -348,6 +348,8 @@ export function AgentPanel(props: { chat: boolean; children?: ComponentChildren;
       {props.chat ? (
         <div class="agent-chat">
           <div class="agent-head">
+            <h2 class="lp-title">Agent</h2>
+            <span class="grow" />
             <span class={'dot ' + status} title={`Agent ${status === 'connected' ? `connected · ${modelLabel(provider, model)}` : status}`} />
             <Button variant="ghost" icon size="sm" tip="New conversation" disabled={!!turn || !msgs.length} onClick={newChat}><SquarePen /></Button>
           </div>

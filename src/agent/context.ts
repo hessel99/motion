@@ -1,5 +1,5 @@
 // the editor state the agent gets with every message (so "this", "these", "here" work):
-// composition, playhead, work area, markers, selection and @-mentioned layers. kept compact.
+// composition, playhead, work area, selection and @-mentioned layers. kept compact.
 
 import type { Store } from '../core/store';
 import type { Layer } from '../core/model';
@@ -45,8 +45,6 @@ export function editorContext(store: Store, mentioned: Layer[] = []): string {
   const c = store.comp;
   const lines: string[] = [];
   lines.push(`comp ${JSON.stringify(c.name)} ${c.width}x${c.height} ${c.fps}fps ${fmtTime(c.duration)}, ${Object.keys(store.project.layers).length} layers; playhead ${fmtTime(store.time)}${store.workArea ? `; work area ${fmtTime(store.workArea[0])}–${fmtTime(store.workArea[1])}` : ''}`);
-  const mk = c.markers ?? [];
-  if (mk.length) lines.push(`markers: ${mk.slice(0, MAX_LIST).map(m => `${fmtTime(m.t)}${m.label ? ' ' + JSON.stringify(m.label) : ''}`).join(', ')}${mk.length > MAX_LIST ? ` (+${mk.length - MAX_LIST})` : ''}`);
   const ml = musicLayer(store);
   if (ml) {
     const m = music(store);

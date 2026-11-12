@@ -52,7 +52,7 @@ export function snapshotDoc(p: Project): DocSnapshot {
   }
   const c = p.comps[p.activeComp];
   const comp: Record<string, string> = {};
-  if (c) for (const f of ['width', 'height', 'fps', 'duration', 'background', 'markers', 'name', 'root'] as const) comp[f] = JSON.stringify((c as any)[f] ?? null);
+  if (c) for (const f of ['width', 'height', 'fps', 'duration', 'background', 'name', 'root'] as const) comp[f] = JSON.stringify((c as any)[f] ?? null);
   return { layers, comp, compId: p.activeComp };
 }
 

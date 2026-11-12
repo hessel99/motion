@@ -26,6 +26,10 @@ import { SettingsPage } from './settings/Settings';
 import { ui, closeSettings, openSettings, toggleAgent } from './chrome/ui-state';
 import { view } from './chrome/view';
 import { SHORTCUTS } from './chrome/shortcuts';
+import { setupPlatform } from './chrome/platform';
+
+// the window frame (mac traffic lights, full screen) as <html> attributes before the first render
+setupPlatform();
 
 let vp: ViewportController | null = null;
 let tl: Timeline | null = null;
@@ -48,9 +52,10 @@ export function App() {
   // the panels changed size: the canvases follow on the next frame (their ResizeObservers also
   // fire, this only avoids one frame at the old size)
   useEffect(() => { requestAnimationFrame(() => { vp?.resize(); tl?.resize(); }); }, [ui.leftOpen, ui.view]);
-  // the window: the icon rail, two fixed full-height sidebars (agent / assets on the left, the
-  // inspector on the right) and between them the stage: the file tabs, then the canvas and the
-  // timeline as two inset cards. Home replaces the stage; Settings is a modal.
+  // the window (the grid lives in chrome.css, its sizes in tokens.css "app shell"): a full-width
+  // title bar (traffic lights, file tabs, Share), under it the icon rail, two fixed sidebars
+  // (agent / assets on the left, the inspector on the right) and between them the stage: the
+  // canvas full bleed over the timeline. Home replaces the stage; Settings is a modal.
   const home = ui.view === 'home';
   return (
     <IconProvider>
@@ -59,11 +64,11 @@ export function App() {
         <Guard name="Top bar"><TopBar /></Guard>
         {/* the editor stays mounted under Home: its canvases and WebGL context live for the session */}
         <aside class="left sidebar" aria-label="Agent and assets" hidden={!ui.leftOpen}><Guard name="Side panel"><LeftPanel /></Guard></aside>
-        <main class="center card" aria-label="Canvas">
+        <main class="center" aria-label="Canvas">
           <Viewport />
           {ui.previewing && <button type="button" class="preview-exit" onClick={stopPreview}>Esc · leave preview</button>}
         </main>
-        <section class="bottom card" aria-label="Timeline">
+        <section class="bottom" aria-label="Timeline">
           <Guard name="Timeline header"><TimelineHeader /></Guard>
           <TimelineHost />
         </section>

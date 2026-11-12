@@ -44,6 +44,8 @@ function startEditor() {
     });
   }
   if (!q.has('nobridge')) agentClient.connect();
+  // figma shader sources: pasted designs get their shaders' code through the bridge
+  void import('./app/shader-sources').then(m => m.shaderSources.start(editor.store));
   // stress lab (scripts/stress-lab.mjs): scene builders + measurement loops, never loaded otherwise
   if (q.has('lab')) import('./lab/index');
 }

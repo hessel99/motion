@@ -97,8 +97,7 @@ describe('choreography tools', () => {
   it('align_to_beats: start, sequence and keys modes', async () => {
     const s = editor.store;
     const ids = await boxes(3);
-    await run('set_markers', { add: [{ t: 0.5, label: 'a' }, { t: 1, label: 'b' }, { t: 2, label: 'c' }] });
-    await run('align_to_beats', { ids, mode: 'sequence' });
+    await run('align_to_beats', { ids, mode: 'sequence', beats: [0.5, 1, 2] });
     expect(ids.map(id => animRange(s.layer(id)!)![0])).toEqual([0.5, 1, 2]);
     await run('align_to_beats', { ids: [ids[0]], mode: 'end', beats: [3] });
     expect(animRange(s.layer(ids[0])!)![1]).toBeCloseTo(3);
