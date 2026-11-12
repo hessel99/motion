@@ -7,7 +7,7 @@ import {
   isAnimated, keyId, layerKeyTimes, moveKeyframes, moveLayers, parseKeyId, renameLayer, setLayerField, valueAt,
   addKeyframe, deleteKeyframes, toggleAnimated,
 } from '../core/commands';
-import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Layer, type PropKey } from '../core/model';
+import { PROP_DEFS, TYPE_PROPS, TRANSFORM_KEYS, type Keyframe, type Layer, type PropKey } from '../core/model';
 import { showContextMenu, type MenuItem } from './menu';
 import { EASE_PRESETS, SPRING_PRESETS } from '../core/easing';
 import { setEase, setInterp, setSpring } from '../core/commands';
@@ -31,7 +31,8 @@ type Drag =
   | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; base: Set<string> }
   | { kind: 'rows'; ids: string[]; sy: number; y: number; moved: boolean }
   | { kind: 'split'; sx: number; w0: number }
-  | { kind: 'bar'; id: string; sx: number; in0: number; out0: number; mode: 'move' | 'in' | 'out' };
+  | { kind: 'bar'; id: string; sx: number; in0: number; out0: number; mode: 'in' | 'out' }
+  | { kind: 'shift'; sx: number; moved: boolean; orig: Map<string, { inP: number; outP: number; kf: Partial<Record<PropKey, Keyframe[]>> }> };
 
 export class Timeline {
   canvas: HTMLCanvasElement;
@@ -526,6 +527,21 @@ export class Timeline {
       const inX = this.tToX(Math.max(0, l.inPoint)), outX = this.tToX(Math.min(comp.duration, l.outPoint));
       if (Math.abs(x - inX) < 5 && l.inPoint > 0 || Math.abs(x - inX) < 5) { st.select([l.id]); this.drag = { kind: 'bar', id: l.id, sx: x, in0: l.inPoint, out0: Math.min(l.outPoint, comp.duration), mode: 'in' }; st.beginGesture('trim'); return; }
       if (Math.abs(x - outX) < 5) { st.select([l.id]); this.drag = { kind: 'bar', id: l.id, sx: x, in0: l.inPoint, out0: Math.min(l.outPoint, comp.duration), mode: 'out' }; st.beginGesture('trim'); return; }
+      // drag the bar body: move the layer (and all its keyframes) in time. alt-drag: marquee instead
+      if (x > inX && x < outX && !e.altKey) {
+        if (!st.selection.includes(l.id)) st.select([l.id]);
+        const orig = new Map<string, { inP: number; outP: number; kf: Partial<Record<PropKey, Keyframe[]>> }>();
+        for (const id of st.selection) {
+          const ll = st.layer(id);
+          if (!ll) continue;
+          const kf: Partial<Record<PropKey, Keyframe[]>> = {};
+          for (const k in ll.props) { const p = ll.props[k as PropKey]; if (p?.kf?.length) kf[k as PropKey] = p.kf; }
+          orig.set(id, { inP: ll.inPoint, outP: ll.outPoint, kf });
+        }
+        this.drag = { kind: 'shift', sx: x, moved: false, orig };
+        st.beginGesture('shift');
+        return;
+      }
     }
     this.drag = { kind: 'marquee', sx: x, sy: y, x, y, base: e.shiftKey ? new Set(st.keySelection) : new Set() };
     if (!e.shiftKey) { st.keySelection = new Set(); st.emit('keys'); }
@@ -595,6 +611,21 @@ export class Timeline {
       if (!d.moved && Math.abs(y - d.sy) < 4) return;
       d.moved = true;
       this.baseDirty = true;
+    } else if (d.kind === 'shift') {
+      if (!d.moved && Math.abs(x - d.sx) < 3) return;
+      d.moved = true;
+      let dt = st.snapTime((x - d.sx) / this.pxPerSec);
+      if (e.shiftKey) dt = (x - d.sx) / this.pxPerSec;
+      st.transact('Move layer in time', tx => {
+        for (const [id, o] of d.orig) {
+          const l = st.layer(id);
+          if (!l) continue;
+          tx.set(l, 'inPoint', o.inP + dt);
+          if (o.outP < 1e8) tx.set(l, 'outPoint', o.outP + dt);
+          for (const k in o.kf) tx.set(l.props[k as PropKey]!, 'kf', o.kf[k as PropKey]!.map(f => ({ ...f, t: f.t + dt })));
+          tx.touch(id);
+        }
+      });
     } else if (d.kind === 'bar') {
       const comp = st.comp;
       const dt = st.snapTime((x - d.sx) / this.pxPerSec);

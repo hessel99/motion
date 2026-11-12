@@ -57,7 +57,7 @@ check('interpolates at 0.5s', mid && mid[4] > kfs[0][1][0] - 200, JSON.stringify
 
 // timeline shows prop rows, select keys by marquee in timeline and apply ease via F9
 const tl = await page.locator('.timeline').boundingBox();
-await page.mouse.move(tl.x + tl.width - 60, tl.y + 40); await page.mouse.down(); await page.mouse.move(tl.x + 306, tl.y + 120, { steps: 6 }); await page.mouse.up();
+await page.mouse.move(tl.x + tl.width - 60, tl.y + 28 + 24 + 6); await page.mouse.down(); await page.mouse.move(tl.x + 306, tl.y + 120, { steps: 6 }); await page.mouse.up();
 const ksel = await ev(() => editor.store.keySelection.size);
 check('timeline marquee selects keys', ksel >= 2, `selected ${ksel}`);
 await page.keyboard.press('F9');
@@ -78,6 +78,30 @@ await page.mouse.click(tl.x + 200, tl.y + 300); // deselect keys (empty area)
 await page.mouse.move(tl.x + keyMoved.x, ky); await page.mouse.down(); await page.mouse.move(tl.x + keyMoved.x + 100, ky, { steps: 6 }); await page.mouse.up();
 const newT = await ev(() => editor.store.layer(editor.store.selection[0])?.props.position.kf?.[1]?.t);
 check('drag keyframe in timeline', newT > keyMoved.t + 0.2, `${keyMoved.t} -> ${newT}`);
+
+// drag layer bar: moves the whole layer + keys in time
+{
+  const k0 = await ev(() => editor.store.layer(editor.store.selection[0]).props.position.kf.map(k => k.t));
+  const bx = tl.x + 700, by = tl.y + 28 + 12;
+  await page.mouse.move(bx, by); await page.mouse.down(); await page.mouse.move(bx + 60, by, { steps: 5 }); await page.mouse.up();
+  const k1 = await ev(() => { const l = editor.store.layer(editor.store.selection[0]); return { t: l.props.position.kf.map(k => k.t), inP: l.inPoint }; });
+  const dt = k1.t[0] - k0[0];
+  check('drag layer bar shifts keys + in point', dt > 0.1 && Math.abs((k1.t[1] - k0[1]) - dt) < 1e-9 && Math.abs(k1.inP - dt) < 1e-9, `${k0} -> ${k1.t} in ${k1.inP}`);
+  await page.keyboard.press('Control+z');
+}
+
+// keyframe copy/paste: select both position keys, copy, move playhead, paste -> 4 keys
+{
+  await ev(() => { const id = editor.store.selection[0]; editor.store.keySelection = new Set([id + '|position|0', id + '|position|1']); editor.store.emit('keys'); editor.store.setTime(3); });
+  await page.mouse.move(cx, cy - 250);
+  await page.keyboard.press('Control+c');
+  await page.keyboard.press('Control+v');
+  await page.waitForTimeout(100);
+  const ts = await ev(() => editor.store.layer(editor.store.selection[0]).props.position.kf.map(k => +k.t.toFixed(3)));
+  check('copy/paste keyframes at playhead', ts.length === 4 && ts[2] === 3, JSON.stringify(ts));
+  await page.keyboard.press('Control+z');
+  await ev(() => { editor.store.keySelection.clear(); editor.store.emit('keys'); });
+}
 
 // scrub ruler
 await page.mouse.click(tl.x + 700, tl.y + 10);

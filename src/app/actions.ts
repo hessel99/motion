@@ -3,7 +3,7 @@
 import { editor } from './editor';
 import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
-  setCompSettings, toggleAnimated,
+  setCompSettings, toggleAnimated, parseKeyId,
 } from '../core/commands';
 import { createProject, uid, type Asset, type Layer, type Project } from '../core/model';
 import { boundsOf } from '../agent/tools';
@@ -251,8 +251,59 @@ function copyPayload(ids: string[]): string {
   return CLIP_PREFIX + JSON.stringify({ roots, layers, assets: [...assets].map(a => s.project.assets[a]).filter(Boolean) });
 }
 
+const KEYS_PREFIX = 'motion-keys:';
+
+/** copied keyframes are stored per property with times relative to the earliest key */
+function copyKeysPayload(): string | null {
+  const s = st();
+  if (!s.keySelection.size) return null;
+  const byProp: Record<string, any[]> = {};
+  let t0 = Infinity;
+  for (const k of s.keySelection) {
+    const { layerId, key, index } = parseKeyId(k);
+    const f = s.layer(layerId)?.props[key]?.kf?.[index];
+    if (!f) continue;
+    (byProp[key] ??= []).push(structuredClone(f));
+    t0 = Math.min(t0, f.t);
+  }
+  for (const arr of Object.values(byProp)) for (const f of arr) f.t -= t0;
+  return KEYS_PREFIX + JSON.stringify(byProp);
+}
+
+/** paste keyframes at the playhead onto the selected layers (same property names) */
+function pasteKeys(text: string) {
+  const s = st();
+  const byProp = JSON.parse(text.slice(KEYS_PREFIX.length)) as Record<string, any[]>;
+  if (!s.selection.length) { toast('Select a layer to paste keyframes onto', 'error'); return; }
+  let n = 0;
+  s.transact('Paste keyframes', tx => {
+    for (const id of s.selection) {
+      const l = s.layer(id);
+      if (!l) continue;
+      for (const [key, frames] of Object.entries(byProp)) {
+        if (!(key in l.props) && !['position', 'scale', 'rotation', 'opacity', 'anchor'].includes(key)) continue;
+        const p = l.props[key as keyof typeof l.props] ?? { v: valueAt(l, key as any, s.time) };
+        if (!l.props[key as keyof typeof l.props]) tx.set(l.props, key as any, p);
+        const incoming = frames.map(f => ({ ...f, t: s.time + f.t }));
+        const rest = (p.kf ?? []).filter(k => !incoming.some(n2 => Math.abs(n2.t - k.t) < 1e-6));
+        tx.set(p, 'kf', [...rest, ...incoming].sort((a, b) => a.t - b.t));
+        n += incoming.length;
+      }
+      tx.touch(id);
+    }
+  });
+  toast(`Pasted ${n} keyframes`);
+}
+
 export function copySelection(e?: ClipboardEvent) {
   const s = st();
+  const keys = copyKeysPayload();
+  if (keys) {
+    memClipboard = keys;
+    if (e?.clipboardData) { e.clipboardData.setData('text/plain', keys); e.preventDefault(); }
+    else navigator.clipboard?.writeText(keys).catch(() => {});
+    return false; // not a layer copy (cut must not delete layers)
+  }
   if (!s.selection.length) return false;
   const payload = copyPayload(s.selection);
   memClipboard = payload;
@@ -299,13 +350,14 @@ export async function handlePaste(e: ClipboardEvent) {
       }
     }
     if (textData.startsWith(CLIP_PREFIX)) return pasteMotion(textData);
+    if (textData.startsWith(KEYS_PREFIX)) return pasteKeys(textData);
     if (/^\s*<svg[\s>]/i.test(textData) || /^\s*<\?xml[\s\S]*<svg/i.test(textData)) return importSvgText(textData);
     for (const item of cd.files) if (item.type.startsWith('image/') || item.name.endsWith('.svg') || item.name.endsWith('.json')) return openBrowserFile(item);
     if (textData.trim().startsWith('{')) {
       const json = JSON.parse(textData);
       if (json.layers && (json.v || json.fr)) return openData('clipboard.json', textData);
     }
-    if (memClipboard && !textData) return pasteMotion(memClipboard);
+    if (memClipboard && !textData) return memClipboard.startsWith(KEYS_PREFIX) ? pasteKeys(memClipboard) : pasteMotion(memClipboard);
     if (html && /figma/i.test(html)) toast('Figma data found but could not be decoded', 'error');
   } catch (err: any) {
     console.error(err);

@@ -74,6 +74,8 @@ export class Editor {
   }
 
   stop() { cancelAnimationFrame(this.raf); }
+  /** restart the loop after stop() (e.g. after a video export) */
+  resume() { this.stop(); this.lastNow = performance.now(); this.start(); }
 
   private tick(now: number) {
     const store = this.store;
