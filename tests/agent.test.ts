@@ -263,3 +263,17 @@ describe('quick actions + labels + persistence', () => {
     expect(c.sessions.claude).toBe('s1');
   });
 });
+
+describe('history markers past the undo cap', () => {
+  it('historyLength stays monotonic and undoTo returns to the marker after 500+ steps', () => {
+    const { s, a } = fresh();
+    for (let i = 0; i < 520; i++) s.transact('x', tx => tx.set(a, 'name', 'n' + i));
+    const marker = s.historyLength;
+    expect(marker).toBeGreaterThan(500);
+    s.transact('agent', tx => tx.set(a, 'name', 'agent'));
+    s.transact('agent2', tx => tx.set(a, 'name', 'agent2'));
+    expect(s.historyLength).toBe(marker + 2);
+    expect(s.undoTo(marker)).toBe(2);
+    expect(a.name).toBe('n519');
+  });
+});

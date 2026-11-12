@@ -134,7 +134,7 @@ export class Store {
       top.redo.push(...tx.redo);
     } else {
       this.undoStack.push({ label, mergeKey: mk, undo: tx.undo, redo: tx.redo, selection: this.selection.slice() });
-      if (this.undoStack.length > 500) this.undoStack.shift();
+      if (this.undoStack.length > 500) { this.undoStack.shift(); this.dropped++; }
     }
     this.emitChange(tx.change);
     this.emit('history');
@@ -168,12 +168,14 @@ export class Store {
   }
 
   get canUndo() { return this.undoStack.length > 0; }
-  /** marker for "undo everything since" (agent turns) */
-  get historyLength() { return this.undoStack.length; }
-  /** undo until the undo stack is back at `marker`. returns steps undone */
+  /** undo entries dropped off the bottom of the capped stack: keeps markers stable once the cap is hit */
+  private dropped = 0;
+  /** marker for "undo everything since" (agent turns). monotonic while editing, even past the 500-step cap */
+  get historyLength() { return this.undoStack.length + this.dropped; }
+  /** undo until the history is back at `marker` (or as far as the stack goes). returns steps undone */
   undoTo(marker: number) {
     let n = 0;
-    while (this.undoStack.length > marker) { this.undo(); n++; }
+    while (this.undoStack.length && this.historyLength > marker) { this.undo(); n++; }
     return n;
   }
   get canRedo() { return this.redoStack.length > 0; }
@@ -211,6 +213,7 @@ export class Store {
     this.solo.clear();
     this.undoStack.length = 0;
     this.redoStack.length = 0;
+    this.dropped = 0;
     this.selection = [];
     this.keySelection.clear();
     this.time = 0;
