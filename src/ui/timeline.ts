@@ -756,9 +756,16 @@ export class Timeline {
       let dt = (x - d.sx) / this.pxPerSec;
       if (!d.moved && Math.abs(x - d.sx) < 3) return;
       d.moved = true;
-      // snap the dragged key to frames (and playhead)
+      // snap the dragged key to frames (and the playhead / markers within 6px; alt: frames only)
       let nt = st.snapTime(d.t0 + dt);
-      if (Math.abs(this.tToX(st.time) - this.tToX(d.t0 + dt)) < 6) nt = st.time;
+      if (!e.altKey) {
+        const rawX = this.tToX(d.t0 + dt);
+        let best = 6;
+        for (const t of [st.time, ...(st.comp.markers ?? []).map(m => m.t)]) {
+          const dd = Math.abs(this.tToX(t) - rawX);
+          if (dd < best) { best = dd; nt = t; }
+        }
+      }
       dt = Math.max(-d.snap.minT, nt - d.t0);
       if (Math.abs(dt - d.dt) < 1e-9) return;
       d.dt = dt;

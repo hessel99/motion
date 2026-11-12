@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { editor } from '../app/editor';
 import {
   addKeyframe, deleteKeyframes, isAnimated, keyId, parseKeyId, setCompSettings, setEase, setLayerField, setProp,
-  setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr,
+  setSegmentHandles, toggleAnimated, valueAt, setSpring, setExpr, addMarker,
 } from '../core/commands';
 import { checkExpr, EXPR_PROPS } from '../core/expr';
 import { EASE_PRESETS, SPRING_PRESETS, springAt } from '../core/easing';
@@ -122,6 +122,22 @@ function LayerPanel({ layers }: { layers: Layer[] }) {
   return <VisualLayerPanel layers={layers} />;
 }
 
+/** onset detection on the clip, one marker per beat inside the clip's visible range (one undo step) */
+async function markBeats(l: Layer) {
+  const store = st();
+  const asset = l.imageRef ? store.project.assets[l.imageRef] : undefined;
+  if (!asset) return;
+  const [{ loadAudioBuffer }, { detectOnsets }] = await Promise.all([import('../audio/engine'), import('../audio/beats')]);
+  const buf = await loadAudioBuffer(asset);
+  if (!buf) { toast('Audio could not be decoded', 'error'); return; }
+  const off = l.startTime ?? 0, c = store.comp;
+  const times = detectOnsets(buf).map(t => t + off).filter(t => t >= Math.max(0, l.inPoint) && t < Math.min(l.outPoint, c.duration));
+  if (!times.length) { toast('No beats found in this clip'); return; }
+  const before = c.markers?.length ?? 0;
+  store.batch('Markers on beats', () => { for (const t of times) addMarker(store, t); });
+  toast(`${(c.markers?.length ?? 0) - before} markers added`);
+}
+
 function AudioPanel({ layers }: { layers: Layer[] }) {
   const store = st();
   const l = layers[0];
@@ -134,6 +150,7 @@ function AudioPanel({ layers }: { layers: Layer[] }) {
         <span class="small">{Math.round((l.volume ?? 1) * 100)}%</span>
       </div>
       <div class="row"><NumField label="Start" step={1 / store.comp.fps} value={l.startTime ?? 0} suffix="s" onChange={(n, mk) => store.transact('Audio start', tx => { for (const id of ids) { const x = store.layer(id); if (x) { tx.set(x, 'startTime', n); tx.touch(id); } } }, mk)} /></div>
+      <div class="row"><button class="btn" title="Detect beats/onsets in this clip and add a timeline marker on each" onClick={() => markBeats(l)}>Add markers on beats</button></div>
       <div class="muted small">Drag the waveform in the timeline to move it. Exported videos include audio.</div>
     </Section>
   );
