@@ -146,7 +146,9 @@ export class AudioEngine {
         // the audio clock (scrub, loop wrap, frame step, long frames where the editor clock is capped)
         const sig = this.signature();
         const expected = this.tStart + (this.ctxStart ? audioCtx().currentTime - this.ctxStart : 0);
-        if (sig !== this.sig || Math.abs(expected - t) > 0.06) this.restart();
+        // without clips there is no audio clock to drift from (restarting would walk the whole
+        // layer tree every frame)
+        if (sig !== this.sig || (this.ctxStart && Math.abs(expected - t) > 0.06)) this.restart();
       }
       this.wasPlaying = playing;
     });
