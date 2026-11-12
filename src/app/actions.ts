@@ -6,7 +6,7 @@ import {
   cloneLayers, deleteLayers, groupLayers, insertLayer, reorder, setEase, setProp, ungroup, valueAt, deleteKeyframes,
   setCompSettings, toggleAnimated, parseKeyId, precompose, keyId,
 } from '../core/commands';
-import { uid, type Asset, type Layer, type Project } from '../core/model';
+import { uid, type Asset, type Composition, type Layer, type Project } from '../core/model';
 import { boundsOf } from '../agent/tools';
 import { demoProject, stressProject } from './demo';
 import { importFigmaDesign, type DesignImportResult } from '../core/design-import';
@@ -422,11 +422,23 @@ function copyPayload(ids: string[]): string {
   const s = st();
   const layers: Layer[] = [];
   const assets = new Set<string>();
-  const walk = (id: string) => { const l = s.layer(id)!; layers.push(l); if (l.imageRef) assets.add(l.imageRef); l.children.forEach(walk); };
+  // precomp layers carry the compositions they show (and those nested in them): pasted into
+  // another document, a precomp layer would otherwise point at a comp that isn't there
+  const comps: Composition[] = [];
+  const compLayers: Layer[] = [];
+  const seen = new Set<string>();
+  const addComp = (cid: string) => {
+    const c = s.project.comps[cid];
+    if (!c || seen.has(cid)) return;
+    seen.add(cid); comps.push(c);
+    const w = (id: string) => { const l = s.project.layers[id]; if (!l) return; compLayers.push(l); if (l.imageRef) assets.add(l.imageRef); if (l.compRef) addComp(l.compRef); l.children.forEach(w); };
+    c.root.forEach(w);
+  };
+  const walk = (id: string) => { const l = s.layer(id)!; layers.push(l); if (l.imageRef) assets.add(l.imageRef); if (l.compRef) addComp(l.compRef); l.children.forEach(walk); };
   const roots = ids.filter(id => s.layer(id) && !ids.some(o => o !== id && s.isAncestor(o, id)));
   roots.forEach(walk);
   // roots are stored in comp space-ish: we copy local values; parent space differences are ignored
-  return CLIP_PREFIX + JSON.stringify({ roots, layers, assets: [...assets].map(a => s.project.assets[a]).filter(Boolean) });
+  return CLIP_PREFIX + JSON.stringify({ roots, layers, comps, compLayers, assets: [...assets].map(a => s.project.assets[a]).filter(Boolean) });
 }
 
 const KEYS_PREFIX = 'motion-keys:';
@@ -513,9 +525,28 @@ function pasteMotion(text: string) {
   }));
   const roots = (data.roots as string[]).map(r => map.get(r)!);
   const s = st();
-  const offset = roots.every(r => s.comp.root.length) ? 0 : 0;
-  void offset;
-  insertLayers({ layers, roots, assets: (data.assets ?? []).filter((a: Asset) => !s.project.assets[a.id]) }, { label: 'Paste' });
+  const assets = (data.assets ?? []).filter((a: Asset) => !s.project.assets[a.id]);
+  // compositions the pasted precomps need that this document doesn't have (a paste from another tab)
+  const missing = ((data.comps ?? []) as Composition[]).filter(c => !s.project.comps[c.id]);
+  if (!missing.length) { insertLayers({ layers, roots, assets }, { label: 'Paste' }); return; }
+  const src = new Map(((data.compLayers ?? []) as Layer[]).map(l => [l.id, l]));
+  const ids = new Map<string, string>();
+  const collect = (id: string) => { const l = src.get(id); if (!l || ids.has(id)) return; ids.set(id, uid()); l.children.forEach(collect); };
+  for (const c of missing) c.root.forEach(collect);
+  const newLayers: Layer[] = [...ids].map(([old, id]) => {
+    const l = structuredClone(src.get(old)!);
+    return { ...l, id, parent: l.parent ? ids.get(l.parent) ?? null : null, children: l.children.map(c => ids.get(c)!).filter(Boolean) };
+  });
+  s.batch('paste', () => {
+    s.transact('Paste', tx => {
+      const P = s.project;
+      for (const c of missing) tx.set(P.comps, c.id, { ...structuredClone(c), root: c.root.map(r => ids.get(r)!).filter(Boolean) });
+      for (const l of newLayers) tx.set(P.layers, l.id, l);
+      tx.structure(); tx.comp();
+    });
+    insertLayers({ layers, roots, assets }, { label: 'Paste' });
+  }, 'Paste');
+  s.emit('comps');
 }
 
 export async function handlePaste(e: ClipboardEvent) {

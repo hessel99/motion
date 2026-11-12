@@ -112,7 +112,7 @@ select:disabled, input:disabled { opacity: 0.5; }
 }
 .num:hover:not(:focus-within) { background: var(--input-bg-hover); }
 .num:focus-within { border-color: var(--accent); }
-.num-label { order: 0; flex: none; padding: 0 var(--space-2) 0 var(--space-4); color: var(--text-muted); cursor: ew-resize; font-size: var(--text-sm); min-width: 22px; align-self: stretch; display: flex; align-items: center; }
+.num-label { order: 0; flex: none; white-space: nowrap; padding: 0 var(--space-2) 0 var(--space-4); color: var(--text-muted); cursor: ew-resize; font-size: var(--text-sm); min-width: 22px; align-self: stretch; display: flex; align-items: center; }
 .num-hint { order: 2; padding-right: var(--space-4); color: var(--text-muted); font-size: var(--text-sm); white-space: nowrap; pointer-events: none; }
 .num-label:hover { color: var(--text); }
 .num input, .num input:hover:not(:focus) { order: 1; border: 0; background: transparent; width: 100%; min-width: 0; min-height: 0; padding: 3px var(--space-2); box-shadow: none; font-variant-numeric: tabular-nums; color: var(--text); }
