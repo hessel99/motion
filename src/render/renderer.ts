@@ -14,7 +14,7 @@ import { PROP_DEFS, type Layer, type Paint, type PropKey } from '../core/model';
 import type { Store, Change } from '../core/store';
 import { Atlas, type AtlasEntry } from './atlas';
 import type { PathGeometry, PathKey } from '../core/model';
-import { loadBundledFonts } from './fonts';
+import { ensureFont, fontsPending, loadBundledFonts } from './fonts';
 import { EffectEval, hasEffects, needsBlendShader, type ResolvedEffect } from './effects';
 import { FxPipeline, BLEND_SHADER, type FxRegion } from './fx';
 import { cubicBezier, EASE_PRESETS, springAt } from '../core/easing';
@@ -438,6 +438,8 @@ export class Renderer {
   }
   contextLost = false;
   contextRestores = 0;
+  /** bundled font families still loading (exports / tests wait for 0) */
+  get fontsPending() { return fontsPending; }
 
   private initGL() {
     const gl = this.gl;
@@ -879,6 +881,10 @@ export class Renderer {
         if (sz[0] <= 0) this.style[os] = Math.ceil(Math.max(1, ...lines.map(x => x.width)));
         if (sz[1] <= 0) this.style[os + 1] = Math.ceil(lines.length * lineHeightPx(l));
       }
+    }
+    if (l.type === 'text' && l.text) {
+      // bundled families load on first use; text drawn meanwhile with a fallback is redrawn
+      for (const fam of [l.text.fontFamily, ...(l.text.runs ?? []).map(r => r.fontFamily ?? '')]) ensureFont(fam).then(now => { if (now) { this.invalidateText(); this.dirty = true; } });
     }
     if (l.type === 'text' && l.text && l.textAnim) {
       const ta = l.textAnim;
