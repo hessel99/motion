@@ -50,6 +50,8 @@ npm run electron       # build + desktop app (starts the bridge itself)
 npm test               # unit tests (vitest)
 node scripts/e2e.mjs out.png           # ui interaction test in chromium (dev server must run)
 node scripts/perf.mjs 1000,5000,10000  # playback perf (dev server must run)
+npm run stress         # stress lab: ~25 brutal scenarios on the production build + regression report
+npm run stress:quick   # shorter windows, 30s soak (results are only compared with other quick runs)
 node scripts/agent-loop.mjs out.png    # drives the editor through MCP like an agent (bridge + dev server)
 node scripts/agent-chat.mjs out.png "prompt"  # REAL claude code run through the sidebar
 ```
@@ -105,6 +107,13 @@ These numbers come from `scripts/perf.mjs`, on the same 4-core container with a 
 | 5,000 mixed, steady state | 5.4 ms |
 
 The 16.6ms budget for 60 fps leaves a lot of headroom for realistic scenes, which have hundreds to a few thousand layers.
+
+### Stress lab (`scripts/stress-lab.mjs`, scenes in `src/lab/`)
+
+- Builds the production bundle, serves it on port 4182 and opens `?lab`, which lazily loads the scene builders and measurement loops (`window.motionLab`). Nothing of it ships in the normal startup path.
+- Scenarios: springs 10k/25k, 8-deep nesting, group-opacity isolation stack, 200 precomps x 50 instances, 2k text animators, 1k path morphs + trim, 3k expressions, 500 big gradient/image rasters, masks + blend modes, overdraw, a production-like mix, camera zoom/pan while playing, scrubbing, drag while playing, motion-blur sub-frames (x1..x16), undo/redo storm, bulk commands, synthetic Lottie/Figma imports, a 3 minute soak.
+- **tick** = the whole editor frame on the main thread (render + timeline/overlay hooks). Draw calls are stubbed for the main numbers because the container GPU is SwiftShader (a few fps for 10k layers); `swFps` is the real software-GPU rate.
+- Every run writes `bench/results/<date>.json` and compares each scenario with its newest earlier result (>10% worse is flagged; rows measured while the machine was busy are marked noisy). `--only a,b`, `--top` (profile top functions), `--report <file>`, `--strict` (exit 1 on regressions).
 
 ## Lessons learned (performance)
 
