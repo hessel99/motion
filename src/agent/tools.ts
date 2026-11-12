@@ -434,7 +434,7 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: 'precompose',
-    description: 'Pre-compose top-level layers of the active composition into a new composition (After Effects style). Returns the new comp id and the precomp layer id. Useful to animate a group of layers as one unit or to reuse it.',
+    description: 'Pre-compose layers of the active composition into a new composition (After Effects style). The layers must share a parent (top level, or e.g. children of a pasted frame: the new composition then takes the parent frame\'s size and space). Returns the new comp id and the precomp layer id. Useful to animate a group of layers as one unit or to reuse it.',
     inputSchema: { type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } }, name: { type: 'string' } }, required: ['ids'] },
     run: ({ ids, name }) => { const r = precompose(st(), ids, name); return text({ compId: r.comp.id, layerId: r.layer.id }); },
   },

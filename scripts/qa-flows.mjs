@@ -301,6 +301,42 @@ for (const [w, h] of [[1440, 900], [1280, 800]]) {
   const moved = await ev(id => editor.store.layer(id).props.opacity.kf.map(k => +k.t.toFixed(2)), grp.a);
   check('MD-55: dragging a summary tick retimes the child keys', moved[1] > 1.1, JSON.stringify(moved));
 
+  // MD-08: ⌘⇧C on children of a frame pre-composes them in place (the picture doesn't change)
+  const pre = await ev(async () => {
+    const c = await import('/src/core/commands.ts');
+    const s = editor.store;
+    for (const id of s.comp.root.slice()) c.deleteLayers(s, [id]);
+    s.setTime(0);
+    const a = c.addLayer(s, 'rect', { x: 300, y: 200, w: 200, h: 200, name: 'Ring', color: [0.9, 0.5, 0.2, 1] });
+    const b = c.addLayer(s, 'ellipse', { x: 700, y: 300, w: 300, h: 200, name: 'Star', color: [0.2, 0.6, 1, 1] });
+    const w = c.addLayer(s, 'rect', { x: 1200, y: 500, w: 400, h: 100, name: 'Word', color: [1, 1, 1, 1] });
+    const gr = c.groupLayers(s, [a.id, b.id, w.id], { x: 160, y: 90, w: 1600, h: 900 }); const g = gr?.id ?? gr;
+    c.setProp(s, g, 'fill', [0.1, 0.12, 0.2, 1]);
+    s.select([a.id, b.id]);
+    window.__shot = () => editor.renderer.snapshot(0, 480);
+    window.__before = window.__shot();
+    return { a: a.id, b: b.id, g };
+  });
+  await page.mouse.click(5, 5);
+  await ev(ids => editor.store.select(ids), [pre.a, pre.b]);
+  await page.keyboard.press('Control+Shift+C');
+  await page.waitForTimeout(300);
+  const after = await ev(async g => {
+    const s = editor.store, kids = s.layer(g).children, pc = s.layer(kids[0]);
+    const load = u => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = u; });
+    // the precomp renders through its own target: let it settle
+    for (let k = 0; k < 10; k++) { editor.renderer.render(0); await new Promise(r => setTimeout(r, 30)); }
+    const [i0, i1] = await Promise.all([load(window.__before), load(window.__shot())]);
+    const cv = document.createElement('canvas'); cv.width = i0.width; cv.height = i0.height;
+    const g2 = cv.getContext('2d');
+    g2.drawImage(i0, 0, 0); const d0 = g2.getImageData(0, 0, cv.width, cv.height).data;
+    g2.clearRect(0, 0, cv.width, cv.height); g2.drawImage(i1, 0, 0); const d1 = g2.getImageData(0, 0, cv.width, cv.height).data;
+    let sum = 0; for (let i = 0; i < d0.length; i++) sum += Math.abs(d0[i] - d1[i]);
+    return { types: kids.map(id => s.layer(id).type), comp: pc?.compRef && [s.project.comps[pc.compRef].width, s.project.comps[pc.compRef].height], diff: sum / d0.length };
+  }, pre.g);
+  check('MD-08: ⌘⇧C pre-composes children of a frame in place', JSON.stringify(after.types) === '["precomp","rect"]' && JSON.stringify(after.comp) === '[1600,900]', JSON.stringify(after));
+  check('MD-08: ... and the frame looks the same', after.diff < 1.5, String(after.diff));
+
   check('MD: no page errors', errors.length === 0, JSON.stringify(errors.slice(0, 5)));
   await ctx.close();
 }

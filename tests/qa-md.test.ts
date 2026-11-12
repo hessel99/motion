@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { GIFEncoder } from 'gifenc';
 import { Store } from '../src/core/store';
-import { addLayer, setProp, toggleAnimated, toggleKeyAtTime, removeEffect, setEffectVisible, effectVisible } from '../src/core/commands';
+import { addLayer, setProp, toggleAnimated, toggleKeyAtTime, removeEffect, setEffectVisible, effectVisible, groupLayers, precompose, valueAt } from '../src/core/commands';
 import { EffectEval } from '../src/render/effects';
 import { gifDelaysCs } from '../src/export/gif';
 
@@ -104,5 +104,43 @@ describe('MD-10: effects can be hidden and removed', () => {
     s.undo();
     expect(s.layer(l.id)!.props.blur!.kf!.length).toBe(2);
     expect(s.layer(l.id)!.effects!.length).toBe(2);
+  });
+});
+
+describe('MD-08: pre-compose layers inside a group / frame', () => {
+  const scene = () => {
+    const s = new Store();
+    const a = addLayer(s, 'rect', { x: 100, y: 100, w: 50, h: 50 });
+    const b = addLayer(s, 'rect', { x: 300, y: 120, w: 50, h: 50 });
+    const c = addLayer(s, 'rect', { x: 500, y: 140, w: 50, h: 50 });
+    const gr: any = groupLayers(s, [a.id, b.id, c.id], { x: 80, y: 60, w: 600, h: 400 });
+    return { s, a, b, c, g: gr?.id ?? gr };
+  };
+  it('the precomp replaces the siblings in their parent and takes the parent box', () => {
+    const { s, a, b, c, g } = scene();
+    const before = [a.id, b.id].map(id => valueAt(s.layer(id)!, 'position', 0));
+    const { comp, layer } = precompose(s, [b.id, a.id]);
+    expect(s.layer(g)!.children).toEqual([layer.id, c.id]);
+    expect(layer.parent).toBe(g);
+    expect(s.project.comps[comp.id].root).toEqual([a.id, b.id]);
+    expect([comp.width, comp.height]).toEqual([600, 400]);
+    expect(s.layer(a.id)!.parent).toBeNull();
+    // the layers keep their values (comp space = the parent's local space) ...
+    expect([a.id, b.id].map(id => valueAt(s.layer(id)!, 'position', 0))).toEqual(before);
+    // ... and the precomp layer maps that space 1:1 onto the parent's box
+    const pl = s.layer(layer.id)!;
+    expect(valueAt(pl, 'position', 0)).toEqual(valueAt(pl, 'anchor', 0));
+    expect(valueAt(pl, 'size', 0)).toEqual([600, 400]);
+    expect(valueAt(pl, 'scale', 0)).toEqual([100, 100]);
+    s.undo();
+    expect(s.layer(g)!.children).toEqual([a.id, b.id, c.id]);
+    expect(s.layer(a.id)!.parent).toBe(g);
+  });
+  it('refuses layers with different parents; a selected child goes along with its parent', () => {
+    const { s, a, g } = scene();
+    const d = addLayer(s, 'rect', { x: 0, y: 0, w: 10, h: 10 });
+    expect(() => precompose(s, [a.id, d.id])).toThrow(/same parent/);
+    const { comp } = precompose(s, [g, a.id, d.id]);
+    expect(s.project.comps[comp.id].root).toEqual([g, d.id]);
   });
 });

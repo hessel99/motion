@@ -709,23 +709,35 @@ export function addPrecompLayer(store: Store, compId: string) {
 export function precompose(store: Store, ids: string[], name?: string) {
   const P = store.project;
   const cur = store.comp;
-  // only layers directly in the active comp root (keeps the math simple and predictable)
-  const roots = cur.root.filter(id => ids.includes(id));
-  if (!roots.length) throw new Error('select top-level layers to pre-compose');
-  const comp = createComp({ name: name ?? `${P.layers[roots[roots.length - 1]].name} comp`, width: cur.width, height: cur.height, fps: cur.fps, duration: cur.duration, background: [0, 0, 0, 0] });
-  const pc = createLayer('precomp', { name: comp.name, w: cur.width, h: cur.height, x: 0, y: 0 });
+  // siblings at any depth (MD-08: part of a pasted figma frame): the new comp takes their parent's
+  // local space (its box), so the layers keep their values and the precomp layer sits where they were
+  // a selected layer inside another selected layer goes along with it
+  const sel = ids.filter(id => P.layers[id] && !ids.some(o => o !== id && store.isAncestor(o, id)));
+  if (!sel.length) throw new Error('select layers to pre-compose');
+  const parentId = P.layers[sel[0]].parent;
+  if (sel.some(id => P.layers[id].parent !== parentId)) throw new Error('select layers with the same parent to pre-compose');
+  const parent = parentId ? P.layers[parentId] : null;
+  const siblings = parent ? parent.children : cur.root;
+  const roots = siblings.filter(id => sel.includes(id));
+  if (!roots.length) throw new Error('select layers of this composition to pre-compose');
+  const box = parent ? (parent.props.size?.v ?? [cur.width, cur.height]) : [cur.width, cur.height];
+  const w = Math.max(1, Math.round(box[0])), h = Math.max(1, Math.round(box[1]));
+  const comp = createComp({ name: name ?? `${P.layers[roots[roots.length - 1]].name} comp`, width: w, height: h, fps: cur.fps, duration: cur.duration, background: [0, 0, 0, 0] });
+  const pc = createLayer('precomp', { name: comp.name, w, h, x: 0, y: 0 });
   pc.compRef = comp.id;
   pc.startTime = 0;
-  const index = cur.root.indexOf(roots[roots.length - 1]);
+  const index = siblings.indexOf(roots[roots.length - 1]);
   store.transact('Pre-compose', tx => {
     comp.root = roots.slice();
     tx.set(P.comps, comp.id, comp);
-    const rest = cur.root.filter(id => !roots.includes(id));
-    const at = rest.length - (cur.root.length - 1 - index);
+    for (const id of roots) if (P.layers[id].parent !== null) tx.set(P.layers[id], 'parent', null);
+    const rest = siblings.filter(id => !roots.includes(id));
+    const at = rest.length - (siblings.length - 1 - index);
     rest.splice(Math.max(0, at), 0, pc.id);
     tx.set(P.layers, pc.id, pc);
-    pc.parent = null;
-    tx.set(cur, 'root', rest);
+    pc.parent = parentId;
+    if (parent) tx.set(parent, 'children', rest);
+    else tx.set(cur, 'root', rest);
     tx.structure();
     tx.comp();
   });
