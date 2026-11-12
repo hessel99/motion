@@ -26,8 +26,8 @@ codebase (S < 1 day, M = days, L = a week or more).
 
 | # | Pattern | What it is | Impact | Effort | Status |
 |---|---|---|---|---|---|
-| 1 | **Feel pad** | 2D field: x = attack (lazy to punchy), y = smoothness (linear to silky), plus an overshoot knob. The background "grain" is a field of tiny curves, so you see where you are going. | High | S | Removed (user decision, Nov 2026) |
-| 2 | **Live swatches + A/B lane** | Hover (or Tab to) an ease and the selected layer plays it on the canvas; a spacing lane races the current ease (A) against the hovered one (B). Click applies. | High | S | Removed (user decision, Nov 2026) |
+| 1 | **Feel pad** | 2D field: x = attack (lazy to punchy), y = smoothness (linear to silky), plus an overshoot knob. The background "grain" is a field of tiny curves, so you see where you are going. | High | S | **Built** |
+| 2 | **Live swatches + A/B lane** | Hover (or Tab to) an ease and the selected layer plays it on the canvas; a spacing lane races the current ease (A) against the hovered one (B). Click applies. | High | S | **Built** |
 | 3 | **Rhythm knobs** | Tempo ("breath": stretch the whole selection's timing), Stagger (seconds between layers) and Groove (rush or build the cascade). With the magnet on, they snap to markers and beats. | High | S | Removed (user decision, Nov 2026) |
 | 4 | **Perform (gesture recording)** | Act out the motion with the mouse while the playhead runs. You get a few clean keys with fitted eases and smooth spatial tangents. | High | M | **Built** |
 | 5 | **Spring knob with detents** | A bounce knob that clicks into the named springs (Gentle, Quick, Bouncy, Wobbly), with an LED ring and the spacing lane as feedback. | Med | S | **Built** |
