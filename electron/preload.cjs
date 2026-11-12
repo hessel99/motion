@@ -5,6 +5,8 @@ contextBridge.exposeInMainWorld('motionNative', {
   platform: process.platform,
   /** Port of the in-process agent bridge (ws://127.0.0.1:PORT/ws). 0 if it failed to start. */
   bridgePort: () => ipcRenderer.invoke('bridge:port'),
+  /** secret the bridge requires from the app's file:// origin */
+  bridgeToken: () => ipcRenderer.invoke('bridge:token'),
   /** opts: {filters?, multi?} -> {path, name, encoding:'utf8'|'base64', data} | null */
   openFile: (opts) => ipcRenderer.invoke('file:open', opts || {}),
   /** opts: {path?, defaultPath?, data, encoding?, filters?} -> saved path | null */

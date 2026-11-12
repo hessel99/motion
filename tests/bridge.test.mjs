@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import WebSocket from 'ws';
-import { startBridge, isAllowedOrigin } from '../bridge/server.mjs';
+import { startBridge, isAllowedOrigin, isAuthorized } from '../bridge/server.mjs';
 import { parseClaudeLine, parseCodexLine, parseGeminiLine, splitJsonLines } from '../bridge/parsers.mjs';
 import { buildCommand } from '../bridge/providers.mjs';
 
@@ -105,8 +105,19 @@ describe('bridge MCP relay', () => {
   it('rejects foreign origins on WS upgrade and MCP', async () => {
     expect(isAllowedOrigin('https://evil.example')).toBe(false);
     expect(isAllowedOrigin('http://localhost:5173')).toBe(true);
-    expect(isAllowedOrigin('file://')).toBe(true);
-    expect(isAllowedOrigin('null')).toBe(true);
+    // opaque origins can be produced by any website (sandboxed iframes): never trusted alone
+    expect(isAllowedOrigin('file://')).toBe(false);
+    expect(isAllowedOrigin('null')).toBe(false);
+    const u = (q) => new URL('http://127.0.0.1/ws' + q);
+    const req = (origin, headers = {}) => ({ headers: { origin, ...headers } });
+    expect(isAuthorized(req('null'), u(''), 'secret')).toBe(false);
+    expect(isAuthorized(req('null'), u('?token=wrong'), 'secret')).toBe(false);
+    expect(isAuthorized(req('null'), u('?token=secret'), 'secret')).toBe(true);
+    expect(isAuthorized(req('file://'), u(''), 'secret')).toBe(false);
+    expect(isAuthorized(req('null', { 'x-motion-token': 'secret' }), u(''), 'secret')).toBe(true);
+    expect(isAuthorized(req('null'), u('?token='), undefined)).toBe(false); // no token configured: opaque origins refused
+    expect(isAuthorized(req('https://evil.example'), u('?token=secret'), 'secret')).toBe(false);
+    expect(isAuthorized(req(undefined), u(''), 'secret')).toBe(true); // CLIs send no origin
     const bad = await rpc({ jsonrpc: '2.0', id: 1, method: 'ping' }, { origin: 'https://evil.example' });
     expect(bad.status).toBe(403);
     await expect(

@@ -11,16 +11,29 @@ export const TOOL_TIMEOUT_MS = 120_000;
 const MAX_BODY = 4 * 1024 * 1024;
 const SUPPORTED_PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 
-/** Origins allowed to open the editor WebSocket / call MCP from a browser context. */
+/**
+ * Origins allowed to open the editor WebSocket / call MCP from a browser context.
+ * "null" / file:// origins are NOT trusted by origin alone: any website can produce Origin: null
+ * (sandboxed iframes, data: urls). They need the per-launch token (see isAuthorized).
+ */
 export function isAllowedOrigin(origin) {
   if (origin == null || origin === '') return true; // non-browser clients (CLIs, node)
-  if (origin === 'null' || origin === 'file://' || origin.startsWith('file://')) return true;
+  if (origin === 'null' || origin.startsWith('file://')) return false;
   try {
     const u = new URL(origin);
     return (u.protocol === 'http:' || u.protocol === 'https:') && (u.hostname === 'localhost' || u.hostname === '127.0.0.1');
   } catch {
     return false;
   }
+}
+
+/** origin check, plus the launch token for opaque origins (the packaged electron app loads file://) */
+export function isAuthorized(req, url, token) {
+  const origin = req.headers.origin;
+  if (isAllowedOrigin(origin)) return true;
+  if (!token || !(origin === 'null' || String(origin).startsWith('file://'))) return false;
+  const given = url.searchParams.get('token') ?? req.headers['x-motion-token'];
+  return given === token;
 }
 
 /** DNS-rebinding guard: Host header must name the loopback interface. */
@@ -30,7 +43,7 @@ function isAllowedHost(host) {
   return h === '127.0.0.1' || h === 'localhost' || h === '::1';
 }
 
-export async function startBridge({ port = 7823, host = '127.0.0.1', log = console.log, workDir } = {}) {
+export async function startBridge({ port = 7823, host = '127.0.0.1', log = console.log, workDir, token } = {}) {
   if (host !== '127.0.0.1' && host !== 'localhost' && host !== '::1') throw new Error('bridge must bind to loopback only');
   const say = typeof log === 'function' ? log : () => {};
 
@@ -149,7 +162,7 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
 
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url ?? '/', 'http://127.0.0.1');
-    if (!isAllowedHost(req.headers.host) || !isAllowedOrigin(req.headers.origin)) {
+    if (!isAllowedHost(req.headers.host) || !isAuthorized(req, url, token)) {
       return json(res, 403, { error: 'forbidden' });
     }
     // CORS for the dev renderer (vite on localhost:5173) hitting /health
@@ -190,8 +203,8 @@ export async function startBridge({ port = 7823, host = '127.0.0.1', log = conso
   // ---------- editor WebSocket ----------
   const wss = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 * 1024 });
   server.on('upgrade', (req, socket, head) => {
-    const { pathname } = new URL(req.url ?? '/', 'http://127.0.0.1');
-    if (pathname !== '/ws' || !isAllowedOrigin(req.headers.origin) || !isAllowedHost(req.headers.host)) {
+    const u = new URL(req.url ?? '/', 'http://127.0.0.1');
+    if (u.pathname !== '/ws' || !isAuthorized(req, u, token) || !isAllowedHost(req.headers.host)) {
       socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
       return socket.destroy();
     }

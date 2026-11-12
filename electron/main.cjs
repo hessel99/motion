@@ -33,6 +33,9 @@ app.commandLine.appendSwitch('enable-zero-copy');
 let win = null;
 let bridge = null;
 let bridgeReady = null;
+// per-launch secret: the packaged app loads file:// (Origin "null"), which websites can fake, so
+// the bridge additionally requires this token from such origins
+const BRIDGE_TOKEN = require('node:crypto').randomBytes(24).toString('hex');
 
 function startBridge() {
   if (bridgeReady) return bridgeReady;
@@ -40,9 +43,9 @@ function startBridge() {
     const mod = await import(pathToFileURL(path.join(__dirname, '..', 'bridge', 'server.mjs')).href);
     const preferred = Number(process.env.MOTION_BRIDGE_PORT || 7823);
     try {
-      bridge = await mod.startBridge({ port: preferred });
+      bridge = await mod.startBridge({ port: preferred, token: BRIDGE_TOKEN });
     } catch (e) {
-      if (e && e.code === 'EADDRINUSE') bridge = await mod.startBridge({ port: 0 }); // another instance owns 7823
+      if (e && e.code === 'EADDRINUSE') bridge = await mod.startBridge({ port: 0, token: BRIDGE_TOKEN }); // another instance owns 7823
       else throw e;
     }
     return bridge.port;
@@ -92,6 +95,7 @@ async function saveDialog(opts) {
 }
 
 ipcMain.handle('bridge:port', () => startBridge());
+ipcMain.handle('bridge:token', () => BRIDGE_TOKEN);
 
 // opts: {filters?, multi?} -> {path, name, encoding:'utf8'|'base64', data} | array when multi | null if cancelled
 ipcMain.handle('file:open', async (_e, opts = {}) => {

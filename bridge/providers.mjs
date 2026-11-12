@@ -79,6 +79,10 @@ export function defaultWorkDir() {
 let claudeLeanUnsupported = false;
 
 export function buildCommand(provider, { message, sessionId, model, systemPrompt, mcpUrl, workDir, readOnlyTools, lean = !claudeLeanUnsupported }) {
+  // these reach argv: only plain ids, never something a CLI could read as a flag
+  const SAFE = /^[A-Za-z0-9][\w.:-]{0,127}$/;
+  if (sessionId != null && !SAFE.test(String(sessionId))) sessionId = undefined;
+  if (model != null && !SAFE.test(String(model))) model = undefined;
   switch (provider) {
     case 'claude': {
       const mcpConfig = JSON.stringify({ mcpServers: { motion: { type: 'http', url: mcpUrl } } });

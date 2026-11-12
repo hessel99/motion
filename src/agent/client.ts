@@ -30,6 +30,7 @@ class AgentClient {
   private readOnlyChats = new Set<string>();
   private retry = 500;
   port = 7823;
+  private token = '';
 
   on(fn: () => void) { this.listeners.add(fn); return () => { this.listeners.delete(fn); }; }
   private emit() { this.listeners.forEach(f => f()); }
@@ -40,6 +41,7 @@ class AgentClient {
     const native = (globalThis as any).motionNative;
     if (native?.bridgePort) {
       try { this.port = await native.bridgePort(); } catch { /* fall back to default */ }
+      try { this.token = (await native.bridgeToken?.()) ?? ''; } catch { /* older preload */ }
     }
     const qp = new URLSearchParams(location.search).get('bridge');
     if (qp) this.port = +qp;
@@ -50,7 +52,7 @@ class AgentClient {
     this.status = 'connecting';
     this.emit();
     let ws: WebSocket;
-    try { ws = new WebSocket(`ws://127.0.0.1:${this.port}/ws`); } catch { this.scheduleReconnect(); return; }
+    try { ws = new WebSocket(`ws://127.0.0.1:${this.port}/ws${this.token ? `?token=${encodeURIComponent(this.token)}` : ''}`); } catch { this.scheduleReconnect(); return; }
     this.ws = ws;
     ws.onopen = () => {
       this.status = 'connected';
