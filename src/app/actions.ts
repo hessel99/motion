@@ -32,9 +32,9 @@ const native = () => (globalThis as any).motionNative as undefined | {
 let currentPath: string | null = null;
 
 // ---------------- dirty state + window title ----------------
-let savedAt = 0; // undo stack length at the last save/open
-export function markSaved() { savedAt = st().historyLength; updateTitle(); }
-export function isDirty() { return st().historyLength !== savedAt; }
+let savedAt = 0; // id of the top undo entry at the last save/open (a count would match after undo + new edits)
+export function markSaved() { savedAt = st().topEntryId; updateTitle(); }
+export function isDirty() { return st().topEntryId !== savedAt; }
 function updateTitle() {
   const name = st().project.name || 'Untitled';
   document.title = `${isDirty() ? '● ' : ''}${name} — Motion`;
@@ -42,7 +42,7 @@ function updateTitle() {
 export function setupTitle() {
   st().on('history', updateTitle);
   st().on('doc', updateTitle);
-  editor.on('loaded', () => { savedAt = st().historyLength; updateTitle(); });
+  editor.on('loaded', () => { savedAt = st().topEntryId; updateTitle(); });
   window.addEventListener('beforeunload', e => { if (isDirty() && !(window as any).__noUnloadGuard) { e.preventDefault(); e.returnValue = ''; } });
   updateTitle();
 }
