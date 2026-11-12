@@ -25,6 +25,8 @@ export class Editor {
   frameTimes = new Float32Array(120);
   frameIdx = 0;
   showHud = false;
+  /** right panel tab: inspector or the style / component library */
+  rightTab: 'design' | 'library' = (() => { try { return localStorage.getItem('motion.rightTab') === 'library' ? 'library' : 'design'; } catch { return 'design'; } })();
   private listeners = new Map<string, Set<() => void>>();
 
   attachCanvas(canvas: HTMLCanvasElement) {

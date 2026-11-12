@@ -18,6 +18,14 @@ contextBridge.exposeInMainWorld('motionNative', {
   autosaveRead: () => ipcRenderer.invoke('autosave:read'),
   /** Always shows the dialog. */
   saveFileAs: (opts) => ipcRenderer.invoke('file:saveAs', opts || {}),
+  /** design tokens: read a .json file again / watch it (cb(path, text) on every save) */
+  readTextFile: (p) => ipcRenderer.invoke('file:readText', p),
+  watchFile: (p) => ipcRenderer.invoke('file:watch', p),
+  onFileChanged: (cb) => {
+    const listener = (_e, p, data) => cb(p, data);
+    ipcRenderer.on('file:changed', listener);
+    return () => ipcRenderer.removeListener('file:changed', listener);
+  },
   /** cb(action) for 'new'|'open'|'save'|'saveAs'|'import'|'export-lottie'; returns unsubscribe. */
   onMenu: (cb) => {
     const listener = (_e, action) => cb(action);

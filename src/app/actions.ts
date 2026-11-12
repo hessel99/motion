@@ -9,6 +9,7 @@ import { createProject, uid, type Asset, type Layer, type Project } from '../cor
 import { boundsOf } from '../agent/tools';
 import { demoProject, stressProject } from './demo';
 import { importFigmaDesign, type DesignImportResult } from '../core/design-import';
+import { createComponent } from '../core/components';
 import type { FigmaDesignData } from '../import/figma/convert';
 
 // importers are loaded lazily (keeps startup fast; missing modules are simply unavailable)
@@ -618,6 +619,12 @@ export function setupShortcuts(hooks: { fit(): void; zoom(f: number): void; togg
     const mod = e.metaKey || e.ctrlKey;
     const k = e.key.toLowerCase();
     const run = (fn: () => void) => { e.preventDefault(); fn(); };
+    if (mod && e.altKey && e.code === 'KeyK') return run(() => {
+      // figma: create component (⌥⌘K); on an instance: detach (⌥⌘B in figma)
+      const id = s.selection[0];
+      if (s.selection.length !== 1 || !id) { toast('Select one layer to make a component', 'error'); return; }
+      try { createComponent(s, id); toast(`${s.layer(id)!.name} is now a component (Library tab: add instances)`); } catch (err: any) { toast(err.message, 'error'); }
+    });
     if (mod && k === 'z') return run(() => (e.shiftKey ? s.redo() : s.undo()));
     if (mod && k === 'y') return run(() => s.redo());
     if (mod && k === 's') return run(() => saveProject(e.shiftKey));
