@@ -74,7 +74,7 @@ await shot('01-paste-offers');
 await page.click('.au-card-btn:has-text("End on a phrase")').catch(() => {});
 await page.waitForTimeout(200);
 const dur = await page.evaluate(() => editor.store.comp.duration);
-ok('fit comp to a 4-bar phrase', Math.abs(dur - 8) < 0.05 || Math.abs(dur - 16) < 0.05, dur);
+ok('fit comp to the next 4-bar phrase', Math.abs(dur - 16) < 0.05, dur);
 await page.click('.au-card-btn:has-text("Sync timing")');
 await page.waitForTimeout(200);
 const synced = await page.evaluate(async () => {

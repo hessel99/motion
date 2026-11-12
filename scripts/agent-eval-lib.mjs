@@ -324,10 +324,19 @@ export function runCheck(check, m, d) {
     case 'wipes': return L.some((l) => l.type === 'rect' && (propAnimated(l, 'size') || kfOf(l, 'scale').some((k) => Math.abs(k.v[0] - k.v[1]) > 5)));
     // music briefs (brief.audio): moves land within ±frames of the generated track's beat grid
     case 'onBeats': {
+      // per move (a run of consecutive changing segments of one property): it lands on the music when
+      // any of its keys after the first (the contact, the overshoot peak or the settle) is on the grid
       const fps = d.comp.fps, tol = (check.frames ?? 1) / fps + 1e-6, step = 60 / check.bpm, off = check.offset ?? 0;
       const near = (t) => Math.abs((t - off) / step - Math.round((t - off) / step)) * step <= tol;
-      const ends = [...new Set(d.segs.filter((s) => d.byId[s.id]?.type !== 'audio').map((s) => +s.t1.toFixed(4)))];
-      return ends.length >= (check.minMoves ?? 4) && ends.filter(near).length / ends.length >= (check.min ?? 0.6);
+      const by = {};
+      for (const s of d.segs) if (d.byId[s.id]?.type !== 'audio') (by[s.id + '|' + s.prop] ??= []).push(s);
+      const runs = [];
+      for (const list of Object.values(by)) {
+        list.sort((a, b) => a.t0 - b.t0);
+        let cur = null;
+        for (const s of list) { if (cur && Math.abs(s.t0 - cur[cur.length - 1]) < 1e-6) cur.push(s.t1); else runs.push((cur = [s.t1])); }
+      }
+      return runs.length >= (check.minMoves ?? 4) && runs.filter((r) => r.some(near)).length / runs.length >= (check.min ?? 0.6);
     }
     case 'hitAt': {
       const tol = (check.frames ?? 1) / d.comp.fps + 1e-6;

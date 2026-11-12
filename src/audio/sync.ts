@@ -282,7 +282,8 @@ export function musicalLengths(m: Music, current: number): { full: number; phras
   const br = bars(m), bar = beatPeriod(m) * m.a.meter;
   const ends = br.map(t => t + bar);
   const full = Math.min(m.to, m.start + m.a.lastSound + 0.05);
-  const bar1 = ends.find(t => t >= current - 1e-3) ?? null;
-  const phrase = br.length ? ends.filter((_, i) => (i + 1) % 4 === 0).find(t => t >= current - 1e-3) ?? null : null;
+  // the next bar / 4-bar phrase end after the current length (a longer comp that ends musically)
+  const bar1 = ends.find(t => t > current + 0.05) ?? null;
+  const phrase = br.length ? ends.filter((_, i) => (i + 1) % 4 === 0).find(t => t > current + 0.05) ?? null : null;
   return { full, phrase, bar: bar1 };
 }
