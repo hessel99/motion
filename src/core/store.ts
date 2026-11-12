@@ -103,6 +103,13 @@ export class Store {
     if (s) for (const fn of s) fn();
   }
 
+  /** transient preview (hover swatches): the caller swapped document values in place and
+   *  restores them itself. only redraw listeners (renderer) hear it: no undo, no ui 'doc' event */
+  notifyPreview(layerIds: Iterable<string>) {
+    const c: Change = { structure: false, comp: false, layers: new Set(layerIds), meta: false, assets: false };
+    for (const fn of this.listeners) fn(c);
+  }
+
   private emitChange(c: Change) {
     for (const fn of this.listeners) fn(c);
     this.emit('doc');
