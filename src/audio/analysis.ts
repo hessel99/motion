@@ -218,7 +218,17 @@ export function analyzeAudio(input: Float32Array, srIn: number, opts: { bpm?: nu
     }
     onsetF.push(f); onsetS.push(v);
   }
-  for (const f of onsetF) onsetT.push(refine(frameT(f)));
+  for (let i = 0; i < onsetF.length; i++) {
+    const t = refine(frameT(onsetF[i]));
+    // two stft peaks can refine to the same hit: keep one (the stronger)
+    if (onsetT.length && t - onsetT[onsetT.length - 1] < 0.03) {
+      if (onsetS[i] > onsetS[onsetT.length - 1]) { onsetT[onsetT.length - 1] = t; onsetS[onsetT.length - 1] = onsetS[i]; }
+      continue;
+    }
+    onsetS[onsetT.length] = onsetS[i]; onsetF[onsetT.length] = onsetF[i];
+    onsetT.push(t);
+  }
+  onsetS.length = onsetF.length = onsetT.length;
   // a sound that starts with the file (trimmed loops) is an onset too: the stft can't see a rise there
   if (feMax > 0 && (!onsetT.length || onsetT[0] > firstSound + 0.04)) {
     let pk = 0;
@@ -389,8 +399,11 @@ export function analyzeAudio(input: Float32Array, srIn: number, opts: { bpm?: nu
     let before = 0, after = 0;
     for (let d = 1; d <= 12; d++) { before = Math.max(before, ampAt(t - 0.02 - d / ENV_RATE)); after = Math.max(after, ampAt(t + d / ENV_RATE)); }
     const jump = Math.max(0, Math.log10((after + 1e-6) / (before + 1e-6))) * 20;
-    const sectionStart = sections.some(s => Math.abs(s.t0 - t) < 0.06) ? 0.5 : 0;
-    return { t, s: onsetS[i] * (0.6 + Math.min(1.2, after / ampMax)) * (1 + Math.min(2, jump / 6)) + sectionStart };
+    // a section change (a drop!) and a bar start make a hit count more
+    const sec = sections.find(s => Math.abs(s.t0 - t) < 0.06 && s.t0 > firstSound + 0.1);
+    const secW = sec ? 1.3 + 0.7 * sec.energy : 1;
+    const lowW = 1 + peakNear(OL, t);
+    return { t, s: onsetS[i] * lowW * (0.6 + Math.min(1.2, after / ampMax)) * (1 + Math.min(2, jump / 6)) * secW };
   });
   const maxAcc = Math.max(4, Math.min(64, Math.round(duration / 1.5)));
   const picked: { t: number; s: number }[] = [];

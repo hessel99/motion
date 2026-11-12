@@ -75,7 +75,7 @@ export const AUDIO_TOOLS: ToolDef[] = [
         return text(lines.join('\n'));
       }
       const lines = [
-        `music ${JSON.stringify(m.layer.name)} (layer ${m.layer.id}): ${A.bpm} BPM, ${A.meter}/4${A.steady ? ', steady grid' : ', variable tempo'}; audible ${f2(m.from)}–${f2(m.to)}s in comp (comp is ${f2(s.comp.duration)}s)`,
+        `music ${JSON.stringify(m.layer.name)} (layer ${m.layer.id}): ${Math.round(A.bpm * 10) / 10} BPM, ${A.meter}/4${A.steady ? ', steady grid' : ', variable tempo'}; audible ${f2(m.from)}–${f2(m.to)}s in comp (comp is ${f2(s.comp.duration)}s)`,
         `beat ${f2(p)}s, bar ${f2(bar)}s; ${bt.length} beats from ${f2(bt[0] ?? 0)}s; ${br.length} bars, downbeats: ${br.slice(0, 40).map(f2).join(' ')}${br.length > 40 ? ' …' : ''}`,
         `sections: ${sec.map(x => `${x.label} ${f2(x.t0)}–${f2(x.t1)} (energy ${x.energy})`).join(' | ')}`,
         `accents (strongest hits, time:strength): ${[...acc].sort((x, y) => y.s - x.s).slice(0, 16).sort((x, y) => x.t - y.t).map(x => `${f2(x.t)}:${f2(x.s)}`).join(' ')}`,

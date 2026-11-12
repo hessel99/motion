@@ -61,7 +61,9 @@ function hashStr(s: string) { let h = 2166136261; for (let i = 0; i < s.length; 
 class Svf {
   lp = 0; bp = 0;
   run(x: number, fc: number, q: number, sr: number): number {
-    const f = 2 * Math.sin(Math.PI * Math.min(0.45, fc / sr));
+    // the chamberlin svf is stable for f < ~1: cutoffs up to ~sr/6
+    const f = 2 * Math.sin(Math.PI * Math.min(0.16, Math.max(0, fc) / sr));
+    if (q < 0.5) q = 0.5;
     const hp = x - this.lp - this.bp / q;
     this.bp += f * hp; this.lp += f * this.bp;
     return hp;
