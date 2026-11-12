@@ -33,6 +33,7 @@ import { PREVIEW_TOOLS } from './tools-preview';
 import { SHAPE_TOOLS } from './tools-shapes';
 import { MOTION_TOOLS } from './tools-motion';
 import { CONCEPT_TOOLS } from './tools-concept';
+import { AUDIO_TOOLS } from './tools-audio';
 
 function summarize(l: Layer, deep: boolean): any {
   const t = st().time;
@@ -655,6 +656,7 @@ export const TOOLS: ToolDef[] = [
   ...GUIDE_TOOLS,
   ...CONCEPT_TOOLS,
   ...SHADER_TOOLS,
+  ...AUDIO_TOOLS,
 ];
 
 export { AGENT_SYSTEM_PROMPT, ASK_MODE_PROMPT } from './prompt';

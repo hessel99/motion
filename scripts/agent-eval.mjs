@@ -263,7 +263,7 @@ async function runBrief(worker, brief, rep) {
   const finished = new Promise((r) => { done = r; });
   worker.onEvent = (ev) => { if (ev.kind !== 'text_delta') events.push(ev); if (ev.kind === 'done') done(); };
   const t0 = Date.now();
-  const setup = await page.evaluate(async ({ comp, prompt, model, dry }) => {
+  const setup = await page.evaluate(async ({ comp, prompt, model, dry, audio }) => {
     const { agentClient } = await import('/src/agent/client.ts');
     const { composeMessage } = await import('/src/agent/context.ts');
     const { setCompSettings } = await import('/src/core/commands.ts');
@@ -279,6 +279,18 @@ async function runBrief(worker, brief, rep) {
         window.__evalLog.push({ name, argsBytes: JSON.stringify(a ?? {}).length, ok, ms: Math.round(performance.now() - s), error, at: Date.now() });
       }
     };
+    if (audio) {
+      // a procedurally generated, royalty-free track (src/audio/synth-track.ts), analysed before the turn
+      const { synthTrack, TRACKS } = await import('/src/audio/synth-track.ts');
+      const { wavDataUrl } = await import('/src/audio/wav.ts');
+      const { addAudioLayer } = await import('/src/audio/import.ts');
+      const { ensureAnalysis } = await import('/src/audio/analysis-store.ts');
+      const tr = synthTrack(TRACKS[audio.track] ?? audio.spec);
+      const l = addAudioLayer(audio.name ?? audio.track, wavDataUrl([tr.samples], tr.sr), 'audio/wav', { at: 0 });
+      await ensureAnalysis(st.project.assets[l.imageRef]);
+      (await import('/src/audio/timing.ts')).refreshAudioEnv(st);
+      st.select([]);
+    }
     const message = composeMessage(st, prompt);
     if (dry) {
       // pipeline self-test without a model: a scripted "agent" through the same tool path
@@ -298,7 +310,7 @@ async function runBrief(worker, brief, rep) {
       window.__chatId = 'dry';
     } else window.__chatId = agentClient.chat({ provider: 'claude', message, model }, (ev) => window.__evalEvent({ ...ev, at: Date.now() }));
     return { message, tools: TOOLS.map((t) => t.name) };
-  }, { comp: brief.comp, prompt: brief.prompt, model: O.model, dry: O.dry });
+  }, { comp: brief.comp, prompt: brief.prompt, model: O.model, dry: O.dry, audio: brief.audio ?? null });
   log(`[w${worker.i}] ${name}: turn started (${setup.tools.length} tools)`);
   let timedOut = false;
   await Promise.race([finished, new Promise((r) => setTimeout(r, O.timeoutMin * 60_000)).then(() => { timedOut = true; })]);

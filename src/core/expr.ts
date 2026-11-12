@@ -7,7 +7,11 @@
 //   motion: linear(t, t0, t1, v0, v1) ease(...) easeIn easeOut, random(seed?), noise(x),
 //           wiggle(freq, amp, octaves?), loopOut('cycle'|'pingpong'|'offset'|'continue'), loopIn(...),
 //           valueAtTime(t), length(v), normalize(v)
+//   audio:  audio('low' | 'mid' | 'high' | 'amp' | 'beat' | 'bar' | 'accent', smoothing?, threshold?)
+//           0..1 level of the comp's music at this frame (see core/audio-env.ts)
 // vectors combine element-wise; a scalar combines with every component.
+
+import { audioLevel, bandIndex } from './audio-env';
 
 export type Val = number | number[];
 
@@ -138,6 +142,8 @@ export interface ExprFrame {
   valueAt: (t: number, out: Float64Array) => void;
   /** random() call counter, reset by every run */
   calls: number;
+  /** offset from local to root comp time (precomps): audio() reads the music at time + tOff */
+  tOff?: number;
 }
 
 /** writes the result into o and returns -1 for a scalar (in o[0]) or the vector length.
@@ -354,7 +360,7 @@ function comp(n: Node, sv: boolean, dim: number): C {
   const cc = (x: Node) => comp(x, sv, dim);
   switch (n.t) {
     case 'num': return K(n.v);
-    case 'str': return fail('strings are only allowed as loop arguments');
+    case 'str': return fail('strings are only allowed as loop / audio arguments');
     case 'arr': {
       const cs = n.items.map(cc), fs = cs.map(c => c.f), len = cs.length;
       const B = new Float64Array(Math.max(1, ...cs.map(c => c.n)));
@@ -563,6 +569,21 @@ function compCall(name: string, args: Node[], sv: boolean, dim: number): C {
         return tag;
       };
       return sv ? S(f) : V(dim, f);
+    }
+    case 'audio': {
+      // audio(band?, smoothing?, threshold?): a scalar read from precomputed envelopes, no allocation
+      const a0 = args[0];
+      if (a0 && a0.t !== 'str') return fail("audio('low' | 'mid' | 'high' | 'amp' | 'beat' | 'bar' | 'accent', smoothing?, threshold?)");
+      const band = bandIndex(a0 ? a0.v : 'amp');
+      const cs = args.slice(1).map(cc);
+      const c1 = cs[0] ?? K(0), c2 = cs[1] ?? K(0), f1 = c1.f, f2 = c2.f, B1 = buf(c1), B2 = buf(c2);
+      const ev = cs.slice(2).map(effect), m = ev.length;
+      return S((fr, o) => {
+        const sm = num(f1(fr, B1), B1), th = num(f2(fr, B2), B2);
+        for (let i = 0; i < m; i++) ev[i](fr);
+        o[0] = audioLevel(band, fr.time + (fr.tOff ?? 0), sm, th);
+        return -1;
+      });
     }
     case 'valueAtTime': {
       if (!args.length) return fail('valueAtTime(t)');

@@ -4,6 +4,9 @@
 
 import type { Asset, Composition, Layer } from '../core/model';
 import type { Editor } from '../app/editor';
+import { valueAt } from '../core/commands';
+import { onAnalysis } from './analysis-store';
+import { refreshAudioEnv } from './timing';
 
 const buffers = new Map<string, AudioBuffer | 'loading' | 'error'>();
 const pending = new Map<string, Promise<AudioBuffer | null>>();
@@ -66,8 +69,37 @@ export function pruneAudio(assets: Record<string, Asset>) {
 
 type ProjectLike = { layers: Record<string, Layer>; assets: Record<string, Asset>; comps: Record<string, Composition> };
 
-/** one audible clip in root comp time: buffer time 0 is at `offset`, audible within [from, to) */
-export interface AudioClip { layer: Layer; asset: Asset; offset: number; from: number; to: number; volume: number }
+/** one audible clip in root comp time: buffer time 0 is at `offset`, audible within [from, to).
+ *  volume: static gain; tOff: comp time of the layer's own comp time 0 (precomps) */
+export interface AudioClip { layer: Layer; asset: Asset; offset: number; from: number; to: number; volume: number; tOff: number }
+
+/** the clip's volume keys and fades make its gain change over time */
+export function clipAnimated(c: AudioClip): boolean {
+  const a = c.layer.audio;
+  return !!(c.layer.props.volume?.kf?.length || (a?.fadeIn ?? 0) > 0 || (a?.fadeOut ?? 0) > 0);
+}
+
+/** gain of a clip at comp time t (static volume × volume keys × fades); bufDur = decoded length */
+export function clipGain(c: AudioClip, t: number, bufDur: number): number {
+  const l = c.layer, a = l.audio;
+  let g = c.volume;
+  if (l.props.volume) g *= Math.max(0, valueAt(l, 'volume', t - c.tOff)[0]) / 100;
+  const s = Math.max(c.from, c.offset), e = Math.min(c.to, c.offset + bufDur);
+  if (a?.fadeIn && a.fadeIn > 0) g *= Math.min(1, Math.max(0, (t - s) / a.fadeIn));
+  if (a?.fadeOut && a.fadeOut > 0) g *= Math.min(1, Math.max(0, (e - t) / a.fadeOut));
+  return g;
+}
+
+/** sets a gain param for playing [from, to) (comp time) starting at context time `at`: a constant, or a
+ *  100 Hz curve when the volume is keyed or faded */
+export function scheduleGain(p: AudioParam, c: AudioClip, at: number, from: number, to: number, bufDur: number) {
+  if (!clipAnimated(c)) { p.value = clipGain(c, from, bufDur); return; }
+  const n = Math.max(2, Math.ceil((to - from) * 100) + 1);
+  const curve = new Float32Array(n);
+  for (let i = 0; i < n; i++) curve[i] = clipGain(c, from + ((to - from) * i) / (n - 1), bufDur);
+  p.value = curve[0];
+  try { p.setValueCurveAtTime(curve, at, Math.max(1e-3, to - from)); } catch { p.value = curve[0]; }
+}
 
 /**
  * every visible audio layer reachable from the root list, through groups and precomps
@@ -85,7 +117,7 @@ export function collectAudioClips(project: ProjectLike, root: string[]): AudioCl
       if (l.type === 'audio') {
         const asset = l.imageRef ? project.assets[l.imageRef] : undefined;
         const v = gain * (l.volume ?? 1);
-        if (asset && v > 0) out.push({ layer: l, asset, offset: tOff + (l.startTime ?? 0), from: a, to: b, volume: v });
+        if (asset && v > 0 && !l.audio?.mute) out.push({ layer: l, asset, offset: tOff + (l.startTime ?? 0), from: a, to: b, volume: v, tOff });
       } else if (l.type === 'precomp') {
         const c = l.compRef ? project.comps[l.compRef] : undefined;
         if (!c || stack.includes(c.id)) continue;
@@ -116,7 +148,7 @@ export async function mixAudio(project: ProjectLike, root: string[], t0: number,
     const src = oc.createBufferSource();
     src.buffer = buf;
     const gain = oc.createGain();
-    gain.gain.value = c.volume;
+    scheduleGain(gain.gain, c, from - t0, from, to, buf.duration);
     src.connect(gain).connect(oc.destination);
     src.start(from - t0, from - c.offset, to - from);
   }
@@ -135,6 +167,18 @@ export class AudioEngine {
 
   constructor(private ed: Editor) {
     onDecoded = () => { ed.emit('audio'); if (ed.store.playing) this.restart(); };
+    // music analysis: audio() expressions, beat ticks and snapping follow the comp's music layer
+    let envQueued = false;
+    const env = () => {
+      if (envQueued) return;
+      envQueued = true;
+      queueMicrotask(() => { envQueued = false; if (refreshAudioEnv(ed.store) && ed.renderer) ed.renderer.dirty = true; });
+    };
+    onAnalysis(() => { env(); ed.emit('audio'); });
+    ed.store.onChange(c => { if (c.structure || c.comp || c.assets || [...c.layers].some(id => ed.store.layer(id)?.type === 'audio')) env(); });
+    ed.store.on('comps', env);
+    ed.on('loaded', env);
+    env();
     // clips are re-collected only after a document change (not every frame)
     // ...and only after one that can change them: a drag of thousands of shape layers while playing
     // must not re-walk the whole layer tree every frame
@@ -171,7 +215,10 @@ export class AudioEngine {
     const st = this.ed.store;
     this.clips = collectAudioClips(st.project, st.comp.root);
     let s = st.comp.id;
-    for (const c of this.clips) s += `|${c.layer.id}:${c.asset.id}:${c.offset}:${c.from}:${c.to}:${c.volume}`;
+    for (const c of this.clips) {
+      const a = c.layer.audio, kf = c.layer.props.volume?.kf;
+      s += `|${c.layer.id}:${c.asset.id}:${c.offset}:${c.from}:${c.to}:${c.volume}:${a?.fadeIn ?? 0}:${a?.fadeOut ?? 0}:${c.layer.props.volume?.v[0] ?? 100}:${kf ? kf.map(k => k.t + '=' + k.v[0]).join(',') : ''}`;
+    }
     return s;
   }
 
@@ -204,10 +251,35 @@ export class AudioEngine {
       const src = ac.createBufferSource();
       src.buffer = buf;
       const gain = ac.createGain();
-      gain.gain.value = c.volume;
+      scheduleGain(gain.gain, c, ac.currentTime + (from - t), from, to, buf.duration);
       src.connect(gain).connect(ac.destination);
       src.start(ac.currentTime + (from - t), from - c.offset, to - from);
       this.sources.push(src);
+    }
+  }
+
+  private lastGrain = 0;
+  /** scrub audio: a short grain of every clip under the playhead (while dragging it, not playing) */
+  scrub(t: number) {
+    if (this.ed.store.playing) return;
+    const now = performance.now();
+    if (now - this.lastGrain < 45) return;
+    this.lastGrain = now;
+    const st = this.ed.store;
+    const ac = audioCtx();
+    if (ac.state === 'suspended') ac.resume();
+    for (const c of collectAudioClips(st.project, st.comp.root)) {
+      const buf = getAudioBuffer(c.asset);
+      if (!buf || t < Math.max(c.from, c.offset) || t >= Math.min(c.to, c.offset + buf.duration)) continue;
+      const src = ac.createBufferSource();
+      src.buffer = buf;
+      const g = ac.createGain(), v = clipGain(c, t, buf.duration) * 0.8, at = ac.currentTime, d = 0.08;
+      g.gain.setValueAtTime(0, at);
+      g.gain.linearRampToValueAtTime(v, at + 0.008);
+      g.gain.setValueAtTime(v, at + d - 0.015);
+      g.gain.linearRampToValueAtTime(0, at + d);
+      src.connect(g).connect(ac.destination);
+      src.start(at, t - c.offset, d);
     }
   }
 }

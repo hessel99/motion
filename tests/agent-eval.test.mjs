@@ -45,6 +45,22 @@ describe('agent eval metrics', () => {
     expect(r.items.map((i) => i.pass)).toEqual([true, true, true, false, true, null]);
     expect([r.hits, r.checkable, r.total]).toEqual([4, 5, 6]);
   });
+  it('music checks: landings on the beat grid, a hit on the drop, restraint, music kept', () => {
+    // b lands at 1.5 (on a 120 bpm beat), a at 0.5; a third layer lands 2 frames off a beat
+    const d2 = structuredClone(doc);
+    d2.layers.c = layer('c', 'rect', { position: { v: [0, 0], kf: [k(0.2, [0, 0]), k(1.0 + 2 / 30, [50, 0])] } });
+    d2.layers.m = layer('m', 'audio', {}, { imageRef: 'x' });
+    const { metrics, derived } = computeMetrics(d2, probe);
+    const r = runChecklist({ checklist: [
+      { text: 'on beats', check: { type: 'onBeats', bpm: 120, min: 0.6, minMoves: 3 } },
+      { text: 'all on beats', check: { type: 'onBeats', bpm: 120, min: 1, minMoves: 3 } },
+      { text: 'hit at 1.5', check: { type: 'hitAt', t: 1.5 } },
+      { text: 'hit at 1.25', check: { type: 'hitAt', t: 1.25 } },
+      { text: 'not every beat', check: { type: 'notEveryBeat', bpm: 120, from: 0, to: 2, min: 0.25 } },
+      { text: 'music kept', check: { type: 'audioKept' } },
+    ] }, metrics, derived);
+    expect(r.items.map((i) => i.pass)).toEqual([true, false, true, false, true, true]);
+  });
   it('names eases', () => {
     expect(segEase(k(0, [0], { out: [0.34, 1.56] }), k(1, [1], { in: [0.64, 1] }))).toBe('Back Out');
     expect(segEase(k(0, [0], { interp: 'hold' }), k(1, [1]))).toBe('Hold');
@@ -66,6 +82,7 @@ describe('agent eval metrics', () => {
       expect(b.comp.width * b.comp.height * b.comp.duration * b.comp.fps).toBeGreaterThan(0);
       expect(b.style.length).toBeGreaterThan(0);
       expect(b.checklist.length).toBeGreaterThanOrEqual(5);
+      if (b.audio) expect(b.audio.track).toMatch(/^(music120|sting120)$/);
     }
   });
 });
