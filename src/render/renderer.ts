@@ -235,6 +235,7 @@ export interface RenderStats {
   atlasEntries: number;
   atlasPages: number;
   drawCalls: number;
+  culled: number;
 }
 
 export class Renderer {
@@ -273,6 +274,8 @@ export class Renderer {
   cssH = 1;
   editorBg: [number, number, number] = [0.1, 0.1, 0.11];
   clipToComp = true;
+  /** skip layers fully outside the viewport (disabled for snapshots/exports which render the whole comp) */
+  cullOffscreen = true;
 
   private cprog: WebGLProgram | null = null;
   private cuOpacity: WebGLUniformLocation | null = null;
@@ -284,7 +287,7 @@ export class Renderer {
   private needsCompile = true;
   private dirtyLayers = new Set<string>();
   dirty = true;
-  stats: RenderStats = { instances: 0, layers: 0, evalMs: 0, writeMs: 0, rasterMs: 0, gpuSubmitMs: 0, frameMs: 0, atlasEntries: 0, atlasPages: 0, drawCalls: 0 };
+  stats: RenderStats = { instances: 0, layers: 0, evalMs: 0, writeMs: 0, rasterMs: 0, gpuSubmitMs: 0, frameMs: 0, atlasEntries: 0, atlasPages: 0, drawCalls: 0, culled: 0 };
   private rasterBudgetMs = 6;
   private pendingUpgrade = false;
   lastTime = -1;
@@ -612,10 +615,15 @@ export class Renderer {
     if (it.entry && !it.entry.dead && it.rasterScale >= scale && performance.now() > budgetEnd) { this.pendingUpgrade = true; return true; }
     // have an older resolution? keep it and upgrade when time allows
     const hasOld = !!it.entry && !it.entry.dead;
-    // never block a frame for long on first-time rasters (cold start / after eviction): pop in next frame
+    const S = this.style, os = i * ST;
+    // off the main thread: resolution upgrades, and anything beyond this frame's raster budget.
+    // first-time rasters within budget stay synchronous so edits (typing, drawing) never flicker.
+    if (l.type !== 'image' && this.workersOk && (hasOld || performance.now() > budgetEnd)) {
+      this.requestAsync(key, l, bucket, [S[os], S[os + 1]], [S[os + 2], S[os + 3], S[os + 4], S[os + 5]], S[os + 14]);
+      return hasOld;
+    }
     if (!hasOld && performance.now() > budgetEnd + 24) { this.pendingUpgrade = true; return false; }
     if (hasOld && performance.now() > budgetEnd) { this.pendingUpgrade = true; return true; }
-    const S = this.style, os = i * ST;
     let r: RasterResult | null = null;
     const size = [S[os], S[os + 1]];
     if (l.type === 'path') r = rasterPath(l, bucket, S[os + 14]);
@@ -641,6 +649,55 @@ export class Renderer {
     return true;
   }
   private rasterMeta = new Map<string, RasterResult>();
+
+  // ---------------- async raster workers ----------------
+  private workers: Worker[] = [];
+  private workersOk = typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined';
+  private pending = new Map<number, string>(); // job id -> atlas key
+  private pendingKeys = new Set<string>();
+  private nextJob = 1;
+  asyncRasters = 0;
+
+  private requestAsync(key: string, l: Layer, bucket: number, size: number[], radius: number[], strokeWidth: number) {
+    if (this.pendingKeys.has(key)) return;
+    if (!this.workers.length) {
+      try {
+        for (let w = 0; w < 2; w++) {
+          const worker = new Worker(new URL('./raster-worker.ts', import.meta.url), { type: 'module' });
+          worker.onmessage = ev => this.onRasterDone(ev.data);
+          worker.onerror = () => { this.workersOk = false; };
+          this.workers.push(worker);
+        }
+      } catch { this.workersOk = false; return; }
+    }
+    const id = this.nextJob++;
+    this.pending.set(id, key);
+    this.pendingKeys.add(key);
+    // plain data only (structured clone): strip nothing, layers are json
+    this.workers[id % this.workers.length].postMessage({ id, layer: l, bucket, size, radius, strokeWidth });
+  }
+
+  private onRasterDone(msg: { id: number; result?: RasterResult | null; error?: string }) {
+    const key = this.pending.get(msg.id);
+    this.pending.delete(msg.id);
+    if (!key) return;
+    this.pendingKeys.delete(key);
+    const r = msg.result;
+    if (!r) return;
+    if (this.atlas.has(key)) return;
+    const e = this.atlas.alloc(key, r.pw, r.ph);
+    if (!e) return;
+    if (this.atlasGen !== this.atlas.generation) {
+      this.rasterMeta.clear();
+      this.atlasGen = this.atlas.generation;
+      for (const x of this.items) { x.rasterKey = null; x.entry = null; }
+    }
+    this.atlas.upload(e, r.data);
+    r.data = undefined as any;
+    this.rasterMeta.set(key, r);
+    this.asyncRasters++;
+    this.dirty = true; // items pick the new key up on the next frame
+  }
   private atlasGen = 0;
 
   // ---------------- frame ----------------
@@ -706,6 +763,9 @@ export class Renderer {
 
     // composition background is a scissored clear (no fragment shader work)
     let k = 0;
+    let culled = 0;
+    const cullOn = this.cullOffscreen;
+    const px0 = this.panX * this.dpr, py0 = this.panY * this.dpr, cw0 = this.canvas.width, ch0 = this.canvas.height;
     const mask = this.drawnMask;
     const cmds = this.cmds;
     cmds.length = 0;
@@ -762,6 +822,20 @@ export class Renderer {
       let a = W[o6], b = W[o6 + 1], c = W[o6 + 2], d = W[o6 + 3], e = W[o6 + 4], f = W[o6 + 5];
       let w = S[os], h = S[os + 1];
       let u0 = 0, v0 = 0, u1 = 0, v1 = 0, page = 0;
+      // viewport culling: skip layers whose (padded) box is completely off-screen.
+      // saves rasterization + atlas space for raster layers and fill work for everything.
+      if (cullOn && !l.mask) {
+        const pad = Math.max(w, h) * 0.25 + (S[os + 14] || 0) + 4 / z;
+        const x0 = -pad, y0 = -pad, x1 = w + pad, y1 = h + pad;
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (let q = 0; q < 4; q++) {
+          const lx = q & 1 ? x1 : x0, ly = q & 2 ? y1 : y0;
+          const sx = (a * lx + c * ly + e) * z + px0, sy = (b * lx + d * ly + f) * z + py0;
+          if (sx < minX) minX = sx; if (sx > maxX) maxX = sx;
+          if (sy < minY) minY = sy; if (sy > maxY) maxY = sy;
+        }
+        if (maxX < 0 || maxY < 0 || minX > cw0 || minY > ch0) { culled++; continue; }
+      }
       if (it.kind >= KIND_MASK) {
         // raster space -> local box: paths scale geometry space by size/geomSize
         let gx = 1, gy = 1;
@@ -867,6 +941,7 @@ export class Renderer {
     st.atlasEntries = this.atlas.size;
     st.atlasPages = this.atlas.pages;
     st.drawCalls = 1;
+    st.culled = culled;
     this.lastTime = t;
     this.dirty = this.pendingUpgrade;
   }

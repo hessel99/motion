@@ -173,7 +173,7 @@ function Hud() {
       const r = editor.renderer.stats;
       el.current.textContent =
         `${editor.measuredFps().toFixed(0)} fps\n` +
-        `layers ${r.layers}  drawn ${r.instances}  draw calls ${r.drawCalls}\n` +
+        `layers ${r.layers}  drawn ${r.instances}  culled ${r.culled}  draw calls ${r.drawCalls}\n` +
         `frame ${r.frameMs.toFixed(2)}ms  eval ${r.evalMs.toFixed(2)}  write ${r.writeMs.toFixed(2)}\n` +
         `raster ${r.rasterMs.toFixed(2)}  gpu submit ${r.gpuSubmitMs.toFixed(2)}\n` +
         `atlas ${r.atlasEntries} entries / ${r.atlasPages} pages`;
