@@ -5,7 +5,7 @@ against the editor's own renderer, with real decoders and players, and every dif
 fixed in the exporter or the renderer (tests were never loosened to pass).
 
 ```bash
-npm run parity          # quick subset (CI): 16 scenes × 8 paths, a few frames each, exits 1 on a failure (~5 min)
+npm run parity          # quick subset (CI): 16 scenes × 8 paths, a few frames each, exits 1 on a failure (~4 min)
 npm run parity:full     # every scene, every frame, plus lottie-native (what "Ignore" costs)
 node scripts/export-parity.mjs --scenes text,masks --paths lottie,mp4   # a subset
 ```
@@ -54,7 +54,70 @@ GIF delays, preflight lists, Lottie mapping) are unit tested in `tests/export-pa
 
 ## Results
 
-RESULTS_TABLE
+Full run (21 scenes, every frame; `node scripts/export-parity-table.mjs` writes these tables).
+"Before" is the code this work started from, measured with the first version of the harness
+(the PNG sequence did not exist; video was then compared to the editor frame directly, without the
+4:2:0 allowance, which mostly matters for the colour chart and stripes). Errors are 0–255 per channel.
+
+| path | before: pass | before: worst mean | after: pass | after: worst mean | after: worst flat colour |
+|---|---|---|---|---|---|
+| png | 0/21 | 58.18 | 21/21 | 0.00 | – |
+| pngseq | 0/21 | – | 20/21 | 0.00 | – |
+| mp4 | 14/21 | 46.06 | 21/21 | 1.47 | 1.46 |
+| mp4hq | 1/21 | 46.03 | 21/21 | 1.47 | 1.46 |
+| webm | 14/21 | 45.96 | 21/21 | 0.84 | 0.99 |
+| gif | 2/21 | 58.21 | 21/21 | 2.75 | – |
+| lottie | 2/21 | 125.75 | 21/21 | 0.47 | – |
+| preview | 7/21 | 46.07 | 21/21 | 1.77 | 1.89 |
+| lottie-native | n/a | n/a | 0/5 | 78.94 | – |
+
+After, per scene (worst frame mean error; ✗ = fails a tolerance):
+
+| scene | png | pngseq | mp4 | mp4hq | webm | gif | lottie | preview | lottie-native |
+|---|---|---|---|---|---|---|---|---|---|
+| timing | 0.00 | 0.00 | 0.12 | 0.12 | 0.11 | 0.00 | 0.05 | 0.52 |  |
+| timing-24to30 | 0.00 | 0.00 | 0.06 | 0.06 | 0.05 | 0.00 | 0.02 | 0.44 |  |
+| timing-60 | 0.00 | 0.00 | 0.21 | 0.21 | 0.15 | 0.01 | 0.07 | 0.21 |  |
+| timing-12 | 0.00 | 0.00 | 0.05 | 0.05 | 0.07 | 0.01 | 0.05 | 0.03 |  |
+| colour | 0.00 | 0.00 | 0.15 | 0.15 | 0.14 | 0.00 | 0.19 | 1.26 |  |
+| shapes | 0.00 | 0.00 | 0.52 | 0.52 | 0.31 | 0.55 | 0.39 | 0.83 |  |
+| paints | 0.00 | 0.00 | 1.47 | 1.47 | 0.82 | 0.58 | 0.13 | 1.45 | 24.89 ✗ |
+| images | 0.00 | 0.00 | 0.83 | 0.83 | 0.57 | 2.75 | 0.13 | 1.43 |  |
+| effects | 0.00 | 0.00 | 0.97 | 0.97 | 0.56 | 0.64 | 0.47 | 1.35 | 3.35 ✗ |
+| shaders | 0.00 | 0.00 | 1.12 | 1.12 | 0.84 | 0.00 | 0.01 | 1.72 | 56.84 ✗ |
+| masks | 0.00 | 0.00 | 0.61 | 0.61 | 0.31 | 0.21 | 0.16 | 0.78 |  |
+| blend | 0.00 | 0.00 | 1.24 | 1.24 | 0.67 | 1.31 | 0.47 | 1.77 |  |
+| group-opacity | 0.00 | 0.00 | 0.38 | 0.38 | 0.29 | 0.59 | 0.39 | 0.62 |  |
+| text | 0.00 | 0.00 | 0.60 | 0.60 | 0.25 | 0.19 | 0.04 | 0.75 | 16.34 ✗ |
+| text-anim | 0.00 | 0.00 | 0.29 | 0.29 | 0.18 | 0.32 | 0.04 | 0.50 | 78.94 ✗ |
+| expressions | 0.00 | 0.00 | 0.24 | 0.24 | 0.20 | 0.20 | 0.11 | 0.41 |  |
+| springs | 0.00 | 0.00 | 0.12 | 0.12 | 0.10 | 0.17 | 0.12 | 0.51 |  |
+| precomp | 0.00 | 0.00 | 0.10 | 0.10 | 0.09 | 0.01 | 0.10 | 0.52 |  |
+| trim | 0.00 | 0.00 ✗ | 0.14 | 0.14 | 0.11 | 0.15 | 0.11 | 0.52 |  |
+| transparent | 0.00 | 0.00 | 0.29 | 0.29 | 0.16 | 0.13 | 0.14 | 0.65 |  |
+| audio | 0.00 | 0.00 | 0.19 | 0.19 | 0.14 | 0.01 | 0.13 | 0.28 |  |
+
+`lottie-native` is informational: every preflight item set to **Ignore** (what that choice costs);
+it never fails the run. The one remaining failure, `trim / pngseq`, is a max error of 3–5 / 255 on a
+handful of edge pixels in 3 of 45 frames (mean 0.00): trim-path frames are drawn into a shared
+per-frame canvas whose slot position depends on render order. Invisible, but not bit-exact yet.
+
+Other measurements:
+
+- **Timing**: every video / GIF / Lottie / preview frame shows the editor frame of the same index
+  (barcodes) at 12, 24→30, 30 and 60 fps; video frame times within 0.25 / fps of `i / fps` (no
+  drift), exact frame counts and durations; GIF frames start within 5 ms of `i / fps`.
+- **Audio**: click onsets at 0.50002 / 1.00002 / 1.50002 s in MP4 and WebM (0.02 ms; it was 7 ms
+  early in WebM by the old measurement, which ignored opus pre-skip: the file was right).
+- **Colour**: flat-colour error 0.33 (MP4) / 0.31 (WebM) decoded by ffmpeg, BT.709 / sRGB / tv tags.
+  Chromium's `<video>` (headless, SwiftShader) decodes limited-range saturated primaries a little
+  off (pure blue 255 → 243; flat error 1.8); with the old full-range stream it read 0.4, but full
+  range is what QuickTime-era and hardware players get wrong, so limited range stays.
+- **Performance**: `scripts/cpu-bench.mjs 10000,25000 --animated 0.1` on production builds, base vs
+  this branch, two alternating runs: frame 1.4 / 1.3 ms vs 1.3 / 1.3 ms at 10k layers, 3.3 / 3.2 vs
+  3.2 / 3.2 ms at 25k (unchanged: the render path only gained a branch in the clear and the raster
+  reuse checks, both outside per-instance loops).
+
 
 ## What was wrong, and what was fixed
 
@@ -66,6 +129,7 @@ RESULTS_TABLE
 | PNG / shaders | the PNG didn't wait for shader results (mean 24) | shaders settled per frame |
 | PNG sequence | didn't exist | zip of numbered PNGs (export dialog → Image → Sequence) |
 | all rasters | a frame's pixels depended on what was rendered before (raster scale hysteresis, also for trim / morph shapes) | exports always use the exact raster bucket |
+| renderer | text animators wrapped every word onto its own line after a load (`fontMetrics` left the shared measuring context at 1000 px) | context restored |
 | renderer | `darken` / `lighten` drew a black box around the layer (GPU MIN/MAX on the quad's transparent pixels) and were wrong for semi-transparent layers | both go through the blend shader |
 | video | colour conversion left to the browser, full-range ("yuvj420p") output that many players show crushed / washed out | rgb → BT.709 limited range 4:2:0 in `src/export/yuv.ts` (2×2 chroma average), frames tagged BT.709 / sRGB transfer / tv range: flat-colour error 0.3 against ffmpeg |
 | video | 0.5 Mbit/s floor: thin detail (shader stripes, text) smeared at small sizes | quality *high* = 0.3 bpp with a 3 Mbit/s floor |
@@ -83,7 +147,7 @@ RESULTS_TABLE
 | Lottie | image layers drawn at the asset size, not the layer box | per-size image assets with `pr: none` |
 | Lottie | linear gradients on non-square boxes bent | start / end chosen so lottie's isolines equal ours (exact); elliptical radials are preflighted |
 | Lottie | effects, angular / diamond / image / noise fills, shaders, inner / outside strokes, smooth corners, per-corner radii, text animators, styled / non-Inter text: silently dropped or approximated | **preflight + bake**, below |
-| audio | (measured fine: MP4 and WebM onsets within 0.1 ms) | exports now also wait for the music analysis `audio()` reads |
+| audio | (measured fine: onsets within 0.02 ms) | exports now also wait for the music analysis `audio()` reads |
 
 ## Lottie: preflight and bakes
 

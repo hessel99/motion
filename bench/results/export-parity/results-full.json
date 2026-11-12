@@ -1,0 +1,7889 @@
+{
+ "date": "2026-11-12T20:44:29.174Z",
+ "mode": "full",
+ "seconds": 712,
+ "summary": {
+  "png": {
+   "pass": 21,
+   "fail": 0,
+   "worstMean": 0.000006510416666666667
+  },
+  "pngseq": {
+   "pass": 20,
+   "fail": 1,
+   "worstMean": 0.0006770833333333334
+  },
+  "mp4": {
+   "pass": 21,
+   "fail": 0,
+   "worstMean": 1.4747526041666668
+  },
+  "mp4hq": {
+   "pass": 21,
+   "fail": 0,
+   "worstMean": 1.4747526041666668
+  },
+  "webm": {
+   "pass": 21,
+   "fail": 0,
+   "worstMean": 0.8386197916666667
+  },
+  "gif": {
+   "pass": 21,
+   "fail": 0,
+   "worstMean": 2.745904947916667
+  },
+  "lottie": {
+   "pass": 21,
+   "fail": 0,
+   "worstMean": 0.4676953125
+  },
+  "preview": {
+   "pass": 21,
+   "fail": 0,
+   "worstMean": 1.7653740776909723
+  },
+  "lottie-native": {
+   "pass": 0,
+   "fail": 5,
+   "worstMean": 78.93574869791667
+  }
+ },
+ "results": [
+  {
+   "scene": "timing",
+   "title": "Frame barcode (30 fps)",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/timing-png-editor.png",
+    "export": "img/timing-png-export.png",
+    "diff": "img/timing-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing",
+   "title": "Frame barcode (30 fps)",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 60 frames, expected 60"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/timing-pngseq-editor.png",
+    "export": "img/timing-pngseq-export.png",
+    "diff": "img/timing-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing",
+   "title": "Frame barcode (30 fps)",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.1198046875,
+    "max": 19,
+    "bad": 0,
+    "raw": 0.6212890625,
+    "colour": 0.6589454079851007,
+    "colourMax": 10,
+    "index": 0,
+    "expect": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/timing-mp4-editor.png",
+    "export": "img/timing-mp4-export.png",
+    "diff": "img/timing-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing",
+   "title": "Frame barcode (30 fps)",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.1198046875,
+    "max": 19,
+    "bad": 0,
+    "raw": 0.6212890625,
+    "colour": 0.6589454079851007,
+    "colourMax": 10,
+    "index": 0,
+    "expect": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/timing-mp4hq-editor.png",
+    "export": "img/timing-mp4hq-export.png",
+    "diff": "img/timing-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing",
+   "title": "Frame barcode (30 fps)",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 2,
+    "mean": 0.11282552083333333,
+    "max": 33,
+    "bad": 0.000078125,
+    "raw": 0.6280013020833334,
+    "colour": 0.6462912895262725,
+    "colourMax": 10,
+    "index": 2,
+    "expect": 2
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/timing-webm-editor.png",
+    "export": "img/timing-webm-export.png",
+    "diff": "img/timing-webm-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "timing",
+   "title": "Frame barcode (30 fps)",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.00203125,
+    "max": 5,
+    "bad": 0,
+    "index": 0,
+    "expect": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 2.000 s, expected 2.000 s"
+    }
+   ],
+   "info": {
+    "frames": 60,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/timing-gif-editor.png",
+    "export": "img/timing-gif-export.png",
+    "diff": "img/timing-gif-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing",
+   "title": "Frame barcode (30 fps)",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 31,
+    "mean": 0.0479296875,
+    "max": 59,
+    "bad": 0.0005989583333333333,
+    "index": 31,
+    "expect": 31
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 28328
+   },
+   "imgs": {
+    "editor": "img/timing-lottie-editor.png",
+    "export": "img/timing-lottie-export.png",
+    "diff": "img/timing-lottie-diff.png",
+    "frame": 31
+   }
+  },
+  {
+   "scene": "timing",
+   "title": "Frame barcode (30 fps)",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.5186409505208334,
+    "max": 30,
+    "bad": 0.000006510416666666667,
+    "raw": 0.7272298177083333,
+    "colour": 0.9730977439476793,
+    "colourMax": 8,
+    "index": 0,
+    "expect": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 2 s, expected 2.0000"
+    }
+   ],
+   "info": {
+    "bytes": 27993
+   },
+   "imgs": {
+    "editor": "img/timing-preview-editor.png",
+    "export": "img/timing-preview-export.png",
+    "diff": "img/timing-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-24to30",
+   "title": "Frame barcode, 24 fps comp exported at 30 fps",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/timing-24to30-png-editor.png",
+    "export": "img/timing-24to30-png-export.png",
+    "diff": "img/timing-24to30-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-24to30",
+   "title": "Frame barcode, 24 fps comp exported at 30 fps",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 48,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 48 frames, expected 48"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/timing-24to30-pngseq-editor.png",
+    "export": "img/timing-24to30-pngseq-export.png",
+    "diff": "img/timing-24to30-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-24to30",
+   "title": "Frame barcode, 24 fps comp exported at 30 fps",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.062135416666666665,
+    "max": 5,
+    "bad": 0,
+    "raw": 0.4780729166666667,
+    "colour": 0.6342243545807631,
+    "colourMax": 3,
+    "index": 0,
+    "expect": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/timing-24to30-mp4-editor.png",
+    "export": "img/timing-24to30-mp4-export.png",
+    "diff": "img/timing-24to30-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-24to30",
+   "title": "Frame barcode, 24 fps comp exported at 30 fps",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.062135416666666665,
+    "max": 5,
+    "bad": 0,
+    "raw": 0.4780729166666667,
+    "colour": 0.6342243545807631,
+    "colourMax": 3,
+    "index": 0,
+    "expect": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/timing-24to30-mp4hq-editor.png",
+    "export": "img/timing-24to30-mp4hq-export.png",
+    "diff": "img/timing-24to30-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-24to30",
+   "title": "Frame barcode, 24 fps comp exported at 30 fps",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 2,
+    "mean": 0.045390625,
+    "max": 13,
+    "bad": 0,
+    "raw": 0.47515625,
+    "colour": 0.6236916494766598,
+    "colourMax": 8,
+    "index": 1,
+    "expect": 1
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/timing-24to30-webm-editor.png",
+    "export": "img/timing-24to30-webm-export.png",
+    "diff": "img/timing-24to30-webm-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "timing-24to30",
+   "title": "Frame barcode, 24 fps comp exported at 30 fps",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.00203125,
+    "max": 5,
+    "bad": 0,
+    "index": 0,
+    "expect": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 2.000 s, expected 2.000 s"
+    }
+   ],
+   "info": {
+    "frames": 60,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/timing-24to30-gif-editor.png",
+    "export": "img/timing-24to30-gif-export.png",
+    "diff": "img/timing-24to30-gif-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-24to30",
+   "title": "Frame barcode, 24 fps comp exported at 30 fps",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 48,
+   "worst": {
+    "i": 31,
+    "mean": 0.02125,
+    "max": 59,
+    "bad": 0.00046875,
+    "index": 31,
+    "expect": 31
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 48 frames, expected 48"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 24, expected 24"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 23059
+   },
+   "imgs": {
+    "editor": "img/timing-24to30-lottie-editor.png",
+    "export": "img/timing-24to30-lottie-export.png",
+    "diff": "img/timing-24to30-lottie-diff.png",
+    "frame": 31
+   }
+  },
+  {
+   "scene": "timing-24to30",
+   "title": "Frame barcode, 24 fps comp exported at 30 fps",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 48,
+   "worst": {
+    "i": 0,
+    "mean": 0.44071126302083335,
+    "max": 5,
+    "bad": 0,
+    "raw": 0.6594612630208333,
+    "colour": 0.8870458135860979,
+    "colourMax": 2,
+    "index": 0,
+    "expect": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 2 s, expected 2.0000"
+    }
+   ],
+   "info": {
+    "bytes": 16795
+   },
+   "imgs": {
+    "editor": "img/timing-24to30-preview-editor.png",
+    "export": "img/timing-24to30-preview-export.png",
+    "diff": "img/timing-24to30-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-60",
+   "title": "Frame barcode (60 fps, odd size 211×117)",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 422x234, expected 422x234"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/timing-60-png-editor.png",
+    "export": "img/timing-60-png-export.png",
+    "diff": "img/timing-60-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-60",
+   "title": "Frame barcode (60 fps, odd size 211×117)",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 60 frames, expected 60"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/timing-60-pngseq-editor.png",
+    "export": "img/timing-60-pngseq-export.png",
+    "diff": "img/timing-60-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-60",
+   "title": "Frame barcode (60 fps, odd size 211×117)",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 2,
+    "mean": 0.2050487687879757,
+    "max": 30,
+    "bad": 0.00003997441637352095,
+    "raw": 0.6858210745123121,
+    "colour": 0.678314556680033,
+    "colourMax": 9,
+    "index": 2,
+    "expect": 2
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 212x118 vs 212x118"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/timing-60-mp4-editor.png",
+    "export": "img/timing-60-mp4-export.png",
+    "diff": "img/timing-60-mp4-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "timing-60",
+   "title": "Frame barcode (60 fps, odd size 211×117)",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 2,
+    "mean": 0.2050487687879757,
+    "max": 30,
+    "bad": 0.00003997441637352095,
+    "raw": 0.6858210745123121,
+    "colour": 0.678314556680033,
+    "colourMax": 9,
+    "index": 2,
+    "expect": 2
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 212x118 vs 212x118"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/timing-60-mp4hq-editor.png",
+    "export": "img/timing-60-mp4hq-export.png",
+    "diff": "img/timing-60-mp4hq-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "timing-60",
+   "title": "Frame barcode (60 fps, odd size 211×117)",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 5,
+    "mean": 0.15381156060121523,
+    "max": 22,
+    "bad": 0,
+    "raw": 0.665843859929645,
+    "colour": 0.6692136262336835,
+    "colourMax": 10,
+    "index": 5,
+    "expect": 5
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 212x118 vs 212x118"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/timing-60-webm-editor.png",
+    "export": "img/timing-60-webm-export.png",
+    "diff": "img/timing-60-webm-diff.png",
+    "frame": 5
+   }
+  },
+  {
+   "scene": "timing-60",
+   "title": "Frame barcode (60 fps, odd size 211×117)",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 50,
+   "worst": {
+    "i": 8,
+    "mean": 0.008445740673228825,
+    "max": 11,
+    "bad": 0,
+    "index": 9,
+    "expect": 9
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 211x117"
+    },
+    {
+     "ok": true,
+     "msg": "50 frames, expected 50"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 0.0 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.000 s, expected 1.000 s"
+    }
+   ],
+   "info": {
+    "frames": 50,
+    "fps": 50
+   },
+   "imgs": {
+    "editor": "img/timing-60-gif-editor.png",
+    "export": "img/timing-60-gif-export.png",
+    "diff": "img/timing-60-gif-diff.png",
+    "frame": 8
+   }
+  },
+  {
+   "scene": "timing-60",
+   "title": "Frame barcode (60 fps, odd size 211×117)",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 16,
+    "mean": 0.06996597399441001,
+    "max": 57,
+    "bad": 0.0025114432697371084,
+    "index": 16,
+    "expect": 16
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 60, expected 60"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 28441
+   },
+   "imgs": {
+    "editor": "img/timing-60-lottie-editor.png",
+    "export": "img/timing-60-lottie-export.png",
+    "diff": "img/timing-60-lottie-diff.png",
+    "frame": 16
+   }
+  },
+  {
+   "scene": "timing-60",
+   "title": "Frame barcode (60 fps, odd size 211×117)",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.21156631020375097,
+    "max": 46,
+    "bad": 0.0006886215417021104,
+    "raw": 0.6549575687608863,
+    "colour": 0.7517799068295684,
+    "colourMax": 18,
+    "index": 0,
+    "expect": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 422x234, expected 2x the comp (422x234)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1 s, expected 1.0000"
+    }
+   ],
+   "info": {
+    "bytes": 82363
+   },
+   "imgs": {
+    "editor": "img/timing-60-preview-editor.png",
+    "export": "img/timing-60-preview-export.png",
+    "diff": "img/timing-60-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-12",
+   "title": "Frame barcode (12 fps, 3 s)",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 320x192, expected 320x192"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/timing-12-png-editor.png",
+    "export": "img/timing-12-png-export.png",
+    "diff": "img/timing-12-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-12",
+   "title": "Frame barcode (12 fps, 3 s)",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 36,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 36 frames, expected 36"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/timing-12-pngseq-editor.png",
+    "export": "img/timing-12-pngseq-export.png",
+    "diff": "img/timing-12-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-12",
+   "title": "Frame barcode (12 fps, 3 s)",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 36,
+   "worst": {
+    "i": 2,
+    "mean": 0.054524739583333336,
+    "max": 6,
+    "bad": 0,
+    "raw": 0.4815592447916667,
+    "colour": 0.6428280358598207,
+    "colourMax": 3,
+    "index": 2,
+    "expect": 2
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 160x96 vs 160x96"
+    },
+    {
+     "ok": true,
+     "msg": "36 frames, expected 36"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 3.0000 s, expected 3.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 36,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/timing-12-mp4-editor.png",
+    "export": "img/timing-12-mp4-export.png",
+    "diff": "img/timing-12-mp4-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "timing-12",
+   "title": "Frame barcode (12 fps, 3 s)",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 36,
+   "worst": {
+    "i": 2,
+    "mean": 0.054524739583333336,
+    "max": 6,
+    "bad": 0,
+    "raw": 0.4815592447916667,
+    "colour": 0.6428280358598207,
+    "colourMax": 3,
+    "index": 2,
+    "expect": 2
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 160x96 vs 160x96"
+    },
+    {
+     "ok": true,
+     "msg": "36 frames, expected 36"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 3.0000 s, expected 3.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 36,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/timing-12-mp4hq-editor.png",
+    "export": "img/timing-12-mp4hq-export.png",
+    "diff": "img/timing-12-mp4hq-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "timing-12",
+   "title": "Frame barcode (12 fps, 3 s)",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 36,
+   "worst": {
+    "i": 2,
+    "mean": 0.06673177083333333,
+    "max": 13,
+    "bad": 0,
+    "raw": 0.490380859375,
+    "colour": 0.6432355338223309,
+    "colourMax": 8,
+    "index": 2,
+    "expect": 2
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 160x96 vs 160x96"
+    },
+    {
+     "ok": true,
+     "msg": "36 frames, expected 36"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 3.0000 s, expected 3.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 36,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/timing-12-webm-editor.png",
+    "export": "img/timing-12-webm-export.png",
+    "diff": "img/timing-12-webm-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "timing-12",
+   "title": "Frame barcode (12 fps, 3 s)",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 36,
+   "worst": {
+    "i": 0,
+    "mean": 0.005078125,
+    "max": 5,
+    "bad": 0,
+    "index": 0,
+    "expect": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 160x96"
+    },
+    {
+     "ok": true,
+     "msg": "36 frames, expected 36"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 3.000 s, expected 3.000 s"
+    }
+   ],
+   "info": {
+    "frames": 36,
+    "fps": 12
+   },
+   "imgs": {
+    "editor": "img/timing-12-gif-editor.png",
+    "export": "img/timing-12-gif-export.png",
+    "diff": "img/timing-12-gif-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "timing-12",
+   "title": "Frame barcode (12 fps, 3 s)",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 36,
+   "worst": {
+    "i": 31,
+    "mean": 0.053125,
+    "max": 59,
+    "bad": 0.001171875,
+    "index": 31,
+    "expect": 31
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 36 frames, expected 36"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 12, expected 12"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 18771
+   },
+   "imgs": {
+    "editor": "img/timing-12-lottie-editor.png",
+    "export": "img/timing-12-lottie-export.png",
+    "diff": "img/timing-12-lottie-diff.png",
+    "frame": 31
+   }
+  },
+  {
+   "scene": "timing-12",
+   "title": "Frame barcode (12 fps, 3 s)",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 36,
+   "worst": {
+    "i": 2,
+    "mean": 0.03197835286458333,
+    "max": 7,
+    "bad": 0,
+    "raw": 0.45854085286458335,
+    "colour": 0.6157472558401351,
+    "colourMax": 3,
+    "index": 2,
+    "expect": 2
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 320x192, expected 2x the comp (320x192)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 3 s, expected 3.0000"
+    }
+   ],
+   "info": {
+    "bytes": 11442
+   },
+   "imgs": {
+    "editor": "img/timing-12-preview-editor.png",
+    "export": "img/timing-12-preview-export.png",
+    "diff": "img/timing-12-preview-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "colour",
+   "title": "Colour chart (flat patches)",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 512x320, expected 512x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/colour-png-editor.png",
+    "export": "img/colour-png-export.png",
+    "diff": "img/colour-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "colour",
+   "title": "Colour chart (flat patches)",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 15 frames, expected 15"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/colour-pngseq-editor.png",
+    "export": "img/colour-pngseq-export.png",
+    "diff": "img/colour-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "colour",
+   "title": "Colour chart (flat patches)",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 0.149017333984375,
+    "max": 32,
+    "bad": 0.00009765625,
+    "raw": 1.34014892578125,
+    "colour": 0.32872152710940006,
+    "colourMax": 5
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 256x160 vs 256x160"
+    },
+    {
+     "ok": true,
+     "msg": "15 frames, expected 15"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 0.5000 s, expected 0.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 15,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/colour-mp4-editor.png",
+    "export": "img/colour-mp4-export.png",
+    "diff": "img/colour-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "colour",
+   "title": "Colour chart (flat patches)",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 0.149017333984375,
+    "max": 32,
+    "bad": 0.00009765625,
+    "raw": 1.34014892578125,
+    "colour": 0.32872152710940006,
+    "colourMax": 5
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 256x160 vs 256x160"
+    },
+    {
+     "ok": true,
+     "msg": "15 frames, expected 15"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 0.5000 s, expected 0.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 15,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/colour-mp4hq-editor.png",
+    "export": "img/colour-mp4hq-export.png",
+    "diff": "img/colour-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "colour",
+   "title": "Colour chart (flat patches)",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 3,
+    "mean": 0.139849853515625,
+    "max": 32,
+    "bad": 0.0000732421875,
+    "raw": 1.33878173828125,
+    "colour": 0.31043471286493424,
+    "colourMax": 9
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 256x160 vs 256x160"
+    },
+    {
+     "ok": true,
+     "msg": "15 frames, expected 15"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 0.5000 s, expected 0.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 15,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/colour-webm-editor.png",
+    "export": "img/colour-webm-export.png",
+    "diff": "img/colour-webm-diff.png",
+    "frame": 3
+   }
+  },
+  {
+   "scene": "colour",
+   "title": "Colour chart (flat patches)",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 256x160"
+    },
+    {
+     "ok": true,
+     "msg": "15 frames, expected 15"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 0.500 s, expected 0.500 s"
+    }
+   ],
+   "info": {
+    "frames": 15,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/colour-gif-editor.png",
+    "export": "img/colour-gif-export.png",
+    "diff": "img/colour-gif-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "colour",
+   "title": "Colour chart (flat patches)",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 0.1943115234375,
+    "max": 32,
+    "bad": 0.00087890625
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 15 frames, expected 15"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 9979
+   },
+   "imgs": {
+    "editor": "img/colour-lottie-editor.png",
+    "export": "img/colour-lottie-export.png",
+    "diff": "img/colour-lottie-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "colour",
+   "title": "Colour chart (flat patches)",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 1.2613967895507812,
+    "max": 32,
+    "bad": 0.0000732421875,
+    "raw": 1.38087158203125,
+    "colour": 1.8344044790091452,
+    "colourMax": 16
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 512x320, expected 2x the comp (512x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 0.5 s, expected 0.5000"
+    }
+   ],
+   "info": {
+    "bytes": 5969
+   },
+   "imgs": {
+    "editor": "img/colour-preview-editor.png",
+    "export": "img/colour-preview-export.png",
+    "diff": "img/colour-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "shapes",
+   "title": "Rect / ellipse / path / strokes, animated transforms",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/shapes-png-editor.png",
+    "export": "img/shapes-png-export.png",
+    "diff": "img/shapes-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "shapes",
+   "title": "Rect / ellipse / path / strokes, animated transforms",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 45 frames, expected 45"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/shapes-pngseq-editor.png",
+    "export": "img/shapes-pngseq-export.png",
+    "diff": "img/shapes-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "shapes",
+   "title": "Rect / ellipse / path / strokes, animated transforms",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.5159375,
+    "max": 28,
+    "bad": 0.00018229166666666667,
+    "raw": 1.1793229166666668,
+    "colour": 0.7812657071053233,
+    "colourMax": 15
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/shapes-mp4-editor.png",
+    "export": "img/shapes-mp4-export.png",
+    "diff": "img/shapes-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "shapes",
+   "title": "Rect / ellipse / path / strokes, animated transforms",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.5159375,
+    "max": 28,
+    "bad": 0.00018229166666666667,
+    "raw": 1.1793229166666668,
+    "colour": 0.7812657071053233,
+    "colourMax": 15
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/shapes-mp4hq-editor.png",
+    "export": "img/shapes-mp4hq-export.png",
+    "diff": "img/shapes-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "shapes",
+   "title": "Rect / ellipse / path / strokes, animated transforms",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 7,
+    "mean": 0.3053255208333333,
+    "max": 24,
+    "bad": 0,
+    "raw": 1.02390625,
+    "colour": 0.6483070393947781,
+    "colourMax": 10
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/shapes-webm-editor.png",
+    "export": "img/shapes-webm-export.png",
+    "diff": "img/shapes-webm-diff.png",
+    "frame": 7
+   }
+  },
+  {
+   "scene": "shapes",
+   "title": "Rect / ellipse / path / strokes, animated transforms",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 31,
+    "mean": 0.5469140625,
+    "max": 11,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.500 s, expected 1.500 s"
+    }
+   ],
+   "info": {
+    "frames": 45,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/shapes-gif-editor.png",
+    "export": "img/shapes-gif-export.png",
+    "diff": "img/shapes-gif-diff.png",
+    "frame": 31
+   }
+  },
+  {
+   "scene": "shapes",
+   "title": "Rect / ellipse / path / strokes, animated transforms",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 22,
+    "mean": 0.3924739583333333,
+    "max": 62,
+    "bad": 0.005989583333333334
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 4053
+   },
+   "imgs": {
+    "editor": "img/shapes-lottie-editor.png",
+    "export": "img/shapes-lottie-export.png",
+    "diff": "img/shapes-lottie-diff.png",
+    "frame": 22
+   }
+  },
+  {
+   "scene": "shapes",
+   "title": "Rect / ellipse / path / strokes, animated transforms",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.8328694661458333,
+    "max": 73,
+    "bad": 0.005787760416666667,
+    "raw": 1.2206429036458333,
+    "colour": 1.1815367606412384,
+    "colourMax": 26
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1.5 s, expected 1.5000"
+    }
+   ],
+   "info": {
+    "bytes": 223221
+   },
+   "imgs": {
+    "editor": "img/shapes-preview-editor.png",
+    "export": "img/shapes-preview-export.png",
+    "diff": "img/shapes-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "paints",
+   "title": "Linear / radial / angular / diamond gradients, image fill, noise",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/paints-png-editor.png",
+    "export": "img/paints-png-export.png",
+    "diff": "img/paints-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "paints",
+   "title": "Linear / radial / angular / diamond gradients, image fill, noise",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 45 frames, expected 45"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/paints-pngseq-editor.png",
+    "export": "img/paints-pngseq-export.png",
+    "diff": "img/paints-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "paints",
+   "title": "Linear / radial / angular / diamond gradients, image fill, noise",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 1.4747526041666668,
+    "max": 50,
+    "bad": 0.00036458333333333335,
+    "raw": 3.3024609375,
+    "colour": 1.4636930837647684,
+    "colourMax": 12
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/paints-mp4-editor.png",
+    "export": "img/paints-mp4-export.png",
+    "diff": "img/paints-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "paints",
+   "title": "Linear / radial / angular / diamond gradients, image fill, noise",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 1.4747526041666668,
+    "max": 50,
+    "bad": 0.00036458333333333335,
+    "raw": 3.3024609375,
+    "colour": 1.4636930837647684,
+    "colourMax": 12
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/paints-mp4hq-editor.png",
+    "export": "img/paints-mp4hq-export.png",
+    "diff": "img/paints-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "paints",
+   "title": "Linear / radial / angular / diamond gradients, image fill, noise",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.8240104166666666,
+    "max": 21,
+    "bad": 0,
+    "raw": 2.7282486979166665,
+    "colour": 0.9924332935085624,
+    "colourMax": 10
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/paints-webm-editor.png",
+    "export": "img/paints-webm-export.png",
+    "diff": "img/paints-webm-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "paints",
+   "title": "Linear / radial / angular / diamond gradients, image fill, noise",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.5788671875,
+    "max": 16,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.500 s, expected 1.500 s"
+    }
+   ],
+   "info": {
+    "frames": 45,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/paints-gif-editor.png",
+    "export": "img/paints-gif-export.png",
+    "diff": "img/paints-gif-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "paints",
+   "title": "Linear / radial / angular / diamond gradients, image fill, noise",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.1266015625,
+    "max": 60,
+    "bad": 0.00036458333333333335
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "paint:l_kxnb1s",
+      "layerId": "l_kxnb1s",
+      "layer": "radial",
+      "feature": "paint",
+      "message": "elliptical radial gradient: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     },
+     {
+      "id": "paint:l_kxnb1t",
+      "layerId": "l_kxnb1t",
+      "layer": "angular",
+      "feature": "paint",
+      "message": "angular fill: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     },
+     {
+      "id": "paint:l_kxnb1u",
+      "layerId": "l_kxnb1u",
+      "layer": "diamond",
+      "feature": "paint",
+      "message": "diamond fill: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     },
+     {
+      "id": "paint:l_kxnb1w",
+      "layerId": "l_kxnb1w",
+      "layer": "image fill",
+      "feature": "paint",
+      "message": "image fill: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     },
+     {
+      "id": "paint:l_kxnb1x",
+      "layerId": "l_kxnb1x",
+      "layer": "noise",
+      "feature": "paint",
+      "message": "2 stacked fills: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     }
+    ],
+    "bytes": 37555
+   },
+   "imgs": {
+    "editor": "img/paints-lottie-editor.png",
+    "export": "img/paints-lottie-export.png",
+    "diff": "img/paints-lottie-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "paints",
+   "title": "Linear / radial / angular / diamond gradients, image fill, noise",
+   "path": "lottie-native",
+   "ok": false,
+   "error": null,
+   "fails": [
+    "frame 0: mean 24.89 > 2.5",
+    "frame 1: mean 24.89 > 2.5",
+    "frame 2: mean 24.89 > 2.5",
+    "frame 3: mean 24.89 > 2.5",
+    "frame 4: mean 24.89 > 2.5",
+    "frame 5: mean 24.89 > 2.5",
+    "frame 6: mean 24.89 > 2.5",
+    "frame 7: mean 24.89 > 2.5",
+    "frame 8: mean 24.89 > 2.5",
+    "frame 9: mean 24.89 > 2.5",
+    "frame 10: mean 24.89 > 2.5",
+    "frame 11: mean 24.89 > 2.5",
+    "frame 12: mean 24.89 > 2.5",
+    "frame 13: mean 24.89 > 2.5",
+    "frame 14: mean 24.89 > 2.5",
+    "frame 15: mean 24.89 > 2.5",
+    "frame 16: mean 24.89 > 2.5",
+    "frame 17: mean 24.89 > 2.5",
+    "frame 18: mean 24.89 > 2.5",
+    "frame 19: mean 24.89 > 2.5",
+    "frame 20: mean 24.89 > 2.5",
+    "frame 21: mean 24.89 > 2.5",
+    "frame 22: mean 24.89 > 2.5",
+    "frame 23: mean 24.89 > 2.5",
+    "frame 24: mean 24.89 > 2.5",
+    "frame 25: mean 24.89 > 2.5",
+    "frame 26: mean 24.89 > 2.5",
+    "frame 27: mean 24.89 > 2.5",
+    "frame 28: mean 24.89 > 2.5",
+    "frame 29: mean 24.89 > 2.5",
+    "frame 30: mean 24.89 > 2.5",
+    "frame 31: mean 24.89 > 2.5",
+    "frame 32: mean 24.89 > 2.5",
+    "frame 33: mean 24.89 > 2.5",
+    "frame 34: mean 24.89 > 2.5",
+    "frame 35: mean 24.89 > 2.5",
+    "frame 36: mean 24.89 > 2.5",
+    "frame 37: mean 24.89 > 2.5",
+    "frame 38: mean 24.89 > 2.5",
+    "frame 39: mean 24.89 > 2.5",
+    "frame 40: mean 24.89 > 2.5",
+    "frame 41: mean 24.89 > 2.5",
+    "frame 42: mean 24.89 > 2.5",
+    "frame 43: mean 24.89 > 2.5",
+    "frame 44: mean 24.89 > 2.5"
+   ],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 24.887532552083332,
+    "max": 239,
+    "bad": 0.43111979166666664
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "paint:l_kxnb1s",
+      "layerId": "l_kxnb1s",
+      "layer": "radial",
+      "feature": "paint",
+      "message": "elliptical radial gradient: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     },
+     {
+      "id": "paint:l_kxnb1t",
+      "layerId": "l_kxnb1t",
+      "layer": "angular",
+      "feature": "paint",
+      "message": "angular fill: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     },
+     {
+      "id": "paint:l_kxnb1u",
+      "layerId": "l_kxnb1u",
+      "layer": "diamond",
+      "feature": "paint",
+      "message": "diamond fill: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     },
+     {
+      "id": "paint:l_kxnb1w",
+      "layerId": "l_kxnb1w",
+      "layer": "image fill",
+      "feature": "paint",
+      "message": "image fill: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     },
+     {
+      "id": "paint:l_kxnb1x",
+      "layerId": "l_kxnb1x",
+      "layer": "noise",
+      "feature": "paint",
+      "message": "2 stacked fills: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     }
+    ],
+    "bytes": 4111
+   },
+   "imgs": {
+    "editor": "img/paints-lottie-native-editor.png",
+    "export": "img/paints-lottie-native-export.png",
+    "diff": "img/paints-lottie-native-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "paints",
+   "title": "Linear / radial / angular / diamond gradients, image fill, noise",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 1.4518375651041666,
+    "max": 72,
+    "bad": 0.00080078125,
+    "raw": 1.771240234375,
+    "colour": 1.4227990112188629,
+    "colourMax": 20
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1.5 s, expected 1.5000"
+    }
+   ],
+   "info": {
+    "bytes": 18421
+   },
+   "imgs": {
+    "editor": "img/paints-preview-editor.png",
+    "export": "img/paints-preview-export.png",
+    "diff": "img/paints-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "images",
+   "title": "Image layer, scaled / rotated / faded",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/images-png-editor.png",
+    "export": "img/images-png-export.png",
+    "diff": "img/images-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "images",
+   "title": "Image layer, scaled / rotated / faded",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 45 frames, expected 45"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/images-pngseq-editor.png",
+    "export": "img/images-pngseq-export.png",
+    "diff": "img/images-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "images",
+   "title": "Image layer, scaled / rotated / faded",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.82919921875,
+    "max": 32,
+    "bad": 0.0003125,
+    "raw": 2.29017578125,
+    "colour": 0.7561623056503602,
+    "colourMax": 21
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/images-mp4-editor.png",
+    "export": "img/images-mp4-export.png",
+    "diff": "img/images-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "images",
+   "title": "Image layer, scaled / rotated / faded",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.82919921875,
+    "max": 32,
+    "bad": 0.0003125,
+    "raw": 2.29017578125,
+    "colour": 0.7561623056503602,
+    "colourMax": 21
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/images-mp4hq-editor.png",
+    "export": "img/images-mp4hq-export.png",
+    "diff": "img/images-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "images",
+   "title": "Image layer, scaled / rotated / faded",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 3,
+    "mean": 0.57298828125,
+    "max": 24,
+    "bad": 0,
+    "raw": 2.1055208333333333,
+    "colour": 0.6906431794704507,
+    "colourMax": 8
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/images-webm-editor.png",
+    "export": "img/images-webm-export.png",
+    "diff": "img/images-webm-diff.png",
+    "frame": 3
+   }
+  },
+  {
+   "scene": "images",
+   "title": "Image layer, scaled / rotated / faded",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 39,
+    "mean": 2.745904947916667,
+    "max": 30,
+    "bad": 0.0009114583333333333
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.500 s, expected 1.500 s"
+    }
+   ],
+   "info": {
+    "frames": 45,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/images-gif-editor.png",
+    "export": "img/images-gif-export.png",
+    "diff": "img/images-gif-diff.png",
+    "frame": 39
+   }
+  },
+  {
+   "scene": "images",
+   "title": "Image layer, scaled / rotated / faded",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 36,
+    "mean": 0.12825520833333334,
+    "max": 7,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 34879
+   },
+   "imgs": {
+    "editor": "img/images-lottie-editor.png",
+    "export": "img/images-lottie-export.png",
+    "diff": "img/images-lottie-diff.png",
+    "frame": 36
+   }
+  },
+  {
+   "scene": "images",
+   "title": "Image layer, scaled / rotated / faded",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 44,
+    "mean": 1.4281526692708333,
+    "max": 35,
+    "bad": 0.007174479166666667,
+    "raw": 1.9573551432291667,
+    "colour": 0.795632446661125,
+    "colourMax": 18
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1.5 s, expected 1.5000"
+    }
+   ],
+   "info": {
+    "bytes": 425133
+   },
+   "imgs": {
+    "editor": "img/images-preview-editor.png",
+    "export": "img/images-preview-export.png",
+    "diff": "img/images-preview-diff.png",
+    "frame": 44
+   }
+  },
+  {
+   "scene": "effects",
+   "title": "Drop / inner shadow, layer blur, background blur, noise effect",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/effects-png-editor.png",
+    "export": "img/effects-png-export.png",
+    "diff": "img/effects-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "effects",
+   "title": "Drop / inner shadow, layer blur, background blur, noise effect",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 30 frames, expected 30"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/effects-pngseq-editor.png",
+    "export": "img/effects-pngseq-export.png",
+    "diff": "img/effects-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "effects",
+   "title": "Drop / inner shadow, layer blur, background blur, noise effect",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 0.9667643229166667,
+    "max": 29,
+    "bad": 0.00018229166666666667,
+    "raw": 1.9738151041666667,
+    "colour": 0.7317236753856472,
+    "colourMax": 19
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/effects-mp4-editor.png",
+    "export": "img/effects-mp4-export.png",
+    "diff": "img/effects-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "effects",
+   "title": "Drop / inner shadow, layer blur, background blur, noise effect",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 0.9667643229166667,
+    "max": 29,
+    "bad": 0.00018229166666666667,
+    "raw": 1.9738151041666667,
+    "colour": 0.7317236753856472,
+    "colourMax": 19
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/effects-mp4hq-editor.png",
+    "export": "img/effects-mp4hq-export.png",
+    "diff": "img/effects-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "effects",
+   "title": "Drop / inner shadow, layer blur, background blur, noise effect",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 5,
+    "mean": 0.5617057291666666,
+    "max": 22,
+    "bad": 0,
+    "raw": 1.6502994791666667,
+    "colour": 0.5725298347046179,
+    "colourMax": 13
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/effects-webm-editor.png",
+    "export": "img/effects-webm-export.png",
+    "diff": "img/effects-webm-diff.png",
+    "frame": 5
+   }
+  },
+  {
+   "scene": "effects",
+   "title": "Drop / inner shadow, layer blur, background blur, noise effect",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 23,
+    "mean": 0.6358268229166667,
+    "max": 11,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.000 s, expected 1.000 s"
+    }
+   ],
+   "info": {
+    "frames": 30,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/effects-gif-editor.png",
+    "export": "img/effects-gif-export.png",
+    "diff": "img/effects-gif-diff.png",
+    "frame": 23
+   }
+  },
+  {
+   "scene": "effects",
+   "title": "Drop / inner shadow, layer blur, background blur, noise effect",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 21,
+    "mean": 0.4676953125,
+    "max": 52,
+    "bad": 0.009140625
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "reported before export (excluded): background blur (background-blur)"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "effects:l_kxnb2a",
+      "layerId": "l_kxnb2a",
+      "layer": "drop shadow",
+      "feature": "effects",
+      "message": "Drop shadow: Lottie players draw no shadows, blurs or noise",
+      "bakeable": true
+     },
+     {
+      "id": "effects:l_kxnb2b",
+      "layerId": "l_kxnb2b",
+      "layer": "inner shadow",
+      "feature": "effects",
+      "message": "Inner shadow: Lottie players draw no shadows, blurs or noise",
+      "bakeable": true
+     },
+     {
+      "id": "effects:l_kxnb2c",
+      "layerId": "l_kxnb2c",
+      "layer": "layer blur",
+      "feature": "effects",
+      "message": "Layer blur: Lottie players draw no shadows, blurs or noise",
+      "bakeable": true
+     },
+     {
+      "id": "background-blur:l_kxnb2d",
+      "layerId": "l_kxnb2d",
+      "layer": "background blur",
+      "feature": "background-blur",
+      "message": "Background blur needs what is behind the layer: Lottie can't show it (baking would freeze the backdrop)",
+      "bakeable": false
+     },
+     {
+      "id": "effects:l_kxnb2e",
+      "layerId": "l_kxnb2e",
+      "layer": "noise effect",
+      "feature": "effects",
+      "message": "Noise: Lottie players draw no shadows, blurs or noise",
+      "bakeable": true
+     }
+    ],
+    "bytes": 103074
+   },
+   "imgs": {
+    "editor": "img/effects-lottie-editor.png",
+    "export": "img/effects-lottie-export.png",
+    "diff": "img/effects-lottie-diff.png",
+    "frame": 21
+   }
+  },
+  {
+   "scene": "effects",
+   "title": "Drop / inner shadow, layer blur, background blur, noise effect",
+   "path": "lottie-native",
+   "ok": false,
+   "error": null,
+   "fails": [
+    "frame 0: mean 2.83 > 2.5",
+    "frame 1: mean 2.83 > 2.5",
+    "frame 2: mean 2.83 > 2.5",
+    "frame 3: mean 2.83 > 2.5",
+    "frame 4: mean 2.83 > 2.5",
+    "frame 5: mean 2.82 > 2.5",
+    "frame 6: mean 2.81 > 2.5",
+    "frame 7: mean 2.80 > 2.5",
+    "frame 8: mean 2.79 > 2.5",
+    "frame 9: mean 2.79 > 2.5",
+    "frame 10: mean 2.79 > 2.5",
+    "frame 11: mean 2.83 > 2.5",
+    "frame 12: mean 2.86 > 2.5",
+    "frame 13: mean 2.89 > 2.5",
+    "frame 14: mean 2.89 > 2.5",
+    "frame 15: mean 2.93 > 2.5",
+    "frame 16: mean 2.96 > 2.5",
+    "frame 17: mean 2.97 > 2.5",
+    "frame 18: mean 3.01 > 2.5",
+    "frame 19: mean 3.09 > 2.5",
+    "frame 20: mean 3.16 > 2.5",
+    "frame 21: mean 3.18 > 2.5",
+    "frame 22: mean 3.18 > 2.5",
+    "frame 23: mean 3.19 > 2.5",
+    "frame 24: mean 3.22 > 2.5",
+    "frame 25: mean 3.26 > 2.5",
+    "frame 26: mean 3.31 > 2.5",
+    "frame 27: mean 3.33 > 2.5",
+    "frame 28: mean 3.34 > 2.5",
+    "frame 29: mean 3.35 > 2.5"
+   ],
+   "frames": 30,
+   "worst": {
+    "i": 29,
+    "mean": 3.3509375,
+    "max": 122,
+    "bad": 0.09981770833333334
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "reported before export (excluded): background blur (background-blur)"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "effects:l_kxnb2a",
+      "layerId": "l_kxnb2a",
+      "layer": "drop shadow",
+      "feature": "effects",
+      "message": "Drop shadow: Lottie players draw no shadows, blurs or noise",
+      "bakeable": true
+     },
+     {
+      "id": "effects:l_kxnb2b",
+      "layerId": "l_kxnb2b",
+      "layer": "inner shadow",
+      "feature": "effects",
+      "message": "Inner shadow: Lottie players draw no shadows, blurs or noise",
+      "bakeable": true
+     },
+     {
+      "id": "effects:l_kxnb2c",
+      "layerId": "l_kxnb2c",
+      "layer": "layer blur",
+      "feature": "effects",
+      "message": "Layer blur: Lottie players draw no shadows, blurs or noise",
+      "bakeable": true
+     },
+     {
+      "id": "background-blur:l_kxnb2d",
+      "layerId": "l_kxnb2d",
+      "layer": "background blur",
+      "feature": "background-blur",
+      "message": "Background blur needs what is behind the layer: Lottie can't show it (baking would freeze the backdrop)",
+      "bakeable": false
+     },
+     {
+      "id": "effects:l_kxnb2e",
+      "layerId": "l_kxnb2e",
+      "layer": "noise effect",
+      "feature": "effects",
+      "message": "Noise: Lottie players draw no shadows, blurs or noise",
+      "bakeable": true
+     }
+    ],
+    "bytes": 3952
+   },
+   "imgs": {
+    "editor": "img/effects-lottie-native-editor.png",
+    "export": "img/effects-lottie-native-export.png",
+    "diff": "img/effects-lottie-native-diff.png",
+    "frame": 29
+   }
+  },
+  {
+   "scene": "effects",
+   "title": "Drop / inner shadow, layer blur, background blur, noise effect",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 1.350146484375,
+    "max": 71,
+    "bad": 0.0018359375,
+    "raw": 1.5339371744791668,
+    "colour": 1.1551106111736034,
+    "colourMax": 20
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1 s, expected 1.0000"
+    }
+   ],
+   "info": {
+    "bytes": 21711
+   },
+   "imgs": {
+    "editor": "img/effects-preview-editor.png",
+    "export": "img/effects-preview-export.png",
+    "diff": "img/effects-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "shaders",
+   "title": "Shader fill (animated) + shader effect (test shaders)",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/shaders-png-editor.png",
+    "export": "img/shaders-png-export.png",
+    "diff": "img/shaders-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "shaders",
+   "title": "Shader fill (animated) + shader effect (test shaders)",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 30 frames, expected 30"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/shaders-pngseq-editor.png",
+    "export": "img/shaders-pngseq-export.png",
+    "diff": "img/shaders-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "shaders",
+   "title": "Shader fill (animated) + shader effect (test shaders)",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 1.1150716145833333,
+    "max": 40,
+    "bad": 0.002421875,
+    "raw": 3.4150846354166666,
+    "colour": 1.088484634404804,
+    "colourMax": 20
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/shaders-mp4-editor.png",
+    "export": "img/shaders-mp4-export.png",
+    "diff": "img/shaders-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "shaders",
+   "title": "Shader fill (animated) + shader effect (test shaders)",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 1.1150716145833333,
+    "max": 40,
+    "bad": 0.002421875,
+    "raw": 3.4150846354166666,
+    "colour": 1.088484634404804,
+    "colourMax": 20
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/shaders-mp4hq-editor.png",
+    "export": "img/shaders-mp4hq-export.png",
+    "diff": "img/shaders-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "shaders",
+   "title": "Shader fill (animated) + shader effect (test shaders)",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 2,
+    "mean": 0.8386197916666667,
+    "max": 39,
+    "bad": 0.0005989583333333333,
+    "raw": 3.1634375,
+    "colour": 0.835357624831309,
+    "colourMax": 18
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/shaders-webm-editor.png",
+    "export": "img/shaders-webm-export.png",
+    "diff": "img/shaders-webm-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "shaders",
+   "title": "Shader fill (animated) + shader effect (test shaders)",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 0.00431640625,
+    "max": 8,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.000 s, expected 1.000 s"
+    }
+   ],
+   "info": {
+    "frames": 30,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/shaders-gif-editor.png",
+    "export": "img/shaders-gif-export.png",
+    "diff": "img/shaders-gif-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "shaders",
+   "title": "Shader fill (animated) + shader effect (test shaders)",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 25,
+    "mean": 0.005651041666666667,
+    "max": 60,
+    "bad": 0.000078125
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "shader:l_kxnb2l",
+      "layerId": "l_kxnb2l",
+      "layer": "shader fill",
+      "feature": "shader",
+      "message": "shader fill: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     },
+     {
+      "id": "shader:l_kxnb2m",
+      "layerId": "l_kxnb2m",
+      "layer": "shader effect",
+      "feature": "shader",
+      "message": "Shader effects only run in Motion",
+      "bakeable": true
+     }
+    ],
+    "bytes": 85276
+   },
+   "imgs": {
+    "editor": "img/shaders-lottie-editor.png",
+    "export": "img/shaders-lottie-export.png",
+    "diff": "img/shaders-lottie-diff.png",
+    "frame": 25
+   }
+  },
+  {
+   "scene": "shaders",
+   "title": "Shader fill (animated) + shader effect (test shaders)",
+   "path": "lottie-native",
+   "ok": false,
+   "error": null,
+   "fails": [
+    "frame 0: mean 56.84 > 2.5",
+    "frame 1: mean 56.84 > 2.5",
+    "frame 2: mean 56.84 > 2.5",
+    "frame 3: mean 56.84 > 2.5",
+    "frame 4: mean 56.84 > 2.5",
+    "frame 5: mean 56.84 > 2.5",
+    "frame 6: mean 56.84 > 2.5",
+    "frame 7: mean 56.84 > 2.5",
+    "frame 8: mean 56.84 > 2.5",
+    "frame 9: mean 56.84 > 2.5",
+    "frame 10: mean 56.84 > 2.5",
+    "frame 11: mean 56.84 > 2.5",
+    "frame 12: mean 56.84 > 2.5",
+    "frame 13: mean 56.84 > 2.5",
+    "frame 14: mean 56.84 > 2.5",
+    "frame 15: mean 56.84 > 2.5",
+    "frame 16: mean 56.84 > 2.5",
+    "frame 17: mean 56.84 > 2.5",
+    "frame 18: mean 56.84 > 2.5",
+    "frame 19: mean 56.84 > 2.5",
+    "frame 20: mean 56.84 > 2.5",
+    "frame 21: mean 56.84 > 2.5",
+    "frame 22: mean 56.84 > 2.5",
+    "frame 23: mean 56.84 > 2.5",
+    "frame 24: mean 56.84 > 2.5",
+    "frame 25: mean 56.84 > 2.5",
+    "frame 26: mean 56.84 > 2.5",
+    "frame 27: mean 56.84 > 2.5",
+    "frame 28: mean 56.84 > 2.5",
+    "frame 29: mean 56.84 > 2.5"
+   ],
+   "frames": 30,
+   "worst": {
+    "i": 17,
+    "mean": 56.83734375,
+    "max": 255,
+    "bad": 0.4814583333333333
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "shader:l_kxnb2l",
+      "layerId": "l_kxnb2l",
+      "layer": "shader fill",
+      "feature": "shader",
+      "message": "shader fill: Lottie can only draw one solid, linear or circular radial fill",
+      "bakeable": true
+     },
+     {
+      "id": "shader:l_kxnb2m",
+      "layerId": "l_kxnb2m",
+      "layer": "shader effect",
+      "feature": "shader",
+      "message": "Shader effects only run in Motion",
+      "bakeable": true
+     }
+    ],
+    "bytes": 1521
+   },
+   "imgs": {
+    "editor": "img/shaders-lottie-native-editor.png",
+    "export": "img/shaders-lottie-native-export.png",
+    "diff": "img/shaders-lottie-native-diff.png",
+    "frame": 17
+   }
+  },
+  {
+   "scene": "shaders",
+   "title": "Shader fill (animated) + shader effect (test shaders)",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 1.7227571614583332,
+    "max": 94,
+    "bad": 0.023177083333333334,
+    "raw": 2.6303190104166667,
+    "colour": 1.8903616697835668,
+    "colourMax": 34
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1 s, expected 1.0000"
+    }
+   ],
+   "info": {
+    "bytes": 498787
+   },
+   "imgs": {
+    "editor": "img/shaders-preview-editor.png",
+    "export": "img/shaders-preview-export.png",
+    "diff": "img/shaders-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "masks",
+   "title": "Alpha / luminance / vector masks, clip group",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/masks-png-editor.png",
+    "export": "img/masks-png-export.png",
+    "diff": "img/masks-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "masks",
+   "title": "Alpha / luminance / vector masks, clip group",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 45 frames, expected 45"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/masks-pngseq-editor.png",
+    "export": "img/masks-pngseq-export.png",
+    "diff": "img/masks-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "masks",
+   "title": "Alpha / luminance / vector masks, clip group",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.6125716145833333,
+    "max": 34,
+    "bad": 0.000234375,
+    "raw": 1.7363736979166666,
+    "colour": 1.0282531554597314,
+    "colourMax": 14
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/masks-mp4-editor.png",
+    "export": "img/masks-mp4-export.png",
+    "diff": "img/masks-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "masks",
+   "title": "Alpha / luminance / vector masks, clip group",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.6125716145833333,
+    "max": 34,
+    "bad": 0.000234375,
+    "raw": 1.7363736979166666,
+    "colour": 1.0282531554597314,
+    "colourMax": 14
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/masks-mp4hq-editor.png",
+    "export": "img/masks-mp4hq-export.png",
+    "diff": "img/masks-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "masks",
+   "title": "Alpha / luminance / vector masks, clip group",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 9,
+    "mean": 0.3083854166666667,
+    "max": 34,
+    "bad": 0.00010416666666666667,
+    "raw": 1.5086458333333332,
+    "colour": 0.7490932172651432,
+    "colourMax": 19
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/masks-webm-editor.png",
+    "export": "img/masks-webm-export.png",
+    "diff": "img/masks-webm-diff.png",
+    "frame": 9
+   }
+  },
+  {
+   "scene": "masks",
+   "title": "Alpha / luminance / vector masks, clip group",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 7,
+    "mean": 0.20590494791666666,
+    "max": 11,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.500 s, expected 1.500 s"
+    }
+   ],
+   "info": {
+    "frames": 45,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/masks-gif-editor.png",
+    "export": "img/masks-gif-export.png",
+    "diff": "img/masks-gif-diff.png",
+    "frame": 7
+   }
+  },
+  {
+   "scene": "masks",
+   "title": "Alpha / luminance / vector masks, clip group",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 16,
+    "mean": 0.15720703125,
+    "max": 48,
+    "bad": 0.00265625
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 10113
+   },
+   "imgs": {
+    "editor": "img/masks-lottie-editor.png",
+    "export": "img/masks-lottie-export.png",
+    "diff": "img/masks-lottie-diff.png",
+    "frame": 16
+   }
+  },
+  {
+   "scene": "masks",
+   "title": "Alpha / luminance / vector masks, clip group",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.77984375,
+    "max": 81,
+    "bad": 0.0037044270833333334,
+    "raw": 1.1176253255208333,
+    "colour": 1.159083546838649,
+    "colourMax": 19
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1.5 s, expected 1.5000"
+    }
+   ],
+   "info": {
+    "bytes": 47155
+   },
+   "imgs": {
+    "editor": "img/masks-preview-editor.png",
+    "export": "img/masks-preview-export.png",
+    "diff": "img/masks-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "blend",
+   "title": "All 18 blend modes over a gradient backdrop",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 576x320, expected 576x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/blend-png-editor.png",
+    "export": "img/blend-png-export.png",
+    "diff": "img/blend-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "blend",
+   "title": "All 18 blend modes over a gradient backdrop",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 15 frames, expected 15"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/blend-pngseq-editor.png",
+    "export": "img/blend-pngseq-export.png",
+    "diff": "img/blend-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "blend",
+   "title": "All 18 blend modes over a gradient backdrop",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 1.2413031684027778,
+    "max": 28,
+    "bad": 0.00006510416666666667,
+    "raw": 1.7002875434027778
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 288x160 vs 288x160"
+    },
+    {
+     "ok": true,
+     "msg": "15 frames, expected 15"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 0.5000 s, expected 0.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 15,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/blend-mp4-editor.png",
+    "export": "img/blend-mp4-export.png",
+    "diff": "img/blend-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "blend",
+   "title": "All 18 blend modes over a gradient backdrop",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 1.2413031684027778,
+    "max": 28,
+    "bad": 0.00006510416666666667,
+    "raw": 1.7002875434027778
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 288x160 vs 288x160"
+    },
+    {
+     "ok": true,
+     "msg": "15 frames, expected 15"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 0.5000 s, expected 0.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 15,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/blend-mp4hq-editor.png",
+    "export": "img/blend-mp4hq-export.png",
+    "diff": "img/blend-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "blend",
+   "title": "All 18 blend modes over a gradient backdrop",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 2,
+    "mean": 0.6666341145833333,
+    "max": 14,
+    "bad": 0,
+    "raw": 1.17490234375
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 288x160 vs 288x160"
+    },
+    {
+     "ok": true,
+     "msg": "15 frames, expected 15"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 0.5000 s, expected 0.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 15,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/blend-webm-editor.png",
+    "export": "img/blend-webm-export.png",
+    "diff": "img/blend-webm-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "blend",
+   "title": "All 18 blend modes over a gradient backdrop",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 1.3055067274305556,
+    "max": 16,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 288x160"
+    },
+    {
+     "ok": true,
+     "msg": "15 frames, expected 15"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 0.500 s, expected 0.500 s"
+    }
+   ],
+   "info": {
+    "frames": 15,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/blend-gif-editor.png",
+    "export": "img/blend-gif-export.png",
+    "diff": "img/blend-gif-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "blend",
+   "title": "All 18 blend modes over a gradient backdrop",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 0.4669650607638889,
+    "max": 47,
+    "bad": 0.000390625
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 15 frames, expected 15"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "reported before export (excluded): linearBurn (blend), add (blend)"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "blend:l_kxnb3a",
+      "layerId": "l_kxnb3a",
+      "layer": "linearBurn",
+      "feature": "blend",
+      "message": "blend mode \"linearBurn\" doesn't exist in Lottie (exported as normal)",
+      "bakeable": false
+     },
+     {
+      "id": "blend:l_kxnb3e",
+      "layerId": "l_kxnb3e",
+      "layer": "add",
+      "feature": "blend",
+      "message": "blend mode \"add\" doesn't exist in Lottie (exported as normal)",
+      "bakeable": false
+     }
+    ],
+    "bytes": 11608
+   },
+   "imgs": {
+    "editor": "img/blend-lottie-editor.png",
+    "export": "img/blend-lottie-export.png",
+    "diff": "img/blend-lottie-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "blend",
+   "title": "All 18 blend modes over a gradient backdrop",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 15,
+   "worst": {
+    "i": 0,
+    "mean": 1.7653740776909723,
+    "max": 73,
+    "bad": 0.003591579861111111,
+    "raw": 2.0219319661458335,
+    "colour": 1.640893470790378,
+    "colourMax": 10
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 576x320, expected 2x the comp (576x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 0.5 s, expected 0.5000"
+    }
+   ],
+   "info": {
+    "bytes": 16359
+   },
+   "imgs": {
+    "editor": "img/blend-preview-editor.png",
+    "export": "img/blend-preview-export.png",
+    "diff": "img/blend-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "group-opacity",
+   "title": "Group opacity (isolated), nested parents, precomp-free hierarchy",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/group-opacity-png-editor.png",
+    "export": "img/group-opacity-png-export.png",
+    "diff": "img/group-opacity-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "group-opacity",
+   "title": "Group opacity (isolated), nested parents, precomp-free hierarchy",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 45 frames, expected 45"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/group-opacity-pngseq-editor.png",
+    "export": "img/group-opacity-pngseq-export.png",
+    "diff": "img/group-opacity-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "group-opacity",
+   "title": "Group opacity (isolated), nested parents, precomp-free hierarchy",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.3777799479166667,
+    "max": 29,
+    "bad": 0.00005208333333333334,
+    "raw": 1.12775390625,
+    "colour": 0.8443740764196749,
+    "colourMax": 16
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/group-opacity-mp4-editor.png",
+    "export": "img/group-opacity-mp4-export.png",
+    "diff": "img/group-opacity-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "group-opacity",
+   "title": "Group opacity (isolated), nested parents, precomp-free hierarchy",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.3777799479166667,
+    "max": 29,
+    "bad": 0.00005208333333333334,
+    "raw": 1.12775390625,
+    "colour": 0.8443740764196749,
+    "colourMax": 16
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/group-opacity-mp4hq-editor.png",
+    "export": "img/group-opacity-mp4hq-export.png",
+    "diff": "img/group-opacity-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "group-opacity",
+   "title": "Group opacity (isolated), nested parents, precomp-free hierarchy",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 7,
+    "mean": 0.2935026041666667,
+    "max": 21,
+    "bad": 0,
+    "raw": 1.0741276041666667,
+    "colour": 0.8218200356869743,
+    "colourMax": 14
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/group-opacity-webm-editor.png",
+    "export": "img/group-opacity-webm-export.png",
+    "diff": "img/group-opacity-webm-diff.png",
+    "frame": 7
+   }
+  },
+  {
+   "scene": "group-opacity",
+   "title": "Group opacity (isolated), nested parents, precomp-free hierarchy",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 7,
+    "mean": 0.5895833333333333,
+    "max": 11,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.500 s, expected 1.500 s"
+    }
+   ],
+   "info": {
+    "frames": 45,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/group-opacity-gif-editor.png",
+    "export": "img/group-opacity-gif-export.png",
+    "diff": "img/group-opacity-gif-diff.png",
+    "frame": 7
+   }
+  },
+  {
+   "scene": "group-opacity",
+   "title": "Group opacity (isolated), nested parents, precomp-free hierarchy",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 7,
+    "mean": 0.38591796875,
+    "max": 71,
+    "bad": 0.004244791666666667
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 3847
+   },
+   "imgs": {
+    "editor": "img/group-opacity-lottie-editor.png",
+    "export": "img/group-opacity-lottie-export.png",
+    "diff": "img/group-opacity-lottie-diff.png",
+    "frame": 7
+   }
+  },
+  {
+   "scene": "group-opacity",
+   "title": "Group opacity (isolated), nested parents, precomp-free hierarchy",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.6165657552083333,
+    "max": 81,
+    "bad": 0.0025325520833333333,
+    "raw": 0.9015250651041666,
+    "colour": 1.0125017880131597,
+    "colourMax": 28
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1.5 s, expected 1.5000"
+    }
+   ],
+   "info": {
+    "bytes": 112141
+   },
+   "imgs": {
+    "editor": "img/group-opacity-preview-editor.png",
+    "export": "img/group-opacity-preview-export.png",
+    "diff": "img/group-opacity-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "text",
+   "title": "Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 640x400, expected 640x400"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/text-png-editor.png",
+    "export": "img/text-png-export.png",
+    "diff": "img/text-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "text",
+   "title": "Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 30 frames, expected 30"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/text-pngseq-editor.png",
+    "export": "img/text-pngseq-export.png",
+    "diff": "img/text-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "text",
+   "title": "Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 28,
+    "mean": 0.5983515625,
+    "max": 84,
+    "bad": 0.00028125,
+    "raw": 1.16979296875,
+    "colour": 0.8449802994483846,
+    "colourMax": 14
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 320x200 vs 320x200"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/text-mp4-editor.png",
+    "export": "img/text-mp4-export.png",
+    "diff": "img/text-mp4-diff.png",
+    "frame": 28
+   }
+  },
+  {
+   "scene": "text",
+   "title": "Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 28,
+    "mean": 0.5983515625,
+    "max": 84,
+    "bad": 0.00028125,
+    "raw": 1.16979296875,
+    "colour": 0.8449802994483846,
+    "colourMax": 14
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 320x200 vs 320x200"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/text-mp4hq-editor.png",
+    "export": "img/text-mp4hq-export.png",
+    "diff": "img/text-mp4hq-diff.png",
+    "frame": 28
+   }
+  },
+  {
+   "scene": "text",
+   "title": "Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 8,
+    "mean": 0.2472421875,
+    "max": 15,
+    "bad": 0,
+    "raw": 0.7242109375,
+    "colour": 0.6949067070095815,
+    "colourMax": 7
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 320x200 vs 320x200"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/text-webm-editor.png",
+    "export": "img/text-webm-export.png",
+    "diff": "img/text-webm-diff.png",
+    "frame": 8
+   }
+  },
+  {
+   "scene": "text",
+   "title": "Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 20,
+    "mean": 0.194796875,
+    "max": 11,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 320x200"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.000 s, expected 1.000 s"
+    }
+   ],
+   "info": {
+    "frames": 30,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/text-gif-editor.png",
+    "export": "img/text-gif-export.png",
+    "diff": "img/text-gif-diff.png",
+    "frame": 20
+   }
+  },
+  {
+   "scene": "text",
+   "title": "Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 24,
+    "mean": 0.039140625,
+    "max": 2,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "text:l_kxnb3x",
+      "layerId": "l_kxnb3x",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb3y",
+      "layerId": "l_kxnb3y",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb3z",
+      "layerId": "l_kxnb3z",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb40",
+      "layerId": "l_kxnb40",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks): underline",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb41",
+      "layerId": "l_kxnb41",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks): text case",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb42",
+      "layerId": "l_kxnb42",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks): mixed styles",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb43",
+      "layerId": "l_kxnb43",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks): font \"serif\" is not embedded, italic",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb44",
+      "layerId": "l_kxnb44",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     }
+    ],
+    "bytes": 148147
+   },
+   "imgs": {
+    "editor": "img/text-lottie-editor.png",
+    "export": "img/text-lottie-export.png",
+    "diff": "img/text-lottie-diff.png",
+    "frame": 24
+   }
+  },
+  {
+   "scene": "text",
+   "title": "Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration",
+   "path": "lottie-native",
+   "ok": false,
+   "error": null,
+   "fails": [
+    "frame 0: mean 14.74 > 2.5",
+    "frame 1: mean 14.74 > 2.5",
+    "frame 2: mean 14.75 > 2.5",
+    "frame 3: mean 14.77 > 2.5",
+    "frame 4: mean 14.79 > 2.5",
+    "frame 5: mean 14.82 > 2.5",
+    "frame 6: mean 14.86 > 2.5",
+    "frame 7: mean 14.90 > 2.5",
+    "frame 8: mean 14.95 > 2.5",
+    "frame 9: mean 15.00 > 2.5",
+    "frame 10: mean 15.06 > 2.5",
+    "frame 11: mean 15.12 > 2.5",
+    "frame 12: mean 15.19 > 2.5",
+    "frame 13: mean 15.26 > 2.5",
+    "frame 14: mean 15.33 > 2.5",
+    "frame 15: mean 15.41 > 2.5",
+    "frame 16: mean 15.49 > 2.5",
+    "frame 17: mean 15.58 > 2.5",
+    "frame 18: mean 15.66 > 2.5",
+    "frame 19: mean 15.74 > 2.5",
+    "frame 20: mean 15.83 > 2.5",
+    "frame 21: mean 15.91 > 2.5",
+    "frame 22: mean 15.98 > 2.5",
+    "frame 23: mean 16.06 > 2.5",
+    "frame 24: mean 16.13 > 2.5",
+    "frame 25: mean 16.19 > 2.5",
+    "frame 26: mean 16.24 > 2.5",
+    "frame 27: mean 16.28 > 2.5",
+    "frame 28: mean 16.32 > 2.5",
+    "frame 29: mean 16.34 > 2.5"
+   ],
+   "frames": 30,
+   "worst": {
+    "i": 29,
+    "mean": 16.3385625,
+    "max": 237,
+    "bad": 0.15765625
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "text:l_kxnb3x",
+      "layerId": "l_kxnb3x",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb3y",
+      "layerId": "l_kxnb3y",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb3z",
+      "layerId": "l_kxnb3z",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb40",
+      "layerId": "l_kxnb40",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks): underline",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb41",
+      "layerId": "l_kxnb41",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks): text case",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb42",
+      "layerId": "l_kxnb42",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks): mixed styles",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb43",
+      "layerId": "l_kxnb43",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks): font \"serif\" is not embedded, italic",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb44",
+      "layerId": "l_kxnb44",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     }
+    ],
+    "bytes": 4197
+   },
+   "imgs": {
+    "editor": "img/text-lottie-native-editor.png",
+    "export": "img/text-lottie-native-export.png",
+    "diff": "img/text-lottie-native-diff.png",
+    "frame": 29
+   }
+  },
+  {
+   "scene": "text",
+   "title": "Text: weights, italic, alignment, wrapping, spacing, case, runs, decoration",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 0.7463486328125,
+    "max": 77,
+    "bad": 0.00170703125,
+    "raw": 1.0406591796875,
+    "colour": 0.9734685759745426,
+    "colourMax": 19
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 640x400, expected 2x the comp (640x400)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1 s, expected 1.0000"
+    }
+   ],
+   "info": {
+    "bytes": 75053
+   },
+   "imgs": {
+    "editor": "img/text-preview-editor.png",
+    "export": "img/text-preview-export.png",
+    "diff": "img/text-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "text-anim",
+   "title": "Text animators (per letter / word)",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 640x240, expected 640x240"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/text-anim-png-editor.png",
+    "export": "img/text-anim-png-export.png",
+    "diff": "img/text-anim-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "text-anim",
+   "title": "Text animators (per letter / word)",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 45 frames, expected 45"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/text-anim-pngseq-editor.png",
+    "export": "img/text-anim-pngseq-export.png",
+    "diff": "img/text-anim-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "text-anim",
+   "title": "Text animators (per letter / word)",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 32,
+    "mean": 0.2855729166666667,
+    "max": 30,
+    "bad": 0.0009375,
+    "raw": 0.71775390625,
+    "colour": 0.6952165937632284,
+    "colourMax": 4
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 320x120 vs 320x120"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/text-anim-mp4-editor.png",
+    "export": "img/text-anim-mp4-export.png",
+    "diff": "img/text-anim-mp4-diff.png",
+    "frame": 32
+   }
+  },
+  {
+   "scene": "text-anim",
+   "title": "Text animators (per letter / word)",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 32,
+    "mean": 0.2855729166666667,
+    "max": 30,
+    "bad": 0.0009375,
+    "raw": 0.71775390625,
+    "colour": 0.6952165937632284,
+    "colourMax": 4
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 320x120 vs 320x120"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/text-anim-mp4hq-editor.png",
+    "export": "img/text-anim-mp4hq-export.png",
+    "diff": "img/text-anim-mp4hq-diff.png",
+    "frame": 32
+   }
+  },
+  {
+   "scene": "text-anim",
+   "title": "Text animators (per letter / word)",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 13,
+    "mean": 0.18159505208333335,
+    "max": 14,
+    "bad": 0,
+    "raw": 0.6177734375,
+    "colour": 0.692721999723795,
+    "colourMax": 4
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 320x120 vs 320x120"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/text-anim-webm-editor.png",
+    "export": "img/text-anim-webm-export.png",
+    "diff": "img/text-anim-webm-diff.png",
+    "frame": 13
+   }
+  },
+  {
+   "scene": "text-anim",
+   "title": "Text animators (per letter / word)",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 13,
+    "mean": 0.32218098958333335,
+    "max": 8,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 320x120"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.500 s, expected 1.500 s"
+    }
+   ],
+   "info": {
+    "frames": 45,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/text-anim-gif-editor.png",
+    "export": "img/text-anim-gif-export.png",
+    "diff": "img/text-anim-gif-diff.png",
+    "frame": 13
+   }
+  },
+  {
+   "scene": "text-anim",
+   "title": "Text animators (per letter / word)",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 22,
+    "mean": 0.03501302083333333,
+    "max": 1,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "text:l_kxnb4f",
+      "layerId": "l_kxnb4f",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     },
+     {
+      "id": "text-animation:l_kxnb4f",
+      "layerId": "l_kxnb4f",
+      "layer": "Text",
+      "feature": "text-animation",
+      "message": "per letter / word animation is not exported to Lottie text",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb4g",
+      "layerId": "l_kxnb4g",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     },
+     {
+      "id": "text-animation:l_kxnb4g",
+      "layerId": "l_kxnb4g",
+      "layer": "Text",
+      "feature": "text-animation",
+      "message": "per letter / word animation is not exported to Lottie text",
+      "bakeable": true
+     }
+    ],
+    "bytes": 578044
+   },
+   "imgs": {
+    "editor": "img/text-anim-lottie-editor.png",
+    "export": "img/text-anim-lottie-export.png",
+    "diff": "img/text-anim-lottie-diff.png",
+    "frame": 22
+   }
+  },
+  {
+   "scene": "text-anim",
+   "title": "Text animators (per letter / word)",
+   "path": "lottie-native",
+   "ok": false,
+   "error": null,
+   "fails": [
+    "frame 0: mean 78.94 > 2.5",
+    "frame 1: mean 78.94 > 2.5",
+    "frame 2: mean 78.88 > 2.5",
+    "frame 3: mean 78.67 > 2.5",
+    "frame 4: mean 78.35 > 2.5",
+    "frame 5: mean 77.66 > 2.5",
+    "frame 6: mean 76.60 > 2.5",
+    "frame 7: mean 75.61 > 2.5",
+    "frame 8: mean 74.44 > 2.5",
+    "frame 9: mean 73.31 > 2.5",
+    "frame 10: mean 72.05 > 2.5",
+    "frame 11: mean 70.94 > 2.5",
+    "frame 12: mean 70.03 > 2.5",
+    "frame 13: mean 69.08 > 2.5",
+    "frame 14: mean 68.82 > 2.5",
+    "frame 15: mean 68.75 > 2.5",
+    "frame 16: mean 68.49 > 2.5",
+    "frame 17: mean 68.44 > 2.5",
+    "frame 18: mean 68.27 > 2.5",
+    "frame 19: mean 68.26 > 2.5",
+    "frame 20: mean 68.20 > 2.5",
+    "frame 21: mean 68.08 > 2.5",
+    "frame 22: mean 67.98 > 2.5",
+    "frame 23: mean 67.93 > 2.5",
+    "frame 24: mean 67.92 > 2.5",
+    "frame 25: mean 67.91 > 2.5",
+    "frame 26: mean 67.91 > 2.5",
+    "frame 27: mean 67.90 > 2.5",
+    "frame 28: mean 67.90 > 2.5",
+    "frame 29: mean 67.90 > 2.5",
+    "frame 30: mean 67.90 > 2.5",
+    "frame 31: mean 67.90 > 2.5",
+    "frame 32: mean 67.89 > 2.5",
+    "frame 33: mean 67.89 > 2.5",
+    "frame 34: mean 67.89 > 2.5",
+    "frame 35: mean 67.89 > 2.5",
+    "frame 36: mean 67.89 > 2.5",
+    "frame 37: mean 67.89 > 2.5",
+    "frame 38: mean 67.89 > 2.5",
+    "frame 39: mean 67.89 > 2.5",
+    "frame 40: mean 67.89 > 2.5",
+    "frame 41: mean 67.89 > 2.5",
+    "frame 42: mean 67.89 > 2.5",
+    "frame 43: mean 67.89 > 2.5",
+    "frame 44: mean 67.89 > 2.5"
+   ],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 78.93574869791667,
+    "max": 237,
+    "bad": 0.4558333333333333
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "text:l_kxnb4f",
+      "layerId": "l_kxnb4f",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     },
+     {
+      "id": "text-animation:l_kxnb4f",
+      "layerId": "l_kxnb4f",
+      "layer": "Text",
+      "feature": "text-animation",
+      "message": "per letter / word animation is not exported to Lottie text",
+      "bakeable": true
+     },
+     {
+      "id": "text:l_kxnb4g",
+      "layerId": "l_kxnb4g",
+      "layer": "Text",
+      "feature": "text",
+      "message": "Lottie players lay text out themselves (no kerning, their own line breaks)",
+      "bakeable": true
+     },
+     {
+      "id": "text-animation:l_kxnb4g",
+      "layerId": "l_kxnb4g",
+      "layer": "Text",
+      "feature": "text-animation",
+      "message": "per letter / word animation is not exported to Lottie text",
+      "bakeable": true
+     }
+    ],
+    "bytes": 36050
+   },
+   "imgs": {
+    "editor": "img/text-anim-lottie-native-editor.png",
+    "export": "img/text-anim-lottie-native-export.png",
+    "diff": "img/text-anim-lottie-native-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "text-anim",
+   "title": "Text animators (per letter / word)",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.50125,
+    "max": 3,
+    "bad": 0,
+    "raw": 0.7516162109375,
+    "colour": 1.0015278564174463,
+    "colourMax": 3
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 640x240, expected 2x the comp (640x240)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1.5 s, expected 1.5000"
+    }
+   ],
+   "info": {
+    "bytes": 156375
+   },
+   "imgs": {
+    "editor": "img/text-anim-preview-editor.png",
+    "export": "img/text-anim-preview-export.png",
+    "diff": "img/text-anim-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "expressions",
+   "title": "Expressions: wiggle (seeded), random, time, loopOut",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/expressions-png-editor.png",
+    "export": "img/expressions-png-export.png",
+    "diff": "img/expressions-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "expressions",
+   "title": "Expressions: wiggle (seeded), random, time, loopOut",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 60 frames, expected 60"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/expressions-pngseq-editor.png",
+    "export": "img/expressions-pngseq-export.png",
+    "diff": "img/expressions-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "expressions",
+   "title": "Expressions: wiggle (seeded), random, time, loopOut",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.23529296875,
+    "max": 40,
+    "bad": 0.0005729166666666667,
+    "raw": 0.8922200520833333,
+    "colour": 0.7836347770902745,
+    "colourMax": 18
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/expressions-mp4-editor.png",
+    "export": "img/expressions-mp4-export.png",
+    "diff": "img/expressions-mp4-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "expressions",
+   "title": "Expressions: wiggle (seeded), random, time, loopOut",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.23529296875,
+    "max": 40,
+    "bad": 0.0005729166666666667,
+    "raw": 0.8922200520833333,
+    "colour": 0.7836347770902745,
+    "colourMax": 18
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/expressions-mp4hq-editor.png",
+    "export": "img/expressions-mp4hq-export.png",
+    "diff": "img/expressions-mp4hq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "expressions",
+   "title": "Expressions: wiggle (seeded), random, time, loopOut",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 4,
+    "mean": 0.19953776041666665,
+    "max": 30,
+    "bad": 0.00002604166666666667,
+    "raw": 0.8776236979166666,
+    "colour": 0.7563392713850104,
+    "colourMax": 18
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/expressions-webm-editor.png",
+    "export": "img/expressions-webm-export.png",
+    "diff": "img/expressions-webm-diff.png",
+    "frame": 4
+   }
+  },
+  {
+   "scene": "expressions",
+   "title": "Expressions: wiggle (seeded), random, time, loopOut",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 33,
+    "mean": 0.19822265625,
+    "max": 11,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 2.000 s, expected 2.000 s"
+    }
+   ],
+   "info": {
+    "frames": 60,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/expressions-gif-editor.png",
+    "export": "img/expressions-gif-export.png",
+    "diff": "img/expressions-gif-diff.png",
+    "frame": 33
+   }
+  },
+  {
+   "scene": "expressions",
+   "title": "Expressions: wiggle (seeded), random, time, loopOut",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 2,
+    "mean": 0.11139973958333334,
+    "max": 55,
+    "bad": 0.003828125
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 24362
+   },
+   "imgs": {
+    "editor": "img/expressions-lottie-editor.png",
+    "export": "img/expressions-lottie-export.png",
+    "diff": "img/expressions-lottie-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "expressions",
+   "title": "Expressions: wiggle (seeded), random, time, loopOut",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.4070231119791667,
+    "max": 60,
+    "bad": 0.00203125,
+    "raw": 0.8322623697916667,
+    "colour": 0.9264280146976951,
+    "colourMax": 19
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 2 s, expected 2.0000"
+    }
+   ],
+   "info": {
+    "bytes": 105761
+   },
+   "imgs": {
+    "editor": "img/expressions-preview-editor.png",
+    "export": "img/expressions-preview-export.png",
+    "diff": "img/expressions-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "springs",
+   "title": "Springs (bounce) on position / scale / rotation",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/springs-png-editor.png",
+    "export": "img/springs-png-export.png",
+    "diff": "img/springs-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "springs",
+   "title": "Springs (bounce) on position / scale / rotation",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 90,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 90 frames, expected 90"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/springs-pngseq-editor.png",
+    "export": "img/springs-pngseq-export.png",
+    "diff": "img/springs-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "springs",
+   "title": "Springs (bounce) on position / scale / rotation",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 90,
+   "worst": {
+    "i": 52,
+    "mean": 0.12248046875,
+    "max": 67,
+    "bad": 0.00046875,
+    "raw": 0.7450651041666667,
+    "colour": 0.7053954868431327,
+    "colourMax": 68
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "90 frames, expected 90"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 90,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/springs-mp4-editor.png",
+    "export": "img/springs-mp4-export.png",
+    "diff": "img/springs-mp4-diff.png",
+    "frame": 52
+   }
+  },
+  {
+   "scene": "springs",
+   "title": "Springs (bounce) on position / scale / rotation",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 90,
+   "worst": {
+    "i": 52,
+    "mean": 0.12248046875,
+    "max": 67,
+    "bad": 0.00046875,
+    "raw": 0.7450651041666667,
+    "colour": 0.7053954868431327,
+    "colourMax": 68
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "90 frames, expected 90"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 90,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/springs-mp4hq-editor.png",
+    "export": "img/springs-mp4hq-export.png",
+    "diff": "img/springs-mp4hq-diff.png",
+    "frame": 52
+   }
+  },
+  {
+   "scene": "springs",
+   "title": "Springs (bounce) on position / scale / rotation",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 90,
+   "worst": {
+    "i": 17,
+    "mean": 0.10055989583333333,
+    "max": 13,
+    "bad": 0,
+    "raw": 0.6908658854166667,
+    "colour": 0.6782069398649709,
+    "colourMax": 6
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "90 frames, expected 90"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 90,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/springs-webm-editor.png",
+    "export": "img/springs-webm-export.png",
+    "diff": "img/springs-webm-diff.png",
+    "frame": 17
+   }
+  },
+  {
+   "scene": "springs",
+   "title": "Springs (bounce) on position / scale / rotation",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 75,
+   "worst": {
+    "i": 30,
+    "mean": 0.17447265625,
+    "max": 7,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "75 frames, expected 75"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 0.0 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.500 s, expected 1.500 s"
+    }
+   ],
+   "info": {
+    "frames": 75,
+    "fps": 50
+   },
+   "imgs": {
+    "editor": "img/springs-gif-editor.png",
+    "export": "img/springs-gif-export.png",
+    "diff": "img/springs-gif-diff.png",
+    "frame": 30
+   }
+  },
+  {
+   "scene": "springs",
+   "title": "Springs (bounce) on position / scale / rotation",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 90,
+   "worst": {
+    "i": 30,
+    "mean": 0.11525390625,
+    "max": 67,
+    "bad": 0.003515625
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 90 frames, expected 90"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 60, expected 60"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 16421
+   },
+   "imgs": {
+    "editor": "img/springs-lottie-editor.png",
+    "export": "img/springs-lottie-export.png",
+    "diff": "img/springs-lottie-diff.png",
+    "frame": 30
+   }
+  },
+  {
+   "scene": "springs",
+   "title": "Springs (bounce) on position / scale / rotation",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 90,
+   "worst": {
+    "i": 0,
+    "mean": 0.5141389973958334,
+    "max": 60,
+    "bad": 0.00024739583333333335,
+    "raw": 0.8184358723958334,
+    "colour": 1.0663308373042886,
+    "colourMax": 16
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1.5 s, expected 1.5000"
+    }
+   ],
+   "info": {
+    "bytes": 160471
+   },
+   "imgs": {
+    "editor": "img/springs-preview-editor.png",
+    "export": "img/springs-preview-export.png",
+    "diff": "img/springs-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "precomp",
+   "title": "Precomp with start offset, nested twice",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/precomp-png-editor.png",
+    "export": "img/precomp-png-export.png",
+    "diff": "img/precomp-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "precomp",
+   "title": "Precomp with start offset, nested twice",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 60 frames, expected 60"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/precomp-pngseq-editor.png",
+    "export": "img/precomp-pngseq-export.png",
+    "diff": "img/precomp-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "precomp",
+   "title": "Precomp with start offset, nested twice",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 28,
+    "mean": 0.103671875,
+    "max": 81,
+    "bad": 0.0003125,
+    "raw": 0.7289127604166666,
+    "colour": 0.7161302906182953,
+    "colourMax": 78
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/precomp-mp4-editor.png",
+    "export": "img/precomp-mp4-export.png",
+    "diff": "img/precomp-mp4-diff.png",
+    "frame": 28
+   }
+  },
+  {
+   "scene": "precomp",
+   "title": "Precomp with start offset, nested twice",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 28,
+    "mean": 0.103671875,
+    "max": 81,
+    "bad": 0.0003125,
+    "raw": 0.7289127604166666,
+    "colour": 0.7161302906182953,
+    "colourMax": 78
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/precomp-mp4hq-editor.png",
+    "export": "img/precomp-mp4hq-export.png",
+    "diff": "img/precomp-mp4hq-diff.png",
+    "frame": 28
+   }
+  },
+  {
+   "scene": "precomp",
+   "title": "Precomp with start offset, nested twice",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 24,
+    "mean": 0.08600260416666666,
+    "max": 85,
+    "bad": 0.00005208333333333334,
+    "raw": 0.6763411458333334,
+    "colour": 0.6896483991357297,
+    "colourMax": 44
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/precomp-webm-editor.png",
+    "export": "img/precomp-webm-export.png",
+    "diff": "img/precomp-webm-diff.png",
+    "frame": 24
+   }
+  },
+  {
+   "scene": "precomp",
+   "title": "Precomp with start offset, nested twice",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 21,
+    "mean": 0.011705729166666666,
+    "max": 11,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 2.000 s, expected 2.000 s"
+    }
+   ],
+   "info": {
+    "frames": 60,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/precomp-gif-editor.png",
+    "export": "img/precomp-gif-export.png",
+    "diff": "img/precomp-gif-diff.png",
+    "frame": 21
+   }
+  },
+  {
+   "scene": "precomp",
+   "title": "Precomp with start offset, nested twice",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 24,
+    "mean": 0.10309895833333334,
+    "max": 58,
+    "bad": 0.0025260416666666665
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 1733
+   },
+   "imgs": {
+    "editor": "img/precomp-lottie-editor.png",
+    "export": "img/precomp-lottie-export.png",
+    "diff": "img/precomp-lottie-diff.png",
+    "frame": 24
+   }
+  },
+  {
+   "scene": "precomp",
+   "title": "Precomp with start offset, nested twice",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.5241357421875,
+    "max": 31,
+    "bad": 0.00001953125,
+    "raw": 0.7644661458333334,
+    "colour": 1.016419960599324,
+    "colourMax": 6
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 2 s, expected 2.0000"
+    }
+   ],
+   "info": {
+    "bytes": 102883
+   },
+   "imgs": {
+    "editor": "img/precomp-preview-editor.png",
+    "export": "img/precomp-preview-export.png",
+    "diff": "img/precomp-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "trim",
+   "title": "Trim paths (animated) and path morph",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 44,
+    "mean": 0.000006510416666666667,
+    "max": 1,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/trim-png-editor.png",
+    "export": "img/trim-png-export.png",
+    "diff": "img/trim-png-diff.png",
+    "frame": 44
+   }
+  },
+  {
+   "scene": "trim",
+   "title": "Trim paths (animated) and path morph",
+   "path": "pngseq",
+   "ok": false,
+   "error": null,
+   "fails": [
+    "frame 3: max error 3 > 2",
+    "frame 18: max error 4 > 2",
+    "frame 25: max error 5 > 2"
+   ],
+   "frames": 45,
+   "worst": {
+    "i": 25,
+    "mean": 0.0006770833333333334,
+    "max": 5,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 45 frames, expected 45"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/trim-pngseq-editor.png",
+    "export": "img/trim-pngseq-export.png",
+    "diff": "img/trim-pngseq-diff.png",
+    "frame": 25
+   }
+  },
+  {
+   "scene": "trim",
+   "title": "Trim paths (animated) and path morph",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 2,
+    "mean": 0.13858723958333333,
+    "max": 22,
+    "bad": 0,
+    "raw": 0.6908528645833333,
+    "colour": 0.7246343341031563,
+    "colourMax": 15
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/trim-mp4-editor.png",
+    "export": "img/trim-mp4-export.png",
+    "diff": "img/trim-mp4-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "trim",
+   "title": "Trim paths (animated) and path morph",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 2,
+    "mean": 0.13858723958333333,
+    "max": 22,
+    "bad": 0,
+    "raw": 0.6908528645833333,
+    "colour": 0.7246343341031563,
+    "colourMax": 15
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/trim-mp4hq-editor.png",
+    "export": "img/trim-mp4hq-export.png",
+    "diff": "img/trim-mp4hq-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "trim",
+   "title": "Trim paths (animated) and path morph",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 9,
+    "mean": 0.11231770833333334,
+    "max": 24,
+    "bad": 0,
+    "raw": 0.6926171875,
+    "colour": 0.7016317016317016,
+    "colourMax": 10
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.5000 s, expected 1.5000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 45,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/trim-webm-editor.png",
+    "export": "img/trim-webm-export.png",
+    "diff": "img/trim-webm-diff.png",
+    "frame": 9
+   }
+  },
+  {
+   "scene": "trim",
+   "title": "Trim paths (animated) and path morph",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 33,
+    "mean": 0.14695963541666668,
+    "max": 9,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.500 s, expected 1.500 s"
+    }
+   ],
+   "info": {
+    "frames": 45,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/trim-gif-editor.png",
+    "export": "img/trim-gif-export.png",
+    "diff": "img/trim-gif-diff.png",
+    "frame": 33
+   }
+  },
+  {
+   "scene": "trim",
+   "title": "Trim paths (animated) and path morph",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 34,
+    "mean": 0.10751953125,
+    "max": 76,
+    "bad": 0.0032552083333333335
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 45 frames, expected 45"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 2703
+   },
+   "imgs": {
+    "editor": "img/trim-lottie-editor.png",
+    "export": "img/trim-lottie-export.png",
+    "diff": "img/trim-lottie-diff.png",
+    "frame": 34
+   }
+  },
+  {
+   "scene": "trim",
+   "title": "Trim paths (animated) and path morph",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 45,
+   "worst": {
+    "i": 0,
+    "mean": 0.5183447265625,
+    "max": 67,
+    "bad": 0.0012174479166666666,
+    "raw": 0.838466796875,
+    "colour": 1.001923147034161,
+    "colourMax": 19
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1.5 s, expected 1.5000"
+    }
+   ],
+   "info": {
+    "bytes": 88097
+   },
+   "imgs": {
+    "editor": "img/trim-preview-editor.png",
+    "export": "img/trim-preview-export.png",
+    "diff": "img/trim-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "transparent",
+   "title": "Transparent background, semi-transparent layers",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 480x320, expected 480x320"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/transparent-png-editor.png",
+    "export": "img/transparent-png-export.png",
+    "diff": "img/transparent-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "transparent",
+   "title": "Transparent background, semi-transparent layers",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 30 frames, expected 30"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/transparent-pngseq-editor.png",
+    "export": "img/transparent-pngseq-export.png",
+    "diff": "img/transparent-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "transparent",
+   "title": "Transparent background, semi-transparent layers",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 2,
+    "mean": 0.2898763020833333,
+    "max": 30,
+    "bad": 0.000078125,
+    "raw": 0.4974283854166667,
+    "colour": 0.26396023890072257,
+    "colourMax": 14
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/transparent-mp4-editor.png",
+    "export": "img/transparent-mp4-export.png",
+    "diff": "img/transparent-mp4-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "transparent",
+   "title": "Transparent background, semi-transparent layers",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 2,
+    "mean": 0.2898763020833333,
+    "max": 30,
+    "bad": 0.000078125,
+    "raw": 0.4974283854166667,
+    "colour": 0.26396023890072257,
+    "colourMax": 14
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 40000000
+   },
+   "imgs": {
+    "editor": "img/transparent-mp4hq-editor.png",
+    "export": "img/transparent-mp4hq-export.png",
+    "diff": "img/transparent-mp4hq-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "transparent",
+   "title": "Transparent background, semi-transparent layers",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 2,
+    "mean": 0.16486328125,
+    "max": 12,
+    "bad": 0,
+    "raw": 0.37852864583333334,
+    "colour": 0.15912792883097357,
+    "colourMax": 10
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 240x160 vs 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 1.0000 s, expected 1.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 30,
+    "bitrate": 3000000
+   },
+   "imgs": {
+    "editor": "img/transparent-webm-editor.png",
+    "export": "img/transparent-webm-export.png",
+    "diff": "img/transparent-webm-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "transparent",
+   "title": "Transparent background, semi-transparent layers",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 3,
+    "mean": 0.12656901041666666,
+    "max": 15,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 240x160"
+    },
+    {
+     "ok": true,
+     "msg": "30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 1.000 s, expected 1.000 s"
+    }
+   ],
+   "info": {
+    "frames": 30,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/transparent-gif-editor.png",
+    "export": "img/transparent-gif-export.png",
+    "diff": "img/transparent-gif-diff.png",
+    "frame": 3
+   }
+  },
+  {
+   "scene": "transparent",
+   "title": "Transparent background, semi-transparent layers",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 4,
+    "mean": 0.13785807291666666,
+    "max": 64,
+    "bad": 0.0013541666666666667
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 30 frames, expected 30"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [],
+    "bytes": 2012
+   },
+   "imgs": {
+    "editor": "img/transparent-lottie-editor.png",
+    "export": "img/transparent-lottie-export.png",
+    "diff": "img/transparent-lottie-diff.png",
+    "frame": 4
+   }
+  },
+  {
+   "scene": "transparent",
+   "title": "Transparent background, semi-transparent layers",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 30,
+   "worst": {
+    "i": 0,
+    "mean": 0.651796875,
+    "max": 73,
+    "bad": 0.0021614583333333334,
+    "raw": 0.7002197265625,
+    "colour": 0.77300805602209,
+    "colourMax": 21
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 480x320, expected 2x the comp (480x320)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 1 s, expected 1.0000"
+    }
+   ],
+   "info": {
+    "bytes": 44767
+   },
+   "imgs": {
+    "editor": "img/transparent-preview-editor.png",
+    "export": "img/transparent-preview-export.png",
+    "diff": "img/transparent-preview-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "audio",
+   "title": "Audio clicks (offset 0.25 s) + flash frames",
+   "path": "png",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 4,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "2x png is 320x192, expected 320x192"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/audio-png-editor.png",
+    "export": "img/audio-png-export.png",
+    "diff": "img/audio-png-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "audio",
+   "title": "Audio clicks (offset 0.25 s) + flash frames",
+   "path": "pngseq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0,
+    "max": 0,
+    "bad": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "png sequence has 60 frames, expected 60"
+    }
+   ],
+   "info": null,
+   "imgs": {
+    "editor": "img/audio-pngseq-editor.png",
+    "export": "img/audio-pngseq-export.png",
+    "diff": "img/audio-pngseq-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "audio",
+   "title": "Audio clicks (offset 0.25 s) + flash frames",
+   "path": "mp4",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 1,
+    "mean": 0.18663736979166667,
+    "max": 17,
+    "bad": 0,
+    "raw": 0.695263671875,
+    "colour": 0.6633105986792248,
+    "colourMax": 10,
+    "index": 1,
+    "expect": 1
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 160x96 vs 160x96"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    },
+    {
+     "ok": true,
+     "msg": "audio clicks off by 0.02 ms (onsets 0.5000, 1.0000, 1.5000 vs 0.5, 1.0, 1.5)"
+    },
+    {
+     "ok": true,
+     "msg": "audio lasts 2.0135 s, video 2.000 s"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000,
+    "audio": {
+     "codec": "opus",
+     "onsets": [
+      0.50002,
+      1.00002,
+      1.50002
+     ],
+     "worstMs": 0.021,
+     "duration": 2.0135
+    }
+   },
+   "imgs": {
+    "editor": "img/audio-mp4-editor.png",
+    "export": "img/audio-mp4-export.png",
+    "diff": "img/audio-mp4-diff.png",
+    "frame": 1
+   }
+  },
+  {
+   "scene": "audio",
+   "title": "Audio clicks (offset 0.25 s) + flash frames",
+   "path": "mp4hq",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 1,
+    "mean": 0.18663736979166667,
+    "max": 17,
+    "bad": 0,
+    "raw": 0.695263671875,
+    "colour": 0.6633105986792248,
+    "colourMax": 10,
+    "index": 1,
+    "expect": 1
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 160x96 vs 160x96"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.00 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    },
+    {
+     "ok": true,
+     "msg": "audio clicks off by 0.02 ms (onsets 0.5000, 1.0000, 1.5000 vs 0.5, 1.0, 1.5)"
+    },
+    {
+     "ok": true,
+     "msg": "audio lasts 2.0135 s, video 2.000 s"
+    }
+   ],
+   "info": {
+    "codec": "avc1.64001f",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 40000000,
+    "audio": {
+     "codec": "opus",
+     "onsets": [
+      0.50002,
+      1.00002,
+      1.50002
+     ],
+     "worstMs": 0.021,
+     "duration": 2.0135
+    }
+   },
+   "imgs": {
+    "editor": "img/audio-mp4hq-editor.png",
+    "export": "img/audio-mp4hq-export.png",
+    "diff": "img/audio-mp4hq-diff.png",
+    "frame": 1
+   }
+  },
+  {
+   "scene": "audio",
+   "title": "Audio clicks (offset 0.25 s) + flash frames",
+   "path": "webm",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 2,
+    "mean": 0.137158203125,
+    "max": 13,
+    "bad": 0,
+    "raw": 0.6592447916666667,
+    "colour": 0.6230610695303178,
+    "colourMax": 8,
+    "index": 2,
+    "expect": 2
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "size 160x96 vs 160x96"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame times drift up to 0.33 ms from i/fps"
+    },
+    {
+     "ok": true,
+     "msg": "video ends at 2.0000 s, expected 2.0000 s"
+    },
+    {
+     "ok": true,
+     "msg": "colour tags missing: space=bt709 range=tv primaries=bt709 transfer=iec61966-2-1"
+    },
+    {
+     "ok": true,
+     "msg": "audio clicks off by 0.02 ms (onsets 0.5000, 1.0000, 1.5000 vs 0.5, 1.0, 1.5)"
+    },
+    {
+     "ok": true,
+     "msg": "audio lasts 2.0135 s, video 2.000 s"
+    }
+   ],
+   "info": {
+    "codec": "vp09.00.41.08",
+    "pix_fmt": "yuv420p",
+    "color": "bt709/bt709/iec61966-2-1/tv",
+    "frames": 60,
+    "bitrate": 3000000,
+    "audio": {
+     "codec": "opus",
+     "onsets": [
+      0.50002,
+      1.00002,
+      1.50002
+     ],
+     "worstMs": 0.021,
+     "duration": 2.0135
+    }
+   },
+   "imgs": {
+    "editor": "img/audio-webm-editor.png",
+    "export": "img/audio-webm-export.png",
+    "diff": "img/audio-webm-diff.png",
+    "frame": 2
+   }
+  },
+  {
+   "scene": "audio",
+   "title": "Audio clicks (offset 0.25 s) + flash frames",
+   "path": "gif",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 0,
+    "mean": 0.009798177083333333,
+    "max": 8,
+    "bad": 0,
+    "index": 0,
+    "expect": 0
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "gif is 160x96"
+    },
+    {
+     "ok": true,
+     "msg": "60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "frame start times drift up to 3.3 ms"
+    },
+    {
+     "ok": true,
+     "msg": "gif lasts 2.000 s, expected 2.000 s"
+    }
+   ],
+   "info": {
+    "frames": 60,
+    "fps": 30
+   },
+   "imgs": {
+    "editor": "img/audio-gif-editor.png",
+    "export": "img/audio-gif-export.png",
+    "diff": "img/audio-gif-diff.png",
+    "frame": 0
+   }
+  },
+  {
+   "scene": "audio",
+   "title": "Audio clicks (offset 0.25 s) + flash frames",
+   "path": "lottie",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 31,
+    "mean": 0.12591145833333334,
+    "max": 59,
+    "bad": 0.0036458333333333334,
+    "index": 31,
+    "expect": 31
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "lottie has 60 frames, expected 60"
+    },
+    {
+     "ok": true,
+     "msg": "lottie frame rate 30, expected 30"
+    }
+   ],
+   "info": {
+    "preflight": [
+     {
+      "id": "audio:l_kxnb5e",
+      "layerId": "l_kxnb5e",
+      "layer": "clicks",
+      "feature": "audio",
+      "message": "Lottie has no audio: this layer is left out",
+      "bakeable": false
+     }
+    ],
+    "bytes": 32233
+   },
+   "imgs": {
+    "editor": "img/audio-lottie-editor.png",
+    "export": "img/audio-lottie-export.png",
+    "diff": "img/audio-lottie-diff.png",
+    "frame": 31
+   }
+  },
+  {
+   "scene": "audio",
+   "title": "Audio clicks (offset 0.25 s) + flash frames",
+   "path": "preview",
+   "ok": true,
+   "error": null,
+   "fails": [],
+   "frames": 60,
+   "worst": {
+    "i": 1,
+    "mean": 0.2810262044270833,
+    "max": 46,
+    "bad": 0.002099609375,
+    "raw": 0.70347900390625,
+    "colour": 0.7889523534090087,
+    "colourMax": 17,
+    "index": 1,
+    "expect": 1
+   },
+   "checks": [
+    {
+     "ok": true,
+     "msg": "preview video is 320x192, expected 2x the comp (320x192)"
+    },
+    {
+     "ok": true,
+     "msg": "preview lasts 2.0135 s, expected 2.0000"
+    }
+   ],
+   "info": {
+    "bytes": 57850
+   },
+   "imgs": {
+    "editor": "img/audio-preview-editor.png",
+    "export": "img/audio-preview-export.png",
+    "diff": "img/audio-preview-diff.png",
+    "frame": 1
+   }
+  }
+ ],
+ "pageErrors": []
+}
