@@ -320,7 +320,9 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
       const sa = sampleAt(sg.t0 + 1e-3), sb = sampleAt(sg.t1 + 0.02);
       const va = G(sa, i, 4) > 0.05 && outside(sa, i) < 0.9, vb = G(sb, i, 4) > 0.05 && outside(sb, i) < 0.9;
       const vEnd = G(sampleAt(sg.t1 - 1e-3), i, 4) > 0.05 && outside(sampleAt(sg.t1 - 1e-3), i) < 0.9;
+      const gone = (t: number) => { for (let c: Layer | undefined = l; c; c = c.parent ? L[c.parent] : undefined) { if (propAt(store, c, 'opacity', t)[0] < 3) return true; const sc = propAt(store, c, 'scale', t); if (Math.max(Math.abs(sc[0]), Math.abs(sc[1])) < 4) return true; } return false; };
       if (sg.key === 'opacity') sg.kind = sg.b.v[0] > sg.a.v[0] ? 'enter' : 'exit';
+      else if (!gone(sg.t0) && gone(sg.t1)) sg.kind = 'exit';
       else if (!va && vb) sg.kind = 'enter';
       else if (va && (!vb || !vEnd)) sg.kind = 'exit';
       else if (sg.key === 'scale' && Math.max(sg.a.v[0], sg.a.v[1]) < 40 && Math.max(sg.b.v[0], sg.b.v[1]) > 60) sg.kind = 'enter';
@@ -341,6 +343,18 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
   const loopy = opts.loop ?? detectLoop(store, infos, D);
   const primary = pickPrimary(infos.filter(x => !isBg(x) && !x.piece && x.area > 0 && !(x.group && x.l.children.length > 6)));
 
+  /** a deliberate impact (gravity): another property starts changing at the landing (a squash), or the
+   *  move falls back after a hop (the previous segment went the other way) */
+  const impact = (sg: Seg): boolean => {
+    if (PHYS.some(k => (sg.l.props[k]?.kf ?? []).some((q, qi, arr) => Math.abs(q.t - sg.t1) < 0.05 && arr[qi + 1] && k !== sg.key && arr[qi + 1].v.some((v, j) => Math.abs(v - q.v[j]) > 1e-6)))) return true;
+    const kf = sg.l.props[sg.key]!.kf!, p = kf[sg.i - 1];
+    if (p) {
+      const d0 = sg.a.v.map((v, j) => v - p.v[j]), d1 = sg.b.v.map((v, j) => v - sg.a.v[j]);
+      if (d0.reduce((x, v, j) => x + v * d1[j], 0) < 0 && sg.a.t - p.t < 0.6) return true;
+    }
+    return false;
+  };
+
   // ================================================================ easing
   // hard stops: a physical move arriving at full speed (linear / ease-in arrival) and not continuing
   {
@@ -353,8 +367,7 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
       const kf = sg.l.props[sg.key]!.kf!;
       const n = kf[sg.i + 2];
       if (n && n.t - sg.b.t < 0.06 && n.v.some((x, j) => Math.abs(x - sg.b.v[j]) > 1e-6)) continue; // continues / turns into an overshoot
-      // an impact: another property (squash, rotation) starts changing right at the landing
-      if (PHYS.some(k => k !== sg.key && (sg.l.props[k]?.kf ?? []).some((q, qi, arr) => Math.abs(q.t - sg.t1) < 0.05 && arr[qi + 1] && arr[qi + 1].v.some((v, j) => Math.abs(v - q.v[j]) > 1e-6)))) continue;
+      if (impact(sg)) continue;
       hits.push(sg);
     }
     hits.sort((a, b) => b.mag * (b.key === 'position' ? 1 : 4) - a.mag * (a.key === 'position' ? 1 : 4));
@@ -385,7 +398,7 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
   }
   // entrances should decelerate, exits accelerate
   {
-    const ent = all.filter(s => s.kind === 'enter' && s.key !== 'opacity' && s.a.interp !== 'hold' && s.a.interp !== 'spring' && !overshootSeg(s.a, s.b));
+    const ent = all.filter(s => s.kind === 'enter' && s.key !== 'opacity' && s.a.interp !== 'hold' && s.a.interp !== 'spring' && !overshootSeg(s.a, s.b) && !impact(s));
     const bad = ent.filter(s => !(s.s0 > s.s1 * 1.8 && s.s1 < 0.35));
     if (ent.length >= 2 && bad.length / ent.length >= 0.5) {
       push('entrance-ease', bad.length / ent.length >= 0.8 ? 'medium' : 'low', `${bad.length} of ${ent.length} entrances don't decelerate (${[...new Set(bad.map(s => s.ease))].join(', ')}): entrances ease out (Expo/Quart/Cubic Out) or spring`, [...new Set(bad.map(s => s.l.id))].slice(0, 8), undefined,
@@ -719,7 +732,7 @@ export function critique(store: Store, opts: CriticOptions = {}): Critique {
     const pieces = infos.filter(x => x.piece).length;
     const elems = drawn.length + Math.min(3, Math.ceil(pieces / 3));
     const moves = all.filter(s => s.key !== 'opacity').length + exprLayers * 2 + infos.filter(x => x.l.textAnim).length * 2;
-    const want = D <= 2.5 ? 2 : D <= 5 ? 4 : 6;
+    const want = D <= 2.5 ? 2 : D <= 6.5 ? 4 : D <= 12 ? 6 : 8;
     if (D >= 2 && (elems < want || moves < D * 1.2)) {
       const sev: Severity = elems <= want / 2 || moves < D * 0.6 ? 'high' : 'medium';
       push('thin', sev, `${elems} element${elems === 1 ? '' : 's'} and ${moves} moves for ${ft(D)}: add supporting elements (shapes, lines, a secondary label) and secondary motion so every beat has something to watch`, primary ? [primary.l.id] : [], undefined,
@@ -837,7 +850,7 @@ function pickPrimary(list: Info[]): Info | undefined {
   let best: Info | undefined, bw = 0;
   for (const x of list) {
     const fs = x.l.text?.fontSize ?? 0;
-    const w = Math.sqrt(x.area) * (x.text ? (fs >= 64 ? 1.6 : 1) : 1) * (x.segs.length || x.expr ? 1 : 0.5);
+    const w = Math.sqrt(x.area) * (x.text ? (fs >= 96 ? 1.5 : 0.7) : 1) * (x.segs.length || x.expr ? 1 : 0.5);
     if (w > bw) { bw = w; best = x; }
   }
   return best;
@@ -858,7 +871,8 @@ function detectLoop(store: Store, infos: Info[], D: number): boolean {
     const kf = p?.kf;
     if (kf && kf.length >= 2 && kf.some((q, i) => i > 0 && q.v.some((v, j) => Math.abs(v - kf[0].v[j]) > 1e-6))) { tracks++; if (kf[0].t <= 0.05 && kf[kf.length - 1].t >= D - 0.05 && kf[kf.length - 1].v.every((v, j) => Math.abs(v - kf[0].v[j]) < 1e-3)) closed++; }
   }
-  return periodic >= 2 || (tracks >= 2 && closed / tracks >= 0.6);
+  // periodic idle wobble on top of entrances is not a loop: only when nothing else is keyed
+  return (periodic >= 2 && closed >= tracks * 0.6) || (tracks >= 2 && closed / tracks >= 0.6);
 }
 
 function outsideBox(b: number[], W: number, H: number) {

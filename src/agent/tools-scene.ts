@@ -336,7 +336,7 @@ function buildLayer(ctx: Ctx, s: any, parent: string | null, compId: string, inh
       } else { key = checkProp(k); off = toValue(key, v); }
       // opacity fades faster than the move: it reads as "arrived" sooner
       const d2 = key === 'opacity' ? Math.min(dur, Math.max(0.15, dur * 0.5)) : dur;
-      const e2 = key === 'opacity' && (defaulted || /^spring/i.test(String(ease)) || Array.isArray(ease)) ? (dir === 'enter' ? 'Ease Out' : 'Ease In') : ease;
+      const e2 = key === 'opacity' && (defaulted || /^(spring|back)/i.test(String(ease)) || Array.isArray(ease)) ? (dir === 'enter' ? 'Ease Out' : 'Ease In') : ease;
       if (dir === 'enter') add(key, [{ t: a, v: off, ease: e2 }, { t: a + d2, v: rest(key) }]);
       else add(key, [{ t: b - d2, v: rest(key), ease: e2 }, { t: b, v: off }]);
     }
